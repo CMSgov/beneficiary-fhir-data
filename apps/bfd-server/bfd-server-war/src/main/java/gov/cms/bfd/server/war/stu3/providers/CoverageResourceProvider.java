@@ -28,7 +28,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import gov.cms.bfd.server.war.commons.RetryOnRdsFailover;
+import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -126,7 +126,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
-  @RetryOnRdsFailover
+  @RetryOnRDSFailover
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
@@ -200,7 +200,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   @Trace
-  @RetryOnRdsFailover
+  @RetryOnRDSFailover
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(

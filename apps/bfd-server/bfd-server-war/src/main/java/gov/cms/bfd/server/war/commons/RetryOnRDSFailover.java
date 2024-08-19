@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,8 +14,8 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
 /**
  * Annotation encapsulating common parameters for the {@link Retryable} spring-retry annotation for
- * use with {@link ca.uhn.fhir.rest.annotation.Search} and {@link ca.uhn.fhir.rest.annotation.Read}
- * annotated resource provider methods that need to retry on {@link FailoverSQLException}s.
+ * use with {@link Search} and {@link Read} annotated resource provider methods that need to retry
+ * on {@link FailoverSQLException}s.
  *
  * <p>Some providers wrap checked {@link Exception}s thrown by asynchronous tasks in {@link
  * RuntimeException}s, thus using a simple "retryFor" expression matching on {@link
@@ -27,7 +29,7 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 @Retryable(
     exceptionExpression = SpringRetryUtils.SHOULD_RETRY_IF_FAILOVER_EXCEPTION_EXPRESSION,
     maxAttempts = 3)
-public @interface RetryOnRdsFailover {
+public @interface RetryOnRDSFailover {
   /**
    * Alias for {@link Retryable#backoff()}.
    *

@@ -24,12 +24,12 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 import software.amazon.jdbc.plugin.failover.FailoverSuccessSQLException;
 
 /**
- * Spring integration tests for the {@link RetryOnRdsFailover} annotation that extends the {@link
+ * Spring integration tests for the {@link RetryOnRDSFailover} annotation that extends the {@link
  * Retryable} annotation from spring-retry.
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {RetryOnRdsFailoverIT.TestContextConfiguration.class})
-public class RetryOnRdsFailoverIT {
+@ContextConfiguration(classes = {RetryOnRDSFailoverIT.TestContextConfiguration.class})
+public class RetryOnRDSFailoverIT {
 
   /**
    * Autowired bean used in order to activate spring-retry's proxying via the {@link
@@ -48,7 +48,7 @@ public class RetryOnRdsFailoverIT {
 
   /**
    * Bean providing a means for counting retry attempts per-test and a method that is used to test
-   * the {@link Exception}-matching of the {@link RetryOnRdsFailover} annotation.
+   * the {@link Exception}-matching of the {@link RetryOnRDSFailover} annotation.
    */
   static class RetryableOperationBean {
     /**
@@ -59,7 +59,7 @@ public class RetryOnRdsFailoverIT {
         new ConcurrentHashMap<>();
 
     /**
-     * Simple helper method annotated with {@link RetryOnRdsFailover} (with a backoff delay of 1 ms
+     * Simple helper method annotated with {@link RetryOnRDSFailover} (with a backoff delay of 1 ms
      * to speed up tests) that simply throws the {@link Exception}s provided and tracks the number
      * of times its been retried. Once all {@link Exception}s are exhausted from the provided list,
      * this method simply returns <code>true</code>.
@@ -72,7 +72,7 @@ public class RetryOnRdsFailoverIT {
      * @throws Exception whichever {@link Exception} that is at the top of the provided list of
      *     {@link Exception}s, if not empty
      */
-    @RetryOnRdsFailover(backoff = @Backoff(delay = 1))
+    @RetryOnRDSFailover(backoff = @Backoff(delay = 1))
     boolean retryableOperation(List<Exception> exceptions, String guid) throws Exception {
       RETRY_COUNTS_PER_GUID.put(guid, RETRY_COUNTS_PER_GUID.getOrDefault(guid, -1) + 1);
 
@@ -85,7 +85,7 @@ public class RetryOnRdsFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRdsFailover} will cause a single retry to occur when a single
+   * Test that verifies {@link RetryOnRDSFailover} will cause a single retry to occur when a single
    * {@link FailoverSuccessSQLException} is thrown.
    */
   @Test
@@ -104,7 +104,7 @@ public class RetryOnRdsFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRdsFailover} will cause a single retry to occur when a single
+   * Test that verifies {@link RetryOnRDSFailover} will cause a single retry to occur when a single
    * {@link RuntimeException} wrapping {@link FailoverSuccessSQLException} is thrown.
    */
   @Test
@@ -126,7 +126,7 @@ public class RetryOnRdsFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRdsFailover} will cause two retries to occur when two matching
+   * Test that verifies {@link RetryOnRDSFailover} will cause two retries to occur when two matching
    * {@link Exception}s to occur.
    */
   @Test
@@ -148,7 +148,7 @@ public class RetryOnRdsFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRdsFailover} will cause the operation to retry upto two times
+   * Test that verifies {@link RetryOnRDSFailover} will cause the operation to retry upto two times
    * and then throw the final {@link Exception} once the number of maximum attempts is reached.
    */
   @Test
@@ -170,7 +170,7 @@ public class RetryOnRdsFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRdsFailover} will not retry on {@link Exception}s that do not
+   * Test that verifies {@link RetryOnRDSFailover} will not retry on {@link Exception}s that do not
    * match {@link FailoverSQLException}s.
    */
   @Test
