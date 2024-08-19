@@ -18,8 +18,9 @@ public final class SpringRetryUtils {
       "T(gov.cms.bfd.server.war.commons.SpringRetryUtils).shouldRetryIfFailover(#root)";
 
   /**
-   * Returns if a given {@link Exception} should be retried or not provided that its "root cause"
-   * (innermost {@link Throwable}) is an instance of {@link FailoverSQLException}.
+   * Returns if a given {@link Exception} should be retried or not provided that it is an instance
+   * of {@link FailoverSQLException} or its "root cause" (innermost {@link Throwable}) is an
+   * instance of {@link FailoverSQLException}.
    *
    * @param ex the {@link Exception} to check for a root cause of {@link FailoverSQLException}
    * @return <code>true</code> if the root cause of the given {@link Exception} is a {@link
