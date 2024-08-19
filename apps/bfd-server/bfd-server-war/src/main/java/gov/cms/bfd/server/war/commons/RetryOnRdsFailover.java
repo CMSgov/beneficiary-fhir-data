@@ -24,8 +24,7 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Retryable(
-    exceptionExpression =
-        "T(org.apache.commons.lang3.exception.ExceptionUtils).getRootCause(#root) instanceof T(software.amazon.jdbc.plugin.failover.FailoverSQLException)",
+    exceptionExpression = "T(gov.cms.bfd.server.war.commons.SpringRetryUtils).shouldRetryIfFailover(#root)",
     maxAttempts = 3,
     backoff = @Backoff(delay = 5000))
 public @interface RetryOnRdsFailover {}
