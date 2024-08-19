@@ -11,6 +11,13 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
  */
 public final class SpringRetryUtils {
   /**
+   * Constant SpEL expression used for {@link Retryable#exceptionExpression()}s that need to invoke
+   * the {@link #shouldRetryIfFailover(Exception)} method.
+   */
+  public static final String SHOULD_RETRY_IF_FAILOVER_EXCEPTION_EXPRESSION =
+      "T(gov.cms.bfd.server.war.commons.SpringRetryUtils).shouldRetryIfFailover(#root)";
+
+  /**
    * Returns if a given {@link Exception} should be retried or not provided that its "root cause"
    * (innermost {@link Throwable}) is an instance of {@link FailoverSQLException}.
    *
