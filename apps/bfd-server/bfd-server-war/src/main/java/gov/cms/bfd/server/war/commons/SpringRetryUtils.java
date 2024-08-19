@@ -26,6 +26,7 @@ public final class SpringRetryUtils {
    *     FailoverSQLException}, <code>false</code> otherwise
    */
   public static boolean shouldRetryIfFailover(Exception ex) {
-    return ExceptionUtils.getRootCause(ex) instanceof FailoverSQLException;
+    return ex instanceof FailoverSQLException
+        || ExceptionUtils.getRootCause(ex) instanceof FailoverSQLException;
   }
 }

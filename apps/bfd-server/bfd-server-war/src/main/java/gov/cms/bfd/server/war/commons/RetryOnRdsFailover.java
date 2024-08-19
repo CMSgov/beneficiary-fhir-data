@@ -5,7 +5,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -29,10 +28,11 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
     exceptionExpression = SpringRetryUtils.SHOULD_RETRY_IF_FAILOVER_EXCEPTION_EXPRESSION,
     maxAttempts = 3)
 public @interface RetryOnRdsFailover {
-    /**
-     * Alias for {@link Retryable#backoff()}.
-     * @return a default {@link Backoff} with a delay of 5000 milliseconds
-     */
-    @AliasFor(annotation = Retryable.class, attribute = "backoff")
-    Backoff backoff() default @Backoff(delay = 5000);
+  /**
+   * Alias for {@link Retryable#backoff()}.
+   *
+   * @return a default {@link Backoff} with a delay of 5000 milliseconds
+   */
+  @AliasFor(annotation = Retryable.class, attribute = "backoff")
+  Backoff backoff() default @Backoff(delay = 5000);
 }
