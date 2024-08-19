@@ -261,6 +261,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- We need to be able to retry our Provider entrypoint methods upon
+            failover of a node in our Aurora Clusters-->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- Mockito utilities for JUnit / Jupiter. -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
