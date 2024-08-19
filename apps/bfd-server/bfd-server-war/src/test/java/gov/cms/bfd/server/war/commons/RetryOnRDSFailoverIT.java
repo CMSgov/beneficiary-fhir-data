@@ -62,13 +62,13 @@ public class RetryOnRDSFailoverIT {
      * Simple helper method annotated with {@link RetryOnRDSFailover} (with a backoff delay of 1 ms
      * to speed up tests) that simply throws the {@link Exception}s provided and tracks the number
      * of times its been retried. Once all {@link Exception}s are exhausted from the provided list,
-     * this method simply returns <code>true</code>.
+     * this method simply returns {@code true}.
      *
-     * @param exceptions mutable {@link List<Exception>} which indicate which {@link Exception}s to
-     *     throw prior to executing actual method logic
+     * @param exceptions mutable {@link List} of {@link Exception}s which indicate which {@link
+     *     Exception}s to throw prior to executing actual method logic
      * @param guid random GUID that is used as a key to identify a given test-case run for tracking
      *     retry counts
-     * @return <code>true</code>, always
+     * @return {@code true}, always
      * @throws Exception whichever {@link Exception} that is at the top of the provided list of
      *     {@link Exception}s, if not empty
      */

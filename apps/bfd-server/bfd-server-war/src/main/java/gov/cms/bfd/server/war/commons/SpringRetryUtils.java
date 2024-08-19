@@ -23,8 +23,8 @@ public final class SpringRetryUtils {
    * instance of {@link FailoverSQLException}.
    *
    * @param ex the {@link Exception} to check for a root cause of {@link FailoverSQLException}
-   * @return <code>true</code> if the root cause of the given {@link Exception} is a {@link
-   *     FailoverSQLException}, <code>false</code> otherwise
+   * @return {@code true} if the root cause of the given {@link Exception} is a {@link
+   *     FailoverSQLException}, {@code false} otherwise
    */
   public static boolean shouldRetryIfFailover(Exception ex) {
     return ex instanceof FailoverSQLException

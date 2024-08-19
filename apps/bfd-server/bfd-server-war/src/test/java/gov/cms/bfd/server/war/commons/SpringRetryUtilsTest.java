@@ -19,7 +19,7 @@ public class SpringRetryUtilsTest {
 
   /**
    * Parameterized test verifying that {@link SpringRetryUtils#shouldRetryIfFailover(Exception)}
-   * returns <code>true</code> if the provided {@link Exception} is a {@link FailoverSQLException}.
+   * returns {@code true} if the provided {@link Exception} is a {@link FailoverSQLException}.
    *
    * @param ex a {@link FailoverSQLException}
    */
@@ -32,7 +32,7 @@ public class SpringRetryUtilsTest {
 
   /**
    * Parameterized test verifying that {@link SpringRetryUtils#shouldRetryIfFailover(Exception)}
-   * returns <code>true</code> if the provided {@link Exception} is wrapping a {@link
+   * returns {@code true} if the provided {@link Exception} is wrapping a {@link
    * FailoverSQLException}.
    *
    * @param ex an {@link Exception} wrapping a {@link FailoverSQLException}
@@ -46,8 +46,8 @@ public class SpringRetryUtilsTest {
 
   /**
    * Parameterized test verifying that {@link SpringRetryUtils#shouldRetryIfFailover(Exception)}
-   * returns <code>false</code> if the provided {@link Exception} is not a {@link
-   * FailoverSQLException} or wrapping a {@link FailoverSQLException}.
+   * returns {@code false} if the provided {@link Exception} is not a {@link FailoverSQLException}
+   * or wrapping a {@link FailoverSQLException}.
    *
    * @param ex an {@link Exception} that does not wrap a {@link FailoverSQLException} or is a {@link
    *     FailoverSQLException}
@@ -79,7 +79,7 @@ public class SpringRetryUtilsTest {
    * #testShouldRetryIfFailoverShouldReturnTrueIfExceptionIsWrappedFailoverSQLException(Exception)}
    * returning {@link Exception}s wrapping {@link FailoverSQLException}s.
    *
-   * @return a {@link Stream<Arguments>} containing {@link Exception}s that wrap {@link
+   * @return a {@link Stream} of {@link Arguments}s containing {@link Exception}s that wrap {@link
    *     FailoverSQLException}
    */
   private static Stream<Arguments> provideWrappedFailoverExceptions() {
@@ -97,8 +97,8 @@ public class SpringRetryUtilsTest {
    * returning {@link Exception}s that are not wrapping {@link FailoverSQLException} or are {@link
    * FailoverSQLException}s.
    *
-   * @return a {@link Stream<Arguments>} containing {@link Exception}s that do not wrap {@link
-   *     FailoverSQLException}s or are {@link FailoverSQLException}s
+   * @return a {@link Stream} of {@link Arguments}s containing {@link Exception}s that do not wrap
+   *     {@link FailoverSQLException}s or are {@link FailoverSQLException}s
    */
   private static Stream<Arguments> provideExceptionsThatDontMatch() {
     return Stream.of(
