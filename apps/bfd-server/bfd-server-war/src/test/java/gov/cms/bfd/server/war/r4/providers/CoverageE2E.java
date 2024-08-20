@@ -37,7 +37,7 @@ public class CoverageE2E extends CoverageE2EBase {
         .body(
             "issue.diagnostics",
             hasItem(
-                "Coverage ID pattern: 'bad-format' does not match expected pattern: {alphaNumericString}?-{alphaNumericString}-{idNumber}"))
+                "Coverage ID pattern: 'bad-format' does not match expected patterns: {alphaNumericString}?-{alphaNumericString}-{idNumber} or {alphaNumericString}?-{alphaNumericString}?-{alphaNumericString}-{idNumber}"))
         .statusCode(400)
         .when()
         .get(requestString);

@@ -142,7 +142,7 @@ public class R4CoverageResourceProviderTest {
     // transformer mocking
     when(coverageTransformer.transform(any(), (EnumSet<Profile>) any()))
         .thenReturn(List.of(testCoverage));
-    when(coverageTransformer.transform(any(), (Beneficiary) any())).thenReturn(testCoverage);
+    when(coverageTransformer.transform(any(), (Beneficiary) any(), any())).thenReturn(testCoverage);
 
     // Mock coverage id
     when(coverageId.getIdPart()).thenReturn(VALID_PART_A_COVERAGE_ID);
@@ -245,7 +245,7 @@ public class R4CoverageResourceProviderTest {
               coverageProvider.read(coverageId);
             });
     assertEquals(
-        "Coverage ID pattern: '1?234' does not match expected pattern: {alphaNumericString}?-{alphaNumericString}-{idNumber}",
+        "Coverage ID pattern: '1?234' does not match expected patterns: {alphaNumericString}?-{alphaNumericString}-{idNumber} or {alphaNumericString}?-{alphaNumericString}?-{alphaNumericString}-{idNumber}",
         exception.getLocalizedMessage());
   }
 
@@ -371,11 +371,11 @@ public class R4CoverageResourceProviderTest {
             metricRegistry, loadedFilterManager, coverageTransformer, true);
     coverageProvider.setEntityManager(entityManager);
 
-    when(coverageId.getIdPart()).thenReturn("c4dic-9145");
+    when(coverageId.getIdPart()).thenReturn("c4dic-part-a-9145");
 
     coverageProvider.read(coverageId);
 
-    verify(coverageTransformer).transform(eq(MedicareSegment.C4DIC), any());
+    verify(coverageTransformer).transform(eq(MedicareSegment.PART_A), any(), any());
   }
 
   /** Test coverage by beneficiary when paging is requested, expect paging links are returned. */

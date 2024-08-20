@@ -65,6 +65,14 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
   private static final Pattern COVERAGE_ID_PATTERN =
       Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
 
+  /**
+   * A {@link Pattern} that will match the C4DIC {@link Coverage#getId()}s used in this application,
+   * e.g. <code>c4dic-part-a-1234</code> or <code>c4dic-part-a--1234</code> (for negative IDs).
+   */
+  private static final Pattern C4DIC_COVERAGE_ID_PATTERN =
+      Pattern.compile(
+          "(\\p{Alnum}+-?\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
+
   /** The entity manager. */
   private EntityManager entityManager;
 
@@ -150,23 +158,43 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
+    Matcher c4dicCoverageIdMatcher = C4DIC_COVERAGE_ID_PATTERN.matcher(coverageIdText);
 
-    if (!coverageIdMatcher.matches()) {
+    System.out.println("coverageIdMatcher.matches() " + coverageIdMatcher.matches());
+    System.out.println("c4dicCoverageIdMatcher.matches() " + c4dicCoverageIdMatcher.matches());
+
+    if ((enabledProfiles.contains(Profile.C4DIC)
+            && !c4dicCoverageIdMatcher.matches()
+            && !coverageIdMatcher.matches())
+        || (!enabledProfiles.contains(Profile.C4DIC) && !coverageIdMatcher.matches())) {
       String invalidCoverageIdMessage =
           "Coverage ID pattern: '"
               + coverageIdText
-              + "' does not match expected pattern: "
-              + "{alphaNumericString}?-{alphaNumericString}-{idNumber}";
+              + "' does not match expected patterns: "
+              + "{alphaNumericString}?-{alphaNumericString}-{idNumber}"
+              + " or {alphaNumericString}?-{alphaNumericString}?-{alphaNumericString}-{idNumber}";
       throw new InvalidRequestException(invalidCoverageIdMessage);
     }
 
-    String coverageIdSegmentText = coverageIdMatcher.group(1);
-    Optional<MedicareSegment> coverageIdSegment =
-        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, this.enabledProfiles);
+    Optional<MedicareSegment> coverageIdSegment;
+    Long beneficiaryId;
+    if (coverageIdMatcher.matches()) {
+      String coverageIdSegmentText = coverageIdMatcher.group(1);
+      beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+      coverageIdSegment = MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
+      enabledProfiles.remove(Profile.C4DIC);
+    } else {
+      String c4dicCoverageIdSegmentText = c4dicCoverageIdMatcher.group(1);
+      beneficiaryId = Long.parseLong(c4dicCoverageIdMatcher.group(2));
+      System.out.println("c4dicCoverageIdSegmentText " + c4dicCoverageIdSegmentText);
+      coverageIdSegment =
+          MedicareSegment.selectByC4dicUrlPrefix(c4dicCoverageIdSegmentText, this.enabledProfiles);
+      System.out.println("coverageIdSegment " + coverageIdSegment);
+    }
     if (!coverageIdSegment.isPresent()) {
       throw new ResourceNotFoundException(coverageId);
     }
-    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
@@ -183,7 +211,9 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
-    Coverage coverage = coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
+    Coverage coverage =
+        coverageTransformer.transform(
+            coverageIdSegment.get(), beneficiaryEntity, this.enabledProfiles);
     return coverage;
   }
 
