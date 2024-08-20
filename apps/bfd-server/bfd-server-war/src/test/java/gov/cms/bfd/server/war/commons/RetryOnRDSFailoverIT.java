@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +55,8 @@ public class RetryOnRDSFailoverIT {
     /**
      * Map of random GUIDs, which map to a given test case run, to the number of retries for that
      * given test case. Used to assert on the number of retries per-test-case.
+     *
+     * <p>A {@link ConcurrentHashMap} is used as these tests may be ran in parallel.
      */
     public static final ConcurrentHashMap<String, Integer> RETRY_COUNTS_PER_GUID =
         new ConcurrentHashMap<>();
@@ -61,23 +64,28 @@ public class RetryOnRDSFailoverIT {
     /**
      * Simple helper method annotated with {@link RetryOnRDSFailover} (with a backoff delay of 1 ms
      * to speed up tests) that simply throws the {@link Exception}s provided and tracks the number
-     * of times its been retried. Once all {@link Exception}s are exhausted from the provided list,
-     * this method simply returns {@code true}.
+     * of times its been retried. Once all {@link Exception}s are popped from the provided {@link
+     * Deque}, this method returns {@code true}.
      *
-     * @param exceptions mutable {@link List} of {@link Exception}s which indicate which {@link
-     *     Exception}s to throw prior to executing actual method logic
+     * @param exceptions {@link Deque} of {@link Exception}s, used like a stack/LIFO queue, which
+     *     indicate which {@link Exception}s to throw prior to executing actual method logic
      * @param guid random GUID that is used as a key to identify a given test-case run for tracking
      *     retry counts
      * @return {@code true}, always
-     * @throws Exception whichever {@link Exception} that is at the top of the provided list of
-     *     {@link Exception}s, if not empty
+     * @throws Exception whichever {@link Exception} that is at the top of the provided {@link
+     *     Deque} of {@link Exception}s, if not empty
      */
     @RetryOnRDSFailover(backoff = @Backoff(delay = 1))
-    boolean retryableOperation(List<Exception> exceptions, String guid) throws Exception {
+    boolean retryableOperation(Deque<Exception> exceptions, String guid) throws Exception {
+      // We track the number of retries manually within this method instead of delegating to
+      // Mockito.spy or other typical means of tracking call counts because it does not play nice
+      // with how spring-retry retries methods annotated with @Retryable (which this method is).
+      // Attempts to use Mockito's spy with this method resulted in Mockito reporting this method as
+      // being called only once, even when it was retried by spring-retry.
       RETRY_COUNTS_PER_GUID.put(guid, RETRY_COUNTS_PER_GUID.getOrDefault(guid, -1) + 1);
 
       if (!exceptions.isEmpty()) {
-        throw exceptions.removeFirst();
+        throw exceptions.pop();
       }
 
       return true;
@@ -92,7 +100,7 @@ public class RetryOnRDSFailoverIT {
   public void testItRetriesOnceWhenFailoverSuccessSQLExceptionIsThrown() throws Exception {
     // Arrange
     final var exceptionsToThrow =
-        new ArrayList<Exception>(List.of(new FailoverSuccessSQLException()));
+        new ArrayDeque<Exception>(List.of(new FailoverSuccessSQLException()));
     final var retryGuid = UUID.randomUUID().toString();
 
     // Act
@@ -111,7 +119,7 @@ public class RetryOnRDSFailoverIT {
   public void testItRetriesOnceWhenWrappedFailoverSuccessSQLExceptionIsThrown() throws Exception {
     // Arrange
     final var exceptionsToThrow =
-        new ArrayList<Exception>(
+        new ArrayDeque<Exception>(
             List.of(
                 new RuntimeException(
                     new JDBCException("test", new FailoverSuccessSQLException()))));
@@ -133,7 +141,7 @@ public class RetryOnRDSFailoverIT {
   public void testItRetriesTwiceWhenMultipleMatchingExceptionsAreThrown() throws Exception {
     // Arrange
     final var exceptionsToThrow =
-        new ArrayList<>(
+        new ArrayDeque<>(
             Arrays.asList(
                 new RuntimeException(new JDBCException("test", new FailoverSuccessSQLException())),
                 new FailoverSuccessSQLException()));
@@ -155,7 +163,7 @@ public class RetryOnRDSFailoverIT {
   public void testItThrowsWhenMaxAttemptsAreExceeded() {
     // Arrange
     final var exceptionsToThrow =
-        new ArrayList<Exception>(
+        new ArrayDeque<Exception>(
             Arrays.asList(
                 new FailoverSuccessSQLException(),
                 new FailoverSuccessSQLException(),
@@ -177,7 +185,7 @@ public class RetryOnRDSFailoverIT {
   public void testItThrowsWhenUnmatchedExceptionIsThrown() {
     // Arrange
     final var exceptionsToThrow =
-        new ArrayList<>(
+        new ArrayDeque<>(
             Arrays.asList(new FailoverSuccessSQLException(), new NullPointerException()));
     final var retryGuid = UUID.randomUUID().toString();
 
