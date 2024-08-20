@@ -40,6 +40,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -77,7 +78,7 @@ import org.springframework.stereotype.Component;
  * the CCW beneficiaries.
  */
 @Component
-public final class PatientResourceProvider implements IResourceProvider, CommonHeaders {
+public class PatientResourceProvider implements IResourceProvider, CommonHeaders {
 
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
@@ -155,6 +156,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    */
   @Read(version = false)
   @Trace
+  @RetryOnRDSFailover
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
@@ -218,6 +220,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -282,6 +285,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(
@@ -737,6 +741,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(shortDefinition = "The patient identifier to search for")

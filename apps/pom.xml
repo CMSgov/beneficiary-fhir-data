@@ -85,6 +85,7 @@
         <aws.crt.version>0.28.12</aws.crt.version>
         <spring-data-jpa.version>3.2.0</spring-data-jpa.version>
         <spring-framework.version>6.1.6</spring-framework.version>
+        <spring-retry.version>2.0.8</spring-retry.version>
 
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
