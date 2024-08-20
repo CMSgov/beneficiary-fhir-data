@@ -51,6 +51,9 @@ locals {
 
 }
 
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
 module "quicksight-dataset-global-state" {
   source = "./modules/quicksight-dataset-global-state"
 
