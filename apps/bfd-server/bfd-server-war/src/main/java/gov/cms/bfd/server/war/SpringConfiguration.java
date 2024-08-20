@@ -59,12 +59,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
 @EnableScheduling
+@EnableRetry(proxyTargetClass = true)
 public class SpringConfiguration extends BaseConfiguration {
   /**
    * The {@link String } property that is used to hold drug code file name that is used for

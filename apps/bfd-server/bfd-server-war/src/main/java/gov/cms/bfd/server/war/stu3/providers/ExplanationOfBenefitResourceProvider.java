@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -63,7 +64,7 @@ import org.springframework.stereotype.Component;
  * derived from the CCW claims.
  */
 @Component
-public final class ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
+public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
     implements IResourceProvider {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
@@ -186,6 +187,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
+  @RetryOnRDSFailover
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     if (eobId == null) {
@@ -274,6 +276,7 @@ public final class ExplanationOfBenefitResourceProvider extends AbstractResource
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
