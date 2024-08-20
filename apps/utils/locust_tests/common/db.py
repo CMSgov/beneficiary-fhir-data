@@ -117,8 +117,10 @@ def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
     Returns:
         list[str]: A list of MBI hashes
     """
-    claims_mbis_query = r"select hash from rda.mbi_cache where regexp_like(mbi, '\dS.+') limit 100"
-    return sorted([str(r[0]) for r in _execute(uri, claims_mbis_query)])
+    claims_mbis_query = (
+        r"select hash from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by hash limit 300"
+    )
+    return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
 def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
