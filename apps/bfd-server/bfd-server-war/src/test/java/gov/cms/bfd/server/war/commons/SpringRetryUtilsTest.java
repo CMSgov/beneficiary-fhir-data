@@ -65,7 +65,8 @@ public class SpringRetryUtilsTest {
    * returning bare {@link FailoverSQLException}s; that is, {@link Exception}s that are of the type
    * {@link FailoverSQLException} and are not wrapping other {@link Exception}s.
    *
-   * @return a {@link Stream<Arguments>} containing all variants of {@link FailoverSQLException}
+   * @return a {@link Stream} of {@link Arguments}s containing all variants of {@link
+   *     FailoverSQLException}
    */
   private static Stream<Arguments> provideBareFailoverExceptions() {
     return Stream.of(
