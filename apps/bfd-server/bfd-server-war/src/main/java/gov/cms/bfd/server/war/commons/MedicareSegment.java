@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
 import java.util.Optional;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -29,17 +28,12 @@ public enum MedicareSegment {
    * input does not match any known segment.
    *
    * @param urlPrefix the {@link #urlPrefix} to find a match for
-   * @param enabledProfiles the CARIN {@link Profile} to use
    * @return the {@link MedicareSegment} (if any) whose {@link #urlPrefix} value matches the one
    *     specified
    */
-  public static Optional<MedicareSegment> selectByC4dicUrlPrefix(
-      String urlPrefix, Set<Profile> enabledProfiles) {
+  public static Optional<MedicareSegment> selectByUrlPrefix(String urlPrefix) {
     for (MedicareSegment medicareSegment : values()) {
-      if (medicareSegment.getC4dicUrlPrefix().equals(urlPrefix)) {
-        if (!enabledProfiles.contains(Profile.C4DIC)) {
-          return Optional.empty();
-        }
+      if (medicareSegment.getUrlPrefix().equals(urlPrefix)) {
         return Optional.of(medicareSegment);
       }
     }
@@ -52,16 +46,34 @@ public enum MedicareSegment {
    * input does not match any known segment.
    *
    * @param urlPrefix the {@link #urlPrefix} to find a match for
+   * @param profile a supported CARIN {@link Profile}
    * @return the {@link MedicareSegment} (if any) whose {@link #urlPrefix} value matches the one
    *     specified
    */
-  public static Optional<MedicareSegment> selectByUrlPrefix(String urlPrefix) {
+  public static Optional<MedicareSegment> selectByUrlPrefix(String urlPrefix, Profile profile) {
     for (MedicareSegment medicareSegment : values()) {
-      if (medicareSegment.getUrlPrefix().equals(urlPrefix)) {
+      if (profile.equals(Profile.C4DIC)) {
+        if (medicareSegment.getC4dicUrlPrefix().equals(urlPrefix)) {
+          return Optional.of(medicareSegment);
+        }
+      } else if (medicareSegment.getUrlPrefix().equals(urlPrefix)) {
         return Optional.of(medicareSegment);
       }
     }
 
     return Optional.empty();
+  }
+
+  /**
+   * Gets the {@link #urlPrefix} based off the segment that matches the CARIN {@link Profile}.
+   *
+   * @param profile a supported CARIN {@link Profile}
+   * @return the {@link #urlPrefix}
+   */
+  public String getUrlPrefix(Profile profile) {
+    if (profile == Profile.C4DIC) {
+      return this.c4dicUrlPrefix;
+    }
+    return this.urlPrefix;
   }
 }

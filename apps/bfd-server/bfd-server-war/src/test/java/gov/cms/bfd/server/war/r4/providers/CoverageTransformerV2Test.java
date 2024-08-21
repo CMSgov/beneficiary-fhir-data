@@ -25,10 +25,8 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -112,23 +110,22 @@ public final class CoverageTransformerV2Test {
     beneficiary.setLastUpdated(calen.getTime().toInstant());
   }
 
-  /*@Test
+  /** Standalone wrapper to output PART_A. */
+  @Test
   public void outputTransformCoveragePartA() throws FHIRException {
-    // FIXME: Possible race conditions? If you run the test individually it passes but if you run
-    // the class it fails
     String partA = "part-a-567834";
-    transformCoverage(MedicareSegment.PART_A, true, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partA, coverage.getIdPart());
     verifyMetrics("part_a");
-  }*/
+  }
 
   /** Standalone wrapper to output PART_B. */
   @Test
   public void outputTransformCoveragePartB() throws FHIRException {
     String partB = "part-b-567834";
-    transformCoverage(MedicareSegment.PART_B, true, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partB, coverage.getIdPart());
@@ -139,7 +136,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void outputTransformCoveragePartC() throws FHIRException {
     String partC = "part-c-567834";
-    transformCoverage(MedicareSegment.PART_C, true, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partC, coverage.getIdPart());
@@ -150,7 +147,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void outputTransformCoveragePartD() throws FHIRException {
     String partD = "part-d-567834";
-    transformCoverage(MedicareSegment.PART_D, true, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(partD, coverage.getIdPart());
@@ -161,7 +158,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void outputTransformCoverageC4Dic() throws FHIRException {
     String c4dicIdPartA = "c4dic-part-a-567834";
-    transformCoverage(MedicareSegment.PART_A, true, Set.of(Profile.C4DIC));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4DIC);
     assertNotNull(coverage);
     assertEquals("Coverage", coverage.getIdElement().getResourceType());
     assertEquals(c4dicIdPartA, coverage.getIdPart());
@@ -194,21 +191,21 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyID("part-a-567834");
   }
 
   /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyExtensionsPartA();
   }
 
@@ -250,49 +247,49 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyCoverageStatus("cancelled");
   }
 
   /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyType();
   }
 
   /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifySubscriber();
   }
 
   /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyRelationship();
   }
 
   /** Tests that the transformer sets the expected period date. */
   @Test
   public void verifyPeriodPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyPeriod(Optional.of("17-Mar-2020"), Optional.of("17-JUN-2020"));
   }
 
   /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyPayor();
   }
 
   /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     verifyCoverageClass("Part A");
   }
 
@@ -320,7 +317,7 @@ public final class CoverageTransformerV2Test {
     newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
     Coverage newCoverage =
-        coverageTransformer.transform(MedicareSegment.PART_A, newBeneficiary, Set.of(Profile.C4BB));
+        coverageTransformer.transform(MedicareSegment.PART_A, newBeneficiary, Profile.C4BB);
     checkForNoYearlyDate(newCoverage);
   }
 
@@ -331,21 +328,21 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyID("part-b-567834");
   }
 
   /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyExtensionsPartB();
   }
 
@@ -372,49 +369,49 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyCoverageStatus("active");
   }
 
   /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyType();
   }
 
   /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifySubscriber();
   }
 
   /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyRelationship();
   }
 
   /** Tests that the transformer sets the expected period date. */
   @Test
   public void verifyPeriodPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyPeriod(Optional.of("17-JUL-2021"), Optional.of("17-AUG-2022"));
   }
 
   /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyPayor();
   }
 
   /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     verifyCoverageClass("Part B");
   }
 
@@ -425,21 +422,21 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyID("part-c-567834");
   }
 
   /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyExtensionsPartC();
   }
 
@@ -491,42 +488,42 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyCoverageStatus("active");
   }
 
   /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyType();
   }
 
   /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifySubscriber();
   }
 
   /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyRelationship();
   }
 
   /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyPayor();
   }
 
   /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     verifyCoverageClass("Part C");
   }
 
@@ -537,28 +534,28 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetIDPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyID("part-d-567834");
   }
 
   /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDatePartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyMeta(ProfileConstants.C4BB_COVERAGE_URL);
   }
 
   /** Tests that the transformer sets the expected period date. */
   @Test
   public void verifyPeriodPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyPeriod(Optional.of("17-FEB-2021"), Optional.of("17-NOV-2022"));
   }
 
   /** Tests that the transformer sets the expected extension entries. */
   @Test
   public void shouldSetExtensionsPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyExtensionsPartD(72);
   }
 
@@ -639,42 +636,42 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage status. */
   @Test
   public void verifyCoverageStatusPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyCoverageStatus("active");
   }
 
   /** Tests that the transformer sets the expected type coding. */
   @Test
   public void verifyTypePartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyType();
   }
 
   /** Tests that the transformer sets the expected subscriber information. */
   @Test
   public void verifySubscriberPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifySubscriber();
   }
 
   /** Tests that the transformer sets the expected relationship data. */
   @Test
   public void verifyRelationshipPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyRelationship();
   }
 
   /** Tests that the transformer sets the expected payor data. */
   @Test
   public void verifyPayorPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyPayor();
   }
 
   /** Tests that the transformer sets the expected coverage class. */
   @Test
   public void verifyCoverageClassPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
     verifyCoverageClass("Part D");
   }
 
@@ -685,14 +682,14 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer sets the expected coverage id. */
   @Test
   public void shouldSetC4DICPartBID() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4DIC));
-    verifyID("c4dic-part-a-567834");
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4DIC);
+    verifyID("c4dic-part-b-567834");
   }
 
   /** Tests that the transformer sets the expected metadata (lastUpdated and profile). */
   @Test
   public void shouldSetCorrectProfileAndDateC4DIC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4DIC));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4DIC);
     verifyMeta(ProfileConstants.C4DIC_COVERAGE_URL + ProfileConstants.C4DIC_VERSION_SUFFIX);
   }
 
@@ -703,22 +700,21 @@ public final class CoverageTransformerV2Test {
   /** Tests that the transformer filters out the C4DIC profile. */
   @Test
   public void shouldFilterOutC4DicProfile() {
-    List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4BB), true);
+    List<IBaseResource> coverages = transformCoverageAll(Profile.C4BB, true);
     assertEquals(4, coverages.size());
   }
 
   /** Tests that the transformer separates each plan into a Coverage resource. */
   @Test
   public void shouldSeparatePlansPerResource() {
-    List<IBaseResource> coverages = transformCoverageAll(EnumSet.of(Profile.C4DIC), true);
+    List<IBaseResource> coverages = transformCoverageAll(Profile.C4DIC, true);
     assertEquals(4, coverages.size());
   }
 
   /** Tests that the transformer returns all profiles. */
   @Test
-  public void shouldReturnAllProfiles() {
-    List<IBaseResource> coverages =
-        transformCoverageAll(EnumSet.of(Profile.C4BB, Profile.C4DIC), true);
+  public void shouldFilterOutC4BBProfile() {
+    List<IBaseResource> coverages = transformCoverageAll(Profile.C4DIC, true);
     assertEquals(4, coverages.size());
   }
 
@@ -896,13 +892,13 @@ public final class CoverageTransformerV2Test {
    *
    * @param medSeg the medicare segment
    * @param showJson {@code true} if the json should be printed to stdout
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param enabledProfile the CARIN {@link Profile} to use
    * @throws FHIRException if there is an issue transforming the coverage
    */
-  public void transformCoverage(
-      MedicareSegment medSeg, boolean showJson, Set<Profile> enabledProfiles) throws FHIRException {
+  public void transformCoverage(MedicareSegment medSeg, boolean showJson, Profile enabledProfile)
+      throws FHIRException {
     if (currSegment == null || currSegment != medSeg) {
-      coverage = coverageTransformer.transform(medSeg, beneficiary, enabledProfiles);
+      coverage = coverageTransformer.transform(medSeg, beneficiary, enabledProfile);
       currSegment = medSeg;
     }
     if (showJson && coverage != null) {
@@ -913,14 +909,14 @@ public final class CoverageTransformerV2Test {
   /**
    * Wrapper to transform all coverages for the included profiles.
    *
-   * @param profiles profiles to include
+   * @param profile profile to include
    * @param showJson {@code true} if the json should be printed to stdout
    * @return list of coverages
    * @throws FHIRException if there is an issue transforming the coverage
    */
-  private List<IBaseResource> transformCoverageAll(Set<Profile> profiles, boolean showJson)
+  private List<IBaseResource> transformCoverageAll(Profile profile, boolean showJson)
       throws FHIRException {
-    List<IBaseResource> coverages = coverageTransformer.transform(beneficiary, profiles);
+    List<IBaseResource> coverages = coverageTransformer.transform(beneficiary, profile);
     if (showJson) {
       for (IBaseResource coverage : coverages) {
         System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
@@ -937,7 +933,8 @@ public final class CoverageTransformerV2Test {
   @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartA() {
-    transformCoverage(MedicareSegment.PART_A, false, Set.of(Profile.C4BB));
+    // transformCoverage(MedicareSegment.PART_A, false, Profile.C4BB);
+    coverage = coverageTransformer.transform(MedicareSegment.PART_A, beneficiary, Profile.C4BB);
     assertPartAMatches(beneficiary, coverage);
   }
 
@@ -948,7 +945,8 @@ public final class CoverageTransformerV2Test {
   @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartB() {
-    transformCoverage(MedicareSegment.PART_B, false, Set.of(Profile.C4BB));
+    // transformCoverage(MedicareSegment.PART_B, false, Profile.C4BB);
+    coverage = coverageTransformer.transform(MedicareSegment.PART_B, beneficiary, Profile.C4BB);
     assertPartBMatches(beneficiary, coverage);
   }
 
@@ -959,7 +957,8 @@ public final class CoverageTransformerV2Test {
   @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartC() {
-    transformCoverage(MedicareSegment.PART_C, false, Set.of(Profile.C4BB));
+    // transformCoverage(MedicareSegment.PART_C, false, Profile.C4BB);
+    coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
     assertPartCMatches(beneficiary, coverage);
   }
 
@@ -970,7 +969,8 @@ public final class CoverageTransformerV2Test {
   @Disabled("Test only used to verify support for Integration Test")
   @Test
   public void verifyIntegrationPartD() {
-    transformCoverage(MedicareSegment.PART_D, false, Set.of(Profile.C4BB));
+    coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
+    // transformCoverage(MedicareSegment.PART_D, false, Profile.C4BB);
     assertPartDMatches(beneficiary, coverage);
   }
 

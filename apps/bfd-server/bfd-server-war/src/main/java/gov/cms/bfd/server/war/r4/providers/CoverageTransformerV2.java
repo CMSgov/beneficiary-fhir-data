@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -60,20 +59,20 @@ final class CoverageTransformerV2 {
    *
    * @param medicareSegment the {@link MedicareSegment} to generate a {@link Coverage} resource for
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return the {@link Coverage} resource that was generated
    */
   @Trace
   public Coverage transform(
-      MedicareSegment medicareSegment, Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+      MedicareSegment medicareSegment, Beneficiary beneficiary, Profile profile) {
     Objects.requireNonNull(medicareSegment);
     Objects.requireNonNull(beneficiary);
 
     return switch (medicareSegment) {
-      case PART_A -> transformPartA(beneficiary, enabledProfiles);
-      case PART_B -> transformPartB(beneficiary, enabledProfiles);
-      case PART_C -> transformPartC(beneficiary, enabledProfiles);
-      case PART_D -> transformPartD(beneficiary, enabledProfiles);
+      case PART_A -> transformPartA(beneficiary, profile);
+      case PART_B -> transformPartB(beneficiary, profile);
+      case PART_C -> transformPartC(beneficiary, profile);
+      case PART_D -> transformPartD(beneficiary, profile);
       default -> throw new BadCodeMonkeyException();
     };
   }
@@ -82,14 +81,14 @@ final class CoverageTransformerV2 {
    * Transforms a beneficiary into a {@link Coverage} resource.
    *
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
   @Trace
-  public List<IBaseResource> transform(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+  public List<IBaseResource> transform(Beneficiary beneficiary, Profile profile) {
     return Arrays.stream(MedicareSegment.values())
-        .map(s -> transform(s, beneficiary, enabledProfiles))
+        .map(s -> transform(s, beneficiary, profile))
         .collect(Collectors.toList());
   }
 
@@ -139,22 +138,21 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_A} {@link
    *     Coverage} resource for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_A} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartA(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+  private Coverage transformPartA(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_a");
     Coverage coverage = new Coverage();
-    Profile profile = (enabledProfiles.contains(Profile.C4DIC)) ? Profile.C4DIC : Profile.C4BB;
 
     addProfile(coverage, profile);
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary, profile));
+
     if (profile.equals(Profile.C4DIC)) {
-      coverage.setId(
-          CommonTransformerUtils.buildC4dicCoverageId(MedicareSegment.PART_A, beneficiary));
       transformC4Dic(beneficiary, coverage);
     } else {
-      coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
       addC4bbPayor(coverage);
     }
 
@@ -210,22 +208,21 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_B} {@link
    *     Coverage} resource for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_B} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartB(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+  private Coverage transformPartB(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_b");
     Coverage coverage = new Coverage();
-    Profile profile = (enabledProfiles.contains(Profile.C4DIC)) ? Profile.C4DIC : Profile.C4BB;
 
     addProfile(coverage, profile);
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary, profile));
+
     if (profile.equals(Profile.C4DIC)) {
-      coverage.setId(
-          CommonTransformerUtils.buildC4dicCoverageId(MedicareSegment.PART_B, beneficiary));
       transformC4Dic(beneficiary, coverage);
     } else {
-      coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
       addC4bbPayor(coverage);
     }
 
@@ -277,22 +274,21 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
    *     Coverage} resource for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_C} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartC(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+  private Coverage transformPartC(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_c");
     Coverage coverage = new Coverage();
-    Profile profile = (enabledProfiles.contains(Profile.C4DIC)) ? Profile.C4DIC : Profile.C4BB;
 
     addProfile(coverage, profile);
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary, profile));
+
     if (profile.equals(Profile.C4DIC)) {
-      coverage.setId(
-          CommonTransformerUtils.buildC4dicCoverageId(MedicareSegment.PART_C, beneficiary));
       transformC4Dic(beneficiary, coverage);
     } else {
-      coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
       addC4bbPayor(coverage);
     }
 
@@ -341,22 +337,21 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
    *     Coverage} resource for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartD(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+  private Coverage transformPartD(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_d");
     Coverage coverage = new Coverage();
-    Profile profile = (enabledProfiles.contains(Profile.C4DIC)) ? Profile.C4DIC : Profile.C4BB;
 
     addProfile(coverage, profile);
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary, profile));
+
     if (profile.equals(Profile.C4DIC)) {
-      coverage.setId(
-          CommonTransformerUtils.buildC4dicCoverageId(MedicareSegment.PART_D, beneficiary));
       transformC4Dic(beneficiary, coverage);
     } else {
-      coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
       addC4bbPayor(coverage);
     }
 
