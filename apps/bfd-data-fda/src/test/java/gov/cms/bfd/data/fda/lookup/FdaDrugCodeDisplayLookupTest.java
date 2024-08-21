@@ -3,9 +3,11 @@ package gov.cms.bfd.data.fda.lookup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import gov.cms.bfd.data.fda.utility.App;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,12 @@ public class FdaDrugCodeDisplayLookupTest {
 
   /** The FAKE_DRUG_CODE_NUMBER for testing. */
   public static final String FAKE_DRUG_CODE_NUMBER = "000000000";
+
+  /** A fake drug code used for testing. */
+  public static final String FAKE_DRUG_CODE = "00000-0000";
+
+  /** A fake drug code display that is associated with the FAKE_DRUG_CODE. */
+  public static final String FAKE_DRUG_CODE_DISPLAY = "Fake Diluent - WATER";
 
   /** The INPUT_FILE_STRING for the InputStream for testing. */
   public static final String INPUT_FILE_STRING =
@@ -40,46 +48,57 @@ public class FdaDrugCodeDisplayLookupTest {
   /** fdaDrugCodeDisplays to be used during testing. */
   public FdaDrugCodeDisplayLookup fdaDrugCodeDisplay;
 
+  /** npiDataStream represents npiDataStream of the main FDA drug org file. */
+  InputStream npiDataStream =
+      Thread.currentThread().getContextClassLoader().getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+
+  /** ndcProductHashMap represents a map of PRODUCTNDC and SUBSTANCENAME for test. */
+  Map<String, String> ndcProductHashMap = new HashMap<>();
+
   /** Clears fdaDrugCodeDisplay before each test. */
   @BeforeEach
   void setup() {
     fdaDrugCodeDisplay = null;
+    ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
   }
 
-  /** Return Fake Drug Code when parameter is true. */
+  /** Return Fake Drug Code. */
   @Test
-  public void shouldReturnFakeDrugCodeWhenConstructorSetToTrue() {
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+  public void shouldReturnFakeDrugCode() throws IOException {
+
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(ndcProductHashMap);
+
     String drugCodeDisplay =
         fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertNotEquals(null, drugCodeDisplay);
   }
 
-  /** Do Not Return Fake Drug Code when parameter is false. */
+  /** Doesn't return Fake Drug Code. */
   @Test
-  public void shouldNotReturnFakeDrugCodeWhenConstructorSetToFalse() {
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+  public void shouldNotReturnFakeDrugCode() throws IOException {
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(npiDataStream);
     String drugCodeDisplay =
         fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
     assertEquals(null, drugCodeDisplay);
   }
 
-  /** Return Fake Drug Code Display when parameter is true. */
+  /** Return Fake Drug Code Display. */
   @Test
-  public void shouldReturnFakeDrugCodeDisplayWhenConstructorSetToTrue() {
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+  public void shouldReturnFakeDrugCodeDisplay() {
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(ndcProductHashMap);
+
     String drugCodeDisplay =
         fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
-    assertEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
+    assertEquals(FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 
-  /** Do not Return Fake Drug Code Display when parameter is false. */
+  /** Do not Return Fake Drug Code Display. */
   @Test
-  public void shouldNotReturnFakeDrugCodeDisplayWhenConstructorSetToFalse() {
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForProduction();
+  public void shouldNotReturnFakeDrugCodeDisplay() throws IOException {
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(npiDataStream);
     String drugCodeDisplay =
         fdaDrugCodeDisplay.retrieveFDADrugCodeDisplay(Optional.of(FAKE_DRUG_CODE_NUMBER));
-    assertNotEquals(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
+    assertNotEquals(FAKE_DRUG_CODE_DISPLAY, drugCodeDisplay);
   }
 
   /** Should not return double quotes in the mapping of the file for the data. */
@@ -89,9 +108,9 @@ public class FdaDrugCodeDisplayLookupTest {
     InputStream targetStream =
         new ByteArrayInputStream(INPUT_FILE_STRING_WITH_DOUBLE_QUOTES.getBytes());
 
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(npiDataStream);
 
-    Map<String, String> results = fdaDrugCodeDisplay.getFdaProcessedData(true, targetStream);
+    Map<String, String> results = fdaDrugCodeDisplay.getFdaProcessedData(targetStream);
     assertEquals("Sterile Diluent - WATER", results.get("00000-0001"));
   }
 
@@ -101,41 +120,21 @@ public class FdaDrugCodeDisplayLookupTest {
 
     InputStream targetStream = new ByteArrayInputStream(INPUT_FILE_STRING.getBytes());
 
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(npiDataStream);
 
-    Map<String, String> results = fdaDrugCodeDisplay.getFdaProcessedData(true, targetStream);
+    Map<String, String> results = fdaDrugCodeDisplay.getFdaProcessedData(targetStream);
     assertEquals("Sterile Diluent - WATER", results.get("00000-0001"));
   }
 
-  /**
-   * Should return Fake FDA Drug Code when include drug code is true when reading the FDA Drug Code
-   * File.
-   */
+  /** Should not return Fake FDA Drug Code when reading the FDA Drug Code File. */
   @Test
-  void shouldReturnFakeDrugCodeWhenReadingFDADrugCodeFileAndIncludeFakeDrugCodeIsTrue() {
+  void shouldReturnFakeDrugCodeWhenReadingFDADrugCodeFile() throws IOException {
 
     InputStream targetStream = new ByteArrayInputStream(INPUT_FILE_STRING.getBytes());
 
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
+    fdaDrugCodeDisplay = new FdaDrugCodeDisplayLookup(npiDataStream);
 
-    Map<String, String> results = fdaDrugCodeDisplay.readFDADrugCodeFile(true, targetStream);
-    assertEquals(
-        FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE_DISPLAY,
-        results.get(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE));
-  }
-
-  /**
-   * Should not return Fake FDA Drug Code when include drug code is false when reading the FDA Drug
-   * Code File.
-   */
-  @Test
-  void shouldReturnFakeDrugCodeWhenReadingFDADrugCodeFileAndIncludeFakeDrugCodeIsDalse() {
-
-    InputStream targetStream = new ByteArrayInputStream(INPUT_FILE_STRING.getBytes());
-
-    fdaDrugCodeDisplay = FdaDrugCodeDisplayLookup.createDrugCodeLookupForTesting();
-
-    Map<String, String> results = fdaDrugCodeDisplay.readFDADrugCodeFile(false, targetStream);
-    assertEquals(null, results.get(FdaDrugCodeDisplayLookup.FAKE_DRUG_CODE));
+    Map<String, String> results = fdaDrugCodeDisplay.readFDADrugCodeFile(targetStream);
+    assertEquals(null, results.get(FAKE_DRUG_CODE));
   }
 }

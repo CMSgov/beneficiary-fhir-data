@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -72,7 +73,7 @@ public final class CarrierClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of(NPIOrgLookup.FAKE_NPI_ORG_NAME));
+        .thenReturn(Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME));
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 

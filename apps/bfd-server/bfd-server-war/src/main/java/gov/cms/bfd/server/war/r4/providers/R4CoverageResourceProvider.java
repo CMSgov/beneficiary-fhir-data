@@ -31,6 +31,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -57,7 +58,7 @@ import org.springframework.stereotype.Component;
  * the CCW beneficiary enrollment data.
  */
 @Component
-public final class R4CoverageResourceProvider implements IResourceProvider {
+public class R4CoverageResourceProvider implements IResourceProvider {
   /**
    * A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application, e.g.
    * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
@@ -140,6 +141,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
+  @RetryOnRDSFailover
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
@@ -236,6 +238,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(
