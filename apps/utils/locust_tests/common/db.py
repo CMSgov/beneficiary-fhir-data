@@ -118,9 +118,7 @@ def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
         list[str]: A list of MBI hashes
     """
     claims_mbis_query = (
-        "select distinct m.hash from rda.claim_message_meta_data c left join rda.mbi_cache m on"
-        " c.mbi_id=m.mbi_id where c.sequence_number < 0 and (claim_type='M' or claim_type='F')"
-        f" limit {LIMIT}"
+        r"select hash from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by hash limit 300"
     )
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
