@@ -1,6 +1,7 @@
 """Members of this file/module should be related to the collection of performance statistics during
 a test run as well as the representation of those statistics via dataclasses or other suitable
 objects"""
+
 import hashlib
 import time
 from dataclasses import dataclass
@@ -295,18 +296,21 @@ class StatsMetadata:
         stats_reset_after_spawn: bool,
         environment: str,
     ):
+        # The value of the pepper doesn't matter, it's just here so that if anything that composes
+        # the hash doesn't change but some external factor (like the data the Regression Suite uses)
+        # does, we can forcefully change the hash so that a new baseline can be generated
+        pepper = "pepper1"
         # Generate a SHA256 hash string from various bits of information
-        str_to_hash = "".join(
-            [
-                "".join(sorted(user_classes_names)),
-                "".join(sorted(tasks_names)),
-                str(num_users),
-                str(requested_runtime),
-                str(spawn_rate),
-                str(stats_reset_after_spawn),
-                str(environment),
-            ]
-        )
+        str_to_hash = "".join([
+            "".join(sorted(user_classes_names)),
+            "".join(sorted(tasks_names)),
+            str(num_users),
+            str(requested_runtime),
+            str(spawn_rate),
+            str(stats_reset_after_spawn),
+            str(environment),
+            pepper,
+        ])
         return hashlib.sha256(str.encode(str_to_hash, encoding="utf-8")).hexdigest()
 
 
