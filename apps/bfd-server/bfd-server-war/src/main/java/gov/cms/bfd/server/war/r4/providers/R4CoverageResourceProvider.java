@@ -255,7 +255,11 @@ public class R4CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
               value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
-      @OptionalParam(name = "_profile") String profile,
+      @OptionalParam(name = "_profile")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COVERAGE_SP_SUPPORTED_PROFILE_SHORT,
+              value = OpenAPIContentProvider.COVERAGE_SP_SUPPORTED_PROFILE_VALUE)
+          String profile,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
