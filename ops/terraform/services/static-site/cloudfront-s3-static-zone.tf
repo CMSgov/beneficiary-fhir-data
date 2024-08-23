@@ -1,11 +1,10 @@
 resource "aws_cloudfront_distribution" "static_site_distribution" {
   origin {
-    domain_name = aws_s3_bucket.static_site.bucket_regional_domain_name
-    origin_id   = "S3-${aws_s3_bucket.static_site.bucket}"
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.static_site_identity.cloudfront_access_identity_path
-    }
+    connection_attempts      = 3
+    connection_timeout       = 10
+    domain_name              = aws_s3_bucket.static_site.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
+    origin_id                = "S3-${aws_s3_bucket.static_site.bucket}"
   }
 
   enabled             = true
@@ -66,6 +65,10 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "static_site_identity" {
-  comment = "Origin access identity for static site ${local.env}"
+resource "aws_cloudfront_origin_access_control" "this" {
+  name                              = "${aws_s3_bucket.static_site.bucket}-oac"
+  description                       = "OAC allowing SSE-KMS support"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
