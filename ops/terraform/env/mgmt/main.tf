@@ -48,6 +48,3 @@ locals {
     nonsensitive(data.aws_ssm_parameters_by_path.common_sensitive.values)
   )
 }
-## BFD-3089
-## relocate data references to ./data-sources.tf
-

@@ -9,7 +9,6 @@ locals {
     Terraform      = true
     tf_module_root = "ops/terraform/env/mgmt/base_config"
   }
-  ## BFD-3089
   established_envs = [
     "test",
     "prod-sbx",
@@ -91,11 +90,10 @@ resource "aws_kms_alias" "secondary" {
   name          = local.kms_key_alias
   target_key_id = aws_kms_replica_key.secondary.arn
 }
-## BFD-3089
-## Replicate above structure for SDLC Baseline environments
+
 resource "aws_kms_key" "primary_config_sdlc" {
   for_each = toset(local.established_envs)
-  
+
   policy                             = local.key_policy_template
   description                        = "${each.value} primary config; used for sensitive SSM configuration"
   multi_region                       = true
@@ -105,7 +103,7 @@ resource "aws_kms_key" "primary_config_sdlc" {
 
 resource "aws_kms_alias" "primary_config_sdlc" {
   for_each = toset(local.established_envs)
-  
+
   name          = "alias/bfd-${each.key}-config-cmk"
   target_key_id = aws_kms_key.primary_config_sdlc[each.key].arn
 }
@@ -116,7 +114,7 @@ resource "aws_kms_replica_key" "secondary_config_sdlc" {
   provider = aws.secondary
 
   policy                             = local.key_policy_template
-  description                        = "${each.value} replica config; used for sensitive SSM configuration"
+  description                        = "${each.value} config replica; used for sensitive SSM configuration"
   primary_key_arn                    = aws_kms_key.primary_config_sdlc[each.value].arn
   bypass_policy_lockout_safety_check = false
 }
