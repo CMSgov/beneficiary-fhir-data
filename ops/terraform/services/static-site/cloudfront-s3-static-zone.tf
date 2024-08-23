@@ -11,7 +11,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "CloudFront distribution for static site ${local.env}"
-  default_root_object = "/index.html"
+  default_root_object = "index.html"
 
   custom_error_response {
     error_code         = 404
