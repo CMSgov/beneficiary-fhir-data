@@ -14,15 +14,6 @@ resource "aws_s3_bucket_ownership_controls" "static_site" {
   }
 }
 
-resource "aws_s3_bucket_website_configuration" "static_site" {
-  bucket = aws_s3_bucket.static_site.bucket
-
-  index_document {
-    suffix = "index.html"
-  }
-
-}
-
 # block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "static_site" {
   bucket                  = aws_s3_bucket.static_site.bucket
