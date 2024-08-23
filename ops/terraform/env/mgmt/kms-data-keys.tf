@@ -8,7 +8,6 @@ resource "aws_kms_key" "data_keys" {
 
   description                        = "Data key for the ${local.region} ${each.key} environment."
   enable_key_rotation                = true
-  multi_region                       = true  ## BFD-3089
   bypass_policy_lockout_safety_check = false
   deletion_window_in_days            = local.kms_default_deletion_window_days
 
@@ -41,7 +40,6 @@ resource "aws_kms_key" "data_keys_alt" {
 
   description                        = "Data key for ${local.alt_region} ${each.key} environment"
   enable_key_rotation                = true
-  multi_region                       = true  ## BFD-3089
   bypass_policy_lockout_safety_check = false
   deletion_window_in_days            = local.kms_default_deletion_window_days
 
