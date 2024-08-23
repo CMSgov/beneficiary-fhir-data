@@ -16,7 +16,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
   custom_error_response {
     error_code         = 404
     response_code      = 200
-    response_page_path = "/error.html"
+    response_page_path = "/404.html"
   }
 
   logging_config {
