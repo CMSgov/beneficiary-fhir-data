@@ -1,5 +1,4 @@
 resource "aws_cloudfront_distribution" "static_site_distribution" {
-  depends_on = [aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site, aws_s3_bucket.cloudfront_logging]
   origin {
     domain_name = aws_s3_bucket.static_site.bucket_regional_domain_name
     origin_id   = "S3-${aws_s3_bucket.static_site.bucket}"
