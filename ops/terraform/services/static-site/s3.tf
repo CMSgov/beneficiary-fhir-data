@@ -55,52 +55,6 @@ resource "aws_s3_bucket_policy" "static_site" {
   policy = data.aws_iam_policy_document.cloudfront_policy.json
 }
 
-resource "aws_s3_object" "index" {
-  bucket = aws_s3_bucket.static_site.bucket
-  key    = "/index.html"
-
-  content_type = "text/html"
-  content      = <<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    ${local.static_site_fqdn} Index page
-  </head>
-  <body>
-    <p>Placeholder page for ${local.static_site_fqdn} Static Site</p>
-  </body>
-</html>
-
-EOF
-
-  lifecycle {
-    ignore_changes = [content, tags]
-  }
-}
-
-resource "aws_s3_object" "error" {
-  bucket = aws_s3_bucket.static_site.bucket
-  key    = "/error.html"
-
-  content_type = "text/html"
-  content      = <<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    ${local.static_site_fqdn} Error page
-  </head>
-  <body>
-    <p>Placeholder Error page for ${local.static_site_fqdn} Static Site</p>
-  </body>
-</html>
-
-EOF
-
-  lifecycle {
-    ignore_changes = [content, tags]
-  }
-}
-
 resource "aws_s3_bucket" "cloudfront_logging" {
   bucket = local.static_logging_name
   tags = {
