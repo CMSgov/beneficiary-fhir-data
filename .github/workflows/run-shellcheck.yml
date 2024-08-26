@@ -1,0 +1,16 @@
+name: 'Run shellcheck'
+on:
+  pull_request:
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run Shellcheck
+        uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: -e SC1071 -e SC2239
+        with:
+          severity: warning
