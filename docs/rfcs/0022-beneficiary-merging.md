@@ -159,7 +159,7 @@ Patient 6 replaces patient 5
       "relation": "self",
       "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6"
     },
-    {
+    {
       "other": {
         "reference": "Patient/5"
       },
