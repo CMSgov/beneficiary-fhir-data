@@ -2,7 +2,7 @@
 
 * RFC Proposal ID: `0022-beneficiary-merging`
 * Start Date: 2024-08-20
-* RFC PR: [beneficiary-fhir-data/rfcs#0021](https://github.com/CMSgov/beneficiary-fhir-data/pull/2092)
+* RFC PR: [beneficiary-fhir-data/rfcs#0022](https://github.com/CMSgov/beneficiary-fhir-data/pull/2413)
 * JIRA Ticket(s):
     * [BFD-3585](https://jira.cms.gov/browse/BFD-3585)
 
