@@ -37,7 +37,7 @@ This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiari
     - [Scenario 6: Cross-referenced beneficiaries with different MBIs](#scenario-6-cross-referenced-beneficiaries-with-different-mbis)
   - [Potential Solutions - Patient Endpoint](#potential-solutions---patient-endpoint)
     - [General Solutions for handling Patient resources when a merge occurs](#general-solutions-for-handling-patient-resources-when-a-merge-occurs)
-      - [Option 1 - links](#option-1---links)
+      - [Option 1 - Links](#option-1---links)
       - [Option 2 - Automatic Replacement](#option-2---automatic-replacement)
       - [Option 3 - Freezing](#option-3---freezing)
     - [Reconciling beneficiary records when searching by contract](#reconciling-beneficiary-records-when-searching-by-contract)
@@ -127,7 +127,7 @@ It's worth noting that sometimes a historical MBI will be linked to both the cro
 
 ### General Solutions for handling Patient resources when a merge occurs
 
-#### Option 1 - links
+#### Option 1 - Links
 
 When a beneficiary merge occurs, the Patient response will contain a field that lists any additional Patient resources that are cross-referenced.
 A resource that contains a link marked as `replaced-by` means the resource refers to an older version of the beneficiary.
