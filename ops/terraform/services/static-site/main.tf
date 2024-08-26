@@ -82,4 +82,14 @@ locals {
   static_site_fqdn = lookup(local.static_site_fqdn_by_env, local.env, null)
 
   kms_key_id = data.aws_kms_key.data_cmk.arn
+
+  # BFD-3588
+  acm_cert_body        = local.ssm_config["/bfd/${local.service}/tls_certificate_body"]
+  acm_private_key_body = local.ssm_config["/bfd/${local.service}/tls_private_key_body"]
+}
+
+# BFD-3588
+resource "aws_acm_certificate" "env_issued" {
+  private_key      = local.acm_private_key_body
+  certificate_body = local.acm_cert_body
 }
