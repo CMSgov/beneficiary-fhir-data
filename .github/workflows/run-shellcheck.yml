@@ -9,8 +9,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run Shellcheck
-        uses: ludeeus/action-shellcheck@master
-        env:
-          SHELLCHECK_OPTS: -e SC1071 -e SC2239
+        uses: marounmaroun/shell-checker@v1
         with:
           severity: warning
+          exclude: 'SC1071,SC2239'
