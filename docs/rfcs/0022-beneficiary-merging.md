@@ -186,7 +186,7 @@ Patient 5 is replaced by patient 6
       "relation": "self",
       "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
     },
-    {
+    {
       "other": {
         "reference": "Patient/6"
       },
@@ -513,11 +513,11 @@ Instead of automatically finding the most recent version, we return the record a
   "active": false,
   
   "link": [
-     {
+    {
       "relation": "self",
       "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct01|S4607&_has:Coverage.rfrncyr=2018"
-     },
-     {
+    },
+    {
       "other": {
         "reference": "Patient/2"
       },
