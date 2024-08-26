@@ -18,4 +18,5 @@ jobs:
         id: ShellCheck
         uses: redhat-plumbers-in-action/differential-shellcheck@v5 
         with:
-          severity: warning 
+          severity: warning
+          triggering-event: pull_request
