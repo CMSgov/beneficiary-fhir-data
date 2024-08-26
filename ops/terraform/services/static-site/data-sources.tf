@@ -127,13 +127,12 @@ data "aws_iam_policy_document" "cloudfront_log_policy" {
   }
 }
 
-## TODO - see ./r53.tf
-# data "aws_acm_certificate" "env_issued" {
-#   domain      = "${local.static_site_fqdn}"
-#   statuses    = ["ISSUED"]
-#   types       = ["IMPORTED"]
-#   most_recent = true
-# }
+data "aws_acm_certificate" "env_issued" {
+  domain      = "${local.static_site_fqdn}"
+  statuses    = ["ISSUED"]
+  types       = ["IMPORTED"]
+  most_recent = true
+}
 
 data "aws_route53_zone" "vpc_root" {
   name         = local.root_domain_name
