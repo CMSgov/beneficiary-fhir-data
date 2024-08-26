@@ -65,7 +65,7 @@ runShellCheckForCommitFiles() {
         # run shellcheck with severity level warning, and suppress warnings about invalid hashbangs (allows it to ignore other types of scripts, e.g. python)
         if ! shellcheck -e SC1071,SC2239 -S warning "$file"; then
           echo "Please fix errors before continuing."
-          return
+          exit 1 
         fi
       fi
     done
