@@ -88,6 +88,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -116,6 +117,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
 import org.slf4j.Logger;
@@ -4135,5 +4137,58 @@ public final class TransformerUtilsV2 {
       availSet.add(ClaimType.HHA);
     }
     return availSet;
+  }
+
+  /**
+   * Creates a {@link org.hl7.fhir.r4.model.ContactPoint} from the specified system, value, and use.
+   *
+   * @param system the {@link org.hl7.fhir.r4.model.ContactPoint#getSystem()} to use
+   * @param value the {@link org.hl7.fhir.r4.model.ContactPoint#getValue()} to use
+   * @param use the {@link org.hl7.fhir.r4.model.ContactPoint#getUse()} to use
+   * @return a {@link org.hl7.fhir.r4.model.ContactPoint}}
+   */
+  static ContactPoint createContactPoint(
+      ContactPoint.ContactPointSystem system, String value, ContactPoint.ContactPointUse use) {
+    ContactPoint contactPoint = new ContactPoint();
+    contactPoint.setSystem(system);
+    contactPoint.setValue(value);
+
+    if (use != null) {
+      contactPoint.setUse(use);
+    }
+
+    return contactPoint;
+  }
+
+  /**
+   * Creates an {@link Extension} from the given system and value.
+   *
+   * @param extensions The list of {@link Extension}s to add to.
+   * @param url The url to use for the {@link Extension}.
+   * @param value The value to use for the {@link Extension}.
+   */
+  static void addExtension(List<Extension> extensions, String url, Type value) {
+    if (value != null) {
+      Extension extension = new Extension();
+      extension.setUrl(url);
+      extension.setValue(value);
+      extensions.add(extension);
+    }
+  }
+
+  /**
+   * Creates an {@link Extension} from the given system and value.
+   *
+   * @param extension The list of {@link Extension}s to add to.
+   * @param url The url to use for the {@link Extension}.
+   * @param value The value to use for the {@link Extension}.
+   */
+  static void addSubExtension(Extension extension, String url, Type value) {
+    if (value != null) {
+      Extension subExtension = new Extension();
+      subExtension.setUrl(url);
+      subExtension.setValue(value);
+      extension.addExtension(subExtension);
+    }
   }
 }

@@ -43,7 +43,6 @@ import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,9 +139,8 @@ public class R4CoverageResourceProviderTest {
     when(loadedFilterManager.isResultSetEmpty(any(), any())).thenReturn(false);
 
     // transformer mocking
-    when(coverageTransformer.transform(any(), (EnumSet<Profile>) any()))
-        .thenReturn(List.of(testCoverage));
-    when(coverageTransformer.transform(any(), (Beneficiary) any())).thenReturn(testCoverage);
+    when(coverageTransformer.transform(any(), (Profile) any())).thenReturn(List.of(testCoverage));
+    when(coverageTransformer.transform(any(), (Beneficiary) any(), any())).thenReturn(testCoverage);
 
     // Mock coverage id
     when(coverageId.getIdPart()).thenReturn(VALID_PART_A_COVERAGE_ID);
@@ -245,7 +243,7 @@ public class R4CoverageResourceProviderTest {
               coverageProvider.read(coverageId);
             });
     assertEquals(
-        "Coverage ID pattern: '1?234' does not match expected pattern: {alphaNumericString}?-{alphaNumericString}-{idNumber}",
+        "Coverage ID pattern: '1?234' does not match expected patterns: {alphaNumericString}?-{alphaNumericString}-{idNumber} or {alphaNumericString}?-{alphaNumericString}?-{alphaNumericString}-{idNumber}",
         exception.getLocalizedMessage());
   }
 
@@ -318,7 +316,7 @@ public class R4CoverageResourceProviderTest {
   @Test
   public void testCoverageByBeneficiaryCount() {
     coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
-    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
+    verify(coverageTransformer).transform(any(), eq(Profile.C4BB));
   }
 
   /**
@@ -330,7 +328,7 @@ public class R4CoverageResourceProviderTest {
     coverageProvider.searchByBeneficiary(
         beneficiary, null, null, ProfileConstants.C4BB_COVERAGE_URL, requestDetails);
 
-    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB)));
+    verify(coverageTransformer).transform(any(), eq(Profile.C4BB));
   }
 
   /**
@@ -347,10 +345,10 @@ public class R4CoverageResourceProviderTest {
     coverageProvider.searchByBeneficiary(
         beneficiary, null, null, ProfileConstants.C4DIC_COVERAGE_URL, requestDetails);
 
-    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4DIC)));
+    verify(coverageTransformer).transform(any(), eq(Profile.C4DIC));
   }
 
-  /** Tests that the transformer is called with both profiles when both are enabled. */
+  /** Tests that the transformer is called with only the C4BB profile if no profile is specified. */
   @Test
   public void testCoverageByBeneficiaryCountBothProfiles() {
     coverageProvider =
@@ -360,7 +358,7 @@ public class R4CoverageResourceProviderTest {
 
     coverageProvider.searchByBeneficiary(beneficiary, null, null, null, requestDetails);
 
-    verify(coverageTransformer).transform(any(), eq(EnumSet.of(Profile.C4BB, Profile.C4DIC)));
+    verify(coverageTransformer).transform(any(), eq(Profile.C4BB));
   }
 
   /** Tests that the transformer is called with the C4DIC profile when a C4DIC ID is used. */
@@ -371,11 +369,11 @@ public class R4CoverageResourceProviderTest {
             metricRegistry, loadedFilterManager, coverageTransformer, true);
     coverageProvider.setEntityManager(entityManager);
 
-    when(coverageId.getIdPart()).thenReturn("c4dic-9145");
+    when(coverageId.getIdPart()).thenReturn("c4dic-part-a-9145");
 
     coverageProvider.read(coverageId);
 
-    verify(coverageTransformer).transform(eq(MedicareSegment.C4DIC), any());
+    verify(coverageTransformer).transform(eq(MedicareSegment.PART_A), any(), any());
   }
 
   /** Test coverage by beneficiary when paging is requested, expect paging links are returned. */

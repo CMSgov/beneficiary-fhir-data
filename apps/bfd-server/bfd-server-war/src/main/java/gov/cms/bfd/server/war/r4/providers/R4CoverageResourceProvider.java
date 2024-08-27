@@ -66,6 +66,14 @@ public class R4CoverageResourceProvider implements IResourceProvider {
   private static final Pattern COVERAGE_ID_PATTERN =
       Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
 
+  /**
+   * A {@link Pattern} that will match the C4DIC {@link Coverage#getId()}s used in this application,
+   * e.g. <code>c4dic-part-a-1234</code> or <code>c4dic-part-a--1234</code> (for negative IDs).
+   */
+  private static final Pattern C4DIC_COVERAGE_ID_PATTERN =
+      Pattern.compile(
+          "(\\p{Alnum}+-?\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
+
   /** The entity manager. */
   private EntityManager entityManager;
 
@@ -152,23 +160,41 @@ public class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
+    Matcher c4dicCoverageIdMatcher = C4DIC_COVERAGE_ID_PATTERN.matcher(coverageIdText);
 
-    if (!coverageIdMatcher.matches()) {
+    if ((enabledProfiles.contains(Profile.C4DIC)
+            && !c4dicCoverageIdMatcher.matches()
+            && !coverageIdMatcher.matches())
+        || (!enabledProfiles.contains(Profile.C4DIC) && !coverageIdMatcher.matches())) {
       String invalidCoverageIdMessage =
           "Coverage ID pattern: '"
               + coverageIdText
-              + "' does not match expected pattern: "
-              + "{alphaNumericString}?-{alphaNumericString}-{idNumber}";
+              + "' does not match expected patterns: "
+              + "{alphaNumericString}?-{alphaNumericString}-{idNumber}"
+              + " or {alphaNumericString}?-{alphaNumericString}?-{alphaNumericString}-{idNumber}";
       throw new InvalidRequestException(invalidCoverageIdMessage);
     }
 
-    String coverageIdSegmentText = coverageIdMatcher.group(1);
-    Optional<MedicareSegment> coverageIdSegment =
-        MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, this.enabledProfiles);
-    if (!coverageIdSegment.isPresent()) {
+    Optional<MedicareSegment> coverageIdSegment;
+    Long beneficiaryId;
+    Profile profileUsed;
+    String coverageIdSegmentText;
+
+    if (coverageIdMatcher.matches()) {
+      profileUsed = Profile.C4BB;
+      coverageIdSegmentText = coverageIdMatcher.group(1);
+      beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+    } else {
+      profileUsed = Profile.C4DIC;
+      coverageIdSegmentText = c4dicCoverageIdMatcher.group(1);
+      beneficiaryId = Long.parseLong(c4dicCoverageIdMatcher.group(2));
+    }
+
+    coverageIdSegment = MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, profileUsed);
+    if (coverageIdSegment.isEmpty()) {
       throw new ResourceNotFoundException(coverageId);
     }
-    Long beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
@@ -185,7 +211,8 @@ public class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), String.valueOf(beneficiaryId)));
     }
 
-    Coverage coverage = coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
+    Coverage coverage =
+        coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity, profileUsed);
     return coverage;
   }
 
@@ -228,23 +255,27 @@ public class R4CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
               value = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE)
           DateRangeParam lastUpdated,
-      @OptionalParam(name = "_profile") String profile,
+      @OptionalParam(name = "_profile")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COVERAGE_SP_SUPPORTED_PROFILE_SHORT,
+              value = OpenAPIContentProvider.COVERAGE_SP_SUPPORTED_PROFILE_VALUE)
+          String profile,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
     Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
 
-    EnumSet<Profile> chosenProfiles =
+    Profile chosenProfile =
         (this.enabledProfiles.contains(Profile.C4DIC) && profile != null)
             ? switch (profile) {
-              case ProfileConstants.C4DIC_COVERAGE_URL -> EnumSet.of(Profile.C4DIC);
-              case ProfileConstants.C4BB_COVERAGE_URL -> EnumSet.of(Profile.C4BB);
+              case ProfileConstants.C4DIC_COVERAGE_URL -> Profile.C4DIC;
+              case ProfileConstants.C4BB_COVERAGE_URL -> Profile.C4BB;
               default -> throw new InvalidRequestException("Invalid profile: " + profile);
             }
-            : this.enabledProfiles;
+            : Profile.C4BB;
 
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
-      coverages = coverageTransformer.transform(beneficiaryEntity, chosenProfiles);
+      coverages = coverageTransformer.transform(beneficiaryEntity, chosenProfile);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
