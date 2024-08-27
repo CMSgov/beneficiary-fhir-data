@@ -282,6 +282,12 @@ resource "aws_autoscaling_group" "this" {
       propagate_at_launch = true
     }
   }
+  # Lifecycle block to ignore changes to instance counts
+  lifecycle {
+    ignore_changes = [
+      desired_capacity # Ignore changes to the desired capacity
+    ]
+  }
 }
 
 # TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
