@@ -20,13 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -58,19 +59,20 @@ final class CoverageTransformerV2 {
    *
    * @param medicareSegment the {@link MedicareSegment} to generate a {@link Coverage} resource for
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
+   * @param profile the CARIN {@link Profile} to use
    * @return the {@link Coverage} resource that was generated
    */
   @Trace
-  public Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
+  public Coverage transform(
+      MedicareSegment medicareSegment, Beneficiary beneficiary, Profile profile) {
     Objects.requireNonNull(medicareSegment);
     Objects.requireNonNull(beneficiary);
 
     return switch (medicareSegment) {
-      case PART_A -> transformPartA(beneficiary);
-      case PART_B -> transformPartB(beneficiary);
-      case PART_C -> transformPartC(beneficiary);
-      case PART_D -> transformPartD(beneficiary);
-      case C4DIC -> transformC4Dic(beneficiary);
+      case PART_A -> transformPartA(beneficiary, profile);
+      case PART_B -> transformPartB(beneficiary, profile);
+      case PART_C -> transformPartC(beneficiary, profile);
+      case PART_D -> transformPartD(beneficiary, profile);
       default -> throw new BadCodeMonkeyException();
     };
   }
@@ -79,56 +81,56 @@ final class CoverageTransformerV2 {
    * Transforms a beneficiary into a {@link Coverage} resource.
    *
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
-   * @param enabledProfiles the CARIN {@link Profile} to use
+   * @param profile the CARIN {@link Profile} to use
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
   @Trace
-  public List<IBaseResource> transform(Beneficiary beneficiary, Set<Profile> enabledProfiles) {
+  public List<IBaseResource> transform(Beneficiary beneficiary, Profile profile) {
     return Arrays.stream(MedicareSegment.values())
-        .filter(
-            s ->
-                (enabledProfiles.contains(Profile.C4DIC) && s == MedicareSegment.C4DIC)
-                    || (enabledProfiles.contains(Profile.C4BB) && s != MedicareSegment.C4DIC))
-        .map(s -> transform(s, beneficiary))
+        .map(s -> transform(s, beneficiary, profile))
         .collect(Collectors.toList());
   }
 
   /**
-   * Transforms a beneficiary into a {@link Coverage} resource per the CARIN Digital Insurance Card
-   * {@link Profile}.
+   * Transforms the {@link Coverage} resource per the CARIN Digital Insurance Card {@link Profile}.
    *
    * @param beneficiary the CCW {@link Beneficiary} to generate the {@link Coverage}s for
-   * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
-   *     Beneficiary}
+   * @param coverage the {@link Coverage} resource to transform
    */
-  private Coverage transformC4Dic(Beneficiary beneficiary) {
-    Timer.Context timer = createTimerContext("c4dic");
-
-    Coverage coverage = new Coverage();
-    Profile profile = Profile.C4DIC;
-
-    addProfile(coverage, profile);
-    addC4DicIdentifier(coverage, beneficiary);
-    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.C4DIC, beneficiary));
-
-    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
-
-    setType(coverage);
+  private void transformC4Dic(Beneficiary beneficiary, Coverage coverage) {
     addC4DicPayor(coverage);
 
-    setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
+    addC4DicIdentifier(coverage, beneficiary);
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
+    coverage.setSubscriber(TransformerUtilsV2.referencePatient(beneficiary));
+    coverage.setStatus(CoverageStatus.ACTIVE);
 
-    createCoverageClass(
-        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+    Extension baseExtension = new Extension();
+    baseExtension.setUrl(TransformerConstants.C4DIC_COLOR_PALETTE_EXT_URL);
 
-    coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
-
-    // update Coverage.meta.lastUpdated
-    TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
-
-    timer.stop();
-    return coverage;
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_FOREGROUNDCOLOR,
+            null));
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_BACKGROUNDCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_BACKGROUNDCOLOR,
+            null));
+    TransformerUtilsV2.addSubExtension(
+        baseExtension,
+        TransformerConstants.C4DIC_HIGHLIGHTCOLOR_EXT_URL,
+        new Coding(
+            TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
+            TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
+            null));
+    coverage.addExtension(baseExtension);
   }
 
   /**
@@ -136,27 +138,32 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_A} {@link
    *     Coverage} resource for
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_A} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartA(Beneficiary beneficiary) {
+  private Coverage transformPartA(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_a");
     Coverage coverage = new Coverage();
-    Profile profile = Profile.C4BB;
 
     addProfile(coverage, profile);
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary, profile));
 
-    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
+    if (profile.equals(Profile.C4DIC)) {
+      transformC4Dic(beneficiary, coverage);
+    } else {
+      addC4bbPayor(coverage);
+    }
 
     setCoverageStatus(coverage, beneficiary.getPartATerminationCode());
     TransformerUtilsV2.setPeriodStart(
         coverage.getPeriod(), beneficiary.getPartACoverageStartDate());
     TransformerUtilsV2.setPeriodEnd(coverage.getPeriod(), beneficiary.getPartACoverageEndDate());
 
-    beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
 
     setType(coverage);
-    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -201,26 +208,33 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_B} {@link
    *     Coverage} resource for
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_B} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartB(Beneficiary beneficiary) {
+  private Coverage transformPartB(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_b");
     Coverage coverage = new Coverage();
-    Profile profile = Profile.C4BB;
 
     addProfile(coverage, profile);
-    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary, profile));
+
+    if (profile.equals(Profile.C4DIC)) {
+      transformC4Dic(beneficiary, coverage);
+    } else {
+      addC4bbPayor(coverage);
+    }
+
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
     TransformerUtilsV2.setPeriodStart(
         coverage.getPeriod(), beneficiary.getPartBCoverageStartDate());
     TransformerUtilsV2.setPeriodEnd(coverage.getPeriod(), beneficiary.getPartBCoverageEndDate());
 
-    beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
 
     setType(coverage);
-    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -260,22 +274,29 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_C} {@link
    *     Coverage} resource for
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_C} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartC(Beneficiary beneficiary) {
+  private Coverage transformPartC(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_c");
     Coverage coverage = new Coverage();
-    Profile profile = Profile.C4BB;
 
     addProfile(coverage, profile);
-    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary));
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary, profile));
+
+    if (profile.equals(Profile.C4DIC)) {
+      transformC4Dic(beneficiary, coverage);
+    } else {
+      addC4bbPayor(coverage);
+    }
+
     coverage.setStatus(CoverageStatus.ACTIVE);
 
-    beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
 
     setType(coverage);
-    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -316,25 +337,31 @@ final class CoverageTransformerV2 {
    *
    * @param beneficiary the {@link Beneficiary} to generate a {@link MedicareSegment#PART_D} {@link
    *     Coverage} resource for
+   * @param profile the CARIN {@link Profile} to use
    * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the specified {@link
    *     Beneficiary}
    */
-  private Coverage transformPartD(Beneficiary beneficiary) {
+  private Coverage transformPartD(Beneficiary beneficiary, Profile profile) {
     Timer.Context timer = createTimerContext("part_d");
     Coverage coverage = new Coverage();
-    Profile profile = Profile.C4BB;
 
     addProfile(coverage, profile);
-    coverage.setId(CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
+    coverage.setId(
+        CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary, profile));
+
+    if (profile.equals(Profile.C4DIC)) {
+      transformC4Dic(beneficiary, coverage);
+    } else {
+      addC4bbPayor(coverage);
+    }
 
     TransformerUtilsV2.setPeriodStart(
         coverage.getPeriod(), beneficiary.getPartDCoverageStartDate());
     TransformerUtilsV2.setPeriodEnd(coverage.getPeriod(), beneficiary.getPartDCoverageEndDate());
 
-    beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
+    beneficiary.getMedicareBeneficiaryId().ifPresent(coverage::setSubscriberId);
 
     setType(coverage);
-    addC4bbPayor(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
@@ -868,8 +895,38 @@ final class CoverageTransformerV2 {
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
     organization.setActive(true);
     organization.setName(COVERAGE_ISSUER);
+    addC4dicOrganizationContact(organization);
 
     coverage.addPayor(new Reference(organization));
+  }
+
+  /**
+   * Sets the Payor's contact information on the contained {@link Organization} resource.
+   *
+   * @param organization The contained {@link Organization} resource
+   */
+  private void addC4dicOrganizationContact(Organization organization) {
+    Organization.OrganizationContactComponent organizationContactComponent =
+        new Organization.OrganizationContactComponent();
+    organizationContactComponent.setPurpose(
+        TransformerUtilsV2.createCodeableConcept(
+            TransformerConstants.C4DIC_CONTACT_TYPE_CODE_SYSTEM,
+            null,
+            TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_DISPLAY,
+            TransformerConstants.C4DIC_CONTACT_TYPE_PAYOR_CODE));
+
+    ContactPoint phoneContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.PHONE,
+            TransformerConstants.C4DIC_MEDICARE_SERVICE_PHONE_NUMBER,
+            null);
+
+    ContactPoint emailContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.URL, TransformerConstants.C4DIC_MEDICARE_URL, null);
+    List<ContactPoint> contactPoints = List.of(phoneContact, emailContact);
+    organizationContactComponent.setTelecom(contactPoints);
+    organization.addContact(organizationContactComponent);
   }
 
   /**
@@ -884,18 +941,20 @@ final class CoverageTransformerV2 {
         TransformerUtilsV2.findOrCreateContainedOrganization(
             coverage, TransformerUtilsV2.PROVIDER_ORG_ID, Profile.C4DIC);
 
-    Identifier identifier =
-        new Identifier()
-            .setType(
-                TransformerUtilsV2.createCodeableConcept(
-                    TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-                    null,
-                    TransformerConstants.PATIENT_MB_ID_DISPLAY,
-                    "MB"))
-            .setValue((String.valueOf(beneficiary.getBeneficiaryId())))
-            .setSystem(TransformerConstants.CODING_BBAPI_BENE_ID)
-            .setAssigner(new Reference(organization));
-    coverage.addIdentifier(identifier);
+    if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
+      Identifier identifier =
+          new Identifier()
+              .setType(
+                  TransformerUtilsV2.createCodeableConcept(
+                      TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+                      null,
+                      TransformerConstants.PATIENT_MB_ID_DISPLAY,
+                      "MB"))
+              .setValue(beneficiary.getMedicareBeneficiaryId().get())
+              .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+              .setAssigner(new Reference(organization));
+      coverage.addIdentifier(identifier);
+    }
   }
 
   /**

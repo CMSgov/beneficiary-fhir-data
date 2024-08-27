@@ -154,6 +154,19 @@ public final class OpenAPIContentProvider {
      - `beneficiary=567834`
      - `beneficiary=1234`""";
 
+  /** Open API content short description for /Coverage's profile parameter. */
+  public static final String COVERAGE_SP_SUPPORTED_PROFILE_SHORT =
+      "Profiles for use cases supported";
+
+  /** Open API content value for /Coverage's profile parameter. */
+  public static final String COVERAGE_SP_SUPPORTED_PROFILE_VALUE =
+      """
+         Filters the response to contain only _Coverage_ data that support the specified profile.
+
+         The following are all valid values for profile:
+         - `http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage`
+         - `http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage`""";
+
   /** Open API short description for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_SHORT = "A list of BFD claim types to include";
 

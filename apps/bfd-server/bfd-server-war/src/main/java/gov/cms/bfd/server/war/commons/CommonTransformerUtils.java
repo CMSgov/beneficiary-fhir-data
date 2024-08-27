@@ -188,6 +188,19 @@ public final class CommonTransformerUtils {
   }
 
   /**
+   * Builds a patient id from a {@link Beneficiary} and a {@link MedicareSegment}.
+   *
+   * @param medicareSegment the {@link MedicareSegment} to compute a Coverage identifier for
+   * @param beneficiary the {@link Beneficiary} to compute a Coverage identifier for
+   * @param profile a supported CARIN {@link Profile}
+   * @return the {@link ca.uhn.fhir.model.primitive.IdDt} for STU3/R4 or Coverage identifier
+   */
+  public static IdDt buildCoverageId(
+      MedicareSegment medicareSegment, Beneficiary beneficiary, Profile profile) {
+    return buildCoverageId(medicareSegment, beneficiary.getBeneficiaryId(), profile);
+  }
+
+  /**
    * Builds a patient id from a beneficiary id and a {@link MedicareSegment}.
    *
    * @param medicareSegment the {@link MedicareSegment} to compute a Coverage identifier for
@@ -199,6 +212,22 @@ public final class CommonTransformerUtils {
     return new IdDt(
         COVERAGE_SIMPLE_CLASSNAME,
         String.format("%s-%d", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * Builds a patient id from a beneficiary id and a {@link MedicareSegment}.
+   *
+   * @param medicareSegment the {@link MedicareSegment} to compute a Coverage identifier for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute an STU3/R4
+   *     Coverage for
+   * @param profile a supported CARIN {@link Profile}
+   * @return the {@link ca.uhn.fhir.model.primitive.IdDt} for STU3/R4 or Coverage identifier
+   */
+  public static IdDt buildCoverageId(
+      MedicareSegment medicareSegment, Long beneficiaryId, Profile profile) {
+    return new IdDt(
+        COVERAGE_SIMPLE_CLASSNAME,
+        String.format("%s-%d", medicareSegment.getUrlPrefix(profile), beneficiaryId));
   }
 
   /**
