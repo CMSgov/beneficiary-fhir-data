@@ -24,7 +24,7 @@ resource "aws_kms_key" "data_keys" {
   }
 }
 
-# alias
+# key aliases for data protection
 resource "aws_kms_alias" "data_keys" {
   for_each = toset(concat(local.established_envs, ["mgmt"]))
 

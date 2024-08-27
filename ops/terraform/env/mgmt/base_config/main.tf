@@ -9,8 +9,15 @@ locals {
     Terraform      = true
     tf_module_root = "ops/terraform/env/mgmt/base_config"
   }
+  established_envs = [
+    "test",
+    "prod-sbx",
+    "prod"
+  ]
 
-  kms_key_alias = "alias/bfd-${local.env}-config-cmk"
+  kms_config_keys_envs = toset(concat(local.established_envs, [local.env]))
+  kms_key_id           = aws_kms_key.primary_config[local.env].arn
+
 
   key_policy_template = jsonencode(
     {
@@ -36,8 +43,6 @@ locals {
     }
   )
 
-  kms_key_id = aws_kms_key.primary.arn
-
   yaml = data.external.yaml.result
   common_sensitive = {
     for key, value in local.yaml
@@ -57,34 +62,43 @@ locals {
   }
 }
 
-resource "aws_kms_key" "primary" {
+resource "aws_kms_key" "primary_config" {
+  for_each = local.kms_config_keys_envs
+
   policy                             = local.key_policy_template
-  description                        = "${local.kms_key_alias} primary; used for sensitive SSM configuration"
+  description                        = "${each.value} primary config; used for sensitive SSM configuration"
   multi_region                       = true
   enable_key_rotation                = true
   bypass_policy_lockout_safety_check = false
 }
 
-resource "aws_kms_alias" "primary" {
-  name          = local.kms_key_alias
-  target_key_id = aws_kms_key.primary.arn
+resource "aws_kms_alias" "primary_config" {
+  for_each = local.kms_config_keys_envs
+
+  name          = "alias/bfd-${each.key}-config-cmk"
+  target_key_id = aws_kms_key.primary_config[each.key].arn
 }
 
-resource "aws_kms_replica_key" "secondary" {
+resource "aws_kms_replica_key" "secondary_config" {
+  for_each = local.kms_config_keys_envs
+
   provider = aws.secondary
 
   policy                             = local.key_policy_template
-  description                        = "${local.kms_key_alias} replica; used for sensitive SSM configuration"
-  primary_key_arn                    = aws_kms_key.primary.arn
+  description                        = "${each.value} config replica; used for sensitive SSM configuration"
+  primary_key_arn                    = aws_kms_key.primary_config[each.value].arn
   bypass_policy_lockout_safety_check = false
 }
 
-resource "aws_kms_alias" "secondary" {
+resource "aws_kms_alias" "secondary_config" {
+  for_each = local.kms_config_keys_envs
+
   provider = aws.secondary
 
-  name          = local.kms_key_alias
-  target_key_id = aws_kms_replica_key.secondary.arn
+  name          = "alias/bfd-${each.key}-config-cmk"
+  target_key_id = aws_kms_replica_key.secondary_config[each.key].arn
 }
+##
 
 resource "aws_ssm_parameter" "common_sensitive" {
   for_each = local.common_sensitive
