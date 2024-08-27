@@ -86,6 +86,7 @@ locals {
   # BFD-3588
   acm_cert_body        = local.ssm_config["/bfd/${local.service}/tls_certificate_body"]
   acm_private_key_body = local.ssm_config["/bfd/${local.service}/tls_private_key_body"]
+
 }
 
 # BFD-3588

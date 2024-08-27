@@ -2603,7 +2603,7 @@ public class FissClaimTransformerTest {
         .setSeq(MIN_SEQUENCE_NUM)
         .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
         .setClaim(claimBuilder.build());
-    assertChangeMatches(RdaChange.Type.INSERT); // here
+    assertChangeMatches(RdaChange.Type.INSERT);
 
     // servTypeCd specific tests begin here
 

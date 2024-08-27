@@ -71,7 +71,6 @@ final class CoverageTransformer {
   @Trace
   public List<IBaseResource> transform(Beneficiary beneficiary) {
     return Arrays.stream(MedicareSegment.values())
-        .filter(medicareSegment -> !medicareSegment.equals(MedicareSegment.C4DIC))
         .map(s -> transform(s, beneficiary))
         .collect(Collectors.toList());
   }
