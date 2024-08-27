@@ -8,7 +8,7 @@
   "kind" : "instance",
   "software" : {
     "name" : "Blue Button API: Direct",
-    "version" : "2.139.0-SNAPSHOT"
+    "version" : "2.147.0-SNAPSHOT"
   },
   "implementation" : {
     "description" : "gov.cms.bfd:bfd-server-war",
@@ -120,7 +120,8 @@
         "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "_profile",
-        "type" : "string"
+        "type" : "string",
+        "documentation" : "Filters the response to contain only _Coverage_ data that support the specified profile.\n\nThe following are all valid values for profile:\n- `http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage`\n- `http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage`"
       }, {
         "name" : "beneficiary",
         "type" : "reference",
