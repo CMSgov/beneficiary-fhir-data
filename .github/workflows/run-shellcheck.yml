@@ -7,8 +7,6 @@ jobs:
   lint:
     name: Shellcheck
     runs-on: ubuntu-20.04
-    permissions:
-      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
