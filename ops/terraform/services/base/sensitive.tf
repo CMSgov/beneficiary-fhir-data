@@ -4,6 +4,8 @@ locals {
   pipeline_sensitive = { for key, value in local.yaml : key => value if contains(split("/", key), "pipeline") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
   server_sensitive   = { for key, value in local.yaml : key => value if contains(split("/", key), "server") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
   eft_sensitive      = { for key, value in local.yaml : key => value if contains(split("/", key), "eft") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
+  # BFD-3588
+  staticsite_sensitive = { for key, value in local.yaml : key => value if contains(split("/", key), "static-site") && strcontains(key, "/sensitive/") && value != "UNDEFINED" }
 }
 
 resource "aws_ssm_parameter" "common_sensitive" {
@@ -57,6 +59,18 @@ resource "aws_ssm_parameter" "server_sensitive" {
 
 resource "aws_ssm_parameter" "eft_sensitive" {
   for_each = local.eft_sensitive
+
+  key_id    = local.kms_key_id
+  name      = each.key
+  overwrite = true
+  type      = "SecureString"
+  value     = each.value
+
+  tags = {}
+}
+
+resource "aws_ssm_parameter" "staticsite_sensitive" {
+  for_each = local.staticsite_sensitive
 
   key_id    = local.kms_key_id
   name      = each.key
