@@ -85,14 +85,13 @@ debug_enabled=false
 debug_suspend=n
 db_host=localhost
 db_port=5432
-username=
-password=
+username="bfd"
+password="InsecureLocalDev"
 install=true
 image_tag=
 image_name=bfd-server
 localstack_ip=localhost
 kubernetes=false
-host_set=false
 
 function usage() {
   script_name=`basename $0`
@@ -121,7 +120,6 @@ while getopts "d:u:p:i:kl:xzZh" option ; do
   d) IFS=':' read h p <<<"$OPTARG"
      db_host=${h:=$db_host}
      db_port=${p:=$db_port}
-     host_set=true
      unset h p
      ;;
   u) username=$OPTARG
@@ -258,16 +256,10 @@ setvar paths/files/truststore "$bin_dir/ssl/${truststore_file}"
 setvar paths/files/keystore "$bin_dir/ssl/${keystore_file}"
 setvar paths/files/war "$bin_dir/$war_file_name"
 
-# Conditional database URL setting
-if $host_set && [[ -n "$username" ]] && [[ -n "$password" ]]; then
-  setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
-    setvar db/username $username
-    setvar db/password $password
-else
- setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
-   setvar db/username "bfd"
-   setvar db/password "InsecureLocalDev"
-fi
+
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
+setvar db/username $username
+setvar db/password $password
 
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
