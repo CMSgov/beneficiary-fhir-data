@@ -55,7 +55,7 @@ This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiari
 ## Causes
 
 The scenarios which cause these merged beneficiary records to be created are somewhat unclear.
-In general, CCW attempts to link all upstream beneficiary data for an individual to a single beneficiary ID, but this process can behave erronously due to limitations in the logic or bad data coming from upstream.
+In general, CCW attempts to link all upstream beneficiary data for an individual to a single beneficiary ID, but this process can behave erroneously due to limitations in the logic or bad data coming from upstream.
 
 One situation that we know does cause a cross-reference number to be generated is when a beneficiary's HICN changes under specific circumstances.
 The following information is paraphrased from the EDB data dictionary:
@@ -68,7 +68,7 @@ The following information is paraphrased from the EDB data dictionary:
 > EDB has a concept of an "equatable" BIC change.
 > When an equatable BIC change occurs, a cross reference ID is generated. 
 > A BIC change from 'B' (wife) to 'D' (widow) is an example of an equatable BIC change.
-> Non-equatable BIC changes only happen under erronous conditions.
+> Non-equatable BIC changes only happen under erroneous conditions.
 
 It's not explicitly stated, but I expect a cross-reference ID _should_ also be generated for non-equatable BIC changes and I have observed some instances of this.
 
@@ -239,7 +239,7 @@ Using the following data:
 
 Searching by id (bene_id) will return only the matched record.
 Searching by identifier (MBI) will return both resources.
-In both cases, the response will contain a `link` field marked as `seealso`, which links to the other resorce.
+In both cases, the response will contain a `link` field marked as `seealso`, which links to the other resource.
 
 As opposed to the `replaced-by`/`replaces` solution, this does not attempt to convey identity, which is helpful in the event that an un-merge occurs.
 
@@ -773,7 +773,7 @@ This means that any consumers of this data who attempt to use MBI as a unique id
 
 This issue is distinct from the merge operations that we've been discussing so far, but it has enough of an overlap that it might make sense to address both issues simultaneously.
 
-With historical identifiers included and of of the propsed changes above included, consumers will be able to see all identifiers associated with the current and past beneficiary records.
+With historical identifiers included and of of the proposed changes above included, consumers will be able to see all identifiers associated with the current and past beneficiary records.
 
 ## Tradeoffs
 
