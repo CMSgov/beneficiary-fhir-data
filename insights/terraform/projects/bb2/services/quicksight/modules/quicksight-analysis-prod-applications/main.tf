@@ -3663,7 +3663,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
         list {
           filter_control_id = "8a2feb46-9bfe-4725-a4ef-16fada3212d1"
           source_filter_id  = "ddcb7121-71df-42a9-829a-c40dddd0c225"
-          title             = "Filter By Enabled Application (1=Yes/0=No)"
+          title             = "Filter By Activated Application (1=Yes/0=No)"
           type              = "SINGLE_SELECT"
 
           display_options {
