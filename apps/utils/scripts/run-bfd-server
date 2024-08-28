@@ -85,6 +85,8 @@ debug_enabled=false
 debug_suspend=n
 db_host=localhost
 db_port=5432
+username="bfd"
+password="InsecureLocalDev"
 install=true
 image_tag=
 image_name=bfd-server
@@ -98,6 +100,8 @@ Runs a BFD server.  Use command line options to change behaviors.
 
 $script_name [options]
 -d db_host[:db_port]      Name of database host.  Optional :n uses port n.
+-u username               Username for the database connection.
+-p password               Password for the database connection.
 -i image_tag              Runs the server as a containing using the image with given tag.
 -k                       Run using kubernetes (using ops/k8s).
 -l localstack_ip          Localstack IP address (for bridge networking).
@@ -111,12 +115,16 @@ Option defaults:
 EOF
 }
 
-while getopts "d:i:kl:xzZh" option ; do
+while getopts "d:u:p:i:kl:xzZh" option ; do
   case $option in
   d) IFS=':' read h p <<<"$OPTARG"
      db_host=${h:=$db_host}
      db_port=${p:=$db_port}
      unset h p
+     ;;
+  u) username=$OPTARG
+     ;;
+  p) password=$OPTARG
      ;;
   i) image_tag=$OPTARG ; install=false ;;
   k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
@@ -248,9 +256,10 @@ setvar paths/files/truststore "$bin_dir/ssl/${truststore_file}"
 setvar paths/files/keystore "$bin_dir/ssl/${keystore_file}"
 setvar paths/files/war "$bin_dir/$war_file_name"
 
-setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
-setvar db/username "bfd"
-setvar db/password "InsecureLocalDev"
+
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
+setvar db/username $username
+setvar db/password $password
 
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"

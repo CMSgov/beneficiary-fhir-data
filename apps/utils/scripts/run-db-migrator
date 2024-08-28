@@ -238,7 +238,7 @@ fi
 
 # Set up the configuration variables using the setvar function.
 export BFD_ENV_NAME=laptop
-setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd"
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb"
 setvar db/username 'bfd'
 setvar db/password 'InsecureLocalDev'
 
