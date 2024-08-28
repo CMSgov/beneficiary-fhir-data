@@ -354,7 +354,7 @@ export BFD_ENV_NAME="laptop"
 setvar ccw/s3_bucket_name "$s3_bucket"
 setvar hicn_hash/iterations "1000"  # The minimum number of iterations recommended by NIST is 1000.
 setvar hicn_hash/pepper "6f6e7474656865726c61657070707265" # nottherealpepper
-setvar db/url "jdbc:postgresql://${db_host}:${db_port}/bfd?logServerErrorDetail=false"
+setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
 setvar db/username "bfd"
 setvar db/password "InsecureLocalDev"
 
