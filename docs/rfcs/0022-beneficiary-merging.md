@@ -7,11 +7,11 @@
     * [BFD-3585](https://jira.cms.gov/browse/BFD-3585)
 
 In a small number of cases, a given individual may be linked to multiple beneficiary records.
-CCW and CME will attempt to link together any changes to a beneficiary's personal information and link it to a single
-beneficiary record, but limitations of these systems occasionally cause a single beneficiary's information to be applied to multiple records.
+CCW and its upstream systems will attempt to track any changes to a beneficiary's personal information and link it to a single
+beneficiary record, but limitations of these systems occasionally cause the information to be applied to multiple records.
 
-When this happens, we receive a cross-reference ID (xref_id) which will indicate there are multiple beneficiary records that point to the same person.
-Additionally, we receive another field called the cross-reference switch (xref_sw) which will tell us which beneficiary
+When this happens, we receive a cross-reference ID (`xref_id`) which will indicate there are multiple beneficiary records that refer to the same person.
+Additionally, we receive another field called the cross-reference switch (`xref_sw`) which will tell us which beneficiary
 record is the most current.
 The value of `xref_sw` can be either `Y` (yes) or `N` (no), with a value of `Y` indicating that this beneficiary has been merged into another and a value of `N` indicating that this is the most current record.
 
@@ -147,7 +147,7 @@ Here the `kill_credit` flag is set to `1`, indicating that the `xref_id` is no l
 When a beneficiary merge occurs, the Patient response will contain a field that lists any additional Patient resources that are cross-referenced.
 A resource that contains a link marked as `replaced-by` means the resource refers to an older version of the beneficiary.
 A resource that contains a link marked as `replaces` means the current resource is the most up-to-date, but older versions also exist.
-A non-current Patient record will also have its `active` field set to `false` (note: we don't currently set the `active` field at all). 
+A non-current Patient record will also have its `active` field set to `false` (**Note:** we don't currently set the `active` field at all). 
 
 Using the following data:
 
