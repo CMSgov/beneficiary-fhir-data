@@ -76,53 +76,53 @@ It's not explicitly stated, but I expect a cross-reference ID _should_ also be g
 
 ### Scenario 1: Happy path
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 1       | 1S00EU8FF04 | null    | null    | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 1                 | 1S00EU8FF04 | null    | null    | null        |
 
 This is the normal scenario - in most cases a beneficiary shouldn't have a cross-reference ID.
 
 ### Scenario 2: Null MBI that is cross-referenced
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 2       | 1S00EU8FF05 | 1       | N       | null        |
-| 3       | null        | 1       | Y       | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 2                 | 1S00EU8FF05 | 1       | N       | null        |
+| 3                 | null        | 1       | Y       | null        |
 
 There is a missing MBI for an older version of beneficiary record, but we can find the beneficiary's MBI from the newer cross-referenced record.
 
 ### Scenario 3: Null MBI that is not cross-referenced
 
-| bene_id | MBI  | xref_id | xref_sw | kill_credit |
-| ------- | ---- | ------- | ------- | ----------- |
-| 4       | null | null    | null    | null        |
+| bene_id (FHIR ID) | mbi_num | xref_id | xref_sw | kill_credit |
+| ----------------- | ------- | ------- | ------- | ----------- |
+| 4                 | null    | null    | null    | null        |
 
 This beneficiary is missing an MBI, but does not have a cross-reference ID. There's no way for us to find the missing data that it's tied to.
 
 ### Scenario 4: Duplicate MBIs that are cross-referenced
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 5       | 1S00EU8FF06 | 2       | Y       | null        |
-| 6       | 1S00EU8FF06 | 2       | N       | null        |
+| bene_id  (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ------------------ | ----------- | ------- | ------- | ----------- |
+| 5                  | 1S00EU8FF06 | 2       | Y       | null        |
+| 6                  | 1S00EU8FF06 | 2       | N       | null        |
 
 These records are cross-referenced, so they refer to the same beneficiary. Currently, BFD will return an error in this scenario.
 
 ### Scenario 5: Duplicate MBIs that are not cross-referenced
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 7       | 1S00EU8FF07 | null    | null    | null        |
-| 8       | 1S00EU8FF07 | null    | null    | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 7                 | 1S00EU8FF07 | null    | null    | null        |
+| 8                 | 1S00EU8FF07 | null    | null    | null        |
 
 This is likely a case of two beneficiaries that should be cross-referenced. This is a very rare scenario (only a few dozen). CCW is looking into this to see if they can provide us with cross-reference IDs for the remaining cases.
 
 ### Scenario 6: Cross-referenced beneficiaries with different MBIs
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 9       | 1S00EU8FF08 | 3       | Y       | null        |
-| 10      | 1S00EU8FF09 | 3       | N       | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 9                 | 1S00EU8FF08 | 3       | Y       | null        |
+| 10                | 1S00EU8FF09 | 3       | N       | null        |
 
 This beneficiary's MBI changed from 1S00EU8FF08 to 1S00EU8FF09. A single beneficiary's MBI can change over time, but usually the new MBI is associated with the existing beneficiary record.
 In this case, the MBI change was associated with a different record instead of the existing one. Without a fix for the merged beneficiaries, the older MBI will not be shown in the list of historical MBIs.
@@ -131,10 +131,10 @@ It's worth noting that sometimes a historical MBI will be linked to both the cro
 
 ### Scenario 7: Invalided cross-reference relationship
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 11      | 1S00EU8FF11 | 3       | Y       | null        |
-| 12      | 1S00EU8FF12 | 3       | N       | 1           |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 11                | 1S00EU8FF11 | 3       | Y       | null        |
+| 12                | 1S00EU8FF12 | 3       | N       | 1           |
 
 Here the `kill_credit` flag is set to `1`, indicating that the `xref_id` is no longer valid and should be treated as though it does not exist.
 
@@ -151,10 +151,10 @@ A non-current Patient record will also have its `active` field set to `false` (*
 
 Using the following data:
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 5       | 1S00EU8FF08 | 2       | Y       | null        |
-| 6       | 1S00EU8FF09 | 2       | N       | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 5                 | 1S00EU8FF08 | 2       | Y       | null        |
+| 6                 | 1S00EU8FF09 | 2       | N       | null        |
 
 Patient 6 replaces patient 5
 
@@ -232,10 +232,10 @@ Patient 5 is replaced by patient 6
 
 Using the following data:
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 5       | 1S00EU8FF08 | 2       | Y       | null        |
-| 6       | 1S00EU8FF09 | 2       | N       | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 5                 | 1S00EU8FF08 | 2       | Y       | null        |
+| 6                 | 1S00EU8FF09 | 2       | N       | null        |
 
 Searching by id (bene_id) will return only the matched record.
 Searching by identifier (MBI) will return both resources.
@@ -372,10 +372,10 @@ Searching for either MBI 1S00EU8FF08 or 1S00EU8FF09 will yield both records:
 
 Using the following data:
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit |
-| ------- | ----------- | ------- | ------- | ----------- |
-| 5       | 1S00EU8FF08 | 2       | Y       | null        |
-| 6       | 1S00EU8FF09 | 2       | N       | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 5                 | 1S00EU8FF08 | 2       | Y       | null        |
+| 6                 | 1S00EU8FF09 | 2       | N       | null        |
 
 Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 5's MBI included as a historical identifier.
 
@@ -550,17 +550,17 @@ This would require storing a field in the database to indicate which cross refer
 
 If we have a single, non-cross-referenced beneficiary:
 
-| bene_id | MBI         | xref_id | xref_sw | frozen | kill_credit |
-| ------- | ----------- | ------- | ------- | ------ | ----------- |
-| 5       | 1S00EU8FF08 | null    | null    | true   | null        |
+| bene_id  (FHIR ID) | mbi_num     | xref_id | xref_sw | frozen | kill_credit |
+| ------------------ | ----------- | ------- | ------- | ------ | ----------- |
+| 5                  | 1S00EU8FF08 | null    | null    | true   | null        |
 
 
 and we later receive a new record to merge:
 
-| bene_id | MBI         | xref_id | xref_sw | frozen | kill_credit |
-| ------- | ----------- | ------- | ------- | ------ | ----------- |
-| 5       | 1S00EU8FF08 | 2       | Y       | true   | null        |
-| 6       | 1S00EU8FF09 | 2       | N       | false  | null        |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | frozen | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ------ | ----------- |
+| 5                 | 1S00EU8FF08 | 2       | Y       | true   | null        |
+| 6                 | 1S00EU8FF09 | 2       | N       | false  | null        |
 
 We can consider the new MBI (1S00EU8FF09) the current identifier, but still return 5 as the bene_id so that consumer won't have to know about the bene_id changing.
 
@@ -671,6 +671,13 @@ We would likely need a one-time process to reset any data being stored downstrea
 
 #### Option 1 - Links
 
+If we have the following data:
+
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit | ptdcntrct01 | rfrnc_yr |
+| ----------------- | ----------- | ------- | ------- | ----------- | ----------- | -------- |
+| 2                 | 1S00EU8FF05 | 1       | Y       | null        | Z1234       | 2019     |
+| 3                 | null        | 1       | N       | null        | S4607       | 2018     |
+
 We can use the linking solution mentioned above in this scenario as well.
 Instead of automatically finding the most recent version, we return the record as is and require the caller to request the cross-referenced resource by following the link.
 
@@ -720,10 +727,10 @@ If a beneficiary record is found in the search, but it has a newer version avail
 
 If we have the following data:
 
-| bene_id | MBI         | xref_id | xref_sw | kill_credit | ptdcntrct01 | rfrnc_yr |
-| ------- | ----------- | ------- | ------- | ----------- | ----------- | -------- |
-| 2       | 1S00EU8FF05 | 1       | Y       | null        | Z1234       | 2019     |
-| 3       | null        | 1       | N       | null        | S4607       | 2018     |
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit | ptdcntrct01 | rfrnc_yr |
+| ----------------- | ----------- | ------- | ------- | ----------- | ----------- | -------- |
+| 2                 | 1S00EU8FF05 | 1       | Y       | null        | Z1234       | 2019     |
+| 3                 | null        | 1       | N       | null        | S4607       | 2018     |
 
 and the caller searches for `/v2/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct01|S4607&_has:Coverage.rfrncyr=2018`, normally beneficiary 3 would be returned. However, because beneficiary 3 has been merged into beneficiary 2, beneficiary 2 will be returned instead.
 
