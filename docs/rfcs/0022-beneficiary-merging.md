@@ -672,7 +672,7 @@ We would likely need a one-time process to reset any data being stored downstrea
 #### Option 1 - Links
 
 We can use the linking solution mentioned above in this scenario as well.
-Instead of automatically finding the most recent version, we return the record as is and require the caller to request the newer version by following the link.
+Instead of automatically finding the most recent version, we return the record as is and require the caller to request the cross-referenced resource by following the link.
 
 ```json
 {
