@@ -681,7 +681,7 @@ If we have the following data:
 We can use the linking solution mentioned above in this scenario as well.
 Instead of automatically finding the most recent version, we return the record as is and require the caller to request the cross-referenced resource by following the link.
 
-```json
+```json5
 {
   "resourceType": "Bundle",
   "id": "720151cf-dfc9-4516-ab39-2925100c7429",
