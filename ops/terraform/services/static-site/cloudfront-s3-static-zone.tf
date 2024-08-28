@@ -18,7 +18,7 @@ resource "aws_cloudfront_distribution" "static_site_distribution" {
     response_page_path = "/404.html"
   }
 
-  aliases = [ local.static_site_fqdn, "${local.static_site_fqdn}.cms.gov" ]
+  aliases = [local.static_site_fqdn, "${local.static_site_fqdn}.cms.gov"]
 
   # In another context redirecting a 403 Forbidden to a 404 Not Found error page would be bad form,
   # but the only time a user would realistically receive a 403 is when they navigate to a bad URL
