@@ -13,9 +13,13 @@ beneficiary record, but limitations of these systems occasionally cause a single
 When this happens, we receive a cross-reference ID (xref_id) which will indicate there are multiple beneficiary records that point to the same person.
 Additionally, we receive another field called the cross-reference switch (xref_sw) which will tell us which beneficiary
 record is the most current.
-The value of `xref_sw` can be either `Y` (yes) or `N` (no), with a value of `Y` indicating that this beneficiary has been merged into another and a value of N indicating that this is the most current record.
+The value of `xref_sw` can be either `Y` (yes) or `N` (no), with a value of `Y` indicating that this beneficiary has been merged into another and a value of `N` indicating that this is the most current record.
 
-This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiaries having a cross-reference ID.
+Additionally, there may be situations where a cross-reference relationship is created in error.
+When this occurs, there will be a 'kill credit' code set to `1` indicating that the cross-reference relationship is invalid and should be ignored.
+When the relationship _is_ valid, the code will either be `null` or `2`.
+
+This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiaries having a cross-reference ID (**Note:** it seems we are still missing quite a lot of xref IDs so it's possible that this number will change).
 
 ## Status
 
@@ -35,13 +39,15 @@ This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiari
     - [Scenario 4: Duplicate MBIs that are cross-referenced](#scenario-4-duplicate-mbis-that-are-cross-referenced)
     - [Scenario 5: Duplicate MBIs that are not cross-referenced](#scenario-5-duplicate-mbis-that-are-not-cross-referenced)
     - [Scenario 6: Cross-referenced beneficiaries with different MBIs](#scenario-6-cross-referenced-beneficiaries-with-different-mbis)
+    - [Scenario 7: Invalided cross-reference relationship](#scenario-7-invalided-cross-reference-relationship)
   - [Potential Solutions - Patient Endpoint](#potential-solutions---patient-endpoint)
     - [General Solutions for handling Patient resources when a merge occurs](#general-solutions-for-handling-patient-resources-when-a-merge-occurs)
-      - [Option 1 - Links](#option-1---links)
-      - [Option 2 - Automatic Replacement](#option-2---automatic-replacement)
-      - [Option 3 - Freezing](#option-3---freezing)
+      - [Option 1 - Links (Replacement)](#option-1---links-replacement)
+      - [Option 4 - Links (See Also)](#option-4---links-see-also)
+      - [Option 3 - Automatic Replacement](#option-3---automatic-replacement)
+      - [Option 4 - Freezing](#option-4---freezing)
     - [Reconciling beneficiary records when searching by contract](#reconciling-beneficiary-records-when-searching-by-contract)
-      - [Option 1 - Links](#option-1---links-1)
+      - [Option 1 - Links](#option-1---links)
       - [Option 2 - Filtering](#option-2---filtering)
     - [Missing historical identifiers when searching by contract](#missing-historical-identifiers-when-searching-by-contract)
   - [Tradeoffs](#tradeoffs)
@@ -70,64 +76,73 @@ It's not explicitly stated, but I expect a cross-reference ID _should_ also be g
 
 ### Scenario 1: Happy path
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 1       | 1S00EU8FF04 | null    | null    |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 1       | 1S00EU8FF04 | null    | null    | null        |
 
 This is the normal scenario - in most cases a beneficiary shouldn't have a cross-reference ID.
 
 ### Scenario 2: Null MBI that is cross-referenced
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 2       | 1S00EU8FF05 | 1       | N       |
-| 3       | null        | 1       | Y       |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 2       | 1S00EU8FF05 | 1       | N       | null        |
+| 3       | null        | 1       | Y       | null        |
 
 There is a missing MBI for an older version of beneficiary record, but we can find the beneficiary's MBI from the newer cross-referenced record.
 
 ### Scenario 3: Null MBI that is not cross-referenced
 
-| bene_id | MBI  | xref_id | xref_sw |
-| ------- | ---- | ------- | ------- |
-| 4       | null | null    | null    |
+| bene_id | MBI  | xref_id | xref_sw | kill_credit |
+| ------- | ---- | ------- | ------- | ----------- |
+| 4       | null | null    | null    | null        |
 
 This beneficiary is missing an MBI, but does not have a cross-reference ID. There's no way for us to find the missing data that it's tied to.
 
 ### Scenario 4: Duplicate MBIs that are cross-referenced
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 5       | 1S00EU8FF06 | 2       | Y       |
-| 6       | 1S00EU8FF06 | 2       | N       |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 5       | 1S00EU8FF06 | 2       | Y       | null        |
+| 6       | 1S00EU8FF06 | 2       | N       | null        |
 
 These records are cross-referenced, so they refer to the same beneficiary. Currently, BFD will return an error in this scenario.
 
 ### Scenario 5: Duplicate MBIs that are not cross-referenced
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 7       | 1S00EU8FF07 | null    | null    |
-| 8       | 1S00EU8FF07 | null    | null    |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 7       | 1S00EU8FF07 | null    | null    | null        |
+| 8       | 1S00EU8FF07 | null    | null    | null        |
 
 This is likely a case of two beneficiaries that should be cross-referenced. This is a very rare scenario (only a few dozen). CCW is looking into this to see if they can provide us with cross-reference IDs for the remaining cases.
 
 ### Scenario 6: Cross-referenced beneficiaries with different MBIs
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 9       | 1S00EU8FF08 | 3       | Y       |
-| 10      | 1S00EU8FF09 | 3       | N       |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 9       | 1S00EU8FF08 | 3       | Y       | null        |
+| 10      | 1S00EU8FF09 | 3       | N       | null        |
 
 This beneficiary's MBI changed from 1S00EU8FF08 to 1S00EU8FF09. A single beneficiary's MBI can change over time, but usually the new MBI is associated with the existing beneficiary record.
 In this case, the MBI change was associated with a different record instead of the existing one. Without a fix for the merged beneficiaries, the older MBI will not be shown in the list of historical MBIs.
 
 It's worth noting that sometimes a historical MBI will be linked to both the cross-referenced record and the new record, so we may have to add some logic to ensure we're not returning duplicate identifiers during a merge operation.
 
+### Scenario 7: Invalided cross-reference relationship
+
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 10      | 1S00EU8FF10 | 3       | Y       | null        |
+| 11      | 1S00EU8FF11 | 3       | N       | 1           |
+
+Here the `kill_credit` flag is set to `1`, indicating that the `xref_id` is no longer valid and should be treated as though it does not exist.
+
 ## Potential Solutions - Patient Endpoint
 
 ### General Solutions for handling Patient resources when a merge occurs
 
-#### Option 1 - Links
+#### Option 1 - Links (Replacement)
 
 When a beneficiary merge occurs, the Patient response will contain a field that lists any additional Patient resources that are cross-referenced.
 A resource that contains a link marked as `replaced-by` means the resource refers to an older version of the beneficiary.
@@ -136,11 +151,10 @@ A non-current Patient record will also have its `active` field set to `false` (n
 
 Using the following data:
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 5       | 1S00EU8FF08 | 2       | Y       |
-| 6       | 1S00EU8FF09 | 2       | N       |
-
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 5       | 1S00EU8FF08 | 2       | Y       | null        |
+| 6       | 1S00EU8FF09 | 2       | N       | null        |
 
 Patient 6 replaces patient 5
 
@@ -196,14 +210,154 @@ Patient 5 is replaced by patient 6
 }
 ```
 
-#### Option 2 - Automatic Replacement
+#### Option 4 - Links (See Also)
 
 Using the following data:
 
-| bene_id | MBI         | xref_id | xref_sw |
-| ------- | ----------- | ------- | ------- |
-| 5       | 1S00EU8FF08 | 2       | Y       |
-| 6       | 1S00EU8FF09 | 2       | N       |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 5       | 1S00EU8FF08 | 2       | Y       | null        |
+| 6       | 1S00EU8FF09 | 2       | N       | null        |
+
+Searching by id (bene_id) will return only the matched record.
+Searching by identifier (MBI) will return both resources.
+In both cases, the response will contain a `link` field marked as `seealso`, which links to the other resorce.
+
+As opposed to the `replaced-by`/`replaces` solution, this does not attempt to convey identity, which is helpful in the event that an un-merge occurs.
+
+We will still need an alternative way to convey which resource is the most current one.
+This may need to be accomplished with an extension.
+
+Searching for id=5 yields:
+
+```json
+{
+  "resourceType": "Bundle",
+  "id": "720151cf-dfc9-4516-ab39-2925100c7429",
+  "meta": {
+    "lastUpdated": "2024-08-09T12:44:27.371-07:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
+    }
+  ],
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "5",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/6"
+            },
+            "type": "seealso"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Searching for id=6 yields:
+
+```json
+{
+  "resourceType": "Bundle",
+  "id": "720151cf-dfc9-4516-ab39-2925100c7429",
+  "meta": {
+    "lastUpdated": "2024-08-09T12:44:27.371-07:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6"
+    }
+  ],
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "6",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/5"
+            },
+            "type": "seealso"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Searching for either MBI 1S00EU8FF08 or 1S00EU8FF09 will yield both records:
+
+```json
+{
+  "resourceType": "Bundle",
+  "id": "720151cf-dfc9-4516-ab39-2925100c7429",
+  "meta": {
+    "lastUpdated": "2024-08-09T12:44:27.371-07:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient"
+    }
+  ],
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "5",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/6"
+            },
+            "type": "seealso"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "6",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/5"
+            },
+            "type": "seealso"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+#### Option 3 - Automatic Replacement
+
+Using the following data:
+
+| bene_id | MBI         | xref_id | xref_sw | kill_credit |
+| ------- | ----------- | ------- | ------- | ----------- |
+| 5       | 1S00EU8FF08 | 2       | Y       | null        |
+| 6       | 1S00EU8FF09 | 2       | N       | null        |
 
 Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 5's MBI included as a historical identifier.
 
@@ -369,7 +523,7 @@ Searching for beneficiary 6 will behave the same way.
 }
 ```
 
-#### Option 3 - Freezing
+#### Option 4 - Freezing
 
 We could "freeze" the beneficiary ID so that we always use the same ID even if a newer version is later created.
 This would prevent consumers from having to handle difficulties related to the bene_id changing over time.
@@ -378,17 +532,17 @@ This would require storing a field in the database to indicate which cross refer
 
 If we have a single, non-cross-referenced beneficiary:
 
-| bene_id | MBI         | xref_id | xref_sw | frozen |
-| ------- | ----------- | ------- | ------- | ------ |
-| 5       | 1S00EU8FF08 | null    | null    | true   |
+| bene_id | MBI         | xref_id | xref_sw | frozen | kill_credit |
+| ------- | ----------- | ------- | ------- | ------ | ----------- |
+| 5       | 1S00EU8FF08 | null    | null    | true   | null        |
 
 
 and we later receive a new record to merge:
 
-| bene_id | MBI         | xref_id | xref_sw | frozen |
-| ------- | ----------- | ------- | ------- | ------ |
-| 5       | 1S00EU8FF08 | 2       | Y       | true   |
-| 6       | 1S00EU8FF09 | 2       | N       | false  |
+| bene_id | MBI         | xref_id | xref_sw | frozen | kill_credit |
+| ------- | ----------- | ------- | ------- | ------ | ----------- |
+| 5       | 1S00EU8FF08 | 2       | Y       | true   | null        |
+| 6       | 1S00EU8FF09 | 2       | N       | false  | null        |
 
 We can consider the new MBI (1S00EU8FF09) the current identifier, but still return 5 as the bene_id so that consumer won't have to know about the bene_id changing.
 
@@ -491,8 +645,9 @@ Searching for bene_id 6 would behave as though that ID doesn't exist at all.
   ]
 }
 ```
+
 The main challenge with this approach is handling existing data since we're currently returning the merged beneficiaries as though they're distinct records.
-We would likely need a one-time process to reset any downstream caches.
+We would likely need a one-time process to reset any data being stored downstream.
 
 ### Reconciling beneficiary records when searching by contract
 
@@ -521,7 +676,7 @@ Instead of automatically finding the most recent version, we return the record a
       "other": {
         "reference": "Patient/2"
       },
-      "type": "replaced-by"
+      "type": "seealso" // or replaces/replaced-by if we go with that option
      }
     ],
     "entry": [
@@ -547,10 +702,10 @@ If a beneficiary record is found in the search, but it has a newer version avail
 
 If we have the following data:
 
-| bene_id | MBI         | xref_id | xref_sw | ptdcntrct01 | rfrnc_yr |
-| ------- | ----------- | ------- | ------- | ----------- | -------- |
-| 2       | 1S00EU8FF05 | 1       | Y       | Z1234       | 2019     |
-| 3       | null        | 1       | N       | S4607       | 2018     |
+| bene_id | MBI         | xref_id | xref_sw | kill_credit | ptdcntrct01 | rfrnc_yr |
+| ------- | ----------- | ------- | ------- | ----------- | ----------- | -------- |
+| 2       | 1S00EU8FF05 | 1       | Y       | null        | Z1234       | 2019     |
+| 3       | null        | 1       | N       | null        | S4607       | 2018     |
 
 and the caller searches for `/v2/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct01|S4607&_has:Coverage.rfrncyr=2018`, normally beneficiary 3 would be returned. However, because beneficiary 3 has been merged into beneficiary 2, beneficiary 2 will be returned instead.
 
@@ -599,3 +754,4 @@ With historical identifiers included and of of the propsed changes above include
 
 These potential solutions fall under a spectrum of tradeoffs between "correctness" and level of effort for consumers.
 The links-based approach is the most correct approach from a FHIR perspective, but requires the most effort from our peering partners and potentially from downstream users as well.
+Using links with `seealso` rather than `replaces`/`replaced-by` makes the relationship between current and previous records less explicit, but provides more flexibility for handling un-merge operations (based on kill-credit) since we're no longer making a statement on identity between links.
