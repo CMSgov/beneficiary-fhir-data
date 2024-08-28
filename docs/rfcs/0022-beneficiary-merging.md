@@ -133,8 +133,8 @@ It's worth noting that sometimes a historical MBI will be linked to both the cro
 
 | bene_id | MBI         | xref_id | xref_sw | kill_credit |
 | ------- | ----------- | ------- | ------- | ----------- |
-| 10      | 1S00EU8FF10 | 3       | Y       | null        |
-| 11      | 1S00EU8FF11 | 3       | N       | 1           |
+| 11      | 1S00EU8FF11 | 3       | Y       | null        |
+| 12      | 1S00EU8FF12 | 3       | N       | 1           |
 
 Here the `kill_credit` flag is set to `1`, indicating that the `xref_id` is no longer valid and should be treated as though it does not exist.
 
@@ -167,17 +167,26 @@ Patient 6 replaces patient 5
   },
   "type": "searchset",
   "total": 1,
-  "active": true,
   "link": [
     {
       "relation": "self",
       "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6"
-    },
+    }
+  ],
+  "entry": [
     {
-      "other": {
-        "reference": "Patient/5"
-      },
-      "type": "replaces"
+      "resource": {
+        "resourceType": "Patient",
+        "id": "6",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/5"
+            },
+            "type": "replaces"
+          }
+        ]
+      }
     }
   ]
 }
@@ -194,17 +203,26 @@ Patient 5 is replaced by patient 6
   },
   "type": "searchset",
   "total": 1,
-  "active": false,
   "link": [
     {
       "relation": "self",
       "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
-    },
+    }
+  ],
+  "entry": [
     {
-      "other": {
-        "reference": "Patient/6"
-      },
-      "type": "replaced-by"
+      "resource": {
+        "resourceType": "Patient",
+        "id": "5",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/6"
+            },
+            "type": "replaced-by"
+          }
+        ]
+      }
     }
   ]
 }
