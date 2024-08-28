@@ -773,7 +773,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
           filter_id      = "ddcb7121-71df-42a9-829a-c40dddd0c225"
           match_operator = "EQUALS"
           null_option    = "ALL_VALUES"
-          value          = 0
+          value          = 1
 
           aggregation_function {
             numerical_aggregation_function {
@@ -930,6 +930,74 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
             sheet_id = "c75cb161-472f-4a1d-bb20-664110b0761f"
             visual_ids = [
               "df9821cf-58d4-4443-9a7c-9094797f0899",
+            ]
+          }
+        }
+      }
+    }
+    filter_groups {
+      cross_dataset   = "SINGLE_DATASET"
+      filter_group_id = "3d58056e-245e-4a83-81c3-ca24bb097fe3"
+      status          = "ENABLED"
+
+      filters {
+        numeric_equality_filter {
+          filter_id          = "cbc81c13-26d5-4ce3-8dca-a42974efb0d3"
+          match_operator     = "EQUALS"
+          null_option        = "NON_NULLS_ONLY"
+          select_all_options = "FILTER_ALL_VALUES"
+          value              = 0
+
+          column {
+            column_name         = "app_access_grant_enabled"
+            data_set_identifier = "prod_global_state_per_app"
+          }
+        }
+      }
+
+      scope_configuration {
+        selected_sheets {
+          sheet_visual_scoping_configurations {
+            scope    = "SELECTED_VISUALS"
+            sheet_id = "8945dc75-5874-45e9-bc0f-3e5a9db0a62d"
+            visual_ids = [
+              "96b056e7-1d03-4b7f-8bfe-be1746e29b67",
+            ]
+          }
+        }
+      }
+    }
+    filter_groups {
+      cross_dataset   = "SINGLE_DATASET"
+      filter_group_id = "37fcbe3e-b7df-41f4-becb-49503ce8bf6f"
+      status          = "ENABLED"
+
+      filters {
+        category_filter {
+          filter_id      = "d3271572-ce23-4214-a871-1fe37a050258"
+
+          column {
+            column_name         = "calc_app_access_grant_category"
+            data_set_identifier = "prod_global_state_per_app"
+          }
+
+          configuration {
+            custom_filter_list_configuration {
+              match_operator     = "CONTAINS"
+              null_option        = "NON_NULLS_ONLY"
+              select_all_options = "FILTER_ALL_VALUES"
+            }
+          }
+        }
+      }
+
+      scope_configuration {
+        selected_sheets {
+          sheet_visual_scoping_configurations {
+            scope    = "SELECTED_VISUALS"
+            sheet_id = "8945dc75-5874-45e9-bc0f-3e5a9db0a62d"
+            visual_ids = [
+              "96b056e7-1d03-4b7f-8bfe-be1746e29b67",
             ]
           }
         }
@@ -3618,6 +3686,61 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
         }
       }
 
+      filter_controls {
+        dropdown {
+          filter_control_id = "21027e4e-eef3-43c4-8c15-95d1d91fa51d"
+          source_filter_id  = "cbc81c13-26d5-4ce3-8dca-a42974efb0d3"
+          title             = "Filter by Access Grant Enabled (1=Yes/0=No)"
+          type              = "SINGLE_SELECT"
+
+          display_options {
+            select_all_options {
+              visibility = "VISIBLE"
+            }
+            title_options {
+              visibility = "VISIBLE"
+
+              font_configuration {
+                font_size {
+                  relative = "MEDIUM"
+                }
+              }
+            }
+          }
+        }
+      }
+      filter_controls {
+        dropdown {
+          filter_control_id = "005d7e89-e99d-4c59-b3d3-09980527345b"
+          source_filter_id  = "d3271572-ce23-4214-a871-1fe37a050258"
+          title             = "Filter by Access Grant Category"
+          type              = "MULTI_SELECT"
+
+          display_options {
+            select_all_options {
+              visibility = "VISIBLE"
+            }
+            title_options {
+              visibility = "VISIBLE"
+
+              font_configuration {
+                font_size {
+                  relative = "MEDIUM"
+                }
+              }
+            }
+          }
+
+          selectable_values {
+            values = [
+              "ONE_TIME",
+              "RESEARCH_S",
+              "THIRTEEN_M",
+            ]
+          }
+        }
+      }
+
       layouts {
         configuration {
           grid_layout {
@@ -3640,81 +3763,64 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
               element_type = "FILTER_CONTROL"
               row_span     = 1
             }
+            elements {
+              column_span  = 2
+              element_id   = "21027e4e-eef3-43c4-8c15-95d1d91fa51d"
+              element_type = "FILTER_CONTROL"
+              row_span     = 1
+            }
+            elements {
+              column_span  = 2
+              element_id   = "005d7e89-e99d-4c59-b3d3-09980527345b"
+              element_type = "FILTER_CONTROL"
+              row_span     = 1
+            }
           }
         }
       }
 
       visuals {
-        pivot_table_visual {
+        table_visual {
           visual_id = "96b056e7-1d03-4b7f-8bfe-be1746e29b67"
 
           chart_configuration {
             field_options {
-              data_path_options {
-                width = "258px"
-
-                data_path_list {
-                  field_id    = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_name.2.1656511719055"
-                  field_value = "app_name"
-                }
-              }
-              data_path_options {
-                width = "151px"
-
-                data_path_list {
-                  field_id    = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_user_organization.1.1656511700288"
-                  field_value = "app_user_organization"
-                }
-              }
               selected_field_options {
                 custom_label = "Organization"
                 field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_user_organization.1.1656511700288"
-                visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "App Name"
                 field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_name.2.1656511719055"
-                visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "Created On"
                 field_id     = "584bdf55-45e0-48fa-a60b-99db83f3bc16.4.1663854685543"
-                visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "First Active"
                 field_id     = "214a59ab-d317-4659-9b52-fc62f0462f03.5.1663854772668"
-                visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "Last Active"
                 field_id     = "89ccbbc4-cdf4-45d9-88ef-a70341c05ba8.6.1664288640814"
-                visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "Grant Category"
                 field_id = "8783cd59-0891-49ff-b328-3a38b1855bb6.0.1709327453902"
-                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "Access Grant Enabled?"
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_access_grant_enabled.7.1724857533205"
               }
               selected_field_options {
                 custom_label = "Report Date"
                 field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.0.1656511666014"
-                visibility   = "VISIBLE"
               }
             }
             field_wells {
-              pivot_table_aggregated_field_wells {
-                columns {
-                  date_dimension_field {
-                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.0.1656511666014"
-
-                    column {
-                      column_name         = "report_date"
-                      data_set_identifier = "prod_global_state_per_app"
-                    }
-                  }
-                }
-                rows {
+              table_aggregated_field_wells {
+                group_by {
                   categorical_dimension_field {
                     field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_user_organization.1.1656511700288"
 
@@ -3724,7 +3830,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                     }
                   }
                 }
-                rows {
+                group_by {
                   categorical_dimension_field {
                     field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_name.2.1656511719055"
 
@@ -3734,7 +3840,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                     }
                   }
                 }
-                rows {
+                group_by {
                   categorical_dimension_field {
                     field_id = "584bdf55-45e0-48fa-a60b-99db83f3bc16.4.1663854685543"
 
@@ -3744,7 +3850,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                     }
                   }
                 }
-                rows {
+                group_by {
                   categorical_dimension_field {
                     field_id = "214a59ab-d317-4659-9b52-fc62f0462f03.5.1663854772668"
 
@@ -3754,7 +3860,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                     }
                   }
                 }
-                rows {
+                group_by {
                   categorical_dimension_field {
                     field_id = "89ccbbc4-cdf4-45d9-88ef-a70341c05ba8.6.1664288640814"
 
@@ -3764,7 +3870,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                     }
                   }
                 }
-                rows {
+                group_by {
                   categorical_dimension_field {
                     field_id = "8783cd59-0891-49ff-b328-3a38b1855bb6.0.1709327453902"
 
@@ -3774,92 +3880,84 @@ resource "aws_quicksight_analysis" "quicksight_analysis_prod_applications" {
                     }
                   }
                 }
-              }
-            }
-            sort_configuration {
-              field_sort_options {
-                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_user_organization.1.1656511700288"
+                group_by {
+                  numerical_dimension_field {
+                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_access_grant_enabled.7.1724857533205"
 
-                sort_by {
-                  field {
-                    direction = "ASC"
-                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_user_organization.1.1656511700288"
+                    column {
+                      column_name         = "app_access_grant_enabled"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
                   }
                 }
-              }
-              field_sort_options {
-                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_name.2.1656511719055"
+                group_by {
+                  date_dimension_field {
+                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.0.1656511666014"
 
-                sort_by {
-                  field {
-                    direction = "ASC"
-                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_name.2.1656511719055"
-                  }
-                }
-              }
-              field_sort_options {
-                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.0.1656511666014"
-
-                sort_by {
-                  field {
-                    direction = "ASC"
-                    field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.report_date.0.1656511666014"
+                    column {
+                      column_name         = "report_date"
+                      data_set_identifier = "prod_global_state_per_app"
+                    }
                   }
                 }
               }
             }
             table_options {
-              column_names_visibility   = "VISIBLE"
-              single_metric_visibility  = "HIDDEN"
-              toggle_buttons_visibility = "VISIBLE"
-
               cell_style {
                 text_wrap = "WRAP"
                 height    = 40
               }
-
-              column_header_style {
-                text_wrap = "WRAP"
-                height    = 40
-              }
-
-              row_header_style {
-                # BUG NOTE: With AWS provider v5.29.0
-                #   After a TF apply,
-                #     plan will show:
-                #       text_wrap -> "WRAP"
-                #       height = 0 -> 40
-                text_wrap                 = "WRAP"
-                height                    = 40
-                horizontal_text_alignment = "CENTER"
-                vertical_text_alignment   = "TOP"
-
-                border {
-                  uniform_border {
-                    style     = "SOLID"
-                    thickness = 1
-                  }
-                }
-              }
-            }
-            total_options {
-              column_subtotal_options {
-                totals_visibility = "HIDDEN"
-              }
-              column_total_options {
-                totals_visibility = "HIDDEN"
-              }
-              row_subtotal_options {
-                totals_visibility = "HIDDEN"
-              }
-              row_total_options {
-                custom_label      = "Total"
-                scroll_status     = "PINNED"
-                totals_visibility = "VISIBLE"
-              }
             }
           }
 
+          conditional_formatting {
+            conditional_formatting_options {
+              cell {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_access_grant_enabled.7.1724857533205"
+                text_format {
+                  icon {
+                    custom_condition {
+                      color      = "#219FD7"
+                      expression = "{app_access_grant_enabled} = 1"
+
+                      display_configuration {
+                        icon_display_option = "ICON_ONLY"
+                      }
+
+                      icon_options {
+                        icon = "CHECKMARK"
+                      }
+                    }
+                  }
+                  text_color {}
+                  background_color { }
+                }
+              }
+            }
+            conditional_formatting_options {
+              cell {
+                field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_access_grant_enabled.7.1724857533205"
+                text_format {
+                  icon {
+                    custom_condition {
+                      color      = "#DE3B00"
+                      expression = "{app_access_grant_enabled} = 0"
+
+                      display_configuration {
+                        icon_display_option = "ICON_ONLY"
+                      }
+
+                      icon_options {
+                        icon = "X"
+                      }
+                    }
+                  }
+                  text_color {}
+                  background_color {}
+                }
+              }
+            }
+          }
           subtitle {
             visibility = "VISIBLE"
           }
