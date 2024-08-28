@@ -72,9 +72,14 @@ locals {
   root_domain_name       = data.aws_ssm_parameter.zone_name.value
   static_cloudfront_name = "bfd-${local.env}-static"
   static_logging_name    = "bfd-${local.env}-staticlogging"
-  static_site_fqdn       = "${local.env}.static.${local.root_domain_name}"
+  static_site_fqdn_by_env = {
+    prod = local.root_domain_name
+    test = "${local.env}.${local.root_domain_name}"
+  }
+  # If the environment is not prod or test, then we must default to the CloudFront distribution URL.
+  # This is specified by null, and the resulting CNAME will be conditionally created depending on
+  # whether this value exists
+  static_site_fqdn = lookup(local.static_site_fqdn_by_env, local.env, null)
 
-  env_kms_alias = "alias/static-${local.env}-s3-key"
-  kms_key_id    = aws_kms_key.static_kms_key.arn
-
+  kms_key_id = data.aws_kms_key.data_cmk.arn
 }

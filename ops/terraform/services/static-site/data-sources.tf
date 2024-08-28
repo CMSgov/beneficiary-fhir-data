@@ -8,6 +8,10 @@ data "aws_kms_key" "config_cmk" {
   key_id = local.kms_config_key_alias
 }
 
+data "aws_kms_key" "data_cmk" {
+  key_id = local.kms_key_alias
+}
+
 data "aws_ssm_parameters_by_path" "params" {
   for_each = toset(local.ssm_hierarchies)
 
@@ -40,43 +44,9 @@ data "aws_ssm_parameter" "zone_is_private" {
   with_decryption = true
 }
 
-data "aws_iam_policy_document" "static_kms_key_policy" {
-  depends_on = [aws_cloudfront_distribution.static_site_distribution, aws_cloudfront_origin_access_identity.static_site_identity]
-  statement {
-    actions = ["kms:*"]
-    effect  = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-    }
-    resources = ["*"]
-  }
-
-  statement {
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey",
-      "kms:ReEncrypt*"
-    ]
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
-    }
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.static_site_distribution.arn]
-    }
-  }
-}
-
 data "aws_iam_policy_document" "cloudfront_policy" {
   ## TODO: this policy may need updated with BFD-3465
-  depends_on = [aws_cloudfront_origin_access_identity.static_site_identity, aws_s3_bucket.static_site]
   statement {
-
     sid    = "AllowCloudFrontServicePrincipal"
     effect = "Allow"
 
@@ -85,43 +55,16 @@ data "aws_iam_policy_document" "cloudfront_policy" {
       identifiers = ["cloudfront.amazonaws.com"]
     }
 
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
-    }
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.static_site_identity.id}"]
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.static_site_distribution.arn]
     }
 
     actions = ["s3:GetObject"]
     resources = [
       "${aws_s3_bucket.static_site.arn}/*"
     ]
-  }
-
-  statement {
-    sid = "AllowKMSAccess"
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket"
-    ]
-    resources = [
-      aws_s3_bucket.static_site.arn,
-      "${aws_s3_bucket.static_site.arn}/*"
-    ]
-
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.static_site_identity.iam_arn]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SecureTransport"
-      values   = ["true"]
-    }
   }
 
   statement {
@@ -144,9 +87,7 @@ data "aws_iam_policy_document" "cloudfront_policy" {
   }
 }
 
-
 data "aws_iam_policy_document" "cloudfront_log_policy" {
-  depends_on = [aws_s3_bucket.cloudfront_logging, aws_cloudfront_distribution.static_site_distribution]
   statement {
     sid = "AllowCloudFrontServicePrincipal"
 

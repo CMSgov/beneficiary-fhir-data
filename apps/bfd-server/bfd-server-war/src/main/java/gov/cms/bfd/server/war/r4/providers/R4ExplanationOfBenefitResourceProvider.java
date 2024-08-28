@@ -33,6 +33,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
+import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -69,7 +70,7 @@ import org.springframework.stereotype.Component;
     name = "ExplanationOfBenefit",
     profile = "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit")
 @Component
-public final class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
+public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProvider
     implements IResourceProvider {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(R4ExplanationOfBenefitResourceProvider.class);
@@ -191,6 +192,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
+  @RetryOnRDSFailover
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     Matcher eobIdMatcher =
@@ -280,6 +282,7 @@ public final class R4ExplanationOfBenefitResourceProvider extends AbstractResour
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(

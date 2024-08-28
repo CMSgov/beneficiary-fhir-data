@@ -24,7 +24,7 @@ resource "aws_kms_key" "data_keys" {
   }
 }
 
-# alias
+# key aliases for data protection
 resource "aws_kms_alias" "data_keys" {
   for_each = toset(concat(local.established_envs, ["mgmt"]))
 
@@ -142,6 +142,22 @@ data "aws_iam_policy_document" "data_keys" {
     ]
     resources = ["*"]
   }
+
+  # Allow CloudFront to use the key to decrypt data
+  statement {
+    sid    = "AllowCloudfrontKeyUsage"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+    ]
+    resources = ["*"]
+  }
+
 
   # Allow cloudwatch logs to use the key to encrypt/decrypt data
   statement {

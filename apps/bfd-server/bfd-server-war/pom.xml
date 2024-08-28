@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-server-parent</artifactId>
-        <version>2.146.0-SNAPSHOT</version>
+        <version>2.150.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-war</artifactId>
@@ -151,6 +151,18 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <!-- Dependency for spring-retry-->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+        </dependency>
+        <dependency>
+            <!-- We need to be able to retry our Provider entrypoint methods upon
+            failover of a node in our Aurora Clusters-->
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+            <version>${spring-retry.version}</version>
+        </dependency>
 
         <dependency>
             <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
@@ -246,6 +258,13 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- We need to be able to retry our Provider entrypoint methods upon
+            failover of a node in our Aurora Clusters-->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

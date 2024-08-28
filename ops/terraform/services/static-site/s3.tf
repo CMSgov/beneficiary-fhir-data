@@ -14,15 +14,6 @@ resource "aws_s3_bucket_ownership_controls" "static_site" {
   }
 }
 
-resource "aws_s3_bucket_website_configuration" "static_site" {
-  bucket = aws_s3_bucket.static_site.bucket
-
-  index_document {
-    suffix = "index.html"
-  }
-
-}
-
 # block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "static_site" {
   bucket                  = aws_s3_bucket.static_site.bucket
@@ -39,6 +30,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "static_site" {
       kms_master_key_id = local.kms_key_id
       sse_algorithm     = "aws:kms"
     }
+
+    bucket_key_enabled = true
   }
 }
 
@@ -53,52 +46,6 @@ resource "aws_s3_bucket_policy" "static_site" {
   bucket = aws_s3_bucket.static_site.bucket
 
   policy = data.aws_iam_policy_document.cloudfront_policy.json
-}
-
-resource "aws_s3_object" "index" {
-  bucket = aws_s3_bucket.static_site.bucket
-  key    = "/index.html"
-
-  content_type = "text/html"
-  content      = <<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    ${local.static_site_fqdn} Index page
-  </head>
-  <body>
-    <p>Placeholder page for ${local.static_site_fqdn} Static Site</p>
-  </body>
-</html>
-
-EOF
-
-  lifecycle {
-    ignore_changes = [content, tags]
-  }
-}
-
-resource "aws_s3_object" "error" {
-  bucket = aws_s3_bucket.static_site.bucket
-  key    = "/error.html"
-
-  content_type = "text/html"
-  content      = <<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    ${local.static_site_fqdn} Error page
-  </head>
-  <body>
-    <p>Placeholder Error page for ${local.static_site_fqdn} Static Site</p>
-  </body>
-</html>
-
-EOF
-
-  lifecycle {
-    ignore_changes = [content, tags]
-  }
 }
 
 resource "aws_s3_bucket" "cloudfront_logging" {
@@ -125,9 +72,8 @@ resource "aws_s3_bucket_ownership_controls" "cloudfront_logging" {
 }
 
 resource "aws_s3_bucket_acl" "cloudfront_logging" {
-  bucket     = aws_s3_bucket.cloudfront_logging.bucket
-  depends_on = [aws_s3_bucket_ownership_controls.cloudfront_logging]
-  acl        = "log-delivery-write"
+  bucket = aws_s3_bucket.cloudfront_logging.bucket
+  acl    = "log-delivery-write"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logging" {

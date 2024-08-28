@@ -40,6 +40,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -77,7 +78,7 @@ import org.springframework.stereotype.Component;
  * the CCW beneficiaries.
  */
 @Component
-public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
+public class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    * NOTE: For v2, HICN no longer supported.
@@ -168,6 +169,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Read(version = false)
   @Trace
+  @RetryOnRDSFailover
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
@@ -233,6 +235,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(
@@ -352,6 +355,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -681,6 +685,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    */
   @Search
   @Trace
+  @RetryOnRDSFailover
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(
