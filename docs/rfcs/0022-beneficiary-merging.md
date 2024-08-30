@@ -19,6 +19,8 @@ Additionally, there may be situations where a cross-reference relationship is cr
 When this occurs, there will be a 'kill credit' code set to `1` indicating that the cross-reference relationship is invalid and should be ignored.
 When the relationship _is_ valid, the code will either be `null` or `2`.
 
+If these cross-referenced records had no claims attached, we could simply ignore them, but unfortunately that is not the case for a sizable portion of them.
+
 This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiaries having a cross-reference ID (**Note:** it seems we are still missing quite a lot of xref IDs so it's possible that this number will change).
 
 ## Status
@@ -43,7 +45,8 @@ This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiari
   - [Potential Solutions - Patient Endpoint](#potential-solutions---patient-endpoint)
     - [General Solutions for handling Patient resources when a merge occurs](#general-solutions-for-handling-patient-resources-when-a-merge-occurs)
       - [Option 1 - Links (Replacement)](#option-1---links-replacement)
-      - [Option 4 - Links (See Also)](#option-4---links-see-also)
+        - [Using \_include to include linked items](#using-_include-to-include-linked-items)
+      - [Option 2 - Links (See Also)](#option-2---links-see-also)
       - [Option 3 - Automatic Replacement](#option-3---automatic-replacement)
       - [Option 4 - Freezing](#option-4---freezing)
     - [Reconciling beneficiary records when searching by contract](#reconciling-beneficiary-records-when-searching-by-contract)
@@ -81,6 +84,14 @@ It's not explicitly stated, but I expect a cross-reference ID _should_ also be g
 | 1                 | 1S00EU8FF04 | null    | null    | null        |
 
 This is the normal scenario - in most cases a beneficiary shouldn't have a cross-reference ID.
+
+Additionally, a beneficiary can have multiple MBIs that are properly attributed in BFD today.
+These appear as historical identifiers on the patient resource.
+
+| bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
+| ----------------- | ----------- | ------- | ------- | ----------- |
+| 1                 | 1S00EU8FF03 | null    | null    | null        |
+| 1                 | 1S00EU8FF04 | null    | null    | null        |
 
 ### Scenario 2: Null MBI that is cross-referenced
 
@@ -228,7 +239,59 @@ Patient 5 is replaced by patient 6
 }
 ```
 
-#### Option 4 - Links (See Also)
+##### Using _include to include linked items
+
+To fetch all linked items in a single call, the `_include` parameter can be set to `patient:link`.
+
+```json
+{
+  "resourceType": "Bundle",
+  "id": "720151cf-dfc9-4516-ab39-2925100c7429",
+  "meta": {
+    "lastUpdated": "2024-08-09T12:44:27.371-07:00"
+  },
+  "type": "searchset",
+  "total": 2,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6&_include=patient:link"
+    }
+  ],
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "6",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/5"
+            },
+            "type": "replaces"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "5",
+        "link": [
+          {
+            "other": {
+              "reference": "Patient/6"
+            },
+            "type": "replaced-by"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+#### Option 2 - Links (See Also)
 
 Using the following data:
 
@@ -242,6 +305,8 @@ Searching by identifier (MBI) will return both resources.
 In both cases, the response will contain a `link` field marked as `seealso`, which links to the other resource.
 
 As opposed to the `replaced-by`/`replaces` solution, this does not attempt to convey identity, which is helpful in the event that an un-merge occurs.
+
+The `_include` operation can be supported here just like in the previous option.
 
 We will still need an alternative way to convey which resource is the most current one.
 This may need to be accomplished with an extension.
@@ -300,56 +365,6 @@ Searching for id=6 yields:
     }
   ],
   "entry": [
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "6",
-        "link": [
-          {
-            "other": {
-              "reference": "Patient/5"
-            },
-            "type": "seealso"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-Searching for either MBI 1S00EU8FF08 or 1S00EU8FF09 will yield both records:
-
-```json
-{
-  "resourceType": "Bundle",
-  "id": "720151cf-dfc9-4516-ab39-2925100c7429",
-  "meta": {
-    "lastUpdated": "2024-08-09T12:44:27.371-07:00"
-  },
-  "type": "searchset",
-  "total": 1,
-  "link": [
-    {
-      "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient"
-    }
-  ],
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "5",
-        "link": [
-          {
-            "other": {
-              "reference": "Patient/6"
-            },
-            "type": "seealso"
-          }
-        ]
-      }
-    },
     {
       "resource": {
         "resourceType": "Patient",
@@ -675,8 +690,8 @@ If we have the following data:
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit | ptdcntrct01 | rfrnc_yr |
 | ----------------- | ----------- | ------- | ------- | ----------- | ----------- | -------- |
-| 2                 | 1S00EU8FF05 | 1       | Y       | null        | Z1234       | 2019     |
-| 3                 | null        | 1       | N       | null        | S4607       | 2018     |
+| 2                 | 1S00EU8FF05 | 1       | N       | null        | Z1234       | 2019     |
+| 3                 | null        | 1       | Y       | null        | S4607       | 2018     |
 
 We can use the linking solution mentioned above in this scenario as well.
 Instead of automatically finding the most recent version, we return the record as is and require the caller to request the cross-referenced resource by following the link.
