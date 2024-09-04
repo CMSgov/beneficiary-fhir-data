@@ -21,10 +21,14 @@
 set -euo pipefail
 shopt -s expand_aliases
 
-if [ "$(uname)" = 'Darwin' ]; then
-  if ! command -v gdate >/dev/null && alias "date=gdate"; then
-    echo "'gdate' not found; try installing with 'brew install coreutils'"
+if [ "$(uname)" == 'Darwin' ]
+then
+  if ! command -v gdate >/dev/null 
+  then
+    echo "'gdate' not found; please install via 'brew install coreutils'"
     exit 1
+  else
+    alias date="gdate"
   fi
 fi
 
@@ -53,7 +57,7 @@ EOF
 
 aws cloudwatch get-metric-data \
   --metric-data-queries "$metric_queries" \
-  --start-time "$(date -u -d "-${review_days} days" "+%Y-%m-%dT%H:%M:%S")" \
+  --start-time "$(date -u --date="-${review_days} days" "+%Y-%m-%dT%H:%M:%S")" \
   --end-time "$(date -u "+%Y-%m-%dT%H:%M:%S")" \
   --output json \
   | jq "$jq_query" \
