@@ -115,5 +115,5 @@ module "quicksight-analysis-dasg-metrics" {
   data_set_prod_per_app_id    = local.dataset_prod_per_app_vars.id
   quicksight_groupname_owners = var.quicksight_groupname_owners
   quicksight_groupname_admins = var.quicksight_groupname_admins
-
+  data_set_perf_mon_id        = var.data_set_perf_mon_id
 }
