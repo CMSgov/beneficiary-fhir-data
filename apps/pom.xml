@@ -79,6 +79,7 @@
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.25</metrics.version>
+        <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.25.70</aws-java-sdk-bom.version>
@@ -823,25 +824,6 @@
                     <version>${fmt.maven.plugin.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>com.rudikershaw.gitbuildhook</groupId>
-                    <artifactId>git-build-hook-maven-plugin</artifactId>
-                    <version>3.4.1</version>
-                    <configuration>
-                        <installHooks>
-                            <!-- Install git hooks; this only works from the top apps directory during an install (build). -->
-                            <pre-commit>../.github/scripts/pre-commit.sh</pre-commit>
-                            <pre-push>../.github/scripts/pre-push.sh</pre-push>
-                        </installHooks>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>install</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
@@ -1031,9 +1013,25 @@
                     <rulesUri>file://${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
                 </configuration>
             </plugin>
+            <!-- Reduce noise by limiting installation to the bfd-parent, disabling inheritance to children. -->
             <plugin>
                 <groupId>com.rudikershaw.gitbuildhook</groupId>
                 <artifactId>git-build-hook-maven-plugin</artifactId>
+                <version>${git-build-hook-maven-plugin.version}</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <installHooks>
+                        <pre-commit>${project.basedir}/../.github/scripts/pre-commit.sh</pre-commit>
+                        <pre-push>${project.basedir}/../.github/scripts/pre-push.sh</pre-push>
+                    </installHooks>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -1,0 +1,39 @@
+title = "BFD GitLeaks Configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "mbi-detection"
+description = "Detects a potential MBI pattern based on https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi.pdf"
+regex = '''([0-9])([ACDEFGHJKMNPQRTUVWXY])([0-9]|[ACDEFGHJKMNPQRTUVWXY])([0-9])([ACDEFGHJKMNPQRTUVWXY])([0-9]|[ACDEFGHJKMNPQRTUVWXY])([0-9])([ACDEFGHJKMNPQRTUVWXY])([ACDEFGHJKMNPQRTUVWXY])([0-9])([0-9])'''
+[rules.allowlist]
+commits = [
+    '''aec486a5597d867d3a2677907dee9bfa979c9dae''', # R4PatientResourceProviderTest.java contained a poorly constructed synthetic MBI
+    '''682ab7e1b531c3852bd78d29f57f63d244615080''', # R4PatientResourceProviderTest.java contained a poorly constructed synthetic MBI
+]
+paths = [
+    '''apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-static-samples/sample-mct-update-6-beneficiaries.txt''',
+    '''apps/bfd-model/bfd-model-rif-samples/src/main/resources/rif-static-samples/sample-mct-update-7-beneficiaries.txt''',
+]
+regexTarget = "match"
+regexes = [
+  '''(1EG4TE5MK73)''', # Sample notional MBI referenced as part of https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi.pdf
+]
+
+[allowlist]
+description = '''General allow list'''
+commits = [
+    '''af39f8b2a77d0d36197601ce23972735c3bfa382''', # data-sources.tf contained a non-sensitive AWS KMS Key identifier matching a "Generaic API Key" pattern
+    '''82cbfb7eb1977caf5c19c25975ff5cd05c642fc1''', # build_bfd-platinum.json contained a non-sensitive AWS KMS Key identifier matching a "Generic API Key" pattern
+]
+paths = [
+    '''apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/test/resources/FISS.ndjson''',
+    '''ops/ansible/roles/bfd-server/test/test_basic.yml''',
+    '''apps/bfd-server/dev/ssl-stores/client-unsecured-key.pem''',
+    '''apps/bfd-server/dev/ssl-stores/server.key''',
+    '''bfd-ops/ansible/roles/attach_ebs/tasks/main.yml''',
+    '''dev/ssl-stores/client-unsecured.pem''',
+    '''dev/ssl-stores/client-test-keypair.pem''',
+    '''files/client-test-keypair.pem''',
+]
