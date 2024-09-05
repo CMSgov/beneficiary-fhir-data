@@ -24,7 +24,7 @@ terraform apply
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.22 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.53.0 |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
@@ -45,7 +45,7 @@ terraform apply
 | <a name="input_force_create_server_log_alarms"></a> [force\_create\_server\_log\_alarms](#input\_force\_create\_server\_log\_alarms) | Forces the creation of bfd\_server\_log\_alarms for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_metrics"></a> [force\_create\_server\_metrics](#input\_force\_create\_server\_metrics) | Forces the creation of bfd\_server\_metrics for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_slo_alarms"></a> [force\_create\_server\_slo\_alarms](#input\_force\_create\_server\_slo\_alarms) | Forces the creation of bfd\_server\_slo\_alarms for ephemeral environments | `bool` | `false` | no |
-| <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
+| <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | Suffix added to the Database JDBC URL to set various JDBC parameters | `string` | `"?logServerErrorDetail=false"` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
