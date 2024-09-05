@@ -216,7 +216,7 @@ module "bfd_server_log_alarms" {
   source = "./modules/bfd_server_log_alarms"
 }
 
-## This is where cloudwatch dashboards are managed. 
+## This is where cloudwatch dashboards are managed.
 #
 module "bfd_dashboards" {
   count = local.create_server_dashboards ? 1 : 0
@@ -228,6 +228,8 @@ module "disk_usage_alarms" {
   count = local.create_server_disk_alarms ? 1 : 0
 
   source = "./modules/bfd_server_disk_alarms"
+
+  asg_name = module.fhir_asg.asg_id
 }
 
 module "bfd_server_error_alerts" {

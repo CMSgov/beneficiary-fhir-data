@@ -155,8 +155,8 @@ def handler(event, context):
                 Unit="Percent",
                 TreatMissingData="notBreaching",
                 ActionsEnabled=True,
-                AlarmActions=[ALARM_ACTION_ARN] if ALARM_ACTION_ARN else None,
-                OKActions=[OK_ACTION_ARN] if OK_ACTION_ARN else None,
+                AlarmActions=[ALARM_ACTION_ARN] if ALARM_ACTION_ARN else [],
+                OKActions=[OK_ACTION_ARN] if OK_ACTION_ARN else [],
             )
 
             print(f"Alarm {alarm_name} successfully created")
