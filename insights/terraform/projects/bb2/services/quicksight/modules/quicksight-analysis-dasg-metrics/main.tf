@@ -12,7 +12,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
 
   permissions {
     principal = "arn:aws:quicksight:us-east-1:${local.account_id}:${var.quicksight_groupname_owners}"
-    actions = [
+    actions   = [
       "quicksight:DeleteAnalysis",
       "quicksight:DescribeAnalysis",
       "quicksight:DescribeAnalysisPermissions",
@@ -25,7 +25,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
 
   permissions {
     principal = "arn:aws:quicksight:us-east-1:${local.account_id}:${var.quicksight_groupname_admins}"
-    actions = [
+    actions   = [
       "quicksight:DeleteAnalysis",
       "quicksight:DescribeAnalysis",
       "quicksight:DescribeAnalysisPermissions",
@@ -60,6 +60,10 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
     data_set_identifiers_declarations {
       data_set_arn = "arn:aws:quicksight:us-east-1:${local.account_id}:dataset/${var.data_set_impl_id}"
       identifier   = "impl_global_state"
+    }
+    data_set_identifiers_declarations {
+      data_set_arn = "arn:aws:quicksight:us-east-1:${local.account_id}:dataset/${var.data_set_perf_mon_id}"
+      identifier   = "events_prod_perf_mon"
     }
     data_set_identifiers_declarations {
       data_set_arn = "arn:aws:quicksight:us-east-1:${local.account_id}:dataset/${var.data_set_prod_id}"
@@ -165,8 +169,8 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       scope_configuration {
         selected_sheets {
           sheet_visual_scoping_configurations {
-            scope    = "SELECTED_VISUALS"
-            sheet_id = "afaae03e-b8f7-47c2-a7eb-e1935ed05ee0"
+            scope      = "SELECTED_VISUALS"
+            sheet_id   = "afaae03e-b8f7-47c2-a7eb-e1935ed05ee0"
             visual_ids = [
               "7a018458-8312-47f0-9cb9-6d340ff29d7d",
             ]
@@ -202,8 +206,8 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       scope_configuration {
         selected_sheets {
           sheet_visual_scoping_configurations {
-            scope    = "SELECTED_VISUALS"
-            sheet_id = "afaae03e-b8f7-47c2-a7eb-e1935ed05ee0"
+            scope      = "SELECTED_VISUALS"
+            sheet_id   = "afaae03e-b8f7-47c2-a7eb-e1935ed05ee0"
             visual_ids = [
               "0948cc12-cc79-4213-95cb-3a1f77599152",
             ]
@@ -239,8 +243,8 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       scope_configuration {
         selected_sheets {
           sheet_visual_scoping_configurations {
-            scope    = "SELECTED_VISUALS"
-            sheet_id = "42c76446-8b34-4221-860b-9e38a2f164c6"
+            scope      = "SELECTED_VISUALS"
+            sheet_id   = "42c76446-8b34-4221-860b-9e38a2f164c6"
             visual_ids = [
               "a32bb923-757d-42a5-8e2e-f9a35dafb81c",
             ]
@@ -278,10 +282,47 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       scope_configuration {
         selected_sheets {
           sheet_visual_scoping_configurations {
-            scope    = "SELECTED_VISUALS"
-            sheet_id = "8ce46ef8-3288-4045-a12e-836dea601e0b"
+            scope      = "SELECTED_VISUALS"
+            sheet_id   = "8ce46ef8-3288-4045-a12e-836dea601e0b"
             visual_ids = [
               "9c24246d-c46a-41b1-a0ef-ed9892d0d80f",
+            ]
+          }
+        }
+      }
+    }
+    filter_groups {
+      cross_dataset   = "SINGLE_DATASET"
+      filter_group_id = "bee9241c-3ad2-42ac-b7a8-7a80b7b8ccbc"
+      status          = "ENABLED"
+
+      filters {
+        category_filter {
+          filter_id = "89db5a12-7e42-4407-a82c-b1de5cb14643"
+
+          configuration {
+            filter_list_configuration {
+              category_values = [
+                "en-us",
+                "es-mx"
+              ]
+              match_operator = "CONTAINS"
+            }
+          }
+
+          column {
+            column_name         = "req_qparam_lang"
+            data_set_identifier = "events_prod_perf_mon"
+          }
+        }
+      }
+      scope_configuration {
+        selected_sheets {
+          sheet_visual_scoping_configurations {
+            scope      = "SELECTED_VISUALS"
+            sheet_id   = "4595cab3-1c2d-4544-b922-29b846c5f2eb"
+            visual_ids = [
+              "bd76b260-b4ac-4912-8512-7e7217ad2fa0",
             ]
           }
         }
@@ -805,11 +846,6 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 visibility   = "VISIBLE"
               }
               selected_field_options {
-                custom_label = "Enrollees served-WoW Gains/Losses %"
-                field_id     = "486c411d-604e-40c0-ad82-8b83c577382b.3.1641420789466"
-                visibility   = "VISIBLE"
-              }
-              selected_field_options {
                 custom_label = "Enrollees served-Progress to FY2024 Target 450K"
                 field_id     = "0581b3bf-d5ad-47a1-ad31-c6cc9c1408ec.4.1641486129331"
                 visibility   = "VISIBLE"
@@ -898,26 +934,6 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 }
                 values {
                   numerical_measure_field {
-                    field_id = "486c411d-604e-40c0-ad82-8b83c577382b.3.1641420789466"
-
-                    column {
-                      column_name         = "bene_served_wow_percent"
-                      data_set_identifier = "prod_global_state"
-                    }
-
-                    format_configuration {
-                      numeric_format_configuration {
-                        percentage_display_format_configuration {
-                          null_value_format_configuration {
-                            null_string = "null"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-                values {
-                  numerical_measure_field {
                     field_id = "0581b3bf-d5ad-47a1-ad31-c6cc9c1408ec.4.1641486129331"
 
                     aggregation_function {
@@ -932,6 +948,17 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                     format_configuration {
                       numeric_format_configuration {
                         percentage_display_format_configuration {
+                          suffix = "%"
+                          negative_value_configuration {
+                            display_mode = "NEGATIVE"
+                          }
+                          separator_configuration {
+                            decimal_separator = "DOT"
+                            thousands_separator {
+                              symbol     = "COMMA"
+                              visibility = "VISIBLE"
+                            }
+                          }
                           null_value_format_configuration {
                             null_string = "null"
                           }
@@ -1196,8 +1223,6 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 }
 
 
-
-
                 values {
                   numerical_measure_field {
                     field_id = "f310934e-c316-4c0e-96ea-f61276d89bab.total_developer_with_registered_app_count.4.1662127374754"
@@ -1411,53 +1436,64 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
     }
     sheets {
       content_type = "INTERACTIVE"
-      name         = "Total Unique Enrollee Authorization by Language"
-      sheet_id     = "97c4c9f6-6ac8-4499-9e85-42b00bcdcfdf"
+      name         = "Permission Screen Language"
+      sheet_id     = "4595cab3-1c2d-4544-b922-29b846c5f2eb"
 
       layouts {
         configuration {
           grid_layout {
             elements {
               column_index = "0"
-              column_span  = 31
-              element_id   = "a9a16dc5-470a-4473-9141-f261a6e8b0b2"
+              column_span  = 20
+              element_id   = "bd76b260-b4ac-4912-8512-7e7217ad2fa0"
               element_type = "VISUAL"
               row_index    = "0"
-              row_span     = 12
+              row_span     = 11
             }
           }
         }
       }
 
       visuals {
-        table_visual {
-          visual_id = "9a9a16dc5-470a-4473-9141-f261a6e8b0b2"
+        pivot_table_visual {
+          visual_id = "bd76b260-b4ac-4912-8512-7e7217ad2fa0"
 
           chart_configuration {
             field_options {
-              #order = []
+              data_path_options {
+                width = "244px"
 
-              selected_field_options {
-                custom_label = "Date"
-                field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.time_of_event.0.1667239330557"
-                width        = "300px"
+                data_path_list {
+                  field_id    = "87e818d6-910f-43fc-a8e5-16483bbce956.time_of_event.0.1718642543721"
+                  field_value = "2024-07-08 00:00:00.000"
+                }
+                data_path_list {
+                  field_id    = "87e818d6-910f-43fc-a8e5-16483bbce956.req_user_id.2.1718642578144"
+                  field_value = "req_user_id"
+                }
               }
               selected_field_options {
                 custom_label = "Language"
-                field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_qparam_lang.2.1667239330557"
-                width        = "300px"
+                field_id     = "87e818d6-910f-43fc-a8e5-16483bbce956.req_qparam_lang.1.1718642562990"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "Date"
+                field_id     = "87e818d6-910f-43fc-a8e5-16483bbce956.time_of_event.0.1718642543721"
+                visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "Total Unique Enrollees"
-                field_id     = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_user_id.2.1667239330557"
-                width        = "300px"
+                field_id     = "87e818d6-910f-43fc-a8e5-16483bbce956.req_user_id.2.1718642578144"
+                visibility   = "VISIBLE"
               }
             }
             field_wells {
-              table_aggregated_field_wells {
-                group_by {
+              pivot_table_aggregated_field_wells {
+                columns {
                   date_dimension_field {
-                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.time_of_event.0.1667239330557"
+                    date_granularity = "WEEK"
+                    field_id         = "87e818d6-910f-43fc-a8e5-16483bbce956.time_of_event.0.1718642543721"
 
                     column {
                       column_name         = "time_of_event"
@@ -1465,9 +1501,9 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                     }
                   }
                 }
-                group_by {
+                rows {
                   categorical_dimension_field {
-                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_qparam_lang.2.1706289461891"
+                    field_id = "87e818d6-910f-43fc-a8e5-16483bbce956.req_qparam_lang.1.1718642562990"
 
                     column {
                       column_name         = "req_qparam_lang"
@@ -1477,10 +1513,10 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 }
                 values {
                   numerical_measure_field {
-                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.req_user_id.2.1667239330557"
+                    field_id = "87e818d6-910f-43fc-a8e5-16483bbce956.req_user_id.2.1718642578144"
 
                     aggregation_function {
-                      simple_numerical_aggregation = "COUNT"
+                      simple_numerical_aggregation = "DISTINCT_COUNT"
                     }
 
                     column {
@@ -1492,17 +1528,21 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
               }
             }
             sort_configuration {
-              row_sort {
-                field_sort {
-                  direction = "DESC"
-                  field_id  = "73bc51bc-79d0-43d6-8757-eae5d7dea826.time_of_event.2.1667239330557"
-                }
-              }
             }
-            table_options {
 
-              cell_style {
-                height = 25
+            table_options {
+              column_names_visibility = "VISIBLE"
+            }
+            total_options {
+              row_subtotal_options {
+                custom_label = "<<$aws:subtotalDimension>> Subtotal"
+                totals_visibility = "VISIBLE"
+                metric_header_cell_style {
+                }
+                total_cell_style {
+                }
+                value_cell_style {
+                }
               }
             }
           }
@@ -1515,7 +1555,11 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
             visibility = "VISIBLE"
 
             format_text {
-              rich_text = "<visual-title>\n  <block align=\"center\">\n   Total Unique Enrollee Authorization by Language  </block></visual-title>"
+              rich_text = <<-EOT
+                <visual-title>
+                  <inline color="#21a0d7" font-size="15px">Permission Screen Language</inline>
+                </visual-title>
+              EOT
             }
           }
         }
