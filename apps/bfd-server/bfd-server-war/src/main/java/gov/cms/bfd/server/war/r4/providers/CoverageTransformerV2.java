@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -29,9 +30,11 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Coverage} resources. */
@@ -106,31 +109,45 @@ final class CoverageTransformerV2 {
     coverage.setSubscriber(TransformerUtilsV2.referencePatient(beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
-    Extension baseExtension = new Extension();
-    baseExtension.setUrl(TransformerConstants.C4DIC_COLOR_PALETTE_EXT_URL);
+    // color extension
+    Extension baseColorExtension = new Extension();
+    baseColorExtension.setUrl(TransformerConstants.C4DIC_COLOR_PALETTE_EXT_URL);
 
     TransformerUtilsV2.addSubExtension(
-        baseExtension,
+        baseColorExtension,
         TransformerConstants.C4DIC_FOREGROUNDCOLOR_EXT_URL,
         new Coding(
             TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
             TransformerConstants.C4DIC_FOREGROUNDCOLOR,
             null));
     TransformerUtilsV2.addSubExtension(
-        baseExtension,
+        baseColorExtension,
         TransformerConstants.C4DIC_BACKGROUNDCOLOR_EXT_URL,
         new Coding(
             TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
             TransformerConstants.C4DIC_BACKGROUNDCOLOR,
             null));
     TransformerUtilsV2.addSubExtension(
-        baseExtension,
+        baseColorExtension,
         TransformerConstants.C4DIC_HIGHLIGHTCOLOR_EXT_URL,
         new Coding(
             TransformerConstants.C4DIC_COLORS_CODE_SYSTEM,
             TransformerConstants.C4DIC_HIGHLIGHTCOLOR,
             null));
-    coverage.addExtension(baseExtension);
+    coverage.addExtension(baseColorExtension);
+
+    // additional card information extension
+    Extension additionalInfoExtension = new Extension();
+    additionalInfoExtension.setUrl(TransformerConstants.C4DIC_ADD_INFO_EXT_URL);
+    additionalInfoExtension.setValue(
+        new Annotation(new MarkdownType(TransformerConstants.C4DIC_ADD_INFO)));
+    coverage.addExtension(additionalInfoExtension);
+
+    // logo extension
+    Extension logoExtension = new Extension();
+    logoExtension.setUrl(TransformerConstants.C4DIC_LOGO_EXT_URL);
+    logoExtension.setValue(new StringType(TransformerConstants.C4DIC_LOGO_URL));
+    coverage.addExtension(logoExtension);
   }
 
   /**
@@ -921,10 +938,17 @@ final class CoverageTransformerV2 {
             TransformerConstants.C4DIC_MEDICARE_SERVICE_PHONE_NUMBER,
             null);
 
-    ContactPoint emailContact =
+    ContactPoint ttyContact =
+        TransformerUtilsV2.createContactPoint(
+            ContactPoint.ContactPointSystem.PHONE,
+            TransformerConstants.C4DIC_MEDICARE_SERVICE_TTY_NUMBER,
+            null);
+
+    ContactPoint websiteContact =
         TransformerUtilsV2.createContactPoint(
             ContactPoint.ContactPointSystem.URL, TransformerConstants.C4DIC_MEDICARE_URL, null);
-    List<ContactPoint> contactPoints = List.of(phoneContact, emailContact);
+
+    List<ContactPoint> contactPoints = List.of(phoneContact, ttyContact, websiteContact);
     organizationContactComponent.setTelecom(contactPoints);
     organization.addContact(organizationContactComponent);
   }

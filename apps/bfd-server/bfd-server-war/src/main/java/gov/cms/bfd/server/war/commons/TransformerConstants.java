@@ -587,8 +587,11 @@ public final class TransformerConstants {
   /** C4DIC Medicare Customer Service Phone Number. */
   public static final String C4DIC_MEDICARE_SERVICE_PHONE_NUMBER = "1-800-633-4227";
 
-  /** C4DIC Medicare URL. */
-  public static final String C4DIC_MEDICARE_URL = "medicare.gov";
+  /** C4DIC Medicare Customer Service TTY Number. */
+  public static final String C4DIC_MEDICARE_SERVICE_TTY_NUMBER = "1-877-486-2084";
+
+  /** C4DIC Medicare website URL. */
+  public static final String C4DIC_MEDICARE_URL = "www.medicare.gov";
 
   /**
    * Code System URL for C4DIC Color Palette extension <a
@@ -650,4 +653,44 @@ public final class TransformerConstants {
    * C4DIC Highlight Color</a>.
    */
   public static final String C4DIC_HIGHLIGHTCOLOR = "#3B9BFB";
+
+  /**
+   * Code System URL for C4DIC Additional Insurance Card Information Extension URL <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension">Extension:
+   * C4DIC Additional Insurance Card Information </a>.
+   */
+  public static final String C4DIC_ADD_INFO_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension";
+
+  /**
+   * Value for C4DIC Additional Insurance Card Information Extension <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension">
+   * C4DIC Additional Insurance Card Information </a>.
+   */
+  public static final String C4DIC_ADD_INFO =
+      "You may be asked to show this card when you get health care services. Only give your personal Medicare "
+          + "information to health care providers, or people you trust who work with Medicare on your behalf. "
+          + "WARNING: Intentionally misusing this card may be considered fraud and/or other violation of "
+          + "federal law and is punishable by law.\n"
+          + "\n"
+          + "Es posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. "
+          + "Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o "
+          + "personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso "
+          + "intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley "
+          + "federal y es sancionada por la ley.";
+
+  /**
+   * Code System URL for C4DIC Logo Extension URL <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension">Extension:
+   * C4DIC Logo </a>.
+   */
+  public static final String C4DIC_LOGO_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Logo-extension";
+
+  /**
+   * URL for C4DIC Logo <a href="https://www.hhs.gov/sites/default/files/logo-white-lg.png">C4DIC
+   * Logo </a>.
+   */
+  public static final String C4DIC_LOGO_URL =
+      "https://www.hhs.gov/sites/default/files/logo-white-lg.png";
 }
