@@ -85,3 +85,9 @@ variable "quicksight_groupname_admins" {
   type        = string
   default     = ""
 }
+
+variable "data_set_perf_mon_id" {
+  description = "DataSet perf mon ID"
+  type        = string
+  default     = ""
+}
