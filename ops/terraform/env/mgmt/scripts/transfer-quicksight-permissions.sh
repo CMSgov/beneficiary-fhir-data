@@ -17,8 +17,8 @@ sole_owner_arn="${SOLE_OWNER_ARN}"
 readonly sole_owner_arn
 
 check_user_exists() {
-  users_found=$(aws quicksight list-users --aws-account-id "$aws_account_id" --namespace default \
-    --query "UserList[?Arn=='$sole_owner_arn']" | jq length)
+  users_found="$(aws quicksight list-users --aws-account-id "$aws_account_id" --namespace default \
+    --query "UserList[?Arn=='$sole_owner_arn']" | jq length)"
   if [ "$users_found" = "0" ]; then
     # User was already deleted through some other means. 
     # If we try to search for their assets, it will fail due to a lookup on a nonexistent ARN
