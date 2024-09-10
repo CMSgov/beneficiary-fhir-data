@@ -161,16 +161,18 @@ resource "aws_launch_template" "main" {
 ## Autoscaling group
 #
 resource "aws_autoscaling_group" "main" {
-  # Generate a new group on every revision of the launch template.
-  # This does a simple version of a blue/green deployment
-  name             = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
+  ##### Generate a new group on every revision of the launch template.
+  ##### This does a simple version of a blue/green deployment
+  # BFD-2588: reuse ASG instead
+  name             = "${aws_launch_template.main.name}" ##  -${aws_launch_template.main.latest_version}"
   desired_capacity = var.asg_config.desired
   max_size         = var.asg_config.max
   min_size         = var.asg_config.min
 
   # If an lb is defined, wait for the ELB
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
-  wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
+  # BFD-2588 increase capacity timeout from 20m to 30m
+  wait_for_capacity_timeout = var.lb_config == null ? null : "30m"
 
   health_check_grace_period = 600                                   # Temporary, will be lowered when/if lifecycle hooks are implemented
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
@@ -229,6 +231,8 @@ resource "aws_autoscaling_group" "main" {
 
   lifecycle {
     create_before_destroy = true
+    # BFD-2588
+    ignore_changes        = [desired_capacity, min_size, max_size]
   }
 }
 
