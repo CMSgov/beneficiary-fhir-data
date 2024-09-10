@@ -5,7 +5,7 @@
 set -e
 
 
-cd "$(dirname $0)"
+cd "$(dirname "$0")"
 swagger_tmp="swagger-tmp"
 rm -rf "./$swagger_tmp"
 mkdir -p "./$swagger_tmp"
