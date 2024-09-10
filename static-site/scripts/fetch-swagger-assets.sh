@@ -20,5 +20,4 @@ assets="../../assets/"
 cp ./dist/swagger-ui-bundle.js "$assets"
 cp ./dist/swagger-ui-standalone-preset.js "$assets"
 cp ./dist/swagger-ui.css "$assets"
-cd ..
-rm -rf "./$swagger_tmp"
+rm -rf "../$swagger_tmp"
