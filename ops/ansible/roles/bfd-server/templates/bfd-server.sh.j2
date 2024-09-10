@@ -174,7 +174,7 @@ service_startup_check() {
 # End smoke testing startup routine
 
 # Set some additional variables.
-JVM_ARGS="-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0"
+JVM_ARGS="-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ ref_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0"
 SERVICE_SCRIPT="$(find {{ ref_dir }} -type f -name bfd-server-launcher.sh)"
 
 CONFIG_SETTINGS_JSON=$(cat <<EOF

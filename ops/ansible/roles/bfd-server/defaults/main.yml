@@ -4,5 +4,6 @@ ref_dir: /usr/local/bfd-server
 user: bfd
 tmp: "{{ ref_dir }}/tmp"
 logs: "{{ ref_dir }}"
-port: 8443
+service_port: 8443
+service: bfd-server
 client_certificates: []

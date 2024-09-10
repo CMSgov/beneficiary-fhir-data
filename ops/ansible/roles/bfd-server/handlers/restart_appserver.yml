@@ -13,7 +13,7 @@
 
 - name: Restart BFD Server Service Task
   service:
-    name: "{{ data_server_appserver_service }}"
+    name: "{{ service }}"
     state: restarted
   become: true
   listen: Restart BFD Server Service
@@ -21,7 +21,7 @@
 
 - name: Wait for BFD Server Service Ready
   wait_for:
-    port: "{{ data_server_appserver_https_port }}"
+    port: "{{ service_port }}"
     timeout: 90
   listen: Restart BFD Server Service
   when: launch_enabled | default(false)
