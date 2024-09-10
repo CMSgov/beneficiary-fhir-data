@@ -1,0 +1,14 @@
+---
+permalink: /swagger.html
+layout: default
+---
+<div id="swagger-ui"></div>
+<script>
+    window.onload = () => {
+        window.ui = SwaggerUIBundle({
+            url: 'assets/open-api.yaml',
+            dom_id: '#swagger-ui',
+        });
+    };
+</script>
+    

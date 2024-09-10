@@ -1,5 +1,5 @@
 ---
----
+--- 
 
 @import 'minima';
 
@@ -12,9 +12,4 @@
 body {
     height: 100vh;
     max-height: 100vh;
-}
-
-main {
-    height: calc(100% - 320px);
-    max-height: calc(100% - 320px);
 }
