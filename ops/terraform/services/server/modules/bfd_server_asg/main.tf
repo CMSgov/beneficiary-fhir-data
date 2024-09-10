@@ -164,13 +164,13 @@ resource "aws_autoscaling_group" "main" {
   ##### Generate a new group on every revision of the launch template.
   ##### This does a simple version of a blue/green deployment
   # BFD-2588: reuse ASG instead
-  name             = "${aws_launch_template.main.name}" ##  -${aws_launch_template.main.latest_version}"
+  name             = aws_launch_template.main.name ##  -${aws_launch_template.main.latest_version}"
   desired_capacity = var.asg_config.desired
   max_size         = var.asg_config.max
   min_size         = var.asg_config.min
 
   # If an lb is defined, wait for the ELB
-  min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
+  min_elb_capacity = var.lb_config == null ? null : var.asg_config.min
   # BFD-2588 increase capacity timeout from 20m to 30m
   wait_for_capacity_timeout = var.lb_config == null ? null : "30m"
 
@@ -232,7 +232,7 @@ resource "aws_autoscaling_group" "main" {
   lifecycle {
     create_before_destroy = true
     # BFD-2588
-    ignore_changes        = [desired_capacity, min_size, max_size]
+    ignore_changes = [desired_capacity, min_size, max_size]
   }
 }
 
