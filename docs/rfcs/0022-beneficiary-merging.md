@@ -81,7 +81,7 @@ It's not explicitly stated, but I expect a cross-reference ID _should_ also be g
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 1                 | 1S00EU8FF04 | null    | null    | null        |
+| -10000013804662   | 1S00F46DH62 | null    | null    | null        |
 
 This is the normal scenario - in most cases a beneficiary shouldn't have a cross-reference ID.
 
@@ -90,15 +90,15 @@ These appear as historical identifiers on the patient resource.
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 1                 | 1S00EU8FF03 | null    | null    | null        |
-| 1                 | 1S00EU8FF04 | null    | null    | null        |
+| -10000013804934   | 1S99F46DM34 | null    | null    | null        |
+| -10000013804934   | 1S00F46DM34 | null    | null    | null        |
 
 ### Scenario 2: Null MBI that is cross-referenced
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 2                 | 1S00EU8FF05 | 1       | N       | null        |
-| 3                 | null        | 1       | Y       | null        |
+| -10000013804967   | 1S00F46DM67 | 1       | N       | null        |
+| -10000013804970   | null        | 1       | Y       | null        |
 
 There is a missing MBI for an older version of beneficiary record, but we can find the beneficiary's MBI from the newer cross-referenced record.
 
@@ -106,7 +106,7 @@ There is a missing MBI for an older version of beneficiary record, but we can fi
 
 | bene_id (FHIR ID) | mbi_num | xref_id | xref_sw | kill_credit |
 | ----------------- | ------- | ------- | ------- | ----------- |
-| 4                 | null    | null    | null    | null        |
+| -10000013804914   | null    | null    | null    | null        |
 
 This beneficiary is missing an MBI, but does not have a cross-reference ID. There's no way for us to find the missing data that it's tied to.
 
@@ -114,8 +114,8 @@ This beneficiary is missing an MBI, but does not have a cross-reference ID. Ther
 
 | bene_id  (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ------------------ | ----------- | ------- | ------- | ----------- |
-| 5                  | 1S00EU8FF06 | 2       | Y       | null        |
-| 6                  | 1S00EU8FF06 | 2       | N       | null        |
+| -10000013804889    | 1S00F46DK89 | 2       | Y       | null        |
+| -10000013804892    | 1S00F46DK89 | 2       | N       | null        |
 
 These records are cross-referenced, so they refer to the same beneficiary. Currently, BFD will return an error in this scenario.
 
@@ -123,8 +123,8 @@ These records are cross-referenced, so they refer to the same beneficiary. Curre
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 7                 | 1S00EU8FF07 | null    | null    | null        |
-| 8                 | 1S00EU8FF07 | null    | null    | null        |
+| -10000013804673   | 1S00F46DH74 | null    | null    | null        |
+| -10000013804679   | 1S00F46DH74 | null    | null    | null        |
 
 This is likely a case of two beneficiaries that should be cross-referenced. This is a very rare scenario (only a few dozen). CCW is looking into this to see if they can provide us with cross-reference IDs for the remaining cases.
 
@@ -132,8 +132,8 @@ This is likely a case of two beneficiaries that should be cross-referenced. This
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 9                 | 1S00EU8FF08 | 3       | Y       | null        |
-| 10                | 1S00EU8FF09 | 3       | N       | null        |
+| -10000013804671   | 1S00F46DH71 | 3       | Y       | null        |
+| -10000013804677   | 1S00F46DH77 | 3       | N       | null        |
 
 This beneficiary's MBI changed from 1S00EU8FF08 to 1S00EU8FF09. A single beneficiary's MBI can change over time, but usually the new MBI is associated with the existing beneficiary record.
 In this case, the MBI change was associated with a different record instead of the existing one. Without a fix for the merged beneficiaries, the older MBI will not be shown in the list of historical MBIs.
@@ -144,8 +144,8 @@ It's worth noting that sometimes a historical MBI will be linked to both the cro
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 11                | 1S00EU8FF11 | 3       | Y       | null        |
-| 12                | 1S00EU8FF12 | 3       | N       | 1           |
+| -10000013804859   | 1S00F46DK59 | 3       | Y       | null        |
+| -10000013804848   | 1S00F46DK48 | 3       | N       | 1           |
 
 Here the `kill_credit` flag is set to `1`, indicating that the `xref_id` is no longer valid and should be treated as though it does not exist.
 
