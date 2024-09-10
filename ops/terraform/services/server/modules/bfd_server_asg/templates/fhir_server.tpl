@@ -1,32 +1,32 @@
 #!/bin/bash
+# shellcheck disable=SC2154
+
 set -e
 
 # add a timestamp to this scripts log output and redirect to both console and logfile
 exec > >(
+    # shellcheck disable=SC2034
 	while read line; do
-	    echo $(date +"%Y-%m-%d %H:%M:%S")" - $${line}" | tee -a /var/log/user_data.log 2>&1
+	    echo "$(date +"%Y-%m-%d %H:%M:%S")"" - $${line}" | tee -a /var/log/user_data.log 2>&1
 	done
 )
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-# TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
-# SSM parameters with hierarchical leaf nodes will have those nodes transformed from "one/two/three"
-# to "one_two_three" by the jq expression below
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/server/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5:]|join("_")): .Value})|add' > server_vars.json
+    --query 'Parameters[? !contains(@.Name, `client_certificates`)]' \
+    | jq 'map({(.Name|split("/")|last): .Value})|add' > server_vars.json
 
-# the previous ssm get-parameter will also pick the certs up due to the 'recursive' arg;.
-# we'll process the ".../client_certs/" path separately.
 aws ssm get-parameters-by-path \
---path "/bfd/${env}/server/nonsensitive/client_certificates/" \
---recursive --region us-east-1 \
---query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")[6]), "certificate": .Value}' \
-| jq -s '{ "data_server_ssl_client_certificates": . }' > client_certificates.json
+    --path "/bfd/${env}/server/nonsensitive/client_certificates/" \
+    --recursive --region us-east-1 \
+    --query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")|last), "certificate": .Value}' \
+    | jq -s '{ "client_certificates": . }' > client_certificates.json
+
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
@@ -36,11 +36,8 @@ aws ssm get-parameters-by-path \
 
 cat <<EOF > extra_vars.json
 {
-  "data_server_appserver_jvmargs": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0",
-  "data_server_new_relic_app_name": "BFD Server ({{ env_name_std }})",
   "data_server_new_relic_environment": "{{ env_name_std }}",
-  "data_server_tmp_dir": "{{ data_server_dir }}/tmp",
-  "data_server_db_url": "${data_server_db_url}",
+  "db_url": "${reader_endpoint}",
   "env": "${env}",
   "launch_lifecycle_hook": "${launch_lifecycle_hook}"
 }

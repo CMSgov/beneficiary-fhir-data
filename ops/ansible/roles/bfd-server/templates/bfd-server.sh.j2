@@ -1,61 +1,19 @@
 #!/bin/bash
 
 # The launcher picks up its config from environment variables, so set those.
-export BFD_PORT='{{ data_server_appserver_https_port }}'
-export BFD_PATHS_FILES_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.pfx'
-export BFD_PATHS_FILES_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.pfx'
-export BFD_PATHS_FILES_WAR="$(find {{ data_server_dir }} -type f -name 'bfd-server-war-*.war')"
+export BFD_PORT='{{ port }}'
+export BFD_PATHS_FILES_KEYSTORE='{{ ref_dir }}/bluebutton-appserver-keystore.pfx'
+export BFD_PATHS_FILES_TRUSTSTORE='{{ ref_dir }}/bluebutton-appserver-truststore.pfx'
+# shellcheck disable=SC1083
+export BFD_PATHS_FILES_WAR="$(find {{ ref_dir }} -type f -name 'bfd-server-war-*.war')"
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
-LOGS_DIR='{{ data_server_dir }}/'
-export BFD_DB_URL='{{ data_server_db_url }}'
-export BFD_DB_USERNAME='{{ data_server_db_username }}'
-export BFD_DB_PASSWORD='{{ data_server_db_password }}'
-{% if db_data_source_type is defined %}
-export BFD_DB_DATA_SOURCE_TYPE='{{ db_data_source_type }}'
-{% endif %}
-{% if db_hikari_max_pool_size is defined %}
-export BFD_DB_HIKARI_MAX_POOL_SIZE='{{ db_hikari_max_pool_size }}'
-{% endif %}
-{% if db_hikari_min_idle_connections is defined %}
-export BFD_DB_HIKARI_MIN_IDLE_CONNECTIONS='{{ db_hikari_min_idle_connections }}'
-{% endif %}
-{% if db_hikari_idle_timeout_ms is defined %}
-export BFD_DB_HIKARI_IDLE_TIMEOUT_MS='{{ db_hikari_idle_timeout_ms }}'
-{% endif %}
-{% if db_hikari_init_fail_timeout_ms is defined %}
-export BFD_DB_HIKARI_INIT_FAIL_TIMEOUT_MS='{{ db_hikari_init_fail_timeout_ms }}'
-{% endif %}
-{% if db_hikari_connection_timeout_ms is defined %}
-export BFD_DB_HIKARI_CONNECTION_TIMEOUT_MS='{{ db_hikari_connection_timeout_ms }}'
-{% endif %}
-{% if db_hikari_keepalive_timeout_ms is defined %}
-export BFD_DB_HIKARI_KEEPALIVE_TIMEOUT_MS='{{ db_hikari_keepalive_timeout_ms }}'
-{% endif %}
-{% if db_hikari_validation_timeout_ms is defined %}
-export BFD_DB_HIKARI_VALIDATION_TIMEOUT_MS='{{ db_hikari_validation_timeout_ms }}'
-{% endif %}
-{% if db_hikari_max_connection_lifetime_ms is defined %}
-export BFD_DB_HIKARI_MAX_CONNECTION_LIFETIME_MS='{{ db_hikari_max_connection_lifetime_ms }}'
-{% endif %}
-{% if db_wrapper_use_custom_preset is defined %}
-export BFD_DB_WRAPPER_USE_CUSTOM_PRESET='{{ db_wrapper_use_custom_preset }}'
-{% endif %}
-{% if db_wrapper_base_preset is defined %}
-export BFD_DB_WRAPPER_BASE_PRESET='{{ db_wrapper_base_preset }}'
-{% endif %}
-{% if db_wrapper_plugins_csv is defined %}
-export BFD_DB_WRAPPER_PLUGINS_CSV='{{ db_wrapper_plugins_csv }}'
-{% endif %}
-{% if db_wrapper_host_selection_strategy is defined %}
-export BFD_DB_WRAPPER_HOST_SELECTION_STRATEGY='{{ db_wrapper_host_selection_strategy }}'
-{% endif %}
-{% if db_wrapper_init_connection_strategy is defined %}
-export BFD_DB_WRAPPER_INIT_CONNECTION_STRATEGY='{{ db_wrapper_init_connection_strategy }}'
-{% endif %}
-export BFD_PAC_ENABLED='{{ pac_resources_enabled }}'
-export BFD_PAC_CLAIM_SOURCE_TYPES='{{ pac_claim_source_types }}'
+LOGS_DIR='{{ ref_dir }}/'
+export BFD_DB_URL='{{ db_url }}'
+# shellcheck disable=SC1054,SC1064,SC1065,SC1072,SC1073
+{{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'  {# application defaults to ssm db/password #}{{ '\n' }}
+{{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'  {# application defaults to ssm db/username #}{{ '\n' }}
 
 # The New Relic agent running in the WAR needs some additional environment variables, so set those.
 {% if data_server_new_relic_license_key is defined %}
@@ -63,19 +21,15 @@ export NEW_RELIC_HOST='gov-collector.newrelic.com'
 export NEW_RELIC_LICENSE_KEY='{{ data_server_new_relic_license_key }}'
 export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
 export NEW_RELIC_HIGH_SECURITY='false'
-export NEW_RELIC_EXTENSIONS_DIR='{{ data_server_dir }}/newrelic/extensions/'
+export NEW_RELIC_EXTENSIONS_DIR='{{ ref_dir }}/newrelic/extensions/'
 {% if data_server_proxy_host is defined %}
 export NEW_RELIC_PROXY_HOST='{{ data_server_proxy_host }}'
 {% endif %}
 {% if data_server_proxy_port is defined %}
 export NEW_RELIC_PROXY_PORT='{{ data_server_proxy_port }}'
 {% endif %}
-{% if data_server_new_relic_app_name is defined %}
-export NEW_RELIC_APP_NAME='{{ data_server_new_relic_app_name }}'
-{% endif %}
-{% if data_server_new_relic_environment is defined %}
-export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
-{% endif %}
+export NEW_RELIC_APP_NAME='{{ app_name }}'
+export NEW_RELIC_ENVIRONMENT='{{ env_name_std }}'
 {% endif %}
 
 # The New Relic reporter sending Dropwizard metrics needs additional env vars.
@@ -84,9 +38,7 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 {% if data_server_new_relic_metric_key is defined %}
 export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ data_server_new_relic_metric_key }}'
 
-{% if data_server_new_relic_app_name is defined %}
-export BFD_NEW_RELIC_APP_NAME='{{ data_server_new_relic_app_name }}'
-{% endif %}
+export BFD_NEW_RELIC_APP_NAME='{{ app_name }}'
 
 {% if data_server_new_relic_metric_host is defined %}
 export BFD_NEW_RELIC_METRICS_HOST='{{ data_server_new_relic_metric_host }}'
@@ -103,9 +55,9 @@ export BFD_NEW_RELIC_METRICS_PERIOD='{{ data_server_new_relic_metric_period }}'
 {% endif %}
 
 # Begin smoke testing startup routine
-STARTUP_TESTING_REQ_TIMEOUT='15'
-STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='1'
-STARTUP_TESTING_BENE_ID='-88888888888888'
+STARTUP_TESTING_REQ_TIMEOUT='{{ request_timeout_seconds }}'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='{{ request_backoff_seconds }}'
+STARTUP_TESTING_BENE_ID='{{ testing_bene_id }}'
 # Lifecycle hook name, used to signal to the ASG that this instance has warmed-up and is ready for
 # traffic
 {% if launch_lifecycle_hook is defined %}
@@ -131,7 +83,7 @@ log() {
 ##
 check_endpoint() {
   set -o pipefail
-  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
+  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ ref_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
 }
 
 ##
@@ -218,12 +170,12 @@ service_startup_check() {
   done
 }
 
-(service_startup_check >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
+(service_startup_check >>"{{ ref_dir }}/bfd-server-startup.log" 2>&1) &
 # End smoke testing startup routine
 
 # Set some additional variables.
-JVM_ARGS='{{ data_server_appserver_jvmargs }}'
-SERVICE_SCRIPT="$(find {{ data_server_dir }} -type f -name bfd-server-launcher.sh)"
+JVM_ARGS="-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0"
+SERVICE_SCRIPT="$(find {{ ref_dir }} -type f -name bfd-server-launcher.sh)"
 
 CONFIG_SETTINGS_JSON=$(cat <<EOF
 {"ssmHierarchies": [
@@ -236,9 +188,9 @@ export CONFIG_SETTINGS_JSON
 
 # 3... 2... 1... launch!
 "$SERVICE_SCRIPT" \
-  -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
+  -javaagent:{{ ref_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
-  "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
+  "-Djava.io.tmpdir={{ tmp }}" \
   "-Dorg.jboss.logging.provider=slf4j" \
-  >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
+  >>"{{ ref_dir }}/bluebutton-server-app-log.json" 2>&1
