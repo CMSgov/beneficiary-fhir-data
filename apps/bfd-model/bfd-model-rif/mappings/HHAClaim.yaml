@@ -139,9 +139,8 @@ mappings:
       sqlType: varchar(2)
     - comment: Claim PPS Indicator Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pps_ind.txt)
       dbName: clm_pps_ind_cd
-      javaType: char
+      javaType: Character
       name: prospectivePaymentCode
-      nullable: false
       sqlType: char
     - comment: Claim Total Charge Amount (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_chrg.txt)
       dbName: clm_tot_chrg_amt
