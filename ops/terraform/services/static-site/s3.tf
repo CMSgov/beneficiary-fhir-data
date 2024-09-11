@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "static_site" {
-  bucket = local.is_ephemeral_env ? null : local.static_cloudfront_name
+  bucket = local.static_cloudfront_name
 
   tags = {
     Layer = "static-${local.layer}",
