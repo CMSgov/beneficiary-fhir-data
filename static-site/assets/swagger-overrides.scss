@@ -1,6 +1,8 @@
 ---
 --- 
 
+// all of this is needed to prevent the base theme CSS from interfering with Swagger's CSS
+
 #swagger-ui {
     .try-out {
         display: none !important;
