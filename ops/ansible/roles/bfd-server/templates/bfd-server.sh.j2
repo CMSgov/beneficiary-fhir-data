@@ -9,49 +9,27 @@ export BFD_PATHS_FILES_WAR="$(find {{ ref_dir }} -type f -name 'bfd-server-war-*
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
-LOGS_DIR='{{ ref_dir }}/'
+LOGS_DIR='{{ logs }}'
 export BFD_DB_URL='{{ db_url }}'
 # shellcheck disable=SC1054,SC1064,SC1065,SC1072,SC1073
 {{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'  {# application defaults to ssm db/password #}{{ '\n' }}
 {{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'  {# application defaults to ssm db/username #}{{ '\n' }}
 
 # The New Relic agent running in the WAR needs some additional environment variables, so set those.
-{% if data_server_new_relic_license_key is defined %}
+{% if license_key is defined %}
 export NEW_RELIC_HOST='gov-collector.newrelic.com'
-export NEW_RELIC_LICENSE_KEY='{{ data_server_new_relic_license_key }}'
+export NEW_RELIC_LICENSE_KEY='{{ license_key }}'
 export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
-export NEW_RELIC_HIGH_SECURITY='false'
+export NEW_RELIC_HIGH_SECURITY='{{ high_security_enabled }}'
 export NEW_RELIC_EXTENSIONS_DIR='{{ ref_dir }}/newrelic/extensions/'
-{% if data_server_proxy_host is defined %}
-export NEW_RELIC_PROXY_HOST='{{ data_server_proxy_host }}'
+{% if proxy_host is defined %}
+export NEW_RELIC_PROXY_HOST='{{ proxy_host }}'
 {% endif %}
-{% if data_server_proxy_port is defined %}
-export NEW_RELIC_PROXY_PORT='{{ data_server_proxy_port }}'
+{% if proxy_port is defined %}
+export NEW_RELIC_PROXY_PORT='{{ proxy_port }}'
 {% endif %}
 export NEW_RELIC_APP_NAME='{{ app_name }}'
 export NEW_RELIC_ENVIRONMENT='{{ env_name_std }}'
-{% endif %}
-
-# The New Relic reporter sending Dropwizard metrics needs additional env vars.
-# Some of those duplicate variables that the New Relic agent configuration also
-# sets, but setting them to the same value here allows one to be run without the other.
-{% if data_server_new_relic_metric_key is defined %}
-export BFD_NEW_RELIC_METRICS_LICENSE_KEY='{{ data_server_new_relic_metric_key }}'
-
-export BFD_NEW_RELIC_APP_NAME='{{ app_name }}'
-
-{% if data_server_new_relic_metric_host is defined %}
-export BFD_NEW_RELIC_METRICS_HOST='{{ data_server_new_relic_metric_host }}'
-{% endif %}
-
-{% if data_server_new_relic_metric_path is defined %}
-export BFD_NEW_RELIC_METRICS_PATH='{{ data_server_new_relic_metric_path }}'
-{% endif %}
-
-{% if data_server_new_relic_metric_period is defined %}
-export BFD_NEW_RELIC_METRICS_PERIOD='{{ data_server_new_relic_metric_period }}'
-{% endif %}
-
 {% endif %}
 
 # Begin smoke testing startup routine
