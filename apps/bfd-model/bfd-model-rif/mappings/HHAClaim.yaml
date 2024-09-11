@@ -850,7 +850,6 @@ mappings:
     optionalComponents: None
     to: patientDischargeStatusCode
   - from: CLM_PPS_IND_CD
-    optionalComponents: None
     to: prospectivePaymentCode
   - defaultValue: '0'
     from: CLM_TOT_CHRG_AMT
