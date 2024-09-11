@@ -158,10 +158,10 @@ SERVICE_SCRIPT="$(find {{ ref_dir }} -type f -name bfd-server-launcher.sh)"
 
 CONFIG_SETTINGS_JSON=$(cat <<EOF
 {"ssmHierarchies": [
+    "/bfd/{{ env_name_std }}/common/sensitive/new_relic/",
+    "/bfd/{{ env_name_std }}/common/nonsensitive/",
     "/bfd/{{ env_name_std }}/server/sensitive/",
-    "/bfd/{{ env_name_std }}/server/nonsensitive/",
-    "/bfd/{{ env_name_std }}/common/sensitive",
-    "/bfd/{{ env_name_std }}/common/nonsensitive"
+    "/bfd/{{ env_name_std }}/server/nonsensitive/"
 ]}
 EOF
 )
