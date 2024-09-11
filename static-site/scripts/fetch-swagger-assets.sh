@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-
-# fetches the latest minified swagger assets from git
-
 set -e
 
+# fetches the latest minified swagger assets from git
 
 cd "$(dirname "$0")"
 swagger_tmp="swagger-tmp"
