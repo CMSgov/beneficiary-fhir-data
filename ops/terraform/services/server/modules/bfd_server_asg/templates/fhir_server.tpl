@@ -59,7 +59,7 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@new_relic_vars.json' --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
+ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@new_relic_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
