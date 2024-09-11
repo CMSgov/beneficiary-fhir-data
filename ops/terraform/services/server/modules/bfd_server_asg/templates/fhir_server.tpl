@@ -50,7 +50,6 @@ aws ssm get-parameters-by-path \
 
 cat <<EOF > extra_vars.json
 {
-  "data_server_new_relic_environment": "{{ env_name_std }}",
   "db_url": "${reader_endpoint}",
   "env": "${env}",
   "launch_lifecycle_hook": "${launch_lifecycle_hook}"
@@ -59,7 +58,13 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@new_relic_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
+ansible-playbook \
+    --extra-vars '@server_vars.json' \
+    --extra-vars '@client_certificates.json' \
+    --extra-vars '@common_vars.json' \
+    --extra-vars '@new_relic_vars.json' \
+    --extra-vars '@extra_vars.json' \
+    --tags "post-ami" launch_bfd-server.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
