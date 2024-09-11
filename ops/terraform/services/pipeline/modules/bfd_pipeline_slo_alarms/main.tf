@@ -16,12 +16,8 @@ locals {
   # alarm.
   topic_names_by_env = {
     prod = {
-      # FUTURE: When SLO Alarms are known to correctly alarm, reevaluate alarm destinations
-      # alert      = local.victor_ops_sns
-      # warning    = local.bfd_warnings_slack_sns
-      # alert_ok   = local.default_alert_ok_sns
-      alert      = local.bfd_test_slack_sns
-      warning    = local.bfd_test_slack_sns
+      alert      = local.victor_ops_sns
+      warning    = local.bfd_warnings_slack_sns
       alert_ok   = null
       warning_ok = null
     }
@@ -76,7 +72,7 @@ View the relevant CloudWatch dashboard below for more information:
 
 * <${local.dashboard_url}|bfd-${local.env}-pipeline>
     * This dashboard visualizes SLOs and other important Pipeline metrics
-  EOF 
+  EOF
 
   data_load_ingestion_time_slo_configs = {
     slo_ingestion_time_warning = {
@@ -168,7 +164,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
     # 3. e1 > e4 - If the current time (when the Alarm evaluates) exceeds Monday at 9 AM; basically,
     #    is current time after current Monday 9 AM ET?
     # If all are true, this means that an ongoing load did not finish prior to the current Monday at
-    # 9 AM ET, and so the SLO has been broken 
+    # 9 AM ET, and so the SLO has been broken
     expression  = "IF(e9 > e7 && e4 > e9 && e1 > e4, 1, 0)"
     id          = "e3"
     label       = "Has ongoing load exceeded Monday 9 AM EST/EDT?"
