@@ -9,7 +9,6 @@ export BFD_PATHS_FILES_WAR="$(find {{ ref_dir }} -type f -name 'bfd-server-war-*
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
-LOGS_DIR='{{ logs }}'
 export BFD_DB_URL='{{ db_url }}'
 # shellcheck disable=SC1054,SC1064,SC1065,SC1072,SC1073
 {{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'  {# application defaults to ssm db/password #}{{ '\n' }}
@@ -19,8 +18,10 @@ export BFD_DB_URL='{{ db_url }}'
 {% if license_key is defined %}
 export NEW_RELIC_HOST='gov-collector.newrelic.com'
 export NEW_RELIC_LICENSE_KEY='{{ license_key }}'
-export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
+export NEW_RELIC_LOG_FILE_PATH='{{ logs }}'
+{% if high_security_enabled is defined %}
 export NEW_RELIC_HIGH_SECURITY='{{ high_security_enabled }}'
+{% endif %}
 export NEW_RELIC_EXTENSIONS_DIR='{{ ref_dir }}/newrelic/extensions/'
 {% if proxy_host is defined %}
 export NEW_RELIC_PROXY_HOST='{{ proxy_host }}'
@@ -158,7 +159,9 @@ SERVICE_SCRIPT="$(find {{ ref_dir }} -type f -name bfd-server-launcher.sh)"
 CONFIG_SETTINGS_JSON=$(cat <<EOF
 {"ssmHierarchies": [
     "/bfd/{{ env_name_std }}/server/sensitive/",
-    "/bfd/{{ env_name_std }}/server/nonsensitive/"
+    "/bfd/{{ env_name_std }}/server/nonsensitive/",
+    "/bfd/{{ env_name_std }}/common/sensitive",
+    "/bfd/{{ env_name_std }}/common/nonsensitive"
 ]}
 EOF
 )
@@ -168,7 +171,7 @@ export CONFIG_SETTINGS_JSON
 "$SERVICE_SCRIPT" \
   -javaagent:{{ ref_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
-  "-DbfdServer.logs.dir=${LOGS_DIR}" \
+  "-DbfdServer.logs.dir={{ logs }}" \
   "-Djava.io.tmpdir={{ tmp }}" \
   "-Dorg.jboss.logging.provider=slf4j" \
   >>"{{ ref_dir }}/bluebutton-server-app-log.json" 2>&1

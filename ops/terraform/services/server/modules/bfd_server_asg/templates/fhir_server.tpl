@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2154
+# shellcheck disable=SC2154,SC2016
 
 set -e
 
@@ -27,12 +27,26 @@ aws ssm get-parameters-by-path \
     --query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")|last), "certificate": .Value}' \
     | jq -s '{ "client_certificates": . }' > client_certificates.json
 
+new_relic_sensitive="$(aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/common/sensitive/new_relic/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add')"
+
+new_relic_nonsensitive="$(aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters[? contains(@.Name, `new_relic`)]' | jq 'map({(.Name|split("/")|last): .Value})|add')"
+
+jq -s 'add | . ' <(echo "$new_relic_nonsensitive") <(echo "$new_relic_sensitive") > new_relic_vars.json
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
 cat <<EOF > extra_vars.json
 {
@@ -45,7 +59,7 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
+ansible-playbook --extra-vars '@new_relic_vars.json' --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
