@@ -5,7 +5,7 @@
 layout: home
 ---
 
-[FAQ](/faq)
+[FAQ](/faq.html)
 
 [V1 Data Dictionary](/data-dictionary-v1.html)
 
