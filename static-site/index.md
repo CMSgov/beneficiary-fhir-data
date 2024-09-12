@@ -9,4 +9,6 @@ layout: home
 
 [V2 Data Dictionary](/data-dictionary-v2.html)
 
+[Swagger](/swagger.html)
+
 [Download Release Assets](https://github.com/CMSgov/beneficiary-fhir-data/releases/latest)
