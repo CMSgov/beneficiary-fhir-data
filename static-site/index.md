@@ -5,10 +5,12 @@
 layout: home
 ---
 
-[V1 Data Dictionary](/data-dictionary-v1.html)
+[FAQ](/faq)
 
-[V2 Data Dictionary](/data-dictionary-v2.html)
+[V1 Data Dictionary](/data-dictionary-v1)
 
-[Swagger](/swagger.html)
+[V2 Data Dictionary](/data-dictionary-v2)
+
+[Swagger](/swagger)
 
 [Download Release Assets](https://github.com/CMSgov/beneficiary-fhir-data/releases/latest)
