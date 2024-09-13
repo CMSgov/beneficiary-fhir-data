@@ -164,10 +164,10 @@ Using the following data:
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 5                 | 1S00EU8FF08 | 2       | Y       | null        |
-| 6                 | 1S00EU8FF09 | 2       | N       | null        |
+| -10000013804671   | 1S00F46DH71 | 2       | Y       | null        |
+| -10000013804677   | 1S00F46DH77 | 2       | N       | null        |
 
-Patient 6 replaces patient 5
+Patient -10000013804677 replaces patient -10000013804671
 
 ```json
 {
@@ -181,18 +181,18 @@ Patient 6 replaces patient 5
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804677"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "6",
+        "id": "-10000013804677",
         "link": [
           {
             "other": {
-              "reference": "Patient/5"
+              "reference": "Patient/-10000013804671"
             },
             "type": "replaces"
           }
@@ -203,7 +203,7 @@ Patient 6 replaces patient 5
 }
 ```
 
-Patient 5 is replaced by patient 6
+Patient -10000013804671 is replaced by patient -10000013804677
 
 ```json
 {
@@ -217,18 +217,18 @@ Patient 5 is replaced by patient 6
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804671"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "5",
+        "id": "-10000013804671",
         "link": [
           {
             "other": {
-              "reference": "Patient/6"
+              "reference": "Patient/-10000013804677"
             },
             "type": "replaced-by"
           }
@@ -255,18 +255,18 @@ To fetch all linked items in a single call, the `_include` parameter can be set 
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6&_include=patient:link"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804677&_include=patient:link"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "6",
+        "id": "-10000013804677",
         "link": [
           {
             "other": {
-              "reference": "Patient/5"
+              "reference": "Patient/-10000013804671"
             },
             "type": "replaces"
           }
@@ -276,11 +276,11 @@ To fetch all linked items in a single call, the `_include` parameter can be set 
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "5",
+        "id": "-10000013804671",
         "link": [
           {
             "other": {
-              "reference": "Patient/6"
+              "reference": "Patient/-10000013804677"
             },
             "type": "replaced-by"
           }
@@ -297,8 +297,8 @@ Using the following data:
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 5                 | 1S00EU8FF08 | 2       | Y       | null        |
-| 6                 | 1S00EU8FF09 | 2       | N       | null        |
+| -10000013804671   | 1S00F46DH71 | 2       | Y       | null        |
+| -10000013804677   | 1S00F46DH77 | 2       | N       | null        |
 
 Searching by id (bene_id) will return only the matched record.
 Searching by identifier (MBI) will return both resources.
@@ -311,7 +311,7 @@ The `_include` operation can be supported here just like in the previous option.
 We will still need an alternative way to convey which resource is the most current one.
 This may need to be accomplished with an extension.
 
-Searching for id=5 yields:
+Searching for id=-10000013804671 yields:
 
 ```json
 {
@@ -325,18 +325,18 @@ Searching for id=5 yields:
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804671"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "5",
+        "id": "-10000013804671",
         "link": [
           {
             "other": {
-              "reference": "Patient/6"
+              "reference": "Patient/-10000013804677"
             },
             "type": "seealso"
           }
@@ -347,7 +347,7 @@ Searching for id=5 yields:
 }
 ```
 
-Searching for id=6 yields:
+Searching for id=-10000013804677 yields:
 
 ```json
 {
@@ -361,18 +361,18 @@ Searching for id=6 yields:
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804677"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "6",
+        "id": "-10000013804677",
         "link": [
           {
             "other": {
-              "reference": "Patient/5"
+              "reference": "Patient/-10000013804671"
             },
             "type": "seealso"
           }
@@ -389,10 +389,10 @@ Using the following data:
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ----------- |
-| 5                 | 1S00EU8FF08 | 2       | Y       | null        |
-| 6                 | 1S00EU8FF09 | 2       | N       | null        |
+| -10000013804671   | 1S00F46DH71 | 2       | Y       | null        |
+| -10000013804677   | 1S00F46DH77 | 2       | N       | null        |
 
-Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 5's MBI included as a historical identifier.
+Searching for beneficiary -10000013804671 will return data for beneficiary -10000013804677 with beneficiary 5's MBI included as a historical identifier.
 
 ```json
 {
@@ -406,14 +406,14 @@ Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804671"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "6",
+        "id": "-10000013804677",
         "meta": {
           "lastUpdated": "2024-08-09T12:44:27.152-07:00",
           "profile": [
@@ -442,7 +442,7 @@ Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 
               ]
             },
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S00EU8FF09",
+            "value": "1S00F46DH77",
           },
           {
             "type": {
@@ -465,7 +465,7 @@ Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 
               ]
             },
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S00EU8FF08"
+            "value": "1S00F46DH71"
           }
         ], 
       }
@@ -474,7 +474,7 @@ Searching for beneficiary 5 will return data for beneficiary 6 with beneficiary 
 }
 ```
 
-Searching for beneficiary 6 will behave the same way.
+Searching for beneficiary -10000013804677 will behave the same way.
 
 ```json
 {
@@ -495,7 +495,7 @@ Searching for beneficiary 6 will behave the same way.
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "6",
+        "id": "-10000013804677",
         "meta": {
           "lastUpdated": "2024-08-09T12:44:27.152-07:00",
           "profile": [
@@ -524,7 +524,7 @@ Searching for beneficiary 6 will behave the same way.
               ]
             },
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S00EU8FF09",
+            "value": "1S00F46DH77",
           },
           {
             "type": {
@@ -547,7 +547,7 @@ Searching for beneficiary 6 will behave the same way.
               ]
             },
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S00EU8FF08"
+            "value": "1S00F46DH71"
           }
         ], 
       }
@@ -567,15 +567,15 @@ If we have a single, non-cross-referenced beneficiary:
 
 | bene_id  (FHIR ID) | mbi_num     | xref_id | xref_sw | frozen | kill_credit |
 | ------------------ | ----------- | ------- | ------- | ------ | ----------- |
-| 5                  | 1S00EU8FF08 | null    | null    | true   | null        |
+| -10000013804671    | 1S00F46DH71 | null    | null    | true   | null        |
 
 
 and we later receive a new record to merge:
 
 | bene_id (FHIR ID) | mbi_num     | xref_id | xref_sw | frozen | kill_credit |
 | ----------------- | ----------- | ------- | ------- | ------ | ----------- |
-| 5                 | 1S00EU8FF08 | 2       | Y       | true   | null        |
-| 6                 | 1S00EU8FF09 | 2       | N       | false  | null        |
+| -10000013804671   | 1S00F46DH71 | 2       | Y       | true   | null        |
+| -10000013804677   | 1S00F46DH77 | 2       | N       | false  | null        |
 
 We can consider the new MBI (1S00EU8FF09) the current identifier, but still return 5 as the bene_id so that consumer won't have to know about the bene_id changing.
 
@@ -591,14 +591,14 @@ We can consider the new MBI (1S00EU8FF09) the current identifier, but still retu
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=5"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804671"
     }
   ],
   "entry": [
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "5",
+        "id": "-10000013804677",
         "meta": {
           "lastUpdated": "2024-08-09T12:44:27.152-07:00",
           "profile": [
@@ -627,7 +627,7 @@ We can consider the new MBI (1S00EU8FF09) the current identifier, but still retu
               ]
             },
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S00EU8FF09",
+            "value": "1S00F46DH77",
           },
           {
             "type": {
@@ -650,7 +650,7 @@ We can consider the new MBI (1S00EU8FF09) the current identifier, but still retu
               ]
             },
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S00EU8FF08"
+            "value": "1S00F46DH71"
           }
         ], 
       }
@@ -659,7 +659,7 @@ We can consider the new MBI (1S00EU8FF09) the current identifier, but still retu
 }
 ```
 
-Searching for bene_id 6 would behave as though that ID doesn't exist at all.
+Searching for bene_id -10000013804677 would behave as though that ID doesn't exist at all.
 
 ```json
 {
@@ -673,7 +673,7 @@ Searching for bene_id 6 would behave as though that ID doesn't exist at all.
   "link": [
     {
       "relation": "self",
-      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=6"
+      "url": "https://prod.bfd.cms.gov/v2/fhir/Patient?_format=json&_id=-10000013804677"
     }
   ]
 }
