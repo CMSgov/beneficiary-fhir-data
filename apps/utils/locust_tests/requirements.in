@@ -4,9 +4,11 @@ psycogreen==1.0.2
 boto3==1.28.52
 setuptools>=70.0.0
 flask==2.3.3
-requests==2.32.0
+flask-cors==5.0.0
+requests==2.32.2
 gevent==23.9.1
-urllib3==1.26.18
+urllib3==1.26.19
 werkzeug==3.0.3
 jinja2==3.1.4
 idna>=3.7
+certifi==2024.7.4
