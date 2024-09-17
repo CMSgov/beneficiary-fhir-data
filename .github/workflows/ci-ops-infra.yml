@@ -7,8 +7,7 @@ on:
     inputs:
       aws-region:
         description: >-
-          Override the AWS Region destination for uploaded artifacts.
-          Default to `us-east-1`.
+          Override the AWS Region destination, Default to `us-east-1`.
         default: us-east-1
         type: string
         required: true
@@ -18,21 +17,18 @@ on:
         type: string
         default: mgmt
       cw-log-group-override:
-        description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
+        description: "Overrides the CloudWatch Log Group target for Terraform logs; must exist"
         required: false
         type: string
       cw-log-stream-override:
-        description: >-
-          Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
-          necessary
+        description: "Overrides the the CloudWatch Log Stream target for Terraform logs; created if necessary"
         required: false
         type: string
   workflow_dispatch:
     inputs:
       aws-region:
         description: >-
-          Override the AWS Region destination for uploaded artifacts.
-          Default to `us-east-1`.
+          Override the AWS Region destination, Default to `us-east-1`.
         default: us-east-1
         type: choice
         options:
