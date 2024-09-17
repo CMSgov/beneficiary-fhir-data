@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "static_site" {
-  bucket = local.is_ephemeral_env ? null : local.static_cloudfront_name
+  bucket = local.static_cloudfront_name
 
   tags = {
     Layer = "static-${local.layer}",
@@ -69,11 +69,6 @@ resource "aws_s3_bucket_ownership_controls" "cloudfront_logging" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
-}
-
-resource "aws_s3_bucket_acl" "cloudfront_logging" {
-  bucket = aws_s3_bucket.cloudfront_logging.bucket
-  acl    = "log-delivery-write"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logging" {

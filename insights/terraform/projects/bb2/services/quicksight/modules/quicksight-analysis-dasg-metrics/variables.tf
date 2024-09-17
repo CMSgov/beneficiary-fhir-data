@@ -32,3 +32,8 @@ variable "quicksight_groupname_admins" {
   description = "Quicksight admins group name"
   type        = string
 }
+
+variable "data_set_perf_mon_id" {
+  description = "DataSet perf mon ID"
+  type        = string
+}
