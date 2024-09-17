@@ -53,8 +53,7 @@ paths:
                     
                     Example:
                       - `excludeSAMHSA=true`
-                  enum: ["true", "false"]
-                includeTaxNumber:
+                includeTaxNumbers:
                   type: string
                   description: |-
                     Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
@@ -64,10 +63,11 @@ paths:
                 service-date:
                   type: string
                   description: |-
-                    Only satisfy the Search request if a claim's Date
-                    falls within a specified _DateRange_. A _DateRange_ can be
-                    defined by providing less than `lt` and/or greater than `gt` values.
-                    This parameter can be included in a request one or more times.
+                    Only satisfy the search request if a claim's date falls within a specified _DateRange_.
+                    The _DateRange_ is defined by the claim's billing period, specifically the 
+                    `Claim.billablePeriod.end`. A _DateRange_ can be further refined by providing 
+                    less than `lt` and/or greater than `gt` values. This parameter can be included 
+                    in a request one or more times.
                     
                     Examples:
                        - `service-date=gt2023-01-02&service-date=lt2023-05-01`
@@ -121,8 +121,10 @@ paths:
         '200':
           description: Success
           content:
-            application/x-www-form-urlencoded:
-              schema:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
   /v2/fhir/Patient/_search:
     post:
       tags: [v2,Patient]
@@ -233,11 +235,13 @@ paths:
         '200':
           description: Success
           content:
-            application/x-www-form-urlencoded:
-              schema:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
   /v1/fhir/Patient/_search:
     post:
-      tags: [ v1,Patient ]
+      tags: [v1,Patient]
       summary: 'search-type: Search for Patient instances'
       description: This is a search type
       requestBody:
@@ -345,8 +349,10 @@ paths:
         '200':
           description: Success
           content:
-            application/x-www-form-urlencoded:
-              schema:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
   /v2/fhir/Claim/_search:
       post:
         tags: [v2,Claim]
@@ -372,12 +378,10 @@ paths:
                       '-', with a length limit of 11 characters.
                       ```
 
-                      The following are all valid values for MBI, and all might
-                      represent the same resource:
-                        - `mbi=9AB2WW3GR44` (unhashed MBI)
-                        - `mbi=82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c` (hashed)
+                      The following are all valid values for MBI:
+                        - `mbi=1EG4TE5MK73` (unhashed MBI)
                         - `mbi=1S00E00HA26` (synthetic MBI)
-                    example: "9AB2WW3GR44"
+                    example: "1EG4TE5MK73"
                   _lastUpdated:
                     type: string
                     description: |-
@@ -402,10 +406,10 @@ paths:
                       Example:
                         - `excludeSAMHSA=true`
                     example: true
-                  includeTaxNumber:
+                  includeTaxNumbers:
                     type: string
                     description: |-
-                      Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
+                      Setting this flag to _true_, provides tax number in the Claim transformed data for the response.
                       
                       Example:
                          - `includeTaxNumbers=true
@@ -419,10 +423,11 @@ paths:
                   service-date:
                     type: string
                     description: |-
-                      Only satisfy the Search request if a claim's Date
-                      falls within a specified _DateRange_. A _DateRange_ can be
-                      defined by providing less than `lt` and/or greater than `gt` values.
-                      This parameter can be included in a request one or more times.
+                      Only satisfy the search request if a claim's date falls within a specified _DateRange_.
+                      The _DateRange_ is defined by the claim's billing period, specifically the 
+                      `Claim.billablePeriod.end`. A _DateRange_ can be further refined by providing 
+                      less than `lt` and/or greater than `gt` values. This parameter can be included 
+                      in a request one or more times.
 
                       Examples:
                         - `service-date=gt2023-01-02&service-date=lt2023-05-01`
@@ -456,11 +461,14 @@ paths:
                         - `type=fiss`
                     example: "fiss,mcs"
           required: true
-        responses:
-          '200':
-            description: Success
-            content:
-              application/x-www-form-urlencoded:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
   /v2/fhir/ClaimResponse/_search:
     post:
       tags: [v2,ClaimResponse]
@@ -486,16 +494,14 @@ paths:
                     '-', with a length limit of 11 characters.
                     ```
                     
-                    The following are all valid values for MBI, and all might
-                    represent the same resource:
-                      - `mbi=9AB2WW3GR44` (unhashed MBI)
-                      - `mbi=82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c` (hashed)
+                    The following are all valid values for MBI:
+                      - `mbi=1EG4TE5MK73` (unhashed MBI)
                       - `mbi=1S00E00HA26` (synthetic MBI)
-                  example: "9AB2WW3GR44"
+                  example: "1EG4TE5MK73"
                 _lastUpdated:
                   type: string
                   description: |-
-                    Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
+                    Only satisfy the Search if the Claim's `last_updated` Date falls within a specified _DateRange_.
                     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
                     This parameter can be included in a request one or more times.
                     
@@ -519,7 +525,7 @@ paths:
                 includeTaxNumbers:
                   type: string
                   description: |-
-                    Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
+                    Setting this flag to _true_, provides tax number in the Claim transformed data for the response.
                     
                     Example:
                       - `includeTaxNumbers=true`
@@ -575,5 +581,7 @@ paths:
         '200':
           description: Success
           content:
-            application/x-www-form-urlencoded:
-              schema:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
