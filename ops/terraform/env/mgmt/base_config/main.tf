@@ -142,7 +142,7 @@ resource "aws_ssm_parameter" "quicksight_sensitive" {
 
 # BFD-3384
 # CloudWatch Log Group for the "CI - Update OPS Infrastructure" Terraform plan/apply logs
-resource "aws_cloudwatch_log_group" "gha_ci_static_site" {
+resource "aws_cloudwatch_log_group" "gha_ci_ops_infra" {
   name       = "/bfd/${local.env}/gha/ci-ops-infra"
-  kms_key_id = data.aws_kms_key.cmk.arn
+  kms_key_id = aws_kms_key.primary_config[local.env].arn
 }
