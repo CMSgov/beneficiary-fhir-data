@@ -139,10 +139,3 @@ resource "aws_ssm_parameter" "quicksight_sensitive" {
   type      = "SecureString"
   value     = each.value
 }
-
-# BFD-3384
-# CloudWatch Log Group for the "CI - Update OPS Infrastructure" Terraform plan/apply logs
-resource "aws_cloudwatch_log_group" "gha_ci_ops_infra" {
-  name       = "/bfd/${local.env}/gha/ci-ops-infra"
-  kms_key_id = aws_kms_key.primary_config[local.env].arn
-}
