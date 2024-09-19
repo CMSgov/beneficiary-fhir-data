@@ -355,7 +355,8 @@ resource "aws_iam_role" "github_actions" {
     aws_iam_policy.github_actions_ecr.arn,
     aws_iam_policy.github_actions_tf_state.arn,
     aws_iam_policy.github_actions_tf_logs.arn,
-    aws_iam_policy.github_actions_static_site.arn
+    aws_iam_policy.github_actions_static_site.arn,
+    aws_iam_policy.github_actions_ci_ops.arn
   ]
 
   assume_role_policy = jsonencode(
