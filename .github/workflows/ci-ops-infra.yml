@@ -15,7 +15,6 @@ on:
         description: "The BFD environment to update"
         required: false
         type: string
-        default: mgmt
       cw-log-group-override:
         description: "Overrides the CloudWatch Log Group target for Terraform logs; must exist"
         required: false
@@ -39,7 +38,6 @@ on:
         description: "The BFD environment to update"
         required: false
         type: string
-        default: mgmt
       branch:
         description: >-
           Override the branch on which the build is based.
@@ -62,17 +60,21 @@ defaults:
   run:
     shell: bash
 env:
+  BFD_TFWS: "default"
+  DFLT_REGION: "us-east-1"
   # AWS Code Artifact Repository
   CA_REPOSITORY: bfd-mgmt
   CA_DOMAIN: bfd-mgmt
-  AWS_REGION: ${{ inputs.aws-region }}
-  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfd-env }}/gha/ci-ops-infra"
+  AWS_REGION: ${{ inputs.aws-region || env.DFLT_REGION }}
+  DEFAULT_ENVPATH: "mgmt"
+  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfd-env || env.DEFAULT_ENVPATH }}/gha/ci-ops-infra"
   DEFAULT_LOG_STREAM: "deploy-terraservice_${{ github.run_number }}"
   # workflow file matchers - workflow jobs will only run if matching files are found
   # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
   # are using this workflow logic ... that has been duplicated from ci-java.yml
   workflow_files_re: "(\
   ^ops/terraform/env/mgmt/|\
+  ^.github/actions/deploy-terraservice/|\
   ^.github/workflows/ci-ops-infra.yml)"
 
 jobs:
@@ -113,45 +115,55 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set environment variables
+        id: set-env-vars
         run: |
+          # set BFD_RELEASE
           release_version="${{ steps.determine-latest-release.outputs.release }}"
           if [[ -z $release_version ]]; then
-            echo "Release version unspecified or unable to be determined"
-            echo 1
+            echo "ERROR: Release version unspecified or unable to be determined" && exit 1;
           fi
-
           echo "BFD_RELEASE=$release_version" >> $GITHUB_ENV
+          # set BFD_TFWS
+          bfd_env_tfws="${{ inputs.bfd-env || env.DEFAULT_ENVPATH }}"
+          if [[ "$bfd_env_tfws" == "mgmt" ]]; then
+            bfd_env_tfws="default"
+          fi
+          echo "BFD_TFWS=${bfd_env_tfws}" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
+        id: config-aws-creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-ops-infra
-          aws-region: ${{ inputs.aws-region }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Mask sensitive AWS data
+        id: mask-sensitive-aws-data
         run: |
           caller_id="$(aws sts get-caller-identity)"
-          account_num="$(jq -r '.Account' <<<$caller_id)"
-          role_arn="$(jq -r '.Arn' <<<$caller_id)"
-          user_id="$(jq -r '.UserId' <<<$caller_id)"
+          account_num="$(jq -r '.Account' <<<${caller_id})"
+          role_arn="$(jq -r '.Arn' <<<${caller_id})"
+          user_id="$(jq -r '.UserId' <<<${caller_id})"
 
           echo "::add-mask::$account_num"
           echo "::add-mask::$role_arn"
           echo "::add-mask::$user_id"
 
       - name: Deploy OPS Mgmt Base Config
+        id: deploy-ops-mgmt-base-config
         uses: ./.github/actions/deploy-terraservice
         with:
-          bfd-env: ${{ inputs.bfd-env }}
+          bfd-env: ${{ env.BFD_TFWS }}
           service-path: ops/terraform/env/mgmt/base_config
           cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
           cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
 
       - name: Deploy OPS Mgmt Service Config
+        id: deploy-ops-mgmt
         uses: ./.github/actions/deploy-terraservice
         with:
-          bfd-env: ${{ inputs.bfd-env }}
+          bfd-env: ${{ env.BFD_TFWS }}
           service-path: ops/terraform/env/mgmt
           cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
           cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
