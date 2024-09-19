@@ -33,9 +33,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "ssm:GetParametersByPath",
             "ssm:GetParameter"
           ]
-          Resource = [
-            "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/*"
-          ]
+          Resource = "*"
         },
         {
           Sid    = "AllowDescribeVpcAttributes"
