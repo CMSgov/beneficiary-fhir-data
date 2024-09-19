@@ -58,6 +58,14 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "kms:List*"
           ]
           Resource = concat(local.all_kms_config_key_arns, local.all_kms_data_key_arns)
+        },
+        {
+          Sid    = "AllowListOfAllKeys"
+          Effect = "Allow"
+          Action = [
+            "kms:List*"
+          ]
+          Resource = "*"
         }
       ]
       Version = "2012-10-17"
