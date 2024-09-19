@@ -20,6 +20,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "ec2:DescribeRouteTables",
             "ec2:DescribeVpcs",
             "ec2:GetEbsEncryptionByDefault",
+            "ec2:GetEbsDefaultKmsKeyId",
             "ec2:GetManagedPrefixListEntries",
             "route53:ListHostedZones",
             "s3:ListAllMyBuckets",
@@ -119,9 +120,26 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Effect = "Allow"
           Action = [
             "quicksight:Get*",
-            "quicksight:Describe*"
+            "quicksight:Describe*",
+            "quicksight:List*"
           ]
           Resource = "*"
+        },
+        {
+          Sid    = "AllowGetRootHostedZone"
+          Effect = "Allow"
+          Action = [
+            "route53:GetHostedZone"
+          ]
+          Resource = aws_route53_zone.zones["root"].arn
+        },
+        {
+          Sid    = "AllowListingRoute53ResourceRecordSets"
+          Effect = "Allow"
+          Action = [
+            "route53:ListResourceRecordSets"
+          ]
+          Resource = "arn:aws:route53:::hostedzone/*"
         }
       ]
       Version = "2012-10-17"
