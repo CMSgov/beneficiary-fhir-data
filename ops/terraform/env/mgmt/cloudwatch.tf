@@ -90,8 +90,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Effect = "Allow"
           Action = [
             "iam:Get*",
-            "iam:List*",
-            "iam:Describe*"
+            "iam:List*"
           ]
           Resource = "*"
         },
