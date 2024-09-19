@@ -19,8 +19,11 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "ec2:DescribeManagedPrefixLists",
             "ec2:DescribeRouteTables",
             "ec2:DescribeVpcs",
+            "ec2:GetEbsEncryptionByDefault",
+            "ec2:GetManagedPrefixListEntries",
             "route53:ListHostedZones",
             "s3:ListAllMyBuckets",
+            "s3:Get*",
             "sts:GetCallerIdentity"
           ]
           Resource = "*"
@@ -50,10 +53,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "kms:Encrypt",
             "kms:Decrypt",
             "kms:ReEncrypt*",
-            "kms:GenerateDataKey*",
-            "kms:DescribeKey",
-            "kms:GetKey*",
-            "kms:List*"
+            "kms:GenerateDataKey*"
           ]
           Resource = concat(local.all_kms_config_key_arns, local.all_kms_data_key_arns)
         },
@@ -61,7 +61,65 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Sid    = "AllowListOfAllKeys"
           Effect = "Allow"
           Action = [
+            "kms:Describe*",
+            "kms:GetKey*",
             "kms:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowSNS"
+          Effect = "Allow"
+          Action = [
+            "sns:Get*",
+            "sns:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowLogMetrics"
+          Effect = "Allow"
+          Action = [
+            "logs:Describe*",
+            "logs:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowIam"
+          Effect = "Allow"
+          Action = [
+            "iam:Get*",
+            "iam:List*",
+            "iam:Describe*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowCodeArtifact"
+          Effect = "Allow"
+          Action = [
+            "codeartifact:Describe*",
+            "codeartifact:Get*",
+            "codeartifact:List*",
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowDynamo"
+          Effect = "Allow"
+          Action = [
+            "dynamodb:Describe*",
+            "dynamodb:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowQuicksignt"
+          Effect = "Allow"
+          Action = [
+            "quicksight:Get*",
+            "quicksight:Describe*"
           ]
           Resource = "*"
         }
