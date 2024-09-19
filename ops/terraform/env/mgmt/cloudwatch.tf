@@ -31,7 +31,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Action = [
             "ssm:Describe*",
             "ssm:GetParametersByPath",
-            "ssm:GetParameter"
+            "ssm:GetParameter",
+            "ssm:List*"
           ]
           Resource = "*"
         },
