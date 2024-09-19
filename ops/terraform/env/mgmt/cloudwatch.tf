@@ -26,9 +26,10 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Resource = "*"
         },
         {
-          Sid    = "AllowGetParams"
+          Sid    = "AllowSsmAccess"
           Effect = "Allow"
           Action = [
+            "ssm:Describe*",
             "ssm:GetParametersByPath",
             "ssm:GetParameter"
           ]
