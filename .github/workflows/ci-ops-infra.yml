@@ -1,5 +1,8 @@
 name: "CI - Update OPS Infrastructure"
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
