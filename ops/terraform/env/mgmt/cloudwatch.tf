@@ -13,7 +13,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
     {
       Statement = [
         {
-          Sid    = "AllowUnconditionalDescribeActions"
+          Sid    = "AllowUnconditionalDescribeGetListActions"
           Effect = "Allow"
           Action = [
             "ec2:DescribeManagedPrefixLists",
@@ -22,8 +22,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "ec2:GetEbsEncryptionByDefault",
             "ec2:GetEbsDefaultKmsKeyId",
             "ec2:GetManagedPrefixListEntries",
-            "route53:ListHostedZones",
-            "s3:ListAllMyBuckets",
+            "s3:List*",
             "s3:Get*",
             "sts:GetCallerIdentity"
           ]
@@ -116,7 +115,7 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Resource = "*"
         },
         {
-          Sid    = "AllowQuicksignt"
+          Sid    = "AllowQuicksight"
           Effect = "Allow"
           Action = [
             "quicksight:Get*",
@@ -126,20 +125,24 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Resource = "*"
         },
         {
-          Sid    = "AllowGetRootHostedZone"
+          Sid    = "AllowR53"
           Effect = "Allow"
           Action = [
-            "route53:GetHostedZone"
-          ]
-          Resource = aws_route53_zone.zones["root"].arn
-        },
-        {
-          Sid    = "AllowListingRoute53ResourceRecordSets"
-          Effect = "Allow"
-          Action = [
+            "route53:GetHostedZone",
+            "route53:ListHostedZones",
             "route53:ListResourceRecordSets"
           ]
-          Resource = "arn:aws:route53:::hostedzone/*"
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowCloudwatch"
+          Effect = "Allow"
+          Action = [
+            "cloudwatch:Get*",
+            "cloudwatch:Describe*",
+            "cloudwatch:List*"
+          ]
+          Resource = "*"
         }
       ]
       Version = "2012-10-17"
