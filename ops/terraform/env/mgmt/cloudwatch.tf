@@ -63,7 +63,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "kms:ReEncrypt*",
             "kms:GenerateDataKey*",
             "kms:DescribeKey",
-            "kms:GetKey*"
+            "kms:GetKey*",
+            "kms:List*"
           ]
           Resource = concat(local.all_kms_config_key_arns, local.all_kms_data_key_arns)
         }
