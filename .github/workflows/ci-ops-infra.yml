@@ -4,6 +4,10 @@ on:
     branches:
       - master
       - BFD-3384
+    paths:
+      - '.github/**'
+      - 'ops/terraform/**'
+
   workflow_dispatch:
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
