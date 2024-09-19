@@ -26,21 +26,11 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Resource = "*"
         },
         {
-          Sid    = "AllowGetHostedZoneParams"
-          Effect = "Allow"
-          Action = [
-            "ssm:GetParameter"
-          ]
-          Resource = [
-            "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain",
-            "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/mgmt/common/sensitive/r53_hosted_zone_root_is_private"
-          ]
-        },
-        {
           Sid    = "AllowGetParams"
           Effect = "Allow"
           Action = [
-            "ssm:GetParametersByPath"
+            "ssm:GetParametersByPath",
+            "ssm:GetParameter"
           ]
           Resource = [
             "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/*"
