@@ -109,7 +109,7 @@ public class ClaimResponseE2E extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         .statusCode(200)
-        .body("entry.size()", equalTo(1))
+        .body("entry.size()", equalTo(2))
         .when()
         .get(requestString);
   }
