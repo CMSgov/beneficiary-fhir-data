@@ -1,58 +1,10 @@
 name: "CI - Update OPS Infrastructure"
 on:
-  # Unfortunately, there is no way to reduce duplication between inputs. They must be specified
-  # seperately for each trigger
-  merge_group:
-  workflow_call:
-    inputs:
-      aws-region:
-        description: >-
-          Override the AWS Region destination, Default to `us-east-1`.
-        default: us-east-1
-        type: string
-        required: true
-      bfd-env:
-        description: "The BFD environment to update"
-        required: false
-        type: string
-      cw-log-group-override:
-        description: "Overrides the CloudWatch Log Group target for Terraform logs; must exist"
-        required: false
-        type: string
-      cw-log-stream-override:
-        description: "Overrides the the CloudWatch Log Stream target for Terraform logs; created if necessary"
-        required: false
-        type: string
+  push:
+    branches:
+      - master
+      - BFD-3384
   workflow_dispatch:
-    inputs:
-      aws-region:
-        description: >-
-          Override the AWS Region destination, Default to `us-east-1`.
-        default: us-east-1
-        type: choice
-        options:
-          - us-east-1
-          - us-west-2
-        required: true
-      bfd-env:
-        description: "The BFD environment to update"
-        required: false
-        type: string
-      branch:
-        description: >-
-          Override the branch on which the build is based.
-          Default to selected reference in the `Use workflow from` drop-down when empty.
-        required: false
-      cw-log-group-override:
-        description: "Overrides the CloudWatch Log Group to submit Terraform logs to; must exist"
-        required: false
-        type: string
-      cw-log-stream-override:
-        description: >-
-          Overrides the the CloudWatch Log Stream to submit Terraform logs to; will be created if
-          necessary
-        required: false
-        type: string
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
@@ -60,83 +12,26 @@ defaults:
   run:
     shell: bash
 env:
-  BFD_TFWS: "default"
-  DFLT_REGION: "us-east-1"
-  # AWS Code Artifact Repository
-  CA_REPOSITORY: bfd-mgmt
-  CA_DOMAIN: bfd-mgmt
-  AWS_REGION: ${{ inputs.aws-region || env.DFLT_REGION }}
-  DEFAULT_ENVPATH: "mgmt"
-  DEFAULT_LOG_GROUP: "/bfd/${{ inputs.bfd-env || env.DEFAULT_ENVPATH }}/gha/ci-ops-infra"
+  DEFAULT_LOG_GROUP: "/bfd/mgmt/gha/ci-ops-infra"
   DEFAULT_LOG_STREAM: "deploy-terraservice_${{ github.run_number }}"
-  # workflow file matchers - workflow jobs will only run if matching files are found
-  # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
-  # are using this workflow logic ... that has been duplicated from ci-java.yml
-  workflow_files_re: "(\
-  ^ops/terraform/env/mgmt/|\
-  ^.github/actions/deploy-terraservice/|\
-  ^.github/workflows/ci-ops-infra.yml)"
 
 jobs:
-  workflow:
-    name: Checking workflow
-    runs-on: ubuntu-latest
-    ## ubuntu-20.04 used previously
-    outputs:
-      files: ${{ steps.workflow_files.outputs.files }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      - id: workflow_files
-        name: Set output
-        run: |
-          echo "files<<EOF" >> $GITHUB_OUTPUT
-          echo "$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -E '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
   update-mgmt-infra:
     runs-on: ubuntu-latest
-    needs: workflow
-    if: needs.workflow.outputs.files
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.branch || github.ref_name }}
-
-      - name: Determine latest release version
-        id: determine-latest-release
-        uses: pozetroninc/github-action-get-latest-release@v0.8.0
-        with:
-          repository: ${{ github.repository }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set environment variables
-        id: set-env-vars
-        run: |
-          # set BFD_RELEASE
-          release_version="${{ steps.determine-latest-release.outputs.release }}"
-          if [[ -z $release_version ]]; then
-            echo "ERROR: Release version unspecified or unable to be determined" && exit 1;
-          fi
-          echo "BFD_RELEASE=$release_version" >> $GITHUB_ENV
-          # set BFD_TFWS
-          bfd_env_tfws="${{ inputs.bfd-env || env.DEFAULT_ENVPATH }}"
-          if [[ "$bfd_env_tfws" == "mgmt" ]]; then
-            bfd_env_tfws="default"
-          fi
-          echo "BFD_TFWS=${bfd_env_tfws}" >> $GITHUB_ENV
+          ref: ${{ github.ref_name }}
 
       - name: Configure AWS credentials
         id: config-aws-creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: ci-ops-infra
-          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: ci-deploy-mgmt
+          aws-region: us-east-1
 
       - name: Mask sensitive AWS data
         id: mask-sensitive-aws-data
@@ -150,22 +45,20 @@ jobs:
           echo "::add-mask::$role_arn"
           echo "::add-mask::$user_id"
 
-      - name: Deploy OPS Mgmt Base Config
-        id: deploy-ops-mgmt-base-config
+      - name: Deploy mgmt base_config
+        id: ci-deploy-mgmt-base-config
         uses: ./.github/actions/deploy-terraservice
         with:
-          bfd-env: ${{ env.BFD_TFWS }}
+          bfd-env: default
           service-path: ops/terraform/env/mgmt/base_config
-          cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
-          cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
+          cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
+          cw-log-stream: ${{ env.DEFAULT_LOG_STREAM }}
 
-      - name: Deploy OPS Mgmt Service Config
-        id: deploy-ops-mgmt
+      - name: Deploy mgmt
+        id: ci-deploy-mgmt
         uses: ./.github/actions/deploy-terraservice
         with:
-          bfd-env: ${{ env.BFD_TFWS }}
+          bfd-env: default
           service-path: ops/terraform/env/mgmt
-          cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
-          cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
-  
-  
+          cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
+          cw-log-stream: ${{ env.DEFAULT_LOG_STREAM }}
