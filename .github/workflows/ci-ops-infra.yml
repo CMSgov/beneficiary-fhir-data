@@ -5,8 +5,9 @@ on:
       - master
       - BFD-3384
     paths:
-      - '.github/**'
-      - 'ops/terraform/**'
+      - '.github/workflows/ci-ops-infra.yml'
+      - '.github/actions/deploy-terraservice/**'
+      - 'ops/terraform/env/mgmt/**'
 
   workflow_dispatch:
 permissions:
