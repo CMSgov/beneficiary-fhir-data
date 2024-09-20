@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - BFD-3384
     paths:
       - '.github/workflows/ci-ops-infra.yml'
       - '.github/actions/deploy-terraservice/**'
