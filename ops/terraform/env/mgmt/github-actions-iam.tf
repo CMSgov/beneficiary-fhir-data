@@ -337,7 +337,7 @@ resource "aws_iam_policy" "github_actions_static_site" {
 # TODO: BFD-3647 for fine-grained adjustment of policy
 resource "aws_iam_policy" "github_actions_ci_ops" {
   name        = "bfd-${local.env}-ci-ops-infra"
-  description = "Grants permissions necessary to allow CI/CD Pipeline for MGMT baseline config"
+  description = "Grants permissions necessary to allow CI/CD PIpeline for MGMT baseline config"
   path        = "/"
   policy = jsonencode(
     {
