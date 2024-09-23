@@ -8,7 +8,10 @@ import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import gov.cms.bfd.server.war.adapters.SupportingInfoComponent;
 import org.hl7.fhir.r4.model.Claim;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Adapter creating R4 FHIR components and other objects from a {@link Claim}. */
 public class ClaimAdapter implements FhirResource {
@@ -24,7 +27,12 @@ public class ClaimAdapter implements FhirResource {
   public ClaimAdapter(Claim claim) {
     this.claim = claim;
   }
-
+  /** {@inheritDoc} */
+  public List<SupportingInfoComponent> getSupportingInfo() {
+    return claim.getSupportingInfo().stream()
+            .map(ClaimAdapter.SupportingInfoAdapter::new)
+            .collect(Collectors.toList());
+  }
   /** {@inheritDoc} */
   @Override
   public List<ProcedureComponent> getProcedure() {
@@ -46,7 +54,28 @@ public class ClaimAdapter implements FhirResource {
   public List<ItemComponent> getItem() {
     return claim.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
   }
+  /** Adapter for creating R4 FHIR supporting info components. */
+  public static class SupportingInfoAdapter implements SupportingInfoComponent {
 
+    /** The eob's supporting information component. */
+    private final Claim.SupportingInformationComponent supportingInfoComponent;
+
+    /**
+     * Instantiates a new SupportingInfo component adapter.
+     *
+     * @param supportingInfoComponent the supporting info component
+     */
+    public SupportingInfoAdapter(
+            Claim.SupportingInformationComponent supportingInfoComponent) {
+      this.supportingInfoComponent = supportingInfoComponent;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public CodeableConcept getSupportingInfoCodeableConcept() {
+      return new CodeableConceptAdapter(supportingInfoComponent.getCode());
+    }
+  }
   /** Adapter for creating R4 FHIR procedure components. */
   public static class ProcedureComponentAdapter implements ProcedureComponent {
 

@@ -76,7 +76,8 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
 
     return containsSamhsaIcdProcedureCode(adapter.getProcedure())
         || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
-        || containsSamhsaLineItem(adapter.getItem());
+        || containsSamhsaLineItem(adapter.getItem())
+        || containsSamhsaSupportingInfo(adapter.getSupportingInfo());
   }
 
   /** Additional valid coding system URL for backwards-compatibility. */
