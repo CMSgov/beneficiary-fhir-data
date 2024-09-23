@@ -118,7 +118,7 @@ cffi==1.16.0 \
     # via
     #   cryptography
     #   pynacl
-cryptography==42.0.4 \
+cryptography==43.0.1 \
     --hash=sha256:01911714117642a3f1792c7f376db572aadadbafcd8d75bb527166009c9f1d1b \
     --hash=sha256:0e89f7b84f421c56e7ff69f11c441ebda73b8a8e6488d322ef71746224c20fce \
     --hash=sha256:12d341bd42cdb7d4937b0cabbdf2a94f949413ac4504904d0cdbdce4a22cbf88 \
@@ -248,7 +248,7 @@ typing-extensions==4.9.0 \
     # via
     #   aws-lambda-powertools
     #   pydantic
-urllib3==2.0.7 \
+urllib3==2.2.2 \
     --hash=sha256:c97dfde1f7bd43a71c8d2a58e369e9b2bf692d1334ea9f9cae55add7d0dd0f84 \
     --hash=sha256:fdb6d215c776278489906c2f8916e6e7d4f5a9b602ccbcfdf7f016fc8da0596e
     # via botocore
