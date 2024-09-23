@@ -172,7 +172,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/new_relic/app_name: BFD Pipeline (${env})
-/bfd/${env}/pipeline/nonsensitive/rda/cleanup/enabled: "true"
+/bfd/${env}/pipeline/nonsensitive/rda/cleanup/enabled: "false"
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: "150000"
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: "15000"
 /bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
