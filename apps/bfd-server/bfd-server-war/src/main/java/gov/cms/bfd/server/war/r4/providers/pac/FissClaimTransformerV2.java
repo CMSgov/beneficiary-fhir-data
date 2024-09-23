@@ -421,7 +421,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
                   codings.add(
                       new Coding(
-                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
+                          TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
                           revenueLine.getHcpcCd(),
                           null));
                   productOrService.setCoding(codings);
