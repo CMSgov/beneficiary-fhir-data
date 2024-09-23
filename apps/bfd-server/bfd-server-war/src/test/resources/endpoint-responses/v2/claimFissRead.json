@@ -182,24 +182,29 @@
       }
     },
     {
-      "category" : {
-        "coding" : [ {
-          "code" : "admtype",
-          "display" : "Information",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-        }, {
-          "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
-          "display" : "Claim Inpatient Admission Type Code",
-          "system" : "https://bluebutton.cms.gov/resources/codesystem/information"
-        } ]
+      "category": {
+        "coding": [
+          {
+            "code": "admtype",
+            "display": "Information",
+            "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          },
+          {
+            "code": "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+            "display": "Claim Inpatient Admission Type Code",
+            "system": "https://bluebutton.cms.gov/resources/codesystem/information"
+          }
+        ]
       },
-      "code" : {
-        "coding" : [ {
-          "code" : "3",
-          "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-        } ]
+      "code": {
+        "coding": [
+          {
+            "code": "3",
+            "system": "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
+          }
+        ]
       },
-      "sequence" : 3
+      "sequence": 3
     }
   ],
   "diagnosis": [
@@ -378,7 +383,7 @@
         ],
         "coding": [
           {
-            "system": "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",
+            "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
             "code": "12345"
           }
         ]
@@ -428,21 +433,25 @@
     },
     {
       "sequence": 2,
-      "detail" : [ {
-        "productOrService" : {
-          "coding" : [ {
-            "code" : "00777310502",
-            "system" : "http://hl7.org/fhir/sid/ndc"
-          } ]
-        },
-        "quantity" : {
-          "code" : "mL",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "ML",
-          "value" : 1.5
-        },
-        "sequence" : 1
-      } ]
+      "detail": [
+        {
+          "productOrService": {
+            "coding": [
+              {
+                "code": "00777310502",
+                "system": "http://hl7.org/fhir/sid/ndc"
+              }
+            ]
+          },
+          "quantity": {
+            "code": "mL",
+            "system": "http://unitsofmeasure.org",
+            "unit": "ML",
+            "value": 1.5
+          },
+          "sequence": 1
+        }
+      ]
     }
   ],
   "total": {
