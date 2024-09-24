@@ -46,7 +46,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
   /** Represents a code that will match a CPT samhsa matcher. */
   private static final String CPT_SAMHSA_CODE = "H0005";
 
-  /** Represents a code that will match a DRG_CD smahsa matcher. */
+  /** Represents a code that will match a DRG_CD samhsa matcher. */
   private static final String DRG_SAMHSA_CD = "895";
 
   /** A date to use for ICD9 testing. */
