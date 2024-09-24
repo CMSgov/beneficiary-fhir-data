@@ -319,8 +319,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
    * @param expectedResult the expected result
    * @param errorMessagePostFix the error message post fix
    */
-  //  @ParameterizedTest(name = "{index}: {0}")
-  //  @MethodSource
+  @ParameterizedTest(name = "{index}: {0}")
+  @MethodSource
   public void mcsTest(
       String testName,
       List<String> diagCodes,
