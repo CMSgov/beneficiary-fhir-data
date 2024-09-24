@@ -95,7 +95,9 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
   protected boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
-
+    if (codingSystems.isEmpty()) {
+      return false;
+    }
     for (String system : codingSystems) {
       if (!(BACKWARDS_COMPATIBLE_HCPCS_SYSTEM.contains(system)
           || TransformerConstants.CODING_SYSTEM_CARIN_HCPCS.equals(system))) {
