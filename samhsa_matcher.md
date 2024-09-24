@@ -72,7 +72,7 @@ flowchart TD
     id17["Mark NOT SAMHSA if code system is empty"]
     id18["For each code system"]
     id19["Mark NOT SAMHSA if the HCPCS system is not present"]
-    id20["Normalize code (trim whitespace and convert to uppercae)"]
+    id20["Normalize code (trim whitespace and convert to uppercase)"]
     id21["Check normalized HCPCS code against normalized CPT codes"]
 
     id0 --> id1
@@ -134,8 +134,8 @@ flowchart TD
     id25["Mark NOT SAMHSA if code system is empty"]
     id26["For each code system"]
     id27["Mark NOT SAMHSA if the HCPCS system is not present"]
-    id28["Normalize code (trim whitespace and convert to uppercae)"]
-    id29["Check normalized HCPCS code against normalized CPT codes"]
+    id28["Normalize code (trim whitespace and convert to uppercase)"]
+    id29["Check normalized HCPCS code against normalized SAMHSA CPT codes"]
 
     id0 --> id1
     id1 -->|Inpatient, Outpatient, SNF| id2
