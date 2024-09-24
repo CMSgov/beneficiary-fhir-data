@@ -72,7 +72,14 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
   protected boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
-
-    return codingSystems.equals(HCPCS_SYSTEM) || codingSystems.equals(DATA_ABSENT_SYSTEM);
+    if (codingSystems.isEmpty()) {
+      return false;
+    }
+    for (String system : codingSystems) {
+      if (!(HCPCS_SYSTEM.contains(system) || DATA_ABSENT_SYSTEM.contains(system))) {
+        return false;
+      }
+    }
+    return true;
   }
 }
