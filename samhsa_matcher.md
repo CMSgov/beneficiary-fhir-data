@@ -111,7 +111,7 @@ flowchart TD
     id7["Throw error"]
     id8["Check normalized ICD code against normalized SAMHSA procedure codes for the given system."]
 
-    id9["For each supporting info. NOTE: This path is not checked in V1."]
+    id9["For each supporting info: (NOTE: This path is not checked in V1)"]
     id10["Filter out items that don't have the DRG system"]
     id11["Normalize code (follows ICD normalization described above)"]
     id12["Check normalized DRG code against normalized SAMHSA DRG codes"]
