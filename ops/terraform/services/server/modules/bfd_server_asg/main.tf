@@ -38,6 +38,9 @@ locals {
   ]
 
   on_launch_lifecycle_hook_name = "bfd-${local.env}-${var.role}-on-launch"
+  # BFD-2558 codify 600 for instance_refresh.checkpoint_delay multiplier
+  asg_health_check_grace_period       = 600
+  asg_refresh_checkpoint_delay_factor = local.scaling_capacity_step
 
   # Adds the ApplicationName to the JDBC connection indicating that queries are from the server.
   full_jdbc_suffix = "${var.jdbc_suffix}&ApplicationName=bfd-server"
@@ -161,20 +164,18 @@ resource "aws_launch_template" "main" {
 ## Autoscaling group
 #
 resource "aws_autoscaling_group" "main" {
-  ##### Generate a new group on every revision of the launch template.
-  ##### This does a simple version of a blue/green deployment
-  # BFD-2588: reuse ASG instead
-  name             = aws_launch_template.main.name ##  -${aws_launch_template.main.latest_version}"
+  # BFD-2558: conversion to reusing ASG by removing suffix "-${aws_launch_template.main.latest_version}
+  name             = aws_launch_template.main.name
   desired_capacity = var.asg_config.desired
   max_size         = var.asg_config.max
   min_size         = var.asg_config.min
 
   # If an lb is defined, wait for the ELB
   min_elb_capacity = var.lb_config == null ? null : var.asg_config.min
-  # BFD-2588 increase capacity timeout from 20m to 30m
+  # BFD-2558 increase capacity timeout from 20m to 30m
   wait_for_capacity_timeout = var.lb_config == null ? null : "30m"
 
-  health_check_grace_period = 600                                   # Temporary, will be lowered when/if lifecycle hooks are implemented
+  health_check_grace_period = local.asg_health_check_grace_period   # Temporary, will be lowered when/if lifecycle hooks are implemented
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
@@ -214,6 +215,24 @@ resource "aws_autoscaling_group" "main" {
     max_group_prepared_capacity = var.asg_config.max_warm
   }
 
+  # BFD-2558 add refresh strategy based on launch template updates
+  #          necessary now that ASG will be reused
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      checkpoint_delay       = (local.asg_health_check_grace_period * local.scaling_capacity_step)
+      min_healthy_percentage = floor(100 / local.scaling_capacity_step)
+
+      standby_instances            = "Terminate"
+      scale_in_protected_instances = "Refresh"
+      skip_matching                = true
+    }
+    # default refresh triggers:
+    # triggers = ["launch_configuration", "launch_template", "mixed_instances_policy"]
+  }
+  termination_policies = ["OldestLaunchConfiguration"]
+  #
+
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
     content {
@@ -231,7 +250,7 @@ resource "aws_autoscaling_group" "main" {
 
   lifecycle {
     create_before_destroy = true
-    # BFD-2588
+    # BFD-2558
     ignore_changes = [desired_capacity, min_size, max_size]
   }
 }
