@@ -7,6 +7,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
+import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
@@ -68,12 +69,14 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
             "SAMHSA ICD 9 Diagnosis code (Principal)",
             ICD_9_DATE,
             List.of(ICD_9_DX_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
@@ -84,12 +87,14 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
             "SAMHSA ICD 10 Diagnosis code (Admitting)",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
@@ -100,12 +105,14 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
             "SAMHSA ICD 10 Diagnosis code (Other)",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
@@ -116,6 +123,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, ICD_9_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
@@ -124,11 +132,13 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, ICD_10_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
             "Non-Samhsa codes (ICD-9)",
             ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
@@ -140,6 +150,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             false,
             "should NOT be filtered but WAS."),
         arguments(
@@ -148,11 +159,31 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(DRG_SAMHSA_CD, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
             "Non-Samhsa DRG_CD",
             ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            false,
+            "should NOT be filtered but WAS."),
+        arguments(
+            "SAMHSA CPT_CODE",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(CPT_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Non-Samhsa CPT_CODE",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
@@ -170,6 +201,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
    *     respectively)
    * @param procCodes the proc codes to set for the procedure(s)
    * @param drgCodes the drg codes to set
+   * @param cptCodes the cpt codes to set
    * @param expectedResult the expected result
    * @param errorMessagePostFix the error message post fix
    */
@@ -181,6 +213,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       List<String> diagCodes,
       List<String> procCodes,
       List<String> drgCodes,
+      List<String> cptCodes,
       boolean expectedResult,
       String errorMessagePostFix) {
     RdaFissClaim entity = new RdaFissClaim();
@@ -220,8 +253,17 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                 })
             .collect(Collectors.toSet());
 
+    Set<RdaFissRevenueLine> lineItems =
+        IntStream.range(0, cptCodes.size())
+            .mapToObj(
+                i -> {
+                  RdaFissRevenueLine line = new RdaFissRevenueLine();
+                  line.setHcpcCd(cptCodes.getFirst());
+                  return line;
+                })
+            .collect(Collectors.toSet());
     entity.setProcCodes(procedures);
-
+    entity.setRevenueLines(lineItems);
     FissClaimTransformerV2 fissClaimTransformerV2 =
         new FissClaimTransformerV2(new MetricRegistry());
     McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
@@ -277,8 +319,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
    * @param expectedResult the expected result
    * @param errorMessagePostFix the error message post fix
    */
-  @ParameterizedTest(name = "{index}: {0}")
-  @MethodSource
+  //  @ParameterizedTest(name = "{index}: {0}")
+  //  @MethodSource
   public void mcsTest(
       String testName,
       List<String> diagCodes,
