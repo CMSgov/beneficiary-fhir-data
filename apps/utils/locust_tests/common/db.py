@@ -247,112 +247,6 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
     return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
-def get_pac_hashed_mbis(uri: str) -> List:
-    """
-    Return a list of unique hashed MBIs that represent a diverse set of FISS and MCS
-    claims over a range of claim statuses.
-
-    We anticipate that fields will have a mixture of blank vs non-blank values based on the status codes received.
-
-    By selecting MBIs that are related to claims with varying status codes, we can get a good mixture of claim data
-    elements, better testing our FHIR transformers' ability to correctly render them.
-    """
-    per_status_max = int(LIMIT / 40)  # Based on ~40 distinct status values between FISS/MCS
-
-    sub_select_day_age = 30
-
-    """
-    selects FISS records only from the last N days
-    """
-    fiss_sub_query = (
-        "select * from rda.fiss_claims where last_updated > current_date - interval"
-        f" '{sub_select_day_age}' day and mbi_id is not null "
-    )
-
-    """
-    Selects FISS rows partitioned by status
-    """
-    fiss_partition_sub_query = (
-        "select fiss.*, ROW_NUMBER() "
-        "   over (partition by fiss.curr_status order by fiss.last_updated desc) "
-        f"from ({fiss_sub_query}) as fiss "
-    )
-
-    """
-    Selects the mbi ids from N of each FISS status
-    """
-    fiss_mbi_sub_query = (
-        "select fiss_partition.mbi_id "
-        f"from ({fiss_partition_sub_query}) fiss_partition "
-        f"where fiss_partition.row_number <= {per_status_max} "
-    )
-
-    """
-    selects MCS records only from the last N days
-    """
-    mcs_sub_query = (
-        "select * from rda.mcs_claims where last_updated > current_date - interval"
-        f" '{sub_select_day_age}' day and mbi_id is not null "
-    )
-
-    """
-    Selects MCS rows partitioned by status
-    """
-    mcs_partition_sub_query = (
-        "select mcs.*, ROW_NUMBER() "
-        "   over (partition by mcs.idr_status_code order by mcs.last_updated desc) "
-        f"from ({mcs_sub_query}) as mcs "
-    )
-
-    """
-    Selects the mbi ids from N of each MCS status
-    """
-    mcs_mbi_sub_query = (
-        "select mcs_partition.mbi_id "
-        f"from ({mcs_partition_sub_query}) mcs_partition "
-        f"where mcs_partition.row_number <= {per_status_max} "
-    )
-
-    """
-    Selects the distinct mbis from both fiss and mcs subqueries
-    """
-    distinct_type_status_mbis = (
-        "select distinct type_status.mbi_id "
-        f"from ({fiss_mbi_sub_query} union {mcs_mbi_sub_query}) as type_status "
-    )
-
-    mbi_query = (
-        # Get up to N distinct MBI hashes
-        "select mbi.hash "
-        "from ( "
-        # Subquery sorts by source to weight 'filler' MBIs last
-        "	select union_select.mbi_id "
-        "	from ( "
-        # Select up to N of the newest claims for each distinct FISS and MCS status value
-        "		select src.mbi_id, 1 as source_order "
-        f"		from ({distinct_type_status_mbis}) src "
-        "		union "
-        # Select whatever MBIs as filler
-        "		select distinct mbi.mbi_id, 2 as source_order "
-        "		from ( "
-        "           select recent_mbis.* "
-        "           from rda.mbi_cache as recent_mbis "
-        f"		    where recent_mbis.mbi_id not in ({distinct_type_status_mbis}) "
-        "           order by recent_mbis.last_updated desc "
-        "       ) as mbi "
-        f"		limit {LIMIT} "
-        "	) as union_select "
-        "	order by union_select.source_order "
-        ") sources "
-        "left join rda.mbi_cache as mbi on mbi.mbi_id = sources.mbi_id "
-        f"limit {LIMIT}"
-    )
-
-    # intentionally reversing the query results, as the important mbis to test
-    # will be at the beginning of the result set and BFDUserBase will pop items
-    # off of the end of the list
-    return [str(r[0]) for r in reversed(_execute(uri, mbi_query))]
-
 
 def get_pac_mbis(uri: str) -> List:
     """
@@ -459,20 +353,6 @@ def get_pac_mbis(uri: str) -> List:
     # will be at the beginning of the result set and BFDUserBase will pop items
     # off of the end of the list
     return [str(r[0]) for r in reversed(_execute(uri, mbi_query))]
-
-
-def get_pac_hashed_mbis_smoketest(uri: str) -> list[str]:
-    """Gets the top LIMIT MBI hashes from the rda table's MBI cache for use with the PACA smoketests
-
-    Args:
-        uri (str): The database connection string
-
-    Returns:
-        list[str]: A list of MBI hashes
-    """
-    smoketest_mbi_query = f"select hash from rda.mbi_cache limit {LIMIT}"
-
-    return [str(r[0]) for r in _execute(uri, smoketest_mbi_query)]
 
 
 def get_pac_mbis_smoketest(uri: str) -> list[str]:

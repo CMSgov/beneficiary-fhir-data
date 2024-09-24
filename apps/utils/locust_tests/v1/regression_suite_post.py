@@ -133,6 +133,22 @@ class RegressionV1User(BFDUserBase):
             name="/v1/fhir/ExplanationOfBenefit/_search search by id",
         )
 
+    @tag("patient", "patient_test_coverage_contract")
+    @task
+    def patient_test_coverage_contract(self):
+        """Patient search by coverage contract (all pages)"""
+        contract = next(self.contract_data)
+        self.run_task_by_parameters(
+            base_path="/v1/fhir/Patient/_search",
+            body={
+                "_id": next(self.bene_ids),
+                "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                "_count": "25",
+            },
+            name="/v1/fhir/Patient search by coverage contract (all pages)"
+        )
+
     @tag("patient", "patient_test_mbi")
     @task
     def patient_test_mbi(self):
@@ -158,4 +174,16 @@ class RegressionV1User(BFDUserBase):
                 "_IncludeTaxNumbers": "true",
             },
             name="/v1/fhir/Patient/_search search by id / includeTaxNumbers / mbi",
+        )
+
+    @tag("patient", "patient_test_id")
+    @task
+    def patient_test_id(self):
+        """Patient search by ID"""
+        self.run_task_by_parameters(
+            base_path="/v1/fhir/Patient/_search",
+            body={
+                "_id": next(self.bene_ids),
+            },
+            name="/v1/fhir/Patient/id"
         )
