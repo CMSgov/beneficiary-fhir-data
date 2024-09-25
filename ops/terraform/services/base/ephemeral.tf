@@ -13,6 +13,8 @@ locals {
     "/bfd/${local.env}/common/nonsensitive/rds_instance_class"              = "/bfd/${local.seed_env}/common/nonsensitive/rds_instance_class"
     "/bfd/${local.env}/common/nonsensitive/vpc_name"                        = "/bfd/${local.seed_env}/common/nonsensitive/vpc_name"
     "/bfd/${local.env}/common/nonsensitive/vpn_security_group"              = "/bfd/${local.seed_env}/common/nonsensitive/vpn_security_group"
+    "/bfd/${local.env}/common/sensitive/new_relic/agent/license_key"        = "/bfd/${local.seed_env}/common/sensitive/new_relic/agent/license_key"
+    "/bfd/${local.env}/common/sensitive/new_relic/metrics/insights_key"     = "/bfd/${local.seed_env}/common/sensitive/new_relic/metrics/insights_key"
   } : {}
 
   # Targeted MIGRATOR hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
@@ -80,11 +82,9 @@ locals {
     "/bfd/${local.env}/server/nonsensitive/launch_template_instance_type"  = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_instance_type"
     "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb" = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
     "/bfd/${local.env}/server/sensitive/server_keystore_base64"            = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
-    "/bfd/${local.env}/server/sensitive/data_server_appserver_https_port"  = "/bfd/${local.seed_env}/server/sensitive/data_server_appserver_https_port"
-    "/bfd/${local.env}/server/sensitive/data_server_db_password"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_password"
-    "/bfd/${local.env}/server/sensitive/data_server_db_username"           = "/bfd/${local.seed_env}/server/sensitive/data_server_db_username"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_license_key" = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_license_key"
-    "/bfd/${local.env}/server/sensitive/data_server_new_relic_metric_key"  = "/bfd/${local.seed_env}/server/sensitive/data_server_new_relic_metric_key"
+    "/bfd/${local.env}/server/sensitive/service_port"                      = "/bfd/${local.seed_env}/server/sensitive/service_port"
+    "/bfd/${local.env}/server/sensitive/db/username"                       = "/bfd/${local.seed_env}/server/sensitive/db/username"
+    "/bfd/${local.env}/server/sensitive/db/password"                       = "/bfd/${local.seed_env}/server/sensitive/db/password"
     "/bfd/${local.env}/server/sensitive/test_client_cert"                  = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
     "/bfd/${local.env}/server/sensitive/test_client_key"                   = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
   }, local.seed_env_certs[local.seed_env]) : {}
