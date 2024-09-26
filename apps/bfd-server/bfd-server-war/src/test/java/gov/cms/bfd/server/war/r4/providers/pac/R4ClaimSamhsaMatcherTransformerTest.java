@@ -260,6 +260,28 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
             true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Samhsa admit diagnosis code and principal code (ICD-9)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            ICD_9_DX_SAMHSA_CODE,
+            ICD_9_DX_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Samhsa admit diagnosis code and principal code (ICD-10)",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            ICD_10_DX_SAMHSA_CODE,
+            ICD_10_DX_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
             "SHOULD be filtered but was NOT."));
   }
 
