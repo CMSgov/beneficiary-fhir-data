@@ -67,6 +67,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 9 Diagnosis code (Admitting)",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -76,6 +78,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 9 Diagnosis code (Principal)",
             ICD_9_DATE,
             List.of(ICD_9_DX_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -85,6 +89,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 9 Diagnosis code (Other)",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -94,6 +100,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 10 Diagnosis code (Admitting)",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -103,6 +111,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 10 Diagnosis code (Principal)",
             ICD_10_DATE,
             List.of(ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -112,6 +122,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 10 Diagnosis code (Other)",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -121,6 +133,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 9 Proc code",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, ICD_9_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -130,6 +144,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 10 Proc code",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, ICD_10_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -139,6 +155,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "Non-Samhsa codes (ICD-9)",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -148,6 +166,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "Non-Samhsa codes (ICD-10)",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -157,6 +177,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA DRG_CD",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             DRG_SAMHSA_CD,
             NON_SAMHSA_CODE,
@@ -166,6 +188,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "Non-Samhsa DRG_CD",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -175,6 +199,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA CPT_CODE",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             CPT_SAMHSA_CODE,
@@ -184,11 +210,57 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "Non-Samhsa CPT_CODE",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
             false,
-            "should NOT be filtered but WAS."));
+            "should NOT be filtered but WAS."),
+        arguments(
+            "Samhsa principal diagnosis code (ICD-9)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            ICD_9_DX_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Samhsa principal diagnosis code (ICD-10)",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            ICD_10_DX_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Samhsa admit diagnosis code (ICD-9)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            ICD_9_DX_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Samhsa admit diagnosis code (ICD-10)",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            ICD_10_DX_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."));
   }
 
   /**
@@ -211,6 +283,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       String testName,
       LocalDate toDate,
       List<String> diagCodes,
+      String principleDiag,
+      String admitDiagCode,
       List<String> procCodes,
       String drgCode,
       String cptCode,
@@ -218,13 +292,10 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       String errorMessagePostFix) {
     RdaFissClaim entity = new RdaFissClaim();
 
-    String principalDxCode = diagCodes.get(0);
-    String admittingDxCode = diagCodes.get(1);
-
     entity.setLastUpdated(Instant.ofEpochMilli(1));
     entity.setStmtCovToDate(toDate);
-    entity.setPrincipleDiag(principalDxCode);
-    entity.setAdmitDiagCode(admittingDxCode);
+    entity.setPrincipleDiag(principleDiag);
+    entity.setAdmitDiagCode(admitDiagCode);
     entity.setDrgCd(drgCode);
     Set<RdaFissDiagnosisCode> diagnoses =
         IntStream.range(0, diagCodes.size())
