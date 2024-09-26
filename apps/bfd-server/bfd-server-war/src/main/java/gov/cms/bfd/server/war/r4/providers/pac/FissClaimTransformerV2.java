@@ -269,13 +269,13 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   private List<Claim.DiagnosisComponent> getDiagnosis(RdaFissClaim claimGroup, boolean isIcd9) {
     final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10_CM;
 
-    Stream<FissDiagnosisV2> diagnosisCodes =
+    Stream<FissDiagnosisAdapterV2> diagnosisCodes =
         ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaFissDiagnosisCode>of())
             .stream()
             .sorted(Comparator.comparing(RdaFissDiagnosisCode::getRdaPosition))
-            .map(FissDiagnosisV2::new);
+            .map(FissDiagnosisAdapterV2::new);
 
-    Stream<FissDiagnosisV2> combinedDiagnosisCodes =
+    Stream<FissDiagnosisAdapterV2> combinedDiagnosisCodes =
         getAllDistinctDiagnosisCodes(claimGroup, diagnosisCodes);
 
     List<Claim.DiagnosisComponent> diagnoses =
@@ -293,16 +293,18 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   }
 
   /**
-   * @param claimGroup
-   * @param diagnosisCodes
-   * @return
+   * Creates a distinct list of all diagnosis codes for the claim.
+   *
+   * @param claimGroup FISS claim.
+   * @param diagnosisCodes List of codes.
+   * @return All diagnosis codes wrapped in adapters.
    */
-  private static Stream<FissDiagnosisV2> getAllDistinctDiagnosisCodes(
-      RdaFissClaim claimGroup, Stream<FissDiagnosisV2> diagnosisCodes) {
-    Stream<FissDiagnosisV2> extraCodes =
+  private static Stream<FissDiagnosisAdapterV2> getAllDistinctDiagnosisCodes(
+      RdaFissClaim claimGroup, Stream<FissDiagnosisAdapterV2> diagnosisCodes) {
+    Stream<FissDiagnosisAdapterV2> extraCodes =
         Stream.of(
-            new FissDiagnosisV2(claimGroup.getAdmitDiagCode()),
-            new FissDiagnosisV2(claimGroup.getPrincipleDiag()));
+            new FissDiagnosisAdapterV2(claimGroup.getAdmitDiagCode()),
+            new FissDiagnosisAdapterV2(claimGroup.getPrincipleDiag()));
 
     // Most of the time, the principal and admit codes should already be included in the list
     // returned by getDiagCodes(),
@@ -312,15 +314,15 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   }
 
   /**
-   * test.
+   * Creates a {@link Claim.DiagnosisComponent} for the claim.
    *
-   * @param diagnosisCode
-   * @param claimGroup
-   * @param icdSystem
-   * @return
+   * @param diagnosisCode Diagnosis code adapter.
+   * @param claimGroup FISS claim.
+   * @param icdSystem ICD system.
+   * @return Diagnosis component.
    */
   private Claim.DiagnosisComponent getDiagnosisComponent(
-      FissDiagnosisV2 diagnosisCode, RdaFissClaim claimGroup, String icdSystem) {
+      FissDiagnosisAdapterV2 diagnosisCode, RdaFissClaim claimGroup, String icdSystem) {
 
     Claim.DiagnosisComponent component;
 
