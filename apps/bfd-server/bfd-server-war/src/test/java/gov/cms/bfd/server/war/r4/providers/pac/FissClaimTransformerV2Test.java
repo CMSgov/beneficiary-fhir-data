@@ -22,7 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class R4FissClaimTransformerTest {
+public class FissClaimTransformerV2Test {
   private static final String DIAG_CODE1 = "DIAG_CODE1";
   private static final String DIAG_CODE2 = "DIAG_CODE2";
   private static final String DIAG_CODE3 = "DIAG_CODE3";
