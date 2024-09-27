@@ -316,38 +316,38 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   /**
    * Creates a {@link Claim.DiagnosisComponent} for the claim.
    *
-   * @param diagnosisCode Diagnosis code adapter.
+   * @param diagnosisCodeAdapter Diagnosis code adapter.
    * @param claimGroup FISS claim.
    * @param icdSystem ICD system.
    * @return Diagnosis component.
    */
   private Claim.DiagnosisComponent getDiagnosisComponent(
-      FissDiagnosisAdapterV2 diagnosisCode, RdaFissClaim claimGroup, String icdSystem) {
+      FissDiagnosisAdapterV2 diagnosisCodeAdapter, RdaFissClaim claimGroup, String icdSystem) {
 
-    Claim.DiagnosisComponent component;
+    String diagnosisCode = diagnosisCodeAdapter.getDiagnosisCode();
+    if (Strings.isBlank(diagnosisCode)) {
+      return null;
+    }
 
-    if (Strings.isNotBlank(diagnosisCode.getDiagnosisCode())) {
-      component =
-          new Claim.DiagnosisComponent()
-              .setDiagnosis(createCodeableConcept(icdSystem, diagnosisCode.getDiagnosisCode()));
+    Claim.DiagnosisComponent component =
+        new Claim.DiagnosisComponent()
+            .setDiagnosis(createCodeableConcept(icdSystem, diagnosisCode));
 
-      if (Strings.isNotBlank(diagnosisCode.getPoaIndicator())) { // Present on Admission
-        component.setOnAdmission(
-            createCodeableConcept(
-                BBCodingSystems.FISS.DIAG_POA_IND, diagnosisCode.getPoaIndicator().toLowerCase()));
-      }
+    if (Strings.isNotBlank(diagnosisCodeAdapter.getPoaIndicator())) { // Present on Admission
+      component.setOnAdmission(
+          createCodeableConcept(
+              BBCodingSystems.FISS.DIAG_POA_IND,
+              diagnosisCodeAdapter.getPoaIndicator().toLowerCase()));
+    }
 
-      if (Strings.isNotBlank(claimGroup.getAdmitDiagCode())
-          && codesAreEqual(claimGroup.getAdmitDiagCode(), diagnosisCode.getDiagnosisCode())) {
-        component.addType(createCodeableConcept(ExDiagnosistype.ADMITTING));
-      }
+    if (Strings.isNotBlank(claimGroup.getAdmitDiagCode())
+        && codesAreEqual(claimGroup.getAdmitDiagCode(), diagnosisCode)) {
+      component.addType(createCodeableConcept(ExDiagnosistype.ADMITTING));
+    }
 
-      if (Strings.isNotBlank(claimGroup.getPrincipleDiag())
-          && codesAreEqual(claimGroup.getPrincipleDiag(), diagnosisCode.getDiagnosisCode())) {
-        component.addType(createCodeableConcept(ExDiagnosistype.PRINCIPAL));
-      }
-    } else {
-      component = null;
+    if (Strings.isNotBlank(claimGroup.getPrincipleDiag())
+        && codesAreEqual(claimGroup.getPrincipleDiag(), diagnosisCode)) {
+      component.addType(createCodeableConcept(ExDiagnosistype.PRINCIPAL));
     }
 
     return component;
@@ -536,16 +536,16 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                   quantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM);
 
                   switch (revenueLine.getNdcQtyQual()) {
-                    case TransformerConstants.CODING_SYSTEM_UCUM_F2 -> quantity.setCode(
-                        TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE);
-                    case TransformerConstants.CODING_SYSTEM_UCUM_GR -> quantity.setCode(
-                        TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE);
-                    case TransformerConstants.CODING_SYSTEM_UCUM_ML -> quantity.setCode(
-                        TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE);
-                    case TransformerConstants.CODING_SYSTEM_UCUM_ME -> quantity.setCode(
-                        TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE);
-                    case TransformerConstants.CODING_SYSTEM_UCUM_UN -> quantity.setCode(
-                        TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_F2 ->
+                        quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_F2_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_GR ->
+                        quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_GR_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_ML ->
+                        quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ML_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_ME ->
+                        quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_ME_CODE);
+                    case TransformerConstants.CODING_SYSTEM_UCUM_UN ->
+                        quantity.setCode(TransformerConstants.CODING_SYSTEM_UCUM_UN_CODE);
                   }
                 }
 
