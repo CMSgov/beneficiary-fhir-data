@@ -190,7 +190,6 @@
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"
 /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
-/bfd/${env}/server/nonsensitive/heathcheck/launch_lifecycle_hook: bfd-prod-fhir-on-launch
 /bfd/${env}/server/nonsensitive/paths/dirs/logs: /usr/local/bfd-server/
 /bfd/${env}/server/nonsensitive/paths/dirs/tmp: /usr/local/bfd-server/tmp
 /bfd/${env}/server/nonsensitive/paths/files/keystore: /usr/local/bfd-server/bluebutton-appserver-keystore.pfx
