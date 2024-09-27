@@ -333,7 +333,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
         new Claim.DiagnosisComponent()
             .setDiagnosis(createCodeableConcept(icdSystem, diagnosisCode));
 
-    if (Strings.isNotBlank(diagnosisCodeAdapter.getPoaIndicator())) { // Present on Admission
+    // Present on Admission
+    if (Strings.isNotBlank(diagnosisCodeAdapter.getPoaIndicator())) {
       component.setOnAdmission(
           createCodeableConcept(
               BBCodingSystems.FISS.DIAG_POA_IND,
