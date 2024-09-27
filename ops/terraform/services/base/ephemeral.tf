@@ -13,8 +13,6 @@ locals {
     "/bfd/${local.env}/common/nonsensitive/rds_instance_class"              = "/bfd/${local.seed_env}/common/nonsensitive/rds_instance_class"
     "/bfd/${local.env}/common/nonsensitive/vpc_name"                        = "/bfd/${local.seed_env}/common/nonsensitive/vpc_name"
     "/bfd/${local.env}/common/nonsensitive/vpn_security_group"              = "/bfd/${local.seed_env}/common/nonsensitive/vpn_security_group"
-    "/bfd/${local.env}/common/sensitive/new_relic/agent/license_key"        = "/bfd/${local.seed_env}/common/sensitive/new_relic/agent/license_key"
-    "/bfd/${local.env}/common/sensitive/new_relic/metrics/insights_key"     = "/bfd/${local.seed_env}/common/sensitive/new_relic/metrics/insights_key"
   } : {}
 
   # Targeted MIGRATOR hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
