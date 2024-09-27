@@ -23,11 +23,22 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+/** FISS claim transformer tests. */
 public class FissClaimTransformerV2Test {
+  /** Test diagnosis code 1. */
   private static final String DIAG_CODE1 = "DIAG_CODE1";
+
+  /** Test diagnosis code 2. */
   private static final String DIAG_CODE2 = "DIAG_CODE2";
+
+  /** Test diagnosis code 3. */
   private static final String DIAG_CODE3 = "DIAG_CODE3";
 
+  /**
+   * Test arguments.
+   *
+   * @return test arguments.
+   */
   public static Stream<Arguments> diagnosisCodeTest() {
     return Stream.of(
         arguments(
@@ -73,7 +84,7 @@ public class FissClaimTransformerV2Test {
   }
 
   /**
-   * Tests that the diagnosis codes are set correctly
+   * Tests that the diagnosis codes are set correctly.
    *
    * @param testName Test name.
    * @param diagCodes Diagnosis codes.
@@ -176,7 +187,7 @@ public class FissClaimTransformerV2Test {
   }
 
   /**
-   * Asserts that the code is set on the component
+   * Asserts that the code is set on the component.
    *
    * @param code Code.
    * @param components Components.

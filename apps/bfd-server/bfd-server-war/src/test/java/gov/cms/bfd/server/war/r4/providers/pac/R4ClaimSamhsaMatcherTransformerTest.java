@@ -293,6 +293,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
    * @param toDate the "to" date to set for the statement date
    * @param diagCodes the diag codes to use for the principal and admitting codes (index 0 and 1
    *     respectively)
+   * @param principalDiagCode the principal diagnosis code
+   * @param admitDiagCode the admit diagnosis code
    * @param procCodes the proc codes to set for the procedure(s)
    * @param drgCode the drg code to set
    * @param cptCode the cpt code to set
@@ -305,7 +307,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       String testName,
       LocalDate toDate,
       List<String> diagCodes,
-      String principleDiag,
+      String principalDiagCode,
       String admitDiagCode,
       List<String> procCodes,
       String drgCode,
@@ -316,7 +318,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setLastUpdated(Instant.ofEpochMilli(1));
     entity.setStmtCovToDate(toDate);
-    entity.setPrincipleDiag(principleDiag);
+    entity.setPrincipleDiag(principalDiagCode);
     entity.setAdmitDiagCode(admitDiagCode);
     entity.setDrgCd(drgCode);
     Set<RdaFissDiagnosisCode> diagnoses =
