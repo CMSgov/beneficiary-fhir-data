@@ -80,7 +80,17 @@ public class FissClaimTransformerV2Test {
             "Null principal diagnosis code", List.of(DIAG_CODE1, DIAG_CODE2), null, DIAG_CODE2, 2),
         arguments(
             "Null admit diagnosis code", List.of(DIAG_CODE1, DIAG_CODE2), DIAG_CODE2, null, 2),
-        arguments("All codes missing", List.of(), null, null, 0));
+        arguments("All codes missing", List.of(), null, null, 0),
+        arguments(
+            "Single null in the list",
+            new ArrayList<String>() {
+              {
+                add(null);
+              }
+            },
+            DIAG_CODE1,
+            DIAG_CODE2,
+            2));
   }
 
   /**
