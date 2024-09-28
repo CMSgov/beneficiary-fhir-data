@@ -13,7 +13,6 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -458,7 +457,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setDiagCodes(diagnoses);
 
-    List<RdaMcsDetail> procedures =
+    Set<RdaMcsDetail> procedures =
         IntStream.range(0, procCodes.size())
             .mapToObj(
                 i -> {
@@ -473,9 +472,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
                   return procCode;
                 })
-            .toList();
+            .collect(Collectors.toSet());
 
-    entity.setDetails(new HashSet<>(procedures));
+    entity.setDetails(procedures);
 
     FissClaimTransformerV2 fissClaimTransformerV2 =
         new FissClaimTransformerV2(new MetricRegistry());
