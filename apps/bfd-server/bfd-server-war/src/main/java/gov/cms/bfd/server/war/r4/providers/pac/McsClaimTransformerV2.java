@@ -207,7 +207,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     if (Strings.isNotBlank(diagnosisAdapter.getDiagnosisCode())) {
       String system;
 
-      if (VALID_ICD_TYPES.contains(diagnosisAdapter.getIcdType())) {
+      if (diagnosisAdapter.getIcdType() != null
+          && VALID_ICD_TYPES.contains(diagnosisAdapter.getIcdType())) {
         system =
             diagnosisAdapter.getIcdType().equals("0")
                 ? IcdCode.CODING_SYSTEM_ICD_10_CM
