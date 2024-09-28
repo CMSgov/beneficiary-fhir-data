@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -170,6 +171,59 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
   }
 
   /**
+   * Return the list of diagnosis codes wrapped in a {@link McsDiagnosisAdapterV2}.
+   *
+   * @param claimGroup claim group
+   * @return diagnosis adapter
+   */
+  private static Stream<McsDiagnosisAdapterV2> getDiagnosisCodes(RdaMcsClaim claimGroup) {
+    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaMcsDiagnosisCode>of())
+        .stream()
+        .sorted(Comparator.comparing(RdaMcsDiagnosisCode::getRdaPosition))
+        .map(McsDiagnosisAdapterV2::new);
+  }
+
+  /**
+   * Return the list of primary diagnosis codes wrapped in a {@link McsDiagnosisAdapterV2}.
+   *
+   * @param claimGroup claim group
+   * @return diagnosis adapter
+   */
+  private static Stream<McsDiagnosisAdapterV2> getPrimaryDiagnosisCodes(RdaMcsClaim claimGroup) {
+    return claimGroup.getDetails().stream()
+        .sorted(Comparator.comparing(RdaMcsDetail::getIdrDtlNumber))
+        .map(McsDiagnosisAdapterV2::new);
+  }
+
+  /**
+   * Map the {@link McsDiagnosisAdapterV2} to a {@link Claim.DiagnosisComponent}.
+   *
+   * @param diagnosisAdapter adapter
+   * @return component
+   */
+  private static Claim.DiagnosisComponent getDiagnosisComponent(
+      McsDiagnosisAdapterV2 diagnosisAdapter) {
+
+    if (Strings.isNotBlank(diagnosisAdapter.getDiagnosisCode())) {
+      String system;
+
+      if (VALID_ICD_TYPES.contains(diagnosisAdapter.getIcdType())) {
+        system =
+            diagnosisAdapter.getIcdType().equals("0")
+                ? IcdCode.CODING_SYSTEM_ICD_10_CM
+                : IcdCode.CODING_SYSTEM_ICD_9;
+      } else {
+        system = null;
+      }
+
+      return new Claim.DiagnosisComponent()
+          .setDiagnosis(createCodeableConcept(system, diagnosisAdapter.getDiagnosisCode()));
+    }
+
+    return null;
+  }
+
+  /**
    * Parses out the diagnosis data from the given {@link RdaMcsClaim} object, creating a list of
    * FHIR {@link Claim.DiagnosisComponent} objects.
    *
@@ -177,37 +231,23 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * @return The list of {@link Claim.DiagnosisComponent} objects containing the diagnosis data.
    */
   private List<Claim.DiagnosisComponent> getDiagnosis(RdaMcsClaim claimGroup) {
-    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaMcsDiagnosisCode>of())
-        .stream()
-        .map(
-            diagCode -> {
-              Claim.DiagnosisComponent component;
 
-              if (Strings.isNotBlank(diagCode.getIdrDiagCode())) {
-                String system;
+    Stream<McsDiagnosisAdapterV2> distinctDiagnosisCodes =
+        Stream.concat(getDiagnosisCodes(claimGroup), getPrimaryDiagnosisCodes(claimGroup))
+            .distinct();
 
-                if (VALID_ICD_TYPES.contains(diagCode.getIdrDiagIcdType())) {
-                  system =
-                      diagCode.getIdrDiagIcdType().equals("0")
-                          ? IcdCode.CODING_SYSTEM_ICD_10_CM
-                          : IcdCode.CODING_SYSTEM_ICD_9;
-                } else {
-                  system = null;
-                }
+    List<Claim.DiagnosisComponent> diagnoses =
+        distinctDiagnosisCodes
+            .map(McsClaimTransformerV2::getDiagnosisComponent)
+            .filter(Objects::nonNull)
+            .toList();
 
-                component =
-                    new Claim.DiagnosisComponent()
-                        .setSequence(diagCode.getRdaPosition())
-                        .setDiagnosis(createCodeableConcept(system, diagCode.getIdrDiagCode()));
-              } else {
-                component = null;
-              }
-
-              return component;
-            })
-        .filter(Objects::nonNull)
-        .sorted(Comparator.comparing(Claim.DiagnosisComponent::getSequence))
-        .toList();
+    // Certain records may be filtered out, so we need to set the sequence after we finish
+    // processing.
+    for (int i = 0; i < diagnoses.size(); i++) {
+      diagnoses.get(i).setSequence(i + 1);
+    }
+    return diagnoses;
   }
 
   /**

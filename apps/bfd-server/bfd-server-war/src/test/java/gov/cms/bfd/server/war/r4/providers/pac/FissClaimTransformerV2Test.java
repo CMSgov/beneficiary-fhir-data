@@ -46,24 +46,28 @@ public class FissClaimTransformerV2Test {
             List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             DIAG_CODE1,
             DIAG_CODE2,
+            List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             3),
         arguments(
             "Same code for admit and principal diagnosis and both codes included in main diagnosis code list",
             List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             DIAG_CODE1,
             DIAG_CODE1,
+            List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             3),
         arguments(
             "Different admit and principal diagnosis codes and both codes NOT included in main diagnosis code list",
             List.of(DIAG_CODE3),
             DIAG_CODE1,
             DIAG_CODE2,
+            List.of(DIAG_CODE3, DIAG_CODE2, DIAG_CODE1),
             3),
         arguments(
             "Same code for admit and principal diagnosis and both codes NOT included in main diagnosis code list",
             List.of(DIAG_CODE2),
             DIAG_CODE1,
             DIAG_CODE1,
+            List.of(DIAG_CODE2, DIAG_CODE1),
             2),
         arguments(
             "Null diagnosis code",
@@ -75,12 +79,23 @@ public class FissClaimTransformerV2Test {
             },
             DIAG_CODE1,
             DIAG_CODE2,
+            List.of(DIAG_CODE2, DIAG_CODE1),
             2),
         arguments(
-            "Null principal diagnosis code", List.of(DIAG_CODE1, DIAG_CODE2), null, DIAG_CODE2, 2),
+            "Null principal diagnosis code",
+            List.of(DIAG_CODE1, DIAG_CODE2),
+            null,
+            DIAG_CODE2,
+            List.of(DIAG_CODE1, DIAG_CODE2),
+            2),
         arguments(
-            "Null admit diagnosis code", List.of(DIAG_CODE1, DIAG_CODE2), DIAG_CODE2, null, 2),
-        arguments("All codes missing", List.of(), null, null, 0),
+            "Null admit diagnosis code",
+            List.of(DIAG_CODE1, DIAG_CODE2),
+            DIAG_CODE2,
+            null,
+            List.of(DIAG_CODE1, DIAG_CODE2),
+            2),
+        arguments("All codes missing", List.of(), null, null, List.of(), 0),
         arguments(
             "Single null in the list",
             new ArrayList<String>() {
@@ -90,6 +105,7 @@ public class FissClaimTransformerV2Test {
             },
             DIAG_CODE1,
             DIAG_CODE2,
+            List.of(DIAG_CODE2, DIAG_CODE1),
             2));
   }
 
@@ -100,6 +116,7 @@ public class FissClaimTransformerV2Test {
    * @param diagCodes Diagnosis codes.
    * @param principalDiagCode Principal diagnosis code.
    * @param admitDiagCode Admit diagnosis code.
+   * @param expectedCodes Expected codes.
    * @param numberOfRecords Number of expected records.
    */
   @ParameterizedTest(name = "{index}: {0}")
@@ -109,6 +126,7 @@ public class FissClaimTransformerV2Test {
       List<String> diagCodes,
       String principalDiagCode,
       String admitDiagCode,
+      List<String> expectedCodes,
       int numberOfRecords) {
 
     RdaFissClaim entity = new RdaFissClaim();
@@ -168,10 +186,13 @@ public class FissClaimTransformerV2Test {
       assertCodeEquals(principalDiagCode, principalCoding);
     }
 
-    short currentSequence = 1;
-    for (Claim.DiagnosisComponent component : claim.getDiagnosis()) {
-      assertEquals(currentSequence, component.getSequence());
-      currentSequence++;
+    for (int i = 0; i < claim.getDiagnosis().size(); i++) {
+      Claim.DiagnosisComponent component = claim.getDiagnosis().get(i);
+      CodeableConcept diagnosis = (CodeableConcept) component.getDiagnosis();
+      assertEquals(1, diagnosis.getCoding().size());
+
+      assertEquals(expectedCodes.get(i), diagnosis.getCoding().getFirst().getCode());
+      assertEquals(i + 1, component.getSequence());
     }
   }
 

@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -376,26 +377,44 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             "SAMHSA ICD 9 Diagnosis code",
             List.of("0:" + NON_SAMHSA_CODE, "1:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             true,
             "not correctly detected."),
         arguments(
             "SAMHSA ICD 10 Diagnosis code",
             List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_10_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             true,
             "not correctly detected."),
         arguments(
             "SAMHSA CPT Proc code",
             List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, CPT_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             true,
             "not correctly detected."),
         arguments(
             "Non-Samhsa codes",
             List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             false,
-            "incorrectly detected."));
+            "incorrectly detected."),
+        arguments(
+            "SAMHSA ICD 9 primary diagnosis code",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "9:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "SAMHSA ICD 10 primary diagnosis code",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_10_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."));
   }
 
   /**
@@ -405,6 +424,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
    * @param testName the test name for reporting
    * @param diagCodes the diagnosis codes to use in the test
    * @param procCodes the proc codes to use in the test
+   * @param primaryDiagCodes the primary diagnosis codes to use in the test
    * @param expectedResult the expected result
    * @param errorMessagePostFix the error message post fix
    */
@@ -414,6 +434,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       String testName,
       List<String> diagCodes,
       List<String> procCodes,
+      List<String> primaryDiagCodes,
       boolean expectedResult,
       String errorMessagePostFix) {
     RdaMcsClaim entity = new RdaMcsClaim();
@@ -437,7 +458,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     entity.setDiagCodes(diagnoses);
 
-    Set<RdaMcsDetail> procedures =
+    List<RdaMcsDetail> procedures =
         IntStream.range(0, procCodes.size())
             .mapToObj(
                 i -> {
@@ -446,11 +467,15 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                   procCode.setIdrDtlNumber((short) (i + 1));
                   procCode.setIdrProcCode(procCodes.get(i));
 
+                  String[] dx = primaryDiagCodes.get(i).split(":");
+                  procCode.setIdrDtlDiagIcdType(dx[0]);
+                  procCode.setIdrDtlPrimaryDiagCode(dx[1]);
+
                   return procCode;
                 })
-            .collect(Collectors.toSet());
+            .toList();
 
-    entity.setDetails(procedures);
+    entity.setDetails(new HashSet<>(procedures));
 
     FissClaimTransformerV2 fissClaimTransformerV2 =
         new FissClaimTransformerV2(new MetricRegistry());
