@@ -190,7 +190,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * @return diagnosis adapter
    */
   private static Stream<McsDiagnosisAdapterV2> getPrimaryDiagnosisCodes(RdaMcsClaim claimGroup) {
-    return claimGroup.getDetails().stream()
+    return ObjectUtils.defaultIfNull(claimGroup.getDetails(), List.<RdaMcsDetail>of()).stream()
         .sorted(Comparator.comparing(RdaMcsDetail::getIdrDtlNumber))
         .map(McsDiagnosisAdapterV2::new);
   }
