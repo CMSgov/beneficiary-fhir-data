@@ -69,6 +69,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
         resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
             .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
             .collect(Collectors.toUnmodifiableSet());
+    // Note: we're adding ICD 9 and ICD 10 codes to both lists here because we can't rely on the
+    // data coming in from RDA to be categorized correctly.
+    // Ideally, we would be able to ignore ICD 9 codes entirely, but there are still some
+    // circumstances where ICD 9 codes are valid even with new data.
+    // See https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists
     Set<String> procdureCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
             .stream()
