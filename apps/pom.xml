@@ -85,7 +85,7 @@
         <aws-java-sdk-bom.version>2.25.70</aws-java-sdk-bom.version>
         <aws.crt.version>0.29.25</aws.crt.version>
         <spring-data-jpa.version>3.2.0</spring-data-jpa.version>
-        <spring-framework.version>6.1.6</spring-framework.version>
+        <spring-framework.version>6.1.12</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
 
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
@@ -172,8 +172,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed when changing this property. -->
         <its.testcontainer.db.image>postgres:16.2-alpine</its.testcontainer.db.image>
@@ -207,7 +207,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>latest</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
