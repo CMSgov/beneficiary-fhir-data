@@ -18,7 +18,7 @@
   when: launch_enabled | default(false)
 
 - name: Enable BFD Server Service Task
-  command: /usr/bin/systemctl --system enable "{{ service }}"
+  command: /usr/bin/systemctl --system enable bfd-server
   become: true
   listen: Enable BFD Server Service
   when: launch_enabled | default(false)
