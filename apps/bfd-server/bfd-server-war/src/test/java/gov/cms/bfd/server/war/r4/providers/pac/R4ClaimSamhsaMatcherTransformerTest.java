@@ -86,6 +86,17 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
+            "SAMHSA ICD 9 Diagnosis code (Other)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
             "SAMHSA ICD 9 Diagnosis code (Other) with date mismatch",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE),
