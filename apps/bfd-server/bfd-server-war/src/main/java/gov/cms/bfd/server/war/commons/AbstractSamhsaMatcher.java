@@ -61,6 +61,14 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * the classpath. The list data is normalized as it is loaded.
    */
   protected AbstractSamhsaMatcher() {
+    this.drgCodes =
+        resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs").stream()
+            .map(AbstractSamhsaMatcher::normalizeDrgCode)
+            .collect(Collectors.toUnmodifiableSet());
+    this.cptCodes =
+        resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
+            .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
+            .collect(Collectors.toUnmodifiableSet());
     Set<String> procdureCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
             .stream()
@@ -86,15 +94,6 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
             .collect(Collectors.toSet()));
     this.icdDiagnosisCodes = diagnosisCodes.stream().collect(Collectors.toUnmodifiableSet());
     this.icdProcedureCodes = procdureCodes.stream().collect(Collectors.toUnmodifiableSet());
-
-    this.drgCodes =
-        resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs").stream()
-            .map(AbstractSamhsaMatcher::normalizeDrgCode)
-            .collect(Collectors.toUnmodifiableSet());
-    this.cptCodes =
-        resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
-            .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
-            .collect(Collectors.toUnmodifiableSet());
   }
 
   /**
