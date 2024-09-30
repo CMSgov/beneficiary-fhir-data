@@ -207,6 +207,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     if (Strings.isNotBlank(diagnosisAdapter.getDiagnosisCode())) {
       String system;
 
+      // Null check is necessary here because VALID_ICD_TYPES.contains(null) will throw a
+      // NullReferenceException
       if (diagnosisAdapter.getIcdType() != null
           && VALID_ICD_TYPES.contains(diagnosisAdapter.getIcdType())) {
         system =
