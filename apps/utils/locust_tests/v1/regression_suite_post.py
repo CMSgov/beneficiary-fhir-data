@@ -185,5 +185,5 @@ class RegressionV1User(BFDUserBase):
             body={
                 "_id": next(self.bene_ids),
             },
-            name="/v1/fhir/Patient/id"
+            name="/v1/fhir/Patient/_search search by id"
         )
