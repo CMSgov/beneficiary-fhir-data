@@ -209,12 +209,15 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
     if (Strings.isNotBlank(diagnosisAdapter.getDiagnosisCode())) {
 
-      String system =
-          switch (diagnosisAdapter.getIcdType()) {
-            case ICD_TYPE_9 -> IcdCode.CODING_SYSTEM_ICD_9;
-            case ICD_TYPE_10 -> IcdCode.CODING_SYSTEM_ICD_10_CM;
-            default -> null;
-          };
+      String system = null;
+      if (diagnosisAdapter.getIcdType() != null) {
+        system =
+            switch (diagnosisAdapter.getIcdType()) {
+              case ICD_TYPE_9 -> IcdCode.CODING_SYSTEM_ICD_9;
+              case ICD_TYPE_10 -> IcdCode.CODING_SYSTEM_ICD_10_CM;
+              default -> null;
+            };
+      }
 
       return new Claim.DiagnosisComponent()
           .setDiagnosis(createCodeableConcept(system, diagnosisAdapter.getDiagnosisCode()));
