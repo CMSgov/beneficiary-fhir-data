@@ -58,3 +58,18 @@ variable "db_environment_override" {
   sensitive   = false
   type        = string
 }
+
+# BFD-2588
+variable "disable_asg_autoscale_alarms" {
+  default     = false
+  description = "For use in release pipeline contexts only."
+  sensitive   = false
+  type        = bool
+}
+
+variable "override_asg_desired_instance_factor" {
+  default     = 1
+  description = "For use in release pipeline contexts only."
+  sensitive   = false
+  type        = number
+}

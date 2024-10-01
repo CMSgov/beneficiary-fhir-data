@@ -75,3 +75,11 @@ variable "scaling_request_count_interval" {
   type        = number
   default     = 5000
 }
+
+# BFD-2588
+variable "disable_asg_autoscale_alarms" {
+  default     = false
+  description = "For use in release pipeline contexts only."
+  sensitive   = false
+  type        = bool
+}

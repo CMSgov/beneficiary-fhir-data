@@ -310,7 +310,9 @@ try {
 							env: bfdEnv,
 							directory: "ops/terraform/services/server",
 							tfVars: [
-								ami_id_override: amiIds.bfdServerAmiId
+								ami_id_override: amiIds.bfdServerAmiId,
+								disable_asg_autoscale_alarms: true,
+								override_asg_desired_instance_factor: 2 
 							]
 						)
 
@@ -339,6 +341,16 @@ try {
 
 						if (hasRegressionRunSucceeded) {
 							println 'Regression suite passed, proceeding to next stage...'
+							// apply terraservice with default config
+							awsAuth.assumeRole()
+							println 'returning Server ASG to default capacity'
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server",
+								tfVars: [
+									ami_id_override: amiIds.bfdServerAmiId
+								]
+							)							
 						} else {
 							try {
 								input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
@@ -476,7 +488,9 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/server",
 								tfVars: [
-									ami_id_override: amiIds.bfdServerAmiId
+									ami_id_override: amiIds.bfdServerAmiId,
+									disable_asg_autoscale_alarms: true,
+									override_asg_desired_instance_factor: 2
 								]
 							)
 
@@ -505,6 +519,16 @@ try {
 
 							if (hasRegressionRunSucceeded) {
 								println 'Regression suite passed, proceeding to next stage...'
+								// apply terraservice with default config
+								awsAuth.assumeRole()
+								println 'returning Server ASG to default capacity'
+								terraform.deployTerraservice(
+									env: bfdEnv,
+									directory: "ops/terraform/services/server",
+									tfVars: [
+										ami_id_override: amiIds.bfdServerAmiId
+									]
+								)		
 							} else {
 								try {
 									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
@@ -640,7 +664,9 @@ try {
 								env: bfdEnv,
 								directory: "ops/terraform/services/server",
 								tfVars: [
-									ami_id_override: amiIds.bfdServerAmiId
+									ami_id_override: amiIds.bfdServerAmiId,
+									disable_asg_autoscale_alarms: true,
+									override_asg_desired_instance_factor: 2
 								]
 							)
 
@@ -669,6 +695,17 @@ try {
 
 							if (hasRegressionRunSucceeded) {
 								println 'Regression suite passed, proceeding to next stage...'
+								// apply terraservice with default config
+								awsAuth.assumeRole()
+								println 'returning Server ASG to default capacity'
+								terraform.deployTerraservice(
+									env: bfdEnv,
+									directory: "ops/terraform/services/server",
+									tfVars: [
+										ami_id_override: amiIds.bfdServerAmiId
+									]
+								)							
+
 							} else {
 								try {
 									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'

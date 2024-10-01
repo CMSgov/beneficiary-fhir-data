@@ -38,10 +38,8 @@ locals {
   ]
 
   on_launch_lifecycle_hook_name = "bfd-${local.env}-${var.role}-on-launch"
-  # BFD-2558 codify 600 for instance_refresh.checkpoint_delay multiplier
-  asg_health_check_grace_period       = 600
-  asg_refresh_checkpoint_delay_factor = local.scaling_capacity_step
 
+  asg_health_check_grace_period = 600
   # Adds the ApplicationName to the JDBC connection indicating that queries are from the server.
   full_jdbc_suffix = "${var.jdbc_suffix}&ApplicationName=bfd-server"
 }
@@ -210,26 +208,36 @@ resource "aws_autoscaling_group" "main" {
   ]
 
   warm_pool {
-    pool_state                  = "Stopped"
-    min_size                    = var.asg_config.min
-    max_group_prepared_capacity = var.asg_config.max_warm
+    pool_state = "Stopped"
+    # BFD-2588
+    # if disabled_asg_autoscale_alarms, set pool sizes at 0 to force refresh
+    min_size                    = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.min)
+    max_group_prepared_capacity = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.max_warm)
+    # instance_reuse_policy {
+    #   reuse_on_scale_in = true
+    # }
   }
 
-  # BFD-2558 add refresh strategy based on launch template updates
-  #          necessary now that ASG will be reused
-  instance_refresh {
-    strategy = "Rolling"
-    preferences {
-      checkpoint_delay       = (local.asg_health_check_grace_period * local.scaling_capacity_step)
-      min_healthy_percentage = floor(100 / local.scaling_capacity_step)
-
-      standby_instances            = "Terminate"
-      scale_in_protected_instances = "Refresh"
-      skip_matching                = true
-    }
-    # default refresh triggers:
-    # triggers = ["launch_configuration", "launch_template", "mixed_instances_policy"]
-  }
+  # # BFD-2558 add refresh strategy based on launch template updates
+  # #          necessary now that ASG will be reused
+  # instance_refresh {
+  #   strategy = "Rolling"
+  #   preferences {
+  #     # rollback ASG if refresh fails
+  #     auto_rollback          = true
+  #     # set checkpoint delay at lifecycle hook heartbeat + 15s fudge factor
+  #     checkpoint_delay       = ((var.asg_config.instance_warmup * 3) + 15)
+  #     # set checkpoint levels to match 3 (hardcoded) min instances
+  #     checkpoint_percentages = [33,67,100]
+  #     # action for Standby state instances
+  #     standby_instances            = "Terminate"
+  #     # action for instances protected from scale-in
+  #     scale_in_protected_instances = "Refresh"
+  #     skip_matching                = true
+  #   }
+  #   # default refresh triggers:
+  #   # triggers = ["launch_configuration", "launch_template", "mixed_instances_policy"]
+  # }
   termination_policies = ["OldestLaunchConfiguration"]
   #
 
@@ -255,18 +263,18 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
-
 ## Autoscaling Policies and Cloudwatch Alarms
 #
 
 resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
+  count               = (var.disable_asg_autoscale_alarms ? 0 : 1)
   alarm_name          = "bfd-${var.role}-${local.env}-avg-cpu-low"
   comparison_operator = "LessThanThreshold"
   datapoints_to_alarm = local.scaling_alarms_config.scale_in.datapoints_to_alarm
   evaluation_periods  = local.scaling_alarms_config.scale_in.consecutive_periods_to_alarm
   threshold           = local.scale_in_cpu_threshold
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_autoscaling_policy.avg_cpu_low.arn]
+  alarm_actions       = [aws_autoscaling_policy.avg_cpu_low[0].arn]
 
   metric_query {
     id          = "m1"
@@ -285,6 +293,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
 }
 
 resource "aws_autoscaling_policy" "avg_cpu_low" {
+  count                     = (var.disable_asg_autoscale_alarms ? 0 : 1)
   name                      = "bfd-${var.role}-${local.env}-avg-cpu-low"
   autoscaling_group_name    = aws_autoscaling_group.main.name
   estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
@@ -299,13 +308,14 @@ resource "aws_autoscaling_policy" "avg_cpu_low" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
+  count               = (var.disable_asg_autoscale_alarms ? 0 : 1)
   alarm_name          = "bfd-${var.role}-${local.env}-avg-cpu-high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   datapoints_to_alarm = local.scaling_alarms_config.scale_out.datapoints_to_alarm
   evaluation_periods  = local.scaling_alarms_config.scale_out.consecutive_periods_to_alarm
   threshold           = 1
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_autoscaling_policy.avg_cpu_high.arn]
+  alarm_actions       = [aws_autoscaling_policy.avg_cpu_high[0].arn]
 
   metric_query {
     id          = "m1"
@@ -381,6 +391,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
 }
 
 resource "aws_autoscaling_policy" "avg_cpu_high" {
+  count                     = (var.disable_asg_autoscale_alarms ? 0 : 1)
   name                      = "bfd-${var.role}-${local.env}-avg-cpu-high"
   autoscaling_group_name    = aws_autoscaling_group.main.name
   estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
