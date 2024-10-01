@@ -51,8 +51,11 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** Valid ICD Types. */
-  private static final List<String> VALID_ICD_TYPES = List.of("0", "9");
+  /** ICD 9. */
+  private static final String ICD_TYPE_9 = "9";
+
+  /** ICD 10. */
+  private static final String ICD_TYPE_10 = "0";
 
   /**
    * Map used to calculate {@link Claim.ClaimStatus} from {@link RdaMcsClaim#getIdrStatusCode()} Any
@@ -205,19 +208,13 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
       McsDiagnosisAdapterV2 diagnosisAdapter) {
 
     if (Strings.isNotBlank(diagnosisAdapter.getDiagnosisCode())) {
-      String system;
 
-      // Null check is necessary here because VALID_ICD_TYPES.contains(null) will throw a
-      // NullReferenceException
-      if (diagnosisAdapter.getIcdType() != null
-          && VALID_ICD_TYPES.contains(diagnosisAdapter.getIcdType())) {
-        system =
-            diagnosisAdapter.getIcdType().equals("0")
-                ? IcdCode.CODING_SYSTEM_ICD_10_CM
-                : IcdCode.CODING_SYSTEM_ICD_9;
-      } else {
-        system = null;
-      }
+      String system =
+          switch (diagnosisAdapter.getIcdType()) {
+            case ICD_TYPE_9 -> IcdCode.CODING_SYSTEM_ICD_9;
+            case ICD_TYPE_10 -> IcdCode.CODING_SYSTEM_ICD_10_CM;
+            default -> null;
+          };
 
       return new Claim.DiagnosisComponent()
           .setDiagnosis(createCodeableConcept(system, diagnosisAdapter.getDiagnosisCode()));
