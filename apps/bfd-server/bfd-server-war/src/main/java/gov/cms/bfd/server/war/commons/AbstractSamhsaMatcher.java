@@ -74,6 +74,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     // Ideally, we would be able to ignore ICD 9 codes entirely, but there are still some
     // circumstances where ICD 9 codes are valid even with new data.
     // See https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists
+
+    // In ICD 9, both procedures and diagnoses were under ICD 9 CM, but they were split under ICD 10
     Set<String> procdureCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
             .stream()
