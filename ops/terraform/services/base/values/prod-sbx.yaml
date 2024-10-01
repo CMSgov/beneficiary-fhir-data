@@ -185,7 +185,7 @@
 /bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: '[ "bfd-prod-sbx-to-ab2d-dev", "bfd-prod-sbx-to-ab2d-impl", "bfd-prod-sbx-to-ab2d-sbx", "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx", "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test", "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc" ]'
 /bfd/${env}/server/nonsensitive/asg_min_instance_count: "3"
 /bfd/${env}/server/nonsensitive/asg_max_instance_count: "12"
-/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: "9"
+/bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: "3"
 /bfd/${env}/server/nonsensitive/asg_desired_instance_count: "3"
 /bfd/${env}/server/nonsensitive/asg_instance_warmup_time: "90"
 /bfd/${env}/server/nonsensitive/launch_template_instance_type: c6a.4xlarge
