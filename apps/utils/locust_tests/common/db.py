@@ -81,6 +81,20 @@ def get_regression_hashed_mbis(uri: str) -> List[str]:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
+def get_regression_mbis(uri: str) -> List[str]:
+    """Retrieves a list of MBIs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic MBIs used for the regression suites
+    """
+    mbi_query = _get_regression_query('SELECT "mbi_num" FROM ccw.beneficiaries')
+    return [str(r[0]) for r in _execute(uri, mbi_query)]
+
+
 def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
     """Retrieves a list of contract IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order, and
@@ -119,6 +133,21 @@ def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
     """
     claims_mbis_query = (
         r"select hash from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by hash limit 300"
+    )
+    return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
+
+
+def get_regression_pac_mbis(uri: str) -> List[str]:
+    """Returns a list of MBI within the set of static, synthetic PAC data
+
+    Args:
+        uri (str): The database connection string
+
+    Returns:
+        list[str]: A list of MBI
+    """
+    claims_mbis_query = (
+        r"select mbi from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by mbi limit 300"
     )
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
@@ -163,6 +192,31 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
+def get_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
+    """
+    Return a list of unique MBIs from the adjudicated beneficiary table
+    """
+
+    if table_sample_pct is None:
+        table_sample_text = ""
+    else:
+        table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
+
+    # Handle possible collisions from duplicates in beneficiaries_history
+    # by only taking MBIs that are distinct in both beneficiaries _and_
+    # benficiaries_history
+    mbi_query = (
+        f"SELECT beneficiaries.mbi_num FROM ccw.beneficiaries {table_sample_text} "
+        "    INNER JOIN ccw.beneficiaries_history "
+        "        ON beneficiaries.mbi_num = beneficiaries_history.mbi_num "
+        "    GROUP BY beneficiaries.mbi_num "
+        "    HAVING count(beneficiaries_history.mbi_num) = 1 "
+        f"LIMIT {LIMIT}"
+    )
+
+    return [str(r[0]) for r in _execute(uri, mbi_query)]
+
+
 def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
     """
     Return a list of contract id / reference year pairs from the beneficiary
@@ -176,7 +230,7 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
 
     contract_id_query = (
         'SELECT "partd_contract_number_id", "year_month" '
-        'FROM ccw.beneficiary_monthly '
+        "FROM ccw.beneficiary_monthly "
         f"{table_sample_text}"
         f"LIMIT {LIMIT}"
     )
@@ -193,9 +247,10 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
     return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
-def get_pac_hashed_mbis(uri: str) -> List:
+
+def get_pac_mbis(uri: str) -> List:
     """
-    Return a list of unique hashed MBIs that represent a diverse set of FISS and MCS
+    Return a list of unique MBIs that represent a diverse set of FISS and MCS
     claims over a range of claim statuses.
 
     We anticipate that fields will have a mixture of blank vs non-blank values based on the status codes received.
@@ -269,7 +324,7 @@ def get_pac_hashed_mbis(uri: str) -> List:
 
     mbi_query = (
         # Get up to N distinct MBI hashes
-        "select mbi.hash "
+        "select mbi.mbi "
         "from ( "
         # Subquery sorts by source to weight 'filler' MBIs last
         "	select union_select.mbi_id "
@@ -300,15 +355,15 @@ def get_pac_hashed_mbis(uri: str) -> List:
     return [str(r[0]) for r in reversed(_execute(uri, mbi_query))]
 
 
-def get_pac_hashed_mbis_smoketest(uri: str) -> list[str]:
-    """Gets the top LIMIT MBI hashes from the rda table's MBI cache for use with the PACA smoketests
+def get_pac_mbis_smoketest(uri: str) -> list[str]:
+    """Gets the top LIMIT MBI from the rda table's MBI cache for use with the PACA smoketests
 
     Args:
         uri (str): The database connection string
 
     Returns:
-        list[str]: A list of MBI hashes
+        list[str]: A list of MBIs
     """
-    smoketest_mbi_query = f"select hash from rda.mbi_cache limit {LIMIT}"
+    smoketest_mbi_query = f"select mbi from rda.mbi_cache limit {LIMIT}"
 
     return [str(r[0]) for r in _execute(uri, smoketest_mbi_query)]
