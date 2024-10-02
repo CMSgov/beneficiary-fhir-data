@@ -57,6 +57,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -285,6 +286,26 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
+   * Returns the given {@link RdaFissClaim} or {@link RdaMcsClaim} entity's MBI ID given the
+   * resource type.
+   *
+   * @param <T> generic type extending {@link IBaseResource}
+   * @param claimIdType the {@link ResourceTypeV2} indicating what the claim's type is (either fiss
+   *     or mcs)
+   * @param claimEntity the claim entity itself; either a {@link RdaFissClaim} or {@link
+   *     RdaMcsClaim}
+   * @return the MBI ID associated with the given claim entity, or <code>null</code> if not found
+   */
+  private <T extends IBaseResource> @Nullable String getClaimEntityMbiId(
+      ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
+    return switch (claimIdType.getTypeLabel()) {
+      case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord().getMbiId().toString();
+      case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord().getMbiId().toString();
+      default -> null;
+    };
+  }
+
+  /**
    * Implementation specific claim type parsing.
    *
    * @param typeText String to parse representing the claim type.
@@ -462,15 +483,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                         .map(e -> new ImmutablePair<>(e, type)))
             .toList();
 
+    // Log the MBI ID to the MDC for forensics in cases where the MBI is not hashed
     entitiesWithType.stream()
-        .map(
-            pair ->
-                switch (pair.right.getTypeLabel()) {
-                  case "fiss" -> ((RdaFissClaim) pair.left).getMbiRecord().getMbiId().toString();
-                  case "mcs" -> ((RdaMcsClaim) pair.left).getMbiRecord().getMbiId().toString();
-                  default -> null;
-                })
+        .map(pair -> getClaimEntityMbiId(pair.right, pair.left))
         .filter(Objects::nonNull)
+        // We choose the first MBI ID from the first claim entity in the Stream as the MBI ID will
+        // be the same for all returned claims, so there is no reason to evaluate the entire Stream.
+        // Multiple MBI IDs would be considered a data consistency issue.
         .findFirst()
         .ifPresent(mbiId -> BfdMDC.put("mbi_id", mbiId));
 
