@@ -334,13 +334,159 @@ resource "aws_iam_policy" "github_actions_static_site" {
   )
 }
 
+# TODO: BFD-3647 for fine-grained adjustment of policy
+resource "aws_iam_policy" "github_actions_ci_ops" {
+  name        = "bfd-${local.env}-ci-ops-infra"
+  description = "Grants permissions necessary to allow CI/CD Pipeline for MGMT baseline config"
+  path        = "/"
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Sid    = "AllowUnconditionalDescribeGetListActions"
+          Effect = "Allow"
+          Action = [
+            "ec2:DescribeManagedPrefixLists",
+            "ec2:DescribeRouteTables",
+            "ec2:DescribeVpcs",
+            "ec2:GetEbsEncryptionByDefault",
+            "ec2:GetEbsDefaultKmsKeyId",
+            "ec2:GetManagedPrefixListEntries",
+            "s3:List*",
+            "s3:Get*",
+            "sts:GetCallerIdentity"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowSsmAccess"
+          Effect = "Allow"
+          Action = [
+            "ssm:Describe*",
+            "ssm:GetParam*",
+            "ssm:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowDescribeVpcAttributes"
+          Effect = "Allow"
+          Action = [
+            "ec2:DescribeVpcAttribute"
+          ]
+          Resource = "arn:aws:ec2:${local.region}:${local.account_id}:vpc/*"
+        },
+        {
+          Sid    = "AllowDescribeAndUseOfCMKs"
+          Effect = "Allow"
+          Action = [
+            "kms:Encrypt",
+            "kms:Decrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*"
+          ]
+          Resource = concat(local.all_kms_config_key_arns, local.all_kms_data_key_arns)
+        },
+        {
+          Sid    = "AllowListOfAllKeys"
+          Effect = "Allow"
+          Action = [
+            "kms:Describe*",
+            "kms:GetKey*",
+            "kms:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowSNS"
+          Effect = "Allow"
+          Action = [
+            "sns:Get*",
+            "sns:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowLogMetrics"
+          Effect = "Allow"
+          Action = [
+            "logs:Describe*",
+            "logs:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowIam"
+          Effect = "Allow"
+          Action = [
+            "iam:Get*",
+            "iam:List*",
+            "iam:DeletePolicyVersion"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowCodeArtifact"
+          Effect = "Allow"
+          Action = [
+            "codeartifact:Describe*",
+            "codeartifact:Get*",
+            "codeartifact:List*",
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowDynamo"
+          Effect = "Allow"
+          Action = [
+            "dynamodb:Describe*",
+            "dynamodb:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowQuicksight"
+          Effect = "Allow"
+          Action = [
+            "quicksight:Get*",
+            "quicksight:Describe*",
+            "quicksight:List*"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowR53"
+          Effect = "Allow"
+          Action = [
+            "route53:GetHostedZone",
+            "route53:ListHostedZones",
+            "route53:ListResourceRecordSets"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "AllowCloudwatch"
+          Effect = "Allow"
+          Action = [
+            "cloudwatch:Get*",
+            "cloudwatch:Describe*",
+            "cloudwatch:List*"
+          ]
+          Resource = "*"
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+}
+
 data "tls_certificate" "github_actions" {
   url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
 }
 
 resource "aws_iam_openid_connect_provider" "github_actions" {
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.github_actions.certificates[0].sha1_fingerprint]
+  thumbprint_list = data.tls_certificate.github_actions.certificates[*].sha1_fingerprint
   url             = "https://token.actions.githubusercontent.com"
 }
 
@@ -355,7 +501,8 @@ resource "aws_iam_role" "github_actions" {
     aws_iam_policy.github_actions_ecr.arn,
     aws_iam_policy.github_actions_tf_state.arn,
     aws_iam_policy.github_actions_tf_logs.arn,
-    aws_iam_policy.github_actions_static_site.arn
+    aws_iam_policy.github_actions_static_site.arn,
+    aws_iam_policy.github_actions_ci_ops.arn
   ]
 
   assume_role_policy = jsonencode(
