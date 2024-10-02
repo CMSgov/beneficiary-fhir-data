@@ -1,17 +1,17 @@
 {
   "resourceType": "Bundle",
-  "id": "d017cb91-6836-4947-9fa4-13474c3bdb6f",
+  "id": "c875ce21-8130-4eba-a78e-4a59587ce637",
   "meta": {
-    "lastUpdated": "2021-12-09T00:19:25.209+00:00"
+    "lastUpdated": "2024-09-26T19:13:06.375+00:00"
   },
   "type": "searchset",
+  "total": 2,
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9970/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:60207/v2/fhir/Claim/?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-25"
     }
   ],
-  "total": 2,
   "entry": [
     {
       "resource": {
@@ -140,7 +140,7 @@
           "start": "1970-07-10",
           "end": "1970-07-20"
         },
-        "created": "2021-12-09T00:19:25+00:00",
+        "created": "2024-09-26T19:13:06+00:00",
         "provider": {
           "reference": "#provider-org"
         },
@@ -211,24 +211,29 @@
             }
           },
           {
-            "category" : {
-              "coding" : [ {
-                "code" : "admtype",
-                "display" : "Information",
-                "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-              }, {
-                "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
-                "display" : "Claim Inpatient Admission Type Code",
-                "system" : "https://bluebutton.cms.gov/resources/codesystem/information"
-              } ]
+            "sequence": 3,
+            "category": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+                  "code": "admtype",
+                  "display": "Information"
+                },
+                {
+                  "system": "https://bluebutton.cms.gov/resources/codesystem/information",
+                  "code": "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+                  "display": "Claim Inpatient Admission Type Code"
+                }
+              ]
             },
-            "code" : {
-              "coding" : [ {
-                "code" : "3",
-                "system" : "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit"
-              } ]
-            },
-            "sequence" : 3
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",
+                  "code": "3"
+                }
+              ]
+            }
           }
         ],
         "diagnosis": [
@@ -291,6 +296,17 @@
                 }
               ]
             },
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                    "code": "principal",
+                    "display": "Principal Diagnosis"
+                  }
+                ]
+              }
+            ],
             "onAdmission": {
               "coding": [
                 {
@@ -407,7 +423,7 @@
               ],
               "coding": [
                 {
-                  "system": "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",
+                  "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
                   "code": "12345"
                 }
               ]
@@ -457,21 +473,25 @@
           },
           {
             "sequence": 2,
-            "detail" : [ {
-              "productOrService" : {
-                "coding" : [ {
-                  "code" : "00777310502",
-                  "system" : "http://hl7.org/fhir/sid/ndc"
-                } ]
-              },
-              "quantity" : {
-                "code" : "mL",
-                "system" : "http://unitsofmeasure.org",
-                "unit" : "ML",
-                "value" : 1.5
-              },
-              "sequence" : 1
-            } ]
+            "detail": [
+              {
+                "sequence": 1,
+                "productOrService": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/sid/ndc",
+                      "code": "00777310502"
+                    }
+                  ]
+                },
+                "quantity": {
+                  "value": 1.5,
+                  "unit": "ML",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mL"
+                }
+              }
+            ]
           }
         ],
         "total": {
@@ -609,7 +629,7 @@
           "start": "1970-07-18",
           "end": "1970-07-20"
         },
-        "created": "2022-01-27T18:26:54+00:00",
+        "created": "2024-09-26T19:13:06+00:00",
         "provider": {
           "reference": "#provider-org"
         },
@@ -696,7 +716,7 @@
           }
         ],
         "total": {
-          "value": 23.0,
+          "value": 23.00,
           "currency": "USD"
         }
       }
