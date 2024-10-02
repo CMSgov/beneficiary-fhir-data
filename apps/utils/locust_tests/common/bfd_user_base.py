@@ -195,10 +195,50 @@ class BFDUserBase(FastHttpUser):
                         self.url_pools[name] = []
                     self.url_pools[name].append(next_url)
 
+    def post_by_url(
+        self,
+        url: str,
+        headers: Optional[Mapping[str, str]] = None,
+        body: Optional[Mapping[str, str]] = None,
+        name: str = "",
+    ):
+        """Send one POST request and parse the response for pagination.
+
+        This method extends Locust's HttpUser::client.post() method to make creating the requests
+        nicer. Specifically, the query string parameters are specified as a separate dictionary
+        opposed to part of the path, the cert and verify arguments (which will never change) are
+        already set, and Cache-Control headers are automatically set to ensure caching is disabled.
+        """
+
+        safe_headers = {} if headers is None else headers
+        safe_body = {} if body is None else body
+
+        with self.client.post(
+            url,
+            headers={**safe_headers, "Cache-Control": "no-store, no-cache"},
+            data=safe_body,
+            name=name,  # type: ignore -- known Locust argument
+            catch_response=True,  # type: ignore -- known Locust argument
+        ) as response:
+            if response.status_code != 200:
+                if isinstance(response, ResponseContextManager):
+                    # pylint: disable=E1121
+                    response.failure(f"Status Code: {response.status_code}")
+                else:
+                    response.failure()
+            elif response.text:
+                # Check for valid "next" URLs that we can add to a URL pool.
+                next_url = BFDUserBase.__get_next_url(response.text)
+                if next_url is not None:
+                    if name not in self.url_pools:
+                        self.url_pools[name] = []
+                    self.url_pools[name].append(next_url)
+
     def run_task(
         self,
         url_callback: Callable,
         headers: Optional[Mapping[str, str]] = None,
+        body: Optional[Mapping[str, str]] = None,
         name: str = "",
     ):
         """Figure out which URL we should query next and query the server.
@@ -222,7 +262,10 @@ class BFDUserBase(FastHttpUser):
 
         if url is not None:
             # Run the test using the URL we found
-            self.get_by_url(url=url, headers=headers, name=name)
+            if body is None:
+                self.get_by_url(url=url, headers=headers, name=name)
+            else:
+                self.post_by_url(url=url, headers=headers, body=body, name=name)
         else:
             # If no URL is found, then this test isn't counted in statistics
 
@@ -251,6 +294,7 @@ class BFDUserBase(FastHttpUser):
         base_path: str,
         params: Optional[Mapping[str, Union[str, int, List[Any]]]] = None,
         headers: Optional[Mapping[str, str]] = None,
+        body: Optional[Mapping[str, str]] = None,
         name: str = "",
     ):
         """Run a task using a base path and parameters"""
@@ -261,7 +305,7 @@ class BFDUserBase(FastHttpUser):
         def make_url():
             return create_url_path(base_path, safe_params)
 
-        self.run_task(name=name, url_callback=make_url, headers=safe_headers)
+        self.run_task(name=name, url_callback=make_url, headers=safe_headers, body=body)
 
     # Helper Functions
 

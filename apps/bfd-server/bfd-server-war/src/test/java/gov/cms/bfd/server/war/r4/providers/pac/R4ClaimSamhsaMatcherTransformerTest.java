@@ -97,6 +97,17 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
+            "SAMHSA ICD 9 Diagnosis code (Other) with date mismatch",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
             "SAMHSA ICD 10 Diagnosis code (Admitting)",
             ICD_10_DATE,
             List.of(NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
@@ -130,6 +141,17 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
+            "SAMHSA ICD 10 Diagnosis code (Other) with date mismatch",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
             "SAMHSA ICD 9 Proc code",
             ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
@@ -141,8 +163,30 @@ public class R4ClaimSamhsaMatcherTransformerTest {
             true,
             "SHOULD be filtered but was NOT."),
         arguments(
+            "SAMHSA ICD 9 Proc code with date mismatch",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, ICD_9_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
             "SAMHSA ICD 10 Proc code",
             ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            List.of(NON_SAMHSA_CODE, ICD_10_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
+            NON_SAMHSA_CODE,
+            NON_SAMHSA_CODE,
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 10 Proc code with date mismatch",
+            ICD_9_DATE,
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
             NON_SAMHSA_CODE,
             NON_SAMHSA_CODE,
@@ -374,28 +418,60 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     return Stream.of(
         arguments(
             "SAMHSA ICD 9 Diagnosis code",
-            List.of("0:" + NON_SAMHSA_CODE, "1:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "9:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "SAMHSA ICD 9 Diagnosis code with code system mismatch",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             true,
             "not correctly detected."),
         arguments(
             "SAMHSA ICD 10 Diagnosis code",
             List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_10_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "SAMHSA ICD 10 Diagnosis code with code system mismatch",
+            List.of("0:" + NON_SAMHSA_CODE, "9:" + ICD_10_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             true,
             "not correctly detected."),
         arguments(
             "SAMHSA CPT Proc code",
             List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, CPT_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             true,
             "not correctly detected."),
         arguments(
             "Non-Samhsa codes",
             List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
             false,
-            "incorrectly detected."));
+            "incorrectly detected."),
+        arguments(
+            "SAMHSA ICD 9 primary diagnosis code",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "9:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "SAMHSA ICD 10 primary diagnosis code",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_10_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."));
   }
 
   /**
@@ -405,6 +481,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
    * @param testName the test name for reporting
    * @param diagCodes the diagnosis codes to use in the test
    * @param procCodes the proc codes to use in the test
+   * @param primaryDiagCodes the primary diagnosis codes to use in the test
    * @param expectedResult the expected result
    * @param errorMessagePostFix the error message post fix
    */
@@ -414,6 +491,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       String testName,
       List<String> diagCodes,
       List<String> procCodes,
+      List<String> primaryDiagCodes,
       boolean expectedResult,
       String errorMessagePostFix) {
     RdaMcsClaim entity = new RdaMcsClaim();
@@ -445,6 +523,10 @@ public class R4ClaimSamhsaMatcherTransformerTest {
                   procCode.setIdrDtlToDate(LocalDate.EPOCH);
                   procCode.setIdrDtlNumber((short) (i + 1));
                   procCode.setIdrProcCode(procCodes.get(i));
+
+                  String[] dx = primaryDiagCodes.get(i).split(":");
+                  procCode.setIdrDtlDiagIcdType(dx[0]);
+                  procCode.setIdrDtlPrimaryDiagCode(dx[1]);
 
                   return procCode;
                 })
