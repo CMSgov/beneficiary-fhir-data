@@ -152,7 +152,7 @@ public abstract class BaseConfiguration {
    * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
    * MetricOptions#getNewRelicMetricKey()} value.
    */
-  public static final String SSM_PATH_NEW_RELIC_METRIC_KEY = "new_relic/metrics/license_key";
+  public static final String SSM_PATH_NEW_RELIC_METRIC_KEY = "new_relic/metrics/insights_key";
 
   /**
    * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
