@@ -21,6 +21,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
@@ -36,7 +39,6 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -449,24 +451,37 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       DateRangeParam serviceDate,
       OffsetLinkBuilder paging,
       BundleOptions bundleOptions) {
-    List<T> resources = new ArrayList<>();
+    var entitiesWithType =
+        resourceTypes.stream()
+            .flatMap(
+                type ->
+                    claimDao
+                        .findAllByMbiAttribute(
+                            type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate)
+                        .stream()
+                        .map(e -> new ImmutablePair<>(e, type)))
+            .toList();
 
-    for (ResourceTypeV2<T, ?> type : resourceTypes) {
-      List<?> entities;
+    entitiesWithType.stream()
+        .map(
+            pair ->
+                switch (pair.right.getTypeLabel()) {
+                  case "fiss" -> ((RdaFissClaim) pair.left).getMbiRecord().getMbiId().toString();
+                  case "mcs" -> ((RdaMcsClaim) pair.left).getMbiRecord().getMbiId().toString();
+                  default -> null;
+                })
+        .filter(Objects::nonNull)
+        .findFirst()
+        .ifPresent(mbiId -> BfdMDC.put("mbi_id", mbiId));
 
-      entities =
-          claimDao.findAllByMbiAttribute(
-              type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate);
-
-      resources.addAll(
-          entities.stream()
-              .filter(e -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(e))
-              .map(e -> transformEntity(type, e, bundleOptions.includeTaxNumbers))
-              .collect(Collectors.toList()));
-    }
-
-    // Enforces a specific sorting for pagination that parities the EOB resource sorting.
-    resources.sort(Comparator.comparing(r -> r.getIdElement().getIdPart()));
+    List<T> resources =
+        entitiesWithType.stream()
+            .filter(
+                pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
+            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
+            // Enforces a specific sorting for pagination that parities the EOB resource sorting.
+            .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
+            .collect(Collectors.toList());
 
     Bundle bundle = new Bundle();
     bundle.setTotal(resources.size());
