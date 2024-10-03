@@ -25,10 +25,10 @@ def get_ssm_db_string(environment):
             f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
         )
         username = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/data_server_db_username", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/db/username", with_decrypt=True
         )
         raw_password = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/data_server_db_password", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/db/password", with_decrypt=True
         )
     except ValueError as exc:
         print("Failed getting SSM DB params: " + str(exc))
