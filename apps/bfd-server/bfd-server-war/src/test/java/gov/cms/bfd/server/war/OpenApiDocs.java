@@ -228,7 +228,9 @@ public class OpenApiDocs {
       for (String path : paths.keySet()) {
         if ((apiVersion.equals(API_VERSION_2)
                 && (path.endsWith("ExplanationOfBenefit/_search")
-                    || path.endsWith("Patient/_search")))
+                    || path.endsWith("Patient/_search")
+                    || path.endsWith("Claim/_search")
+                    || path.endsWith("ClaimResponse/_search")))
             || (apiVersion.equals(API_VERSION_1) && path.endsWith("Patient/_search"))) {
           var pathMap = (Map<String, Object>) paths.get(path);
           var postSpec = findPostSpecification(path, postSpecs);

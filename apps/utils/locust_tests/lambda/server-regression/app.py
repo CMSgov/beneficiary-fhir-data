@@ -142,10 +142,10 @@ def handler(event, context):
             f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier"
         )
         username = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/data_server_db_username", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/db/username", with_decrypt=True
         )
         raw_password = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/data_server_db_password", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/db/password", with_decrypt=True
         )
         cert_key = get_ssm_parameter(
             f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
@@ -181,40 +181,47 @@ def handler(event, context):
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
     store_tag_args = [f"--stats-store-tag={tag}" for tag in invoke_event.store_tags]
-    regression_process = subprocess.run(
-        [
-            "locust",
-            f"--locustfile=/var/task/{invoke_event.suite_version}/regression_suite.py",
-            f"--host={invoke_event.host}",
-            f"--users={invoke_event.users}",
-            f"--spawn-rate={invoke_event.spawn_rate}",
-            f"--spawned-runtime={invoke_event.spawned_runtime}",
-            f"--database-connection-string={db_dsn}",
-            f"--client-cert-path={cert_path}",
-            "--stats-store-s3",
-            f"--stats-env={environment}",
-            f"--stats-store-s3-bucket={s3_bucket}",
-            f"--stats-store-s3-database=bfd-insights-bfd-{environment}",
-            (
-                f"--stats-store-s3-table=bfd_insights_bfd_{environment.replace('-', '_')}_server_regression"
-            ),
-            "--stats-compare-average",
-            f"--stats-compare-tag={invoke_event.compare_tag}",
-            "--headless",
-            "--only-summary",
-        ]
-        + store_tag_args,
-        text=True,
-        check=False,
-    )
-    regression_suite_succeeded = regression_process.returncode == 0
 
-    # Signal the outcome of the locust test run
-    send_pipeline_signal(
-        signal_queue_url=signal_queue_url,
-        result=TestResult.SUCCESS if regression_suite_succeeded else TestResult.FAILURE,
-        message="Pipeline run finished, check the CloudWatch logs for more information",
-        context=context,
-    )
+    # Prepare to run the regression test suite
+    locust_files = ["regression_suite.py", "regression_suite_post.py"]
 
-    return regression_process.stdout
+    for locust_file in locust_files:
+        # The command to run Locust with the current test file
+        regression_process = subprocess.run(
+            [
+                "locust",
+                f"--locustfile=/var/task/{invoke_event.suite_version}/{locust_file}",
+                f"--host={invoke_event.host}",
+                f"--users={invoke_event.users}",
+                f"--spawn-rate={invoke_event.spawn_rate}",
+                f"--spawned-runtime={invoke_event.spawned_runtime}",
+                f"--database-connection-string={db_dsn}",
+                f"--client-cert-path={cert_path}",
+                "--stats-store-s3",
+                f"--stats-env={environment}",
+                f"--stats-store-s3-bucket={s3_bucket}",
+                f"--stats-store-s3-database=bfd-insights-bfd-{environment}",
+                (
+                    f"--stats-store-s3-table=bfd_insights_bfd_{environment.replace('-', '_')}_server_regression"
+                ),
+                "--stats-compare-average",
+                f"--stats-compare-tag={invoke_event.compare_tag}",
+                "--headless",
+                "--only-summary",
+            ]
+            + store_tag_args,
+            text=True,
+            check=False,
+        )
+
+        regression_suite_succeeded = regression_process.returncode == 0
+
+        # Signal the outcome of the locust test run
+        send_pipeline_signal(
+            signal_queue_url=signal_queue_url,
+            result=TestResult.SUCCESS if regression_suite_succeeded else TestResult.FAILURE,
+            message="Pipeline run finished, check the CloudWatch logs for more information",
+            context=context,
+        )
+
+        return regression_process.stdout
