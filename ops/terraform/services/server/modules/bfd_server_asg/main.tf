@@ -143,7 +143,7 @@ resource "aws_launch_template" "main" {
     seed_env              = local.seed_env
     port                  = var.lb_config.port
     accountId             = var.launch_config.account_id
-    data_server_db_url    = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${local.full_jdbc_suffix}"
+    reader_endpoint       = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${local.full_jdbc_suffix}"
     launch_lifecycle_hook = local.on_launch_lifecycle_hook_name
   }))
 

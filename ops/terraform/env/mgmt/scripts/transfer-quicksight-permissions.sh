@@ -16,6 +16,16 @@ readonly aws_account_id
 sole_owner_arn="${SOLE_OWNER_ARN}"
 readonly sole_owner_arn
 
+check_user_exists() {
+  users_found="$(aws quicksight list-users --aws-account-id "$aws_account_id" --namespace default \
+    --query "UserList[?Arn=='$sole_owner_arn']" | jq length)"
+  if [ "$users_found" = "0" ]; then
+    # User was already deleted through some other means. 
+    # If we try to search for their assets, it will fail due to a lookup on a nonexistent ARN
+    exit 0;
+  fi
+}
+
 format_asset_permissions() {
   permissions=$1
   echo "[{\"Principal\": \"$principal_admin_arn\",\"Actions\": $permissions}]"
@@ -24,12 +34,16 @@ format_asset_permissions() {
 search_asset_sole_owner() {
   asset=$1
   query_id=$2
+  # it thinks this is an array expansion, but it's just part of the query syntax
+  # shellcheck disable=SC1087
   aws quicksight "search-$asset" --aws-account-id "$aws_account_id" \
     --filters "Operator=StringEquals,Name=DIRECT_QUICKSIGHT_SOLE_OWNER,Value=$sole_owner_arn" \
     --query "$query_id[] | [?Status != 'DELETED']"
 }
 
 transfer_sole_ownership_of_assets() {
+  check_user_exists
+
   data_sources=$(search_asset_sole_owner "data-sources" "DataSourceSummaries")
   data_sources=$(echo "$data_sources" | jq -r '[.[].DataSourceId] | join(",")')
 

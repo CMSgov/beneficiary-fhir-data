@@ -10,7 +10,7 @@
 
 - name: Create Server User
   user:
-    name: "{{ data_server_user }}"
+    name: "{{ user }}"
     shell: /bin/false
   become: true
 
@@ -18,16 +18,16 @@
   lineinfile:
     path: /etc/sudoers
     state: present
-    line: "{{ data_server_user }} ALL=(ALL) NOPASSWD: /sbin/iptables"
+    line: "{{ user }} ALL=(ALL) NOPASSWD: /sbin/iptables"
     validate: /usr/sbin/visudo -cf %s
   become: true
 
 - name: Create Server Directory
   file:
-    path: "{{ data_server_dir }}"
+    path: "{{ ref_dir }}"
     state: directory
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
 
@@ -36,50 +36,50 @@
 # accidentally change the permissions on /tmp.)
 - name: Check for Custom Temp Directory
   stat:
-    path: "{{ data_server_tmp_dir }}"
+    path: "{{ tmp }}"
   become: true
   register: stat_tmp
-  when: data_server_tmp_dir is defined
+  when: tmp is defined
 
 - name: Create Custom Temp Directory
   file:
-    path: "{{ data_server_tmp_dir }}"
+    path: "{{ tmp }}"
     state: directory
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
-  when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
+  when: tmp is defined and stat_tmp.stat.exists == false
 
 - name: Copy and Unzip BFD Server Launcher
   unarchive:
     src: "{{ data_server_launcher }}"
-    dest: "{{ data_server_dir }}"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    dest: "{{ ref_dir }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
   become: true
 
 - name: Copy BFD Server WAR
   copy:
     src: "{{ data_server_war }}"
-    dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
+    dest: "{{ ref_dir }}/{{ data_server_war | basename }}"
   become: true
 
 - name: Create New Relic Directories
   file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
   loop:
-    - "{{ data_server_dir }}/newrelic"
-    - "{{ data_server_dir }}/newrelic/extensions"
+    - "{{ ref_dir }}/newrelic"
+    - "{{ ref_dir }}/newrelic/extensions"
 
 - name: Find New Relic Agent
   find:
-    paths: "{{ data_server_dir }}"
+    paths: "{{ ref_dir }}"
     pattern: newrelic-agent*.jar
     recurse: true
   register: find_nra
@@ -87,10 +87,10 @@
 - name: Copy New Relic Java Agent
   copy:
     src: "{{ item.path }}"
-    dest: "{{ data_server_dir }}/newrelic/newrelic.jar"
+    dest: "{{ ref_dir }}/newrelic/newrelic.jar"
     remote_src: true
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: u=rw,g=r,o=r
   with_items:
     - "{{ find_nra.files }}"
@@ -99,18 +99,18 @@
 - name: Copy New Relic Java Agent Config
   template:
     src: 'newrelic.yml.j2'
-    dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    dest: "{{ ref_dir }}/newrelic/newrelic.yml"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: u=rw,g=r
   become: true
 
 - name: Configure New Relic Extensions
   template:
     src: 'newrelic_tracing.xml.j2'
-    dest: "{{ data_server_dir }}/newrelic/extensions/tracing.xml"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
+    dest: "{{ ref_dir }}/newrelic/extensions/tracing.xml"
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: u=rw,g=r,o=r
   become: true
 

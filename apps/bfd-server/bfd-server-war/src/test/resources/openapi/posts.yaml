@@ -6,7 +6,7 @@ paths:
       description: This is a search type
       requestBody:
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               type: object
               properties:
@@ -53,22 +53,21 @@ paths:
                     
                     Example:
                       - `excludeSAMHSA=true`
-                  enum: ["true", "false"]
-                includeTaxNumber:
+                includeTaxNumbers:
                   type: string
                   description: |-
                     Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
                     
                     Example:
                        - `includeTaxNumbers=true`
-                  enum: ["true", "false"]
                 service-date:
                   type: string
                   description: |-
-                    Only satisfy the Search request if a claim's Date
-                    falls within a specified _DateRange_. A _DateRange_ can be
-                    defined by providing less than `lt` and/or greater than `gt` values.
-                    This parameter can be included in a request one or more times.
+                    Only satisfy the search request if a claim's date falls within a specified _DateRange_.
+                    The _DateRange_ is defined by the claim's billing period, specifically the 
+                    `Claim.billablePeriod.end`. A _DateRange_ can be further refined by providing 
+                    less than `lt` and/or greater than `gt` values. This parameter can be included 
+                    in a request one or more times.
                     
                     Examples:
                        - `service-date=gt2023-01-02&service-date=lt2023-05-01`
@@ -133,7 +132,7 @@ paths:
       description: This is a search type
       requestBody:
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               type: object
               properties:
@@ -242,12 +241,12 @@ paths:
               schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
   /v1/fhir/Patient/_search:
     post:
-      tags: [ v1,Patient ]
+      tags: [v1,Patient]
       summary: 'search-type: Search for Patient instances'
       description: This is a search type
       requestBody:
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               type: object
               properties:
@@ -351,6 +350,238 @@ paths:
           description: Success
           content:
             application/fhir+json:
-              schema: { $ref: '#/components/schemas/FHIR-JSON-RESOURCE' }
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
             application/fhir+xml:
-              schema: { $ref: '#/components/schemas/FHIR-XML-RESOURCE' }
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
+  /v2/fhir/Claim/_search:
+      post:
+        tags: [v2,Claim]
+        summary: 'search-type: Search for Claim instances'
+        description: This is a search type
+        requestBody:
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  mbi:
+                    type: string
+                    description: |-
+                      **NOTE: THIS IS A REQUIRED FIELD**
+
+                      Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI
+                      represents the medicare benficiary ID, or as much of that
+                      defined by the [FHIR specification](https://terminology.hl7.org/NamingSystem-cmsMBI.html) as:
+
+                      ```
+                      A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
+                      '-', with a length limit of 11 characters.
+                      ```
+
+                      The following are all valid values for MBI:
+                        - `mbi=1EG4TE5MK73` (unhashed MBI)
+                        - `mbi=1S00E00HA26` (synthetic MBI)
+                    example: "1EG4TE5MK73"
+                  _lastUpdated:
+                    type: string
+                    description: |-
+                      Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
+                      A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
+                      This parameter can be included in a request one or more times.
+
+                      Examples:
+                        - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
+                        - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
+                        - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                    example: "gt2023-01-02"
+                  excludeSAMHSA:
+                    type: string
+                    description: |-
+                      The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
+                      is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
+                      Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
+                      _ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_
+                      and _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
+
+                      Example:
+                        - `excludeSAMHSA=true`
+                    example: true
+                  includeTaxNumbers:
+                    type: string
+                    description: |-
+                      Setting this flag to _true_, provides tax number in the Claim transformed data for the response.
+                      
+                      Example:
+                         - `includeTaxNumbers=true
+                  isHashed:
+                    type: string
+                    description: |-
+                      Set this flag to false during POST request. Not setting the flag is defaulted to true
+                      
+                      Example:
+                        - `isHashed=true`
+                  service-date:
+                    type: string
+                    description: |-
+                      Only satisfy the search request if a claim's date falls within a specified _DateRange_.
+                      The _DateRange_ is defined by the claim's billing period, specifically the 
+                      `Claim.billablePeriod.end`. A _DateRange_ can be further refined by providing 
+                      less than `lt` and/or greater than `gt` values. This parameter can be included 
+                      in a request one or more times.
+
+                      Examples:
+                        - `service-date=gt2023-01-02&service-date=lt2023-05-01`
+                        - `service-date=gt2023-01-02`
+                        - `service-date=lt2023-05-01`
+                    example: "lt2023-05-01"
+                  startIndex:
+                    type: string
+                    description: |-
+                      When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset
+                      (starting point) into the list of elements for the _Request_.
+                      It is optional and defaults to 1 if not supplied.
+                      A value 0 is not allowed and negative indices are not currently supported.
+
+                      Example:
+                      - `startIndex=100`
+                    example: 100
+                  type:
+                    type: string
+                    description: |-
+                      A list of one or more comma-separated claim types to be included in the request;
+                      within BFD, the claim types represent an _OR_ inclusion logic meaning any claims matching one of the specified
+                      claim types will be checked
+
+                      Supported Claim Type values:
+                        - `fiss`
+                        - `mcs`
+
+                      Examples:
+                        - `type=fiss,mcs`
+                        - `type=fiss`
+                    example: "fiss,mcs"
+          required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}
+  /v2/fhir/ClaimResponse/_search:
+    post:
+      tags: [v2,ClaimResponse]
+      summary: 'search-type: Search for ClaimResponse instances'
+      description: This is a search type
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                mbi:
+                  type: string
+                  description: |-
+                    **NOTE: THIS IS A REQUIRED FIELD**
+                    
+                    Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI
+                    represents the medicare benficiary ID, or as much of that
+                    defined by the [FHIR specification](https://terminology.hl7.org/NamingSystem-cmsMBI.html) as:
+                    
+                    ```
+                    A combination of upper case ASCII letters ('A'..'Z except for S, L, O, I, B, and Z.', numerals ('0'..'9'),
+                    '-', with a length limit of 11 characters.
+                    ```
+                    
+                    The following are all valid values for MBI:
+                      - `mbi=1EG4TE5MK73` (unhashed MBI)
+                      - `mbi=1S00E00HA26` (synthetic MBI)
+                  example: "1EG4TE5MK73"
+                _lastUpdated:
+                  type: string
+                  description: |-
+                    Only satisfy the Search if the Claim's `last_updated` Date falls within a specified _DateRange_.
+                    A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
+                    This parameter can be included in a request one or more times.
+                    
+                    Examples:
+                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                  example: "gt2023-01-02"
+                excludeSAMHSA:
+                  type: string
+                  description: |-
+                    The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
+                    is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
+                    Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
+                    _ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_
+                    and _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.
+                    
+                    Example:
+                      - `excludeSAMHSA=true`
+                  example: true
+                includeTaxNumbers:
+                  type: string
+                  description: |-
+                    Setting this flag to _true_, provides tax number in the Claim transformed data for the response.
+                    
+                    Example:
+                      - `includeTaxNumbers=true`
+                  example: true
+                isHashed:
+                  type: string
+                  description: |-
+                    Set this flag to false during POST request. Not setting the flag is defaulted to true
+                    
+                    Example:
+                      - `isHashed=true`
+                service-date:
+                  type: string
+                  description: |-
+                    Only satisfy the Search request if a claim's Date
+                    falls within a specified _DateRange_. A _DateRange_ can be
+                    defined by providing less than `lt` and/or greater than `gt` values.
+                    This parameter can be included in a request one or more times.
+                    
+                    Examples:
+                      - `service-date=gt2023-01-02&service-date=lt2023-05-01`
+                      - `service-date=gt2023-01-02`
+                      - `service-date=lt2023-05-01`
+                  example: "lt2023-05-01"
+                startIndex:
+                  type: string
+                  description: |-
+                    When fetching a _Bundle Response_ using pagination, this URL parameter represents an offset
+                    (starting point) into the list of elements for the _Request_.
+                    It is optional and defaults to 1 if not supplied.
+                    A value 0 is not allowed and negative indices are not currently supported.
+                    
+                    Example:
+                    - `startIndex=100`
+                  example: 100
+                type:
+                  type: string
+                  description: |-
+                    A list of one or more comma-separated claim types to be included in the request;
+                    within BFD, the claim types represent an _OR_ inclusion logic meaning any claims matching one of the specified
+                    claim types will be checked
+                    
+                    Supported Claim Type values:
+                      - `fiss`
+                      - `mcs`
+                    
+                    Examples:
+                      - `type=fiss,mcs`
+                      - `type=fiss`
+                  example: "fiss,mcs"
+        required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/fhir+json:
+              schema: {$ref: '#/components/schemas/FHIR-JSON-RESOURCE'}
+            application/fhir+xml:
+              schema: {$ref: '#/components/schemas/FHIR-XML-RESOURCE'}

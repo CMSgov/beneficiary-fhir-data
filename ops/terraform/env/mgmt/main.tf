@@ -28,6 +28,7 @@ locals {
   init_fail_alarm_name  = "bfd-${local.env}-cloud-init-failure"
   #
 
+  all_kms_data_key_arns = concat(values(aws_kms_key.data_keys)[*].arn, values(aws_kms_key.data_keys_alt)[*].arn)
   all_kms_config_key_arns = flatten(
     [
       for v in concat(
