@@ -690,7 +690,7 @@ public class RDATestUtils {
    * @param em our {@link EntityManager}
    * @return the {@link Mbi}
    */
-  private Mbi lookupTestMbiRecord(EntityManager em) {
+  public Mbi lookupTestMbiRecord(EntityManager em) {
     final CriteriaBuilder builder = em.getCriteriaBuilder();
     final CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
     final Root<Mbi> root = criteria.from(Mbi.class);
