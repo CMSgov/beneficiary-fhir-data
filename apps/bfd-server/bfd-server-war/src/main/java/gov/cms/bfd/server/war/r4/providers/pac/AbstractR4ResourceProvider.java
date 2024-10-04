@@ -236,6 +236,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
+    Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity);
+    if (claimEntityMbi != null) logMbiIdentifiersToMdc(claimEntityMbi);
+
     return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);
   }
 
