@@ -861,6 +861,9 @@ public final class ServerTestUtils {
     assertMdcEntries(
         requestAuth,
         requestString,
+        // Generate a Map that is the combination of the default keys and any additional keys to
+        // check where each key has a corresponding empty value indicating that only the key's
+        // existence should be verified; basically, this method doesn't check any MDC values
         Stream.concat(DEFAULT_MDC_KEYS.stream(), additionalMdcKeysToCheck.stream())
             .distinct()
             .collect(Collectors.toMap(key -> key, key -> Optional.empty())),
