@@ -21,8 +21,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
@@ -285,24 +287,36 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
-   * Returns the given MBI Hash of the MBI associated with the given {@link RdaFissClaim} or {@link
-   * RdaMcsClaim}, depending on resource type.
+   * Returns the {@link Mbi} associated with the given {@link RdaFissClaim} or {@link RdaMcsClaim},
+   * depending on resource type.
    *
    * @param <T> generic type extending {@link IBaseResource}
    * @param claimIdType the {@link ResourceTypeV2} indicating what the claim's type is (either fiss
    *     or mcs)
    * @param claimEntity the claim entity itself; either a {@link RdaFissClaim} or {@link
    *     RdaMcsClaim}
-   * @return the MBI Hash of the MBI associated with the given claim entity, or <code>null</code> if
-   *     not found
+   * @return the {@link Mbi} associated with the given claim entity, or <code>null</code> if not
+   *     found
    */
-  private <T extends IBaseResource> @Nullable String getClaimEntityMbiHash(
+  private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
     return switch (claimIdType.getTypeLabel()) {
-      case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord().getHash();
-      case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord().getHash();
+      case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
+      case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
       default -> null;
     };
+  }
+
+  /**
+   * Logs relevant identifiers (hash, ID) from a given {@link Mbi} to the MDC.
+   *
+   * @param mbi the {@link Mbi} to log
+   */
+  private void logMbiIdentifiersToMdc(Mbi mbi) {
+    requireNonNull(mbi);
+
+    BfdMDC.put("mbi_hash", mbi.getHash());
+    BfdMDC.put("mbi_id", mbi.getMbiId().toString());
   }
 
   /**
@@ -470,6 +484,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       BundleOptions bundleOptions) {
     var entitiesWithType =
         resourceTypes.stream()
+            // There may be multiple resource types which will each result in a list of claim
+            // entities. So, to ensure that we have a flat list of entities to their type, we use
+            // flatMap
             .flatMap(
                 type ->
                     claimDao
@@ -479,22 +496,17 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                         .map(e -> new ImmutablePair<>(e, type)))
             .toList();
 
-    // Log the MBI Hash for a given Claim/ClaimResponse request regardless of whether a hashed MBI
-    // was provided or not
-    if (!bundleOptions.isHashed) {
-      // If the given MBI is not hashed, then to provide it to the MDC we need to extract it from
-      // the MBI associated with the returned claim entities
-      entitiesWithType.stream()
-          .map(pair -> getClaimEntityMbiHash(pair.right, pair.left))
-          .filter(Objects::nonNull)
-          // We choose the first MBI Hash from the first claim entity in the Stream as the MBI Hash
-          // will be the same for all returned claims, so there is no reason to evaluate the entire Stream
-          .findFirst()
-          .ifPresent(TransformerUtilsV2::logMbiHashToMdc);
-    } else {
-      // If the MBI was provided hashed in the request, just log it as is
-      TransformerUtilsV2.logMbiHashToMdc(mbi);
-    }
+    // Log nonsensitive MBI identifiers for a given Claim/ClaimResponse request for use in
+    // historical analysis
+    entitiesWithType.stream()
+        .map(pair -> getClaimEntityMbi(pair.right, pair.left))
+        .filter(Objects::nonNull)
+        // We choose the first MBI from the first, valid claim entity (technically, all entities
+        // should fit these criteria or something is very wrong) in the Stream as the MBI
+        // will be the same for all returned claims, so there is no reason to evaluate the entire
+        // Stream
+        .findFirst()
+        .ifPresent(this::logMbiIdentifiersToMdc);
 
     List<T> resources =
         entitiesWithType.stream()
