@@ -316,6 +316,9 @@ try {
 							]
 						)
 
+						//refreshAsg = sh(returnStdout: true, script: 'ops/terraform/services/server/modules/bfd_server_asg/scripts/manual_refresh_asg_for_regression.bash bfd-${bfdEnv}-fhir')
+						//println '${refreshAsg}';
+
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,

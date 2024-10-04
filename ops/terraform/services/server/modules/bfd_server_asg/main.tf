@@ -210,12 +210,12 @@ resource "aws_autoscaling_group" "main" {
   warm_pool {
     pool_state = "Stopped"
     # BFD-2588
-    # if disabled_asg_autoscale_alarms, set pool sizes at 0 to force refresh
+    # if disabled_asg_autoscale_alarms, set pool sizes at 0..0 to enable manual refresh
     min_size                    = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.min)
     max_group_prepared_capacity = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.max_warm)
-    # instance_reuse_policy {
-    #   reuse_on_scale_in = true
-    # }
+    instance_reuse_policy {
+      reuse_on_scale_in = true
+    }
   }
 
   # # BFD-2558 add refresh strategy based on launch template updates
@@ -260,6 +260,24 @@ resource "aws_autoscaling_group" "main" {
     create_before_destroy = true
     # BFD-2558
     ignore_changes = [desired_capacity, min_size, max_size]
+  }
+}
+
+# BFD-2558
+resource "null_resource" "run_script" {
+  depends_on = [aws_autoscaling_group.main]
+
+  # execute only with disable_asg_autoscale_alarms
+  count = (var.disable_asg_autoscale_alarms ? 1 : 0)
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    working_dir = abspath(path.module)
+    command     = "./scripts/manual_refresh_asg_for_regression.bash ${aws_autoscaling_group.main.name}"
+  }
+
+  lifecycle {
+    replace_triggered_by = [aws_autoscaling_group.main]
   }
 }
 
