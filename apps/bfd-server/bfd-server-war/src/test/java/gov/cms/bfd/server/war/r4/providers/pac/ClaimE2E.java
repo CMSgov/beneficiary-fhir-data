@@ -159,6 +159,52 @@ public class ClaimE2E extends ServerRequiredTest {
   }
 
   /**
+   * Tests to see if nonsensitive MBI identifiers (hash and ID) are logged to the MDC when a FISS
+   * {@link Claim} with an associated {@link Mbi} is looked up by a specific ID.
+   */
+  @Test
+  void testClaimReadLogsMbiIdentifiersForFissClaimWithMbiRecord() throws IOException {
+    String requestString = claimEndpoint + "f-123456";
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            Optional.empty()));
+  }
+
+  /**
+   * Tests to see if nonsensitive MBI identifiers (hash and ID) are logged to the MDC when an MCS
+   * {@link Claim} with an associated {@link Mbi} is looked up by a specific ID.
+   */
+  @Test
+  void testClaimReadLogsMbiIdentifiersForMcsClaimWithMbiRecord() throws IOException {
+    String requestString = claimEndpoint + "m-654321";
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            Optional.empty()));
+  }
+
+  /**
    * Tests to see if the correct response is given when a search is done for {@link Claim}s using
    * given mbi and service-date range. In this test case the query finds the matched claims because
    * their to dates are within the date range even though their from dates are not.
