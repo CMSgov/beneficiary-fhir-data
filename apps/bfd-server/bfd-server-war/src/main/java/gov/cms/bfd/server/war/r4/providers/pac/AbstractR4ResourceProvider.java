@@ -315,8 +315,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private void logMbiIdentifiersToMdc(Mbi mbi) {
     requireNonNull(mbi);
 
-    BfdMDC.put("mbi_hash", mbi.getHash());
-    BfdMDC.put("mbi_id", mbi.getMbiId().toString());
+    BfdMDC.put(BfdMDC.MBI_HASH, mbi.getHash());
+    BfdMDC.put(BfdMDC.MBI_ID, mbi.getMbiId().toString());
   }
 
   /**
