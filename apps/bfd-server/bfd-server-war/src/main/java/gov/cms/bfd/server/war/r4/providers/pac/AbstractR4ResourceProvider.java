@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
@@ -286,21 +285,22 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
-   * Returns the given {@link RdaFissClaim} or {@link RdaMcsClaim} entity's MBI ID given the
-   * resource type.
+   * Returns the given MBI Hash of the MBI associated with the given {@link RdaFissClaim} or {@link
+   * RdaMcsClaim}, depending on resource type.
    *
    * @param <T> generic type extending {@link IBaseResource}
    * @param claimIdType the {@link ResourceTypeV2} indicating what the claim's type is (either fiss
    *     or mcs)
    * @param claimEntity the claim entity itself; either a {@link RdaFissClaim} or {@link
    *     RdaMcsClaim}
-   * @return the MBI ID associated with the given claim entity, or <code>null</code> if not found
+   * @return the MBI Hash of the MBI associated with the given claim entity, or <code>null</code> if
+   *     not found
    */
-  private <T extends IBaseResource> @Nullable String getClaimEntityMbiId(
+  private <T extends IBaseResource> @Nullable String getClaimEntityMbiHash(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
     return switch (claimIdType.getTypeLabel()) {
-      case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord().getMbiId().toString();
-      case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord().getMbiId().toString();
+      case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord().getHash();
+      case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord().getHash();
       default -> null;
     };
   }
@@ -431,10 +431,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           new OffsetLinkBuilder(
               requestDetails, String.format("/%s?", resourceType.getSimpleName()));
 
-      if (isHashed) {
-        TransformerUtilsV2.logMbiHashToMdc(mbiString);
-      }
-
       BundleOptions bundleOptions = new BundleOptions(isHashed, excludeSamhsa, includeTaxNumbers);
 
       if (types != null) {
@@ -483,15 +479,22 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                         .map(e -> new ImmutablePair<>(e, type)))
             .toList();
 
-    // Log the MBI ID to the MDC for forensics in cases where the MBI is not hashed
-    entitiesWithType.stream()
-        .map(pair -> getClaimEntityMbiId(pair.right, pair.left))
-        .filter(Objects::nonNull)
-        // We choose the first MBI ID from the first claim entity in the Stream as the MBI ID will
-        // be the same for all returned claims, so there is no reason to evaluate the entire Stream.
-        // Multiple MBI IDs would be considered a data consistency issue.
-        .findFirst()
-        .ifPresent(mbiId -> BfdMDC.put("mbi_id", mbiId));
+    // Log the MBI Hash for a given Claim/ClaimResponse request regardless of whether a hashed MBI
+    // was provided or not
+    if (!bundleOptions.isHashed) {
+      // If the given MBI is not hashed, then to provide it to the MDC we need to extract it from
+      // the MBI associated with the returned claim entities
+      entitiesWithType.stream()
+          .map(pair -> getClaimEntityMbiHash(pair.right, pair.left))
+          .filter(Objects::nonNull)
+          // We choose the first MBI Hash from the first claim entity in the Stream as the MBI Hash
+          // will be the same for all returned claims, so there is no reason to evaluate the entire Stream
+          .findFirst()
+          .ifPresent(TransformerUtilsV2::logMbiHashToMdc);
+    } else {
+      // If the MBI was provided hashed in the request, just log it as is
+      TransformerUtilsV2.logMbiHashToMdc(mbi);
+    }
 
     List<T> resources =
         entitiesWithType.stream()
