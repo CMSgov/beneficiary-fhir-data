@@ -145,9 +145,9 @@ manual_scale_asg() {
     CONTINUE=1
     HALTMSG=""
     LOOPTIME=0
-    SLEEPSEC=60
-    WAIT_TIMEOUT_MIN=${timeout}
-
+    SLEEPSEC=30
+    WAIT_TIMEOUT_SEC=$(( ${timeout} * 60 ))
+    
     ## DBGFILE=".debug.${asgname}.${direction}.${ltversion}.${RANDOM}.log"
     DBGFILE="/dev/null"
     echo "STARTING $(date)" >> $DBGFILE
@@ -166,7 +166,7 @@ manual_scale_asg() {
     do
         # sleep at beginning of loop supports async nature of ASG changes
         sleep ${SLEEPSEC}
-        LOOPTIME=$(( ${LOOPTIME} + 1 ))
+        LOOPTIME=$(( ${LOOPTIME} + ${SLEEPSEC} ))
 
         # after sleeping check ASG state
         asgStateJson=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names ${asgname} --output json | jq "${asg_query}")
@@ -174,7 +174,7 @@ manual_scale_asg() {
         readyCount=$(getAsgReadyVersionCount "${asgStateJson}" "${ltversion}" "${direction}" )
 
         # if desired capacity not reached, immediately go back to sleep
-        echo "LOOPCOUNT ${LOOPTIME}" >> $DBGFILE
+        echo "LOOPTIME ${LOOPTIME}" >> $DBGFILE
         echo "State ${asgStateJson}" >> $DBGFILE
         if [ ${desCapNow} -ne ${reqsize} ]
         then
@@ -207,7 +207,7 @@ manual_scale_asg() {
 
         # Reaching this point indicates Scale Request is not yet complete
         # Check timeout 
-        if [ ${LOOPTIME} -ge ${WAIT_TIMEOUT_MIN} ]
+        if [ ${LOOPTIME} -ge ${WAIT_TIMEOUT_SEC} ]
         then
             CONTINUE=0;
             HALTMSG="ERROR: SCALE ${direction} TIMEOUT ${timeout} mins REACHED"
@@ -255,7 +255,7 @@ fi
 if [ ${currentWarmSize} -gt 0 ]
 then
     echo "    Need to Terminate Warm Instances ..."
-    warm_pool_removal_msg=$(manual_rm_warm_pool ${asg_name})
+    warm_pool_removal_msg=$(manual_rm_warm_pool ${asg_name} ${refresh_timeout})
     if [ "${warm_pool_removal_msg}" != "SUCCESS" ]
     then 
         echo ${warm_pool_removal_msg} && exit 4;
