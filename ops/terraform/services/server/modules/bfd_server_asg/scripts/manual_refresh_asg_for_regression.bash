@@ -64,9 +64,9 @@ getAsgReadyVersionCount() {
     direction=${3}
     if [ "${direction}" == "UP" ]
     then
-        echo "${json}"|jq -r --arg ltver ${ltversion} '[.Instances[]|select(.LaunchTemplate.Version=="$ltver")|select(.LifecycleState == "InService")]|length'
+        echo "${json}"|jq -r --arg ltver ${ltversion} '[.Instances[]|select(.LaunchTemplate.Version==$ltver)|select(.LifecycleState == "InService")]|length'
     else
-        echo "${json}"|jq -r --arg ltver ${ltversion} '[.Instances[]|select(.LaunchTemplate.Version!="$ltver")|select(.LifecycleState == "InService")]|length'
+        echo "${json}"|jq -r --arg ltver ${ltversion} '[.Instances[]|select(.LaunchTemplate.Version!=$ltver)|select(.LifecycleState == "InService")]|length'
     fi
 }
 
@@ -148,7 +148,8 @@ manual_scale_asg() {
     SLEEPSEC=60
     WAIT_TIMEOUT_MIN=${timeout}
 
-    DBGFILE=".debug.${asgname}.${direction}.${ltversion}.${RANDOM}.log"
+    ## DBGFILE=".debug.${asgname}.${direction}.${ltversion}.${RANDOM}.log"
+    DBGFILE="/dev/null"
     echo "STARTING $(date)" >> $DBGFILE
 
     # Request new desired capacity
@@ -173,7 +174,8 @@ manual_scale_asg() {
         readyCount=$(getAsgReadyVersionCount "${asgStateJson}" "${ltversion}" "${direction}" )
 
         # if desired capacity not reached, immediately go back to sleep
-        echo "LOOPCOUNT ${LOOPTIME}" >> $DBGFILE && echo "State ${asgStateJson}" >> $DBGFILE
+        echo "LOOPCOUNT ${LOOPTIME}" >> $DBGFILE
+        echo "State ${asgStateJson}" >> $DBGFILE
         if [ ${desCapNow} -ne ${reqsize} ]
         then
             echo "NEXT for ${desCapNow} ne ${reqsize}" >> $DBGFILE
@@ -182,6 +184,7 @@ manual_scale_asg() {
             # verify readyCount matches target (UP: scaleUpCount, DOWN: 0)
             if [ "${direction}" == "UP" ] 
             then
+                echo "    direction ${direction} readyCount ${readyCount} vs scaleUpCount ${scaleUpCount}" >> $DBGFILE
                 if [ ${readyCount} -eq ${scaleUpCount} ]
                 then
                     HALTMSG="SUCCESS"
@@ -190,6 +193,7 @@ manual_scale_asg() {
                     echo "NEXT UP for ${readyCount} eq ${scaleUpCount}" >> $DBGFILE
                 fi
             else ## direction == DOWN
+                echo "    direction ${direction} readyCount ${readyCount} vs 0" >> $DBGFILE
                 if [ ${readyCount} -eq 0 ]
                 then
                     HALTMSG="SUCCESS"
@@ -212,6 +216,7 @@ manual_scale_asg() {
     echo "${HALTMSG}"
 }
 
+# set script options
 set -euo pipefail
 shopt -s expand_aliases
 
@@ -249,40 +254,39 @@ fi
 # Do we need to remove the Warm Pool
 if [ ${currentWarmSize} -gt 0 ]
 then
-  echo "    Need to Terminate Warm Instances ..."
-  warm_pool_removal_msg=$(manual_rm_warm_pool ${asg_name})
-  if [ "${warm_pool_removal_msg}" != "SUCCESS" ]
-  then 
-    echo ${warm_pool_removal_msg} && exit 4;
-  fi
+    echo "    Need to Terminate Warm Instances ..."
+    warm_pool_removal_msg=$(manual_rm_warm_pool ${asg_name})
+    if [ "${warm_pool_removal_msg}" != "SUCCESS" ]
+    then 
+        echo ${warm_pool_removal_msg} && exit 4;
+    fi
 else
-  echo "    Warm Pool Size ${currentWarmSize} requires no adjustment"
+    echo "    Warm Pool Size ${currentWarmSize} requires no adjustment"
 fi
 
 # Do we need to execute Scaling down/up for Regression Testing
-if [ ${targetScaleUp} -lt ${currentMax} ] && [ ${cfgLaunchVer} -gt ${maxHotLaunchVer} ]
+if [ ${targetScaleUp} -le ${currentMax} ] && [ ${cfgLaunchVer} -gt ${maxHotLaunchVer} ]
 then
-  echo "    Need to force Refresh by scaling UP Hot Instances from ${initHotSize} to ${targetScaleUp} then back down Down"
-  scale_up_msg=$(manual_scale_asg ${asg_name} ${targetScaleUp} UP ${cfgLaunchVer} ${refresh_timeout})
-  ##if [ "${scale_up_msg}" != "SUCCESS" ]
-  echo "${scale_up_msg}"
-  if [ $(echo "${scale_up_msg}" | grep SUCCESS | wc -l) -eq 0 ]
-  then
-    echo ${scale_up_msg} && exit 8;
-  else
-    echo "    Scale UP SUCCEEDED"
-    scale_down_msg=$(manual_scale_asg ${asg_name} ${initHotSize} DOWN ${cfgLaunchVer} ${refresh_timeout})
-    if [ "${scale_down_msg}" != "SUCCESS" ]
+    echo "    Need to force Refresh by scaling UP Hot Instances from ${initHotSize} to ${targetScaleUp} then back down Down"
+    scale_up_msg=$(manual_scale_asg ${asg_name} ${targetScaleUp} UP ${cfgLaunchVer} ${refresh_timeout})
+
+    if [ $(echo "${scale_up_msg}" | grep SUCCESS | wc -l) -eq 0 ]
     then
-      echo ${scale_down_msg} && exit 16;
+        echo ${scale_up_msg} && exit 8;
+    else
+        echo "    Scale UP SUCCEEDED"
+        scale_down_msg=$(manual_scale_asg ${asg_name} ${initHotSize} DOWN ${cfgLaunchVer} ${refresh_timeout})
+        if [ $(echo "${scale_down_msg}" | grep SUCCESS | wc -l) -eq 0 ]
+        then
+            echo ${scale_down_msg} && exit 16;
+        fi
     fi
-  fi
-  echo "SUCCESS"
+    echo "SUCCESS"
 else
-  if [ ${maxHotLaunchVer} -ge ${cfgLaunchVer} ]
-  then
-    echo "    Launch Versions already match, No Scaling required"
-  else
-    echo "    Cluster max ${currentMax} does not support Scale Up to ${targetScaleUp}"
-  fi
+    if [ ${maxHotLaunchVer} -ge ${cfgLaunchVer} ]
+    then
+        echo "    Launch Versions already match, No Scaling required"
+    else
+        echo "    Cluster max ${currentMax} does not support Scale Up to ${targetScaleUp}"
+    fi
 fi 

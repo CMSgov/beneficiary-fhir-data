@@ -68,7 +68,7 @@ locals {
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
 
-  ami_id = "ami-032e2a66394f48f92" # "ami-087cf32e7146fceec"  # data.aws_ami.main.image_id #  
+  ami_id = data.aws_ami.main.image_id # "ami-07e53caa4708f5e2f" #
 
   create_server_lb_alarms    = !local.is_ephemeral_env || var.force_create_server_lb_alarms
   create_server_metrics      = !local.is_ephemeral_env || var.force_create_server_metrics
