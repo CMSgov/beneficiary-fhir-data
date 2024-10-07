@@ -248,7 +248,7 @@ echo "    Targeted Scaling Count ${targetScaleUp}, configured Launch Ver ${cfgLa
 if [ ${minHotLaunchVer} -ne ${maxHotLaunchVer} ]
 then
     lvarray="$(echo "${asgJson}"|jq -r '[.Instances[]|.LaunchTemplate.Version|tonumber]')"
-    echo "ERROR: Mix of active Launch Template versions ${lvarray} is UNSUPPORTED OPERATION" && exit -2;
+    echo "ERROR: Mix of active Launch Template versions ${lvarray} is UNSUPPORTED OPERATION" && exit 2;
 fi
 
 # Do we need to remove the Warm Pool
