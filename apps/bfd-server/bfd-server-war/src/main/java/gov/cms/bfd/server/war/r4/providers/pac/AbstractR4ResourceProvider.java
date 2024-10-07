@@ -298,15 +298,17 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *     or mcs)
    * @param claimEntity the claim entity itself; either a {@link RdaFissClaim} or {@link
    *     RdaMcsClaim}
-   * @return the {@link Mbi} associated with the given claim entity, or <code>null</code> if not
-   *     found
+   * @return the {@link Mbi} associated with the given claim entity
+   * @throws IllegalArgumentException if the given {@link ResourceTypeV2} does not indicate either a
+   *     FISS or MCS claim ID type
    */
   private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
       case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
-      default -> null;
+      default -> throw new IllegalArgumentException(
+          "Invalid claim ID type '" + claimIdType.getTypeLabel() + "', cannot get claim data");
     };
   }
 
