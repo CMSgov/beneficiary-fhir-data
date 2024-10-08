@@ -270,13 +270,13 @@ then
     echo "    Need to force Refresh by scaling UP Hot Instances from ${initHotSize} to ${targetScaleUp} then back down Down"
     scale_up_msg=$(manual_scale_asg ${asg_name} ${targetScaleUp} UP ${cfgLaunchVer} ${refresh_timeout})
 
-    if [ $(echo "${scale_up_msg}" | grep "SUCCESS" | wc -l) -eq 0 ]
+    if [ "$(echo "${scale_up_msg}" | grep "SUCCESS" | wc -l)" -eq 0 ]
     then
         echo ${scale_up_msg} && exit 8;
     else
         echo "    Scale UP SUCCEEDED"
         scale_down_msg=$(manual_scale_asg ${asg_name} ${initHotSize} DOWN ${cfgLaunchVer} ${refresh_timeout})
-        if [ $(echo "${scale_down_msg}" | grep "SUCCESS" | wc -l) -eq 0 ]
+        if [ "$(echo "${scale_down_msg}" | grep "SUCCESS" | wc -l)" -eq 0 ]
         then
             echo ${scale_down_msg} && exit 16;
         fi
