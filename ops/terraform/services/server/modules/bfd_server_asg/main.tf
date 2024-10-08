@@ -264,22 +264,22 @@ resource "aws_autoscaling_group" "main" {
 }
 
 # BFD-2558
-resource "null_resource" "run_script" {
-  depends_on = [aws_autoscaling_group.main]
+# resource "null_resource" "run_script" {
+#   depends_on = [aws_autoscaling_group.main]
 
-  # execute only with disable_asg_autoscale_alarms
-  count = (var.disable_asg_autoscale_alarms ? 1 : 0)
+#   # execute only with disable_asg_autoscale_alarms
+#   count = (var.disable_asg_autoscale_alarms ? 1 : 0)
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    working_dir = abspath(path.module)
-    command     = "./scripts/manual_refresh_asg_for_regression.bash ${aws_autoscaling_group.main.name}"
-  }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     working_dir = abspath(path.module)
+#     command     = "./scripts/manual_refresh_asg_for_regression.bash ${aws_autoscaling_group.main.name}"
+#   }
 
-  lifecycle {
-    replace_triggered_by = [aws_autoscaling_group.main]
-  }
-}
+#   lifecycle {
+#     replace_triggered_by = [aws_autoscaling_group.main]
+#   }
+# }
 
 ## Autoscaling Policies and Cloudwatch Alarms
 #

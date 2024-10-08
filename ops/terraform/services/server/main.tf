@@ -68,7 +68,7 @@ locals {
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
 
-  ami_id = data.aws_ami.main.image_id # "ami-07e53caa4708f5e2f" #
+  ami_id = data.aws_ami.main.image_id # "ami-07e53caa4708f5e2f" # 
 
   create_server_lb_alarms    = !local.is_ephemeral_env || var.force_create_server_lb_alarms
   create_server_metrics      = !local.is_ephemeral_env || var.force_create_server_metrics
@@ -155,7 +155,7 @@ module "fhir_asg" {
     min             = local.asg_min_instance_count
     max             = local.asg_max_instance_count
     max_warm        = local.asg_max_warm_instance_count
-    desired         = (max(var.override_asg_desired_instance_factor, 1) * local.asg_desired_instance_count)
+    desired         = var.override_asg_desired_instance_factor * local.asg_desired_instance_count
     sns_topic_arn   = ""
     instance_warmup = local.asg_instance_warmup_time
   }
