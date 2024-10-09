@@ -1013,7 +1013,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET);
 
-    ServerTestUtils.assertAccessJsonHasMdcKeys(
+    ServerTestUtils.assertDefaultAndAdditionalMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys, headers);
   }
 
@@ -1036,7 +1036,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS);
 
-    ServerTestUtils.assertAccessJsonHasMdcKeys(
+    ServerTestUtils.assertDefaultAndAdditionalMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys, headers);
   }
 
