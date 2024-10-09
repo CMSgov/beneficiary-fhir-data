@@ -207,16 +207,17 @@ resource "aws_autoscaling_group" "main" {
     "GroupTotalInstances",
   ]
 
-  warm_pool {
-    pool_state = "Stopped"
-    # BFD-2588
-    # if disabled_asg_autoscale_alarms, set pool sizes at 0..0 to enable manual refresh
-    min_size                    = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.min)
-    max_group_prepared_capacity = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.max_warm)
-    instance_reuse_policy {
-      reuse_on_scale_in = true
-    }
-  }
+  # BFD-2558 - remove altogether?
+  # warm_pool {
+  #   pool_state = "Stopped"
+  #   # BFD-2588
+  #   # if disabled_asg_autoscale_alarms, set pool sizes at 0..0 to enable manual refresh
+  #   min_size                    = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.min)
+  #   max_group_prepared_capacity = (var.disable_asg_autoscale_alarms ? 0 : var.asg_config.max_warm)
+  #   instance_reuse_policy {
+  #     reuse_on_scale_in = true
+  #   }
+  # }
 
   # # BFD-2558 add refresh strategy based on launch template updates
   # #          necessary now that ASG will be reused
