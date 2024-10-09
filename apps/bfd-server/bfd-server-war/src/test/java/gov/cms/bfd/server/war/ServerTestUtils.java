@@ -80,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
@@ -100,6 +101,41 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 /** Contains test utilities. */
 public final class ServerTestUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerTestUtils.class);
+
+  /** The list of base mdc keys that should be on every write to access.json. */
+  private static final List<String> DEFAULT_MDC_KEYS =
+      Arrays.asList(
+          BfdMDC.BENE_ID,
+          BfdMDC.HAPI_RESPONSE_TIMESTAMP_MILLI,
+          BfdMDC.HAPI_POST_PROCESS_TIMESTAMP_MILLI,
+          BfdMDC.HAPI_PRE_HANDLE_TIMESTAMP_MILLI,
+          BfdMDC.HAPI_PRE_PROCESS_TIMESTAMP_MILLI,
+          BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI,
+          BfdMDC.HAPI_PROCESSING_COMPLETED_NORM_TIMESTAMP_MILLI,
+          BfdMDC.HTTP_ACCESS_REQUEST_CLIENTSSL_DN,
+          BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT,
+          BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING,
+          BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING,
+          BfdMDC.HTTP_ACCESS_REQUEST_HEADER_HOST_ENCODING,
+          BfdMDC.HTTP_ACCESS_REQUEST_HEADER_USER_AGENT,
+          BfdMDC.HTTP_ACCESS_REQUEST_HTTP_METHOD,
+          BfdMDC.HTTP_ACCESS_REQUEST_OPERATION,
+          BfdMDC.HTTP_ACCESS_REQUEST_QUERY_STR,
+          BfdMDC.HTTP_ACCESS_REQUEST_TYPE,
+          BfdMDC.HTTP_ACCESS_REQUEST_URI,
+          BfdMDC.HTTP_ACCESS_REQUEST_URL,
+          BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONTENT_TYPE,
+          BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
+          BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_ENCODING,
+          BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_TYPE,
+          BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_DATE,
+          BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_LAST_MODIFIED,
+          BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_POWERED_BY,
+          BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID,
+          BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
+          BfdMDC.HTTP_ACCESS_RESPONSE_STATUS,
+          BfdMDC.HTTP_ACCESS_RESPONSE_CONTENT_LENGTH,
+          BfdMDC.RESOURCES_RETURNED);
 
   /** The singleton {@link ServerTestUtils} instance to use everywhere. */
   private static ServerTestUtils SINGLETON;
@@ -787,9 +823,9 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Assert mdc keys are written to the access.json log when calling the given REST query string.
-   * Will check a set of common mdc keys that should be on every call, and optionally takes a list
-   * of additional keys to check for specific to the request made.
+   * Assert mdc keys (not values) are written to the access.json log when calling the given REST
+   * query string. Will check a set of common mdc keys that should be on every call, and optionally
+   * takes a list of additional keys to check for specific to the request made.
    *
    * @param requestAuth the request auth for the restAssured call
    * @param requestString the request string for the restAssured call
@@ -797,17 +833,17 @@ public final class ServerTestUtils {
    *     mdc keys to check for in the access.json
    * @throws IOException if there is an issue with the IO around the access.json file
    */
-  public static void assertAccessJsonHasMdcKeys(
+  public static void assertDefaultAndAdditionalMdcKeys(
       RequestSpecification requestAuth, String requestString, List<String> additionalMdcKeysToCheck)
       throws IOException {
-    assertAccessJsonHasMdcKeys(
+    assertDefaultAndAdditionalMdcKeys(
         requestAuth, requestString, additionalMdcKeysToCheck, new HashMap<>());
   }
 
   /**
-   * Assert mdc keys are written to the access.json log when calling the given REST query string.
-   * Will check a set of common mdc keys that should be on every call, and optionally takes a list
-   * of additional keys to check for specific to the request made.
+   * Assert mdc keys (not values) are written to the access.json log when calling the given REST
+   * query string. Will check a set of common mdc keys that should be on every call, and optionally
+   * takes a list of additional keys to check for specific to the request made.
    *
    * @param requestAuth the request auth for the restAssured call
    * @param requestString the request string for the restAssured call
@@ -816,61 +852,68 @@ public final class ServerTestUtils {
    * @param headers the headers needed for the restAssured request
    * @throws IOException if there is an issue with the IO around the access.json file
    */
-  public static void assertAccessJsonHasMdcKeys(
+  public static void assertDefaultAndAdditionalMdcKeys(
       RequestSpecification requestAuth,
       String requestString,
       List<String> additionalMdcKeysToCheck,
       Map<String, String> headers)
       throws IOException {
+    assertMdcEntries(
+        requestAuth,
+        requestString,
+        // Generate a Map that is the combination of the default keys and any additional keys to
+        // check where each key has a corresponding empty value indicating that only the key's
+        // existence should be verified; basically, this method doesn't check any MDC values
+        Stream.concat(DEFAULT_MDC_KEYS.stream(), additionalMdcKeysToCheck.stream())
+            .distinct()
+            .collect(Collectors.toMap(key -> key, key -> Optional.empty())),
+        headers);
+  }
 
+  /**
+   * Assert that MDC entries provided exist in the access.jon log, and optionally check the values
+   * of the entries if the value provided for a given MDC key is not an empty {@link Optional}
+   * value.
+   *
+   * @param requestAuth the request auth for the restAssured call
+   * @param requestString the request string for the restAssured call
+   * @param expectedMdcKeysToValues a {@link Map} of MDC keys to values that are asserted upon. Keys
+   *     are always checked for existence, whereas values are only checked if a non-empty value is
+   *     provided
+   * @throws IOException if there is an issue with the IO around the access.json file
+   */
+  public static void assertMdcEntries(
+      RequestSpecification requestAuth,
+      String requestString,
+      Map<String, Optional<String>> expectedMdcKeysToValues)
+      throws IOException {
+    assertMdcEntries(requestAuth, requestString, expectedMdcKeysToValues, new HashMap<>());
+  }
+
+  /**
+   * Assert that MDC entries provided exist in the access.jon log, and optionally check the values
+   * of the entries if the value provided for a given MDC key is not an empty {@link Optional}
+   * value.
+   *
+   * @param requestAuth the request auth for the restAssured call
+   * @param requestString the request string for the restAssured call
+   * @param expectedMdcKeysToValues a {@link Map} of MDC keys to values that are asserted upon. Keys
+   *     are always checked for existence, whereas values are only checked if a non-empty value is
+   *     provided
+   * @param headers the headers needed for the restAssured request
+   * @throws IOException if there is an issue with the IO around the access.json file
+   */
+  public static void assertMdcEntries(
+      RequestSpecification requestAuth,
+      String requestString,
+      Map<String, Optional<String>> expectedMdcKeysToValues,
+      Map<String, String> headers)
+      throws IOException {
     Path accessLogJson =
         ServerTestUtils.getWarProjectDirectory()
             .resolve("target")
             .resolve("server-work")
             .resolve("access.json");
-
-    // A list of base mdc keys that should be on every write to access.json
-    List<String> baseKeysToCheck =
-        Arrays.asList(
-            BfdMDC.BENE_ID,
-            BfdMDC.HAPI_RESPONSE_TIMESTAMP_MILLI,
-            BfdMDC.HAPI_POST_PROCESS_TIMESTAMP_MILLI,
-            BfdMDC.HAPI_PRE_HANDLE_TIMESTAMP_MILLI,
-            BfdMDC.HAPI_PRE_PROCESS_TIMESTAMP_MILLI,
-            BfdMDC.HAPI_PROCESSING_COMPLETED_TIMESTAMP_MILLI,
-            BfdMDC.HAPI_PROCESSING_COMPLETED_NORM_TIMESTAMP_MILLI,
-            BfdMDC.HTTP_ACCESS_REQUEST_CLIENTSSL_DN,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONN_ENCODING,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_HOST_ENCODING,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_USER_AGENT,
-            BfdMDC.HTTP_ACCESS_REQUEST_HTTP_METHOD,
-            BfdMDC.HTTP_ACCESS_REQUEST_OPERATION,
-            BfdMDC.HTTP_ACCESS_REQUEST_QUERY_STR,
-            BfdMDC.HTTP_ACCESS_REQUEST_TYPE,
-            BfdMDC.HTTP_ACCESS_REQUEST_URI,
-            BfdMDC.HTTP_ACCESS_REQUEST_URL,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_CONTENT_TYPE,
-            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
-            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_ENCODING,
-            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_TYPE,
-            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_DATE,
-            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_LAST_MODIFIED,
-            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_POWERED_BY,
-            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID,
-            BfdMDC.HTTP_ACCESS_RESPONSE_OUTPUT_SIZE_IN_BYTES,
-            BfdMDC.HTTP_ACCESS_RESPONSE_STATUS,
-            BfdMDC.HTTP_ACCESS_RESPONSE_CONTENT_LENGTH,
-            BfdMDC.RESOURCES_RETURNED);
-
-    // Copy array so its mutable for the below add
-    List<String> mdcAccessKeysToCheck = new ArrayList<>(baseKeysToCheck);
-
-    // If there are any other additional mdc keys specific to this call, add them to the list to
-    // check
-    mdcAccessKeysToCheck.addAll(additionalMdcKeysToCheck);
-
     // Empty the access json to avoid pollution from other tests
     try (BufferedWriter writer = Files.newBufferedWriter(accessLogJson)) {
       Files.writeString(accessLogJson, "");
@@ -906,7 +949,7 @@ public final class ServerTestUtils {
 
     // Compile a list of mdc keys that are missing from the expected list
     List<String> missingMdcKeys = new ArrayList<>();
-    for (String mdcKey : mdcAccessKeysToCheck) {
+    for (String mdcKey : expectedMdcKeysToValues.keySet()) {
       if (!mdcKeyValueMap.containsKey(mdcKey)) {
         LOGGER.info("Missing header: " + mdcKey);
         missingMdcKeys.add(mdcKey);
@@ -918,16 +961,41 @@ public final class ServerTestUtils {
      * testing them on all endpoints */
     List<String> extraMdcKeys = new ArrayList<>();
     for (String mdcKey : mdcKeyValueMap.keySet()) {
-      if (!mdcAccessKeysToCheck.contains(mdcKey)
+      if (!expectedMdcKeysToValues.containsKey(mdcKey)
+          && !DEFAULT_MDC_KEYS.contains(mdcKey)
           && !mdcKey.startsWith("jpa")
           && !mdcKey.startsWith("database")) {
         LOGGER.info("Extra header: " + mdcKey);
         extraMdcKeys.add(mdcKey);
       }
     }
+
+    // Reduce the expected MDC entries to a subset of entries with values we'd like to check; that
+    // is, any entry with a value that isn't an empty Optional
+    Map<String, String> mdcEntriesWithExpectedVals =
+        expectedMdcKeysToValues.entrySet().stream()
+            .filter(es -> es.getValue().isPresent())
+            .map(es -> Map.entry(es.getKey(), es.getValue().get()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    // Reduce the actual values map to one with keys matching that of the expected, checked map
+    // above. This is necessary as we only want to check the value of a particular entry if a value
+    // was provided
+    Map<String, String> actualMdcEntriesToCheck =
+        mdcKeyValueMap.entrySet().stream()
+            .filter(es -> mdcEntriesWithExpectedVals.containsKey(es.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     // Check we have no missing mdc keys in a way that makes a useful assertion error if not
     assertEquals(missingMdcKeys, new ArrayList<>(), "Missing expected MDC keys in access.json");
     assertEquals(
         extraMdcKeys, new ArrayList<>(), "Found unexpected additional MDC keys in access.json");
+
+    // Check the MDC entries with an expected value against the real value assertMdcEntries from
+    // access.json
+    assertEquals(
+        mdcEntriesWithExpectedVals,
+        actualMdcEntriesToCheck,
+        "Found MDC entries with unexpected values in access.json");
   }
 }
