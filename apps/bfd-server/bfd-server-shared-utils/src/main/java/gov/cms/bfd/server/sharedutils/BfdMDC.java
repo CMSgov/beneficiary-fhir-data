@@ -262,6 +262,12 @@ public class BfdMDC {
   /** MDC key for the resources returned. */
   public static final String RESOURCES_RETURNED = computeMDCKey("resources_returned_count");
 
+  /** MDC key for MBI Hash. */
+  public static final String MBI_HASH = "mbi_hash";
+
+  /** MDC key for MBI Id. */
+  public static final String MBI_ID = "mbi_id";
+
   /**
    * Set the MDC Adapter. Normally this is not needed, but it can be useful in testing.
    *
