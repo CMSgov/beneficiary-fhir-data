@@ -389,7 +389,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
     List<String> additionalExpectedMdcKeys =
         List.of(BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION);
 
-    ServerTestUtils.assertAccessJsonHasMdcKeys(
+    ServerTestUtils.assertDefaultAndAdditionalMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys);
   }
 
@@ -406,7 +406,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
 
     List<String> additionalExpectedMdcKeys = List.of(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
 
-    ServerTestUtils.assertAccessJsonHasMdcKeys(
+    ServerTestUtils.assertDefaultAndAdditionalMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys);
   }
 

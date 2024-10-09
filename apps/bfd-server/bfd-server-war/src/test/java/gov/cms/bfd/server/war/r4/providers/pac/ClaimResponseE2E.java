@@ -4,9 +4,15 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerRequiredTest;
+import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.junit.jupiter.api.AfterAll;
@@ -73,6 +79,52 @@ public class ClaimResponseE2E extends ServerRequiredTest {
     String requestString = claimResponseEndpoint + "m-654321";
 
     verifyResponseMatchesFor(requestString, "claimResponseMcsRead", READ_IGNORE_PATTERNS);
+  }
+
+  /**
+   * Tests to see if nonsensitive MBI identifiers (hash and ID) are logged to the MDC when a FISS
+   * {@link ClaimResponse} with an associated {@link Mbi} is looked up by a specific ID.
+   */
+  @Test
+  void testClaimResponseReadLogsMbiIdentifiersForFissClaimWithMbiRecord() throws IOException {
+    String requestString = claimResponseEndpoint + "f-123456";
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            Optional.empty()));
+  }
+
+  /**
+   * Tests to see if nonsensitive MBI identifiers (hash and ID) are logged to the MDC when an MCS
+   * {@link ClaimResponse} with an associated {@link Mbi} is looked up by a specific ID.
+   */
+  @Test
+  void testClaimResponseReadLogsMbiIdentifiersForMcsClaimWithMbiRecord() throws IOException {
+    String requestString = claimResponseEndpoint + "m-654321";
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            Optional.empty()));
   }
 
   /**
@@ -197,6 +249,29 @@ public class ClaimResponseE2E extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verify that ClaimResponse logs nonsensitive MBI identifiers (hash and ID) to the MDC log when
+   * receiving a valid ClaimResponse request.
+   */
+  @Test
+  public void testClaimResponseFindByPatientLogsMbiIdentifiers() throws IOException {
+    String requestString = claimResponseEndpoint + "?mbi=" + RDATestUtils.MBI_HASH;
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
+            Optional.empty()));
   }
 
   /**

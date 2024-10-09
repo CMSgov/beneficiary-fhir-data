@@ -34,7 +34,6 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -4056,17 +4055,6 @@ public final class TransformerUtilsV2 {
             .setIdentifier(
                 TransformerUtilsV2.createIdentifier(
                     CcwCodebookVariable.PRVDR_NUM, providerNumber)));
-  }
-
-  /**
-   * Logs the mbi hash to mdc.
-   *
-   * @param mbiHash the mbi hash to log
-   */
-  public static void logMbiHashToMdc(String mbiHash) {
-    if (!Strings.isNullOrEmpty(mbiHash)) {
-      BfdMDC.put("mbi_hash", mbiHash);
-    }
   }
 
   /**
