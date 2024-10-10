@@ -64,8 +64,6 @@ locals {
 }
 
 ## Security groups
-#
-
 # base
 resource "aws_security_group" "base" {
   name        = "bfd-${local.env}-${var.role}-base"
@@ -111,7 +109,6 @@ resource "aws_security_group_rule" "allow_db_access" {
   security_group_id        = each.value                   # The SG associated with each replica
   source_security_group_id = aws_security_group.app[0].id # Every instance in the ASG
 }
-
 
 ## Launch Template
 resource "aws_launch_template" "main" {
@@ -174,7 +171,6 @@ resource "aws_launch_template" "main" {
     tags          = merge({ Name = "bfd-${local.env}-${var.role}" }, local.additional_tags)
   }
 }
-
 
 ## Autoscaling group
 resource "aws_autoscaling_group" "main" {
@@ -245,10 +241,7 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
-
 ## Autoscaling Policies and Cloudwatch Alarms
-#
-
 resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
   alarm_name          = "bfd-${var.role}-${local.env}-avg-cpu-low"
   comparison_operator = "LessThanThreshold"
