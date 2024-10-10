@@ -214,7 +214,7 @@
 /bfd/${env}/server/nonsensitive/launch_template_instance_type: c6a.4xlarge
 /bfd/${env}/server/nonsensitive/launch_template_volume_iops: "3000"
 /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: "170"
-/bfd/${env}/server/nonsensitive/launch_template_volume_throughput: "125"
+/bfd/${env}/server/nonsensitive/launch_template_volume_throughput: 225
 /bfd/${env}/server/nonsensitive/launch_template_volume_type: gp3
 /bfd/${env}/server/nonsensitive/500_errors_alerter_rate: 5 minutes
 /bfd/${env}/server/nonsensitive/500_errors_alerter_log_lookback_seconds: "330"
