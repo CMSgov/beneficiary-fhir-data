@@ -256,7 +256,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
   evaluation_periods  = local.scaling_alarms_config.scale_in.consecutive_periods_to_alarm
   threshold           = local.scale_in_cpu_threshold
   treat_missing_data  = "notBreaching"
-  alarm_actions       = local.need_scale_out ? [] : [aws_autoscaling_policy.avg_cpu_low.arn]
+  alarm_actions       = [aws_autoscaling_policy.avg_cpu_low.arn]
 
   metric_query {
     id          = "m1"
