@@ -184,7 +184,7 @@ resource "aws_autoscaling_group" "main" {
   name             = aws_launch_template.main.name
   desired_capacity = local.need_scale_out ? max(2 * local.asg_instance_count, 2 * var.asg_config.desired) : local.dynamic_desired_capacity
   max_size         = local.need_scale_out ? min(4 * local.asg_instance_count, 2 * var.asg_config.max) : var.asg_config.max
-  min_size         = var.asg_config.min
+  min_size         = local.need_scale_out ? max(2 * local.asg_instance_count, 2 * var.asg_config.min) : var.asg_config.min
 
   # If an lb is defined, wait for the ELB
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
