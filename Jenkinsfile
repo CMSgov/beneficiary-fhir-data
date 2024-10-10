@@ -305,7 +305,7 @@ try {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
-                        // Initial `server` terraservice deployment (scale-out)
+						// Initial `server` terraservice deployment (scale-out)
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,
@@ -315,7 +315,7 @@ try {
 							]
 						)
 
-                        // Secondary `server` terraservice deployment (scale-in)
+						// Secondary `server` terraservice deployment (scale-in)
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,
