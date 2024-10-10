@@ -105,6 +105,7 @@ resource "aws_iam_policy" "ssm" {
           "Resource" : [
             "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
             "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+            "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/new_relic/*",
             "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
           ]
         },

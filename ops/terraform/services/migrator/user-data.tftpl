@@ -1,8 +1,11 @@
 #!/bin/bash
+# shellcheck disable=SC2154,SC2016
+
 set -e
 
 # add a timestamp to this scripts log output and redirect to both console and logfile
 exec > >(
+    # shellcheck disable=SC2034
     while read line; do
         echo "$(date +"%Y-%m-%d %H:%M:%S") - $${line}" | tee -a /var/log/user_data.log 2>&1
     done
@@ -24,6 +27,21 @@ aws ssm get-parameters-by-path \
     --region us-east-1 \
     --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
+new_relic_sensitive="$(aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/common/sensitive/new_relic/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add')"
+
+new_relic_nonsensitive="$(aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters[? contains(@.Name, `new_relic`)]' | jq 'map({(.Name|split("/")|last): .Value})|add')"
+
+jq -s 'add | . ' <(echo "$new_relic_nonsensitive") <(echo "$new_relic_sensitive") > new_relic_vars.json
+
 cat <<EOF > extra_vars.json
 {
   "db_url": "${writer_endpoint}"
@@ -32,7 +50,12 @@ EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@migrator_vars.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-db-migrator.yml
+ansible-playbook \
+    --extra-vars '@migrator_vars.json' \
+    --extra-vars '@common_vars.json' \
+    --extra-vars '@new_relic_vars.json' \
+    --extra-vars '@extra_vars.json' \
+    --tags "post-ami" launch_bfd-db-migrator.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

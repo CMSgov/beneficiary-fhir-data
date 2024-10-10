@@ -1373,6 +1373,17 @@ module "glue-table-api-requests" {
       "type"    = "string",
       "comment" = ""
     },
+    {
+      "name"    = "mdc_mbi_id",
+      "type"    = "string",
+      "comment" = ""
+    },
+
+    {
+      "name"    = "mdc_mbi_hash",
+      "type"    = "string",
+      "comment" = ""
+    }
   ]
 }
 

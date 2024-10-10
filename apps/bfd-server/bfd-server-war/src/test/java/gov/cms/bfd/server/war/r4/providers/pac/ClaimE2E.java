@@ -4,12 +4,18 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.ServerRequiredTest;
+import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterAll;
@@ -153,6 +159,52 @@ public class ClaimE2E extends ServerRequiredTest {
   }
 
   /**
+   * Tests to see if nonsensitive MBI identifiers (hash and ID) are logged to the MDC when a FISS
+   * {@link Claim} with an associated {@link Mbi} is looked up by a specific ID.
+   */
+  @Test
+  void testClaimReadLogsMbiIdentifiersForFissClaimWithMbiRecord() throws IOException {
+    String requestString = claimEndpoint + "f-123456";
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            Optional.empty()));
+  }
+
+  /**
+   * Tests to see if nonsensitive MBI identifiers (hash and ID) are logged to the MDC when an MCS
+   * {@link Claim} with an associated {@link Mbi} is looked up by a specific ID.
+   */
+  @Test
+  void testClaimReadLogsMbiIdentifiersForMcsClaimWithMbiRecord() throws IOException {
+    String requestString = claimEndpoint + "m-654321";
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            Optional.empty()));
+  }
+
+  /**
    * Tests to see if the correct response is given when a search is done for {@link Claim}s using
    * given mbi and service-date range. In this test case the query finds the matched claims because
    * their to dates are within the date range even though their from dates are not.
@@ -265,6 +317,29 @@ public class ClaimE2E extends ServerRequiredTest {
         .statusCode(200)
         .when()
         .get(requestString);
+  }
+
+  /**
+   * Verify that Claim logs nonsensitive MBI identifiers (hash and ID) to the MDC log when receiving
+   * a valid Claim request.
+   */
+  @Test
+  public void testClaimFindByPatientLogsMbiIdentifiers() throws IOException {
+    String requestString = claimEndpoint + "?mbi=" + RDATestUtils.MBI_HASH;
+
+    Mbi testingMbi = rdaTestUtils.lookupTestMbiRecord(rdaTestUtils.getEntityManager());
+    ServerTestUtils.assertMdcEntries(
+        requestAuth,
+        requestString,
+        Map.of(
+            BfdMDC.MBI_HASH,
+            Optional.of(testingMbi.getHash()),
+            BfdMDC.MBI_ID,
+            Optional.of(testingMbi.getMbiId().toString()),
+            // This isn't a default key, but we need to include it without checking its value to
+            // satisfy the assertion for extra, unexpected MDC keys
+            BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
+            Optional.empty()));
   }
 
   /**
