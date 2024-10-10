@@ -46,7 +46,7 @@
 /bfd/${env}/server/nonsensitive/lb_ingress_port: 443
 /bfd/${env}/server/nonsensitive/lb_egress_port: 7443
 /bfd/${env}/server/nonsensitive/launch_template_volume_iops: 3000
-/bfd/${env}/server/nonsensitive/launch_template_volume_throughput: 125
+/bfd/${env}/server/nonsensitive/launch_template_volume_throughput: 225
 /bfd/${env}/server/nonsensitive/launch_template_volume_type: gp3
 /bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
   []

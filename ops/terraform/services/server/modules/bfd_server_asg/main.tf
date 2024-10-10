@@ -5,6 +5,26 @@ locals {
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
   rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
 
+  # These variables ensures that we accommodate deployments where the ASG is already scaled-out
+  asg_instance_count       = tonumber(data.external.current_asg_instances.result["count"])
+  dynamic_desired_capacity = max(length([for each in jsondecode(data.external.current_asg_instances.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)]), var.asg_config.desired)
+
+  # Dynamic capacity used here to avoid scaling out after ASG was unable to satisfy previous
+  # requested ASG settings, e.g. partial/total deployment failures, other ASG capacity issues
+  not_initial_deployment             = local.asg_instance_count >= local.dynamic_desired_capacity
+  is_old_version_present_in_asg      = alltrue([for each in jsondecode(data.external.current_asg_instances.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)])
+  is_current_version_absent_from_asg = alltrue([for each in jsondecode(data.external.current_asg_instances.result["instance_launch_templates"]) : false if tonumber(each) == tonumber(aws_launch_template.main.latest_version)])
+
+  # Scale out when all of these statements are true
+  # - the ASG already existed before running this terraform apply
+  # - the ASG contains instances running an outdated launch template version
+  # - the ASG does *not* contain instances running the latest launch template version
+  need_scale_out = alltrue([
+    local.not_initial_deployment,
+    local.is_old_version_present_in_asg,
+    local.is_current_version_absent_from_asg
+  ])
+
   additional_tags = { Layer = var.layer, role = var.role }
 
   # FUTURE: Encode the scaling step, scaling stages, and alarm evaluation periods within config
@@ -94,7 +114,6 @@ resource "aws_security_group_rule" "allow_db_access" {
 
 
 ## Launch Template
-#
 resource "aws_launch_template" "main" {
   name                   = "bfd-${local.env}-${var.role}"
   description            = "Template for the ${local.env} environment ${var.role} servers"
@@ -124,12 +143,11 @@ resource "aws_launch_template" "main" {
       encrypted             = true
       iops                  = var.launch_config.volume_iops
       kms_key_id            = data.aws_kms_key.master_key.arn
-      throughput            = var.launch_config.volume_throughput
+      throughput            = 225 #FIXME var.launch_config.volume_throughput
       volume_size           = var.launch_config.volume_size
       volume_type           = var.launch_config.volume_type
     }
   }
-
 
   metadata_options {
     http_endpoint               = "enabled"
@@ -159,13 +177,13 @@ resource "aws_launch_template" "main" {
 
 
 ## Autoscaling group
-#
 resource "aws_autoscaling_group" "main" {
-  # Generate a new group on every revision of the launch template.
-  # This does a simple version of a blue/green deployment
-  name             = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
-  desired_capacity = var.asg_config.desired
-  max_size         = var.asg_config.max
+  # Deployments of this ASG require two executions of `terraform apply` where:
+  # 1. request instances running the latest launch template versions by scale-out
+  # 2. request instances running outdated launch teamplate versions be destroyed by scale-in
+  name             = aws_launch_template.main.name
+  desired_capacity = local.need_scale_out ? max(2 * local.asg_instance_count, 2 * var.asg_config.desired) : local.dynamic_desired_capacity
+  max_size         = local.need_scale_out ? min(4 * local.asg_instance_count, 2 * var.asg_config.max) : var.asg_config.max
   min_size         = var.asg_config.min
 
   # If an lb is defined, wait for the ELB
@@ -176,6 +194,7 @@ resource "aws_autoscaling_group" "main" {
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
+  termination_policies      = ["OldestLaunchTemplate"]
 
   # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
   # Server application running on the instance is ready to start serving traffic. As a result, it is
@@ -205,12 +224,6 @@ resource "aws_autoscaling_group" "main" {
     "GroupTerminatingInstances",
     "GroupTotalInstances",
   ]
-
-  warm_pool {
-    pool_state                  = "Stopped"
-    min_size                    = var.asg_config.min
-    max_group_prepared_capacity = var.asg_config.max_warm
-  }
 
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
@@ -243,7 +256,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
   evaluation_periods  = local.scaling_alarms_config.scale_in.consecutive_periods_to_alarm
   threshold           = local.scale_in_cpu_threshold
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_autoscaling_policy.avg_cpu_low.arn]
+  alarm_actions       = local.need_scale_out ? [] : [aws_autoscaling_policy.avg_cpu_low.arn]
 
   metric_query {
     id          = "m1"
