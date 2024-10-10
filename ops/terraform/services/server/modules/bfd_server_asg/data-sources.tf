@@ -25,3 +25,10 @@ data "external" "rds" {
     local.env                                       # environment name, almost exclusively here to provide beta reader functionality for production
   ]
 }
+
+data "external" "current_asg_instances" {
+  program = [
+    "${path.module}/scripts/asg-data.sh", # helper script
+    local.env
+  ]
+}
