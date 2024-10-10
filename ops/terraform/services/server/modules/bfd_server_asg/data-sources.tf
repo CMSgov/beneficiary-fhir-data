@@ -26,7 +26,7 @@ data "external" "rds" {
   ]
 }
 
-data "external" "current_asg_instances" {
+data "external" "current_asg" {
   program = [
     "${path.module}/scripts/asg-data.sh", # helper script
     local.env

@@ -30,6 +30,6 @@ export asg="$(aws autoscaling describe-auto-scaling-groups \
     --output json --query 'AutoScalingGroups[0]')"
 
 yq  --output-format=json --null-input '{
-  "count": env(asg) | .Instances | length | tostring,
+  "desired_capacity": env(asg) | .DesiredCapacity // 0 | tostring,
   "instance_launch_templates": env(asg) | [.Instances[].LaunchTemplate.Version] | @json
 }'

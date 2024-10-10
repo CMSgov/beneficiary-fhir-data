@@ -6,14 +6,14 @@ locals {
   rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
 
   # These variables ensures that we accommodate deployments where the ASG is already scaled-out
-  asg_instance_count       = tonumber(data.external.current_asg_instances.result["count"])
-  dynamic_desired_capacity = max(length([for each in jsondecode(data.external.current_asg_instances.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)]), var.asg_config.desired)
+  dynamic_desired_capacity = max(length([for each in jsondecode(data.external.current_asg.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)]), var.asg_config.desired)
+  remote_desired_capacity  = tonumber(data.external.current_asg.result["desired_capacity"])
 
   # Dynamic capacity used here to avoid scaling out after ASG was unable to satisfy previous
   # requested ASG settings, e.g. partial/total deployment failures, other ASG capacity issues
-  not_initial_deployment             = local.asg_instance_count >= local.dynamic_desired_capacity
-  is_old_version_present_in_asg      = alltrue([for each in jsondecode(data.external.current_asg_instances.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)])
-  is_current_version_absent_from_asg = alltrue([for each in jsondecode(data.external.current_asg_instances.result["instance_launch_templates"]) : false if tonumber(each) == tonumber(aws_launch_template.main.latest_version)])
+  not_initial_deployment             = local.remote_desired_capacity > 0
+  is_old_version_present_in_asg      = alltrue([for each in jsondecode(data.external.current_asg.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)])
+  is_current_version_absent_from_asg = alltrue([for each in jsondecode(data.external.current_asg.result["instance_launch_templates"]) : false if tonumber(each) == tonumber(aws_launch_template.main.latest_version)])
 
   # Scale out when all of these statements are true
   # - the ASG already existed before running this terraform apply
@@ -178,9 +178,9 @@ resource "aws_autoscaling_group" "main" {
   # 1. request instances running the latest launch template versions by scale-out
   # 2. request instances running outdated launch teamplate versions be destroyed by scale-in
   name             = aws_launch_template.main.name
-  desired_capacity = local.need_scale_out ? max(2 * local.asg_instance_count, 2 * var.asg_config.desired) : local.dynamic_desired_capacity
-  max_size         = local.need_scale_out ? min(4 * local.asg_instance_count, 2 * var.asg_config.max) : var.asg_config.max
-  min_size         = local.need_scale_out ? max(2 * local.asg_instance_count, 2 * var.asg_config.min) : var.asg_config.min
+  desired_capacity = local.need_scale_out ? max(2 * local.remote_desired_capacity, 2 * var.asg_config.desired) : local.dynamic_desired_capacity
+  max_size         = local.need_scale_out ? min(4 * local.remote_desired_capacity, 2 * var.asg_config.max) : var.asg_config.max
+  min_size         = local.need_scale_out ? max(2 * local.remote_desired_capacity, 2 * var.asg_config.min) : var.asg_config.min
 
   # If an lb is defined, wait for the ELB
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
@@ -206,7 +206,7 @@ resource "aws_autoscaling_group" "main" {
   initial_lifecycle_hook {
     name                 = local.on_launch_lifecycle_hook_name
     default_result       = "ABANDON"
-    heartbeat_timeout    = var.asg_config.instance_warmup * 3
+    heartbeat_timeout    = var.asg_config.instance_warmup * 2
     lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
   }
 
