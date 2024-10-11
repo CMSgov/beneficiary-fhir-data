@@ -32,7 +32,7 @@ resource "aws_sns_topic" "this" {
 
 resource "aws_autoscaling_notification" "this" {
   topic_arn   = aws_sns_topic.this.arn
-  group_names = [var.asg_name]
+  group_names = var.asg_names
 
   notifications = [
     "autoscaling:EC2_INSTANCE_LAUNCH",
