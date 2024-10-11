@@ -1,28 +1,73 @@
 locals {
+  asgs = {
+    odd = {
+      name             = "${aws_launch_template.main.name}-odd"
+      desired_capacity = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      max_size         = var.asg_config.max
+      min_size         = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      warmpool_size    = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+    }
+    even = {
+      name             = "${aws_launch_template.main.name}-even"
+      desired_capacity = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      max_size         = var.asg_config.max
+      min_size         = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      warmpool_size    = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+    }
+  }
+
   env      = terraform.workspace
   seed_env = var.seed_env
 
   # When the CustomEndpoint is empty, fall back to the ReaderEndpoint
   rds_reader_endpoint = data.external.rds.result["ReaderEndpoint"]
 
-  # These variables ensures that we accommodate deployments where the ASG is already scaled-out
-  dynamic_desired_capacity = max(length([for each in jsondecode(data.external.current_asg.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)]), var.asg_config.desired)
-  remote_desired_capacity  = tonumber(data.external.current_asg.result["desired_capacity"])
+  latest_ltv                     = tonumber(aws_launch_template.main.latest_version)
+  is_latest_launch_template_odd  = local.latest_ltv % 2 == 1
+  is_latest_launch_template_even = local.latest_ltv % 2 == 0
 
-  # Dynamic capacity used here to avoid scaling out after ASG was unable to satisfy previous
-  # requested ASG settings, e.g. partial/total deployment failures, other ASG capacity issues
-  not_initial_deployment             = local.remote_desired_capacity > 0
-  is_old_version_present_in_asg      = alltrue([for each in jsondecode(data.external.current_asg.result["instance_launch_templates"]) : true if tonumber(each) != tonumber(aws_launch_template.main.latest_version)])
-  is_current_version_absent_from_asg = alltrue([for each in jsondecode(data.external.current_asg.result["instance_launch_templates"]) : false if tonumber(each) == tonumber(aws_launch_template.main.latest_version)])
+  odd_remote_desired_capacity  = tonumber(data.external.current_asg.result["odd_desired_capacity"])
+  even_remote_desired_capacity = tonumber(data.external.current_asg.result["even_desired_capacity"])
 
-  # Scale out when all of these statements are true
-  # - the ASG already existed before running this terraform apply
-  # - the ASG contains instances running an outdated launch template version
-  # - the ASG does *not* contain instances running the latest launch template version
-  need_scale_out = alltrue([
-    local.not_initial_deployment,
-    local.is_old_version_present_in_asg,
-    local.is_current_version_absent_from_asg
+  odd_remote_warmpool_min_size  = tonumber(data.external.current_asg.result["odd_warmpool_min_size"])
+  even_remote_warmpool_min_size = tonumber(data.external.current_asg.result["even_warmpool_min_size"])
+
+  #ODD scales OUT when launchtemplate is ODD and ODD ASG has 0 desired capacity
+  odd_needs_scale_out = alltrue([
+    local.is_latest_launch_template_odd,
+    local.odd_remote_desired_capacity == 0
+  ])
+
+  #ODD scales IN when launchtemplate EVEN, both ODD and EVEN ASGS have capacity
+  odd_needs_scale_in = alltrue([
+    local.is_latest_launch_template_even,
+    local.odd_remote_desired_capacity > 0,
+    local.even_remote_desired_capacity > 0
+  ])
+
+  #ODD maintains state when ODD does not need to scale IN or OUT
+  odd_maintains_state = alltrue([
+    !local.odd_needs_scale_out,
+    !local.odd_needs_scale_in
+  ])
+
+  #EVEN scales OUT when launchtemplate is EVEN and EVEN ASG has 0 desired capacity
+  even_needs_scale_out = alltrue([
+    local.is_latest_launch_template_even,
+    local.even_remote_desired_capacity == 0
+  ])
+
+  #EVEN scales IN when launchtemplate is ODD, both EVEN and ODD ASGs have capacity
+  even_needs_scale_in = alltrue([
+    local.is_latest_launch_template_odd,
+    local.even_remote_desired_capacity > 0,
+    local.odd_remote_desired_capacity > 0
+  ])
+
+  #EVEN maintains state when EVEN does not need to scale IN or OUT
+  even_maintains_state = alltrue([
+    !local.even_needs_scale_out,
+    !local.even_needs_scale_in
   ])
 
   additional_tags = { Layer = var.layer, role = var.role }
@@ -172,15 +217,14 @@ resource "aws_launch_template" "main" {
   }
 }
 
-## Autoscaling group
 resource "aws_autoscaling_group" "main" {
-  # Deployments of this ASG require two executions of `terraform apply` where:
-  # 1. request instances running the latest launch template versions by scale-out
-  # 2. request instances running outdated launch teamplate versions be destroyed by scale-in
-  name             = aws_launch_template.main.name
-  desired_capacity = local.need_scale_out ? max(2 * local.remote_desired_capacity, 2 * var.asg_config.desired) : local.dynamic_desired_capacity
-  max_size         = local.need_scale_out ? min(4 * local.remote_desired_capacity, 2 * var.asg_config.max) : var.asg_config.max
-  min_size         = local.need_scale_out ? max(2 * local.remote_desired_capacity, 2 * var.asg_config.min) : var.asg_config.min
+  # Deployments of this ASG require two executions of `terraform apply`
+  for_each = local.asgs
+
+  name             = each.value.name
+  desired_capacity = each.value.desired_capacity
+  max_size         = each.value.max_size
+  min_size         = each.value.min_size
 
   # If an lb is defined, wait for the ELB
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
@@ -221,6 +265,24 @@ resource "aws_autoscaling_group" "main" {
     "GroupTotalInstances",
   ]
 
+  # NOTE: AWS Provider for Terraform does not fully respect the warm pool blocks
+  # - it reports that the warm pool will be destroyed when it is not called for
+  # - it reports that the warm pool will be destroyed when we want to destroy it
+  # - in either case, terraform 1.5.0 with provider AWS v5.53.0 does not destroy the warm pool
+  # See null resource provider below for deletion logic
+  force_delete_warm_pool = true
+  dynamic "warm_pool" {
+    for_each = each.value.warmpool_size == 0 ? toset([]) : toset([each.value.warmpool_size])
+    content {
+      pool_state                  = "Stopped"
+      min_size                    = warm_pool.value
+      max_group_prepared_capacity = warm_pool.value
+      instance_reuse_policy {
+        reuse_on_scale_in = false
+      }
+    }
+  }
+
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
     content {
@@ -235,21 +297,18 @@ resource "aws_autoscaling_group" "main" {
     value               = "bfd-${local.env}-${var.role}"
     propagate_at_launch = true
   }
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
-## Autoscaling Policies and Cloudwatch Alarms
 resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
-  alarm_name          = "bfd-${var.role}-${local.env}-avg-cpu-low"
+  for_each   = local.asgs
+  alarm_name = "${each.value.name}-avg-cpu-low"
+
   comparison_operator = "LessThanThreshold"
   datapoints_to_alarm = local.scaling_alarms_config.scale_in.datapoints_to_alarm
   evaluation_periods  = local.scaling_alarms_config.scale_in.consecutive_periods_to_alarm
   threshold           = local.scale_in_cpu_threshold
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_autoscaling_policy.avg_cpu_low.arn]
+  alarm_actions       = [aws_autoscaling_policy.avg_cpu_low[each.key].arn]
 
   metric_query {
     id          = "m1"
@@ -257,7 +316,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
 
     metric {
       dimensions = {
-        AutoScalingGroupName = aws_autoscaling_group.main.name
+        AutoScalingGroupName = aws_autoscaling_group.main[each.key].name
       }
       metric_name = "CPUUtilization"
       namespace   = "AWS/EC2"
@@ -268,8 +327,10 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_low" {
 }
 
 resource "aws_autoscaling_policy" "avg_cpu_low" {
-  name                      = "bfd-${var.role}-${local.env}-avg-cpu-low"
-  autoscaling_group_name    = aws_autoscaling_group.main.name
+  for_each = local.asgs
+
+  name                      = "${each.value.name}-avg-cpu-low"
+  autoscaling_group_name    = aws_autoscaling_group.main[each.key].name
   estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
   adjustment_type           = "ChangeInCapacity"
   metric_aggregation_type   = "Average"
@@ -282,13 +343,15 @@ resource "aws_autoscaling_policy" "avg_cpu_low" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
-  alarm_name          = "bfd-${var.role}-${local.env}-avg-cpu-high"
+  for_each = local.asgs
+
+  alarm_name          = "${each.value.name}-avg-cpu-high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   datapoints_to_alarm = local.scaling_alarms_config.scale_out.datapoints_to_alarm
   evaluation_periods  = local.scaling_alarms_config.scale_out.consecutive_periods_to_alarm
   threshold           = 1
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_autoscaling_policy.avg_cpu_high.arn]
+  alarm_actions       = [aws_autoscaling_policy.avg_cpu_high[each.key].arn]
 
   metric_query {
     id          = "m1"
@@ -296,7 +359,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
 
     metric {
       dimensions = {
-        AutoScalingGroupName = aws_autoscaling_group.main.name
+        AutoScalingGroupName = aws_autoscaling_group.main[each.key].name
       }
       metric_name = "CPUUtilization"
       namespace   = "AWS/EC2"
@@ -311,7 +374,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
 
     metric {
       dimensions = {
-        AutoScalingGroupName = aws_autoscaling_group.main.name
+        AutoScalingGroupName = aws_autoscaling_group.main[each.key].name
       }
       metric_name = "GroupDesiredCapacity"
       namespace   = "AWS/AutoScaling"
@@ -326,7 +389,7 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
 
     metric {
       dimensions = {
-        AutoScalingGroupName = aws_autoscaling_group.main.name
+        AutoScalingGroupName = aws_autoscaling_group.main[each.key].name
       }
       metric_name = "GroupInServiceInstances"
       namespace   = "AWS/AutoScaling"
@@ -364,8 +427,10 @@ resource "aws_cloudwatch_metric_alarm" "avg_cpu_high" {
 }
 
 resource "aws_autoscaling_policy" "avg_cpu_high" {
-  name                      = "bfd-${var.role}-${local.env}-avg-cpu-high"
-  autoscaling_group_name    = aws_autoscaling_group.main.name
+  for_each = local.asgs
+
+  name                      = "${each.value.name}-avg-cpu-high"
+  autoscaling_group_name    = aws_autoscaling_group.main[each.key].name
   estimated_instance_warmup = 0 # explicitly disable warmup as lifecycle hooks handle it more accurately
   adjustment_type           = "ExactCapacity"
   metric_aggregation_type   = "Average"
@@ -381,17 +446,20 @@ resource "aws_autoscaling_policy" "avg_cpu_high" {
   }
 }
 
-## Autoscaling Notifications
-resource "aws_autoscaling_notification" "asg_notifications" {
-  count = var.asg_config.sns_topic_arn != "" ? 1 : 0
+# NOTE: Required to *actually* delete a warm pool as of terraform 1.5.0 and AWS Provider v5.53.0
+resource "null_resource" "warm_pool_size" {
+  for_each = local.asgs
 
-  group_names = [aws_autoscaling_group.main.name]
+  triggers = {
+    should_delete_warmpool = each.value.warmpool_size == 0
+  }
 
-  notifications = [
-    "autoscaling:EC2_INSTANCE_LAUNCH",
-    "autoscaling:EC2_INSTANCE_TERMINATE",
-    "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
-  ]
+  provisioner "local-exec" {
+    environment = {
+      will_delete = self.triggers.should_delete_warmpool
+      asg_name    = each.value.name
+    }
 
-  topic_arn = var.asg_config.sns_topic_arn
+    command = "[[ $will_delete == \"true\" ]] && aws autoscaling delete-warm-pool --auto-scaling-group-name \"$asg_name\" --force-delete || echo \"No change to $asg_name will_delete = $will_delete\""
+  }
 }

@@ -229,7 +229,7 @@ module "disk_usage_alarms" {
 
   source = "./modules/bfd_server_disk_alarms"
 
-  asg_name = module.fhir_asg.asg_id
+  asg_names = module.fhir_asg.asg_ids
 }
 
 module "bfd_server_error_alerts" {
