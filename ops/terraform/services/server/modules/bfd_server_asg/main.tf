@@ -140,7 +140,7 @@ resource "aws_launch_template" "main" {
       encrypted             = true
       iops                  = var.launch_config.volume_iops
       kms_key_id            = data.aws_kms_key.master_key.arn
-      throughput            = 250 #FIXME var.launch_config.volume_throughput
+      throughput            = var.launch_config.volume_throughput
       volume_size           = var.launch_config.volume_size
       volume_type           = var.launch_config.volume_type
     }
