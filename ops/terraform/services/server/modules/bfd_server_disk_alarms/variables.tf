@@ -1,6 +1,6 @@
-variable "asg_name" {
-  description = "Name of the ASG to attach notifications to"
-  type        = string
+variable "asg_names" {
+  description = "Names of the ASG to attach notifications to"
+  type        = list(string)
   default     = null
 }
 
