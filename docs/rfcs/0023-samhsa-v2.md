@@ -2,7 +2,7 @@
 
 * RFC Proposal ID: `0023-samhsa-v2`
 * Start Date: 2024-10-11
-* RFC PR: TODO
+* RFC PR: [beneficiary-fhir-data/rfcs#0023](https://github.com/CMSgov/beneficiary-fhir-data/pull/2464)
 * JIRA Ticket(s):
     * [BFD-3660](https://jira.cms.gov/browse/BFD-3660)
 
@@ -14,6 +14,14 @@ A proposal to rewrite the SAMHSA filter to be more reliable and easier to mainta
 * Implementation JIRA Ticket(s):
 
 ## Table of Contents
+
+- [RFC Proposal](#rfc-proposal)
+  - [Status](#status)
+  - [Table of Contents](#table-of-contents)
+  - [Background](#background)
+  - [Implementation Overview](#implementation-overview)
+  - [Database Schema](#database-schema)
+    - [Optional Addition: Claim Details](#optional-addition-claim-details)
 
 ## Background
 
