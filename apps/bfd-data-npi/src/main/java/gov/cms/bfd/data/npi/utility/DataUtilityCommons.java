@@ -284,11 +284,12 @@ public class DataUtilityCommons {
       String[] fields = line.split(",");
       Map<String, Integer> indexes = getIndexNumbers(fields);
       Integer codeIndex = getIndexNumberForField(indexes, "Code");
-      Integer classificationIndex = getIndexNumberForField(indexes, "Classification");
+      Integer displayIndex = getIndexNumberForField(indexes, "Display Name");
       while ((line = reader.readLine()) != null) {
-        fields = line.split(",");
+        // split on commas not in quotes
+        fields = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
         String code = fields[codeIndex].trim();
-        String classification = fields[classificationIndex].trim();
+        String classification = fields[displayIndex].trim();
         taxonomyMapping.put(code, classification);
       }
     }

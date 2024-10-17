@@ -14,7 +14,7 @@ public class DataUtilityCommonsTest {
   private static final String TAXONOMY_CODE = "207X00000X";
 
   /** A fake Taxonomy Display. */
-  private static final String TAXONOMY_DISPLAY = "Orthopaedic Surgery";
+  private static final String TAXONOMY_DISPLAY = "Orthopaedic Surgery Physician";
 
   /** This logic is used when parsing the header for the NPI files. */
   @Test
