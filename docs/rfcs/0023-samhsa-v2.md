@@ -202,7 +202,7 @@ At processing time, the pipeline will check each claim against the configured li
 
 The SQL queries used to fetch the claims data for the EOB, Claim, and ClaimResponse endpoints will need to join against the tag tables in order to determine which claims have SAMHSA data.
 SAMHSA claims should not be included if `excludeSAMHSA=true` is supplied in the request. 
-The `R` and `42CFRPart2` [Security Labels](https://build.fhir.org/security-labels.html) should be applied if SAMHSA data is allowed to be returned.
+The `R` and `42CFRPart2` [Security Labels](https://build.fhir.org/security-labels.html) should be applied to the FHIR response if SAMHSA data is allowed to be returned.
 
 The new approach should be fully compatible with the existing filter, therefore we should utilize a feature flag in order to allow both implementations to coexist.
 This reduces risk in the event that a defect in the new implementation creates a need to fall back to the current one.
