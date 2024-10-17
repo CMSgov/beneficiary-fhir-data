@@ -1,5 +1,7 @@
 package gov.cms.bfd.data.npi.lookup;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /** NPI org lookup test. */
 public class NPIOrgLookupTest {
@@ -22,11 +22,15 @@ public class NPIOrgLookupTest {
 
   /** A fake npi number. */
   public static final String FAKE_NPI_NUMBER = "0000000000";
+
   /** A fake Practitioner NPI. */
   public static final String FAKE_PRACTITIONER_NPI = "1111111111";
+
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
-public static final String FAKE_TAXONOMY = "0000000X\tFake Taxonomy";
+
+  public static final String FAKE_TAXONOMY = "0000000X\tFake Taxonomy";
+
   /** Setup Before Each test method. */
   @BeforeEach
   void setup() throws IOException {
@@ -38,14 +42,15 @@ public static final String FAKE_TAXONOMY = "0000000X\tFake Taxonomy";
 
     npiOrgDataLookup = new NPIOrgLookup(npiOrgHashMap);
   }
-  /** Should Return taxonomy */
-@Test
-  public void shouldReturnTaxonomy() {
-  npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_PRACTITIONER_NPI));
-  assertTrue(npiOrgDisplay.isPresent());
-  assertEquals(FAKE_TAXONOMY, npiOrgDisplay.get());
 
-}
+  /** Should Return taxonomy */
+  @Test
+  public void shouldReturnTaxonomy() {
+    npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_PRACTITIONER_NPI));
+    assertTrue(npiOrgDisplay.isPresent());
+    assertEquals(FAKE_TAXONOMY, npiOrgDisplay.get());
+  }
+
   /** Return Fake NPI Org. */
   @Test
   public void shouldReturnFakeOrgData() throws IOException {
