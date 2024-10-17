@@ -16,6 +16,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -317,12 +318,6 @@ final class CoverageTransformerV2 {
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
-    createCoverageClass(
-        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
-
-    createCoverageClass(
-        coverage, CoverageClass.PLAN, TransformerConstants.COVERAGE_PLAN_PART_C, Optional.empty());
-
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
@@ -341,6 +336,12 @@ final class CoverageTransformerV2 {
       // Monthly Medicare-Medicaid dual eligibility codes
       transformEntitlementDualEligibility(coverage, beneficiary);
     }
+
+    createCoverageClass(
+        coverage,
+        CoverageClass.PLAN,
+        concatenatePartCContractAndPbp(beneficiary),
+        Optional.empty());
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -381,12 +382,6 @@ final class CoverageTransformerV2 {
     setType(coverage);
 
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
-
-    createCoverageClass(
-        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
-
-    createCoverageClass(
-        coverage, CoverageClass.PLAN, TransformerConstants.COVERAGE_PLAN_PART_D, Optional.empty());
 
     coverage.setStatus(CoverageStatus.ACTIVE);
 
@@ -441,6 +436,12 @@ final class CoverageTransformerV2 {
       // Monthly Medicare-Medicaid dual eligibility codes
       transformEntitlementDualEligibility(coverage, beneficiary);
     }
+
+    createCoverageClass(
+        coverage,
+        CoverageClass.PLAN,
+        concatenatePartDContractAndPbp(beneficiary),
+        Optional.empty());
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -1097,5 +1098,134 @@ final class CoverageTransformerV2 {
   Timer.Context createTimerContext(String partId) {
     return CommonTransformerUtils.createMetricsTimer(
         metricRegistry, getClass().getSimpleName(), "transform", partId);
+  }
+
+  /**
+   * concatenates Part C Contract And Pbp.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @return concatenated Contract And Pbp
+   */
+  private String concatenatePartCContractAndPbp(Beneficiary beneficiary) {
+    int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+    String contractId = getPartCContractNumber(beneficiary, month).orElse(null);
+    String pbpId = getPartCPbpNumber(beneficiary, month).orElse(null);
+    return contractId + "-" + pbpId;
+  }
+
+  /**
+   * concatenates Part D Contract And Pbp.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @return concatenated Contract And Pbp
+   */
+  private String concatenatePartDContractAndPbp(Beneficiary beneficiary) {
+
+    int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+
+    String contractId = getPartDContractNumber(beneficiary, month).orElse(null);
+    String pbpId = getPartDPbpNumber(beneficiary, month).orElse(null);
+
+    return contractId + "-" + pbpId;
+  }
+
+  /**
+   * gets the current month PartCContractNumber.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param month the value of current month
+   * @return PartCContractNumber of the current month
+   */
+  public Optional<String> getPartCContractNumber(Beneficiary beneficiary, int month) {
+    return switch (month) {
+      case 1 -> beneficiary.getPartCContractNumberJanId();
+      case 2 -> beneficiary.getPartCContractNumberFebId();
+      case 3 -> beneficiary.getPartCContractNumberMarId();
+      case 4 -> beneficiary.getPartCContractNumberAprId();
+      case 5 -> beneficiary.getPartCContractNumberMayId();
+      case 6 -> beneficiary.getPartCContractNumberJunId();
+      case 7 -> beneficiary.getPartCContractNumberJulId();
+      case 8 -> beneficiary.getPartCContractNumberAugId();
+      case 9 -> beneficiary.getPartCContractNumberSeptId();
+      case 10 -> beneficiary.getPartCContractNumberOctId();
+      case 11 -> beneficiary.getPartCContractNumberNovId();
+      case 12 -> beneficiary.getPartCContractNumberDecId();
+      default -> Optional.empty();
+    };
+  }
+
+  /**
+   * gets the current month PartCPbpNumber.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param month the value of current month
+   * @return PartCPbpNumber code of the current month
+   */
+  public Optional<String> getPartCPbpNumber(Beneficiary beneficiary, int month) {
+    return switch (month) {
+      case 1 -> beneficiary.getPartCPbpNumberJanId();
+      case 2 -> beneficiary.getPartCPbpNumberFebId();
+      case 3 -> beneficiary.getPartCPbpNumberMarId();
+      case 4 -> beneficiary.getPartCPbpNumberAprId();
+      case 5 -> beneficiary.getPartCPbpNumberMayId();
+      case 6 -> beneficiary.getPartCPbpNumberJunId();
+      case 7 -> beneficiary.getPartCPbpNumberJulId();
+      case 8 -> beneficiary.getPartCPbpNumberAugId();
+      case 9 -> beneficiary.getPartCPbpNumberSeptId();
+      case 10 -> beneficiary.getPartCPbpNumberOctId();
+      case 11 -> beneficiary.getPartCPbpNumberNovId();
+      case 12 -> beneficiary.getPartCPbpNumberDecId();
+      default -> Optional.empty();
+    };
+  }
+
+  /**
+   * gets the current month PartDContractNumber.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param month the value of current month
+   * @return PartDContractNumber of the current month
+   */
+  public Optional<String> getPartDContractNumber(Beneficiary beneficiary, int month) {
+    return switch (month) {
+      case 1 -> beneficiary.getPartDContractNumberJanId();
+      case 2 -> beneficiary.getPartDContractNumberFebId();
+      case 3 -> beneficiary.getPartDContractNumberMarId();
+      case 4 -> beneficiary.getPartDContractNumberAprId();
+      case 5 -> beneficiary.getPartDContractNumberMayId();
+      case 6 -> beneficiary.getPartDContractNumberJunId();
+      case 7 -> beneficiary.getPartDContractNumberJulId();
+      case 8 -> beneficiary.getPartDContractNumberAugId();
+      case 9 -> beneficiary.getPartDContractNumberSeptId();
+      case 10 -> beneficiary.getPartDContractNumberOctId();
+      case 11 -> beneficiary.getPartDContractNumberNovId();
+      case 12 -> beneficiary.getPartDContractNumberDecId();
+      default -> Optional.empty();
+    };
+  }
+
+  /**
+   * gets the current month PartDPbpNumber.
+   *
+   * @param beneficiary the value for {@link Beneficiary}
+   * @param month the value of current month
+   * @return PartDPbpNumber code of the current month
+   */
+  public Optional<String> getPartDPbpNumber(Beneficiary beneficiary, int month) {
+    return switch (month) {
+      case 1 -> beneficiary.getPartDPbpNumberJanId();
+      case 2 -> beneficiary.getPartDPbpNumberFebId();
+      case 3 -> beneficiary.getPartDPbpNumberMarId();
+      case 4 -> beneficiary.getPartDPbpNumberAprId();
+      case 5 -> beneficiary.getPartDPbpNumberMayId();
+      case 6 -> beneficiary.getPartDPbpNumberJunId();
+      case 7 -> beneficiary.getPartDPbpNumberJulId();
+      case 8 -> beneficiary.getPartDPbpNumberAugId();
+      case 9 -> beneficiary.getPartDPbpNumberSeptId();
+      case 10 -> beneficiary.getPartDPbpNumberOctId();
+      case 11 -> beneficiary.getPartDPbpNumberNovId();
+      case 12 -> beneficiary.getPartDPbpNumberDecId();
+      default -> Optional.empty();
+    };
   }
 }
