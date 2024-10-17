@@ -22,6 +22,8 @@ A proposal to rewrite the SAMHSA filter to be more reliable and easier to mainta
   - [Implementation Overview](#implementation-overview)
   - [Database Schema](#database-schema)
     - [Optional Addition: Claim Details](#optional-addition-claim-details)
+  - [Pipeline Updates](#pipeline-updates)
+  - [FHIR Server Updates](#fhir-server-updates)
 
 ## Background
 
@@ -191,3 +193,17 @@ An example `details` field may look like this:
 ]
 ```
 
+## Pipeline Updates
+
+The CCW and RDA pipelines will need to be updated to populate the new tables.
+At processing time, the pipeline will check each claim against the configured list of SAMHSA codes and populate the tag tables with both the `R` and `42CFRPart2` tags for each SAMHSA claim.
+
+## FHIR Server Updates
+
+The SQL queries used to fetch the claims data for the EOB, Claim, and ClaimResponse endpoints will need to join against the tag tables in order to determine which claims have SAMHSA data.
+SAMHSA claims should not be included if `excludeSAMHSA=true` is supplied in the request. 
+The `R` and `42CFRPart2` [Security Labels](https://build.fhir.org/security-labels.html) should be applied if SAMHSA data is allowed to be returned.
+
+The new approach should be fully compatible with the existing filter, therefore we should utilize a feature flag in order to allow both implementations to coexist.
+This reduces risk in the event that a defect in the new implementation creates a need to fall back to the current one.
+The feature flag and current implementation can be removed at a later time.
