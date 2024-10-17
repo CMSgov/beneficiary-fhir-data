@@ -29,6 +29,7 @@ public class NPIOrgLookupTest {
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
+  /** A fake taxonomy to use with FAKE_PRACTITIONER_NPI. */
   public static final String FAKE_TAXONOMY = "0000000X\tFake Taxonomy";
 
   /** Setup Before Each test method. */
@@ -43,7 +44,7 @@ public class NPIOrgLookupTest {
     npiOrgDataLookup = new NPIOrgLookup(npiOrgHashMap);
   }
 
-  /** Should Return taxonomy */
+  /** Should Return taxonomy. */
   @Test
   public void shouldReturnTaxonomy() {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(FAKE_PRACTITIONER_NPI));

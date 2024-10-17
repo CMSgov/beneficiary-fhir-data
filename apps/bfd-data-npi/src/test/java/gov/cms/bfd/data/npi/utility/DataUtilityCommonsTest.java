@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Test;
 
 /** Data Utility Commons Test. */
 public class DataUtilityCommonsTest {
-
+  /** A fake Taxonomy Code. */
   private static final String TAXONOMY_CODE = "207X00000X";
+
+  /** A fake Taxonomy Display. */
   private static final String TAXONOMY_DISPLAY = "Orthopaedic Surgery";
 
   /** This logic is used when parsing the header for the NPI files. */
