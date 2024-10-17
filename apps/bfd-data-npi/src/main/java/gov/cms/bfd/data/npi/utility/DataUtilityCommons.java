@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -41,6 +42,9 @@ public class DataUtilityCommons {
 
   /** The day of the month we should check to see if the file has posted. */
   private static final int DAYS_IN_EXPIRATION = 10;
+
+  /** Field for taxonomy code. */
+  private static final String TAXONOMY_CODE_FIELD = "Healthcare Provider Taxonomy Code_1";
 
   /**
    * Gets the org names from the npi file.
@@ -263,6 +267,35 @@ public class DataUtilityCommons {
   }
 
   /**
+   * Loads the taxonomy groupings into a map.
+   *
+   * @return map of taxonomy groupings.
+   * @throws IOException exception thrown.
+   */
+  public static Map<String, String> processTaxonomyDescriptions() throws IOException {
+    ClassLoader classLoader = DataUtilityCommons.class.getClassLoader();
+    File taxonomyFile =
+        new File(
+            Objects.requireNonNull(classLoader.getResource("nucc_taxonomy_240.csv")).getFile());
+    Map<String, String> taxonomyMapping = new HashMap<>();
+    try (FileInputStream is = new FileInputStream(taxonomyFile);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      String line = reader.readLine();
+      String[] fields = line.split(",");
+      Map<String, Integer> indexes = getIndexNumbers(fields);
+      Integer codeIndex = getIndexNumberForField(indexes, "Code");
+      Integer classificationIndex = getIndexNumberForField(indexes, "Classification");
+      while ((line = reader.readLine()) != null) {
+        fields = line.split(",");
+        String code = fields[codeIndex].trim();
+        String classification = fields[classificationIndex].trim();
+        taxonomyMapping.put(code, classification);
+      }
+    }
+    return taxonomyMapping;
+  }
+
+  /**
    * Converts the npi data file.
    *
    * @param convertedNpiDataFile converted npi data file.
@@ -271,6 +304,8 @@ public class DataUtilityCommons {
    */
   private static void convertNpiDataFile(Path convertedNpiDataFile, Path originalNpiDataFile)
       throws IOException {
+
+    Map<String, String> taxonomyMap = DataUtilityCommons.processTaxonomyDescriptions();
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
         Charset.forName("windows-1252")
@@ -296,6 +331,7 @@ public class DataUtilityCommons {
       Map<String, Integer> indexes = getIndexNumbers(fields);
       Integer npiIndex = getIndexNumberForField(indexes, "NPI");
       Integer entityTypeCodeIndex = getIndexNumberForField(indexes, "Entity Type Code");
+      Integer taxonomyCodeIndex = getIndexNumberForField(indexes, TAXONOMY_CODE_FIELD);
       Integer orgNameIndex =
           getIndexNumberForField(indexes, "Provider Organization Name (Legal Business Name)");
 
@@ -305,10 +341,14 @@ public class DataUtilityCommons {
         String orgName = fields[orgNameIndex].trim().replace("\"", "");
         String npi = fields[npiIndex].trim().replace("\"", "");
         String entityTypeCode = fields[entityTypeCodeIndex].trim().replace("\"", "");
-
+        String taxonomyCode = fields[taxonomyCodeIndex].trim().replace("\"", "");
         // entity type code 2 is organization
-        if (!Strings.isNullOrEmpty(entityTypeCode) && Integer.parseInt(entityTypeCode) == 2) {
-          out.write(npi + "\t" + orgName);
+        if (!Strings.isNullOrEmpty(entityTypeCode)) {
+          if (Integer.parseInt(entityTypeCode) == 2) {
+            out.write(npi + "\t" + orgName);
+          } else {
+            out.write(npi + "\t" + taxonomyCode + "\t" + taxonomyMap.get(taxonomyCode));
+          }
           out.newLine();
         }
       }
