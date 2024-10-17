@@ -99,6 +99,11 @@ public class NPIOrgLookup {
         if (npiDataColumns.length == 2) {
           npiProcessedData.put(
               npiDataColumns[0].replace("\"", ""), npiDataColumns[1].replace("\"", ""));
+        } else if (npiDataColumns.length == 3) {
+          // three columns means it's a practitioner taxonomy
+          npiProcessedData.put(
+              npiDataColumns[0].replace("\"", ""),
+              npiDataColumns[1].replace("\"", "") + "\t" + npiDataColumns[2].replace("\"", ""));
         }
       }
     }
