@@ -82,6 +82,8 @@ public class OpenApiDocs {
 
         // Add post specifications
         openApiDocs.addPostSpecifications(spec, apiVersion);
+
+        // Add deprecation flag to deprecated endpoints
         openApiDocs.addDeprecatedFlag(spec, apiVersion);
         specs.add(spec);
       }
