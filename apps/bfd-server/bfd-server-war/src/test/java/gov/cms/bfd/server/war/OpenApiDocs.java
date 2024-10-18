@@ -420,7 +420,7 @@ public class OpenApiDocs {
    * Retrieve the get method spec for a given endpoint.
    *
    * @param endPoint the endpoint to search for.
-   * @param getSpecs the collection of post specifications.
+   * @param getSpecs the collection of get specifications.
    * @return the get spec for the given endpoint.
    * @throws RuntimeException when get spec is not found.
    */
