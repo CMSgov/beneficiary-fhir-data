@@ -262,7 +262,7 @@ public class OpenApiDocs {
                   || path.endsWith("ClaimResponse/_search")))
           || (apiVersion.equals(API_VERSION_1) && path.endsWith("Patient/_search"))) {
         var getSpec = findGetSpecification(path, spec);
-        getSpec.put("deprecated", "true");
+        getSpec.put("deprecated", true);
       }
     }
   }
