@@ -247,7 +247,6 @@ public class OpenApiDocs {
    *
    * @param spec the OpenAPI spec Map to update with deprecated info.
    * @param apiVersion either V1 or V2
-   * @throws IOException for input stream errors.
    */
   private void addDeprecatedFlag(Map<String, Object> spec, String apiVersion) {
 
