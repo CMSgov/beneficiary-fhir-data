@@ -245,7 +245,8 @@ public class OpenApiDocs {
   }
 
   /**
-   * Adds deprecated flag to certain HAPI FHIR generated get endpoints.
+   * Adds deprecated flag to certain HAPI FHIR generated get endpoints. Since we are passed the
+   * entire YAML tree, we can traverse it until we get to the needed get node to add the flag.
    *
    * @param spec the OpenAPI spec Map to update with deprecated info.
    * @param apiVersion either V1 or V2
