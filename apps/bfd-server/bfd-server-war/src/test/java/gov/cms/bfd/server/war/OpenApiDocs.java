@@ -249,7 +249,7 @@ public class OpenApiDocs {
    * @param apiVersion either V1 or V2
    * @throws IOException for input stream errors.
    */
-  private void addDeprecatedFlag(Map<String, Object> spec, String apiVersion) throws IOException {
+  private void addDeprecatedFlag(Map<String, Object> spec, String apiVersion) {
 
     // iterate over paths and add post specification to _search endpoints
     var paths = (Map<String, Object>) spec.get("paths");
