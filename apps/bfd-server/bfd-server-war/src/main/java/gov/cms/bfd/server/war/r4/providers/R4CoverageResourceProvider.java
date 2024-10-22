@@ -213,6 +213,11 @@ public class R4CoverageResourceProvider implements IResourceProvider {
 
     Coverage coverage =
         coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity, profileUsed);
+
+    if (coverage.isEmpty()) {
+      throw new ResourceNotFoundException(coverageId);
+    }
+
     return coverage;
   }
 
