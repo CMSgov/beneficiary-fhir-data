@@ -205,11 +205,20 @@
         "type" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
+            "code" : "group",
+            "display" : "Group"
+          } ]
+        },
+        "value" : "Medicare"
+      }, {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
             "code" : "plan",
             "display" : "Plan"
           } ]
         },
-        "value" : "H1225-003"
+        "value" : "Part C"
       } ]
     }
   }, {
@@ -259,11 +268,20 @@
         "type" : {
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
+            "code" : "group",
+            "display" : "Group"
+          } ]
+        },
+        "value" : "Medicare"
+      }, {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
             "code" : "plan",
             "display" : "Plan"
           } ]
         },
-        "value" : "S4607-003"
+        "value" : "Part D"
       } ]
     }
   } ]

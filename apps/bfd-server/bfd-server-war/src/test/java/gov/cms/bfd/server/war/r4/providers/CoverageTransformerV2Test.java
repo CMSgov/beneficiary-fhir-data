@@ -553,7 +553,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageClassPartC() {
     coverage = coverageTransformer.transform(MedicareSegment.PART_C, beneficiary, Profile.C4BB);
-    verifyCoveragePartCAndCClass(coverage.getClass_().getFirst().getValue());
+    verifyCoverageClass("Part C");
   }
 
   // ==================
@@ -701,7 +701,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void verifyCoverageClassPartD() {
     coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
-    verifyCoveragePartCAndCClass(coverage.getClass_().getFirst().getValue());
+    verifyCoverageClass("Part D");
   }
 
   // ==================
@@ -914,27 +914,6 @@ public final class CoverageTransformerV2Test {
 
     assertTrue(compare.getClass_().get(0).equalsDeep(coverage.getClass_().get(0)));
     assertTrue(compare.getClass_().get(1).equalsDeep(coverage.getClass_().get(1)));
-  }
-
-  /**
-   * Verifies the correct number of coverage class entries and the entries have the correct data.
-   *
-   * @param planValue value expected for plan
-   */
-  private static void verifyCoveragePartCAndCClass(String planValue) {
-    assertEquals(1, coverage.getClass_().size());
-
-    Coverage compare = new Coverage();
-    compare
-        .addClass_()
-        .setValue(planValue)
-        .getType()
-        .addCoding()
-        .setCode("plan")
-        .setDisplay("Plan")
-        .setSystem("http://terminology.hl7.org/CodeSystem/coverage-class");
-
-    assertTrue(compare.getClass_().get(0).equalsDeep(coverage.getClass_().getFirst()));
   }
 
   /**

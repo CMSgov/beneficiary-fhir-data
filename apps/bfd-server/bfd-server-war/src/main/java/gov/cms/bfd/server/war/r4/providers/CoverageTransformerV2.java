@@ -338,12 +338,26 @@ final class CoverageTransformerV2 {
       transformEntitlementDualEligibility(coverage, beneficiary);
     }
 
-    String ContractAndPbpID = concatenatePartCContractAndPbp(beneficiary);
-    if (ContractAndPbpID == null) {
-      return null;
-    }
+    int month = Calendar.getInstance().get(Calendar.MONTH);
+    String contractAndPbpID =
+        concatenateContractAndPbp(
+            getPartCContractNumber(beneficiary, month), getPartCPbpNumber(beneficiary, month));
 
-    createCoverageClass(coverage, CoverageClass.PLAN, ContractAndPbpID, Optional.empty());
+    if (profile.equals(Profile.C4DIC)) {
+      // Hide resource Part C when Contract ID or PBP ID is null
+      if (contractAndPbpID == null) {
+        return null;
+      }
+      createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
+    } else {
+      createCoverageClass(
+          coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_C,
+          Optional.empty());
+    }
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -439,12 +453,27 @@ final class CoverageTransformerV2 {
       transformEntitlementDualEligibility(coverage, beneficiary);
     }
 
-    String ContractAndPbpID = concatenatePartDContractAndPbp(beneficiary);
+    int month = Calendar.getInstance().get(Calendar.MONTH);
 
-    if (ContractAndPbpID == null) {
-      return null;
+    String contractAndPbpID =
+        concatenateContractAndPbp(
+            getPartDContractNumber(beneficiary, month), getPartDPbpNumber(beneficiary, month));
+
+    if (profile.equals(Profile.C4DIC)) {
+      // Hide resource Part D when Contract ID or PBP ID is null
+      if (contractAndPbpID == null) {
+        return null;
+      }
+      createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
+    } else {
+      createCoverageClass(
+          coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+      createCoverageClass(
+          coverage,
+          CoverageClass.PLAN,
+          TransformerConstants.COVERAGE_PLAN_PART_D,
+          Optional.empty());
     }
-    createCoverageClass(coverage, CoverageClass.PLAN, ContractAndPbpID, Optional.empty());
 
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
@@ -1104,33 +1133,17 @@ final class CoverageTransformerV2 {
   }
 
   /**
-   * concatenates Part C Contract And Pbp.
+   * concatenates contractNumber and pbpNumber.
    *
-   * @param beneficiary the value for {@link Beneficiary}
+   * @param contractNumber value of contract number
+   * @param pbpNumber value of pbp number
    * @return concatenated Contract And Pbp
    */
-  private String concatenatePartCContractAndPbp(Beneficiary beneficiary) {
-    int month = Calendar.getInstance().get(Calendar.MONTH);
-    String contractId = getPartCContractNumber(beneficiary, month).orElse(null);
-    String pbpId = getPartCPbpNumber(beneficiary, month).orElse(null);
-    if (contractId != null && pbpId != null) {
-      return contractId + "-" + pbpId;
-    }
-    return null;
-  }
+  private String concatenateContractAndPbp(
+      Optional<String> contractNumber, Optional<String> pbpNumber) {
+    String contractId = contractNumber.orElse(null);
+    String pbpId = pbpNumber.orElse(null);
 
-  /**
-   * concatenates Part D Contract And Pbp.
-   *
-   * @param beneficiary the value for {@link Beneficiary}
-   * @return concatenated Contract And Pbp
-   */
-  private String concatenatePartDContractAndPbp(Beneficiary beneficiary) {
-
-    int month = Calendar.getInstance().get(Calendar.MONTH);
-
-    String contractId = getPartDContractNumber(beneficiary, month).orElse(null);
-    String pbpId = getPartDPbpNumber(beneficiary, month).orElse(null);
     if (contractId != null && pbpId != null) {
       return contractId + "-" + pbpId;
     }
