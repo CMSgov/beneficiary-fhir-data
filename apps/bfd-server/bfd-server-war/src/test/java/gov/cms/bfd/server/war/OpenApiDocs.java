@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,23 @@ public class OpenApiDocs {
 
   /** YAML reading/writing utility. */
   private final Yaml yaml;
+
+  /** V2 deprecated endpoints. */
+  public static final String[] V2_DEPRECATED_ENDPOINTS =
+      new String[] {
+        "/ExplanationOfBenefit",
+        "/Patient",
+        "/Claim",
+        "/ClaimResponse",
+        "/ExplanationOfBenefit/_search",
+        "/Patient/_search",
+        "/Claim/_search",
+        "/ClaimResponse/_search"
+      };
+
+  /** V1 deprecated endpoints. */
+  public static final String[] V1_DEPRECATED_ENDPOINTS =
+      new String[] {"/Patient", "/Patient/_search"};
 
   /**
    * Entry point, starts an E2E test server instance and downloads OpenAPI yaml.
@@ -252,16 +270,13 @@ public class OpenApiDocs {
    * @param apiVersion either V1 or V2
    */
   private void addDeprecatedFlag(Map<String, Object> spec, String apiVersion) {
-
     // iterate over paths and add post specification to _search endpoints
     var paths = (Map<String, Object>) spec.get("paths");
     for (String path : paths.keySet()) {
       if ((apiVersion.equals(API_VERSION_2)
-              && (path.endsWith("ExplanationOfBenefit/_search")
-                  || path.endsWith("Patient/_search")
-                  || path.endsWith("Claim/_search")
-                  || path.endsWith("ClaimResponse/_search")))
-          || (apiVersion.equals(API_VERSION_1) && path.endsWith("Patient/_search"))) {
+              && (Arrays.stream(V2_DEPRECATED_ENDPOINTS).anyMatch(path::endsWith))
+          || (apiVersion.equals(API_VERSION_1)
+              && Arrays.stream(V1_DEPRECATED_ENDPOINTS).anyMatch(path::endsWith)))) {
         var getSpec = findGetSpecification(path, spec);
         getSpec.put("deprecated", true);
       }
