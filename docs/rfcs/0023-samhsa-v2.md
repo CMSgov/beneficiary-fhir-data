@@ -22,6 +22,7 @@ A proposal to rewrite the SAMHSA filter to be more reliable and easier to mainta
   - [Implementation Overview](#implementation-overview)
   - [Database Schema](#database-schema)
     - [Optional Addition: Claim Details](#optional-addition-claim-details)
+    - [Entity Definitions - DSL vs JPA](#entity-definitions---dsl-vs-jpa)
   - [Pipeline Updates](#pipeline-updates)
   - [FHIR Server Updates](#fhir-server-updates)
 
@@ -192,6 +193,14 @@ An example `details` field may look like this:
     }
 ]
 ```
+
+### Entity Definitions - DSL vs JPA
+
+Most of our database tables are generated using the YAML-based DSL.
+The DSL takes care of generating the JPA entities and also includes extra logic to handle automatically mapping incoming data from RIF files or protobufs.
+
+The main purpose of the DSL is to make it easy to map incoming data directly into our database tables. However, the tables we're adding for this functionality will be populated using our own logic and don't directly map to the fields coming from the RIF files or RDA messages, so the extra codegen features provided by the DSL are largely unnecessary.
+The internal RDA tracking tables (`mbi_cache`, `message_errors`, `rda_api_progress`, and `claim_message_meta_data`) are also defined using JPA entities directly, so there is precedent for this.
 
 ## Pipeline Updates
 
