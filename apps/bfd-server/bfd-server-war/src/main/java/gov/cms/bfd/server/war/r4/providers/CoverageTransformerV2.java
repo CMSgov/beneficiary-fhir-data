@@ -339,6 +339,8 @@ final class CoverageTransformerV2 {
     }
 
     String ContractAndPbpID = concatenatePartCContractAndPbp(beneficiary);
+
+    // Hide resource Part C when Contract ID or PBP ID is null
     if (ContractAndPbpID == null) {
       return null;
     }
@@ -441,6 +443,7 @@ final class CoverageTransformerV2 {
 
     String ContractAndPbpID = concatenatePartDContractAndPbp(beneficiary);
 
+    //    Hide resource Part D when Contract ID or PBP ID is null
     if (ContractAndPbpID == null) {
       return null;
     }
