@@ -29,6 +29,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +46,18 @@ public class DataUtilityCommons {
   /** The day of the month we should check to see if the file has posted. */
   private static final int DAYS_IN_EXPIRATION = 10;
 
-  /** Field for taxonomy code. */
+  /** Field for taxonomy code in CSV. */
   private static final String TAXONOMY_CODE_FIELD = "Healthcare Provider Taxonomy Code_1";
+
+  /** Field for provider organization name in CSV. */
+  public static final String PROVIDER_ORGANIZATION_NAME_FIELD =
+      "Provider Organization Name (Legal Business Name)";
+
+  /** Field for NPI in CSV. */
+  public static final String NPI_FIELD = "NPI";
+
+  /** Field for Entity Type Code in CSV. */
+  public static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
 
   /**
    * Gets the org names from the npi file.
@@ -280,17 +293,15 @@ public class DataUtilityCommons {
     Map<String, String> taxonomyMapping = new HashMap<>();
     try (FileInputStream is = new FileInputStream(taxonomyFile);
         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-      String line = reader.readLine();
-      String[] fields = line.split(",");
-      Map<String, Integer> indexes = getIndexNumbers(fields);
-      Integer codeIndex = getIndexNumberForField(indexes, "Code");
-      Integer displayIndex = getIndexNumberForField(indexes, "Display Name");
-      while ((line = reader.readLine()) != null) {
+      CSVParser csvParser =
+          new CSVParser(
+              reader,
+              CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+      for (CSVRecord csvRecord : csvParser) {
         // split on commas not in quotes
-        fields = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-        String code = fields[codeIndex].trim();
-        String classification = fields[displayIndex].trim();
-        taxonomyMapping.put(code, classification);
+        String code = csvRecord.get("code");
+        String displayName = csvRecord.get("Display Name");
+        taxonomyMapping.put(code, displayName);
       }
     }
     return taxonomyMapping;
@@ -313,36 +324,25 @@ public class DataUtilityCommons {
             .newDecoder()
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
-
     CharsetEncoder outEnc =
         StandardCharsets.UTF_8
             .newEncoder()
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
-
     try (FileInputStream is = new FileInputStream(originalNpiDataFile.toFile().getAbsolutePath());
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
         FileOutputStream fw =
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
-
-      // Get indexes according to header
-      String line = reader.readLine();
-      String[] fields = line.split(",");
-      Map<String, Integer> indexes = getIndexNumbers(fields);
-      Integer npiIndex = getIndexNumberForField(indexes, "NPI");
-      Integer entityTypeCodeIndex = getIndexNumberForField(indexes, "Entity Type Code");
-      Integer taxonomyCodeIndex = getIndexNumberForField(indexes, TAXONOMY_CODE_FIELD);
-      Integer orgNameIndex =
-          getIndexNumberForField(indexes, "Provider Organization Name (Legal Business Name)");
-
-      while ((line = reader.readLine()) != null) {
-        fields = line.split(",");
-
-        String orgName = fields[orgNameIndex].trim().replace("\"", "");
-        String npi = fields[npiIndex].trim().replace("\"", "");
-        String entityTypeCode = fields[entityTypeCodeIndex].trim().replace("\"", "");
-        String taxonomyCode = fields[taxonomyCodeIndex].trim().replace("\"", "");
+      CSVParser csvParser =
+          new CSVParser(
+              reader,
+              CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+      for (CSVRecord csvRecord : csvParser) {
+        String orgName = csvRecord.get(PROVIDER_ORGANIZATION_NAME_FIELD);
+        String npi = csvRecord.get(NPI_FIELD);
+        String entityTypeCode = csvRecord.get(ENTITY_TYPE_CODE_FIELD);
+        String taxonomyCode = csvRecord.get(TAXONOMY_CODE_FIELD);
         // entity type code 2 is organization
         if (!Strings.isNullOrEmpty(entityTypeCode)) {
           if (Integer.parseInt(entityTypeCode) == 2) {
