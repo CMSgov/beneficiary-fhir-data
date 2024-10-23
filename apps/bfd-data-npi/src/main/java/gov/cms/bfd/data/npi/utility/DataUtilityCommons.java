@@ -298,7 +298,6 @@ public class DataUtilityCommons {
               reader,
               CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
       for (CSVRecord csvRecord : csvParser) {
-        // split on commas not in quotes
         String code = csvRecord.get("code");
         String displayName = csvRecord.get("Display Name");
         taxonomyMapping.put(code, displayName);
