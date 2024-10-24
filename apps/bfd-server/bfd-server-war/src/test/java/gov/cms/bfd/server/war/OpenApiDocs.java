@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,23 @@ public class OpenApiDocs {
 
   /** YAML reading/writing utility. */
   private final Yaml yaml;
+
+  /** V2 deprecated endpoints. */
+  public static final String[] V2_DEPRECATED_ENDPOINTS =
+      new String[] {
+        "/ExplanationOfBenefit",
+        "/Patient",
+        "/Claim",
+        "/ClaimResponse",
+        "/ExplanationOfBenefit/_search",
+        "/Patient/_search",
+        "/Claim/_search",
+        "/ClaimResponse/_search"
+      };
+
+  /** V1 deprecated endpoints. */
+  public static final String[] V1_DEPRECATED_ENDPOINTS =
+      new String[] {"/Patient", "/Patient/_search"};
 
   /**
    * Entry point, starts an E2E test server instance and downloads OpenAPI yaml.
@@ -83,6 +101,8 @@ public class OpenApiDocs {
         // Add post specifications
         openApiDocs.addPostSpecifications(spec, apiVersion);
 
+        // Add deprecation flag to deprecated endpoints
+        openApiDocs.addDeprecatedFlag(spec, apiVersion);
         specs.add(spec);
       }
 
@@ -243,6 +263,27 @@ public class OpenApiDocs {
   }
 
   /**
+   * Adds deprecated flag to certain HAPI FHIR generated get endpoints. Since we are passed the
+   * entire YAML tree, we can traverse it until we get to the needed get node to add the flag.
+   *
+   * @param spec the OpenAPI spec Map to update with deprecated info.
+   * @param apiVersion either V1 or V2
+   */
+  private void addDeprecatedFlag(Map<String, Object> spec, String apiVersion) {
+    // iterate over paths and add deprecated to search endpoints
+    var paths = (Map<String, Object>) spec.get("paths");
+    for (String path : paths.keySet()) {
+      if ((apiVersion.equals(API_VERSION_2)
+              && (Arrays.stream(V2_DEPRECATED_ENDPOINTS).anyMatch(path::endsWith))
+          || (apiVersion.equals(API_VERSION_1)
+              && Arrays.stream(V1_DEPRECATED_ENDPOINTS).anyMatch(path::endsWith)))) {
+        var getSpec = findGetSpecification(path, spec);
+        getSpec.put("deprecated", true);
+      }
+    }
+  }
+
+  /**
    * Merge the spec Maps for BFD API V1 and V2, adding version tags and servers to the combined
    * definition.
    *
@@ -389,6 +430,24 @@ public class OpenApiDocs {
       throw new RuntimeException("POST specification not found for endpoint " + endPoint);
     }
     return (Map<String, Object>) path.get("post");
+  }
+
+  /**
+   * Retrieve the get method spec for a given endpoint.
+   *
+   * @param endPoint the endpoint to search for.
+   * @param getSpecs the collection of get specifications.
+   * @return the get spec for the given endpoint.
+   * @throws RuntimeException when get spec is not found.
+   */
+  private Map<String, Object> findGetSpecification(String endPoint, Map<String, Object> getSpecs)
+      throws RuntimeException {
+    var paths = (Map<String, Object>) getSpecs.get("paths");
+    var path = (Map<String, Object>) paths.get(endPoint);
+    if (path == null) {
+      throw new RuntimeException("GET specification not found for endpoint " + endPoint);
+    }
+    return (Map<String, Object>) path.get("get");
   }
 
   /**
