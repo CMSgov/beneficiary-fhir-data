@@ -255,7 +255,7 @@ public final class DMEClaimTransformerV2Test {
     assertEquals("Participating", ((Coding) member2.getExtension().get(0).getValue()).getDisplay());
     // Check Qualification
     assertEquals(
-        "https://www.nubc.org/provider-taxonomy",
+        "http://nucc.org/provider-taxonomy",
         member2.getQualification().getCoding().getFirst().getSystem());
     assertEquals(
         "Orthopaedic Surgery", member2.getQualification().getCoding().getFirst().getDisplay());

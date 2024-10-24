@@ -782,7 +782,7 @@ public class CarrierClaimTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding()
-                        .setSystem("https://www.nubc.org/provider-taxonomy")
+                        .setSystem("http://nucc.org/provider-taxonomy")
                         .setDisplay("Health Care")
                         .setCode("390200000X"))));
     compare3.addExtension(

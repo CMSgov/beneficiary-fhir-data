@@ -1970,7 +1970,7 @@ public final class TransformerUtilsV2 {
           String taxonomyDisplay = taxonomyArray[1];
           careTeamEntry.setQualification(
               createCodeableConcept(
-                  TransformerConstants.NUBC_TAXONOMY_SYSTEM, null, taxonomyDisplay, taxonomyCode));
+                  TransformerConstants.NUCC_TAXONOMY_SYSTEM, null, taxonomyDisplay, taxonomyCode));
         }
       }
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);

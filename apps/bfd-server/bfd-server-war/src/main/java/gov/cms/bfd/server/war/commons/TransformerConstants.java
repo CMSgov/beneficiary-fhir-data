@@ -99,11 +99,14 @@ public final class TransformerConstants {
   /** Base URL for nubc. */
   public static final String BASE_URL_NUBC = "https://www.nubc.org";
 
-  /** System for NUBC taxonomy. */
-  public static final String NUBC_TAXONOMY = "/provider-taxonomy";
+  /** Base URL for nucc. */
+  public static final String BASE_URL_NUCC = "http://nucc.org";
+
+  /** System for NUCC taxonomy. */
+  public static final String NUCC_TAXONOMY = "/provider-taxonomy";
 
   /** Full system for NUBC taxonomy. */
-  public static final String NUBC_TAXONOMY_SYSTEM = BASE_URL_NUBC + NUBC_TAXONOMY;
+  public static final String NUCC_TAXONOMY_SYSTEM = BASE_URL_NUCC + NUCC_TAXONOMY;
 
   /** System for NUBC admsn. */
   public static final String NUBC_ADMIT_CODE_SYSTEM =

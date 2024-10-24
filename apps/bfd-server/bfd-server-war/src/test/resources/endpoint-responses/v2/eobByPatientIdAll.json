@@ -183,7 +183,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207R00000X",
             "display" : "Internal Medicine Physician"
           } ]
@@ -211,7 +211,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207T00000X",
             "display" : "Neurological Surgery Physician"
           } ]
@@ -239,7 +239,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "204D00000X",
             "display" : "Neuromusculoskeletal Medicine & OMM Physician"
           } ]
@@ -267,7 +267,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207ZH0000X",
             "display" : "Hematology (Pathology) Physician"
           } ]
@@ -1777,7 +1777,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207R00000X",
             "display" : "Internal Medicine Physician"
           } ]
@@ -1805,7 +1805,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207ZH0000X",
             "display" : "Hematology (Pathology) Physician"
           } ]
@@ -2491,7 +2491,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207ZH0000X",
             "display" : "Hematology (Pathology) Physician"
           } ]
@@ -3539,7 +3539,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207R00000X",
             "display" : "Internal Medicine Physician"
           } ]
@@ -3567,7 +3567,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207T00000X",
             "display" : "Neurological Surgery Physician"
           } ]
@@ -3616,7 +3616,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207ZH0000X",
             "display" : "Hematology (Pathology) Physician"
           } ]
@@ -5820,7 +5820,7 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "https://www.nubc.org/provider-taxonomy",
+            "system" : "http://nucc.org/provider-taxonomy",
             "code" : "207ZH0000X",
             "display" : "Hematology (Pathology) Physician"
           } ]
