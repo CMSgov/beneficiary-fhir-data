@@ -52,15 +52,16 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
   private static final String RESPONSE_PREFIX = "response";
 
   /** obfuscated replacement for MBI. */
-  private static final String OBFUSCATED_MBI = "us-mbi|*********";
-
-  /** Regex Pattern to check for an /Patient request end-point. */
-  private static final Pattern PATIENT_REQUEST_REGEX = Pattern.compile("fhir/Patient");
+  private static final String OBFUSCATED_MBI = "*********";
 
   /** Regex Pattern to check for an MBI. */
   private static final Pattern MBI_REGEX =
-      Pattern.compile(
-          "us-mbi\\|[1-9][^SLOIBZsloibz0-9][^SLOIBZsloibz][0-9]-?[^SLOIBZsloibz0-9][^SLOIBZsloibz][0-9]-?[^SLOIBZsloibz0-9][^SLOIBZsloibz0-9][0-9][0-9]");
+      // Real MBIs disallow certain characters, but we'll be conservative here for simplicity's
+      // sake, and so we can easily test against synthetic MBIs.
+
+      // See the following link for more info on the MBI format
+      // https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf
+      Pattern.compile("\\d\\p{Alpha}\\p{Alnum}\\d-?\\p{Alpha}\\p{Alnum}\\d-?\\p{Alpha}{2}\\d{2}");
 
   /** {@inheritDoc} */
   @Override
@@ -113,63 +114,62 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
     // Record the request type.
     BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, "request_type"), request.getClass().getName());
 
-    // Set the default Operation (will hopefully be customized further in specific handler methods).
-    CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.OTHER);
+    // Record the basic request components.
+    CanonicalOperation operation =
+        new CanonicalOperation(CanonicalOperation.Endpoint.matchByHttpUri(request));
+    BfdMDC.put(
+        BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "http_method"), request.getMethod());
+    String url = replaceAllMbis(request.getRequestURL().toString());
+    BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "url"), url);
 
-    if (request instanceof HttpServletRequest) {
-      HttpServletRequest servletRequest = (HttpServletRequest) request;
+    // There shouldn't be any MBIs in the URI or URL, but we can't prevent someone from including
+    // one accidentally
+    String uri = replaceAllMbis(request.getRequestURI());
+    BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri"), uri);
 
-      // Record the basic request components.
-      operation =
-          new CanonicalOperation(CanonicalOperation.Endpoint.matchByHttpUri(servletRequest));
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "http_method"),
-          servletRequest.getMethod());
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "url"),
-          servletRequest.getRequestURL().toString());
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "uri"), servletRequest.getRequestURI());
+    String queryString = replaceAllMbis(request.getQueryString());
 
-      Matcher matcher = PATIENT_REQUEST_REGEX.matcher(servletRequest.getRequestURI());
-      // Only /Patient supports us-mbi identifier
-      if (matcher.find()
-          && servletRequest.getQueryString() != null
-          && servletRequest.getQueryString().length() > 0) {
-        // protect vs. logging an MBI_NUM
-        matcher = MBI_REGEX.matcher(servletRequest.getQueryString());
-        String uriString =
-            matcher.find() ? matcher.replaceAll(OBFUSCATED_MBI) : servletRequest.getQueryString();
-        BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"), uriString);
-      } else {
+    BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"), queryString);
+    BfdMDC.put(
+        BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "clientSSL", "DN"),
+        getClientSslPrincipalDistinguishedName(request));
+
+    // Record the request headers.
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String headerName = headerNames.nextElement();
+      List<String> headerValues = Collections.list(request.getHeaders(headerName));
+      if (headerValues.isEmpty())
+        BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName), "");
+      else if (headerValues.size() == 1)
         BfdMDC.put(
-            BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"),
-            servletRequest.getQueryString());
-      }
-      BfdMDC.put(
-          BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "clientSSL", "DN"),
-          getClientSslPrincipalDistinguishedName(servletRequest));
-
-      // Record the request headers.
-      Enumeration<String> headerNames = servletRequest.getHeaderNames();
-      while (headerNames.hasMoreElements()) {
-        String headerName = headerNames.nextElement();
-        List<String> headerValues = Collections.list(servletRequest.getHeaders(headerName));
-        if (headerValues.isEmpty())
-          BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName), "");
-        else if (headerValues.size() == 1)
-          BfdMDC.put(
-              BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName),
-              headerValues.get(0));
-        else
-          BfdMDC.put(
-              BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName),
-              headerValues.toString());
-      }
+            BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName),
+            replaceAllMbis(headerValues.getFirst()));
+      else
+        BfdMDC.put(
+            BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "header", headerName),
+            replaceAllMbis(headerValues.toString()));
     }
 
     // Publish the Operation name for monitoring systems.
     operation.publishOperationName();
+  }
+
+  /**
+   * Replace all MBIs with placeholders.
+   *
+   * @param input input string
+   * @return modified input
+   */
+  private String replaceAllMbis(String input) {
+    if (input == null) {
+      return input;
+    }
+    Matcher matcher = MBI_REGEX.matcher(input);
+    while (matcher.find()) {
+      input = input.replace(matcher.group(), OBFUSCATED_MBI);
+    }
+    return input;
   }
 
   /**
@@ -267,7 +267,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
   private static X509Certificate getClientCertificate(HttpServletRequest request) {
     X509Certificate[] certs =
         (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate");
-    if (certs == null || certs.length <= 0) {
+    if (certs == null || certs.length == 0) {
       LOGGER.debug("No client certificate found for request.");
       return null;
     }
