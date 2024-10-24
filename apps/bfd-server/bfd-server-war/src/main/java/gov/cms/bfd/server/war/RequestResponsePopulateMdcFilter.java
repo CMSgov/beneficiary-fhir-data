@@ -162,6 +162,9 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
    * @return modified input
    */
   private String replaceAllMbis(String input) {
+    if (input == null) {
+      return input;
+    }
     Matcher matcher = MBI_REGEX.matcher(input);
     while (matcher.find()) {
       input = input.replace(matcher.group(), OBFUSCATED_MBI);
