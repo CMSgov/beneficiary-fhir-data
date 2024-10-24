@@ -44,6 +44,9 @@ public final class RequestResponsePopulateMdcFilterTest {
     return Stream.of(
         arguments("nonsensitive", "nonsensitive"),
         arguments("1S00S00SS00", "*********"),
+        arguments("1S00-S00-SS00", "*********"),
+        arguments("1S00-S00SS00", "*********"),
+        arguments("1S00S00-SS00", "*********"),
         arguments("1s00S00sS00", "*********"),
         arguments("1S00S00SS001S00S00SS00", "******************"),
         arguments("1S00S00SS00dd1S00S00SS00", "*********dd*********"),

@@ -61,7 +61,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
 
       // See the following link for more info on the MBI format
       // https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi-with-format.pdf
-      Pattern.compile("(?:\\d\\p{Alpha}\\p{Alnum}){2}\\d\\p{Alpha}{2}\\d{2}");
+      Pattern.compile("\\d\\p{Alpha}\\p{Alnum}\\d-?\\p{Alpha}\\p{Alnum}\\d-?\\p{Alpha}{2}\\d{2}");
 
   /** {@inheritDoc} */
   @Override
