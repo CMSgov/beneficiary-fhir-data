@@ -180,6 +180,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getBeneficiaryPartBDeductAmount(),
         claimGroup.getPaymentDenialCode(),
         claimGroup.getReferringPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getReferringPhysicianNpi()),
         claimGroup.getReferringPhysicianUpin(),
         claimGroup.getProviderAssignmentIndicator(),
         claimGroup.getProviderPaymentAmount(),
@@ -201,7 +202,9 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         eob,
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimProfessionalAndNonClinicianCareTeamRole.REFERRING,
-        Optional.ofNullable(claimGroup.getReferringProviderIdNumber()));
+        Optional.ofNullable(claimGroup.getReferringProviderIdNumber()),
+        npiOrgLookup.retrieveNPIOrgDisplay(
+            Optional.ofNullable(claimGroup.getReferringProviderIdNumber())));
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
     eob.addExtension(
@@ -230,8 +233,8 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               item,
               C4BBPractitionerIdentifierType.NPI,
               C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-              line.getPerformingPhysicianNpi());
-
+              line.getPerformingPhysicianNpi(),
+              npiOrgLookup.retrieveNPIOrgDisplay(line.getPerformingPhysicianNpi()));
       // Fall back to UPIN if NPI not present
       if (line.getPerformingPhysicianNpi().isEmpty()) {
         performing =
@@ -248,9 +251,6 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
         // Update the responsible flag
         careTeam.setResponsible(true);
-        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-        TransformerUtilsV2.addCareTeamQualification(
-            careTeam, eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode());
 
         // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
         TransformerUtilsV2.addCareTeamExtension(

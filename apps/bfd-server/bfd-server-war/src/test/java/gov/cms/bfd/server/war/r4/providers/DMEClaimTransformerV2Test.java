@@ -14,6 +14,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
@@ -84,6 +85,9 @@ public final class DMEClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  /** The NPI Org lookup. */
+  @Mock NPIOrgLookup mockNpiOrgLookup;
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -114,8 +118,10 @@ public final class DMEClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
-
-    dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(any()))
+        .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
+    dmeClaimTransformer =
+        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
     claim = generateClaim();
     ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
@@ -249,10 +255,11 @@ public final class DMEClaimTransformerV2Test {
     assertEquals("Participating", ((Coding) member2.getExtension().get(0).getValue()).getDisplay());
     // Check Qualification
     assertEquals(
-        "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
-        member2.getQualification().getCoding().get(0).getSystem());
-    assertEquals("Pharmacy (DMERC)", member2.getQualification().getCoding().get(0).getDisplay());
-    assertEquals("A5", member2.getQualification().getCoding().get(0).getCode());
+        "http://nucc.org/provider-taxonomy",
+        member2.getQualification().getCoding().getFirst().getSystem());
+    assertEquals(
+        "Orthopaedic Surgery", member2.getQualification().getCoding().getFirst().getDisplay());
+    assertEquals("207X00000X", member2.getQualification().getCoding().get(0).getCode());
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -289,7 +296,6 @@ public final class DMEClaimTransformerV2Test {
         CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD);
     for (CareTeamComponent careTeam : genEob.getCareTeam()) {
       assertFalse(careTeam.getExtension().stream().anyMatch(i -> i.getUrl().equals(prtIndCdUrl)));
-      assertTrue(careTeam.getQualification().getCoding().isEmpty());
     }
   }
 

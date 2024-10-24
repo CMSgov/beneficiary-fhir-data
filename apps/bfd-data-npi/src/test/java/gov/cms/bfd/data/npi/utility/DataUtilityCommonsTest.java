@@ -3,12 +3,18 @@ package gov.cms.bfd.data.npi.utility;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /** Data Utility Commons Test. */
 public class DataUtilityCommonsTest {
+  /** A fake Taxonomy Code. */
+  private static final String TAXONOMY_CODE = "207X00000X";
+
+  /** A fake Taxonomy Display. */
+  private static final String TAXONOMY_DISPLAY = "Orthopaedic Surgery Physician";
 
   /** This logic is used when parsing the header for the NPI files. */
   @Test
@@ -40,6 +46,13 @@ public class DataUtilityCommonsTest {
     assertEquals(
         mapOfIndexResults.get(fieldToFind),
         DataUtilityCommons.getIndexNumberForField(mapOfIndexResults, fieldToFind));
+  }
+
+  /** This test ensures the proper loading of the taxonomy codes and descriptions. */
+  @Test
+  public void taxonomyDescriptionsProperlyLoad() throws IOException {
+    Map<String, String> taxonomyMap = DataUtilityCommons.processTaxonomyDescriptions();
+    assertEquals(TAXONOMY_DISPLAY, taxonomyMap.get(TAXONOMY_CODE));
   }
 
   /**

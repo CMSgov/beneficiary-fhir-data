@@ -13,6 +13,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.fda.utility.App;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -81,6 +82,9 @@ public final class PartDEventTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  /** The mock npi lookup. */
+  @Mock NPIOrgLookup mockNpiOrgLookup;
+
   /** ndcProductHashMap represents a map of PRODUCTNDC and SUBSTANCENAME for test. */
   Map<String, String> ndcProductHashMap = new HashMap<>();
 
@@ -113,6 +117,8 @@ public final class PartDEventTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty()))
+        .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
     InputStream npiDataStream =
         Thread.currentThread()
             .getContextClassLoader()
@@ -121,7 +127,8 @@ public final class PartDEventTransformerV2Test {
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         new FdaDrugCodeDisplayLookup(ndcProductHashMap);
 
-    partdEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    partdEventTransformer =
+        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
     claim = generateClaim();
     eob = partdEventTransformer.transform(claim, false);
   }

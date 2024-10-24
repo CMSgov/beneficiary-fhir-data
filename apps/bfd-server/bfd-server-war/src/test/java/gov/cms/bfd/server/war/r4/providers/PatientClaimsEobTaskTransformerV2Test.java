@@ -110,6 +110,9 @@ class PatientClaimsEobTaskTransformerV2Test {
   /** The mock entity manager for mocking database calls. */
   @Mock EntityManager mockEntityManager;
 
+  /** The mock npi lookup. */
+  @Mock NPIOrgLookup mockNpiTaxonomyLookup;
+
   /** Sets up the test class. */
   @BeforeEach
   public void setup() {
@@ -121,7 +124,8 @@ class PatientClaimsEobTaskTransformerV2Test {
     // NPI and FDA drug mocking
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
-
+    when(mockNpiTaxonomyLookup.retrieveNPIOrgDisplay(Optional.empty()))
+        .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
     // used to get the claim type in transformer utils
     CodeableConcept mockConcept = mock(CodeableConcept.class);
     Coding mockCoding = mock(Coding.class);
@@ -272,7 +276,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
+        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -305,7 +309,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
+        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
@@ -475,7 +479,7 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new PartDEventTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
+        new PartDEventTransformerV2(new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup, mockNpiOrgLookup);
