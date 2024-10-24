@@ -30,9 +30,16 @@ public final class RequestResponsePopulateMdcFilterTest {
   /** A mocked MDC adapter for use in the tests. */
   @Mock MDCAdapter mdcMock;
 
+  /** A mocked servlet request for use in the tests. */
   @Mock HttpServletRequest servletRequest;
+
+  /** A mocked servlet response for use in the tests. */
   @Mock HttpServletResponse servletResponse;
+
+  /** A mocked filter chain for use in the tests. */
   @Mock FilterChain filterChain;
+
+  /** The previous MDC adapter. */
   private static MDCAdapter previousAdapter;
 
   /** Set up tests with a mocked MDC adapter and make sure the MDC context is clear. */
@@ -55,6 +62,10 @@ public final class RequestResponsePopulateMdcFilterTest {
     BfdMDC.setMDCAdapter(previousAdapter);
   }
 
+  /***
+   * Test arguments.
+   * @return arguments
+   */
   public static Stream<Arguments> loggingTest() {
     return Stream.of(
         arguments("nonsensitive", "nonsensitive"),
@@ -76,6 +87,12 @@ public final class RequestResponsePopulateMdcFilterTest {
             "_format=application%2Ffhir%2Bjson*********&identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%*********"));
   }
 
+  /***
+   * Verify the query string is logged correctly.
+   * @param queryString query string
+   * @param loggedQueryString logged query string
+   * @throws ServletException Servlet exception
+   */
   @ParameterizedTest
   @MethodSource("loggingTest")
   public void logQueryString(String queryString, String loggedQueryString) throws ServletException {
@@ -90,6 +107,13 @@ public final class RequestResponsePopulateMdcFilterTest {
     Mockito.verify(mdcMock).put("http_access_request_query_string", loggedQueryString);
   }
 
+  /**
+   * Verify the URL is logged correctly.
+   *
+   * @param requestUrl request URL
+   * @param loggedRequestUrl logged request URL
+   * @throws ServletException Servlet exception
+   */
   @ParameterizedTest
   @MethodSource("loggingTest")
   public void logRequestUrl(String requestUrl, String loggedRequestUrl) throws ServletException {
@@ -104,6 +128,13 @@ public final class RequestResponsePopulateMdcFilterTest {
     Mockito.verify(mdcMock).put("http_access_request_url", loggedRequestUrl);
   }
 
+  /**
+   * Verify the URI is logged correctly.
+   *
+   * @param requestUri request URI
+   * @param loggedRequestUri logged request URI
+   * @throws ServletException Servlet exception
+   */
   @ParameterizedTest
   @MethodSource("loggingTest")
   public void logRequestUri(String requestUri, String loggedRequestUri) throws ServletException {
@@ -118,6 +149,13 @@ public final class RequestResponsePopulateMdcFilterTest {
     Mockito.verify(mdcMock).put("http_access_request_uri", loggedRequestUri);
   }
 
+  /**
+   * Verify the header is logged correctly.
+   *
+   * @param requestHeader request header
+   * @param loggedRequestHeader logged request header
+   * @throws ServletException Servlet exception
+   */
   @ParameterizedTest
   @MethodSource("loggingTest")
   public void logHeader(String requestHeader, String loggedRequestHeader) throws ServletException {
