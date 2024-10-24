@@ -270,7 +270,7 @@ public class OpenApiDocs {
    * @param apiVersion either V1 or V2
    */
   private void addDeprecatedFlag(Map<String, Object> spec, String apiVersion) {
-    // iterate over paths and add post specification to _search endpoints
+    // iterate over paths and add deprecated to search endpoints
     var paths = (Map<String, Object>) spec.get("paths");
     for (String path : paths.keySet()) {
       if ((apiVersion.equals(API_VERSION_2)
