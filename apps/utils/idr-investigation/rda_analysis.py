@@ -145,41 +145,55 @@ def main() -> None:
     rda_fields = extract_rda_rows_from_path(
         "/Users/mitchalessio/Repositories/beneficiary-fhir-data/apps/utils/idr-investigation/RDA API Data Dictionary.xlsx"
     )
+    print("Writing all RDA fields from RDA DD to CSV")
     write_to_csv(filename="all_rda_fields.csv", list_to_write=rda_fields)
 
     # IDR
+    unfiltered_idr_fields = extract_idr_rows_from_path(
+        "/Users/mitchalessio/Downloads/SF-IDR-Data-Dictionary-R205-2024-09-30.xlsm"
+    )
+    print("Writing all IDR fields extracted from IDR Data Dictionary")
+    write_to_csv(filename="./all_idr_fields.csv", list_to_write=unfiltered_idr_fields)
+
     idr_fields = [
         idr_field
-        for idr_field in extract_idr_rows_from_path(
-            "/Users/mitchalessio/Downloads/SF-IDR-Data-Dictionary-R205-2024-09-30.xlsm"
-        )
+        for idr_field in unfiltered_idr_fields
         if idr_field.col_data_source_name.lower()
-        not in [
-            "idr derived",
-            "derived",
-            "unknown",
-            "-",
-            " ",
-        ]
+        and idr_field.col_data_source_name.lower() != "-"
+        and not any(
+            invalid_substr.lower() in idr_field.col_data_source_name.lower()
+            for invalid_substr in ["idr derived", "derived", "unknown", "n/a"]
+        )
+        and not any(
+            invalid_substr.lower() in idr_field.table_name.lower()
+            for invalid_substr in ["MDCD", "medicaid"]
+        )
+        and "medicaid" not in idr_field.entity_name.lower()
     ]
+    print(
+        "Writing filtered IDR fields that are candidates for matching with RDA-provided BFD fields"
+    )
+    write_to_csv(filename="./all_filtered_idr_fields.rda_prov_fields.csv", list_to_write=idr_fields)
 
     # BFD
-    bfd_fields = extract_bfd_rda_columns_from_path(
+    bfd_rda_cols = extract_bfd_rda_columns_from_path(
         "/Users/mitchalessio/Repositories/beneficiary-fhir-data/apps/utils/idr-investigation/rda_columns.xlsx"
     )
+    print("Writing all RDA columns extracted from .xlsx")
+    write_to_csv(filename="./all_rda_columns.csv", list_to_write=bfd_rda_cols)
 
     # Map BFD's rda fields to RDA's source_copybook_field_labels
     bfd_to_rda_source_field_mapping = [
         BfdToRdaMappedField(
-            bfd_column_name=bfd_field.column_name,
+            bfd_column_name=bfd_rda_col.column_name,
             rda_source_system=rda_field.source_system,
             rda_api_field_label=rda_field.api_field_label,
             rda_field_name=rda_field.field_name,
             rda_source_copybook_field=rda_field.source_copybook_field,
             rda_source_system_def=rda_field.source_system_def,
         )
-        for (bfd_field, rda_field) in itertools.product(bfd_fields, rda_fields)
-        if clean_str(bfd_field.column_name) in clean_str(rda_field.source_copybook_field)
+        for (bfd_rda_col, rda_field) in itertools.product(bfd_rda_cols, rda_fields)
+        if clean_str(bfd_rda_col.column_name) in clean_str(rda_field.source_copybook_field)
     ]
     # unique_fields = set()
 
@@ -199,43 +213,39 @@ def main() -> None:
     for fuzz_ratio_field in (x.name for x in fields(FullyMappedField) if "ratio" in x.name.lower()):
         ratio_threshold = 70
         mapped_fields_exceeding_threshold = [
-            x
-            for x in fully_mapped_fields
-            if (dx := asdict(x))
-            and dx[fuzz_ratio_field] is not None
-            and int(dx[fuzz_ratio_field]) >= ratio_threshold
+            (mapped_field, fuzz_ratio)
+            for mapped_field in fully_mapped_fields
+            if (fuzz_ratio := getattr(mapped_field, fuzz_ratio_field))
+            and fuzz_ratio is not None
+            and int(fuzz_ratio) >= ratio_threshold
         ]
         bfd_fields_exceeding_threshold = set(
-            x.bfd_column_name for x in mapped_fields_exceeding_threshold
+            mapped_field.bfd_column_name for (mapped_field, _) in mapped_fields_exceeding_threshold
         )
-        print(len(bfd_fields_exceeding_threshold))
-        print(len(mapped_fields_exceeding_threshold))
 
         high_ratio_mapped_fields_filename = (
             f"./all_rda_{ratio_threshold}_{fuzz_ratio_field}_mapped_columns.csv"
         )
-        print(f"Writing {high_ratio_mapped_fields_filename}...")
         write_to_csv(
             filename=high_ratio_mapped_fields_filename,
-            list_to_write=mapped_fields_exceeding_threshold,
+            list_to_write=[mapped_field for (mapped_field, _) in mapped_fields_exceeding_threshold],
         )
-        print(f"Done writing {high_ratio_mapped_fields_filename}")
 
         ratio_max_per_bfd_orig_field = {
-            x: max(
-                int(asdict(y)[fuzz_ratio_field])
-                for y in mapped_fields_exceeding_threshold
-                if y.bfd_column_name == x
+            bfd_column_name: max(
+                fuzz_ratio
+                for (mapped_field, fuzz_ratio) in mapped_fields_exceeding_threshold
+                if mapped_field.bfd_column_name == bfd_column_name
             )
-            for x in bfd_fields_exceeding_threshold
+            for bfd_column_name in bfd_fields_exceeding_threshold
         }
         fields_with_likely_matches = [
             BfdRdaColumnWithLikelyMatch(
                 bfd_column_name=k,
                 idr_matched_column_names=[
-                    x.idr_column_name
-                    for x in mapped_fields_exceeding_threshold
-                    if x.bfd_column_name == k and asdict(x)[fuzz_ratio_field] == v
+                    mapped_field.idr_column_name
+                    for (mapped_field, fuzz_ratio) in mapped_fields_exceeding_threshold
+                    if mapped_field.bfd_column_name == k and fuzz_ratio == v
                 ],
                 ratio_type=fuzz_ratio_field,
                 highest_ratio=v,
@@ -245,11 +255,9 @@ def main() -> None:
         high_ratio_bfd_fields_filename = (
             f"./all_{ratio_threshold}_{fuzz_ratio_field}_bfd_rda_columns.csv"
         )
-        print(f"Writing {high_ratio_bfd_fields_filename}...")
         write_to_csv(
             filename=high_ratio_bfd_fields_filename, list_to_write=fields_with_likely_matches
         )
-        print(f"Done writing {high_ratio_bfd_fields_filename}")
 
     substring_matches_filename = "./all_rda_substring_matched_mapped_columns.csv"
     substring_matches = [
@@ -257,12 +265,10 @@ def main() -> None:
         for x in fully_mapped_fields
         if x.rda_cleaned_copybook_field.replace("idr", "") in x.idr_cleaned_col_data_source_name
     ]
-    print(f"Writing {len(substring_matches)} fields to {substring_matches_filename}...")
     write_to_csv(
         filename=substring_matches_filename,
         list_to_write=substring_matches,
     )
-    print(f"Done writing {len(substring_matches)} fields to {substring_matches_filename}...")
 
     substring_matches_by_field_filename = "./all_rda_substring_matched_bfd_rda_columns.csv"
     substring_matched_by_field_dict: dict[str, list[str]] = {}
@@ -279,15 +285,9 @@ def main() -> None:
         BfdRdaColumnSubstringMatches(bfd_column_name=k, idr_matched_column_names=v)
         for k, v in substring_matched_by_field_dict.items()
     ]
-    print(
-        f"Writing {len(substring_matched_rda_columns)} fields to {substring_matches_by_field_filename}..."
-    )
     write_to_csv(
         filename=substring_matches_by_field_filename,
         list_to_write=substring_matched_rda_columns,
-    )
-    print(
-        f"Done writing {len(substring_matched_rda_columns)} fields to {substring_matches_by_field_filename}..."
     )
 
 

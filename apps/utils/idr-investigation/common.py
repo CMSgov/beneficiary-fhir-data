@@ -18,20 +18,20 @@ class CsvWriteable(ABC):
 
 @dataclass
 class BfdV2DataFieldRow(CsvWriteable):
+    column_name: str
     field_name: str
     description: str
     ccw_mapping: str
     cclf_mapping: str
-    column_name: str
 
     @staticmethod
     def get_header_field_mapping() -> dict[str, str]:
         return {
+            "column_name": "BFD Field Database Column Name",
             "field_name": "BFD Field Name",
             "description": "BFD Field Description",
             "ccw_mapping": "BFD Field CCW Mapping",
             "cclf_mapping": "BFD Field CCLF Mapping",
-            "column_name": "BFD Field Database Column Name",
         }
 
 
@@ -122,18 +122,22 @@ def write_to_csv(
     filename: str,
     list_to_write: Sequence[CsvWriteable],
 ) -> None:
+    print(f"Writing {len(list_to_write)} row(s) to {filename}...")
     with Path(filename).open("w") as csv_file:
-        wr = csv.writer(csv_file, delimiter=",")
+        wr = csv.writer(csv_file, delimiter=",", dialect="unix")
         wr.writerow(
             header_mapping[x.name]
             for x in fields(list_to_write[0])
             if (header_mapping := list_to_write[0].get_header_field_mapping())
         )
-        for field_object in list_to_write:
-            wr.writerow(
-                x if not isinstance(x, list) else ", ".join(cast(list[Any], x))
-                for x in asdict(field_object).values()
+        wr.writerows(
+            (
+                y if not isinstance(y, list) else ", ".join(cast(list[Any], y))
+                for y in asdict(x).values()
             )
+            for x in list_to_write
+        )
+    print(f"Successfully wrote {len(list_to_write)} row(s) to {filename}")
 
 
 def extract_bfd_rows_from_path(workbook_path: str) -> list[BfdV2DataFieldRow]:
@@ -157,13 +161,15 @@ def extract_bfd_rows_from_path(workbook_path: str) -> list[BfdV2DataFieldRow]:
     )
     return [
         BfdV2DataFieldRow(
+            column_name=column_name,
             field_name=cell_str_value_at_col(row=row, col_idx=bfd_field_name_column),
             description=cell_str_value_at_col(row=row, col_idx=bfd_description_column),
             ccw_mapping=cell_str_value_at_col(row=row, col_idx=bfd_ccw_mapping_column),
             cclf_mapping=cell_str_value_at_col(row=row, col_idx=bfd_cclf_mapping_column),
-            column_name=cell_str_value_at_col(row=row, col_idx=bfd_column_name_column),
         )
         for row in bfd_sheet.iter_rows(min_row=2)
+        # There are a few meta fields that aren't useful and have no map in the DB. Exclude them.
+        if (column_name := cell_str_value_at_col(row=row, col_idx=bfd_column_name_column))
     ]
 
 
@@ -188,13 +194,15 @@ def extract_rda_rows_from_path(workbook_path: str) -> list[RdaDataFieldRow]:
     )
     return [
         RdaDataFieldRow(
-            source_system=cell_str_value_at_col(row=row, col_idx=rda_source_system_column),
+            source_system=source_system,
             api_field_label=cell_str_value_at_col(row=row, col_idx=rda_api_field_label_column),
             field_name=cell_str_value_at_col(row=row, col_idx=rda_field_name_column),
             source_copybook_field=cell_str_value_at_col(row=row, col_idx=rda_copybook_field_column),
             source_system_def=cell_str_value_at_col(row=row, col_idx=rda_source_system_def_column),
         )
         for row in rda_sheet.iter_rows(min_row=2)
+        # RDA DD has one field without a source system which is the Claim Key. We don't need it.
+        if (source_system := cell_str_value_at_col(row=row, col_idx=rda_source_system_column))
     ]
 
 
@@ -222,7 +230,7 @@ def extract_idr_rows_from_path(workbook_path: str) -> list[IdrDataFieldRow]:
     )
     return [
         IdrDataFieldRow(
-            column_name=cell_str_value_at_col(row=row, col_idx=idr_column_name_column),
+            column_name=column_name,
             entity_name=cell_str_value_at_col(row=row, col_idx=idr_entity_name_column),
             col_data_source_name=cell_str_value_at_col(
                 row=row, col_idx=idr_col_data_source_name_column
@@ -232,6 +240,8 @@ def extract_idr_rows_from_path(workbook_path: str) -> list[IdrDataFieldRow]:
             table_name=cell_str_value_at_col(row=row, col_idx=idr_table_name_column),
         )
         for row in idr_sheet.iter_rows(min_row=5)
+        # IDR DD has a few empty rows at the end. We can get rid of them
+        if (column_name := cell_str_value_at_col(row=row, col_idx=idr_column_name_column))
     ]
 
 

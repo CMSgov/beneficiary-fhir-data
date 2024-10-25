@@ -119,36 +119,38 @@ def map_bfd_to_idr_fields(
 
 def main() -> None:
     # IDR
+    unfiltered_idr_fields = extract_idr_rows_from_path(
+        "/Users/mitchalessio/Downloads/SF-IDR-Data-Dictionary-R205-2024-09-30.xlsm"
+    )
+    print("Writing all IDR fields extracted from IDR Data Dictionary")
+    write_to_csv(filename="./all_idr_fields.csv", list_to_write=unfiltered_idr_fields)
+
     idr_fields = [
         idr_field
-        for idr_field in extract_idr_rows_from_path(
-            "/Users/mitchalessio/Downloads/SF-IDR-Data-Dictionary-R205-2024-09-30.xlsm"
-        )
+        for idr_field in unfiltered_idr_fields
         if not any(
             invalid_substr.lower() in idr_field.table_name.lower()
             for invalid_substr in ["MCS", "FISS", "MDCD", "medicaid"]
         )
         and "medicaid" not in idr_field.entity_name.lower()
     ]
+    print(
+        "Writing filtered IDR fields that are candidates for matching with CCW-provided BFD fields"
+    )
+    write_to_csv(filename="./all_filtered_idr_fields.ccw_prov_fields.csv", list_to_write=idr_fields)
 
     # BFD
     bfd_fields = extract_bfd_rows_from_path(
         "/Users/mitchalessio/Downloads/data-dictionary-2.160.0.xlsx"
     )
+    print("Writing all unique BFD fields extracted from BFD DD")
+    write_to_csv(filename="./all_bfd_fields.csv", list_to_write=bfd_fields)
 
     bfd_fields_to_idr_fields = list(itertools.product(bfd_fields, idr_fields))
     print(f"Mapping and computing ratios for {len(bfd_fields_to_idr_fields)} field combinations")
     with Pool() as pool:
         mappings = pool.map(map_bfd_to_idr_fields, bfd_fields_to_idr_fields)
     print(f"Finished mapping {len(mappings)} field combinations")
-
-    print("Writing all unique IDR fields extracted from IDR Data Dictionary")
-    write_to_csv(filename="./all_idr_fields.csv", list_to_write=idr_fields)
-    print("Done writing IDR fields")
-
-    print("Writing all unique BFD fields extracted from BFD DD")
-    write_to_csv(filename="./all_bfd_fields.csv", list_to_write=bfd_fields)
-    print("Done writing BFD fields")
 
     # print(f"Writing all {len(mappings)} mapped field combinations")
     # with Path("./all_mapped_fields.csv").open("w") as csv_file:
@@ -172,18 +174,14 @@ def main() -> None:
         bfd_fields_exceeding_threshold = set(
             mapped_field.bfd_column_name for (mapped_field, _) in mapped_fields_exceeding_threshold
         )
-        print(len(bfd_fields_exceeding_threshold))
-        print(len(mapped_fields_exceeding_threshold))
 
         high_ratio_mapped_fields_filename = (
             f"./all_{ratio_threshold}_{fuzz_ratio_field}_mapped_fields.csv"
         )
-        print(f"Writing {high_ratio_mapped_fields_filename}...")
         write_to_csv(
             filename=high_ratio_mapped_fields_filename,
             list_to_write=[mapped_field for (mapped_field, _) in mapped_fields_exceeding_threshold],
         )
-        print(f"Done writing {high_ratio_mapped_fields_filename}")
 
         ratio_max_per_bfd_orig_field = {
             bfd_column_name: max(
@@ -209,11 +207,9 @@ def main() -> None:
         high_ratio_bfd_fields_filename = (
             f"./all_{ratio_threshold}_{fuzz_ratio_field}_bfd_fields.csv"
         )
-        print(f"Writing {high_ratio_bfd_fields_filename}...")
         write_to_csv(
             filename=high_ratio_bfd_fields_filename, list_to_write=fields_with_likely_matches
         )
-        print(f"Done writing {high_ratio_bfd_fields_filename}")
 
 
 if __name__ == "__main__":
