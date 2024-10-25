@@ -1,0 +1,58 @@
+[project]
+# Support Python 3.10+.
+requires-python = ">=3.13"
+name = "idr-investigation"
+version = "0.0.1"
+
+[tool.ruff]
+# Set the maximum line length to 79.
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+  # "D",    # pydocstyle
+  "E501",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  "ANN",
+  "LOG",
+  "G",
+  "PT",
+  "RSE",
+  "PIE",
+  "RET",
+  "SLF",
+  "ARG",
+  "PTH",
+  "PLE",
+  "PLW",
+  "PERF",
+  "FURB",
+  "RUF"
+]
+ignore = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pyright]
+# ...
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = "none"
