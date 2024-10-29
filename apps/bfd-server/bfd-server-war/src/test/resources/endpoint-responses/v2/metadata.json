@@ -1,6 +1,10 @@
 {
   "resourceType" : "CapabilityStatement",
   "id" : "IGNORED_FIELD",
+  "text" : {
+    "status" : "generated",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\">Blue Button API: Direct</div>"
+  },
   "name" : "RestServer",
   "status" : "active",
   "date" : "IGNORED_FIELD",
