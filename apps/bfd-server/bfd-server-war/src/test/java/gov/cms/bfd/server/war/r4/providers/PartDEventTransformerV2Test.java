@@ -13,6 +13,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.fda.utility.App;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
@@ -115,10 +116,16 @@ public final class PartDEventTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    NPIData npiData =
+        NPIData.builder()
+            .npi("0000000000")
+            .taxonomyCode("207X00000X")
+            .taxonomyDisplay("Orthopaedic Surgery")
+            .build();
+
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty()))
-        .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of(npiData));
     InputStream npiDataStream =
         Thread.currentThread()
             .getContextClassLoader()

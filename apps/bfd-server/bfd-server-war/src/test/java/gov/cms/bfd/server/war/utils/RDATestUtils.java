@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.utils;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.fda.utility.App;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
@@ -38,6 +39,8 @@ import javax.sql.DataSource;
 import org.jetbrains.annotations.NotNull;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 /** Supplies test data for the RDA based unit tests. */
 public class RDATestUtils {
@@ -91,8 +94,11 @@ public class RDATestUtils {
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 
-  /** a fake taxonomy. */
-  public static final String FAKE_TAXONOMY = "390200000X\tHealth Care";
+  /** a fake taxonomy code. */
+  public static final String FAKE_TAXONOMY_CODE = "390200000X";
+
+  /** a fake taxonomy display. */
+  public static final String FAKE_TAXONOMY_DISPLAY = "Health Care";
 
   /** A fake drug code used for testing. */
   public static final String FAKE_DRUG_CODE = "00000-0000";
@@ -739,8 +745,26 @@ public class RDATestUtils {
   public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
     MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
     Map<String, String> npiOrgHashMap = new HashMap<>();
-    npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
-    npiOrgHashMap.put(FAKE_PRACTITIONER_NPI, FAKE_TAXONOMY);
+    ObjectMapper mapper = new ObjectMapper();
+    NPIData npiOrgData =
+        NPIData.builder()
+            .npi(FAKE_NPI_NUMBER)
+            .providerOrganizationName(FAKE_NPI_ORG_NAME)
+            .taxonomyDisplay(FAKE_TAXONOMY_DISPLAY)
+            .taxonomyCode(FAKE_TAXONOMY_CODE)
+            .build();
+    NPIData npiTaxonomyData =
+        NPIData.builder()
+            .npi(FAKE_PRACTITIONER_NPI)
+            .providerOrganizationName(FAKE_NPI_ORG_NAME)
+            .taxonomyCode(FAKE_TAXONOMY_CODE)
+            .taxonomyDisplay(FAKE_TAXONOMY_DISPLAY)
+            .build();
+    try {
+      npiOrgHashMap.put(FAKE_NPI_NUMBER, mapper.writeValueAsString(npiOrgData));
+      npiOrgHashMap.put(FAKE_PRACTITIONER_NPI, mapper.writeValueAsString(npiTaxonomyData));
+    } catch (JsonProcessingException ignored) {
+    }
     npiOrgLookup
         .when(NPIOrgLookup::createNpiOrgLookup)
         .thenAnswer(

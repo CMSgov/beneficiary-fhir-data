@@ -7,6 +7,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -201,7 +202,9 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
               performingCareTeamMember,
               TransformerConstants.CODING_NPI_US,
               TransformerConstants.CODING_NPI_US,
-              npiOrgLookup.retrieveNPIOrgDisplay(claimLine.getOrganizationNpi()),
+              npiOrgLookup
+                  .retrieveNPIOrgDisplay(claimLine.getOrganizationNpi())
+                  .map(NPIData::getProviderOrganizationName),
               claimLine.getOrganizationNpi().get());
         }
       }
