@@ -143,7 +143,7 @@ def map_bfd_to_rda_to_idr(pair: tuple[BfdToRdaMappedField, IdrDataFieldRow]) -> 
 def main() -> None:
     # RDA
     rda_fields = extract_rda_rows_from_path(
-        "/Users/mitchalessio/Repositories/beneficiary-fhir-data/apps/utils/idr-investigation/RDA API Data Dictionary.xlsx"
+        "/Users/mitchalessio/Documents/RDA API Data Dictionary.xlsx"
     )
     print("Writing all RDA fields from RDA DD to CSV")
     write_to_csv(filename="all_rda_fields.csv", list_to_write=rda_fields)
@@ -177,7 +177,7 @@ def main() -> None:
 
     # BFD
     bfd_rda_cols = extract_bfd_rda_columns_from_path(
-        "/Users/mitchalessio/Repositories/beneficiary-fhir-data/apps/utils/idr-investigation/rda_columns.xlsx"
+        "/Users/mitchalessio/Documents/rda_columns.xlsx"
     )
     print("Writing all RDA columns extracted from .xlsx")
     write_to_csv(filename="./all_rda_columns.csv", list_to_write=bfd_rda_cols)
