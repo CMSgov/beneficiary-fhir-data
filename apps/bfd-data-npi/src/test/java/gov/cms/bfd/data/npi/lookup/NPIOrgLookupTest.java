@@ -35,22 +35,27 @@ public class NPIOrgLookupTest {
   public static final String FAKE_TAXONOMY_DISPLAY = "Fake Taxonomy";
 
   /** Test JSON, which will be deserialized. */
-  private static final String testJson = String.format(
-      "%s" +
-      "\t" +
-      " \"npi\": \"%s\"," +
-       " \"entityTypeCode\": \"2\"," +
-       " \"providerOrganizationName\": \"%s," +
-       " \"taxonomyCode\": \"%s\"," +
-       " \"taxonomyDisplay\": \"%s\"," +
-       " \"providerNamePrefix\": \"Dr\","  +
-       " \"providerFirstName\": \"Stephen\"," +
-       " \"providerMiddleName\", \"J.\"," +
-       " \"providerLastName\": \"Smith\"," +
-       " \"providerNameSuffix\": \"Sr.\"," +
-       " \"providerCredential\": \"MD\"" +
-       " }",
-          FAKE_NPI_NUMBER, FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME, FAKE_TAXONOMY_CODE, FAKE_TAXONOMY_DISPLAY);
+  private static final String testJson =
+      String.format(
+          "%s"
+              + "\t"
+              + " \"npi\": \"%s\","
+              + " \"entityTypeCode\": \"2\","
+              + " \"providerOrganizationName\": \"%s,"
+              + " \"taxonomyCode\": \"%s\","
+              + " \"taxonomyDisplay\": \"%s\","
+              + " \"providerNamePrefix\": \"Dr\","
+              + " \"providerFirstName\": \"Stephen\","
+              + " \"providerMiddleName\", \"J.\","
+              + " \"providerLastName\": \"Smith\","
+              + " \"providerNameSuffix\": \"Sr.\","
+              + " \"providerCredential\": \"MD\""
+              + " }",
+          FAKE_NPI_NUMBER,
+          FAKE_NPI_NUMBER,
+          FAKE_NPI_ORG_NAME,
+          FAKE_TAXONOMY_CODE,
+          FAKE_TAXONOMY_DISPLAY);
 
   /** Setup Before Each test method. */
   @BeforeEach
@@ -125,7 +130,7 @@ public class NPIOrgLookupTest {
   @Test
   public void shouldReturnMapWhenInputStreamIsFormattedCorrectly() throws IOException {
 
-      InputStream targetStream = new ByteArrayInputStream(testJson.getBytes());
+    InputStream targetStream = new ByteArrayInputStream(testJson.getBytes());
     Map<String, String> npiOrgMap = npiOrgDataLookup.readNPIOrgDataStream(targetStream);
     assertFalse(isNullOrEmptyMap(npiOrgMap));
     assertTrue(npiOrgMap.containsKey(FAKE_NPI_NUMBER));
