@@ -32,3 +32,7 @@ data "external" "current_asg" {
     local.env
   ]
 }
+
+data "aws_launch_template" "main" {
+  name = "bfd-${local.env}-${var.role}"
+}

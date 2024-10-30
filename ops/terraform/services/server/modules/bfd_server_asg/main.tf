@@ -70,6 +70,24 @@ locals {
     !local.even_needs_scale_in
   ])
 
+  # We need to know when an operator is attempting to create a new Launch Template version (most
+  # likely with a new AMI) when both odd and even are scaled-out. This is an invalid state, and
+  # likely indicates that the operator is attempting to resolve the situation where "green"
+  # instances failed the Regression Suite or other verification before being promoted to "blue"
+  # instances. Because "green" and "blue" changes based on Launch Template version divisiblity, the
+  # operator must resolve this situation out-of-band (likely by incrementing the LT version and then
+  # resetting the previous green ASG) before applying.
+  prev_green_needs_reset = alltrue([
+    # ODD is scaled-out
+    local.odd_remote_desired_capacity > 0,
+    # EVEN is scaled-out
+    local.even_remote_desired_capacity > 0,
+    # But, the existing, latest launch template is being replaced by a new Template (likely with a
+    # new AMI) indicating that an operator is attempting to create new instances in-between green
+    # (the incoming version) being accepted into blue
+    data.aws_launch_template.main.latest_version != aws_launch_template.main.latest_version
+  ])
+
   additional_tags = { Layer = var.layer, role = var.role }
 
   # FUTURE: Encode the scaling step, scaling stages, and alarm evaluation periods within config
@@ -157,6 +175,17 @@ resource "aws_security_group_rule" "allow_db_access" {
 
 ## Launch Template
 resource "aws_launch_template" "main" {
+  lifecycle {
+    precondition {
+      condition     = local.prev_green_needs_reset == true
+      error_message = <<-EOF
+A new launch template cannot be created while both ASGs (blue and green) are scaled-out. This
+situation typically indicates that green, the incoming ASG, failed automated checks. Refer to the
+corresponding Runbook for instructions on how to remediate this situation.
+EOF
+    }
+  }
+
   name                   = "bfd-${local.env}-${var.role}"
   description            = "Template for the ${local.env} environment ${var.role} servers"
   vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.tool_sg], aws_security_group.app[*].id)
