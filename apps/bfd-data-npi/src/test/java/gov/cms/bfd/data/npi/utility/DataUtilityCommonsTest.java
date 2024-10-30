@@ -2,8 +2,6 @@ package gov.cms.bfd.data.npi.utility;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,18 +78,5 @@ public class DataUtilityCommonsTest {
 
     String expectedMessage = "NPI Org File Processing Error: Cannot field fieldname field3";
     assertEquals(expectedMessage, exception.getMessage());
-  }
-
-  @Test
-  public void shouldReturnJson() throws JsonProcessingException {
-    NPIData npiData =
-        NPIData.builder()
-            .providerOrganizationName("This Org")
-            .npi("1234567890")
-            .providerFirstName("James")
-            .providerLastName("Smith")
-            .build();
-    String json = DataUtilityCommons.getJson(npiData);
-    assertNotNull(json);
   }
 }

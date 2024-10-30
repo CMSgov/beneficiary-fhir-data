@@ -1,6 +1,5 @@
 package gov.cms.bfd.data.npi.utility;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.BufferedOutputStream;
@@ -61,11 +60,22 @@ public class DataUtilityCommons {
   /** Field for Entity Type Code in CSV. */
   public static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
 
+  /** Field for Provider Credential code in CSV. */
   private static final String PROVIDER_CREDENTIAL_FIELD = "Provider Credential Text";
+
+  /** Field for Provider first name in CSV. */
   private static final String PROVIDER_FIRST_NAME_FIELD = "Provider First Name";
+
+  /** Field for Provider middle name in CSV. */
   private static final String PROVIDER_MIDDLE_NAME_FIELD = "Provider Middle Name";
+
+  /** Field for Provider last name in CSV. */
   private static final String PROVIDER_LAST_NAME_FIELD = "Provider Last Name (Legal Name)";
+
+  /** Field for Provider prefix in CSV. */
   private static final String PROVIDER_PREFIX_FIELD = "Provider Name Prefix Text";
+
+  /** Field for Provider Suffix in CSV. */
   private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
 
   /**
@@ -409,10 +419,5 @@ public class DataUtilityCommons {
 
     throw new IllegalStateException(
         "NPI Org File Processing Error: Cannot field fieldname " + fieldName);
-  }
-
-  public static String getJson(NPIData npiData) throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    return mapper.writeValueAsString(npiData);
   }
 }

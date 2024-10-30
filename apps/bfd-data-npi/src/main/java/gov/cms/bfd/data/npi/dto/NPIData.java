@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/** DTO used to supply the server with NPI enrichment information. */
 @Builder
 @Getter
 @AllArgsConstructor
@@ -16,15 +17,36 @@ import lombok.NoArgsConstructor;
 @JsonInclude(NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NPIData {
+  /** Provider or Org npi. */
   String npi;
+
+  /** Entity Type. Will be 1 or 2. */
   String entityTypeCode;
+
+  /** Organization name. */
   String providerOrganizationName;
+
+  /** Taxonomy code. */
   String taxonomyCode;
+
+  /** Taxonomy display. */
   String taxonomyDisplay;
+
+  /** Provider name prefix. */
   String providerNamePrefix;
+
+  /** Provider first name. */
   String providerFirstName;
+
+  /** Provider middle name. */
   String providerMiddleName;
+
+  /** Provider last name. */
   String providerLastName;
+
+  /** Provider suffix. */
   String providerNameSuffix;
+
+  /** Provider credential. */
   String providerCredential;
 }
