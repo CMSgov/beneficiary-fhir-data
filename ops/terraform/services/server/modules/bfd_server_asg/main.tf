@@ -85,7 +85,7 @@ locals {
     # But, the existing, latest launch template is being replaced by a new Template (likely with a
     # new AMI) indicating that an operator is attempting to create new instances in-between green
     # (the incoming version) being accepted into blue
-    data.aws_launch_template.main.latest_version != aws_launch_template.main.latest_version
+    data.external.current_lt_version.result["latest_version"] != tostring(aws_launch_template.main.latest_version)
   ])
 
   additional_tags = { Layer = var.layer, role = var.role }
@@ -175,17 +175,6 @@ resource "aws_security_group_rule" "allow_db_access" {
 
 ## Launch Template
 resource "aws_launch_template" "main" {
-  lifecycle {
-    precondition {
-      condition     = local.prev_green_needs_reset == true
-      error_message = <<-EOF
-A new launch template cannot be created while both ASGs (blue and green) are scaled-out. This
-situation typically indicates that green, the incoming ASG, failed automated checks. Refer to the
-corresponding Runbook for instructions on how to remediate this situation.
-EOF
-    }
-  }
-
   name                   = "bfd-${local.env}-${var.role}"
   description            = "Template for the ${local.env} environment ${var.role} servers"
   vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.tool_sg], aws_security_group.app[*].id)
@@ -250,13 +239,25 @@ resource "aws_autoscaling_group" "main" {
   # Deployments of this ASG require two executions of `terraform apply`
   for_each = local.asgs
 
+  lifecycle {
+    precondition {
+      condition     = local.prev_green_needs_reset == false
+      error_message = <<-EOF
+A new launch template cannot be created while both ASGs (blue and green) are scaled-out. This
+situation typically indicates that green, the incoming ASG, failed automated checks. Refer to the
+corresponding Runbook for instructions on how to remediate this situation.
+EOF
+    }
+  }
+
+
   name             = each.value.name
   desired_capacity = each.value.desired_capacity
   max_size         = each.value.max_size
   min_size         = each.value.min_size
 
   # If an lb is defined, wait for the ELB
-  min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
+  min_elb_capacity          = each.value.desired_capacity
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
   health_check_grace_period = 600                                   # Temporary, will be lowered when/if lifecycle hooks are implemented
@@ -267,8 +268,7 @@ resource "aws_autoscaling_group" "main" {
 
   # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
   # Server application running on the instance is ready to start serving traffic. As a result, it is
-  # unnecessary to have any cooldown or instance warmup period
-  default_cooldown        = 0
+  # unnecessary to have any instance warmup period
   default_instance_warmup = 0
 
   launch_template {
@@ -282,6 +282,8 @@ resource "aws_autoscaling_group" "main" {
     heartbeat_timeout    = var.asg_config.instance_warmup * 2
     lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
   }
+
+
 
   enabled_metrics = [
     "GroupMinSize",
@@ -489,6 +491,13 @@ resource "null_resource" "warm_pool_size" {
       asg_name    = each.value.name
     }
 
-    command = "[[ $will_delete == \"true\" ]] && aws autoscaling delete-warm-pool --auto-scaling-group-name \"$asg_name\" --force-delete || echo \"No change to $asg_name will_delete = $will_delete\""
+    command = <<-EOF
+if [[ $will_delete == "true" ]]; then
+  aws autoscaling delete-warm-pool --auto-scaling-group-name "$asg_name" --force-delete
+  echo "Deleting "$asg_name" warm_pool. 'will_delete' is "$will_delete""
+else
+  echo "No change to "$asg_name" warm_pool. 'will_delete' is "$will_delete""
+fi
+EOF
   }
 }

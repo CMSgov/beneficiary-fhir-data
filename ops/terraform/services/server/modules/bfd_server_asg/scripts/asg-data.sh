@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 #######################################
 # Fetch the even/odd autoscaling group instance and warm_pool counts.
-# Returns json object includes...
+# Returned json object includes...
 # "odd_desired_capacity", "odd_warmpool_min_size", "even_desired_capacity",
 # and "even_warmpool_min_size" as strings.
 # This is intended for use in terraform as an external data resource.

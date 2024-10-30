@@ -33,6 +33,9 @@ data "external" "current_asg" {
   ]
 }
 
-data "aws_launch_template" "main" {
-  name = "bfd-${local.env}-${var.role}"
+data "external" "current_lt_version" {
+  program = [
+    "${path.module}/scripts/launch-template-data.sh", # helper script
+    local.env
+  ]
 }
