@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.utility.App;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.zip.InflaterInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,13 +99,16 @@ public class NPIOrgLookup {
    * @return the hashmapped for npis and the npi org names
    */
   protected Map<String, String> readNPIOrgDataStream(InputStream inputStream) throws IOException {
-
+    boolean isFileStream = !(inputStream instanceof ByteArrayInputStream);
     Map<String, String> npiProcessedData = new HashMap<>();
-    ObjectMapper mapper = new ObjectMapper();
     String line;
-    try (final InputStream npiStream = inputStream;
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
+    try (InflaterInputStream inflaterInputStream = new InflaterInputStream(inputStream);
+         // The resource only needs to be inflated if it came from a file.
+         final BufferedReader reader =
+            new BufferedReader(
+                new InputStreamReader(isFileStream ? inflaterInputStream : inputStream))) {
       while ((line = reader.readLine()) != null) {
+        // the first part of the line will be the NPI, and the second part is the json.
         String[] tsv = line.split("\t");
         if (tsv.length == 2) {
           npiProcessedData.put(tsv[0], tsv[1]);

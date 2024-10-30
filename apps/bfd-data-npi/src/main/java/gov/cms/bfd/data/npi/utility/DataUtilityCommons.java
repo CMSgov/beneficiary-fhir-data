@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -28,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -351,7 +350,7 @@ public class DataUtilityCommons {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
         FileOutputStream fw =
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
+        DeflaterOutputStream dos = new DeflaterOutputStream(fw); ) {
       CSVParser csvParser =
           new CSVParser(
               reader,
@@ -383,10 +382,11 @@ public class DataUtilityCommons {
                 .providerCredential(providerCredential)
                 .build();
         String json = objectMapper.writeValueAsString(npiData);
-        out.write(npi + "\t" + json);
-        out.write("\n");
-        break;
+
+        dos.write((npi + "\t" + json).getBytes());
+        dos.write("\n".getBytes());
       }
+      dos.close();
     }
   }
 
