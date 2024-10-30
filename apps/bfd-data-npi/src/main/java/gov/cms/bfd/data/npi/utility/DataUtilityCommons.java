@@ -385,6 +385,7 @@ public class DataUtilityCommons {
         String json = objectMapper.writeValueAsString(npiData);
         out.write(npi + "\t" + json);
         out.write("\n");
+        break;
       }
     }
   }
