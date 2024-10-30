@@ -471,7 +471,7 @@ public final class CoverageTransformerV2Test {
 
   /** Tests that the expected extensions exist. */
   private static void verifyExtensionsPartC() {
-    assertEquals(57, coverage.getExtension().size());
+    assertEquals(59, coverage.getExtension().size());
 
     // ptc_cntrct_id_01 thru ptc_cntrct_id_12
     for (int i = 1; i < 13; i++) {
