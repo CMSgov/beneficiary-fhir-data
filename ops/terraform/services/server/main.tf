@@ -142,13 +142,12 @@ module "lb_alarms" {
 module "fhir_asg" {
   source = "./modules/bfd_server_asg"
 
-  kms_key_alias  = local.kms_key_alias
-  env_config     = local.env_config
-  role           = local.legacy_service
-  layer          = "app"
-  lb_config      = module.fhir_lb.lb_config
-  seed_env       = local.seed_env
-  db_environment = local.db_environment
+  kms_key_alias = local.kms_key_alias
+  env_config    = local.env_config
+  role          = local.legacy_service
+  layer         = "app"
+  lb_config     = module.fhir_lb.lb_config
+  seed_env      = local.seed_env
 
   # Initial size is one server per AZ
   asg_config = {

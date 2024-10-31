@@ -65,18 +65,16 @@ No requirements.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_asg_config"></a> [asg\_config](#input\_asg\_config) | n/a | `object({ min = number, max = number, max_warm = number, desired = number, sns_topic_arn = string, instance_warmup = number })` | n/a | yes |
-| <a name="input_db_environment"></a> [db\_environment](#input\_db\_environment) | FIXME: Environment name. | `string` | n/a | yes |
 | <a name="input_env_config"></a> [env\_config](#input\_env\_config) | All high-level info for the whole vpc | `object({ default_tags = map(string), vpc_id = string, azs = list(string) })` | n/a | yes |
 | <a name="input_kms_key_alias"></a> [kms\_key\_alias](#input\_kms\_key\_alias) | Key alias of environment's KMS key | `string` | n/a | yes |
 | <a name="input_launch_config"></a> [launch\_config](#input\_launch\_config) | n/a | <pre>object({<br>    account_id        = string<br>    ami_id            = string<br>    instance_type     = string<br>    key_name          = string<br>    profile           = string<br>    user_data_tpl     = string<br>    volume_iops       = string<br>    volume_size       = number<br>    volume_throughput = number<br>    volume_type       = string<br>  })</pre> | n/a | yes |
 | <a name="input_layer"></a> [layer](#input\_layer) | app or data | `string` | n/a | yes |
 | <a name="input_mgmt_config"></a> [mgmt\_config](#input\_mgmt\_config) | n/a | `object({ vpn_sg = string, tool_sg = string, remote_sg = string, ci_cidrs = list(string) })` | n/a | yes |
 | <a name="input_role"></a> [role](#input\_role) | n/a | `string` | n/a | yes |
-| <a name="input_seed_env"></a> [seed\_env](#input\_seed\_env) | The solution's source environment. For established environments this is equal to the environment's name | `any` | n/a | yes |
+| <a name="input_seed_env"></a> [seed\_env](#input\_seed\_env) | The solution's source environment. For established environments this is equal to the environment's name | `string` | n/a | yes |
 | <a name="input_db_config"></a> [db\_config](#input\_db\_config) | Setup a db ingress rules if defined | `object({ db_sg = list(string), role = string, db_cluster_identifier = string })` | <pre>{<br>  "db_cluster_identifier": null,<br>  "db_sg": [],<br>  "role": null<br>}</pre> | no |
 | <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging | `string` | `"?logServerErrorDetail=false"` | no |
 | <a name="input_lb_config"></a> [lb\_config](#input\_lb\_config) | Load balancer information | `object({ name = string, port = number, sg = string })` | `null` | no |
-| <a name="input_scaling_request_count_interval"></a> [scaling\_request\_count\_interval](#input\_scaling\_request\_count\_interval) | The distinct interval for each scaling range, based on the ELB metric RequestCount | `number` | `5000` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
