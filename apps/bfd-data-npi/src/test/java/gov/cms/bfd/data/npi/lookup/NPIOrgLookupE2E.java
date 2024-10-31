@@ -42,25 +42,34 @@ public class NPIOrgLookupE2E {
   @BeforeEach
   void setup() throws IOException {
     StringBuilder initialString = new StringBuilder();
-    initialString.append(npiOrgNumber);
-    initialString.append("\t");
-    initialString.append("{ ");
-    initialString.append("\"npi\": \"");
-    initialString.append(npiOrgNumber);
-    initialString.append("\", \"providerOrganizationName\": \"");
-    initialString.append(npiOrgName);
-    initialString.append("\" }");
+    initialString.append(
+        String.format(
+            "%s"
+                + "\t"
+                + " {"
+                + " \"npi\": \"%s\","
+                + " \"entityTypeCode\": \"2\","
+                + " \"providerOrganizationName\": \"%s\""
+                + " }",
+            npiOrgNumber, npiOrgNumber, npiOrgName));
     initialString.append("\n");
-    initialString.append(practitionerNPI);
-    initialString.append("\t");
-    initialString.append("{ ");
-    initialString.append("\"npi\": \"");
-    initialString.append(practitionerNPI);
-    initialString.append("\", \"taxonomyCode\": \"");
-    initialString.append(taxononomyCode);
-    initialString.append("\", \"taxonomyDisplay\": \"");
-    initialString.append(taxonomyDisplay);
-    initialString.append("\" }");
+    initialString.append(
+        String.format(
+            "%s"
+                + "\t"
+                + " {"
+                + " \"npi\": \"%s\","
+                + " \"taxonomyCode\": \"%s\","
+                + " \"taxonomyDisplay\": \"%s\","
+                + " \"providerNamePrefix\": \"Dr\","
+                + " \"providerFirstName\": \"Stephen\","
+                + " \"providerMiddleName\": \"J.\","
+                + " \"providerLastName\": \"Smith\","
+                + " \"providerNameSuffix\": \"Sr.\","
+                + " \"providerCredential\": \"MD\""
+                + " }",
+            practitionerNPI, practitionerNPI, taxononomyCode, taxonomyDisplay));
+
     InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
     npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
     npiOrgDisplay = Optional.empty();

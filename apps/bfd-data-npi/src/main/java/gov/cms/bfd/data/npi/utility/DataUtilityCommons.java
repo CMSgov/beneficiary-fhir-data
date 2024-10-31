@@ -382,7 +382,6 @@ public class DataUtilityCommons {
                 .providerCredential(providerCredential)
                 .build();
         String json = objectMapper.writeValueAsString(npiData);
-
         dos.write((npi + "\t" + json).getBytes());
         dos.write("\n".getBytes());
       }

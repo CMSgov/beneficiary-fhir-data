@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.utility.App;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,9 @@ public class NPIOrgLookup {
 
   /** A field to return the production org lookup. */
   private static NPIOrgLookup npiOrgLookupForProduction;
+
+  /** Zlib compression header. */
+  private static final byte[] COMPRESSED_HEADER = {120, -100};
 
   /**
    * Factory method for creating a {@link NPIOrgLookup } for production that does not include the
@@ -58,7 +62,7 @@ public class NPIOrgLookup {
    * @throws IOException if there is an issue reading file
    */
   public NPIOrgLookup(InputStream npiDataStream) throws IOException {
-    npiOrgHashMap = readNPIOrgDataStream(npiDataStream);
+    npiOrgHashMap = readNPIOrgDataStream(new BufferedInputStream(npiDataStream));
   }
 
   /**
@@ -99,14 +103,13 @@ public class NPIOrgLookup {
    * @return the hashmapped for npis and the npi org names
    */
   protected Map<String, String> readNPIOrgDataStream(InputStream inputStream) throws IOException {
-    boolean isFileStream = !(inputStream instanceof ByteArrayInputStream);
     Map<String, String> npiProcessedData = new HashMap<>();
+    // if the stream is compressed, we will have to use InflaterInputStream to read it.
+    boolean isCompressedStream = isStreamDeflated(inputStream);
     String line;
-    try (InflaterInputStream inflaterInputStream = new InflaterInputStream(inputStream);
-         // The resource only needs to be inflated if it came from a file.
-         final BufferedReader reader =
-            new BufferedReader(
-                new InputStreamReader(isFileStream ? inflaterInputStream : inputStream))) {
+    try (final InputStream npiStream =
+            isCompressedStream ? new InflaterInputStream(inputStream) : inputStream;
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
       while ((line = reader.readLine()) != null) {
         // the first part of the line will be the NPI, and the second part is the json.
         String[] tsv = line.split("\t");
@@ -116,6 +119,26 @@ public class NPIOrgLookup {
       }
     }
     return npiProcessedData;
+  }
+
+  /**
+   * Checks if a stream is deflated. We will read the first two bytes of the stream to compare
+   * against the Zlib header (used by DeflaterOutputStream), then reset the stream back to the
+   * beginning.
+   *
+   * @param inputStream The stream to check
+   * @return true if the stream is deflated
+   * @throws IOException on read error.
+   */
+  public boolean isStreamDeflated(InputStream inputStream) throws IOException {
+    // Mark the current position in the stream.
+    inputStream.mark(2);
+    // Read the first two bytes
+    byte[] bytes = new byte[2];
+    int bytesRead = inputStream.read(bytes);
+    // Reset the stream to the marked position
+    inputStream.reset();
+    return (bytesRead == 2 && Arrays.equals(bytes, COMPRESSED_HEADER));
   }
 
   /**
