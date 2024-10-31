@@ -9,7 +9,7 @@ data "external" "src_table_version" {
   program = [
     "bash", "-c",
     <<-EOF
-    aws glue get-table --name bfd_insights_bfd_${var.env}_api_requests \
+    aws glue get-table --name ${var.source_table_name} \
       --database-name ${var.database_name} |
       yq -o=j '{"version": .Table.VersionId // 0 | tostring}'
     EOF
