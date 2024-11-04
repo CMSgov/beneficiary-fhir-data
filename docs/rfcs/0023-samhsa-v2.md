@@ -39,8 +39,8 @@ Instead of basing the SAMHSA filter on the FHIR payload, it would be safer to ch
 
 ## Implementation Overview
 
-The implementation will utilize [FHIR Security Labels](https://build.fhir.org/security-labels.html) to tag claims as 'sensitive'.
-SAMHSA claims will include a [Confidentiality](https://terminology.hl7.org/4.0.0/CodeSystem-v3-Confidentiality.html) tag of `R` for 'restricted' and an [Act Code](https://terminology.hl7.org/6.0.2/CodeSystem-v3-ActCode.html) tag of `42CFRPart2`.
+The implementation will utilize [FHIR Security Labels](https://hl7.org/fhir/R4/security-labels.html) to tag claims as 'sensitive'.
+SAMHSA claims will include a [Confidentiality](https://terminology.hl7.org/5.5.0/CodeSystem-v3-Confidentiality.html#v3-Confidentiality-R) tag of `R` for 'restricted' and an [Act Code](https://terminology.hl7.org/5.5.0/CodeSystem-v3-ActCode.html#v3-ActCode-42CFRPart2CD) tag of `42CFRPart2`.
 Non-SAMHSA claims will include a Confidentiality tag of `N` (normal).
 
 These tags will be stored in the database using a new set of tables.
