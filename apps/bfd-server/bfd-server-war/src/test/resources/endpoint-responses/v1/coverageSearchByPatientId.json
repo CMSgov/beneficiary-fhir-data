@@ -592,6 +592,18 @@
           "code" : "003"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_11",
+          "code" : "003"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_12",
+          "code" : "003"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_01",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_01",
@@ -649,6 +661,18 @@
         "url" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_10",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_10",
+          "code" : "00"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_11",
+          "code" : "00"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_12",
           "code" : "00"
         }
       }, {
@@ -1065,6 +1089,12 @@
           "code" : "003"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdpbpid12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdpbpid12",
+          "code" : "003"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/sgmtid01",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/sgmtid01",
@@ -1128,6 +1158,12 @@
         "url" : "https://bluebutton.cms.gov/resources/variables/sgmtid11",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/sgmtid11",
+          "code" : "000"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/sgmtid12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/sgmtid12",
           "code" : "000"
         }
       }, {
