@@ -362,9 +362,15 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Sid    = "AllowSsmAccess"
           Effect = "Allow"
           Action = [
-            "ssm:Describe*",
-            "ssm:GetParam*",
-            "ssm:List*"
+            "ssm:ListTagsForResource",
+            "ssm:DescribeParameters",
+            "ssm:PutParameter",
+            "ssm:DeleteParameter",
+            "ssm:GetParameterHistory",
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter",
+            "ssm:DeleteParameters"
           ]
           Resource = "*"
         },
@@ -450,7 +456,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Action = [
             "quicksight:Get*",
             "quicksight:Describe*",
-            "quicksight:List*"
+            "quicksight:List*",
+            "quicksight:Create*"
           ]
           Resource = "*"
         },
