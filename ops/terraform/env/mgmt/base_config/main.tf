@@ -43,23 +43,8 @@ locals {
     }
   )
 
-  yaml = data.external.yaml.result
-  common_sensitive = {
-    for key, value in local.yaml
-    : key => value if contains(split("/", key), "common") && value != "UNDEFINED"
-  }
-  cpm_sensitive = {
-    for key, value in local.yaml
-    : key => value if contains(split("/", key), "cpm") && value != "UNDEFINED"
-  }
-  jenkins_sensitive = {
-    for key, value in local.yaml
-    : key => value if contains(split("/", key), "jenkins") && value != "UNDEFINED"
-  }
-  quicksight_sensitive = {
-    for key, value in local.yaml
-    : key => value if contains(split("/", key), "quicksight") && value != "UNDEFINED"
-  }
+  yaml                   = data.external.yaml.result
+  defined_ssm_parameters = { for key, value in local.yaml : key => value if value != "UNDEFINED" }
 }
 
 resource "aws_kms_key" "primary_config" {
@@ -100,42 +85,12 @@ resource "aws_kms_alias" "secondary_config" {
 }
 ##
 
-resource "aws_ssm_parameter" "common_sensitive" {
-  for_each = local.common_sensitive
+resource "aws_ssm_parameter" "ssm" {
+  for_each = local.defined_ssm_parameters
 
-  key_id    = local.kms_key_id
+  key_id    = strcontains(each.key, "/sensitive/") ? local.kms_key_id : null
   name      = each.key
   overwrite = true
-  type      = "SecureString"
-  value     = each.value
-}
-
-resource "aws_ssm_parameter" "cpm_sensitive" {
-  for_each = local.cpm_sensitive
-
-  key_id    = local.kms_key_id
-  name      = each.key
-  overwrite = true
-  type      = "SecureString"
-  value     = each.value
-}
-
-resource "aws_ssm_parameter" "jenkins_sensitive" {
-  for_each = local.jenkins_sensitive
-
-  key_id    = local.kms_key_id
-  name      = each.key
-  overwrite = true
-  type      = "SecureString"
-  value     = each.value
-}
-
-resource "aws_ssm_parameter" "quicksight_sensitive" {
-  for_each = local.quicksight_sensitive
-
-  key_id    = local.kms_key_id
-  name      = each.key
-  overwrite = true
-  type      = "SecureString"
+  type      = strcontains(each.key, "/sensitive/") ? "SecureString" : "String"
   value     = each.value
 }
