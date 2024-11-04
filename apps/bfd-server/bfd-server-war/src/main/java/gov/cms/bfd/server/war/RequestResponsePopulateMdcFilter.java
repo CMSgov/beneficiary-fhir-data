@@ -1,20 +1,20 @@
 package gov.cms.bfd.server.war;
 
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.commons.ClientCertificateUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.EOFException;
 import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.security.auth.x500.X500Principal;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -66,7 +66,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
   /** {@inheritDoc} */
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      @NotNull HttpServletRequest request, @NotNull HttpServletResponse response, FilterChain chain)
       throws ServletException {
 
     /*
@@ -132,7 +132,7 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
     BfdMDC.put(BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "query_string"), queryString);
     BfdMDC.put(
         BfdMDC.computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "clientSSL", "DN"),
-        getClientSslPrincipalDistinguishedName(request));
+        ClientCertificateUtils.getClientSslPrincipalDistinguishedName(request));
 
     // Record the request headers.
     Enumeration<String> headerNames = request.getHeaderNames();
@@ -233,44 +233,5 @@ public class RequestResponsePopulateMdcFilter extends OncePerRequestFilter {
     } finally {
       BfdMDC.clear();
     }
-  }
-
-  /**
-   * Gets the {@link X500Principal#getName()} for the client certificate if available.
-   *
-   * @param request the {@link HttpServletRequest} to get the client principal DN (if any) for
-   * @return the {@link X500Principal#getName()} for the client certificate, or <code>null</code> if
-   *     that's not available
-   */
-  private static String getClientSslPrincipalDistinguishedName(HttpServletRequest request) {
-    /*
-     * Note: Now that Wildfly/JBoss is properly configured with a security realm,
-     * this method is equivalent to calling `request.getRemoteUser()`.
-     */
-    X509Certificate clientCert = getClientCertificate(request);
-    if (clientCert == null || clientCert.getSubjectX500Principal() == null) {
-      LOGGER.debug("No client SSL principal available: {}", clientCert);
-      return null;
-    }
-
-    return clientCert.getSubjectX500Principal().getName();
-  }
-
-  /**
-   * Gets the {@link X509Certificate} for the {@link HttpServletRequest}'s client SSL certificate if
-   * available.
-   *
-   * @param request the {@link HttpServletRequest} to get the client SSL certificate for
-   * @return the {@link X509Certificate} for the {@link HttpServletRequest}'s client SSL
-   *     certificate, or <code>null</code> if that's not available
-   */
-  private static X509Certificate getClientCertificate(HttpServletRequest request) {
-    X509Certificate[] certs =
-        (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate");
-    if (certs == null || certs.length == 0) {
-      LOGGER.debug("No client certificate found for request.");
-      return null;
-    }
-    return certs[certs.length - 1];
   }
 }

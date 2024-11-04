@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -79,6 +80,11 @@ public final class CommonTransformerUtils {
    */
   private static final String COVERAGE_SIMPLE_CLASSNAME =
       org.hl7.fhir.dstu3.model.Coverage.class.getSimpleName();
+
+  /***
+   * test.
+   * */
+  public static final String IS_SAMHSA_ALLOWED = "IS_SAMHSA_ALLOWED";
 
   /**
    * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
@@ -784,5 +790,19 @@ public final class CommonTransformerUtils {
     }
 
     return claimTypes;
+  }
+
+  /**
+   * test.
+   *
+   * @param requestDetails
+   * @return boolean
+   */
+  public static boolean isSamhsaAllowed(RequestDetails requestDetails) {
+    Object isSamhsaAllowed = requestDetails.getAttribute(IS_SAMHSA_ALLOWED);
+    if (isSamhsaAllowed == null) {
+      throw new BadCodeMonkeyException(IS_SAMHSA_ALLOWED + " attribute missing from request");
+    }
+    return (boolean) isSamhsaAllowed;
   }
 }

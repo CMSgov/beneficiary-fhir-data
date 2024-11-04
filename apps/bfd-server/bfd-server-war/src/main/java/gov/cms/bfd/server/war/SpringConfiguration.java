@@ -81,6 +81,9 @@ public class SpringConfiguration extends BaseConfiguration {
    */
   public static final String PROP_ORG_FILE_NAME = "bfdServer.org.file.name";
 
+  /** test. */
+  public static final String PROP_SAMHSA_ALLOWED_DNS = "bfdServer.org.samhsa.allowed.dns";
+
   /**
    * The {@link String } Boolean property that is used to enable the partially adjudicated claims
    * data resources.

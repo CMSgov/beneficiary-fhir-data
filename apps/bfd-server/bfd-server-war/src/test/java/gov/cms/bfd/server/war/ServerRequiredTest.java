@@ -72,17 +72,18 @@ public class ServerRequiredTest {
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
       assertTrue(startedServer, "Could not startup server for tests.");
       baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
-      setRequestAuth();
+      requestAuth = getRequestAuth("test-keystore.p12");
+
       // Setup a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     }
   }
 
   /** Sets the request auth (security certs) used in calls to the local server. */
-  private static void setRequestAuth() {
+  protected static RequestSpecification getRequestAuth(String keystoreFileName) {
     // Get the certs for the test
     String trustStorePath = "src/test/resources/certs/test-truststore.jks";
-    String keyStorePath = "src/test/resources/certs/test-keystore.p12";
+    String keyStorePath = "src/test/resources/certs/" + keystoreFileName;
     String testPassword = "changeit";
     String keystoreType = "pkcs12";
     // Set up the cert for the calls
@@ -96,8 +97,7 @@ public class ServerRequiredTest {
                 .keyStoreType(keystoreType)
                 .trustStoreType(keystoreType)
                 .allowAllHostnames());
-    requestAuth =
-        new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
+    return new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
   }
 
   /**

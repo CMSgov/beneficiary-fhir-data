@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+if [[ "$BFD_PATH" = "" ]] ; then
+  echo "Please set BFD_PATH environment variable to root of source tree." 1>&2
+  echo "It should be the directory containing the ops and apps subdirectories." 1>&1
+  exit 1
+fi
+
+keytool -genkey -v -alias client-local-dev-samhsa -keyalg RSA -storetype PKCS12 -keystore test-samhsa-keystore.p12 \
+  -dname "CN=client-local-dev-samhsa" -storepass changeit -keypass changeit
+
+keytool -importkeystore \
+        -deststorepass changeit -destkeypass changeit -destkeystore "$BFD_PATH/apps/bfd-server/dev/ssl-stores/server-truststore.pfx" \
+        -srckeystore test-samhsa-keystore.p12 -srcstoretype PKCS12 -srcstorepass changeit

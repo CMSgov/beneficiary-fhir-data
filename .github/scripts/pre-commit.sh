@@ -59,9 +59,14 @@ runShellCheckForCommitFiles() {
     for file in $commits; do
       filename=$(basename -- "$file")
       extension="${filename##*.}"
-      if [ "$extension" == "zip" ]; then
-        continue
-      fi
+
+      # Skip binary formats
+      case "$extension" in
+        "zip" | "p12" | "pfx" | "cer" | "pem")
+          continue ;;
+        *) ;;
+      esac
+
       firstTwo=$( sed 's/^\(..\).*/\1/;q' "$file" )
       # check for a hashbang or a .sh extension to determine if this is a shell script.
       if [ "$firstTwo" == "#!" ] || [ "$extension" == "sh" ]; then

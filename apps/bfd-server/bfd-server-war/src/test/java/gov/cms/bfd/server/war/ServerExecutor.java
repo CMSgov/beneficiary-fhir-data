@@ -155,6 +155,7 @@ public class ServerExecutor {
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_PASSWORD, dbPassword);
     appSettings.put(SpringConfiguration.PROP_DRUG_CODE_FILE_NAME, drugCodeFileName);
     appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, orgFileName);
+    appSettings.put(SpringConfiguration.PROP_SAMHSA_ALLOWED_DNS, "CN=client-local-dev-samhsa");
   }
 
   /**

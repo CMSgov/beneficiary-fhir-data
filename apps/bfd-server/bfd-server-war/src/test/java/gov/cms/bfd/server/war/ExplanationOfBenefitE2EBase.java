@@ -635,7 +635,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     int numSamhsaClaims = samhsaFiles.size() - 6;
 
     given()
-        .spec(requestAuth)
+        .spec(getRequestAuth("test-samhsa-keystore.p12"))
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA
