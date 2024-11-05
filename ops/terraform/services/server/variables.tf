@@ -4,12 +4,6 @@ variable "ami_id_override" {
   default     = null
 }
 
-variable "jdbc_suffix" {
-  default     = "?logServerErrorDetail=false"
-  description = "Suffix added to the Database JDBC URL to set various JDBC parameters"
-  type        = string
-}
-
 variable "force_create_server_lb_alarms" {
   description = "Forces the creation of bfd_server_lb_alarms for ephemeral environments"
   default     = false

@@ -171,7 +171,7 @@ export CONFIG_SETTINGS_JSON
 "$SERVICE_SCRIPT" \
   -javaagent:{{ ref_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
-  "-DbfdServer.logs.dir={{ logs }}" \
+  "-DbfdServer.logs.dir={{ logs | regex_replace('\\/$', '') }}/" \
   "-Djava.io.tmpdir={{ tmp }}" \
   "-Dorg.jboss.logging.provider=slf4j" \
   >>"{{ ref_dir }}/bluebutton-server-app-log.json" 2>&1
