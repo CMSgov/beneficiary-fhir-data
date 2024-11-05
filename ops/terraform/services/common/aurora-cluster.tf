@@ -38,7 +38,13 @@ resource "aws_rds_cluster" "aurora_cluster" {
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
   engine_version              = "16.2"
-  apply_immediately           = local.rds_apply_immediately
+
+  lifecycle {
+    # TODO: Remove when Postgres upgrade is finished
+    ignore_changes = [engine_version]
+  }
+
+  apply_immediately = local.rds_apply_immediately
 
   backtrack_window                    = 0
   backup_retention_period             = local.rds_backup_retention_period
