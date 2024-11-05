@@ -176,7 +176,7 @@
         <its.db.password />
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed when changing this property. -->
-        <its.testcontainer.db.image>postgres:16.2-alpine</its.testcontainer.db.image>
+        <its.testcontainer.db.image>postgres:16.4-alpine</its.testcontainer.db.image>
         <!-- Docker image used with testcontainers to simulate AWS services for testing. -->
         <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be changed when changing this property. -->
         <its.testcontainer.aws.image>localstack/localstack:3.0.2</its.testcontainer.aws.image>
