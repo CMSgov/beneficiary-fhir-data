@@ -344,12 +344,13 @@ public class DataUtilityCommons {
         String taxonomyCode = csvRecord.get(TAXONOMY_CODE_FIELD);
         // entity type code 2 is organization
         if (!Strings.isNullOrEmpty(entityTypeCode)) {
-          if (Integer.parseInt(entityTypeCode) == 2) {
+          if (Integer.parseInt(entityTypeCode) == 2 && !Strings.isNullOrEmpty(orgName)) {
             out.write(npi + "\t" + orgName);
-          } else {
+            out.newLine();
+          } else if (!Strings.isNullOrEmpty(taxonomyCode)) {
             out.write(npi + "\t" + taxonomyCode + "\t" + taxonomyMap.get(taxonomyCode));
+            out.newLine();
           }
-          out.newLine();
         }
       }
     }
