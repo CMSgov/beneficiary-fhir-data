@@ -3,7 +3,8 @@
     "source_ami": "",
     "subnet_id": ""
   },
-  "builders": [{
+  "builders": [
+    {
       "type": "amazon-ebs",
       "iam_instance_profile": "bfd-packer",
       "ssh_username": "ec2-user",
@@ -22,9 +23,11 @@
       "launch_block_device_mappings": [
         {
           "device_name": "/dev/xvda",
-          "volume_type": "gp2",
+          "volume_type": "gp3",
           "volume_size": 30,
-          "delete_on_termination": true
+          "delete_on_termination": true,
+          "throughput": 250,
+          "iops": 3000
         }
       ],
       "tags": {
@@ -36,7 +39,8 @@
       "kms_key_id": "076b1eb1-2fe3-45d3-a8c8-dae8c26d4e8c"
     }
   ],
-  "provisioners": [{
+  "provisioners": [
+    {
       "type": "ansible",
       "user": "ec2-user",
       "playbook_file": "./build_bfd-platinum.yml",
@@ -45,10 +49,11 @@
       ]
     }
   ],
-  "post-processors": [{
-    "type": "manifest",
-    "output": "manifest_platinum.json",
-    "strip_path": true
-  }
-]
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest_platinum.json",
+      "strip_path": true
+    }
+  ]
 }
