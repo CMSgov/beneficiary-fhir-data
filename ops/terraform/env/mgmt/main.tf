@@ -41,11 +41,20 @@ locals {
     ]
   )
 
-  sensitive_common_config = zipmap(
+  ssm_hierarchies = ["/bfd/${local.env}/common"]
+  ssm_flattened_data = {
+    names = flatten(
+      [for k, v in data.aws_ssm_parameters_by_path.params : v.names]
+    )
+    values = flatten(
+      [for k, v in data.aws_ssm_parameters_by_path.params : nonsensitive(v.values)]
+    )
+  }
+  ssm_config = zipmap(
     [
-      for name in data.aws_ssm_parameters_by_path.common_sensitive.names :
-      element(split("/", name), length(split("/", name)) - 1)
+      for name in local.ssm_flattened_data.names :
+      replace(name, "/((non)*sensitive|${local.env})//", "")
     ],
-    nonsensitive(data.aws_ssm_parameters_by_path.common_sensitive.values)
+    local.ssm_flattened_data.values
   )
 }

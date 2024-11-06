@@ -1,7 +1,5 @@
 # `server` Terraservice
 
-> _NOTE: As of writing, this Terraservice is used only for ephemeral environments and not for our established environments. This Terraservice will eventually be promoted to manage the BFD Server's infrastructure in those established environments, but until then **do not** `apply` this Terraservice in any established environment._
-
 This "Terraservice" encapsulates the Terraform necessary to create AWS infrastructure related to the BFD Server. This Terraservice explicitly depends upon the `base` and `common` Terraservices. Ephemeral environments are supported through usage of `terraform workspace`s.
 
 ## Usage
@@ -12,7 +10,10 @@ Assuming you have created a Terraform workspace corresponding to your target env
 
 ```bash
 terraform apply
+terraform apply
 ```
+
+**NOTE** the above double-invocation of terraform is correct. Two executions of `terraform apply` are necessary to achieve the desired state as of BFD-2558.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
@@ -45,7 +46,6 @@ terraform apply
 | <a name="input_force_create_server_log_alarms"></a> [force\_create\_server\_log\_alarms](#input\_force\_create\_server\_log\_alarms) | Forces the creation of bfd\_server\_log\_alarms for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_metrics"></a> [force\_create\_server\_metrics](#input\_force\_create\_server\_metrics) | Forces the creation of bfd\_server\_metrics for ephemeral environments | `bool` | `false` | no |
 | <a name="input_force_create_server_slo_alarms"></a> [force\_create\_server\_slo\_alarms](#input\_force\_create\_server\_slo\_alarms) | Forces the creation of bfd\_server\_slo\_alarms for ephemeral environments | `bool` | `false` | no |
-| <a name="input_jdbc_suffix"></a> [jdbc\_suffix](#input\_jdbc\_suffix) | Suffix added to the Database JDBC URL to set various JDBC parameters | `string` | `"?logServerErrorDetail=false"` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
