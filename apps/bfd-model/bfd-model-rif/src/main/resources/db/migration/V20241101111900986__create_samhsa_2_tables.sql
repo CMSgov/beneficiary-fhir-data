@@ -4,7 +4,7 @@ CREATE TYPE tag_code AS ENUM('R', '42CFRPart2');
 CREATE TABLE IF NOT EXISTS ccw.hha_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_hha_tags_clm_id_to_hha_claims_clm_id
@@ -17,7 +17,7 @@ CREATE INDEX IF NOT EXISTS hha_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS ccw.carrier_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_carrier_tags_clm_id_to_carrier_claims_clm_id
@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS carrier_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS ccw.dme_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_dme_tags_clm_id_to_dme_claims_clm_id
@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS dme_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS ccw.hospice_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_hospice_tags_clm_id_to_hospice_claims_clm_id
@@ -56,7 +56,7 @@ CREATE INDEX IF NOT EXISTS hospice_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS ccw.outpatient_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_outpatient_tags_clm_id_to_outpatient_claims_clm_id
@@ -69,7 +69,7 @@ CREATE INDEX IF NOT EXISTS outpatient_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS ccw.snf_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_snf_tags_clm_id_to_snf_claims_clm_id
@@ -82,7 +82,7 @@ CREATE INDEX IF NOT EXISTS snf_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS ccw.inpatient_tags (
     tag_id BIGINT,
     clm_id BIGINT NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_inpatient_tags_clm_id_to_inpatient_claims_clm_id
@@ -95,7 +95,7 @@ CREATE INDEX IF NOT EXISTS inpatient_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS rda.mcs_tags (
     tag_id BIGINT,
     clm_id CHARACTER VARYING(15) NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_mcs_tags_clm_id_to_mcs_claims_clm_id
@@ -108,7 +108,7 @@ CREATE INDEX IF NOT EXISTS mcs_tags_clm_id_idx
 CREATE TABLE IF NOT EXISTS rda.fiss_tags (
     tag_id BIGINT,
     clm_id CHARACTER VARYING(43) NOT NULL,
-    code TAG_CODE,
+    code TAG_CODE NOT NULL,
     details JSONB,
     PRIMARY KEY(tag_id),
     CONSTRAINT fk_fiss_tags_clm_id_to_fiss_claims_clm_id
