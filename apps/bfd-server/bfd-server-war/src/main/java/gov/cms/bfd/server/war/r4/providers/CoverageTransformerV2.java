@@ -169,7 +169,9 @@ final class CoverageTransformerV2 {
     coverage.setId(
         CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary, profile));
 
-    if (profile.equals(Profile.C4DIC)) {
+    boolean isProfileC4DIC = profile.equals(Profile.C4DIC);
+
+    if (isProfileC4DIC) {
       transformC4Dic(beneficiary, coverage);
     } else {
       addC4bbPayor(coverage);
@@ -208,8 +210,14 @@ final class CoverageTransformerV2 {
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       addCoverageDecimalExtension(
           coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
-      // Monthly Medicare-Medicaid dual eligibility codes
-      transformEntitlementDualEligibility(coverage, beneficiary);
+
+      if (isProfileC4DIC) {
+        int month = Calendar.getInstance().get(Calendar.MONTH);
+        transformCurrentMonthEntitlementDualEligibility(coverage, beneficiary, month);
+      } else {
+        // Monthly Medicare-Medicaid dual eligibility codes
+        transformEntitlementDualEligibility(coverage, beneficiary);
+      }
 
       // Medicare Entitlement Buy In Indicator
       transformEntitlementBuyInIndicators(coverage, beneficiary);
@@ -238,8 +246,9 @@ final class CoverageTransformerV2 {
     addProfile(coverage, profile);
     coverage.setId(
         CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary, profile));
+    boolean isProfileC4DIC = profile.equals(Profile.C4DIC);
 
-    if (profile.equals(Profile.C4DIC)) {
+    if (isProfileC4DIC) {
       transformC4Dic(beneficiary, coverage);
     } else {
       addC4bbPayor(coverage);
@@ -274,9 +283,17 @@ final class CoverageTransformerV2 {
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       addCoverageDecimalExtension(
           coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
-      // Monthly Medicare-Medicaid dual eligibility codes
-      transformEntitlementDualEligibility(coverage, beneficiary);
 
+      if (isProfileC4DIC) {
+        int month = Calendar.getInstance().get(Calendar.MONTH);
+
+        addCoverageCodeExtension(
+            coverage, CcwCodebookVariable.CREC, beneficiary.getEntitlementCodeCurrent());
+        transformCurrentMonthEntitlementDualEligibility(coverage, beneficiary, month);
+      } else {
+        // Monthly Medicare-Medicaid dual eligibility codes
+        transformEntitlementDualEligibility(coverage, beneficiary);
+      }
       // Medicare Entitlement Buy In Indicator
       transformEntitlementBuyInIndicators(coverage, beneficiary);
     }
@@ -305,7 +322,9 @@ final class CoverageTransformerV2 {
     coverage.setId(
         CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary, profile));
 
-    if (profile.equals(Profile.C4DIC)) {
+    boolean isProfileC4DIC = profile.equals(Profile.C4DIC);
+
+    if (isProfileC4DIC) {
       transformC4Dic(beneficiary, coverage);
     } else {
       addC4bbPayor(coverage);
@@ -321,6 +340,8 @@ final class CoverageTransformerV2 {
 
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
+    int month = Calendar.getInstance().get(Calendar.MONTH);
+
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       transformPartCContractNumber(coverage, beneficiary);
 
@@ -334,21 +355,26 @@ final class CoverageTransformerV2 {
       addCoverageDecimalExtension(
           coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
 
-      // Monthly Medicare-Medicaid dual eligibility codes
-      transformEntitlementDualEligibility(coverage, beneficiary);
+      if (isProfileC4DIC) {
+        transformCurrentMonthEntitlementDualEligibility(coverage, beneficiary, month);
+      } else {
+        // Monthly Medicare-Medicaid dual eligibility codes
+        transformEntitlementDualEligibility(coverage, beneficiary);
+      }
     }
-
-    int month = Calendar.getInstance().get(Calendar.MONTH);
     String contractAndPbpID =
         concatenateContractAndPbp(
             getPartCContractNumber(beneficiary, month), getPartCPbpNumber(beneficiary, month));
 
-    if (profile.equals(Profile.C4DIC)) {
+    if (isProfileC4DIC) {
       // Hide resource Part C when Contract ID or PBP ID is null
       if (contractAndPbpID == null) {
         return null;
       }
+      addCoverageCodeExtension(
+          coverage, CcwCodebookVariable.CREC, beneficiary.getEntitlementCodeCurrent());
       createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
+
     } else {
       createCoverageClass(
           coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
@@ -383,7 +409,9 @@ final class CoverageTransformerV2 {
     coverage.setId(
         CommonTransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary, profile));
 
-    if (profile.equals(Profile.C4DIC)) {
+    boolean isProfileC4DIC = profile.equals(Profile.C4DIC);
+
+    if (isProfileC4DIC) {
       transformC4Dic(beneficiary, coverage);
     } else {
       addC4bbPayor(coverage);
@@ -406,6 +434,8 @@ final class CoverageTransformerV2 {
     addCoverageExtension(
         coverage, CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode());
 
+    int month = Calendar.getInstance().get(Calendar.MONTH);
+
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
 
       transformPartDContractNumber(coverage, beneficiary);
@@ -415,14 +445,14 @@ final class CoverageTransformerV2 {
           .getBeneficiaryMonthlys()
           .forEach(
               beneMonthly -> {
-                int month = beneMonthly.getYearMonth().getMonthValue();
+                int beneMonth = beneMonthly.getYearMonth().getMonthValue();
                 String yearMonth =
-                    String.format("%s-%s", beneMonthly.getYearMonth().getYear(), month);
+                    String.format("%s-%s", beneMonthly.getYearMonth().getYear(), beneMonth);
 
                 Map<Integer, CcwCodebookVariable> mapOfMonth =
                     CommonTransformerUtils.getPartDCcwCodebookMonthMap();
 
-                if (mapOfMonth.containsKey(month)) {
+                if (mapOfMonth.containsKey(beneMonth)) {
                   if (beneMonthly.getPartDContractNumberId().isEmpty()
                       || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
                     beneMonthly.setPartDContractNumberId(Optional.of("0"));
@@ -431,7 +461,7 @@ final class CoverageTransformerV2 {
                   coverage.addExtension(
                       TransformerUtilsV2.createExtensionCoding(
                           coverage,
-                          mapOfMonth.get(month),
+                          mapOfMonth.get(beneMonth),
                           yearMonth,
                           beneMonthly.getPartDContractNumberId()));
                 }
@@ -449,22 +479,26 @@ final class CoverageTransformerV2 {
       addCoverageDecimalExtension(
           coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
 
-      // Monthly Medicare-Medicaid dual eligibility codes
-      transformEntitlementDualEligibility(coverage, beneficiary);
+      if (isProfileC4DIC) {
+        transformCurrentMonthEntitlementDualEligibility(coverage, beneficiary, month);
+      } else {
+        // Monthly Medicare-Medicaid dual eligibility codes
+        transformEntitlementDualEligibility(coverage, beneficiary);
+      }
     }
-
-    int month = Calendar.getInstance().get(Calendar.MONTH);
 
     String contractAndPbpID =
         concatenateContractAndPbp(
             getPartDContractNumber(beneficiary, month), getPartDPbpNumber(beneficiary, month));
 
-    if (profile.equals(Profile.C4DIC)) {
+    if (isProfileC4DIC) {
       // Hide resource Part D when Contract ID or PBP ID is null
       if (contractAndPbpID == null) {
         return null;
       }
       createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
+      addCoverageCodeExtension(
+          coverage, CcwCodebookVariable.CREC, beneficiary.getEntitlementCodeCurrent());
     } else {
       createCoverageClass(
           coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
@@ -688,6 +722,74 @@ final class CoverageTransformerV2 {
         coverage, CcwCodebookVariable.DUAL_11, beneficiary.getMedicaidDualEligibilityNovCode());
     addCoverageExtension(
         coverage, CcwCodebookVariable.DUAL_12, beneficiary.getMedicaidDualEligibilityDecCode());
+  }
+
+  /**
+   * current monthly Medicare-Medicaid dual eligibility code extensions to the provided {@link
+   * Coverage} resource.
+   *
+   * @param coverage the {@link Coverage} to generate
+   * @param beneficiary the {@link Beneficiary} to generate Coverage for
+   * @param currentMonth the value of current month in integer
+   */
+  private void transformCurrentMonthEntitlementDualEligibility(
+      Coverage coverage, Beneficiary beneficiary, int currentMonth) {
+
+    // Monthly Medicare-Medicaid dual eligibility codes
+    switch (currentMonth) {
+      case 0:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_01, beneficiary.getMedicaidDualEligibilityJanCode());
+        break;
+      case 1:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode());
+        break;
+      case 2:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_03, beneficiary.getMedicaidDualEligibilityMarCode());
+        break;
+      case 3:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_04, beneficiary.getMedicaidDualEligibilityAprCode());
+        break;
+      case 4:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_05, beneficiary.getMedicaidDualEligibilityMayCode());
+        break;
+      case 5:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_06, beneficiary.getMedicaidDualEligibilityJunCode());
+        break;
+      case 6:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_07, beneficiary.getMedicaidDualEligibilityJulCode());
+        break;
+      case 7:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_08, beneficiary.getMedicaidDualEligibilityAugCode());
+        break;
+      case 8:
+        addCoverageExtension(
+            coverage,
+            CcwCodebookVariable.DUAL_09,
+            beneficiary.getMedicaidDualEligibilitySeptCode());
+        break;
+      case 9:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_10, beneficiary.getMedicaidDualEligibilityOctCode());
+        break;
+      case 10:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_11, beneficiary.getMedicaidDualEligibilityNovCode());
+        break;
+      case 11:
+        addCoverageExtension(
+            coverage, CcwCodebookVariable.DUAL_12, beneficiary.getMedicaidDualEligibilityDecCode());
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid month: " + currentMonth);
+    }
   }
 
   /**
