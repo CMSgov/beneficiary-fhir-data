@@ -1,5 +1,9 @@
-DROP TYPE IF EXISTS tag_code CASCADE;
-CREATE TYPE tag_code AS ENUM('R', '42CFRPart2');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tag_code') THEN
+        CREATE TYPE tag_code AS ENUM('R', '42CFRPart2');
+    END IF;
+END$$;
 
 CREATE TABLE IF NOT EXISTS ccw.hha_tags (
     tag_id BIGINT,
