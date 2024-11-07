@@ -25,3 +25,17 @@ data "external" "rds" {
     local.env                                       # environment name, almost exclusively here to provide beta reader functionality for production
   ]
 }
+
+data "external" "current_asg" {
+  program = [
+    "${path.module}/scripts/asg-data.sh", # helper script
+    local.env
+  ]
+}
+
+data "external" "current_lt_version" {
+  program = [
+    "${path.module}/scripts/launch-template-data.sh", # helper script
+    local.env
+  ]
+}
