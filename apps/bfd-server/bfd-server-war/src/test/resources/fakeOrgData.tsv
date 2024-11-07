@@ -1,1 +1,5 @@
-0000000000	Fake ORG Name
+0000000000	{ "npi": "0000000000", "providerOrganizationName": "Fake ORG Name"}
+2222222222	{ "npi":  "2222222222", "taxonomyCode": "207R00000X", "taxonomyDisplay": "Internal Medicine Physician" }
+3333333333	{ "npi": "3333333333", "taxonomyCode": "207T00000X", "taxonomyDisplay": "Neurological Surgery Physician" }
+4444	{ "npi": "444", "taxonomyCode": "204D00000X", "taxonomyDisplay": "Neuromusculoskeletal Medicine & OMM Physician" }
+345345345	{ "npi": "345345345", "taxonomyCode": "207ZH0000X", "taxonomyDisplay": "Hematology (Pathology) Physician" }

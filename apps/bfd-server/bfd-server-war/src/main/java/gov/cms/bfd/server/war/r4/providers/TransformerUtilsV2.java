@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -1921,6 +1922,7 @@ public final class TransformerUtilsV2 {
    * @param roleSystem the role system
    * @param roleCode the role code
    * @param roleDisplay the role display
+   * @param taxonomy Practitioner taxonomy
    * @return the {@link CareTeamComponent} that was created/linked
    */
   private static CareTeamComponent addCareTeamPractitioner(
@@ -1930,7 +1932,8 @@ public final class TransformerUtilsV2 {
       String practitionerIdValue,
       String roleSystem,
       String roleCode,
-      String roleDisplay) {
+      String roleDisplay,
+      Optional<NPIData> taxonomy) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
@@ -1961,6 +1964,13 @@ public final class TransformerUtilsV2 {
       careTeamEntry.setSequence(eob.getCareTeam().size());
       careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
+      if (taxonomy.isPresent()) {
+        String taxonomyCode = taxonomy.get().getTaxonomyCode();
+        String taxonomyDisplay = taxonomy.get().getTaxonomyDisplay();
+        careTeamEntry.setQualification(
+            createCodeableConcept(
+                TransformerConstants.NUCC_TAXONOMY_SYSTEM, null, taxonomyDisplay, taxonomyCode));
+      }
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
       careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
       careTeamEntry.setRole(careTeamRoleConcept);
@@ -2454,6 +2464,7 @@ public final class TransformerUtilsV2 {
    * @param paymentDenialCode CARR_CLM_PMT_DNL_CD,
    * @param referringPhysicianNpi RFR_PHYSN_NPI
    * @param referringPhysicianUpin RFR_PHYSN_UPIN
+   * @param referringPhysicianTaxonomy RFR_PHYSN_TAXONOMY
    * @param providerAssignmentIndicator CARR_CLM_PRVDR_ASGNMT_IND_SW,
    * @param providerPaymentAmount NCH_CLM_PRVDR_PMT_AMT,
    * @param beneficiaryPaymentAmount NCH_CLM_BENE_PMT_AMT,
@@ -2469,6 +2480,7 @@ public final class TransformerUtilsV2 {
       BigDecimal beneficiaryPartBDeductAmount,
       String paymentDenialCode,
       Optional<String> referringPhysicianNpi,
+      Optional<NPIData> referringPhysicianTaxonomy,
       Optional<String> referringPhysicianUpin,
       Optional<Character> providerAssignmentIndicator,
       BigDecimal providerPaymentAmount,
@@ -2506,7 +2518,8 @@ public final class TransformerUtilsV2 {
         eob,
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimProfessionalAndNonClinicianCareTeamRole.REFERRING,
-        referringPhysicianNpi);
+        referringPhysicianNpi,
+        referringPhysicianTaxonomy);
 
     // If we don't have an NPI, do we have a UPIN?
     if (!referringPhysicianNpi.isPresent()) {
@@ -2902,7 +2915,41 @@ public final class TransformerUtilsV2 {
     return id.map(
         i ->
             addCareTeamPractitioner(
-                eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay()));
+                eob,
+                item,
+                type,
+                i,
+                role.getSystem(),
+                role.toCode(),
+                role.getDisplay(),
+                Optional.empty()));
+  }
+
+  /**
+   * Optionally adds a member to {@link ExplanationOfBenefit#getCareTeam()}.
+   *
+   * <p>Used for Institutional claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param type the type to use
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   * @param taxonomy The Practioner's taxonomy
+   * @return the optional
+   */
+  static Optional<CareTeamComponent> addCareTeamMember(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimInstitutionalCareTeamRole role,
+      Optional<String> id,
+      Optional<NPIData> taxonomy) {
+    return id.map(
+        i ->
+            addCareTeamPractitioner(
+                eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay(), taxonomy));
   }
 
   /**
@@ -2926,6 +2973,28 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Adds a member to {@link ExplanationOfBenefit#getCareTeam()}.
+   *
+   * <p>Used for Institutional claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param type the type to use
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   * @param taxonomy The practitioner's taxonomy
+   * @return the optional
+   */
+  static Optional<CareTeamComponent> addCareTeamMember(
+      ExplanationOfBenefit eob,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimInstitutionalCareTeamRole role,
+      Optional<String> id,
+      Optional<NPIData> taxonomy) {
+    return addCareTeamMember(eob, null, type, role, id, taxonomy);
+  }
+
+  /**
    * Optionally adds a member to {@link ExplanationOfBenefit#getCareTeam()}.
    *
    * <p>Used for Pharmacy claims
@@ -2936,6 +3005,7 @@ public final class TransformerUtilsV2 {
    * @param type the type to use
    * @param role The care team member's role
    * @param id The NPI or UPIN coded as a string
+   * @param taxonomy The Practitioner's taxonomy
    * @return the optional
    */
   static Optional<CareTeamComponent> addCareTeamMember(
@@ -2943,11 +3013,12 @@ public final class TransformerUtilsV2 {
       ItemComponent item,
       C4BBPractitionerIdentifierType type,
       C4BBClaimPharmacyTeamRole role,
-      Optional<String> id) {
+      Optional<String> id,
+      Optional<NPIData> taxonomy) {
     return id.map(
         i ->
             addCareTeamPractitioner(
-                eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay()));
+                eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay(), taxonomy));
   }
 
   /**
@@ -2972,7 +3043,41 @@ public final class TransformerUtilsV2 {
     return id.map(
         i ->
             addCareTeamPractitioner(
-                eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay()));
+                eob,
+                item,
+                type,
+                i,
+                role.getSystem(),
+                role.toCode(),
+                role.getDisplay(),
+                Optional.empty()));
+  }
+
+  /**
+   * Adds a member to {@link ExplanationOfBenefit#getCareTeam()}.
+   *
+   * <p>Used for Professional and Non-Clinician claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param type the type to use
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   * @param taxonomy The Practioner's taxonomy
+   * @return the optional
+   */
+  static Optional<CareTeamComponent> addCareTeamMember(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
+      Optional<String> id,
+      Optional<NPIData> taxonomy) {
+    return id.map(
+        i ->
+            addCareTeamPractitioner(
+                eob, item, type, i, role.getSystem(), role.toCode(), role.getDisplay(), taxonomy));
   }
 
   /**
@@ -3035,6 +3140,28 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Adds a member to {@link ExplanationOfBenefit#getCareTeam()}.
+   *
+   * <p>Used for Professional and Non-Clinician claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param type the type to use
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   * @param taxonomy The Practitioner's taxononmy
+   * @return the optional
+   */
+  static Optional<CareTeamComponent> addCareTeamMember(
+      ExplanationOfBenefit eob,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
+      Optional<String> id,
+      Optional<NPIData> taxonomy) {
+    return addCareTeamMember(eob, null, type, role, id, taxonomy);
+  }
+
+  /**
    * Handles mapping the following values to the appropriate member of {@link
    * ExplanationOfBenefit#getCareTeam()}. This updates the passed in {@link ExplanationOfBenefit} in
    * place.
@@ -3044,8 +3171,11 @@ public final class TransformerUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
    * @param attendingPhysicianNpi AT_PHYSN_NPI
+   * @param attendingPhysicianTaxonomy AT_PHYSN_TAXONOMY
    * @param operatingPhysicianNpi OP_PHYSN_NPI
+   * @param operatingPhysicianTaxonomy OP_PHYSN_TAXONOMY
    * @param otherPhysicianNpi OT_PHYSN_NPI
+   * @param otherPhysicianTaxonomy OT_PHYSN_TAXONOMY
    * @param attendingPhysicianUpin AT_PHYSN_UPIN
    * @param operatingPhysicianUpin OP_PHYSN_UPIN
    * @param otherPhysicianUpin OT_PHYSN_UPIN
@@ -3053,8 +3183,11 @@ public final class TransformerUtilsV2 {
   static void mapCareTeam(
       ExplanationOfBenefit eob,
       Optional<String> attendingPhysicianNpi,
+      Optional<NPIData> attendingPhysicianTaxonomy,
       Optional<String> operatingPhysicianNpi,
+      Optional<NPIData> operatingPhysicianTaxonomy,
       Optional<String> otherPhysicianNpi,
+      Optional<NPIData> otherPhysicianTaxonomy,
       Optional<String> attendingPhysicianUpin,
       Optional<String> operatingPhysicianUpin,
       Optional<String> otherPhysicianUpin) {
@@ -3064,7 +3197,8 @@ public final class TransformerUtilsV2 {
         eob,
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimInstitutionalCareTeamRole.ATTENDING,
-        attendingPhysicianNpi);
+        attendingPhysicianNpi,
+        attendingPhysicianTaxonomy);
 
     // AT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
@@ -3078,7 +3212,8 @@ public final class TransformerUtilsV2 {
         eob,
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimInstitutionalCareTeamRole.OPERATING,
-        operatingPhysicianNpi);
+        operatingPhysicianNpi,
+        operatingPhysicianTaxonomy);
 
     // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
@@ -3092,7 +3227,8 @@ public final class TransformerUtilsV2 {
         eob,
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimInstitutionalCareTeamRole.OTHER_OPERATING,
-        otherPhysicianNpi);
+        otherPhysicianNpi,
+        otherPhysicianTaxonomy);
 
     // OT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(

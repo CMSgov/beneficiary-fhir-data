@@ -40,7 +40,6 @@ public final class App {
     if (args.length > 1) {
       throw new IllegalArgumentException("Invalid arguments supplied for NPI download.");
     }
-
     String outputDir = null;
     Optional<String> downloadUrl = Optional.empty();
 
@@ -56,7 +55,6 @@ public final class App {
     if (!Strings.isNullOrEmpty(downloadUrlProperty)) {
       downloadUrl = Optional.of(downloadUrlProperty);
     }
-
     DataUtilityCommons.getNPIOrgNames(outputDir, downloadUrl, NPI_RESOURCE);
   }
 }

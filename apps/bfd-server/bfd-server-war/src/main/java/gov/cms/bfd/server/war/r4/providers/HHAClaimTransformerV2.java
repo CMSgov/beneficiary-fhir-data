@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
@@ -154,7 +155,9 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup
+            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi())
+            .map(NPIData::getProviderOrganizationName),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -197,6 +200,9 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
+        Optional.empty(),
+        Optional.empty(),
         Optional.empty(),
         Optional.empty(),
         claimGroup.getAttendingPhysicianUpin(),
@@ -306,7 +312,8 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-          line.getRevenueCenterRenderingPhysicianNPI());
+          line.getRevenueCenterRenderingPhysicianNPI(),
+          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
 
       // REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
       TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, eob, line.getStatusCode());

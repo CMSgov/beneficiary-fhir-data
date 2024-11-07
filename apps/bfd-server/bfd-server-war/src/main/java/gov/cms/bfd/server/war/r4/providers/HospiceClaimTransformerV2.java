@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
@@ -174,7 +175,9 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi()),
+        npiOrgLookup
+            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi())
+            .map(NPIData::getProviderOrganizationName),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
         claimGroup.getClaimNonPaymentReasonCode(),
@@ -213,6 +216,9 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
+        Optional.empty(),
+        Optional.empty(),
         Optional.empty(),
         Optional.empty(),
         claimGroup.getAttendingPhysicianUpin(),
@@ -275,7 +281,8 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.PERFORMING,
-          line.getRevenueCenterRenderingPhysicianNPI());
+          line.getRevenueCenterRenderingPhysicianNPI(),
+          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
 
       // HCPCS_CD => ExplanationOfBenefit.item.productOrService
       // HCPCS_1ST_MDFR_CD => ExplanationOfBenefit.item.modifier

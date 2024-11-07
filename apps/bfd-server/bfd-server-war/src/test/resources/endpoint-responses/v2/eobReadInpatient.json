@@ -255,6 +255,13 @@
         "code" : "performing",
         "display" : "Performing provider"
       } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "http://nucc.org/provider-taxonomy",
+        "code" : "207ZH0000X",
+        "display" : "Hematology (Pathology) Physician"
+      } ]
     }
   } ],
   "supportingInfo" : [ {

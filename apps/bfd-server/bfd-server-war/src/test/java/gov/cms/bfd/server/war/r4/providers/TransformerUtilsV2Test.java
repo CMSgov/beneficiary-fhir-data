@@ -952,7 +952,7 @@ public class TransformerUtilsV2Test {
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     claimTransformerInterface =
         new DMEClaimTransformerV2(
-            new MetricRegistry(), new FdaDrugCodeDisplayLookup(npiDataStream));
+            new MetricRegistry(), new FdaDrugCodeDisplayLookup(npiDataStream), npiOrgLookup);
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);

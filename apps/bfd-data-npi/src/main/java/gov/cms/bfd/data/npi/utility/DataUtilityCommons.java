@@ -1,16 +1,15 @@
 package gov.cms.bfd.data.npi.utility;
 
-import com.google.common.base.Strings;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -24,10 +23,15 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +45,37 @@ public class DataUtilityCommons {
 
   /** The day of the month we should check to see if the file has posted. */
   private static final int DAYS_IN_EXPIRATION = 10;
+
+  /** Field for taxonomy code in CSV. */
+  private static final String TAXONOMY_CODE_FIELD = "Healthcare Provider Taxonomy Code_1";
+
+  /** Field for provider organization name in CSV. */
+  public static final String PROVIDER_ORGANIZATION_NAME_FIELD =
+      "Provider Organization Name (Legal Business Name)";
+
+  /** Field for NPI in CSV. */
+  public static final String NPI_FIELD = "NPI";
+
+  /** Field for Entity Type Code in CSV. */
+  public static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
+
+  /** Field for Provider Credential code in CSV. */
+  private static final String PROVIDER_CREDENTIAL_FIELD = "Provider Credential Text";
+
+  /** Field for Provider first name in CSV. */
+  private static final String PROVIDER_FIRST_NAME_FIELD = "Provider First Name";
+
+  /** Field for Provider middle name in CSV. */
+  private static final String PROVIDER_MIDDLE_NAME_FIELD = "Provider Middle Name";
+
+  /** Field for Provider last name in CSV. */
+  private static final String PROVIDER_LAST_NAME_FIELD = "Provider Last Name (Legal Name)";
+
+  /** Field for Provider prefix in CSV. */
+  private static final String PROVIDER_PREFIX_FIELD = "Provider Name Prefix Text";
+
+  /** Field for Provider Suffix in CSV. */
+  private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
 
   /**
    * Gets the org names from the npi file.
@@ -263,6 +298,33 @@ public class DataUtilityCommons {
   }
 
   /**
+   * Loads the taxonomy groupings into a map.
+   *
+   * @return map of taxonomy groupings.
+   * @throws IOException exception thrown.
+   */
+  public static Map<String, String> processTaxonomyDescriptions() throws IOException {
+    ClassLoader classLoader = DataUtilityCommons.class.getClassLoader();
+    File taxonomyFile =
+        new File(
+            Objects.requireNonNull(classLoader.getResource("nucc_taxonomy_240.csv")).getFile());
+    Map<String, String> taxonomyMapping = new HashMap<>();
+    try (FileInputStream is = new FileInputStream(taxonomyFile);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      CSVParser csvParser =
+          new CSVParser(
+              reader,
+              CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+      for (CSVRecord csvRecord : csvParser) {
+        String code = csvRecord.get("code");
+        String displayName = csvRecord.get("Display Name");
+        taxonomyMapping.put(code, displayName);
+      }
+    }
+    return taxonomyMapping;
+  }
+
+  /**
    * Converts the npi data file.
    *
    * @param convertedNpiDataFile converted npi data file.
@@ -271,47 +333,59 @@ public class DataUtilityCommons {
    */
   private static void convertNpiDataFile(Path convertedNpiDataFile, Path originalNpiDataFile)
       throws IOException {
+
+    Map<String, String> taxonomyMap = DataUtilityCommons.processTaxonomyDescriptions();
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
         Charset.forName("windows-1252")
             .newDecoder()
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
-
     CharsetEncoder outEnc =
         StandardCharsets.UTF_8
             .newEncoder()
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
-
     try (FileInputStream is = new FileInputStream(originalNpiDataFile.toFile().getAbsolutePath());
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
         FileOutputStream fw =
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
-
-      // Get indexes according to header
-      String line = reader.readLine();
-      String[] fields = line.split(",");
-      Map<String, Integer> indexes = getIndexNumbers(fields);
-      Integer npiIndex = getIndexNumberForField(indexes, "NPI");
-      Integer entityTypeCodeIndex = getIndexNumberForField(indexes, "Entity Type Code");
-      Integer orgNameIndex =
-          getIndexNumberForField(indexes, "Provider Organization Name (Legal Business Name)");
-
-      while ((line = reader.readLine()) != null) {
-        fields = line.split(",");
-
-        String orgName = fields[orgNameIndex].trim().replace("\"", "");
-        String npi = fields[npiIndex].trim().replace("\"", "");
-        String entityTypeCode = fields[entityTypeCodeIndex].trim().replace("\"", "");
-
-        // entity type code 2 is organization
-        if (!Strings.isNullOrEmpty(entityTypeCode) && Integer.parseInt(entityTypeCode) == 2) {
-          out.write(npi + "\t" + orgName);
-          out.newLine();
-        }
+        DeflaterOutputStream dos = new DeflaterOutputStream(fw); ) {
+      CSVParser csvParser =
+          new CSVParser(
+              reader,
+              CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+      ObjectMapper objectMapper = new ObjectMapper();
+      for (CSVRecord csvRecord : csvParser) {
+        String orgName = csvRecord.get(PROVIDER_ORGANIZATION_NAME_FIELD);
+        String npi = csvRecord.get(NPI_FIELD);
+        String entityTypeCode = csvRecord.get(ENTITY_TYPE_CODE_FIELD);
+        String taxonomyCode = csvRecord.get(TAXONOMY_CODE_FIELD);
+        String providerFirstName = csvRecord.get(PROVIDER_FIRST_NAME_FIELD);
+        String providerMiddleName = csvRecord.get(PROVIDER_MIDDLE_NAME_FIELD);
+        String providerLastName = csvRecord.get(PROVIDER_LAST_NAME_FIELD);
+        String providerPrefix = csvRecord.get(PROVIDER_PREFIX_FIELD);
+        String providerSuffix = csvRecord.get(PROVIDER_SUFFIX_FIELD);
+        String providerCredential = csvRecord.get(PROVIDER_CREDENTIAL_FIELD);
+        NPIData npiData =
+            NPIData.builder()
+                .npi(npi)
+                .providerOrganizationName(orgName)
+                .entityTypeCode(entityTypeCode)
+                .taxonomyCode(taxonomyCode)
+                .taxonomyDisplay(taxonomyMap.get(taxonomyCode))
+                .providerFirstName(providerFirstName)
+                .providerMiddleName(providerMiddleName)
+                .providerLastName(providerLastName)
+                .providerNamePrefix(providerPrefix)
+                .providerNameSuffix(providerSuffix)
+                .providerCredential(providerCredential)
+                .build();
+        String json = objectMapper.writeValueAsString(npiData);
+        dos.write((npi + "\t" + json).getBytes());
+        dos.write("\n".getBytes());
       }
+      dos.close();
     }
   }
 
