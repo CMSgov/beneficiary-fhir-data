@@ -1,11 +1,16 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import SamhsaUtils.SamhsaUtil;
+import SamhsaUtils.model.FissTag;
+import SamhsaUtils.model.McsTag;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -13,6 +18,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -206,6 +212,30 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       throw new ProcessingException(e, 0);
     }
   }
+  public void writeFissTags(List<FissTag> fissTags) {
+    transactionManager.executeProcedure(
+            entityManager -> {
+              try {
+                for (FissTag fissTag : fissTags) {
+                    entityManager.merge(fissTag);
+                }
+              } finally {
+                // TODO: Add some metrics
+              }
+            });
+  }
+  public void writeMcsTags(List<McsTag> mcsTags) {
+    transactionManager.executeProcedure(
+            entityManager -> {
+              try {
+                for (McsTag mcsTag : mcsTags) {
+                  entityManager.merge(mcsTag);
+                }
+              } finally {
+                // TODO: Add some metrics
+              }
+            });
+  }
 
   /**
    * Writes the claims to the database in the calling thread.
@@ -236,6 +266,26 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     metrics.successes.increment();
     metrics.objectsWritten.increment(claims.size());
     return claims.size();
+  }
+  private void processClaimsForSamhsa(Collection<RdaChange<TClaim>> changes) {
+    try {
+      for (RdaChange<TClaim> change : changes) {
+        switch(change.getClaim()) {
+          case RdaFissClaim claim -> {
+            Optional<List<FissTag>> fissTags = SamhsaUtil.checkAndProcessFissClaim(claim);
+              fissTags.ifPresent(this::writeFissTags);
+          }
+          case RdaMcsClaim claim -> {
+            Optional<List<McsTag>> mcsTags = SamhsaUtil.checkAndProcessMcsClaim(claim);
+            mcsTags.ifPresent(this::writeMcsTags);
+
+          }
+          default -> {}
+        }
+      }
+    } finally {
+       //TODO: Implement metrics
+    }
   }
 
   /**
