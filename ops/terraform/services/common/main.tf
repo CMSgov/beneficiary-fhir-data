@@ -48,8 +48,10 @@ locals {
   management_security_group       = local.nonsensitive_config["management_security_group"]
   vpn_security_group              = local.nonsensitive_config["vpn_security_group"]
 
+  # Invariant RDS configuration
+  rds_aurora_family = "aurora-postgresql16"
+
   # RDS configuration SSM lookups
-  rds_aurora_family                       = local.nonsensitive_config["rds_aurora_family"]
   rds_backup_retention_period             = local.nonsensitive_config["rds_backup_retention_period"]
   rds_cluster_identifier                  = "bfd-${local.env}-aurora-cluster"
   rds_iam_database_authentication_enabled = local.nonsensitive_config["rds_iam_database_authentication_enabled"]
