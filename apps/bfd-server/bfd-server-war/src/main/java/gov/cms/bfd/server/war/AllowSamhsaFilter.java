@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_ALLOWED_CERT_ALIASES_JSON;
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_ALLOWED_CERTIFICATE_ALIASES_JSON;
 import static gov.cms.bfd.server.war.commons.CommonTransformerUtils.SHOULD_FILTER_SAMHSA;
 
 import com.google.gson.Gson;
@@ -41,18 +41,18 @@ public class AllowSamhsaFilter extends OncePerRequestFilter {
   /**
    * Creates a new {@link AllowSamhsaFilter}.
    *
-   * @param samhsaAllowedCertAliasesJson list of certificate aliases to identify clients that are
-   *     allowed to see SAMHSA data
+   * @param samhsaAllowedCertificateAliasesJson list of certificate aliases to identify clients that
+   *     are allowed to see SAMHSA data
    * @param keyStore server key store
    */
   public AllowSamhsaFilter(
-      @Value("${" + SSM_PATH_SAMHSA_ALLOWED_CERT_ALIASES_JSON + "}")
-          String samhsaAllowedCertAliasesJson,
+      @Value("${" + SSM_PATH_SAMHSA_ALLOWED_CERTIFICATE_ALIASES_JSON + "}")
+          String samhsaAllowedCertificateAliasesJson,
       @Qualifier("serverTrustStore") KeyStore keyStore) {
     super();
     Gson deserializer = new Gson();
     String[] samhsaAllowedCertAliases =
-        deserializer.fromJson(samhsaAllowedCertAliasesJson, String[].class);
+        deserializer.fromJson(samhsaAllowedCertificateAliasesJson, String[].class);
     this.samhsaAllowedSerialNumbers =
         Arrays.stream(samhsaAllowedCertAliases)
             .map(allowedCert -> getCertSerialNumber(keyStore, allowedCert))

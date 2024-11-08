@@ -265,7 +265,7 @@ setvar db/password $password
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
 setvar c4dic/enabled false
-setvar client_certificates/samhsa_allowed_json '["client-local-dev-samhsa"]'
+setvar samhsa_allowed_certificates_json '["client-local-dev-samhsa"]'
 
 classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"

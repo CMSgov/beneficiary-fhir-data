@@ -86,9 +86,12 @@ public class SpringConfiguration extends BaseConfiguration {
    */
   public static final String PROP_ORG_FILE_NAME = "bfdServer.org.file.name";
 
-  /** test. */
-  public static final String SSM_PATH_SAMHSA_ALLOWED_CERT_ALIASES_JSON =
-      "client_certificates/samhsa_allowed_aliases_json";
+  /**
+   * The {@link String} property that lists the client certificates that are allowed to see SAMHSA
+   * data.
+   */
+  public static final String SSM_PATH_SAMHSA_ALLOWED_CERTIFICATE_ALIASES_JSON =
+      "samhsa_allowed_certificate_aliases_json";
 
   /**
    * The {@link String } Boolean property that is used to enable the partially adjudicated claims
