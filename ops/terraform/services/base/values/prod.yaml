@@ -76,7 +76,6 @@
 /dpc/${env}/eft/sensitive/outbound/recognized_files_json: >-
   <<CIPHER>>AgV4V-puBiMaqsztddTkqa6ulSkV2boNK3Z3k8O3zjPfOy0AdAACAAtBcHBsaWNhdGlvbgAGY2lwaGVyABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFvTGQ4SFphZ3BDTmd4U1NtY3VZeU5GNUpTbE5SUzBxZG5nWWJIcm5lR0I1WXdLM3BPWFJvWnNJdWJ3dHh2YlJ0Zz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMTo1NzczNzM4MzE3MTE6a2V5L21yay1iMjNlYjZmZWVlYmM0MzQ2YTk5YTZhNTliYzU2MWRmMwC4AQIBAHipsbBUtIKaXI95_AIHiGnjDkxfPDRzgqb6WVwMZI7-kwGxaEljmifZxl3xg3UWJLICAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMRqfVWZyPft-EnrvVAgEQgDuvHh_BKMlRZ0Oct9djV7w8yb2oUt6M7f4lzqQEDFhPDyw1DeqvHlly4lQWGCuv9miflREwBc25QIaIvwIAABAANTDXCRUuipcJ_7hYh67QoiJg4zlul6KmCSVhox8fVVwGYkgN7bkcWj1nltaVH5Qa_____wAAAAEAAAAAAAAAAAAAAAEAAAIcb0LOqBpkOs8cMGjve6zPc1ZVa7FQEw1GmhV-TF7_RE9bINHlLiz44yfUnhVU7I2fxD_aJRbAOQE1L6ToKsZLPPKCnzkYGzdAVFPGSPh-XI-PyIGBY1fFgR5M50SmmVsV3-pTt-lDkzuWzxzhA6I-inuUSW6CZSlNK9GcB7UsM09VBIrebw0pwD-Ig_EkspGA3EAMMl8tSAjGgd6bIxtkamhZkyHq_pL6g-WU4SyZuB8LH4jwy1Cgccm-mRYvBocLx6xDZaq_fyFQDVwG7_LlKRZmjQutAqnB-XMl_Dt1TtDtTgNhkfxVgYEJtO0Zt3lYHe6B8hCrP6K1FYcGrbnBC-IhRhXCOn2SAyFZTJWnxf6U1HcwGt4mZ_6FM93KwDJLRbBz07FOKnW8RBULmjcUJ-HPVzRHh2WtutdaK0tQiHhB15Buk0ToBbFbch_VZc3zLS4yqrFHYtHuTvNVrz44_sX-eDHX59xXPAez862RKI0IuaDAeLUUiYSJxgO2jtQDeQ4ozJGUcfg4qAfDJMBTq0F0-esE1RiA2oAcG35e1sJUgUtotQo-Tylm_e_1V5xBzhONa95mm_0ARq2cXGJLQFAIatf_TK18s4kN4DCZH2j8vqOJhLiwJRsy0Fwz_Ov5-v581qGVkS0FdH37wU1cFokBdQpaoIqgYSGabmxpjvMiqRLvcyWM1pW5EEbwT3NnDdx0prqEqkyX7Nw1BRfwC4StpujLcxmDpxJffQBnMGUCMDT7R-sWfuR9BstESSsSR87nJaYZxbDrFGwp6dHJHuJUbMO0kx7aHXUfEqOlGDWgPwIxAJ7w1M5TwLs0kNA-pPHODV9wTSQM-xXOaUfCUIQedJlv0f9IzD1JYER0XA-bg_BStg==<</CIPHER>>
 /bfd/${env}/common/nonsensitive/enterprise_tools_security_group: bfd-prod-enterprise-tools
-/bfd/${env}/common/nonsensitive/env_name_std: prod
 /bfd/${env}/common/nonsensitive/key_pair: bfd-prod
 /bfd/${env}/common/nonsensitive/kms_key_alias: alias/bfd-prod-cmk
 /bfd/${env}/common/nonsensitive/kms_config_key_alias: alias/bfd-prod-config-cmk
@@ -103,7 +102,6 @@
 /bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/${env}/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
-/bfd/${env}/migrator/nonsensitive/ref_dir: /opt/bfd-db-migrator
 /bfd/${env}/migrator/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/migrator/nonsensitive/db/hikari/max_pool_size: UNDEFINED
@@ -116,7 +114,6 @@
 /bfd/${env}/migrator/nonsensitive/volume_throughput: "125"
 /bfd/${env}/migrator/nonsensitive/volume_type: gp3
 /bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-prod-migrator
-/bfd/${env}/pipeline/nonsensitive/ref_dir: /bluebutton-data-pipeline
 /bfd/${env}/pipeline/nonsensitive/thread_multiple: "3"
 /bfd/${env}/pipeline/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/db/data_source_type: HIKARI
@@ -151,7 +148,6 @@
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: "150000"
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: "15000"
 /bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
-/bfd/${env}/server/nonsensitive/ref_dir: /usr/local/bfd-server
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
 /bfd/${env}/server/nonsensitive/db/hikari/max_pool_size: 80 # vcpus * 5
