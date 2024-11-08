@@ -10,9 +10,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SamhsaEntry {
-    String system;
-    String code;
-    String startDate;
-    String endDate;
-    String comment;
+  String system;
+  String code;
+  String startDate;
+  String endDate;
+  String comment;
 }

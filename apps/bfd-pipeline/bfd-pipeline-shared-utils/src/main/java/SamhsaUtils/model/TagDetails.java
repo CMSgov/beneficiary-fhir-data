@@ -12,8 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class TagDetails {
-    String table;
-    String column;
-    Integer clm_line_num;
-    String type;
+  String table;
+  String column;
+  Integer clm_line_num;
+  String type;
 }
