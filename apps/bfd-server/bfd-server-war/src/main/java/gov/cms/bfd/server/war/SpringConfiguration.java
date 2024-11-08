@@ -36,8 +36,13 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +87,8 @@ public class SpringConfiguration extends BaseConfiguration {
   public static final String PROP_ORG_FILE_NAME = "bfdServer.org.file.name";
 
   /** test. */
-  public static final String PROP_SAMHSA_ALLOWED_DNS = "bfdServer.org.samhsa.allowed.dns";
+  public static final String SSM_PATH_SAMHSA_ALLOWED_CERT_ALIASES_JSON =
+      "client_certificates/samhsa_allowed_aliases_json";
 
   /**
    * The {@link String } Boolean property that is used to enable the partially adjudicated claims
@@ -102,6 +108,9 @@ public class SpringConfiguration extends BaseConfiguration {
    * claims data.
    */
   public static final String SSM_PATH_PAC_CLAIM_SOURCE_TYPES = "pac/claim_source_types";
+
+  /** SSM Path for the server trust store. */
+  private static final String SSM_PATH_TRUSTSTORE = "paths/files/truststore";
 
   /** The {@link String } Boolean property that is used to enable the C4DIC profile. */
   public static final String SSM_PATH_C4DIC_ENABLED = "c4dic/enabled";
@@ -168,6 +177,25 @@ public class SpringConfiguration extends BaseConfiguration {
   @Bean
   public AwsClientConfig awsClientConfig(ConfigLoader configLoader) {
     return loadAwsClientConfig(configLoader);
+  }
+
+  /**
+   * Creates a {@link KeyStore} from the trust store path.
+   *
+   * @param configLoader config loader
+   * @return the {@link KeyStore} object
+   * @throws KeyStoreException if the key store can't be created
+   * @throws IOException if there's a problem reading the file
+   * @throws CertificateException if the certificates can't be loaded
+   * @throws NoSuchAlgorithmException if the key store algorithm can't be found
+   */
+  @Bean(name = "serverTrustStore")
+  public KeyStore serverTrustStore(ConfigLoader configLoader)
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    String truststore = configLoader.readableFile(SSM_PATH_TRUSTSTORE).toString();
+    KeyStore keyStore = KeyStore.getInstance("PKCS12");
+    keyStore.load(new FileInputStream(truststore), "changeit".toCharArray());
+    return keyStore;
   }
 
   /**

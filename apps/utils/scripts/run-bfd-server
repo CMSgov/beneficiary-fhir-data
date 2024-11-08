@@ -160,12 +160,13 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
   export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
   SSM_PARAMETER_PATH=/bfd-server
-  export CONFIG_SETTINGS_JSON=$(cat <<EOF
+  CONFIG_SETTINGS_JSON=$(cat <<EOF
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
 EOF
 )
+  export CONFIG_SETTINGS_JSON
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -189,10 +190,10 @@ function setvar() {
 ARGS="-Xms${max_heap} -Xmx${max_heap}"
 ARGS="$ARGS -Dorg.jboss.logging.provider=slf4j"
 
-# If debug_enabled is true an IDE can connect its debugger on port 5005 to debug the pipeline.
+# If debug_enabled is true an IDE can connect its debugger on port ${debug_port} to debug the pipeline.
 # If debug_suspend is y the pipeline app will wait for a debugger to connect before doing any work.
 if [[ $debug_enabled = "true" ]] ; then
-  ARGS="$ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=${debug_suspend},address=*:5005"
+  ARGS="$ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=${debug_suspend},address=*:${debug_port}"
 fi
 
 cd $exec_dir
@@ -264,6 +265,7 @@ setvar db/password $password
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
 setvar c4dic/enabled false
+setvar client_certificates/samhsa_allowed_json '["client-local-dev-samhsa"]'
 
 classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"
@@ -294,7 +296,7 @@ if [[ x$kubernetes = xtrue ]] ; then
 elif [[ x$image_tag = x ]] ; then
   echo running application directly
   export CLASSPATH="$classpath"
-  exec $java $properties $ARGS $mainClass
+  exec $java $ARGS $mainClass
 else
   ssl_mount=/home/app/ssl
   echo running container

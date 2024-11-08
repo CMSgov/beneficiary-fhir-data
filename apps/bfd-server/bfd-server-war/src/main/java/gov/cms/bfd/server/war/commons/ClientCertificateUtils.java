@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import javax.security.auth.x500.X500Principal;
 import org.slf4j.Logger;
@@ -32,6 +33,22 @@ public class ClientCertificateUtils {
     }
 
     return clientCert.getSubjectX500Principal().getName();
+  }
+
+  /**
+   * Gets the serial number for the client certificate if available.
+   *
+   * @param request the {@link HttpServletRequest} containing the certificate
+   * @return the serial number
+   */
+  public static BigInteger getClientSslSerialNumber(HttpServletRequest request) {
+    X509Certificate clientCert = getClientCertificate(request);
+    if (clientCert == null) {
+      LOGGER.debug("No client cert available");
+      return null;
+    }
+
+    return clientCert.getSerialNumber();
   }
 
   /**

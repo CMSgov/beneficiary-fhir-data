@@ -84,7 +84,7 @@ public final class CommonTransformerUtils {
   /***
    * test.
    * */
-  public static final String IS_SAMHSA_ALLOWED = "IS_SAMHSA_ALLOWED";
+  public static final String SHOULD_FILTER_SAMHSA = "SHOULD_FILTER_SAMHSA";
 
   /**
    * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
@@ -793,16 +793,22 @@ public final class CommonTransformerUtils {
   }
 
   /**
-   * test.
+   * Determines if SAMHSA data should be filtered based on the client's identity and the
+   * "excludeSAMHSA" request parameter.
    *
-   * @param requestDetails
-   * @return boolean
+   * @param excludeSamhsa the value of the "excludeSAMHSA" parameter
+   * @param requestDetails the {@link RequestDetails} containing the authentication info
+   * @return whether to filter SAMHSA
    */
-  public static boolean isSamhsaAllowed(RequestDetails requestDetails) {
-    Object isSamhsaAllowed = requestDetails.getAttribute(IS_SAMHSA_ALLOWED);
-    if (isSamhsaAllowed == null) {
-      throw new BadCodeMonkeyException(IS_SAMHSA_ALLOWED + " attribute missing from request");
+  public static boolean shouldFilterSamhsa(String excludeSamhsa, RequestDetails requestDetails) {
+
+    if (Boolean.parseBoolean(excludeSamhsa)) {
+      return true;
     }
-    return (boolean) isSamhsaAllowed;
+    Object shouldFilterSamhsa = requestDetails.getAttribute(SHOULD_FILTER_SAMHSA);
+    if (shouldFilterSamhsa == null) {
+      throw new BadCodeMonkeyException(SHOULD_FILTER_SAMHSA + " attribute missing from request");
+    }
+    return (boolean) shouldFilterSamhsa;
   }
 }

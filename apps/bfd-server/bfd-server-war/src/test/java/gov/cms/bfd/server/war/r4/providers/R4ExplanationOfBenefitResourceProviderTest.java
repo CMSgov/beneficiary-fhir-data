@@ -176,7 +176,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
 
-    when(requestDetails.getAttribute(CommonTransformerUtils.IS_SAMHSA_ALLOWED)).thenReturn(false);
+    when(requestDetails.getAttribute(CommonTransformerUtils.SHOULD_FILTER_SAMHSA)).thenReturn(true);
 
     // the EOB provider
     eobProvider =

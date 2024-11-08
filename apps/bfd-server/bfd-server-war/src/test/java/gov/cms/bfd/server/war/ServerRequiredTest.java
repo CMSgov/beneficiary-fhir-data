@@ -42,6 +42,9 @@ public class ServerRequiredTest {
   @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
+  @GuardedBy("class synchronized")
+  protected static String samhsaKeyStore = "test-samhsa-keystore.p12";
+
   /** The Server test utils instance, for convenience and brevity. */
   protected ServerTestUtils testUtils = ServerTestUtils.get();
 

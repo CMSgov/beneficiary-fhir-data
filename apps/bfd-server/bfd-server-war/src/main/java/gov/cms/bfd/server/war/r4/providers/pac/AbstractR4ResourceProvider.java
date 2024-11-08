@@ -444,7 +444,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
-      boolean excludeSamhsa = !CommonTransformerUtils.isSamhsaAllowed(requestDetails);
+      boolean excludeSamhsa = CommonTransformerUtils.shouldFilterSamhsa(samhsa, requestDetails);
       boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
       OffsetLinkBuilder paging =

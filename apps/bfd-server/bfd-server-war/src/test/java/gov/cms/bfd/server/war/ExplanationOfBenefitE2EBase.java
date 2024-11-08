@@ -618,6 +618,29 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
+  /** Expect SAMHSA to be filtered when SAMHSA is allowed but excludeSAMHSA is true */
+  @Test
+  public void
+      testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueWithSamhsaAllowedExpectNoError() {
+
+    // dont load samhsa data
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    // call samhsa filter, but it shouldn't do anything since there is nothing to filter
+    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
+
+    // make sure all 8 entries come back as expected and no 400/500/other errors
+    given()
+        .spec(getRequestAuth(samhsaKeyStore))
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // we should have 8 claim type entries
+        .body("entry.size()", equalTo(8))
+        .body("total", equalTo(8))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
   /**
    * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
    * set, as we default to false. The server call takes a long time with the amount of exhaustive
