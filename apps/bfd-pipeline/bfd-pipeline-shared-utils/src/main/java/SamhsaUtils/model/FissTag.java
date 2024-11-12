@@ -4,6 +4,10 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,18 +24,18 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @Getter
 @Setter
+@IdClass(FissTagKey.class)
 public class FissTag {
-  @Column(name = "tag_id")
-  String tagId;
-
+  @Id
   @Convert(converter = TagCodeConverter.class)
   @Column(name = "code", nullable = false)
   private TagCode code;
-
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", nullable = true)
   private TagDetails[] details;
-
+  @Id
+  @ManyToOne
+  @JoinColumn(name="claim_id")
   @Column(name = "clm_id", nullable = false)
   RdaFissClaim claim;
 }

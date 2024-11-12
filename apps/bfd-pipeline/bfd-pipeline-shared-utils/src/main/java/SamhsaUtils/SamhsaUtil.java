@@ -15,11 +15,8 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,61 +33,57 @@ public class SamhsaUtil {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
   }
 
-  public Optional<List<FissTag>> processBatch(List<RdaFissClaim> claims) {
-    return Optional.empty();
+  public <TClaim, TTag> Optional<List<TTag>> processClaim (TClaim claim) {
+      switch (claim) {
+        case RdaFissClaim fissClaim -> {
+         return Optional.of((List<TTag>)checkAndProcessFissClaim(fissClaim));
+        }
+        case RdaMcsClaim mcsClaim -> {
+          return Optional.of((List<TTag>)checkAndProcessMcsClaim(mcsClaim));
+        }
+        default -> throw new RuntimeException("Unknown claim type.");
+      }
   }
 
-  public static String generateHash(String... values) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("SHA-256");
-      String combined = String.join(":", values);
-      byte[] hashBytes = md.digest(combined.getBytes(StandardCharsets.UTF_8));
-      return String.format("%064x", new BigInteger(1, hashBytes));
-    } catch (NoSuchAlgorithmException ex) {
-      throw new RuntimeException("Error generating hash ID", ex);
-    }
+  public <TTag> boolean persistTags(Optional<List<TTag>> tags) {
+    return false;
   }
-
-  public static Optional<List<McsTag>> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
+  public static List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
     List<String> samhsaFields = getPossibleMcsSamhsaFields(mcsClaim);
     if (checkSamhsaFields(Objects.requireNonNull(samhsaFields))) {
       List<McsTag> mcsTags = new ArrayList<>();
       mcsTags.add(
           McsTag.builder()
-              .tagId(generateHash(mcsClaim.getIdrClmHdIcn(), TagCode._42CFRPart2.name()))
               .claim(mcsClaim)
               .code(TagCode._42CFRPart2)
               .build());
       mcsTags.add(
           McsTag.builder()
-              .tagId(generateHash(mcsClaim.getIdrClmHdIcn(), TagCode.R.name()))
               .claim(mcsClaim)
               .code(TagCode.R)
               .build());
-      return Optional.of(mcsTags);
+      return mcsTags;
     }
-    return Optional.empty();
+    return Collections.emptyList();
   }
 
-  public static Optional<List<FissTag>> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
+  public List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
     List<String> samhsaFields = getPossibleFissSamhsaFields(fissClaim);
     if (checkSamhsaFields(Objects.requireNonNull(samhsaFields))) {
       List<FissTag> fissTags = new ArrayList<>();
       fissTags.add(
           FissTag.builder()
-              .tagId(generateHash(fissClaim.getClaimId(), TagCode._42CFRPart2.name()))
               .claim(fissClaim)
               .code(TagCode._42CFRPart2)
               .build());
       fissTags.add(
           FissTag.builder()
-              .tagId(generateHash(fissClaim.getClaimId(), TagCode.R.name()))
               .claim(fissClaim)
               .code(TagCode.R)
               .build());
-      return Optional.of(fissTags);
+      return fissTags;
     }
-    return Optional.empty();
+    return Collections.emptyList();
   }
 
   private static boolean checkSamhsaFields(List<String> fields) {

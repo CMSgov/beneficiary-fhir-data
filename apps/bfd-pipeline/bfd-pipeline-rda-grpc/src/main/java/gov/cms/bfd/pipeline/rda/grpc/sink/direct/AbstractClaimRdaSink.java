@@ -1,8 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import SamhsaUtils.SamhsaUtil;
-import SamhsaUtils.model.FissTag;
-import SamhsaUtils.model.McsTag;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.util.JsonFormat;
@@ -212,32 +210,6 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
   }
 
-  public void writeFissTags(List<FissTag> fissTags) {
-    transactionManager.executeProcedure(
-        entityManager -> {
-          try {
-            for (FissTag fissTag : fissTags) {
-              entityManager.merge(fissTag);
-            }
-          } finally {
-            // TODO: Add some metrics
-          }
-        });
-  }
-
-  public void writeMcsTags(List<McsTag> mcsTags) {
-    transactionManager.executeProcedure(
-        entityManager -> {
-          try {
-            for (McsTag mcsTag : mcsTags) {
-              entityManager.merge(mcsTag);
-            }
-          } finally {
-            // TODO: Add some metrics
-          }
-        });
-  }
-
   /**
    * Writes the claims to the database in the calling thread.
    *
@@ -267,26 +239,6 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     metrics.successes.increment();
     metrics.objectsWritten.increment(claims.size());
     return claims.size();
-  }
-
-  private void processClaimsForSamhsa(Collection<RdaChange<TClaim>> changes) {
-    try {
-      for (RdaChange<TClaim> change : changes) {
-        switch (change.getClaim()) {
-          case RdaFissClaim claim -> {
-            Optional<List<FissTag>> fissTags = SamhsaUtil.checkAndProcessFissClaim(claim);
-            fissTags.ifPresent(this::writeFissTags);
-          }
-          case RdaMcsClaim claim -> {
-            Optional<List<McsTag>> mcsTags = SamhsaUtil.checkAndProcessMcsClaim(claim);
-            mcsTags.ifPresent(this::writeMcsTags);
-          }
-          default -> {}
-        }
-      }
-    } finally {
-      // TODO: Implement metrics
-    }
   }
 
   /**
@@ -448,7 +400,8 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param maxSeq highest sequence number from claims in the collection
    * @param changes collection of claims to write to the database
    */
-  private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
+  private <TTag> void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
+    SamhsaUtil samhsaUtil = new SamhsaUtil();
     transactionManager.executeProcedure(
         entityManager -> {
           final Instant startTime = Instant.now();
@@ -459,6 +412,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
                 var metaData = createMetaData(change);
                 entityManager.merge(metaData);
                 entityManager.merge(change.getClaim());
+                Optional<List<TTag>> tags = samhsaUtil.processClaim(change.getClaim());
+                if (tags.isPresent()) {
+                  for(TTag tag: tags.get()) {
+                    entityManager.merge(tag);
+                  }
+                }
                 insertCount += getInsertCount(change.getClaim());
               } else {
                 // We would expect this to have been filtered by the RdaSource so it is safe
