@@ -24,7 +24,7 @@
         {
           "device_name": "/dev/xvda",
           "volume_type": "gp3",
-          "volume_size": 30,
+          "volume_size": 8,
           "delete_on_termination": true,
           "throughput": 250,
           "iops": 3000
