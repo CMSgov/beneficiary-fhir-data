@@ -42,7 +42,7 @@ public class ServerRequiredTest {
   @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
-  /** SAMHSA keystore filename */
+  /** SAMHSA keystore filename. */
   @GuardedBy("class synchronized")
   protected static final String SAMHSA_KEYSTORE = "test-samhsa-keystore.p12";
 
