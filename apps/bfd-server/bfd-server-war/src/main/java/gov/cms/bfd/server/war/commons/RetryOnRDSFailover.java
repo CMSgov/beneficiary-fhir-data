@@ -32,10 +32,10 @@ public @interface RetryOnRDSFailover {
   /**
    * Alias for {@link Retryable#backoff()}.
    *
-   * @return a default {@link Backoff} with a delay of 5000 milliseconds
+   * @return a default {@link Backoff} with a starting delay of 1000 milliseconds increasing up to 10 seconds
    */
   @AliasFor(annotation = Retryable.class, attribute = "backoff")
-  Backoff backoff() default @Backoff(delay = 5000);
+  Backoff backoff() default @Backoff(delay = 1000, multiplier = 1.4, maxDelay = 10000);
 
   /**
    * Alias for {@link Retryable#stateful()}.
@@ -48,10 +48,10 @@ public @interface RetryOnRDSFailover {
   /**
    * Alias for {@link Retryable#maxAttempts()}.
    *
-   * @return a default of {@code 3} attempts
+   * @return a default of {@code 10} attempts
    */
   @AliasFor(annotation = Retryable.class, attribute = "maxAttempts")
-  int maxAttempts() default 3;
+  int maxAttempts() default 10;
 
   /**
    * Alias for {@link Retryable#listeners()}.

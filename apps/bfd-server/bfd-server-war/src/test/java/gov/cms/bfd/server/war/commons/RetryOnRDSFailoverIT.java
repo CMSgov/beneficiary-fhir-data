@@ -75,7 +75,7 @@ public class RetryOnRDSFailoverIT {
      * @throws Exception whichever {@link Exception} that is at the top of the provided {@link
      *     Deque} of {@link Exception}s, if not empty
      */
-    @RetryOnRDSFailover(backoff = @Backoff(delay = 1))
+    @RetryOnRDSFailover(backoff = @Backoff(delay = 1), maxAttempts = 3)
     boolean retryableOperation(Deque<Exception> exceptions, String guid) throws Exception {
       // We track the number of retries manually within this method instead of delegating to
       // Mockito.spy or other typical means of tracking call counts because it does not play nice
