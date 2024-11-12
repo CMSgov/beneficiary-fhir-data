@@ -1618,7 +1618,8 @@ public final class TransformerTestUtilsV2 {
       claimTransformerInterface =
           new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
     } else if (rifRecord instanceof DMEClaim) {
-      claimTransformerInterface = new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup);
+      claimTransformerInterface =
+          new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
     } else if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, npiOrgLookup);
     } else if (rifRecord instanceof HospiceClaim) {
@@ -1630,7 +1631,7 @@ public final class TransformerTestUtilsV2 {
           new OutpatientClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
     } else if (rifRecord instanceof PartDEvent) {
       claimTransformerInterface =
-          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup);
+          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
     } else if (rifRecord instanceof SNFClaim) {
       claimTransformerInterface = new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
     } else {
