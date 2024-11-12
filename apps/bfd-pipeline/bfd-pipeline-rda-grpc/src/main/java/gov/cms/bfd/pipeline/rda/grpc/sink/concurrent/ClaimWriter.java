@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import SamhsaUtils.SamhsaUtil;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;

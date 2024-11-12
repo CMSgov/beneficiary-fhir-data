@@ -30,12 +30,14 @@ public class FissTag {
   @Convert(converter = TagCodeConverter.class)
   @Column(name = "code", nullable = false)
   private TagCode code;
+
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", nullable = true)
   private TagDetails[] details;
+
   @Id
   @ManyToOne
-  @JoinColumn(name="claim_id")
+  @JoinColumn(name = "claim_id")
   @Column(name = "clm_id", nullable = false)
   RdaFissClaim claim;
 }

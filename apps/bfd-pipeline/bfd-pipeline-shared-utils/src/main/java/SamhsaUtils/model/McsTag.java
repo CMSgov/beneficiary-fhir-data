@@ -30,12 +30,14 @@ public class McsTag {
   @Convert(converter = TagCodeConverter.class)
   @Column(name = "code", nullable = false)
   private TagCode code;
+
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", nullable = true)
   private TagDetails[] details;
+
   @Id
   @ManyToOne
-  @JoinColumn(name="idr_clm_hd_icn")
+  @JoinColumn(name = "idr_clm_hd_icn")
   @Column(name = "clm_id", nullable = false)
   RdaMcsClaim claim;
 }

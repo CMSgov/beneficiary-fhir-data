@@ -7,8 +7,6 @@ import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.model.rda.RdaClaimMessageMetaData;
-import gov.cms.bfd.model.rda.entities.RdaFissClaim;
-import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.NumericGauges;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -414,7 +412,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
                 entityManager.merge(change.getClaim());
                 Optional<List<TTag>> tags = samhsaUtil.processClaim(change.getClaim());
                 if (tags.isPresent()) {
-                  for(TTag tag: tags.get()) {
+                  for (TTag tag : tags.get()) {
                     entityManager.merge(tag);
                   }
                 }

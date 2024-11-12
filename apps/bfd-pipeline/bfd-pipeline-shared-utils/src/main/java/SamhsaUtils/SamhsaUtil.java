@@ -33,35 +33,28 @@ public class SamhsaUtil {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
   }
 
-  public <TClaim, TTag> Optional<List<TTag>> processClaim (TClaim claim) {
-      switch (claim) {
-        case RdaFissClaim fissClaim -> {
-         return Optional.of((List<TTag>)checkAndProcessFissClaim(fissClaim));
-        }
-        case RdaMcsClaim mcsClaim -> {
-          return Optional.of((List<TTag>)checkAndProcessMcsClaim(mcsClaim));
-        }
-        default -> throw new RuntimeException("Unknown claim type.");
+  public <TClaim, TTag> Optional<List<TTag>> processClaim(TClaim claim) {
+    switch (claim) {
+      case RdaFissClaim fissClaim -> {
+        return Optional.of((List<TTag>) checkAndProcessFissClaim(fissClaim));
       }
+      case RdaMcsClaim mcsClaim -> {
+        return Optional.of((List<TTag>) checkAndProcessMcsClaim(mcsClaim));
+      }
+      default -> throw new RuntimeException("Unknown claim type.");
+    }
   }
 
   public <TTag> boolean persistTags(Optional<List<TTag>> tags) {
     return false;
   }
+
   public static List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
     List<String> samhsaFields = getPossibleMcsSamhsaFields(mcsClaim);
     if (checkSamhsaFields(Objects.requireNonNull(samhsaFields))) {
       List<McsTag> mcsTags = new ArrayList<>();
-      mcsTags.add(
-          McsTag.builder()
-              .claim(mcsClaim)
-              .code(TagCode._42CFRPart2)
-              .build());
-      mcsTags.add(
-          McsTag.builder()
-              .claim(mcsClaim)
-              .code(TagCode.R)
-              .build());
+      mcsTags.add(McsTag.builder().claim(mcsClaim).code(TagCode._42CFRPart2).build());
+      mcsTags.add(McsTag.builder().claim(mcsClaim).code(TagCode.R).build());
       return mcsTags;
     }
     return Collections.emptyList();
@@ -71,16 +64,8 @@ public class SamhsaUtil {
     List<String> samhsaFields = getPossibleFissSamhsaFields(fissClaim);
     if (checkSamhsaFields(Objects.requireNonNull(samhsaFields))) {
       List<FissTag> fissTags = new ArrayList<>();
-      fissTags.add(
-          FissTag.builder()
-              .claim(fissClaim)
-              .code(TagCode._42CFRPart2)
-              .build());
-      fissTags.add(
-          FissTag.builder()
-              .claim(fissClaim)
-              .code(TagCode.R)
-              .build());
+      fissTags.add(FissTag.builder().claim(fissClaim).code(TagCode._42CFRPart2).build());
+      fissTags.add(FissTag.builder().claim(fissClaim).code(TagCode.R).build());
       return fissTags;
     }
     return Collections.emptyList();
