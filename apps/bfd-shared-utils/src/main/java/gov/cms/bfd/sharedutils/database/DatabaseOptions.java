@@ -276,6 +276,9 @@ public class DatabaseOptions {
                     "efm2",
                     software.amazon.jdbc.plugin.efm2.HostMonitoringConnectionPluginFactory.class);
                 put("failover", FailoverConnectionPluginFactory.class);
+                put(
+                    "failover2",
+                    software.amazon.jdbc.plugin.failover2.FailoverConnectionPluginFactory.class);
                 put("iam", IamAuthConnectionPluginFactory.class);
                 put("awsSecretsManager", AwsSecretsManagerConnectionPluginFactory.class);
                 put("federatedAuth", FederatedAuthPluginFactory.class);
