@@ -11,7 +11,7 @@ exec > >(
 	done
 )
 
-cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
+cd /beneficiary-fhir-data/ops/ansible
 
 aws ssm get-parameters-by-path \
     --with-decryption \
