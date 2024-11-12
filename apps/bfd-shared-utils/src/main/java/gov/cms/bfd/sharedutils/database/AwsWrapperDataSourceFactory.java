@@ -13,12 +13,18 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
 import software.amazon.jdbc.HostSpec;
+import software.amazon.jdbc.PropertyDefinition;
+import software.amazon.jdbc.dialect.DialectCodes;
+import software.amazon.jdbc.dialect.DialectManager;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
+import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
 import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
 import software.amazon.jdbc.profile.ConfigurationProfile;
 import software.amazon.jdbc.profile.ConfigurationProfileBuilder;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectCodes;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectManager;
 
 /**
  * This class implements a {@link DataSourceFactory} that creates {@link AwsWrapperDataSource}
@@ -130,7 +136,10 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
   private static Properties getProperties(AwsJdbcWrapperOptions wrapperOptions) {
     final var targetDataSourceProps = new Properties();
     targetDataSourceProps.setProperty(
-        "wrapperProfileName",
+        TargetDriverDialectManager.TARGET_DRIVER_DIALECT.name, TargetDriverDialectCodes.PG_JDBC);
+    targetDataSourceProps.setProperty(DialectManager.DIALECT.name, DialectCodes.AURORA_PG);
+    targetDataSourceProps.setProperty(
+        PropertyDefinition.PROFILE_NAME.name,
         wrapperOptions.useCustomPreset() ? CUSTOM_PRESET_NAME : wrapperOptions.getBasePresetCode());
     targetDataSourceProps.setProperty(
         AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name,
@@ -138,6 +147,11 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
     targetDataSourceProps.setProperty(
         ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name,
         wrapperOptions.getHostSelectionStrategy());
+    // Aggressive cluster topology refresh should enable Server instances to switch to incoming
+    // reader nodes more quickly (default is 30 seconds). Note that when failover occurs, a
+    // different value ("high refresh rate") is used
+    targetDataSourceProps.setProperty(
+        RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name, "3000");
     return targetDataSourceProps;
   }
 

@@ -4,9 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
+import software.amazon.jdbc.PropertyDefinition;
+import software.amazon.jdbc.dialect.DialectCodes;
+import software.amazon.jdbc.dialect.DialectManager;
+import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
 import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectCodes;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectManager;
 
 /** Unit tests for {@link AwsWrapperDataSourceFactory}. */
 public class AwsWrapperDataSourceFactoryTest {
@@ -46,7 +52,12 @@ public class AwsWrapperDataSourceFactoryTest {
     assertEquals(dataSource.getUser(), dbOptions.getDatabaseUsername());
     assertEquals(dataSource.getPassword(), dbOptions.getDatabasePassword());
     assertEquals(
-        dataSourceProps.get("wrapperProfileName"), AwsWrapperDataSourceFactory.CUSTOM_PRESET_NAME);
+        dataSourceProps.get(TargetDriverDialectManager.TARGET_DRIVER_DIALECT.name),
+        TargetDriverDialectCodes.PG_JDBC);
+    assertEquals(dataSourceProps.get(DialectManager.DIALECT.name), DialectCodes.AURORA_PG);
+    assertEquals(
+        dataSourceProps.get(PropertyDefinition.PROFILE_NAME.name),
+        AwsWrapperDataSourceFactory.CUSTOM_PRESET_NAME);
     assertEquals(
         dataSourceProps.get(
             AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name),
@@ -54,6 +65,8 @@ public class AwsWrapperDataSourceFactoryTest {
     assertEquals(
         dataSourceProps.get(ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name),
         dbOptions.getAwsJdbcWrapperOptions().getInitialConnectionStrategy());
+    assertEquals(
+        dataSourceProps.get(RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name), "3000");
     assertInstanceOf(HikariPooledConnectionProvider.class, customProfile.getConnectionProvider());
   }
 }
