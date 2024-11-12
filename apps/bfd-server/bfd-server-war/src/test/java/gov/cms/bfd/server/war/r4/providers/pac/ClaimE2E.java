@@ -350,7 +350,7 @@ public class ClaimE2E extends ServerRequiredTest {
     String requestString = claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH;
 
     given()
-        .spec(getRequestAuth(samhsaKeyStore))
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // since we start on the last item's index with 2 items per page, 1 item returned
@@ -372,7 +372,7 @@ public class ClaimE2E extends ServerRequiredTest {
         claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&excludeSAMHSA=true";
 
     given()
-        .spec(getRequestAuth(samhsaKeyStore))
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // since we start on the last item's index with 2 items per page, 1 item returned

@@ -618,7 +618,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
-  /** Expect SAMHSA to be filtered when SAMHSA is allowed but excludeSAMHSA is true */
+  /** Expect SAMHSA to be filtered when SAMHSA is allowed but excludeSAMHSA is true. */
   @Test
   public void
       testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueWithSamhsaAllowedExpectNoError() {
@@ -630,7 +630,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
     given()
-        .spec(getRequestAuth(samhsaKeyStore))
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
@@ -658,7 +658,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     int numSamhsaClaims = samhsaFiles.size() - 6;
 
     given()
-        .spec(getRequestAuth(samhsaKeyStore))
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA

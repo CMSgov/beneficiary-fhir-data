@@ -42,8 +42,9 @@ public class ServerRequiredTest {
   @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
+  /** SAMHSA keystore filename */
   @GuardedBy("class synchronized")
-  protected static String samhsaKeyStore = "test-samhsa-keystore.p12";
+  protected static final String SAMHSA_KEYSTORE = "test-samhsa-keystore.p12";
 
   /** The Server test utils instance, for convenience and brevity. */
   protected ServerTestUtils testUtils = ServerTestUtils.get();
@@ -77,16 +78,21 @@ public class ServerRequiredTest {
       baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       requestAuth = getRequestAuth("test-keystore.p12");
 
-      // Setup a shutdown hook to shut down the server when we are finished with all tests
+      // Set up a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     }
   }
 
-  /** Sets the request auth (security certs) used in calls to the local server. */
-  protected static RequestSpecification getRequestAuth(String keystoreFileName) {
+  /**
+   * Sets the request auth (security certs) used in calls to the local server.
+   *
+   * @param keystoreFilename keystore filename
+   * @return The authenticated {@link RequestSpecification}
+   */
+  protected static RequestSpecification getRequestAuth(String keystoreFilename) {
     // Get the certs for the test
     String trustStorePath = "src/test/resources/certs/test-truststore.jks";
-    String keyStorePath = "src/test/resources/certs/" + keystoreFileName;
+    String keyStorePath = "src/test/resources/certs/" + keystoreFilename;
     String testPassword = "changeit";
     String keystoreType = "pkcs12";
     // Set up the cert for the calls

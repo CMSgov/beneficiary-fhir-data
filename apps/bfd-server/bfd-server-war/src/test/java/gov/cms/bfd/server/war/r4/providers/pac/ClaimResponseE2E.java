@@ -180,7 +180,7 @@ public class ClaimResponseE2E extends ServerRequiredTest {
 
     // Test passes as long as we get a 200 with an entry and not an error
     given()
-        .spec(getRequestAuth(samhsaKeyStore))
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .statusCode(200)
         .body("entry.size()", equalTo(3))
@@ -203,7 +203,7 @@ public class ClaimResponseE2E extends ServerRequiredTest {
 
     // Test passes as long as we get a 200 with an entry and not an error
     given()
-        .spec(getRequestAuth(samhsaKeyStore))
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .statusCode(200)
         .body("entry.size()", equalTo(2))
