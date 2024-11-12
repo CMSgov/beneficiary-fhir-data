@@ -32,7 +32,8 @@ public @interface RetryOnRDSFailover {
   /**
    * Alias for {@link Retryable#backoff()}.
    *
-   * @return a default {@link Backoff} with a starting delay of 1000 milliseconds increasing up to 10 seconds
+   * @return a default {@link Backoff} with a starting delay of 1000 milliseconds increasing up to
+   *     10 seconds
    */
   @AliasFor(annotation = Retryable.class, attribute = "backoff")
   Backoff backoff() default @Backoff(delay = 1000, multiplier = 1.4, maxDelay = 10000);
