@@ -6,6 +6,8 @@ permalink: /faq.html
 
 #### Table of Contents
 
+- [FHIR Basics](#fhir-basics)
+  - [What is FHIR?](#what-is-fhir)
 - [BFD Basics](#bfd-basics)
   - [What is FHIR?](#what-is-fhir)
   - [What does BFD stand for?](#what-does-bfd-stand-for)
@@ -37,9 +39,9 @@ permalink: /faq.html
   - [What other additional resources that are valuable to review in learning about BFD and its ecosystem?](#what-other-additional-resources-that-are-valuable-to-review-in-learning-about-bfd-and-its-ecosystem)
 <br/>
 
-### BFD Basics
+### FHIR Basics
 
-#### What data is available via BFD?
+#### What data is FHIR?
 
 
 FHIR, or Fast Healthcare Interoperability Resources, is a standard for exchanging healthcare information electronically. Developed by HL7 International, FHIR aims to simplify and streamline the interoperability of health data across different systems.
@@ -51,6 +53,8 @@ Key features of FHIR include:
 - **Flexibility**: It is designed to be adaptable, allowing developers to implement it in various environments and applications.
 
 Overall, FHIR aims to improve the accessibility, usability, and integration of healthcare information to enhance patient care.
+
+### BFD Basics
 
 #### What does BFD stand for?
 
