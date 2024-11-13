@@ -6,7 +6,6 @@ BEGIN
 END$$;
 
 CREATE TABLE IF NOT EXISTS ccw.hha_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -18,7 +17,6 @@ CREATE INDEX IF NOT EXISTS hha_tags_clm_id_idx
     ON ccw.hha_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS ccw.carrier_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -30,7 +28,6 @@ CREATE INDEX IF NOT EXISTS carrier_tags_clm_id_idx
     ON ccw.carrier_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS ccw.dme_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -42,7 +39,6 @@ CREATE INDEX IF NOT EXISTS dme_tags_clm_id_idx
     ON ccw.dme_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS ccw.hospice_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -54,7 +50,6 @@ CREATE INDEX IF NOT EXISTS hospice_tags_clm_id_idx
     ON ccw.hospice_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS ccw.outpatient_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -66,7 +61,6 @@ CREATE INDEX IF NOT EXISTS outpatient_tags_clm_id_idx
     ON ccw.outpatient_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS ccw.snf_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -78,7 +72,6 @@ CREATE INDEX IF NOT EXISTS snf_tags_clm_id_idx
     ON ccw.snf_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS ccw.inpatient_tags (
-    tag_id BIGINT,
     clm_id BIGINT NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -90,7 +83,6 @@ CREATE INDEX IF NOT EXISTS inpatient_tags_clm_id_idx
     ON ccw.inpatient_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS rda.mcs_tags (
-    tag_id BIGINT,
     clm_id CHARACTER VARYING(15) NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
@@ -102,7 +94,6 @@ CREATE INDEX IF NOT EXISTS mcs_tags_clm_id_idx
     ON rda.mcs_tags(clm_id);
 
 CREATE TABLE IF NOT EXISTS rda.fiss_tags (
-    tag_id BIGINT,
     clm_id CHARACTER VARYING(43) NOT NULL,
     code TAG_CODE NOT NULL,
     details JSONB,
