@@ -9,7 +9,6 @@ permalink: /faq.html
 - [FHIR Basics](#fhir-basics)
   - [What is FHIR?](#what-is-fhir)
 - [BFD Basics](#bfd-basics)
-  - [What is FHIR?](#what-is-fhir)
   - [What does BFD stand for?](#what-does-bfd-stand-for)
   - [What data is available via BFD?](#what-data-is-available-via-bfd)
   - [How frequently is BFD data updated?](#how-frequently-is-bfd-data-updated)
@@ -41,7 +40,7 @@ permalink: /faq.html
 
 ### FHIR Basics
 
-#### What data is FHIR?
+#### What is FHIR?
 
 
 FHIR, or Fast Healthcare Interoperability Resources, is a standard for exchanging healthcare information electronically. Developed by HL7 International, FHIR aims to simplify and streamline the interoperability of health data across different systems.
