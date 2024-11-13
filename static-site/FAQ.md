@@ -116,7 +116,7 @@ Scroll down to the section titled 'Available Synthetic Beneficiaries' to find li
 
 #### What is the difference between the 'Claim Number' in the CMS Portal, and the 'Claim ID' or 'Claim Group' in the FHIR payloads provided by BFD?
 
-The [Claim Number](https://resdac.org/cms-data/variables/claim-number) found in the CMS Portal ("check my claims") is the IDR (Integrated Data Repository) Claim Unique ID and is derived from data in the National Claims History (NCH) file process. 
+The [Claim Number](https://resdac.org/cms-data/variables/claim-number) found in the [CMS Portal](MyMedicare.gov) ("check my claims") is the IDR (Integrated Data Repository) Claim Unique ID and is derived from data in the National Claims History (NCH) file process. 
 The [Claim ID](https://resdac.org/cms-data/variables/claim-id) (CLM_ID) and [Claim Group ID](https://bluebutton.cms.gov/resources/identifier/claim-group/) is specific to the CCW and is not applicable to any other identification system or data source. 
 
 The 'Claim Group ID' value is derived within the process from loading CCW data into the BFD database. 
