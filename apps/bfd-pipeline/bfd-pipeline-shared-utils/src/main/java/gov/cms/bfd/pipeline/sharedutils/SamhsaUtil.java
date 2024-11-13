@@ -203,9 +203,9 @@ public class SamhsaUtil {
    */
   private Optional<List<TagDetails>> getPossibleMcsSamhsaFields(RdaMcsClaim mcsClaim) {
     List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate = Collections.min(mcsClaim.getDetails().stream()
-            .map(RdaMcsDetail::getIdrDtlFromDate)
-            .toList());
+    LocalDate serviceDate =
+        Collections.min(
+            mcsClaim.getDetails().stream().map(RdaMcsDetail::getIdrDtlFromDate).toList());
     Instant lastUpdated = mcsClaim.getLastUpdated();
 
     int i = 1;
@@ -226,19 +226,18 @@ public class SamhsaUtil {
           "mcs_details",
           "idr_dtl_primary_diag_code",
           i,
-              entries,
-              serviceDate,
-              lastUpdated);
+          entries,
+          serviceDate,
+          lastUpdated);
 
       buildDetails(
           isSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
           "mcs_details",
           "idr_proc_code",
           i++,
-              entries,
-              serviceDate,
-              lastUpdated);
-
+          entries,
+          serviceDate,
+          lastUpdated);
     }
     return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
@@ -265,12 +264,14 @@ public class SamhsaUtil {
     if (entry.isPresent()) {
       try {
         LocalDate startDate = LocalDate.parse(entry.get().getStartDate());
-        LocalDate endDate = entry.get().getEndDate().equals("Active")? LocalDate.now(): LocalDate.parse(entry.get().getEndDate());
+        LocalDate endDate =
+            entry.get().getEndDate().equals("Active")
+                ? LocalDate.now()
+                : LocalDate.parse(entry.get().getEndDate());
         // if the last update to the claim is before the start date of the SAMHSA code
         // or the service date of the claim is after the end date of the code,
         // do nothing.
-        if (lastUpdated.isBefore(Instant.from(startDate))
-                || serviceDate.isAfter(endDate)) {
+        if (lastUpdated.isBefore(Instant.from(startDate)) || serviceDate.isAfter(endDate)) {
           return;
         }
       } catch (DateTimeParseException ignore) {
@@ -295,10 +296,9 @@ public class SamhsaUtil {
    */
   private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim) {
     List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate = Collections.min(
-            fissClaim.getRevenueLines().stream()
-                    .map(RdaFissRevenueLine::getServiceDate)
-                    .toList());
+    LocalDate serviceDate =
+        Collections.min(
+            fissClaim.getRevenueLines().stream().map(RdaFissRevenueLine::getServiceDate).toList());
     Instant lastUpdated = fissClaim.getLastUpdated();
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
@@ -324,9 +324,8 @@ public class SamhsaUtil {
           "hcpcs_cd",
           i++,
           entries,
-              serviceDate,
-              lastUpdated);
-
+          serviceDate,
+          lastUpdated);
     }
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
@@ -334,16 +333,16 @@ public class SamhsaUtil {
         "drg_cd",
         null,
         entries,
-            serviceDate,
-            lastUpdated);
+        serviceDate,
+        lastUpdated);
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
         "fiss_claims",
         "principle_diag",
         null,
         entries,
-            serviceDate,
-            lastUpdated);
+        serviceDate,
+        lastUpdated);
     i = 1;
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
@@ -352,8 +351,8 @@ public class SamhsaUtil {
           "diag_cd2",
           i++,
           entries,
-              serviceDate,
-              lastUpdated);
+          serviceDate,
+          lastUpdated);
     }
     i = 1;
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
@@ -363,9 +362,8 @@ public class SamhsaUtil {
           "proc_code",
           i++,
           entries,
-              serviceDate,
-              lastUpdated);
-
+          serviceDate,
+          lastUpdated);
     }
     return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
