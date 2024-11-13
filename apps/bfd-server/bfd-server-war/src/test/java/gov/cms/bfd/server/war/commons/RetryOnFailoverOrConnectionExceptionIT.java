@@ -25,12 +25,13 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 import software.amazon.jdbc.plugin.failover.FailoverSuccessSQLException;
 
 /**
- * Spring integration tests for the {@link RetryOnRDSFailover} annotation that extends the {@link
- * Retryable} annotation from spring-retry.
+ * Spring integration tests for the {@link RetryOnFailoverOrConnectionException} annotation that
+ * extends the {@link Retryable} annotation from spring-retry.
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {RetryOnRDSFailoverIT.TestContextConfiguration.class})
-public class RetryOnRDSFailoverIT {
+@ContextConfiguration(
+    classes = {RetryOnFailoverOrConnectionExceptionIT.TestContextConfiguration.class})
+public class RetryOnFailoverOrConnectionExceptionIT {
 
   /**
    * Autowired bean used in order to activate spring-retry's proxying via the {@link
@@ -49,7 +50,7 @@ public class RetryOnRDSFailoverIT {
 
   /**
    * Bean providing a means for counting retry attempts per-test and a method that is used to test
-   * the {@link Exception}-matching of the {@link RetryOnRDSFailover} annotation.
+   * the {@link Exception}-matching of the {@link RetryOnFailoverOrConnectionException} annotation.
    */
   static class RetryableOperationBean {
     /**
@@ -62,10 +63,10 @@ public class RetryOnRDSFailoverIT {
         new ConcurrentHashMap<>();
 
     /**
-     * Simple helper method annotated with {@link RetryOnRDSFailover} (with a backoff delay of 1 ms
-     * to speed up tests) that simply throws the {@link Exception}s provided and tracks the number
-     * of times its been retried. Once all {@link Exception}s are popped from the provided {@link
-     * Deque}, this method returns {@code true}.
+     * Simple helper method annotated with {@link RetryOnFailoverOrConnectionException} (with a
+     * backoff delay of 1 ms to speed up tests) that simply throws the {@link Exception}s provided
+     * and tracks the number of times its been retried. Once all {@link Exception}s are popped from
+     * the provided {@link Deque}, this method returns {@code true}.
      *
      * @param exceptions {@link Deque} of {@link Exception}s, used like a stack/LIFO queue, which
      *     indicate which {@link Exception}s to throw prior to executing actual method logic
@@ -75,7 +76,7 @@ public class RetryOnRDSFailoverIT {
      * @throws Exception whichever {@link Exception} that is at the top of the provided {@link
      *     Deque} of {@link Exception}s, if not empty
      */
-    @RetryOnRDSFailover(backoff = @Backoff(delay = 1), maxAttempts = 3)
+    @RetryOnFailoverOrConnectionException(backoff = @Backoff(delay = 1), maxAttempts = 3)
     boolean retryableOperation(Deque<Exception> exceptions, String guid) throws Exception {
       // We track the number of retries manually within this method instead of delegating to
       // Mockito.spy or other typical means of tracking call counts because it does not play nice
@@ -93,8 +94,8 @@ public class RetryOnRDSFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRDSFailover} will cause a single retry to occur when a single
-   * {@link FailoverSuccessSQLException} is thrown.
+   * Test that verifies {@link RetryOnFailoverOrConnectionException} will cause a single retry to
+   * occur when a single {@link FailoverSuccessSQLException} is thrown.
    */
   @Test
   public void testItRetriesOnceWhenFailoverSuccessSQLExceptionIsThrown() throws Exception {
@@ -112,8 +113,9 @@ public class RetryOnRDSFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRDSFailover} will cause a single retry to occur when a single
-   * {@link RuntimeException} wrapping {@link FailoverSuccessSQLException} is thrown.
+   * Test that verifies {@link RetryOnFailoverOrConnectionException} will cause a single retry to
+   * occur when a single {@link RuntimeException} wrapping {@link FailoverSuccessSQLException} is
+   * thrown.
    */
   @Test
   public void testItRetriesOnceWhenWrappedFailoverSuccessSQLExceptionIsThrown() throws Exception {
@@ -134,8 +136,8 @@ public class RetryOnRDSFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRDSFailover} will cause two retries to occur when two matching
-   * {@link Exception}s to occur.
+   * Test that verifies {@link RetryOnFailoverOrConnectionException} will cause two retries to occur
+   * when two matching {@link Exception}s to occur.
    */
   @Test
   public void testItRetriesTwiceWhenMultipleMatchingExceptionsAreThrown() throws Exception {
@@ -156,8 +158,9 @@ public class RetryOnRDSFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRDSFailover} will cause the operation to retry upto two times
-   * and then throw the final {@link Exception} once the number of maximum attempts is reached.
+   * Test that verifies {@link RetryOnFailoverOrConnectionException} will cause the operation to
+   * retry upto two times and then throw the final {@link Exception} once the number of maximum
+   * attempts is reached.
    */
   @Test
   public void testItThrowsWhenMaxAttemptsAreExceeded() {
@@ -178,8 +181,8 @@ public class RetryOnRDSFailoverIT {
   }
 
   /**
-   * Test that verifies {@link RetryOnRDSFailover} will not retry on {@link Exception}s that do not
-   * match {@link FailoverSQLException}s.
+   * Test that verifies {@link RetryOnFailoverOrConnectionException} will not retry on {@link
+   * Exception}s that do not match {@link FailoverSQLException}s.
    */
   @Test
   public void testItThrowsWhenUnmatchedExceptionIsThrown() {

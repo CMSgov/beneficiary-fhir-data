@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -15,20 +16,23 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 /**
  * Annotation encapsulating common parameters for the {@link Retryable} spring-retry annotation for
  * use with {@link Search} and {@link Read} annotated resource provider methods that need to retry
- * on {@link FailoverSQLException}s.
+ * on {@link FailoverSQLException}s or {@link JDBCConnectionException}s.
  *
  * <p>Some providers wrap checked {@link Exception}s thrown by asynchronous tasks in {@link
  * RuntimeException}s, thus using a simple "retryFor" expression matching on {@link
- * FailoverSQLException} is not possible for all provider operations. Instead, a SpEL expression is
- * used which calls {@link SpringRetryUtils#shouldRetryIfFailover(Exception)} which will enable
- * retries for {@link Exception}s that are {@link FailoverSQLException}s or {@link Exception}s with
- * a root cause of {@link FailoverSQLException}.
+ * FailoverSQLException} or {@link JDBCConnectionException} is not possible for all provider
+ * operations. Instead, a SpEL expression is used which calls {@link
+ * SpringRetryUtils#shouldRetryIfFailoverOrConnectionException(Exception)} which will enable retries
+ * for {@link Exception}s that are {@link FailoverSQLException}s or {@link JDBCConnectionException}s
+ * or {@link Exception}s with inner causes including either.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Retryable(exceptionExpression = SpringRetryUtils.SHOULD_RETRY_IF_FAILOVER_EXCEPTION_EXPRESSION)
-public @interface RetryOnRDSFailover {
+@Retryable(
+    exceptionExpression =
+        SpringRetryUtils.SHOULD_RETRY_IF_FAILOVER_OR_CONNECTION_EXCEPTION_EXPRESSION)
+public @interface RetryOnFailoverOrConnectionException {
   /**
    * Alias for {@link Retryable#backoff()}.
    *
