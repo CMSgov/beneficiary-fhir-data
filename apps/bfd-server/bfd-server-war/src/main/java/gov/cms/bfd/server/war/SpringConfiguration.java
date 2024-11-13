@@ -275,6 +275,9 @@ public class SpringConfiguration extends BaseConfiguration {
     // requests.
     extraProperties.put("jakarta.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
 
+    // Manually specify the dialect as PostgreSQL
+    extraProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+
     return extraProperties;
   }
 
