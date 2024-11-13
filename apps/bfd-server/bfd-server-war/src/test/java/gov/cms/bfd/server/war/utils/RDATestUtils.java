@@ -85,8 +85,14 @@ public class RDATestUtils {
   /** A fake npi number. */
   public static final String FAKE_NPI_NUMBER = "0000000000";
 
+  /** A fake practitioner NPI. */
+  public static final String FAKE_PRACTITIONER_NPI = "1923124";
+
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
+
+  /** a fake taxonomy. */
+  public static final String FAKE_TAXONOMY = "390200000X\tHealth Care";
 
   /** A fake drug code used for testing. */
   public static final String FAKE_DRUG_CODE = "00000-0000";
@@ -734,6 +740,7 @@ public class RDATestUtils {
     MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
     Map<String, String> npiOrgHashMap = new HashMap<>();
     npiOrgHashMap.put(FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME);
+    npiOrgHashMap.put(FAKE_PRACTITIONER_NPI, FAKE_TAXONOMY);
     npiOrgLookup
         .when(NPIOrgLookup::createNpiOrgLookup)
         .thenAnswer(

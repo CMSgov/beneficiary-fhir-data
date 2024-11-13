@@ -139,8 +139,11 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
         claimGroup.getOperatingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOperatingPhysicianNpi()),
         claimGroup.getOtherPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOtherPhysicianNpi()),
         claimGroup.getAttendingPhysicianUpin(),
         claimGroup.getOperatingPhysicianUpin(),
         claimGroup.getOtherPhysicianUpin());
@@ -424,7 +427,8 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
           item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.PERFORMING,
-          line.getRevenueCenterRenderingPhysicianNPI());
+          line.getRevenueCenterRenderingPhysicianNPI(),
+          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
 
       // REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
       TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, eob, line.getStatusCode());
