@@ -202,7 +202,7 @@ No. This information is not provided as part of the CCW-based BFD FHIR API. Whil
 
 #### Does the BFD FHIR API provide information on benefit details such as deductibles, copays, coinsurance, etc.?
 
-In general, BFD has somewhat limited information available for deductibles. For Part A claims, BFD has deductible related data elements for Inpatient and Skilled Nursing Facility (SNF) claims:
+In general, BFD has somewhat limited information available for deductibles. For Part A claims, BFD has deductible-related data elements for Inpatient and Skilled Nursing Facility (SNF) claims:
 
 - **NCH_IP_TOT_DDCTN_AMT**
 - **NCH_BENE_IP_DDCTBL_AMT**
