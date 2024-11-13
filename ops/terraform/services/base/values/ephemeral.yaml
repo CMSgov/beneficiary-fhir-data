@@ -63,6 +63,6 @@
 /bfd/${env}/server/nonsensitive/db/hikari/max_connection_lifetime_ms: 1800000 # 30 minutes
 /bfd/${env}/server/nonsensitive/db/wrapper/use_custom_preset: "true"
 /bfd/${env}/server/nonsensitive/db/wrapper/base_preset: E
-/bfd/${env}/server/nonsensitive/db/wrapper/plugins_csv: "initialConnection,auroraConnectionTracker,readWriteSplitting,efm2,failover"
+/bfd/${env}/server/nonsensitive/db/wrapper/plugins_csv: "initialConnection,auroraConnectionTracker,readWriteSplitting,efm2,failover2"
 /bfd/${env}/server/nonsensitive/db/wrapper/host_selection_strategy: roundRobin
 /bfd/${env}/server/nonsensitive/db/wrapper/init_connection_strategy: roundRobin
