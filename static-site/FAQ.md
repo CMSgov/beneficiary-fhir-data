@@ -127,7 +127,7 @@ The upstream processing systems, MCS (Multi-Carrier System) or FISS (Fiscal Inte
 
 #### Are pending or partially adjudicated claims available? How long does it take for those claims to be available?
 
-Yes,  PAC data comes from FISS (Fiscal Intermediary Shared Systems) and MCS (Multi Carrier Systems)  via the MPSM (Medicare Payment System Modernization) RDA (Replicated Data Access) API and is made available in BFD  through the Claim and ClaimResponse resources.
+Yes, PAC data comes from FISS (Fiscal Intermediary Shared Systems) and MCS (Multi Carrier Systems)  via the MPSM (Medicare Payment System Modernization) RDA (Replicated Data Access) API and is made available in BFD  through the Claim and ClaimResponse resources.
 
 
 PAC data is received from the MPSM RDA API  as it becomes available, typically nightly. <ins>However, it is important to note that PAC data availability varies by data source.</ins> This shared CMS [whitepaper](https://confluence.cms.gov/display/BFD/FHIR+and+CMS+Documentation+Links?preview=/415007408/455427981/medicare-claims-maturity%20(1).pdf) documents some additional details on the claim lifecycle.
