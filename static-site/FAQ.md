@@ -198,7 +198,7 @@ It's more likely the claim will get updated and the status remains the same. The
 
 #### Does the BFD FHIR API send Part A claims data for care received in Critical Access Hospitals and teaching hospitals for Part C enrollees?
 
-No. This information is not provided as part of the CCW-based BFD FHIR API. While we do have Part C enrollee data, our APIs focus is on Fee for Service Medicare (A, B, & D) and not Medicare Advantage (Part C).
+No. This information is not provided as part of the CCW-based BFD FHIR API. While we do have Part C enrollee data, our APIs focus is on Fee for Service Medicare (A, B, and D) and not Medicare Advantage (Part C).
 
 #### Does the BFD FHIR API provide information on benefit details such as deductibles, copays, coinsurance, etc.?
 
