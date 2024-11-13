@@ -144,7 +144,7 @@
   code: G2072
   startDate: 1970-01-01
   endDate: ACTIVE
-  comment: Medication- assisted treatment, buprenorphine (implant insertion)
+  comment: Medication-assisted treatment, buprenorphine (implant insertion)
 - system: https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets
   code: G2073
   startDate: 1970-01-01
