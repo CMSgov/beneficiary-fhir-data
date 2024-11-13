@@ -106,7 +106,7 @@
 /bfd/${env}/server/nonsensitive/db/hikari/min_idle_connections: 20
 /bfd/${env}/server/nonsensitive/db/hikari/idle_timeout_ms: 900000 # 15 minutes
 /bfd/${env}/server/nonsensitive/db/hikari/init_fail_timeout_ms: -1
-/bfd/${env}/server/nonsensitive/db/hikari/connection_timeout_ms: 10000 # 10 seconds
+/bfd/${env}/server/nonsensitive/db/hikari/connection_timeout_ms: 30000 # 30 seconds
 /bfd/${env}/server/nonsensitive/db/hikari/keepalive_timeout_ms: 180000 # 3 minutes
 /bfd/${env}/server/nonsensitive/db/hikari/validation_timeout_ms: 1000 # 1 second
 /bfd/${env}/server/nonsensitive/db/hikari/max_connection_lifetime_ms: 1800000 # 30 minutes
