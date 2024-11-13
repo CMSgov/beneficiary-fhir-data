@@ -69,7 +69,7 @@ BFD receives data from two different data source maintainers (CCW- Chronic Condi
 
 Weekly, on Friday afternoons, BFD receives beneficiary data and adjudicated claims data supporting the FHIR Coverage, ExplanationOfBenefit, and Patient resources via weekly RIF files from CCW. The data is loaded into BFD no later than 9:00 AM ET the next business day (typically Monday).
 
-Partially adjudicated claims data supporting the FHIR Claim and ClaimResponse resources is updated nightly (M-F). This data is provided via RDA.
+Partially adjudicated claims data supporting the FHIR Claim and ClaimResponse resources is updated nightly. This data is provided via RDA.
 
 Please note that The amount of time it takes a claim to progress through the data ecosystem depends on a variety of factors from the data source maintainers. A CMS [whitepaper](https://confluence.cms.gov/display/BFD/FHIR+and+CMS+Documentation+Links?preview=/415007408/455427981/medicare-claims-maturity%20(1).pdf) documents some additional details on the claim lifecycle.
 
