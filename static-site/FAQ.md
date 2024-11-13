@@ -186,7 +186,7 @@ The BFD team will work with CCW to answer your questions. In some situations, yo
 
 #### What PAC (Partially Adjudicated Claim) data does BFD contain?
 
-There is a detailed Confluence page that contains a more in-depth overview of the PAC (Partially Adjudicated Claim) data and its mapping. It can be found [here](https://confluence.cms.gov/pages/viewpage.action?pageId=1012446673).
+Please utilize the hyperlinked internal resource on [confluence](https://confluence.cms.gov/pages/viewpage.action?pageId=1012446673) to review PAC data and its mappings.
 
 ### Data Retention/Lifecycle
 
