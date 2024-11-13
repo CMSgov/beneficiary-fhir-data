@@ -36,11 +36,11 @@ public @interface RetryOnFailoverOrConnectionException {
   /**
    * Alias for {@link Retryable#backoff()}.
    *
-   * @return a default {@link Backoff} with a starting delay of 1000 milliseconds increasing up to
-   *     10 seconds
+   * @return a default {@link Backoff} with a starting delay of 3 seconds increasing up to
+   *     10 seconds with some jitter to reduce the likelihood of a "thundering herd"
    */
   @AliasFor(annotation = Retryable.class, attribute = "backoff")
-  Backoff backoff() default @Backoff(delay = 1000, multiplier = 1.4, maxDelay = 10000);
+  Backoff backoff() default @Backoff(delay = 3000, multiplier = 1.2, maxDelay = 10000, random = true);
 
   /**
    * Alias for {@link Retryable#stateful()}.
@@ -53,10 +53,10 @@ public @interface RetryOnFailoverOrConnectionException {
   /**
    * Alias for {@link Retryable#maxAttempts()}.
    *
-   * @return a default of {@code 10} attempts
+   * @return a default of {@code 5} attempts
    */
   @AliasFor(annotation = Retryable.class, attribute = "maxAttempts")
-  int maxAttempts() default 10;
+  int maxAttempts() default 5;
 
   /**
    * Alias for {@link Retryable#listeners()}.
