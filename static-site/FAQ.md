@@ -45,10 +45,10 @@ permalink: /faq.html
 FHIR, or Fast Healthcare Interoperability Resources, is a standard for exchanging healthcare information electronically. Developed by HL7 International, FHIR aims to simplify and streamline the interoperability of health data across different systems.
 
 Key features of FHIR include:
-- Resource-based Structure: FHIR organizes healthcare data into "resources," which represent discrete clinical or administrative concepts, such as patients, medications, and lab results.
-- RESTful APIs: It utilizes modern web technologies and principles, including RESTful APIs, allowing for easy integration and access to health information.
-- Interoperability: FHIR promotes interoperability between disparate health systems, enabling them to communicate and share data effectively.
-- Flexibility: It is designed to be adaptable, allowing developers to implement it in various environments and applications.
+- **Resource-based Structure**: FHIR organizes healthcare data into "resources," which represent discrete clinical or administrative concepts, such as patients, medications, and lab results.
+- **RESTful APIs**: It utilizes modern web technologies and principles, including RESTful APIs, allowing for easy integration and access to health information.
+- **Interoperability**: FHIR promotes interoperability between disparate health systems, enabling them to communicate and share data effectively.
+- **Flexibility**: It is designed to be adaptable, allowing developers to implement it in various environments and applications.
 
 Overall, FHIR aims to improve the accessibility, usability, and integration of healthcare information to enhance patient care.
 
