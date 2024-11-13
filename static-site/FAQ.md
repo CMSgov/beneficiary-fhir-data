@@ -209,7 +209,7 @@ In general, BFD has somewhat limited information available for deductibles. For 
 
 BFD does not provide Medicare Advantage claims so there is no deductible information relating to Part C. In terms of Part D claims, unfortunately BFD currently does not provide any deductible-related data elements.
 
-BFD does include deductible information under the adjudication fields, please read over the FAQ question on monetary fields (What are the payment-related monetary fields in BFD on the Explanation of Benefits (EOB) endpoint?) for more information.
+BFD does include deductible information under the adjudication fields, please read over the FAQ question on monetary fields [What are the payment-related monetary fields in BFD on the Explanation of Benefits (EOB) endpoint?](#what-are-the-payment-related-monetary-fields-in-bfd-on-the-explanation-of-benefits-eob-endpoint) for more information.
 
 #### How does United States Core Data for Interoperability (USCDI) relate to FHIR and its implementation within the BFD API?
 
