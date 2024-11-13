@@ -705,7 +705,7 @@ public class PatientE2E extends PatientE2EBase {
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB);
     additionalExpectedMdcKeys.add(BfdMDC.HTTP_ACCESS_REQUEST_HEADER_IDENTIFIERS);
 
-    ServerTestUtils.assertAccessJsonHasMdcKeys(
+    ServerTestUtils.assertDefaultAndAdditionalMdcKeys(
         requestAuth, requestString, additionalExpectedMdcKeys, headers);
   }
 

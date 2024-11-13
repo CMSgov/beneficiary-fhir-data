@@ -99,6 +99,15 @@ public final class TransformerConstants {
   /** Base URL for nubc. */
   public static final String BASE_URL_NUBC = "https://www.nubc.org";
 
+  /** Base URL for nucc. */
+  public static final String BASE_URL_NUCC = "http://nucc.org";
+
+  /** System for NUCC taxonomy. */
+  public static final String NUCC_TAXONOMY = "/provider-taxonomy";
+
+  /** Full system for NUBC taxonomy. */
+  public static final String NUCC_TAXONOMY_SYSTEM = BASE_URL_NUCC + NUCC_TAXONOMY;
+
   /** System for NUBC admsn. */
   public static final String NUBC_ADMIT_CODE_SYSTEM =
       BASE_URL_NUBC + "/CodeSystem/PriorityTypeOfAdmitOrVisit";
@@ -585,10 +594,11 @@ public final class TransformerConstants {
   public static final String C4DIC_CONTACT_TYPE_PAYOR_DISPLAY = "Payor";
 
   /** C4DIC Medicare Customer Service Phone Number. */
-  public static final String C4DIC_MEDICARE_SERVICE_PHONE_NUMBER = "1-800-633-4227";
+  public static final String C4DIC_MEDICARE_SERVICE_PHONE_NUMBER =
+      "1-800-MEDICARE\n(1-800-633-4227)";
 
   /** C4DIC Medicare Customer Service TTY Number. */
-  public static final String C4DIC_MEDICARE_SERVICE_TTY_NUMBER = "1-877-486-2084";
+  public static final String C4DIC_MEDICARE_SERVICE_TTY_NUMBER = "TTY: 1-877-486-2048";
 
   /** C4DIC Medicare website URL. */
   public static final String C4DIC_MEDICARE_URL = "www.medicare.gov";
@@ -652,7 +662,7 @@ public final class TransformerConstants {
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-HighlightColor-extension">Extension:
    * C4DIC Highlight Color</a>.
    */
-  public static final String C4DIC_HIGHLIGHTCOLOR = "#3B9BFB";
+  public static final String C4DIC_HIGHLIGHTCOLOR = "#335097";
 
   /**
    * Code System URL for C4DIC Additional Insurance Card Information Extension URL <a

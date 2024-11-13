@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -268,37 +269,89 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   private List<Claim.DiagnosisComponent> getDiagnosis(RdaFissClaim claimGroup, boolean isIcd9) {
     final String icdSystem = isIcd9 ? IcdCode.CODING_SYSTEM_ICD_9 : IcdCode.CODING_SYSTEM_ICD_10_CM;
 
-    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaFissDiagnosisCode>of())
-        .stream()
-        .map(
-            diagnosisCode -> {
-              Claim.DiagnosisComponent component;
+    Stream<FissDiagnosisAdapterV2> diagnosisCodes =
+        ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<RdaFissDiagnosisCode>of())
+            .stream()
+            .sorted(Comparator.comparing(RdaFissDiagnosisCode::getRdaPosition))
+            .map(FissDiagnosisAdapterV2::new);
 
-              if (Strings.isNotBlank(diagnosisCode.getDiagCd2())) {
-                component =
-                    new Claim.DiagnosisComponent()
-                        .setSequence(diagnosisCode.getRdaPosition())
-                        .setDiagnosis(createCodeableConcept(icdSystem, diagnosisCode.getDiagCd2()));
+    Stream<FissDiagnosisAdapterV2> combinedDiagnosisCodes =
+        getAllDistinctDiagnosisCodes(claimGroup, diagnosisCodes);
 
-                if (Strings.isNotBlank(diagnosisCode.getDiagPoaInd())) { // Present on Admission
-                  component.setOnAdmission(
-                      createCodeableConcept(
-                          BBCodingSystems.FISS.DIAG_POA_IND,
-                          diagnosisCode.getDiagPoaInd().toLowerCase()));
-                }
+    List<Claim.DiagnosisComponent> diagnoses =
+        combinedDiagnosisCodes
+            .map(diagnosisCode -> getDiagnosisComponent(diagnosisCode, claimGroup, icdSystem))
+            .filter(Objects::nonNull)
+            .toList();
 
-                if (codesAreEqual(claimGroup.getAdmitDiagCode(), diagnosisCode.getDiagCd2())) {
-                  component.setType(List.of(createCodeableConcept(ExDiagnosistype.ADMITTING)));
-                }
-              } else {
-                component = null;
-              }
+    // Certain records may be filtered out, so we need to set the sequence after we finish
+    // processing.
+    for (int i = 0; i < diagnoses.size(); i++) {
+      diagnoses.get(i).setSequence(i + 1);
+    }
+    return diagnoses;
+  }
 
-              return component;
-            })
-        .filter(Objects::nonNull)
-        .sorted(Comparator.comparing(Claim.DiagnosisComponent::getSequence))
-        .toList();
+  /**
+   * Creates a distinct list of all diagnosis codes for the claim.
+   *
+   * @param claimGroup FISS claim.
+   * @param diagnosisCodes List of codes.
+   * @return All diagnosis codes wrapped in adapters.
+   */
+  private static Stream<FissDiagnosisAdapterV2> getAllDistinctDiagnosisCodes(
+      RdaFissClaim claimGroup, Stream<FissDiagnosisAdapterV2> diagnosisCodes) {
+    Stream<FissDiagnosisAdapterV2> extraCodes =
+        Stream.of(
+            new FissDiagnosisAdapterV2(claimGroup.getAdmitDiagCode()),
+            new FissDiagnosisAdapterV2(claimGroup.getPrincipleDiag()));
+
+    // Most of the time, the principal and admit codes should already be included in the list
+    // returned by getDiagCodes(),
+    // but if they're not, we need to make sure they're included in the final result.
+    // Here we'll concatenate them all together and filter out any duplicates.
+    return Stream.concat(diagnosisCodes, extraCodes).distinct();
+  }
+
+  /**
+   * Creates a {@link Claim.DiagnosisComponent} for the claim.
+   *
+   * @param diagnosisCodeAdapter Diagnosis code adapter.
+   * @param claimGroup FISS claim.
+   * @param icdSystem ICD system.
+   * @return Diagnosis component.
+   */
+  private Claim.DiagnosisComponent getDiagnosisComponent(
+      FissDiagnosisAdapterV2 diagnosisCodeAdapter, RdaFissClaim claimGroup, String icdSystem) {
+
+    String diagnosisCode = diagnosisCodeAdapter.getDiagnosisCode();
+    if (Strings.isBlank(diagnosisCode)) {
+      return null;
+    }
+
+    Claim.DiagnosisComponent component =
+        new Claim.DiagnosisComponent()
+            .setDiagnosis(createCodeableConcept(icdSystem, diagnosisCode));
+
+    // Present on Admission
+    if (Strings.isNotBlank(diagnosisCodeAdapter.getPoaIndicator())) {
+      component.setOnAdmission(
+          createCodeableConcept(
+              BBCodingSystems.FISS.DIAG_POA_IND,
+              diagnosisCodeAdapter.getPoaIndicator().toLowerCase()));
+    }
+
+    if (Strings.isNotBlank(claimGroup.getAdmitDiagCode())
+        && codesAreEqual(claimGroup.getAdmitDiagCode(), diagnosisCode)) {
+      component.addType(createCodeableConcept(ExDiagnosistype.ADMITTING));
+    }
+
+    if (Strings.isNotBlank(claimGroup.getPrincipleDiag())
+        && codesAreEqual(claimGroup.getPrincipleDiag(), diagnosisCode)) {
+      component.addType(createCodeableConcept(ExDiagnosistype.PRINCIPAL));
+    }
+
+    return component;
   }
 
   /**
@@ -421,7 +474,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                 if (Strings.isNotBlank(revenueLine.getHcpcCd())) {
                   codings.add(
                       new Coding(
-                          CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD),
+                          TransformerConstants.CODING_SYSTEM_CARIN_HCPCS,
                           revenueLine.getHcpcCd(),
                           null));
                   productOrService.setCoding(codings);

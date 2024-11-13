@@ -1,4 +1,4 @@
-"{{ data_server_dir }}/access.json" "{{ data_server_dir }}/bluebutton-server-app-log.json" {
+"{{ ref_dir }}/access.json" "{{ ref_dir }}/bluebutton-server-app-log.json" {
     rotate 1
     hourly
     #size of largest live logfile at time of creation was 272M w/out log rotation
@@ -7,7 +7,7 @@
     compress
 }
 
-"{{ data_server_dir }}/access.log" {
+"{{ ref_dir }}/access.log" {
     rotate 1
     hourly
     #size of live logfile at time of creation was 30M w/out log rotation
@@ -16,7 +16,7 @@
     compress
 }
 
-"{{ data_server_dir }}/gc.log" {
+"{{ ref_dir }}/gc.log" {
     rotate 1
     daily
     #size of live logfile at time of creation was 2.7M w/out log rotation
@@ -25,7 +25,7 @@
     compress
 }
 
-"{{ data_server_dir }}/newrelic_agent.log" {
+"{{ ref_dir }}/newrelic_agent.log" {
     rotate 1
     daily
     #size of live logfile at time of creation was 9.3k w/out log rotation
@@ -34,7 +34,7 @@
     compress
 }
 
-"{{ data_server_dir }}/bfd-server-startup.log" {
+"{{ ref_dir }}/bfd-server-startup.log" {
     rotate 1
     daily
     #size of live logfile at time of creation was 224 w/out log rotation

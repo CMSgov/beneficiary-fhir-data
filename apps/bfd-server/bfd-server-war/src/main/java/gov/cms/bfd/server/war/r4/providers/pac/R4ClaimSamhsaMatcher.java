@@ -1,12 +1,17 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
+import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.r4.ClaimAdapter;
 import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Claim;
 import org.springframework.stereotype.Component;
 
@@ -71,8 +76,13 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
 
     return containsSamhsaIcdProcedureCode(adapter.getProcedure())
         || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
-        || containsSamhsaLineItem(adapter.getItem());
+        || containsSamhsaLineItem(adapter.getItem())
+        || containsSamhsaSupportingInfo(adapter.getSupportingInfo());
   }
+
+  /** Additional valid coding system URL for backwards-compatibility. */
+  private static final Set<String> BACKWARDS_COMPATIBLE_HCPCS_SYSTEM =
+      Set.of(CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD));
 
   /**
    * Checks if the given {@link CodeableConcept} contains only known coding systems.
@@ -83,8 +93,19 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
    */
   @Override
   protected boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
-    return procedureConcept.getCoding().stream()
-        .allMatch(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_CARIN_HCPCS));
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+    if (codingSystems.isEmpty()) {
+      return false;
+    }
+    for (String system : codingSystems) {
+      if (!(BACKWARDS_COMPATIBLE_HCPCS_SYSTEM.contains(system)
+          || TransformerConstants.CODING_SYSTEM_CARIN_HCPCS.equals(system))) {
+        return false;
+      }
+      ;
+    }
+    return true;
   }
 
   /**

@@ -267,8 +267,11 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
         claimGroup.getOperatingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOperatingPhysicianNpi()),
         claimGroup.getOtherPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOtherPhysicianNpi()),
         claimGroup.getAttendingPhysicianUpin(),
         claimGroup.getOperatingPhysicianUpin(),
         claimGroup.getOtherPhysicianUpin());
@@ -388,7 +391,8 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.PERFORMING,
-          line.getRevenueCenterRenderingPhysicianNPI());
+          line.getRevenueCenterRenderingPhysicianNPI(),
+          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
     }
 
     // Last Updated => ExplanationOfBenefit.meta.lastUpdated
