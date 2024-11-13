@@ -26,7 +26,6 @@
             <excludes>
                 <exclude>**/*.sh</exclude>
                 <exclude>**/*.py</exclude>
-                <exclude>ansible/playbooks-ccs/ansible-playbook-wrapper</exclude>
                 <exclude>ccs-ops-misc/scripts/*</exclude>
                 <exclude>ccs-ops-misc/synthetic-data/scripts/synthea-automation/*</exclude>
             </excludes>
@@ -40,7 +39,6 @@
             <includes>
                 <include>**/*.sh</include>
                 <include>**/*.py</include>
-                <include>ansible/playbooks-ccs/ansible-playbook-wrapper</include>
                 <include>ccs-ops-misc/scripts/*</include>
                 <include>ccs-ops-misc/synthetic-data/scripts/synthea-automation/*</include>
             </includes>
