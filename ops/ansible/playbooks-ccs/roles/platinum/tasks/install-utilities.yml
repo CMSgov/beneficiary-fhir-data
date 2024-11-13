@@ -1,7 +1,0 @@
-- name: Copy the RBAC utility script and add execute permissions
-  copy:
-    src: "{{ playbook_dir }}/roles/{{ role_name }}/files/{{ item }}"
-    dest: "/usr/local/bin/{{ item }}"
-    mode: 0644
-  with_items:
-    - "permit-user-access"
