@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Retryable;
 import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 
@@ -10,6 +12,9 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
  * operation can be retried.
  */
 public final class SpringRetryUtils {
+  /** Logger for this class. */
+  static final Logger LOGGER = LoggerFactory.getLogger(SpringRetryUtils.class);
+
   /**
    * Constant SpEL expression used for {@link Retryable#exceptionExpression()}s that need to invoke
    * the {@link #shouldRetryIfFailover(Exception)} method.
@@ -27,6 +32,8 @@ public final class SpringRetryUtils {
    *     FailoverSQLException}, {@code false} otherwise
    */
   public static boolean shouldRetryIfFailover(Exception ex) {
+    LOGGER.warn("Failover exception caused retry.", ex);
+
     return ex instanceof FailoverSQLException
         || ExceptionUtils.getRootCause(ex) instanceof FailoverSQLException;
   }
