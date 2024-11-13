@@ -1,5 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
+# Copy the RBAC utility script
+cat <<"EOS" | sudo tee /usr/local/bin/permit-user-access
 set -e
 
 ###########################################################
@@ -81,3 +83,7 @@ add_ssh_users_and_sudoers() {
 }
 
 add_ssh_users_and_sudoers
+EOS
+
+# Add execute permissions to RBAC script
+sudo chmod 0644 /usr/local/bin/permit-user-access
