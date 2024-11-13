@@ -86,7 +86,7 @@ Additional details about more technical differences can be found on this [page](
 Currently, all of the Peering Partner APIs still utilize v1 for some clients with DPC solely using v1. All Peering Partners are highly recommended to make plans to move to v2. 
 
 #### Where can I find the BFD data dictionary?
-The data dictionary can be accessed [here](https://d2tcxctwdgn0ff.cloudfront.net/index.html).
+The data dictionary can be accessed [here](/data-dictionary-v1) for v1 and [here](/data-dictionary-v2) for v2.
 The data dictionary will be updated with each release, as needed.
 
 #### What are some important resources I can use while onboarding to the DASG ecosystem?
