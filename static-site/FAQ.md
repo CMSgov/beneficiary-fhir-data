@@ -59,9 +59,9 @@ Beneficiary FHIR Data Server
 #### What data is available via BFD?
 
 BFD provides different types of data on/about persons who are eligible for Medicare via various [FHIR](http://hl7.org/fhir) resources:
-- Patient resources that contain demographic data, such as name, address, etc.
-- Coverage resources that contain enrollment data, such as Part A status, Part D status, etc.
-- ExplanationOfBenefit resources that contain Part A, B, and D Medicare claims data, such as date of service, diagnosis codes, etc. An EOB shows the status of a claim and how it was processed. The EOB includes the amounts paid by a plan and amounts one is responsible to pay, if any. 
+- [Patient](https://www.hl7.org/fhir/r4/patient.html) resources that contain demographic data, such as name, address, etc.
+- [Coverage](https://www.hl7.org/fhir/r4/coverage.html) resources that contain enrollment data, such as Part A status, Part D status, etc.
+- [ExplanationOfBenefit](https://www.hl7.org/fhir/r4/explanationofbenefit.html) resources that contain Part A, B, and D Medicare claims data, such as date of service, diagnosis codes, etc. An EOB shows the status of a claim and how it was processed. The EOB includes the amounts paid by a plan and amounts one is responsible to pay, if any. 
 
 #### How frequently is BFD data updated?
 
