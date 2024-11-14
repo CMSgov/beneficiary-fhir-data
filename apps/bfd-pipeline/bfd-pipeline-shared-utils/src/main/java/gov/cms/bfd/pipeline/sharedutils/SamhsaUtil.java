@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
@@ -27,14 +26,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
 
 /**
- * Class to create SAMHSA tags. This class will take a claim, iterate through the
- * SAMHSA-related fields, and determine if there are any SAMHSA codes. If any are found,
- * a tag is created to mark the claim as SAMHSA.
+ * Class to create SAMHSA tags. This class will take a claim, iterate through the SAMHSA-related
+ * fields, and determine if there are any SAMHSA codes. If any are found, a tag is created to mark
+ * the claim as SAMHSA.
  */
 public class SamhsaUtil {
   /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
@@ -92,8 +92,8 @@ public class SamhsaUtil {
   }
 
   /**
-   * Process a claim to check for SAMHSA codes. This will be the external entry point for
-   * other parts of the application.
+   * Process a claim to check for SAMHSA codes. This will be the external entry point for other
+   * parts of the application.
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
@@ -162,7 +162,13 @@ public class SamhsaUtil {
    * @return A list of tag entities to persist.
    */
   private List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
-    Optional<List<TagDetails>> entries = getPossibleFissSamhsaFields(fissClaim);
+
+    Optional<List<TagDetails>> entries = Optional.empty();
+    try {
+      entries = getPossibleFissSamhsaFields(fissClaim);
+    } catch (NoSuchElementException ignored) {
+      // Claim is missing elements, so we're unable to process it.
+    }
     if (entries.isPresent()) {
       List<FissTag> fissTags = new ArrayList<>();
       fissTags.add(
@@ -200,7 +206,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
           "mcs_diagnosis_codes",
           "idr_diag_code",
-          (int)diagCode.getRdaPosition(),
+          (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
@@ -210,7 +216,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
           "mcs_details",
           "idr_dtl_primary_diag_code",
-          (int)detail.getIdrDtlNumber(),
+          (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
           lastUpdated);
@@ -219,7 +225,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
           "mcs_details",
           "idr_proc_code",
-          (int)detail.getIdrDtlNumber(),
+          (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
           lastUpdated);
@@ -279,7 +285,7 @@ public class SamhsaUtil {
    * @param fissClaim The claim to check.
    * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
    */
-  private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim) {
+  private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim) throws NoSuchElementException {
     List<TagDetails> entries = new ArrayList<>();
     LocalDate serviceDate =
         Collections.min(
@@ -298,7 +304,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
           "fiss_revenue_lines",
           "apc_hcpcs_apc",
-          (int)revenueLine.getRdaPosition(),
+          (int) revenueLine.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
@@ -306,7 +312,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
           "fiss_revenue_lines",
           "hcpcs_cd",
-          (int)revenueLine.getRdaPosition(),
+          (int) revenueLine.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
@@ -332,7 +338,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
           "fiss_diagnosis_codes",
           "diag_cd2",
-          (int)diagCode.getRdaPosition(),
+          (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
@@ -342,7 +348,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
           "fiss_proc_codes",
           "proc_code",
-          (int)procCode.getRdaPosition(),
+          (int) procCode.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
