@@ -203,12 +203,14 @@ public class SamhsaUtil {
     LocalDate serviceDate;
     // If there is an error reading the service date, set it to the earliest possible time.
     try {
-      serviceDate = Collections.min(
+      serviceDate =
+          Collections.min(
               mcsClaim.getDetails().stream().map(RdaMcsDetail::getIdrDtlFromDate).toList());
     } catch (Exception e) {
       serviceDate = LocalDate.parse("1970-01-01");
     }
-    Instant lastUpdated = mcsClaim.getLastUpdated() == null? Instant.now():mcsClaim.getLastUpdated();
+    Instant lastUpdated =
+        mcsClaim.getLastUpdated() == null ? Instant.now() : mcsClaim.getLastUpdated();
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
@@ -297,15 +299,18 @@ public class SamhsaUtil {
       throws NoSuchElementException {
     List<TagDetails> entries = new ArrayList<>();
     LocalDate serviceDate;
-    // If there is an error reading the service date, set it to the earliest possible time.
     try {
-    serviceDate =
-        Collections.min(
-            fissClaim.getRevenueLines().stream().map(RdaFissRevenueLine::getServiceDate).toList());
+      serviceDate =
+          Collections.min(
+              fissClaim.getRevenueLines().stream()
+                  .map(RdaFissRevenueLine::getServiceDate)
+                  .toList());
     } catch (Exception e) {
+      // If there is an error reading the service date, set it to the earliest possible date.
       serviceDate = LocalDate.parse("1970-01-01");
     }
-    Instant lastUpdated = fissClaim.getLastUpdated() == null? Instant.now():fissClaim.getLastUpdated();
+    Instant lastUpdated =
+        fissClaim.getLastUpdated() == null ? Instant.now() : fissClaim.getLastUpdated();
 
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),

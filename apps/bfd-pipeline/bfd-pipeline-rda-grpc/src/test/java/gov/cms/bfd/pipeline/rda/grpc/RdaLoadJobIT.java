@@ -384,14 +384,19 @@ public class RdaLoadJobIT {
                 .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
                 .getResultList());
   }
-  private List<FissTag> getRdaFissTags(TransactionManager transactionManager) {
-      return transactionManager.executeFunction(
-              entityManager ->
-                      entityManager
-                              .createQuery("select c from FissTag c", FissTag.class)
-                              .getResultList());
 
+  /**
+   * Gets the Fiss Tags from the database using a query.
+   *
+   * @param transactionManager the transaction manager to connect to the database
+   * @return the rda fiss tags
+   */
+  private List<FissTag> getRdaFissTags(TransactionManager transactionManager) {
+    return transactionManager.executeFunction(
+        entityManager ->
+            entityManager.createQuery("select c from FissTag c", FissTag.class).getResultList());
   }
+
   /**
    * Creates the RDA load options.
    *

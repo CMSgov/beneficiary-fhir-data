@@ -175,7 +175,6 @@ public class RdaServerJobIT extends AbstractLocalStackS3Test {
             fissChange = fissTransformer.transformClaim(fissStream.next());
             assertEquals(1101L, fissChange.getSequenceNumber());
             assertFalse(fissStream.hasNext());
-
           }
         } finally {
           fissChannel.shutdownNow();
