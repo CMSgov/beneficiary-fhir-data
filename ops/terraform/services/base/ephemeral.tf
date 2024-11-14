@@ -81,6 +81,7 @@ locals {
     "/bfd/${local.env}/server/nonsensitive/launch_template_volume_size_gb"          = "/bfd/${local.seed_env}/server/nonsensitive/launch_template_volume_size_gb"
     "/bfd/${local.env}/server/nonsensitive/heathcheck/request_timeout_seconds"      = "/bfd/${local.seed_env}/server/nonsensitive/heathcheck/request_timeout_seconds"
     "/bfd/${local.env}/server/nonsensitive/heathcheck/request_backoff_seconds"      = "/bfd/${local.seed_env}/server/nonsensitive/heathcheck/request_backoff_seconds"
+    "/bfd/${local.env}/server/nonsensitive/heathcheck/testing_bene_id"              = "/bfd/${local.seed_env}/server/nonsensitive/heathcheck/testing_bene_id"
     "/bfd/${local.env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json" = "/bfd/${local.seed_env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json"
     "/bfd/${local.env}/server/sensitive/server_keystore_base64"                     = "/bfd/${local.seed_env}/server/sensitive/server_keystore_base64"
     "/bfd/${local.env}/server/sensitive/service_port"                               = "/bfd/${local.seed_env}/server/sensitive/service_port"
