@@ -298,6 +298,13 @@
         "code" : "performing",
         "display" : "Performing provider"
       } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+        "code" : "41",
+        "display" : "Optometrist"
+      } ]
     }
   }, {
     "sequence" : 4,
