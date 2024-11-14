@@ -22,7 +22,7 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @Getter
 @Setter
-@IdClass(TagKey.class)
+@IdClass(RdaTagKey.class)
 public class FissTag {
   /** Tag Code. */
   @Id

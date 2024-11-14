@@ -19,7 +19,7 @@ public class TagDetails {
   /** The column in the claims table. */
   String column;
 
-  /** The line entry in the table. */
+  /** The line entry in the table. Will correspond to either rdaPosition, or idrDtlNumber */
   Integer clm_line_num;
 
   /** The type. */

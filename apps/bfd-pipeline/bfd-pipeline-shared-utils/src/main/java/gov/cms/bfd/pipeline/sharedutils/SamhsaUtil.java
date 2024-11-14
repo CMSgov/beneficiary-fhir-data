@@ -31,19 +31,23 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
 
-/** Class to facilitate the creation of SAMHSA tags for associated claims. */
+/**
+ * Class to create SAMHSA tags. This class will take a claim, iterate through the
+ * SAMHSA-related fields, and determine if there are any SAMHSA codes. If any are found,
+ * a tag is created to mark the claim as SAMHSA.
+ */
 public class SamhsaUtil {
-  /** Map of the SAMHSA codes. */
+  /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
   private Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
 
   /** Instance of this class. Will be a singleton. */
   private static SamhsaUtil samhsaUtil;
 
-  /** The file from which SAMHSA entries are pulled. */
+  /** The file from which SAMHSA entries are pulled. Must be in the resources folder. */
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
 
   /**
-   * Loads a stream of a resource.
+   * Creates a stream from a file.
    *
    * @param fileName The file to load.
    * @return an InputStream of the file.
@@ -88,7 +92,8 @@ public class SamhsaUtil {
   }
 
   /**
-   * Process a claim to check for SAMHSA codes.
+   * Process a claim to check for SAMHSA codes. This will be the external entry point for
+   * other parts of the application.
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
@@ -151,23 +156,6 @@ public class SamhsaUtil {
   }
 
   /**
-   * Creates a JSON string from a list of TagDetails.
-   *
-   * @param entries The list of tag details to convert
-   * @return a JSON string of the tag details.
-   */
-  private String getDetailsJson(List<TagDetails> entries) {
-    String detailsJson;
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      detailsJson = mapper.writeValueAsString(entries);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("JsonProcessingException while mapping Json.", e);
-    }
-    return detailsJson;
-  }
-
-  /**
    * Checks for SAMHSA codes in a FISS Claim and constructs the tags.
    *
    * @param fissClaim The claim to check.
@@ -176,7 +164,6 @@ public class SamhsaUtil {
   private List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
     Optional<List<TagDetails>> entries = getPossibleFissSamhsaFields(fissClaim);
     if (entries.isPresent()) {
-      String detailsJson = getDetailsJson(entries.get());
       List<FissTag> fissTags = new ArrayList<>();
       fissTags.add(
           FissTag.builder()
@@ -208,24 +195,22 @@ public class SamhsaUtil {
             mcsClaim.getDetails().stream().map(RdaMcsDetail::getIdrDtlFromDate).toList());
     Instant lastUpdated = mcsClaim.getLastUpdated();
 
-    int i = 1;
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
           "mcs_diagnosis_codes",
           "idr_diag_code",
-          i++,
+          (int)diagCode.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
     }
-    i = 1;
     for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
           "mcs_details",
           "idr_dtl_primary_diag_code",
-          i,
+          (int)detail.getIdrDtlNumber(),
           entries,
           serviceDate,
           lastUpdated);
@@ -234,7 +219,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
           "mcs_details",
           "idr_proc_code",
-          i++,
+          (int)detail.getIdrDtlNumber(),
           entries,
           serviceDate,
           lastUpdated);
@@ -308,13 +293,12 @@ public class SamhsaUtil {
         entries,
         serviceDate,
         lastUpdated);
-    int i = 1;
     for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
           "fiss_revenue_lines",
           "apc_hcpcs_apc",
-          i,
+          (int)revenueLine.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
@@ -322,7 +306,7 @@ public class SamhsaUtil {
           isSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
           "fiss_revenue_lines",
           "hcpcs_cd",
-          i++,
+          (int)revenueLine.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
@@ -343,24 +327,22 @@ public class SamhsaUtil {
         entries,
         serviceDate,
         lastUpdated);
-    i = 1;
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
           "fiss_diagnosis_codes",
           "diag_cd2",
-          i++,
+          (int)diagCode.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);
     }
-    i = 1;
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
           "fiss_proc_codes",
           "proc_code",
-          i++,
+          (int)procCode.getRdaPosition(),
           entries,
           serviceDate,
           lastUpdated);

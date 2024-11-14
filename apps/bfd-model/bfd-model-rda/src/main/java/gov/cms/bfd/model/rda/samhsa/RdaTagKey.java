@@ -6,11 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** The composite key for the FISS tags. */
+/** The composite key for RDA tags. */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class TagKey implements Serializable {
+public class RdaTagKey implements Serializable {
   /** The associated claim. */
   private String claim;
 
@@ -21,8 +21,8 @@ public class TagKey implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof TagKey tagKey)) return false;
-    return this.claim.equals(tagKey.getClaim()) && this.code.equals(tagKey.getCode());
+    if (!(o instanceof RdaTagKey rdaTagKey)) return false;
+    return this.claim.equals(rdaTagKey.getClaim()) && this.code.equals(rdaTagKey.getCode());
   }
 
   /** {@inheritDoc} */

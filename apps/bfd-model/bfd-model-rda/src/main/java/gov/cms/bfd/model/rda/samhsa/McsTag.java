@@ -21,7 +21,7 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @Builder
-@IdClass(TagKey.class)
+@IdClass(RdaTagKey.class)
 @Table(name = "mcs_tags", schema = "rda")
 public class McsTag {
   /** The tag code. */
