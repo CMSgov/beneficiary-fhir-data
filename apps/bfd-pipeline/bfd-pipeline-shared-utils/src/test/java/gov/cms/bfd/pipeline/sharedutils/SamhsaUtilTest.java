@@ -105,6 +105,11 @@ public class SamhsaUtilTest {
     verify(entityManager, times(0)).merge(captor.capture());
   }
 
+  /**
+   * Gets a fake MCS claim.
+   *
+   * @return a fake MCS claim.
+   */
   private RdaMcsClaim getSAMHSAMcsClaim() {
     RdaMcsClaim mcsClaim =
         RdaMcsClaim.builder()
@@ -127,6 +132,11 @@ public class SamhsaUtilTest {
     return mcsClaim;
   }
 
+  /**
+   * Gets a fake FISS claim.
+   *
+   * @return A fake FISS claim.
+   */
   private RdaFissClaim getSAMHSAFissClaim() {
     RdaFissClaim fissClaim =
         RdaFissClaim.builder()
