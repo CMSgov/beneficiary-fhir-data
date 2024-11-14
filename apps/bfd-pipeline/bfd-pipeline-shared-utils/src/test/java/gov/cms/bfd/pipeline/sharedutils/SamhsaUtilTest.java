@@ -14,30 +14,30 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.model.rda.samhsa.SamhsaEntry;
-
+import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 
 /** Unit tests for SamhsaUtil class. */
 public class SamhsaUtilTest {
   /** An instance of SamhsaUtil. */
   SamhsaUtil samhsaUtil;
+
   /** Test Fiss Claim. */
   RdaFissClaim fissClaim;
+
   /** Test MCS Claim. */
   RdaMcsClaim mcsClaim;
+
   /** Entity manager that will be mocked. */
-EntityManager entityManager;
+  EntityManager entityManager;
+
   /** A SAMHSA code to use in the tests. */
   private static final String TEST_SAMHSA_CODE = "H0005";
 
@@ -71,13 +71,12 @@ EntityManager entityManager;
   @Test
   public void shouldNotSaveFissTag() {
     fissClaim.setAdmitDiagCode("NONSAMHSA");
-    for (RdaFissRevenueLine revenueLine: fissClaim.getRevenueLines()) {
+    for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
       revenueLine.setHcpcCd("NONSAMHSA");
     }
     ArgumentCaptor<FissTag> captor = ArgumentCaptor.forClass(FissTag.class);
     samhsaUtil.processClaim(fissClaim, entityManager);
     verify(entityManager, times(0)).merge(captor.capture());
-
   }
 
   /** This test should create MCS Tags and attempt to save them to the database. */
@@ -87,16 +86,17 @@ EntityManager entityManager;
     samhsaUtil.processClaim(mcsClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
     List<McsTag> tags = captor.getAllValues();
-    assertEquals(tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count(), 2);
+    assertEquals(
+        tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count(), 2);
   }
 
   /** This test should not try to save a tag. */
   @Test
   public void shouldNotSaveMcsTag() {
-    for (RdaMcsDiagnosisCode diagCode: mcsClaim.getDiagCodes()) {
+    for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       diagCode.setIdrDiagCode("NONSAMHSA");
     }
-    for (RdaMcsDetail detail: mcsClaim.getDetails()) {
+    for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       detail.setIdrProcCode("NONSAMHSA");
     }
 
@@ -104,44 +104,52 @@ EntityManager entityManager;
     samhsaUtil.processClaim(mcsClaim, entityManager);
     verify(entityManager, times(0)).merge(captor.capture());
   }
-private RdaMcsClaim getSAMHSAMcsClaim() {
-    RdaMcsClaim mcsClaim = RdaMcsClaim.builder()
+
+  private RdaMcsClaim getSAMHSAMcsClaim() {
+    RdaMcsClaim mcsClaim =
+        RdaMcsClaim.builder()
             .idrClmHdIcn("456ABC")
             .lastUpdated(Instant.now())
-            .diagCodes(Set.of(
+            .diagCodes(
+                Set.of(
                     RdaMcsDiagnosisCode.builder()
-                            .idrClmHdIcn("456ABC")
-                            .idrDiagCode("F10.26")
-                            .build()))
-            .details(Set.of(RdaMcsDetail.builder()
-                    .idrDtlFromDate(LocalDate.parse("1970-01-01"))
-                    .idrClmHdIcn("456ABC")
-                    .idrProcCode("H0006")
-                    .build()))
+                        .idrClmHdIcn("456ABC")
+                        .idrDiagCode("F10.26")
+                        .build()))
+            .details(
+                Set.of(
+                    RdaMcsDetail.builder()
+                        .idrDtlFromDate(LocalDate.parse("1970-01-01"))
+                        .idrClmHdIcn("456ABC")
+                        .idrProcCode("H0006")
+                        .build()))
             .build();
     return mcsClaim;
-}
+  }
+
   private RdaFissClaim getSAMHSAFissClaim() {
-    RdaFissClaim fissClaim = RdaFissClaim.builder()
+    RdaFissClaim fissClaim =
+        RdaFissClaim.builder()
             .claimId("XYZ123")
             .lastUpdated(Instant.now())
             .admitDiagCode("F10.21")
-            .revenueLines(Set.of(RdaFissRevenueLine.builder()
-                    .claimId("XYZ123")
-                    .serviceDate(LocalDate.parse("1970-01-01"))
-                    .hcpcCd("H0007")
-                            .rdaPosition((short) 1)
-                    .build()))
-            .diagCodes(Set.of(RdaFissDiagnosisCode.builder()
-                    .claimId("XYZ123")
-                    .rdaPosition((short) 1)
-                    .build()))
-            .procCodes(Set.of(RdaFissProcCode.builder()
-                    .claimId("XYZ123")
-                    .rdaPosition((short) 1)
-                    .build()))
+            .revenueLines(
+                Set.of(
+                    RdaFissRevenueLine.builder()
+                        .claimId("XYZ123")
+                        .serviceDate(LocalDate.parse("1970-01-01"))
+                        .hcpcCd("H0007")
+                        .rdaPosition((short) 1)
+                        .build()))
+            .diagCodes(
+                Set.of(
+                    RdaFissDiagnosisCode.builder()
+                        .claimId("XYZ123")
+                        .rdaPosition((short) 1)
+                        .build()))
+            .procCodes(
+                Set.of(RdaFissProcCode.builder().claimId("XYZ123").rdaPosition((short) 1).build()))
             .build();
     return fissClaim;
-
   }
 }
