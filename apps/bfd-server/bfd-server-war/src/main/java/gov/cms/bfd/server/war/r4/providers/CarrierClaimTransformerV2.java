@@ -251,6 +251,9 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
         // Update the responsible flag
         careTeam.setResponsible(true);
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        TransformerUtilsV2.addCareTeamQualification(
+            careTeam, eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode());
 
         // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
         TransformerUtilsV2.addCareTeamExtension(
