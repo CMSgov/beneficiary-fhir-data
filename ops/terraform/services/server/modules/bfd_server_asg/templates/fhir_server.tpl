@@ -52,6 +52,7 @@ cat <<EOF > extra_vars.json
 {
   "db_url": "${reader_endpoint}",
   "env": "${env}",
+  "env_name_std": "${env}",
   "launch_lifecycle_hook": "${launch_lifecycle_hook}"
 }
 EOF
