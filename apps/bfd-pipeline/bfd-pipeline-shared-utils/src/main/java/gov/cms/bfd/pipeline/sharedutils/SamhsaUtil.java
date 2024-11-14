@@ -167,12 +167,7 @@ public class SamhsaUtil {
    * @return A list of tag entities to persist.
    */
   private List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
-    Optional<List<TagDetails>> entries = Optional.empty();
-    try {
-      entries = getPossibleFissSamhsaFields(fissClaim);
-    } catch (NoSuchElementException ignored) {
-      // Claim is missing elements, so we're unable to process it.
-    }
+    Optional<List<TagDetails>> entries = getPossibleFissSamhsaFields(fissClaim);
     if (entries.isPresent()) {
       List<FissTag> fissTags = new ArrayList<>();
       fissTags.add(
@@ -295,8 +290,7 @@ public class SamhsaUtil {
    * @param fissClaim The claim to check.
    * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
    */
-  private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim)
-      throws NoSuchElementException {
+  private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim) {
     List<TagDetails> entries = new ArrayList<>();
     LocalDate serviceDate;
     try {
