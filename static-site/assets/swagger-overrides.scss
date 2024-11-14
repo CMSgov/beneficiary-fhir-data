@@ -1,6 +1,11 @@
 --- 
 ---
-// all of this is needed to prevent the base theme CSS from interfering with Swagger's CSS
+/* all of this is needed to prevent the base theme CSS from interfering with Swagger's CSS */
+
+/* override parent width to allow swagger doc to expand */
+.page-content .wrapper {
+    max-width: 1200px;
+}
 
 .swagger-ui {
     .try-out {
