@@ -135,7 +135,12 @@ public class SamhsaUtil {
    * @return A list of tag entities to persist.
    */
   private List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
-    Optional<List<TagDetails>> entries = getPossibleMcsSamhsaFields(mcsClaim);
+    Optional<List<TagDetails>> entries = Optional.empty();
+    try {
+      entries = getPossibleMcsSamhsaFields(mcsClaim);
+    } catch (NoSuchElementException ignored) {
+      // Claim is missing elements, so we're unable to process it.
+    }
     if (entries.isPresent()) {
       List<McsTag> mcsTags = new ArrayList<>();
       mcsTags.add(
@@ -162,7 +167,6 @@ public class SamhsaUtil {
    * @return A list of tag entities to persist.
    */
   private List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
-
     Optional<List<TagDetails>> entries = Optional.empty();
     try {
       entries = getPossibleFissSamhsaFields(fissClaim);
