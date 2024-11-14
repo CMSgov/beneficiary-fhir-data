@@ -39,8 +39,8 @@
 /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: https://gov-metric-api.newrelic.com
 /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: /metric/v1
-/bfd/${env}/server/nonsensitive/pac_resources_enabled: true
-/bfd/${env}/server/nonsensitive/pac_claim_source_types: fiss,mcs
+/bfd/${env}/server/nonsensitive/pac/enabled: true
+/bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/lb_is_public: false
 /bfd/${env}/server/nonsensitive/lb_ingress_port: 443

@@ -51,6 +51,7 @@ jq -s 'add | . ' <(echo "$new_relic_nonsensitive") <(echo "$new_relic_sensitive"
 cat <<EOF > extra_vars.json
 {
   "db_url": "${writer_endpoint}",
+  "env_name_std": "${env}",
   "pipeline_instance_type": "${pipeline_instance}",
   "s3_bucket": "${pipeline_bucket}"
 }
