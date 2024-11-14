@@ -14,7 +14,8 @@ import lombok.AllArgsConstructor;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
 import software.amazon.jdbc.HostSpec;
 import software.amazon.jdbc.PropertyDefinition;
-import software.amazon.jdbc.dialect.AuroraPgDialect;
+import software.amazon.jdbc.dialect.DialectCodes;
+import software.amazon.jdbc.dialect.DialectManager;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
@@ -23,7 +24,8 @@ import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
 import software.amazon.jdbc.profile.ConfigurationProfile;
 import software.amazon.jdbc.profile.ConfigurationProfileBuilder;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
-import software.amazon.jdbc.targetdriverdialect.PgTargetDriverDialect;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectCodes;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectManager;
 
 /**
  * This class implements a {@link DataSourceFactory} that creates {@link AwsWrapperDataSource}
@@ -101,8 +103,6 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
         .from(wrapperOptions.getBasePresetCode())
         .withName(CUSTOM_PRESET_NAME)
         .withPluginFactories(wrapperOptions.getPlugins())
-        .withDialect(new AuroraPgDialect())
-        .withTargetDriverDialect(new PgTargetDriverDialect())
         .withConnectionProvider(
             new HikariPooledConnectionProvider(
                 (HostSpec hostSpec, Properties originalProps) -> {
@@ -136,6 +136,9 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
    */
   private static Properties getProperties(AwsJdbcWrapperOptions wrapperOptions) {
     final var targetDataSourceProps = new Properties();
+    targetDataSourceProps.setProperty(
+        TargetDriverDialectManager.TARGET_DRIVER_DIALECT.name, TargetDriverDialectCodes.PG_JDBC);
+    targetDataSourceProps.setProperty(DialectManager.DIALECT.name, DialectCodes.AURORA_PG);
     targetDataSourceProps.setProperty(
         PropertyDefinition.PROFILE_NAME.name,
         wrapperOptions.useCustomPreset() ? CUSTOM_PRESET_NAME : wrapperOptions.getBasePresetCode());
