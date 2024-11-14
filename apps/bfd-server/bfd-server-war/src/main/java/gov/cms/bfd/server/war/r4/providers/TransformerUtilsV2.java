@@ -822,10 +822,13 @@ public final class TransformerUtilsV2 {
     }
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
-    CodeableConcept concept = new CodeableConcept();
-    concept.addCoding(coding);
-
-    careTeam.setQualification(concept);
+    // Only add the qualification if it doesn't already exist
+    if (careTeam.getQualification().getCoding().stream()
+        .noneMatch(
+            c ->
+                c.getSystem().equals(coding.getSystem()) && c.getCode().equals(coding.getCode()))) {
+      careTeam.getQualification().addCoding(coding);
+    }
   }
 
   /**
@@ -1968,9 +1971,12 @@ public final class TransformerUtilsV2 {
         if (taxonomyArray.length == 2) {
           String taxonomyCode = taxonomyArray[0];
           String taxonomyDisplay = taxonomyArray[1];
-          careTeamEntry.setQualification(
-              createCodeableConcept(
-                  TransformerConstants.NUCC_TAXONOMY_SYSTEM, null, taxonomyDisplay, taxonomyCode));
+          addCodingToCodeableConcept(
+              careTeamEntry.getQualification(),
+              TransformerConstants.NUCC_TAXONOMY_SYSTEM,
+              null,
+              taxonomyDisplay,
+              taxonomyCode);
         }
       }
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
