@@ -19,10 +19,13 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.samhsa.FissTag;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
@@ -42,6 +45,8 @@ public class RdaPipelineTestUtils {
    */
   private static final List<Class<?>> RDA_ENTITY_CLASSES =
       List.of(
+          FissTag.class,
+          McsTag.class,
           RdaFissRevenueLine.class,
           RdaFissPayer.class,
           RdaFissDiagnosisCode.class,
