@@ -244,6 +244,10 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         CareTeamComponent careTeam = performing.get();
         performing.get().setResponsible(true);
 
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        TransformerUtilsV2.addCareTeamQualification(
+            careTeam, eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode());
+
         // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
         TransformerUtilsV2.addCareTeamExtension(
             CcwCodebookVariable.PRTCPTNG_IND_CD,
