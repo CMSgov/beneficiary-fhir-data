@@ -36,6 +36,7 @@ public class SamhsaUtilTest {
   RdaFissClaim fissClaim;
   /** Test MCS Claim. */
   RdaMcsClaim mcsClaim;
+  /** Entity manager that will be mocked. */
 EntityManager entityManager;
   /** A SAMHSA code to use in the tests. */
   private static final String TEST_SAMHSA_CODE = "H0005";
