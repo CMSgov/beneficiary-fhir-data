@@ -53,7 +53,7 @@ public class SamhsaUtilTest {
   /** This test should return a SAMHSA code entry for the given code. */
   @Test
   public void shouldReturnSamhsaEntry() {
-    Optional<SamhsaEntry> entry = samhsaUtil.isSamhsaCode(Optional.of(TEST_SAMHSA_CODE));
+    Optional<SamhsaEntry> entry = samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_CODE));
     assertTrue(entry.isPresent());
   }
 

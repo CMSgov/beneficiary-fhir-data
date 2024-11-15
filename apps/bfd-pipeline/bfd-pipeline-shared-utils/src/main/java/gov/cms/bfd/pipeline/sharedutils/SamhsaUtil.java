@@ -196,7 +196,7 @@ public class SamhsaUtil {
         mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
+          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
           "mcs_diagnosis_codes",
           "idr_diag_code",
           (int) diagCode.getRdaPosition(),
@@ -206,7 +206,7 @@ public class SamhsaUtil {
     }
     for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
+          getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
           "mcs_details",
           "idr_dtl_primary_diag_code",
           (int) detail.getIdrDtlNumber(),
@@ -215,7 +215,7 @@ public class SamhsaUtil {
           throughDate);
 
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
+          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
           "mcs_details",
           "idr_proc_code",
           (int) detail.getIdrDtlNumber(),
@@ -288,7 +288,7 @@ public class SamhsaUtil {
         fissClaim.getStmtCovToDate() == null ? LocalDate.now() : fissClaim.getStmtCovToDate();
 
     buildDetails(
-        isSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
         "fiss_claims",
         "admit_diag_code",
         null,
@@ -297,7 +297,9 @@ public class SamhsaUtil {
         throughDate);
     for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
+          // Ideally, this column should never contain SAMHSA data, but it is
+          // possible that SAMHSA data could end up here due to user error.
+          getSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
           "fiss_revenue_lines",
           "apc_hcpcs_apc",
           (int) revenueLine.getRdaPosition(),
@@ -305,7 +307,7 @@ public class SamhsaUtil {
           serviceDate,
           throughDate);
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
+          getSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
           "fiss_revenue_lines",
           "hcpcs_cd",
           (int) revenueLine.getRdaPosition(),
@@ -314,7 +316,7 @@ public class SamhsaUtil {
           throughDate);
     }
     buildDetails(
-        isSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
         "fiss_claims",
         "drg_cd",
         null,
@@ -322,7 +324,7 @@ public class SamhsaUtil {
         serviceDate,
         throughDate);
     buildDetails(
-        isSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
         "fiss_claims",
         "principle_diag",
         null,
@@ -331,7 +333,7 @@ public class SamhsaUtil {
         throughDate);
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
+          getSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
           "fiss_diagnosis_codes",
           "diag_cd2",
           (int) diagCode.getRdaPosition(),
@@ -341,7 +343,7 @@ public class SamhsaUtil {
     }
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
+          getSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
           "fiss_proc_codes",
           "proc_code",
           (int) procCode.getRdaPosition(),
@@ -358,7 +360,7 @@ public class SamhsaUtil {
    * @param code the code to check.
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
-  public Optional<SamhsaEntry> isSamhsaCode(Optional<String> code) {
+  public Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
     if (!code.isPresent()) {
       return Optional.empty();
     }
