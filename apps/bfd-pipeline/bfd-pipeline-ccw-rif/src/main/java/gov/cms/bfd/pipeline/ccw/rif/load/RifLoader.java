@@ -21,6 +21,7 @@ import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.pipeline.sharedutils.FluxWaiter;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.Entity;
@@ -348,11 +349,11 @@ public final class RifLoader {
      */
     LoadedBatchBuilder loadedBatchBuilder =
         new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
-
+    SamhsaUtil samhsaUtil = SamhsaUtil.getSamhsaUtil();
     for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
       RecordAction recordAction = rifRecordEvent.getRecordAction();
       RifRecordBase record = rifRecordEvent.getRecord();
-
+      samhsaUtil.processClaim(record, entityManager);
       LOGGER.trace("Loading '{}' record.", rifFileType);
 
       // Set lastUpdated to the same value for the whole batch

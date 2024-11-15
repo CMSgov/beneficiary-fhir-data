@@ -14,9 +14,14 @@ import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.model.rda.samhsa.SamhsaEntry;
 import gov.cms.bfd.model.rda.samhsa.TagCode;
 import gov.cms.bfd.model.rda.samhsa.TagDetails;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
+import gov.cms.bfd.model.rif.samhsa.CarrierTag;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -25,7 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
@@ -101,14 +105,20 @@ public class SamhsaUtil {
   public <TClaim> void processClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
-        Optional<List<FissTag>> tags = Optional.ofNullable(checkAndProcessFissClaim(fissClaim));
+        Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
         persistTags(tags, entityManager);
       }
       case RdaMcsClaim mcsClaim -> {
-        Optional<List<McsTag>> tags = Optional.ofNullable(checkAndProcessMcsClaim(mcsClaim));
+        Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
         persistTags(tags, entityManager);
       }
-      default -> throw new RuntimeException("Unknown claim type.");
+      case CarrierClaim carrierClaim -> {
+        Optional<List< CarrierTag>> tags = Optional.of(checkAndProcessCarrierClaim(carrierClaim));
+        persistTags(tags, entityManager);
+      }
+      default -> {
+        // Do nothing
+      }
     }
   }
 
@@ -134,12 +144,7 @@ public class SamhsaUtil {
    * @return A list of tag entities to persist.
    */
   private List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
-    Optional<List<TagDetails>> entries = Optional.empty();
-    try {
-      entries = getPossibleMcsSamhsaFields(mcsClaim);
-    } catch (NoSuchElementException ignored) {
-      // Claim is missing elements, so we're unable to process it.
-    }
+    Optional<List<TagDetails>> entries = getPossibleMcsSamhsaFields(mcsClaim);
     if (entries.isPresent()) {
       List<McsTag> mcsTags = new ArrayList<>();
       mcsTags.add(
@@ -158,7 +163,26 @@ public class SamhsaUtil {
     }
     return Collections.emptyList();
   }
-
+  private List<CarrierTag> checkAndProcessCarrierClaim(CarrierClaim claim) {
+    Optional<List<TagDetails>> entries = getPossibleCarrierFields(claim);
+    if (entries.isPresent()) {
+      List<CarrierTag> carrierTags = new ArrayList<>();
+      carrierTags.add(
+              CarrierTag.builder()
+                      .claim(claim.getClaimId())
+                      .code(TagCode._42CFRPart2.toString())
+                      .details(entries.get())
+                      .build());
+      carrierTags.add(
+              CarrierTag.builder()
+                      .claim(claim.getClaimId())
+                      .code(TagCode.R.toString())
+                      .details(entries.get())
+                      .build());
+      return carrierTags;
+    }
+    return Collections.emptyList();
+  }
   /**
    * Checks for SAMHSA codes in a FISS Claim and constructs the tags.
    *
@@ -184,6 +208,31 @@ public class SamhsaUtil {
       return fissTags;
     }
     return Collections.emptyList();
+  }
+
+  private Optional<List<TagDetails>> getPossibleCarrierFields(CarrierClaim claim) {
+    Class<?> claimClass= CarrierClaim.class;
+    List<TagDetails> entries = new ArrayList<>();
+    LocalDate serviceDate =
+            claim.getDateFrom() == null
+                    ? LocalDate.parse("1970-01-01")
+                    : claim.getDateFrom();
+    LocalDate throughDate =
+            claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
+    buildDetails(isSamhsaCode(claim.getDiagnosisPrincipalCode()), "carrier_claims", "prncpal_dgns_cd", null, entries, serviceDate, throughDate);
+    try {
+      for (int i = 1; i <= 12; i++) {
+        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
+        buildDetails((isSamhsaCode((Optional<String>)method.invoke(claim))), "carrier_claims", "icd_dgns_cd" + i, null, entries, serviceDate, throughDate);
+      }
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
+    }
+    for (CarrierClaimLine line: claim.getLines()) {
+      buildDetails(isSamhsaCode(line.getDiagnosisCode()), "carrier_claim_lines", "line_icd_dgns_cd", (int) line.getLineNumber(), entries, serviceDate, throughDate);
+      buildDetails(isSamhsaCode(line.getHcpcsCode()), "carrier_claim_lines", "hcpcs_cd", (int) line.getLineNumber(), entries, serviceDate, throughDate);
+    }
+    return entries.isEmpty()?Optional.empty(): Optional.of(entries);
   }
 
   /**
