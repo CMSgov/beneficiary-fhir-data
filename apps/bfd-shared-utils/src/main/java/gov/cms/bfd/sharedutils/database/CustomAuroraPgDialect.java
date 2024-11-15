@@ -42,7 +42,7 @@ FROM
   ) as topology
   INNER JOIN public.cluster_instance_statuses as statuses ON topology.server_id = statuses.server_id
 where
-  statuses.server_status = 'available'
+  statuses.server_status != 'creating'
 """;
 
   /** Test. */
