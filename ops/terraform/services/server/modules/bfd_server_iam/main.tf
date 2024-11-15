@@ -213,3 +213,8 @@ resource "aws_iam_role_policy_attachment" "asg" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.asg.arn
 }
+
+resource "aws_iam_role_policy_attachment" "ec2_instances_tags_ro" {
+  role       = aws_iam_role.instance.id
+  policy_arn = data.aws_iam_policy.ec2_instances_tags.arn
+}

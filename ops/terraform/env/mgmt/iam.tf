@@ -1,88 +1,23 @@
-#TODO: Determine if the bfd-packages sees continued use
-resource "aws_iam_policy" "packer_s3" {
-  description = "packer S3 Policy"
-  name        = "bfd-${local.env}-packer-s3"
+resource "aws_iam_policy" "ec2_instances_tags_ro" {
+  description = "Global EC2 Instances and Tags RO Policy"
+  name        = "bfd-${local.env}-ec2-instance-tags-ro"
   path        = "/"
   policy      = <<-POLICY
 {
+  "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "EC2InstanceTagsRO",
       "Action": [
-        "s3:GetObjectAcl",
-        "s3:GetObject",
-        "s3:GetObjectVersionAcl",
-        "s3:GetObjectTagging",
-        "s3:ListBucket",
-        "s3:GetObjectVersion"
+        "ec2:DescribeTags",
+        "ec2:DescribeInstances"
       ],
       "Effect": "Allow",
-      "Resource": [
-        "arn:aws:s3:::bfd-packages/*",
-        "arn:aws:s3:::bfd-packages"
-      ],
-      "Sid": "BFDProfile"
+      "Resource": "*"
     }
-  ],
-  "Version": "2012-10-17"
+  ]
 }
 POLICY
-
-}
-
-resource "aws_iam_policy" "packer_ssm" {
-  description = "Policy granting permission for bfd-packer profiled instances to access some common SSM hierarchies"
-  name        = "bfd-${local.env}-packer-ssm"
-  path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
-    {
-      "Action": [
-        "ssm:GetParametersByPath",
-        "ssm:GetParameters",
-        "ssm:GetParameter"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        %{for env in local.established_envs~}
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${env}/common/*",
-        %{endfor~}
-        "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/*"
-      ],
-      "Sid": "BFDProfile"
-    }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
-}
-
-resource "aws_iam_policy" "packer_kms" {
-  description = "Policy granting permission for bfd-packer profiled instances to decrypt using mgmt and established environment KMS keys"
-  name        = "bfd-${local.env}-packer-kms"
-  path        = "/"
-  policy = jsonencode(
-    {
-      "Statement" : [
-        {
-          "Action" : ["kms:Decrypt"],
-          "Effect" : "Allow",
-          "Resource" : concat(
-            [
-              "${local.bfd_insights_kms_key_id}",
-              "${local.kms_key_id}",
-              "${local.tf_state_kms_key_id}",
-              "${local.test_kms_key_id}",
-              "${local.prod_sbx_kms_key_id}",
-              "${local.prod_kms_key_id}"
-            ],
-            local.all_kms_config_key_arns
-          )
-        }
-      ],
-      "Version" : "2012-10-17"
-    }
-  )
 }
 
 resource "aws_iam_policy" "code_artifact_rw" {

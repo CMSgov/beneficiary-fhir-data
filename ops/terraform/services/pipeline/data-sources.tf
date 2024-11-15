@@ -137,3 +137,7 @@ data "aws_sns_topic" "bfd_notices_slack_alarm" {
   count = local.is_ephemeral_env ? 0 : 1
   name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
 }
+
+data "aws_iam_policy" "ec2_instances_tags_ro" {
+  name = "bfd-mgmt-ec2-instances-tags-ro"
+}
