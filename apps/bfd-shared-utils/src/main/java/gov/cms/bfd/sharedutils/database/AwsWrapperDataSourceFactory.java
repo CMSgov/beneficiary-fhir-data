@@ -158,9 +158,9 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
         HostAvailabilityStrategyFactory.DEFAULT_HOST_AVAILABILITY_STRATEGY.name,
         ExponentialBackoffHostAvailabilityStrategy.NAME);
     targetDataSourceProps.setProperty(
-        HostAvailabilityStrategyFactory.HOST_AVAILABILITY_STRATEGY_INITIAL_BACKOFF_TIME.name, "5");
+        HostAvailabilityStrategyFactory.HOST_AVAILABILITY_STRATEGY_INITIAL_BACKOFF_TIME.name, "30");
     targetDataSourceProps.setProperty(
-        HostAvailabilityStrategyFactory.HOST_AVAILABILITY_STRATEGY_MAX_RETRIES.name, "10");
+        HostAvailabilityStrategyFactory.HOST_AVAILABILITY_STRATEGY_MAX_RETRIES.name, "5");
     return targetDataSourceProps;
   }
 
