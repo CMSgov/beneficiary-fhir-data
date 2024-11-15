@@ -1,4 +1,4 @@
-package gov.cms.bfd.model.rda.samhsa;
+package gov.cms.bfd.pipeline.sharedutils.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

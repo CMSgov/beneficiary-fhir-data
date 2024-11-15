@@ -13,10 +13,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
-import gov.cms.bfd.model.rda.samhsa.SamhsaEntry;
-import gov.cms.bfd.model.rif.entities.CarrierClaim;
-import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
+import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,8 +35,6 @@ public class SamhsaUtilTest {
   /** Test MCS Claim. */
   RdaMcsClaim mcsClaim;
 
-  /** Test Carrier Claim */
-   CarrierClaim carrierClaim;
   /** Entity manager that will be mocked. */
   EntityManager entityManager;
 
@@ -53,13 +48,12 @@ public class SamhsaUtilTest {
     entityManager = mock(EntityManager.class);
     fissClaim = getSAMHSAFissClaim();
     mcsClaim = getSAMHSAMcsClaim();
-    carrierClaim = getSamhsaCarrierClaim();
   }
 
   /** This test should return a SAMHSA code entry for the given code. */
   @Test
   public void shouldReturnSamhsaEntry() {
-    Optional<SamhsaEntry> entry = samhsaUtil.isSamhsaCode(Optional.of(TEST_SAMHSA_CODE));
+    Optional<SamhsaEntry> entry = samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_CODE));
     assertTrue(entry.isPresent());
   }
 
@@ -96,16 +90,6 @@ public class SamhsaUtilTest {
         tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count(), 2);
   }
 
-  @Test
-  public void shouldSaveCarrierTag() {
-    ArgumentCaptor<CarrierTag> captor = ArgumentCaptor.forClass(CarrierTag.class);
-    samhsaUtil.processClaim(carrierClaim, entityManager);
-    verify(entityManager, times(2)).merge(captor.capture());
-    List<CarrierTag> tags = captor.getAllValues();
-    assertEquals(2,
-            tags.stream().filter(t -> t.getClaim().equals(carrierClaim.getClaimId())).count());
-    assertEquals(4, tags.getFirst().getDetails().size());
-  }
   /** This test should not try to save a tag. */
   @Test
   public void shouldNotSaveMcsTag() {
@@ -177,21 +161,5 @@ public class SamhsaUtilTest {
                 Set.of(RdaFissProcCode.builder().claimId("XYZ123").rdaPosition((short) 1).build()))
             .build();
     return fissClaim;
-  }
-  public CarrierClaim getSamhsaCarrierClaim() {
-    CarrierClaim claim = CarrierClaim.builder()
-            .claimId(1234567890)
-            .diagnosisPrincipalCode("F10.26")
-            .diagnosis1Code("F10.29")
-            .lines(List.of(
-                    CarrierClaimLine.builder()
-                            .diagnosisCode("F10.27")
-                            .lineNumber((short)1)
-                            .hcpcsCode("H0006")
-                            .build()))
-            .dateFrom(LocalDate.parse("1970-01-01"))
-            .dateThrough(LocalDate.now())
-            .build();
-    return claim;
   }
 }

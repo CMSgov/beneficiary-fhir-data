@@ -11,17 +11,12 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
-import gov.cms.bfd.model.rda.samhsa.SamhsaEntry;
-import gov.cms.bfd.model.rda.samhsa.TagCode;
-import gov.cms.bfd.model.rda.samhsa.TagDetails;
-import gov.cms.bfd.model.rif.entities.CarrierClaim;
-import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
+import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -30,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
@@ -112,13 +108,7 @@ public class SamhsaUtil {
         Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
         persistTags(tags, entityManager);
       }
-      case CarrierClaim carrierClaim -> {
-        Optional<List< CarrierTag>> tags = Optional.of(checkAndProcessCarrierClaim(carrierClaim));
-        persistTags(tags, entityManager);
-      }
-      default -> {
-        // Do nothing
-      }
+      default -> throw new RuntimeException("Unknown claim type.");
     }
   }
 
@@ -163,26 +153,7 @@ public class SamhsaUtil {
     }
     return Collections.emptyList();
   }
-  private List<CarrierTag> checkAndProcessCarrierClaim(CarrierClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleCarrierFields(claim);
-    if (entries.isPresent()) {
-      List<CarrierTag> carrierTags = new ArrayList<>();
-      carrierTags.add(
-              CarrierTag.builder()
-                      .claim(claim.getClaimId())
-                      .code(TagCode._42CFRPart2.toString())
-                      .details(entries.get())
-                      .build());
-      carrierTags.add(
-              CarrierTag.builder()
-                      .claim(claim.getClaimId())
-                      .code(TagCode.R.toString())
-                      .details(entries.get())
-                      .build());
-      return carrierTags;
-    }
-    return Collections.emptyList();
-  }
+
   /**
    * Checks for SAMHSA codes in a FISS Claim and constructs the tags.
    *
@@ -210,31 +181,6 @@ public class SamhsaUtil {
     return Collections.emptyList();
   }
 
-  private Optional<List<TagDetails>> getPossibleCarrierFields(CarrierClaim claim) {
-    Class<?> claimClass= CarrierClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-            claim.getDateFrom() == null
-                    ? LocalDate.parse("1970-01-01")
-                    : claim.getDateFrom();
-    LocalDate throughDate =
-            claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(isSamhsaCode(claim.getDiagnosisPrincipalCode()), "carrier_claims", "prncpal_dgns_cd", null, entries, serviceDate, throughDate);
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails((isSamhsaCode((Optional<String>)method.invoke(claim))), "carrier_claims", "icd_dgns_cd" + i, null, entries, serviceDate, throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    for (CarrierClaimLine line: claim.getLines()) {
-      buildDetails(isSamhsaCode(line.getDiagnosisCode()), "carrier_claim_lines", "line_icd_dgns_cd", (int) line.getLineNumber(), entries, serviceDate, throughDate);
-      buildDetails(isSamhsaCode(line.getHcpcsCode()), "carrier_claim_lines", "hcpcs_cd", (int) line.getLineNumber(), entries, serviceDate, throughDate);
-    }
-    return entries.isEmpty()?Optional.empty(): Optional.of(entries);
-  }
-
   /**
    * Constructs a list of TagDetail objects for an MCS claim.
    *
@@ -251,7 +197,7 @@ public class SamhsaUtil {
         mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
+          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
           "mcs_diagnosis_codes",
           "idr_diag_code",
           (int) diagCode.getRdaPosition(),
@@ -261,7 +207,7 @@ public class SamhsaUtil {
     }
     for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
+          getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
           "mcs_details",
           "idr_dtl_primary_diag_code",
           (int) detail.getIdrDtlNumber(),
@@ -270,7 +216,7 @@ public class SamhsaUtil {
           throughDate);
 
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
+          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
           "mcs_details",
           "idr_proc_code",
           (int) detail.getIdrDtlNumber(),
@@ -343,7 +289,7 @@ public class SamhsaUtil {
         fissClaim.getStmtCovToDate() == null ? LocalDate.now() : fissClaim.getStmtCovToDate();
 
     buildDetails(
-        isSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
         "fiss_claims",
         "admit_diag_code",
         null,
@@ -352,7 +298,9 @@ public class SamhsaUtil {
         throughDate);
     for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
+          // Ideally, this column should never contain SAMHSA data, but it is
+          // possible that SAMHSA data could end up here due to user error.
+          getSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
           "fiss_revenue_lines",
           "apc_hcpcs_apc",
           (int) revenueLine.getRdaPosition(),
@@ -360,7 +308,7 @@ public class SamhsaUtil {
           serviceDate,
           throughDate);
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
+          getSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
           "fiss_revenue_lines",
           "hcpcs_cd",
           (int) revenueLine.getRdaPosition(),
@@ -369,7 +317,7 @@ public class SamhsaUtil {
           throughDate);
     }
     buildDetails(
-        isSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
         "fiss_claims",
         "drg_cd",
         null,
@@ -377,7 +325,7 @@ public class SamhsaUtil {
         serviceDate,
         throughDate);
     buildDetails(
-        isSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
         "fiss_claims",
         "principle_diag",
         null,
@@ -386,7 +334,7 @@ public class SamhsaUtil {
         throughDate);
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
+          getSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
           "fiss_diagnosis_codes",
           "diag_cd2",
           (int) diagCode.getRdaPosition(),
@@ -396,7 +344,7 @@ public class SamhsaUtil {
     }
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
       buildDetails(
-          isSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
+          getSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
           "fiss_proc_codes",
           "proc_code",
           (int) procCode.getRdaPosition(),
@@ -413,7 +361,7 @@ public class SamhsaUtil {
    * @param code the code to check.
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
-  public Optional<SamhsaEntry> isSamhsaCode(Optional<String> code) {
+  public Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
     if (!code.isPresent()) {
       return Optional.empty();
     }
