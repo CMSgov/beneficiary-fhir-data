@@ -784,7 +784,11 @@ public class CarrierClaimTransformerV2Test {
                     new Coding()
                         .setSystem("http://nucc.org/provider-taxonomy")
                         .setDisplay("Health Care")
-                        .setCode("390200000X"))));
+                        .setCode("390200000X"),
+                    new Coding()
+                        .setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_spclty")
+                        .setDisplay("Optometrist")
+                        .setCode("41"))));
     compare3.addExtension(
         "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
         new Coding()

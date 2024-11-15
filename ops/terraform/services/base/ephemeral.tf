@@ -9,7 +9,6 @@ locals {
     "/bfd/${local.env}/common/nonsensitive/kms_key_alias"                   = "/bfd/${local.seed_env}/common/nonsensitive/kms_key_alias"
     "/bfd/${local.env}/common/nonsensitive/kms_config_key_alias"            = "/bfd/${local.seed_env}/common/nonsensitive/kms_config_key_alias"
     "/bfd/${local.env}/common/nonsensitive/management_security_group"       = "/bfd/${local.seed_env}/common/nonsensitive/management_security_group"
-    "/bfd/${local.env}/common/nonsensitive/rds_aurora_family"               = "/bfd/${local.seed_env}/common/nonsensitive/rds_aurora_family"
     "/bfd/${local.env}/common/nonsensitive/rds_instance_class"              = "/bfd/${local.seed_env}/common/nonsensitive/rds_instance_class"
     "/bfd/${local.env}/common/nonsensitive/vpc_name"                        = "/bfd/${local.seed_env}/common/nonsensitive/vpc_name"
     "/bfd/${local.env}/common/nonsensitive/vpn_security_group"              = "/bfd/${local.seed_env}/common/nonsensitive/vpn_security_group"
