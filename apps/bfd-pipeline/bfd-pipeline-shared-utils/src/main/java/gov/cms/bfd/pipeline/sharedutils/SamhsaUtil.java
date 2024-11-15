@@ -17,7 +17,6 @@ import gov.cms.bfd.model.rda.samhsa.TagDetails;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -195,17 +194,12 @@ public class SamhsaUtil {
    */
   private Optional<List<TagDetails>> getPossibleMcsSamhsaFields(RdaMcsClaim mcsClaim) {
     List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate;
-    // If there is an error reading the service date, set it to the earliest possible time.
-    try {
-      serviceDate =
-          Collections.min(
-              mcsClaim.getDetails().stream().map(RdaMcsDetail::getIdrDtlFromDate).toList());
-    } catch (Exception e) {
-      serviceDate = LocalDate.parse("1970-01-01");
-    }
-    Instant lastUpdated =
-        mcsClaim.getLastUpdated() == null ? Instant.now() : mcsClaim.getLastUpdated();
+    LocalDate serviceDate =
+        mcsClaim.getIdrHdrFromDateOfSvc() == null
+            ? LocalDate.parse("1970-01-01")
+            : mcsClaim.getIdrHdrFromDateOfSvc();
+    LocalDate throughDate =
+        mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
@@ -214,7 +208,7 @@ public class SamhsaUtil {
           (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
     }
     for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       buildDetails(
@@ -224,7 +218,7 @@ public class SamhsaUtil {
           (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
 
       buildDetails(
           isSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
@@ -233,7 +227,7 @@ public class SamhsaUtil {
           (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
     }
     return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
@@ -245,9 +239,9 @@ public class SamhsaUtil {
    * @param table The table that the code belongs to
    * @param column The column that the cod belongs to
    * @param lineNum The line number that the code belongs to
-   * @param detailsList The TagDetails list to add to.
+   * @param detailsList The TagDetails list to add to
    * @param serviceDate The first date of service for the claim
-   * @param lastUpdated The last updated date for the claim
+   * @param throughDate The service through date
    */
   private void buildDetails(
       Optional<SamhsaEntry> entry,
@@ -256,7 +250,7 @@ public class SamhsaUtil {
       Integer lineNum,
       List<TagDetails> detailsList,
       LocalDate serviceDate,
-      Instant lastUpdated) {
+      LocalDate throughDate) {
     if (entry.isPresent()) {
       try {
         LocalDate startDate = LocalDate.parse(entry.get().getStartDate());
@@ -267,7 +261,7 @@ public class SamhsaUtil {
         // if the last update to the claim is before the start date of the SAMHSA code
         // or the service date of the claim is after the end date of the code,
         // do nothing.
-        if (lastUpdated.isBefore(Instant.from(startDate)) || serviceDate.isAfter(endDate)) {
+        if (throughDate.isBefore(startDate) || serviceDate.isAfter(endDate)) {
           return;
         }
       } catch (DateTimeParseException ignore) {
@@ -292,19 +286,12 @@ public class SamhsaUtil {
    */
   private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim) {
     List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate;
-    try {
-      serviceDate =
-          Collections.min(
-              fissClaim.getRevenueLines().stream()
-                  .map(RdaFissRevenueLine::getServiceDate)
-                  .toList());
-    } catch (Exception e) {
-      // If there is an error reading the service date, set it to the earliest possible date.
-      serviceDate = LocalDate.parse("1970-01-01");
-    }
-    Instant lastUpdated =
-        fissClaim.getLastUpdated() == null ? Instant.now() : fissClaim.getLastUpdated();
+    LocalDate serviceDate =
+        fissClaim.getStmtCovFromDate() == null
+            ? LocalDate.parse("1970-01-01")
+            : fissClaim.getStmtCovFromDate();
+    LocalDate throughDate =
+        fissClaim.getStmtCovToDate() == null ? LocalDate.now() : fissClaim.getStmtCovToDate();
 
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
@@ -313,7 +300,7 @@ public class SamhsaUtil {
         null,
         entries,
         serviceDate,
-        lastUpdated);
+        throughDate);
     for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
@@ -322,7 +309,7 @@ public class SamhsaUtil {
           (int) revenueLine.getRdaPosition(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
       buildDetails(
           isSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
           "fiss_revenue_lines",
@@ -330,7 +317,7 @@ public class SamhsaUtil {
           (int) revenueLine.getRdaPosition(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
     }
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
@@ -339,7 +326,7 @@ public class SamhsaUtil {
         null,
         entries,
         serviceDate,
-        lastUpdated);
+        throughDate);
     buildDetails(
         isSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
         "fiss_claims",
@@ -347,7 +334,7 @@ public class SamhsaUtil {
         null,
         entries,
         serviceDate,
-        lastUpdated);
+        throughDate);
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
           isSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
@@ -356,7 +343,7 @@ public class SamhsaUtil {
           (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
     }
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
       buildDetails(
@@ -366,7 +353,7 @@ public class SamhsaUtil {
           (int) procCode.getRdaPosition(),
           entries,
           serviceDate,
-          lastUpdated);
+          throughDate);
     }
     return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
