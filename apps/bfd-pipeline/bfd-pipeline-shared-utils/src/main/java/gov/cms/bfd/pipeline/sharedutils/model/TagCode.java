@@ -7,7 +7,7 @@ public enum TagCode {
   /** Tag Code 42CFRPart2. */
   _42CFRPart2("42CFRPart2");
 
-  /** Name of the enum in the DB */
+  /** Name of the enum in the DB. */
   private String dbName;
 
   /**
