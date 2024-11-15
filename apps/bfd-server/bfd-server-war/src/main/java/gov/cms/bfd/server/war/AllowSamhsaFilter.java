@@ -3,7 +3,8 @@ package gov.cms.bfd.server.war;
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_ALLOWED_CERTIFICATE_ALIASES_JSON;
 import static gov.cms.bfd.server.war.commons.CommonTransformerUtils.SHOULD_FILTER_SAMHSA;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.war.commons.ClientCertificateUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -48,11 +49,12 @@ public class AllowSamhsaFilter extends OncePerRequestFilter {
   public AllowSamhsaFilter(
       @Value("${" + SSM_PATH_SAMHSA_ALLOWED_CERTIFICATE_ALIASES_JSON + "}")
           String samhsaAllowedCertificateAliasesJson,
-      @Qualifier("serverTrustStore") KeyStore keyStore) {
+      @Qualifier("serverTrustStore") KeyStore keyStore)
+      throws JsonProcessingException {
     super();
-    Gson deserializer = new Gson();
+    ObjectMapper mapper = new ObjectMapper();
     String[] samhsaAllowedCertAliases =
-        deserializer.fromJson(samhsaAllowedCertificateAliasesJson, String[].class);
+        mapper.readValue(samhsaAllowedCertificateAliasesJson, String[].class);
     this.samhsaAllowedSerialNumbers =
         Arrays.stream(samhsaAllowedCertAliases)
             .map(allowedCert -> getCertSerialNumber(keyStore, allowedCert))
