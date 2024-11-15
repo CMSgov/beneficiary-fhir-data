@@ -134,17 +134,17 @@
   code: G2070
   startDate: 1970-01-01
   endDate: ACTIVE
-  comment: No longer active as of 01-01-2025
+  comment: No longer active as of 01-01-2025. These are being retained temporarily in case of accidental use.
 - system: https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets
   code: G2071
   startDate: 1970-01-01
   endDate: ACTIVE
-  comment: No longer active as of 01-01-2025
+  comment: No longer active as of 01-01-2025. These are being retained temporarily in case of accidental use.
 - system: https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets
   code: G2072
   startDate: 1970-01-01
   endDate: ACTIVE
-  comment: No longer active as of 01-01-2025
+  comment: No longer active as of 01-01-2025. These are being retained temporarily in case of accidental use.
 - system: https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets
   code: G2073
   startDate: 1970-01-01
