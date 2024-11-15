@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.util.Strings;
@@ -101,11 +100,11 @@ public class SamhsaUtil {
   public <TClaim> void processClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
-        Optional<List<FissTag>> tags = Optional.ofNullable(checkAndProcessFissClaim(fissClaim));
+        Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
         persistTags(tags, entityManager);
       }
       case RdaMcsClaim mcsClaim -> {
-        Optional<List<McsTag>> tags = Optional.ofNullable(checkAndProcessMcsClaim(mcsClaim));
+        Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
         persistTags(tags, entityManager);
       }
       default -> throw new RuntimeException("Unknown claim type.");
@@ -134,12 +133,7 @@ public class SamhsaUtil {
    * @return A list of tag entities to persist.
    */
   private List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
-    Optional<List<TagDetails>> entries = Optional.empty();
-    try {
-      entries = getPossibleMcsSamhsaFields(mcsClaim);
-    } catch (NoSuchElementException ignored) {
-      // Claim is missing elements, so we're unable to process it.
-    }
+    Optional<List<TagDetails>> entries = getPossibleMcsSamhsaFields(mcsClaim);
     if (entries.isPresent()) {
       List<McsTag> mcsTags = new ArrayList<>();
       mcsTags.add(
