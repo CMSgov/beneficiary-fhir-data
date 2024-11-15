@@ -17,6 +17,8 @@ import software.amazon.jdbc.PropertyDefinition;
 import software.amazon.jdbc.dialect.DialectCodes;
 import software.amazon.jdbc.dialect.DialectManager;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
+import software.amazon.jdbc.hostavailability.ExponentialBackoffHostAvailabilityStrategy;
+import software.amazon.jdbc.hostavailability.HostAvailabilityStrategyFactory;
 import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
 import software.amazon.jdbc.plugin.failover2.FailoverConnectionPlugin;
@@ -148,13 +150,17 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
     targetDataSourceProps.setProperty(
         ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name,
         wrapperOptions.getHostSelectionStrategy());
-    // Aggressive cluster topology refresh should enable Server instances to switch to incoming
-    // reader nodes more quickly (default is 30 seconds). Note that when failover occurs, a
-    // different value ("high refresh rate") is used
     targetDataSourceProps.setProperty(
         RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name, "3000");
     targetDataSourceProps.setProperty(
         FailoverConnectionPlugin.ENABLE_CONNECT_FAILOVER.name, "true");
+    targetDataSourceProps.setProperty(
+        HostAvailabilityStrategyFactory.DEFAULT_HOST_AVAILABILITY_STRATEGY.name,
+        ExponentialBackoffHostAvailabilityStrategy.NAME);
+    targetDataSourceProps.setProperty(
+        HostAvailabilityStrategyFactory.HOST_AVAILABILITY_STRATEGY_INITIAL_BACKOFF_TIME.name, "5");
+    targetDataSourceProps.setProperty(
+        HostAvailabilityStrategyFactory.HOST_AVAILABILITY_STRATEGY_MAX_RETRIES.name, "10");
     return targetDataSourceProps;
   }
 
