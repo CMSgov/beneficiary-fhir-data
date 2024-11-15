@@ -13,7 +13,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
-import gov.cms.bfd.model.rda.samhsa.SamhsaEntry;
+import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.LocalDate;

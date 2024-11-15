@@ -32,7 +32,7 @@ public class McsTag {
   /** The tag details. */
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", nullable = true)
-  private List<TagDetails> details;
+  private List details;
 
   /** The associated claim. */
   @Id
