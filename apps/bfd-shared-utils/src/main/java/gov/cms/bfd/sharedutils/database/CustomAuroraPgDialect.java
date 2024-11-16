@@ -40,9 +40,10 @@ FROM
       OR SESSION_ID = 'MASTER_SESSION_ID'
       OR LAST_UPDATE_TIMESTAMP IS NULL
   ) as topology
-  INNER JOIN public.cluster_instance_statuses as statuses ON topology.server_id = statuses.server_id
-where
-  statuses.server_status != 'creating'
+  LEFT JOIN public.cluster_instance_statuses as statuses ON topology.server_id = statuses.server_id
+WHERE
+  statuses.server_status IS NULL
+  OR statuses.server_status != 'creating'
 """;
 
   /** Test. */
