@@ -252,10 +252,12 @@ public class SamhsaUtil {
             entry.get().getEndDate().equals("Active")
                 ? LocalDate.now()
                 : LocalDate.parse(entry.get().getEndDate());
-        // if the last update to the claim is before the start date of the SAMHSA code
-        // or the service date of the claim is after the end date of the code,
-        // do nothing.
-        if (throughDate.isBefore(startDate) || serviceDate.isAfter(endDate)) {
+
+        // if the throughDate is not between the start and end date,
+        // and the serviceDate is not between the start and end date,
+        // then the claim falls outside the date range of the SAMHSA code.
+        if ((throughDate.isBefore(startDate) || throughDate.isAfter(endDate))
+            && (serviceDate.isBefore(startDate) || serviceDate.isAfter(endDate))) {
           return;
         }
       } catch (DateTimeParseException ignore) {
