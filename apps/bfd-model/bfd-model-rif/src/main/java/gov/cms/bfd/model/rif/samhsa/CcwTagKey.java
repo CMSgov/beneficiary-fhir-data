@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CcwTagKey implements Serializable {
   /** The associated claim. */
-  private String claim;
+  private Long claim;
 
   /** The tag code. */
-  private Long code;
+  private String code;
 
   /** {@inheritDoc} */
   @Override

@@ -22,7 +22,7 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @Builder
 @IdClass(CcwTagKey.class)
-@Table(name = "dme_tags", schema = "rda")
+@Table(name = "dme_tags", schema = "ccw")
 public class DmeTag {
   /** The tag code. */
   @Id

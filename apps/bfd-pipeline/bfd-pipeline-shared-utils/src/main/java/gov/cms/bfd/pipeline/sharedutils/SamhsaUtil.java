@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
-import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -24,7 +23,6 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
-import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.samhsa.CarrierTag;
@@ -162,10 +160,8 @@ public class SamhsaUtil {
         Optional<List<SnfTag>> tags = Optional.of(checkAndProcessSnfClaim(snfClaim));
         persistTags(tags, entityManager);
       }
-      case Beneficiary ignored -> {} // Do nothing
-      case PartDEvent ignored -> {} // Do nothing
       default -> {
-        throw new RuntimeException("Error: unknown claim type.");
+        // throw new RuntimeException("Error: unknown claim type.");
       }
     }
   }
@@ -436,7 +432,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("diagnosisExternal" + i + "Code");
+        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "snf_claims",
@@ -451,7 +447,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("procedure" + i + "Code");
+        Method method = claimClass.getMethod("getProcedure" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "snf_claims",
@@ -539,7 +535,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("diagnosisExternal" + i + "Code");
+        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "inpatient_claims",
@@ -554,7 +550,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("procedure" + i + "Code");
+        Method method = claimClass.getMethod("getProcedure" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "outpatient_claims",
@@ -618,7 +614,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("diagnosisExternal" + i + "Code");
+        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "outpatient_claims",
@@ -633,7 +629,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("procedure" + i + "Code");
+        Method method = claimClass.getMethod("getProcedure" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "outpatient_claims",
@@ -762,7 +758,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("diagnosisExternal" + i + "Code");
+        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "hospice_claims",
@@ -834,7 +830,7 @@ public class SamhsaUtil {
     }
     try {
       for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("diagnosisExternal" + i + "Code");
+        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
         buildDetails(
             (getSamhsaCode((Optional<String>) method.invoke(claim))),
             "hha_claims",
@@ -1059,10 +1055,12 @@ public class SamhsaUtil {
             entry.get().getEndDate().equals("Active")
                 ? LocalDate.now()
                 : LocalDate.parse(entry.get().getEndDate());
-        // if the last update to the claim is before the start date of the SAMHSA code
-        // or the service date of the claim is after the end date of the code,
-        // do nothing.
-        if (throughDate.isBefore(startDate) || serviceDate.isAfter(endDate)) {
+
+        // if the throughDate is not between the start and end date,
+        // and the serviceDate is not between the start and end date,
+        // then the claim falls outside of the date range of the SAMHSA code.
+        if ((throughDate.isBefore(startDate) || throughDate.isAfter(endDate))
+            && (serviceDate.isBefore(startDate) || serviceDate.isAfter(endDate))) {
           return;
         }
       } catch (DateTimeParseException ignore) {
