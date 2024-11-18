@@ -14,22 +14,22 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/** Entity for a Carrier tag. */
+/** Entity for an MCS tag. */
 @Entity
-@Table(name = "carrier_tags", schema = "ccw")
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @IdClass(CcwTagKey.class)
-public class CarrierTag {
-  /** Tag Code. */
+@Table(name = "hospice_tags", schema = "rda")
+public class HospiceTag {
+  /** The tag code. */
   @Id
   @Column(name = "code", nullable = false)
   private String code;
 
-  /** the details field. */
+  /** The tag details. */
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", nullable = true)
   private List details;

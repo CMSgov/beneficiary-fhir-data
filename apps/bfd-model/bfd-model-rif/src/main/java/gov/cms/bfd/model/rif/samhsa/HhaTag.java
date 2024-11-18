@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
-import java.util.List;
 
 /** Entity for an MCS tag. */
 @Entity
@@ -23,7 +22,7 @@ import java.util.List;
 @Setter
 @Builder
 @IdClass(CcwTagKey.class)
-@Table(name = "mcs_tags", schema = "rda")
+@Table(name = "hha_tags", schema = "rda")
 public class HhaTag {
   /** The tag code. */
   @Id
@@ -38,5 +37,5 @@ public class HhaTag {
   /** The associated claim. */
   @Id
   @Column(name = "clm_id", nullable = false)
-  String claim;
+  Long claim;
 }

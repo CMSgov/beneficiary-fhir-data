@@ -1,11 +1,10 @@
 package gov.cms.bfd.model.rif.samhsa;
 
+import java.io.Serializable;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /** The composite key for RDA tags. */
 @NoArgsConstructor
