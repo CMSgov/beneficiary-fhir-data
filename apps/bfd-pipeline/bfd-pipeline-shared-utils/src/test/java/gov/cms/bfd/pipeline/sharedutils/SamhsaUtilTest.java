@@ -29,12 +29,6 @@ public class SamhsaUtilTest {
   /** An instance of SamhsaUtil. */
   SamhsaUtil samhsaUtil;
 
-  /** Test Fiss Claim. */
-  RdaFissClaim fissClaim;
-
-  /** Test MCS Claim. */
-  RdaMcsClaim mcsClaim;
-
   /** Entity manager that will be mocked. */
   EntityManager entityManager;
 
@@ -46,8 +40,6 @@ public class SamhsaUtilTest {
   void setup() {
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
     entityManager = mock(EntityManager.class);
-    fissClaim = getSAMHSAFissClaim();
-    mcsClaim = getSAMHSAMcsClaim();
   }
 
   /** This test should return a SAMHSA code entry for the given code. */
@@ -61,6 +53,7 @@ public class SamhsaUtilTest {
   @Test
   public void shouldSaveFissTags() {
     ArgumentCaptor<FissTag> captor = ArgumentCaptor.forClass(FissTag.class);
+    RdaFissClaim fissClaim = getSAMHSAFissClaim();
     samhsaUtil.processClaim(fissClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
     List<FissTag> tags = captor.getAllValues();
@@ -70,6 +63,7 @@ public class SamhsaUtilTest {
   /** This test should not try to save a tag. */
   @Test
   public void shouldNotSaveFissTag() {
+    RdaFissClaim fissClaim = getSAMHSAFissClaim();
     fissClaim.setAdmitDiagCode("NONSAMHSA");
     for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
       revenueLine.setHcpcCd("NONSAMHSA");
@@ -82,6 +76,7 @@ public class SamhsaUtilTest {
   /** This test should create MCS Tags and attempt to save them to the database. */
   @Test
   public void shouldSaveMcsTag() {
+    RdaMcsClaim mcsClaim = getSAMHSAMcsClaim();
     ArgumentCaptor<McsTag> captor = ArgumentCaptor.forClass(McsTag.class);
     samhsaUtil.processClaim(mcsClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
@@ -93,6 +88,7 @@ public class SamhsaUtilTest {
   /** This test should not try to save a tag. */
   @Test
   public void shouldNotSaveMcsTag() {
+    RdaMcsClaim mcsClaim = getNonSAMHSAMcsClaim();
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       diagCode.setIdrDiagCode("NONSAMHSA");
     }
@@ -106,9 +102,9 @@ public class SamhsaUtilTest {
   }
 
   /**
-   * Gets a fake MCS claim.
+   * Gets a fake Samhsa MCS claim.
    *
-   * @return a fake MCS claim.
+   * @return a fake Samhsa MCS claim.
    */
   private RdaMcsClaim getSAMHSAMcsClaim() {
     RdaMcsClaim mcsClaim =
@@ -133,9 +129,36 @@ public class SamhsaUtilTest {
   }
 
   /**
-   * Gets a fake FISS claim.
+   * Gets a fake Non-Samhsa MCS claim.
    *
-   * @return A fake FISS claim.
+   * @return a fake Non-Samhsa MCS claim.
+   */
+  private RdaMcsClaim getNonSAMHSAMcsClaim() {
+    RdaMcsClaim mcsClaim =
+        RdaMcsClaim.builder()
+            .idrClmHdIcn("456ABC")
+            .lastUpdated(Instant.now())
+            .diagCodes(
+                Set.of(
+                    RdaMcsDiagnosisCode.builder()
+                        .idrClmHdIcn("456ABC")
+                        .idrDiagCode("NONSAMHSA")
+                        .build()))
+            .details(
+                Set.of(
+                    RdaMcsDetail.builder()
+                        .idrDtlFromDate(LocalDate.parse("1970-01-01"))
+                        .idrClmHdIcn("456ABC")
+                        .idrProcCode("NONSAMHSA")
+                        .build()))
+            .build();
+    return mcsClaim;
+  }
+
+  /**
+   * Gets a fake Samhsa FISS claim.
+   *
+   * @return A fake Samhsa FISS claim.
    */
   private RdaFissClaim getSAMHSAFissClaim() {
     RdaFissClaim fissClaim =
@@ -149,6 +172,37 @@ public class SamhsaUtilTest {
                         .claimId("XYZ123")
                         .serviceDate(LocalDate.parse("1970-01-01"))
                         .hcpcCd("H0007")
+                        .rdaPosition((short) 1)
+                        .build()))
+            .diagCodes(
+                Set.of(
+                    RdaFissDiagnosisCode.builder()
+                        .claimId("XYZ123")
+                        .rdaPosition((short) 1)
+                        .build()))
+            .procCodes(
+                Set.of(RdaFissProcCode.builder().claimId("XYZ123").rdaPosition((short) 1).build()))
+            .build();
+    return fissClaim;
+  }
+
+  /**
+   * Gets a fake Non-Samhsa FISS claim.
+   *
+   * @return A fake Non-Samhsa FISS claim.
+   */
+  private RdaFissClaim getNonSAMHSAFissClaim() {
+    RdaFissClaim fissClaim =
+        RdaFissClaim.builder()
+            .claimId("XYZ123")
+            .lastUpdated(Instant.now())
+            .admitDiagCode("NONSAMHSA")
+            .revenueLines(
+                Set.of(
+                    RdaFissRevenueLine.builder()
+                        .claimId("XYZ123")
+                        .serviceDate(LocalDate.parse("1970-01-01"))
+                        .hcpcCd("NONSAMHSA")
                         .rdaPosition((short) 1)
                         .build()))
             .diagCodes(
