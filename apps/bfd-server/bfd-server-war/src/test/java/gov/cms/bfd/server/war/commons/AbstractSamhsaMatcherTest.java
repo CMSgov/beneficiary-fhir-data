@@ -1230,4 +1230,94 @@ public class AbstractSamhsaMatcherTest {
 
     assertTrue(method.apply(mockSamhsaMatcher, mockCoding), errorMessage);
   }
+
+  /**
+   * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+   * the expected column data from the given file.
+   */
+  @Test
+  public void testNumberOfCptCodesReturned() {
+    int expected = 66;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+            "samhsa-related-codes/codes-cpt.csv", "CPT Code");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("G0533"));
+  }
+
+  /**
+   * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+   * the expected column data from the given file.
+   */
+  @Test
+  public void testNumberOfDrgCodesReturned() {
+    int expected = 3;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+            "samhsa-related-codes/codes-drg.csv", "MS-DRGs");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("MS-DRG 896"));
+  }
+
+  /**
+   * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+   * the expected column data from the given file.
+   */
+  @Test
+  public void testNumberOfIcd9DiagnosisCodesReturned() {
+    int expected = 135;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+            "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("291.81"));
+  }
+
+  /**
+   * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+   * the expected column data from the given file.
+   */
+  @Test
+  public void testNumberOfIcd9ProcedureCodesReturned() {
+    int expected = 14;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+            "samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("94.67"));
+  }
+
+  /**
+   * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+   * the expected column data from the given file.
+   */
+  @Test
+  public void testNumberOfIcd10DiagnosisCodesReturned() {
+    int expected = 405;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+            "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("F19.280"));
+  }
+
+  /**
+   * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+   * the expected column data from the given file.
+   */
+  @Test
+  public void testNumberOfIcd10ProcedureCodesReturned() {
+    int expected = 57;
+    List<String> actual =
+        AbstractSamhsaMatcher.resourceCsvColumnToList(
+            "samhsa-related-codes/codes-icd-10-procedure.csv", "ICD-10-PCS Code");
+
+    assertEquals(expected, actual.size());
+    assertTrue(actual.contains("HZ86ZZZ"));
+  }
 }
