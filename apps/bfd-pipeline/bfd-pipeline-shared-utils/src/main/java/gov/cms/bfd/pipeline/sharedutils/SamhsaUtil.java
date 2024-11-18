@@ -249,7 +249,7 @@ public class SamhsaUtil {
       try {
         LocalDate startDate = LocalDate.parse(entry.get().getStartDate());
         LocalDate endDate =
-            entry.get().getEndDate().equals("Active")
+            entry.get().getEndDate().equalsIgnoreCase("Active")
                 ? LocalDate.now()
                 : LocalDate.parse(entry.get().getEndDate());
 
