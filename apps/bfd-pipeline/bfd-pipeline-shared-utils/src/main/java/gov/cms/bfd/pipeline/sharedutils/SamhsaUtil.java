@@ -227,6 +227,19 @@ public class SamhsaUtil {
   }
 
   /**
+   * Tests if a given date is within the range of two other dates.
+   *
+   * @param earlyDate early date to test against
+   * @param laterDate later date to test against
+   * @param dateToTest the date that's being tested
+   * @return true if dateToTest is outside the range of the two other dates.
+   */
+  private boolean isDateOutsideOfRange(
+      LocalDate earlyDate, LocalDate laterDate, LocalDate dateToTest) {
+    return dateToTest.isBefore(earlyDate) || dateToTest.isAfter(laterDate);
+  }
+
+  /**
    * Builds a TagDetails object, and adds it to a list of TagDetails.
    *
    * @param entry The SamhsaEntry that holds information about the SAMHSA code.
@@ -250,14 +263,14 @@ public class SamhsaUtil {
         LocalDate startDate = LocalDate.parse(entry.get().getStartDate());
         LocalDate endDate =
             entry.get().getEndDate().equalsIgnoreCase("Active")
-                ? LocalDate.now()
+                ? LocalDate.MAX
                 : LocalDate.parse(entry.get().getEndDate());
 
         // if the throughDate is not between the start and end date,
         // and the serviceDate is not between the start and end date,
         // then the claim falls outside the date range of the SAMHSA code.
-        if ((throughDate.isBefore(startDate) || throughDate.isAfter(endDate))
-            && (serviceDate.isBefore(startDate) || serviceDate.isAfter(endDate))) {
+        if (isDateOutsideOfRange(startDate, endDate, throughDate)
+            && isDateOutsideOfRange(startDate, endDate, serviceDate)) {
           return;
         }
       } catch (DateTimeParseException ignore) {
