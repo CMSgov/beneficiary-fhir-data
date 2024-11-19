@@ -18,7 +18,7 @@ import software.amazon.jdbc.dialect.DialectManager;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
-import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
+import software.amazon.jdbc.plugin.failover2.FailoverConnectionPlugin;
 import software.amazon.jdbc.profile.ConfigurationProfile;
 import software.amazon.jdbc.profile.ConfigurationProfileBuilder;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
@@ -143,12 +143,13 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
         wrapperOptions.useCustomPreset() ? CUSTOM_PRESET_NAME : wrapperOptions.getBasePresetCode());
     targetDataSourceProps.setProperty(
         AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name,
-        wrapperOptions.getInitialConnectionStrategy());
+        wrapperOptions.getHostSelectorStrategy());
     targetDataSourceProps.setProperty(
-        ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name,
-        wrapperOptions.getHostSelectionStrategy());
+        FailoverConnectionPlugin.FAILOVER_READER_HOST_SELECTOR_STRATEGY.name,
+        wrapperOptions.getHostSelectorStrategy());
     targetDataSourceProps.setProperty(
-        RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name, "3000");
+        RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name,
+        Integer.toString(wrapperOptions.getClusterTopologyRefreshRateMs()));
     return targetDataSourceProps;
   }
 

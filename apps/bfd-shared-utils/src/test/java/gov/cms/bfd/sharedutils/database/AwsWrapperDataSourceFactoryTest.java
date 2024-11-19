@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
 import software.amazon.jdbc.PropertyDefinition;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
-import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
+import software.amazon.jdbc.plugin.failover2.FailoverConnectionPlugin;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
 
 /** Unit tests for {@link AwsWrapperDataSourceFactory}. */
@@ -31,6 +31,8 @@ public class AwsWrapperDataSourceFactoryTest {
                     .basePresetCode("E")
                     .useCustomPreset(true)
                     .pluginsCsv("efm2,failover")
+                    .hostSelectorStrategy("leastConnections")
+                    .clusterTopologyRefreshRateMs(100)
                     .build())
             .build();
     var factory = new AwsWrapperDataSourceFactory(dbOptions);
@@ -52,10 +54,10 @@ public class AwsWrapperDataSourceFactoryTest {
     assertEquals(
         dataSourceProps.get(
             AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name),
-        dbOptions.getAwsJdbcWrapperOptions().getHostSelectionStrategy());
+        dbOptions.getAwsJdbcWrapperOptions().getHostSelectorStrategy());
     assertEquals(
-        dataSourceProps.get(ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name),
-        dbOptions.getAwsJdbcWrapperOptions().getInitialConnectionStrategy());
+        dataSourceProps.get(FailoverConnectionPlugin.FAILOVER_READER_HOST_SELECTOR_STRATEGY.name),
+        dbOptions.getAwsJdbcWrapperOptions().getHostSelectorStrategy());
     assertInstanceOf(HikariPooledConnectionProvider.class, customProfile.getConnectionProvider());
   }
 }
