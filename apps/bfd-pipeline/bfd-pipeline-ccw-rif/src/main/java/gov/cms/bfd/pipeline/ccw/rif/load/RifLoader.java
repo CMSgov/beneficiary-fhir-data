@@ -21,6 +21,7 @@ import gov.cms.bfd.pipeline.sharedutils.FluxUtils;
 import gov.cms.bfd.pipeline.sharedutils.FluxWaiter;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.Entity;
@@ -36,6 +37,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,6 +90,17 @@ public final class RifLoader {
    * The maximum amount of time we will wait for a job to quit when an interrupt has been triggered.
    */
   private static final Duration MAX_INTERRUPTED_WAIT_TIME = Duration.ofMinutes(5);
+
+  /** These filetypes will be checked for SAMHSA data. */
+  private static final RifFileType[] POSSIBLE_SAMHSA_CLAIMS = {
+    RifFileType.CARRIER,
+    RifFileType.DME,
+    RifFileType.HHA,
+    RifFileType.HOSPICE,
+    RifFileType.INPATIENT,
+    RifFileType.OUTPATIENT,
+    RifFileType.SNF
+  };
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -348,11 +361,10 @@ public final class RifLoader {
      */
     LoadedBatchBuilder loadedBatchBuilder =
         new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
-
+    SamhsaUtil samhsaUtil = SamhsaUtil.getSamhsaUtil();
     for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
       RecordAction recordAction = rifRecordEvent.getRecordAction();
       RifRecordBase record = rifRecordEvent.getRecord();
-
       LOGGER.trace("Loading '{}' record.", rifFileType);
 
       // Set lastUpdated to the same value for the whole batch
@@ -399,7 +411,9 @@ public final class RifLoader {
                   "Unhandled %s: '%s'.", RecordAction.class, rifRecordEvent.getRecordAction()));
         }
       } else throw new BadCodeMonkeyException();
-
+      if (Arrays.asList(POSSIBLE_SAMHSA_CLAIMS).contains(rifFileType)) {
+        samhsaUtil.processClaim(record, entityManager);
+      }
       LOGGER.trace("Loaded '{}' record.", rifFileType);
 
       fileEventMetrics
