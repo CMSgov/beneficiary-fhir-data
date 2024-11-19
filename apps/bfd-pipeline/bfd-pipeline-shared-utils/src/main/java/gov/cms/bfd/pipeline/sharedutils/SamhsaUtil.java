@@ -160,9 +160,7 @@ public class SamhsaUtil {
         Optional<List<SnfTag>> tags = Optional.of(checkAndProcessSnfClaim(snfClaim));
         persistTags(tags, entityManager);
       }
-      default -> {
-        // throw new RuntimeException("Error: unknown claim type.");
-      }
+      default -> throw new RuntimeException("Error: unknown claim type.");
     }
   }
 

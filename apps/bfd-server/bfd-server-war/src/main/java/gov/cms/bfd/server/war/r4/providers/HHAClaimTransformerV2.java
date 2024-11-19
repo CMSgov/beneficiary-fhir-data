@@ -197,6 +197,9 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
+        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
+        Optional.empty(),
+        Optional.empty(),
         Optional.empty(),
         Optional.empty(),
         claimGroup.getAttendingPhysicianUpin(),
@@ -306,7 +309,8 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-          line.getRevenueCenterRenderingPhysicianNPI());
+          line.getRevenueCenterRenderingPhysicianNPI(),
+          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
 
       // REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
       TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, eob, line.getStatusCode());

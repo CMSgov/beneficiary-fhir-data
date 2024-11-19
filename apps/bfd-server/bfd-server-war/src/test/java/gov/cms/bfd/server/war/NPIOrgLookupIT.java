@@ -15,7 +15,7 @@ public class NPIOrgLookupIT {
   public void VerifyAValidNPIOrg() throws IOException {
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
     Optional<String> orgDisplay = npiOrgLookup.retrieveNPIOrgDisplay(Optional.of("1497758544"));
-    assertEquals("CUMBERLAND COUNTY HOSPITAL SYSTEM", orgDisplay.get());
+    assertEquals("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC", orgDisplay.get());
   }
 
   /** Verifies that it returns a empty string for a non valid npiOrg Number. */

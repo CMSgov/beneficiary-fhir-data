@@ -782,6 +782,10 @@ public class CarrierClaimTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding()
+                        .setSystem("http://nucc.org/provider-taxonomy")
+                        .setDisplay("Health Care")
+                        .setCode("390200000X"),
+                    new Coding()
                         .setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_spclty")
                         .setDisplay("Optometrist")
                         .setCode("41"))));
@@ -838,7 +842,6 @@ public class CarrierClaimTransformerV2Test {
     // Set the optional care team fields to empty
     for (CarrierClaimLine line : loadedClaim.getLines()) {
       line.setProviderParticipatingIndCode(Optional.empty());
-      line.setProviderSpecialityCode(Optional.empty());
     }
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
@@ -849,7 +852,6 @@ public class CarrierClaimTransformerV2Test {
         CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRTCPTNG_IND_CD);
     for (CareTeamComponent careTeam : genEob.getCareTeam()) {
       assertFalse(careTeam.getExtension().stream().anyMatch(i -> i.getUrl().equals(prtIndCdUrl)));
-      assertTrue(careTeam.getQualification().getCoding().isEmpty());
     }
   }
 

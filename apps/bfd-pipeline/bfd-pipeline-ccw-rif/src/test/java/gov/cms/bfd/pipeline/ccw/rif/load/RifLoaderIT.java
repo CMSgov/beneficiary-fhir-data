@@ -23,6 +23,13 @@ import gov.cms.bfd.model.rif.entities.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
+import gov.cms.bfd.model.rif.samhsa.CarrierTag;
+import gov.cms.bfd.model.rif.samhsa.DmeTag;
+import gov.cms.bfd.model.rif.samhsa.HhaTag;
+import gov.cms.bfd.model.rif.samhsa.HospiceTag;
+import gov.cms.bfd.model.rif.samhsa.InpatientTag;
+import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
+import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
@@ -35,6 +42,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -44,6 +52,8 @@ import jakarta.persistence.criteria.Root;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -99,6 +109,28 @@ public final class RifLoaderIT {
   @AfterEach
   public void finished(TestInfo testInfo) {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
+  }
+
+  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A_SAMHSA} data. */
+  @Test
+  public void loadSampleASamhsa() {
+    List<StaticRifResource> sampleResources =
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources());
+    final var rifFiles =
+        sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList());
+    RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), false, rifFiles);
+    loadSample(
+        sampleResources.get(0).getResourceUrl().toString(),
+        CcwRifLoadTestUtils.getLoadOptions(),
+        rifFilesEvent);
+
+    validateSamhsaTagsInDatabase(124, CarrierTag.class);
+    validateSamhsaTagsInDatabase(124, DmeTag.class);
+    validateSamhsaTagsInDatabase(124, HhaTag.class);
+    validateSamhsaTagsInDatabase(124, HospiceTag.class);
+    validateSamhsaTagsInDatabase(244, InpatientTag.class);
+    validateSamhsaTagsInDatabase(238, OutpatientTag.class);
+    validateSamhsaTagsInDatabase(244, SnfTag.class);
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
@@ -1063,6 +1095,58 @@ public final class RifLoaderIT {
         };
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
     return editSamples(samplesStream, fileEditor);
+  }
+
+  /**
+   * Validates that the correct number of SAMHSA tags were created for a claim type.
+   *
+   * @param expectedCount The expected number of tags
+   * @param entityClass The class of the entity being tested
+   * @param <T> The type of the entity being tested.
+   */
+  private <T> void validateSamhsaTagsInDatabase(int expectedCount, Class<T> entityClass) {
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+      // Count and verify the number of carrier tag records in the DB.
+      CriteriaQuery<T> tagCountQuery = criteriaBuilder.createQuery(entityClass);
+      Root<T> root = tagCountQuery.from(entityClass);
+      tagCountQuery.select(root);
+      List<T> tags = entityManager.createQuery(tagCountQuery).getResultList();
+      assertEquals(expectedCount, tags.size(), "Unexpected number of Tag records.");
+
+      long _42CFRPart2CodesCount = getTagCodeCount(TagCode._42CFRPart2, entityClass, tags);
+      long rCodesCount = getTagCodeCount(TagCode.R, entityClass, tags);
+
+      // There should be two codes for each claim number.
+      assertEquals(tags.size() / 2, _42CFRPart2CodesCount);
+      assertEquals(tags.size() / 2, rCodesCount);
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
+    }
+  }
+
+  private <T> Long getTagCodeCount(TagCode code, Class<T> entityClass, List<T> tags) {
+    return tags.stream()
+        .filter(
+            e -> {
+              try {
+                Method getCodeMethod = entityClass.getMethod("getCode");
+                return getCodeMethod.invoke(e).equals(code.toString());
+
+              } catch (IllegalAccessException
+                  | InvocationTargetException
+                  | NoSuchMethodException ex) {
+                throw new RuntimeException("Error getting code from tag.", ex);
+              }
+            })
+        .count();
   }
 
   /**

@@ -131,7 +131,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
-        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     CarrierClaimTransformerV2 carrierClaimTransformerV2 =
         new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     HHAClaimTransformerV2 hhaClaimTransformerV2 =
@@ -141,7 +141,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
         new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     PartDEventTransformerV2 partDEventTransformer =
-        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     SNFClaimTransformerV2 snfClaimTransformerV2 =
         new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
 
