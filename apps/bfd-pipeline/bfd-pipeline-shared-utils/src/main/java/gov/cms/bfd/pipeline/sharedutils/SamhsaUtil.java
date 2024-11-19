@@ -227,7 +227,7 @@ public class SamhsaUtil {
   }
 
   /**
-   * Tests if a given date is within the range of two other dates.
+   * Tests if a given date is outside the range of two other dates.
    *
    * @param earlyDate early date to test against
    * @param laterDate later date to test against
