@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
@@ -404,6 +405,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
    * @param changes collection of claims to write to the database
    */
   private void mergeBatch(long maxSeq, Collection<RdaChange<TClaim>> changes) {
+    SamhsaUtil samhsaUtil = SamhsaUtil.getSamhsaUtil();
     transactionManager.executeProcedure(
         entityManager -> {
           final Instant startTime = Instant.now();
@@ -414,6 +416,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
                 var metaData = createMetaData(change);
                 entityManager.merge(metaData);
                 entityManager.merge(change.getClaim());
+                samhsaUtil.processClaim(change.getClaim(), entityManager);
                 insertCount += getInsertCount(change.getClaim());
               } else {
                 // We would expect this to have been filtered by the RdaSource so it is safe

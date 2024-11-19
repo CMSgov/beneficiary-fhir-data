@@ -11,6 +11,7 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -143,6 +144,13 @@ public class RdaLoadJobIT {
             assertEquals(expected.getFissProcCodesCount(), resultClaim.getProcCodes().size());
             assertEquals(expected.getFissDiagCodesCount(), resultClaim.getDiagCodes().size());
           }
+          List<FissTag> fissTags = getRdaFissTags(transactionManager);
+          // There should be one matching claim, with two FissTag entries.
+          assertEquals(fissTags.size(), 2);
+          assertTrue(fissTags.stream().anyMatch(f -> f.getCode().equals("42CFRPart2")));
+          assertTrue(fissTags.stream().anyMatch(f -> f.getCode().equals("R")));
+          // There should be five hits for SAMHSA codes in this claim (one for each revenueLine).
+          assertEquals(5, fissTags.getFirst().getDetails().size());
         });
   }
 
@@ -159,7 +167,7 @@ public class RdaLoadJobIT {
         (appState, transactionManager) -> {
           assertTablesAreEmpty(transactionManager);
           final List<String> badFissClaimJson = new ArrayList<>(fissClaimJson);
-          final int badClaimIndex = badFissClaimJson.size() - 1;
+          final int badClaimIndex = badFissClaimJson.size() - 2;
           final int fullBatchSize = badFissClaimJson.size() - badFissClaimJson.size() % BATCH_SIZE;
           badFissClaimJson.set(
               badClaimIndex,
@@ -375,6 +383,18 @@ public class RdaLoadJobIT {
             entityManager
                 .createQuery("select c from RdaFissClaim c", RdaFissClaim.class)
                 .getResultList());
+  }
+
+  /**
+   * Gets the Fiss Tags from the database using a query.
+   *
+   * @param transactionManager the transaction manager to connect to the database
+   * @return the rda fiss tags
+   */
+  private List<FissTag> getRdaFissTags(TransactionManager transactionManager) {
+    return transactionManager.executeFunction(
+        entityManager ->
+            entityManager.createQuery("select c from FissTag c", FissTag.class).getResultList());
   }
 
   /**
