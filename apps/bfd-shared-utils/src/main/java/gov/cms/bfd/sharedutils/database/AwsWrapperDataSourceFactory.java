@@ -77,7 +77,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
           customPresetProfile.getName(), customPresetProfile);
     }
 
-    DialectManager.setCustomDialect(new CustomAuroraPgDialect());
+    DialectManager.setCustomDialect(new StatusAwareAuroraPgDialect());
 
     final var targetDataSourceProps = getProperties(wrapperOptions);
     dataSource.setTargetDataSourceProperties(mergeProperties(properties, targetDataSourceProps));
