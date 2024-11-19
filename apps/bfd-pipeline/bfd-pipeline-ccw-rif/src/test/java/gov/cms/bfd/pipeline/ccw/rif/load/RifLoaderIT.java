@@ -111,7 +111,7 @@ public final class RifLoaderIT {
     LOGGER.info("{}: finished.", testInfo.getDisplayName());
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A_SAMHSA} data. */
+  /** Tests that SAMHSA tags are properly crated for SAMHSA test claims. */
   @Test
   public void loadSampleASamhsa() {
     List<StaticRifResource> sampleResources =
@@ -1132,6 +1132,15 @@ public final class RifLoaderIT {
     }
   }
 
+  /**
+   * Returns the number of claims with a particular tag code.
+   *
+   * @param code The TagCode to test for
+   * @param entityClass The Tag class
+   * @param tags The list of tags
+   * @param <T> Type claim type
+   * @return the number of claims with this TagCode.
+   */
   private <T> Long getTagCodeCount(TagCode code, Class<T> entityClass, List<T> tags) {
     return tags.stream()
         .filter(
