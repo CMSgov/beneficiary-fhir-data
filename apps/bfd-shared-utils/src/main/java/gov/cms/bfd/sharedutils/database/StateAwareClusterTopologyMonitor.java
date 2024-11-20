@@ -4,7 +4,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import software.amazon.awssdk.services.rds.RdsClient;
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.Filter;
 import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.HostSpec;
 import software.amazon.jdbc.PluginService;
@@ -20,6 +26,9 @@ import software.amazon.jdbc.util.CacheMap;
  * hosts filtered by their API status.
  */
 public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl {
+
+  /** Test. */
+  protected final ConcurrentHashMap<String, String> hostsStateMap = new ConcurrentHashMap<>();
 
   /** Used for {@link RdsClient#describeDBInstances()} calls to filter the topology/host list. */
   private final RdsClient rdsClient;
@@ -82,13 +91,21 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
   }
 
   @Override
+  public void run() {
+    final var instanceStateMonitor = new InstanceStateMonitoringThread(this);
+    instanceStateMonitor.start();
+
+    super.run();
+  }
+
+  @Override
   protected List<HostSpec> queryForTopology(Connection conn) throws SQLException {
     final var dbTopology = super.queryForTopology(conn);
 
     // Taken from logic to determine if the monitor is in high refresh rate mode in delay()
     boolean isInHighRefreshRateMode =
         highRefreshRateEndTimeNano > 0 && System.nanoTime() < highRefreshRateEndTimeNano;
-    if (isInHighRefreshRateMode) {
+    if (isInHighRefreshRateMode || hostsStateMap.isEmpty()) {
       // We don't want to make API calls to check status every 100 ms (which is the default high
       // refresh rate). Just return the topology as it is from the database and move on. High
       // refresh rate occurs only after failover, so the worst case has already happened and there
@@ -96,6 +113,46 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
       return dbTopology;
     }
 
-    return StateAwareHostListProviderUtils.filterUnreadyHostsByApiState(dbTopology, rdsClient);
+    return dbTopology.stream()
+        .filter(
+            hostSpec ->
+                hostsStateMap.containsKey(hostSpec.getHostId())
+                    && !hostsStateMap.get(hostSpec.getHostId()).equalsIgnoreCase("creating"))
+        .toList();
+  }
+
+  /** Test. */
+  @AllArgsConstructor
+  private static class InstanceStateMonitoringThread extends Thread {
+
+    /** Test. */
+    private final StateAwareClusterTopologyMonitor monitor;
+
+    @Override
+    public void run() {
+      try {
+        while (!this.monitor.stop.get()) {
+          final var dbInstanceIdFilter =
+              Filter.builder()
+                  .name("db-cluster-id")
+                  .values(this.monitor.clusterId.replaceFirst("\\..*$", ""))
+                  .build();
+          final var dbInstancesDetails =
+              this.monitor.rdsClient.describeDBInstances(
+                  request -> request.filters(dbInstanceIdFilter));
+
+          final var dbInstancesStateMap =
+              dbInstancesDetails.dbInstances().stream()
+                  .collect(
+                      Collectors.toMap(
+                          DBInstance::dbInstanceIdentifier, DBInstance::dbInstanceStatus));
+          this.monitor.hostsStateMap.putAll(dbInstancesStateMap);
+
+          TimeUnit.MILLISECONDS.sleep(5000);
+        }
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+      }
+    }
   }
 }
