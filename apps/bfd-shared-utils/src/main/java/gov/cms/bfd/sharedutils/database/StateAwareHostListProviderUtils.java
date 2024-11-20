@@ -12,13 +12,13 @@ import software.amazon.jdbc.HostSpec;
 /** Utilities for custom "state aware" {@link HostListProvider}s. */
 public final class StateAwareHostListProviderUtils {
   /**
-   * Returns a filtered {@link List<HostSpec>} of hosts where hosts still in their {@code creating}
-   * phase, as reported by the RDS API, are filtered out of the host list.
+   * Returns a filtered {@link List} of {@link HostSpec}s where hosts still in their {@code
+   * creating} phase, as reported by the RDS API, are filtered out of the host list.
    *
-   * @param hostList {@link List<HostSpec>} of hosts to filter
+   * @param hostList {@link List} of {@link HostSpec}s of hosts to filter
    * @param rdsClient {@link RdsClient} used to check instance status
-   * @return a filtered {@link List<HostSpec>} with all unready hosts removed if there is no AWS API
-   *     error. Otherwise, the full host list is returned
+   * @return a filtered {@link List} of {@link HostSpec}s with all unready hosts removed if there is
+   *     no AWS API error. Otherwise, the full host list is returned
    */
   public static List<HostSpec> filterUnreadyHostsByApiState(
       List<HostSpec> hostList, RdsClient rdsClient) {
