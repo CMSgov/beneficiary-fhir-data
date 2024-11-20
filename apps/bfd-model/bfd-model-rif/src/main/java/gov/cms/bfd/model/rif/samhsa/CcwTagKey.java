@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** The composite key for RDA tags. */
+/** The composite key for CCW tags. */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
