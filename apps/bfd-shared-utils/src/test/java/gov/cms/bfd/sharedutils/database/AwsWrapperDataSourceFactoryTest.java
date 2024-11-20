@@ -2,6 +2,7 @@ package gov.cms.bfd.sharedutils.database;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
 import software.amazon.jdbc.PropertyDefinition;
@@ -35,7 +36,8 @@ public class AwsWrapperDataSourceFactoryTest {
                     .clusterTopologyRefreshRateMs(100)
                     .build())
             .build();
-    var factory = new AwsWrapperDataSourceFactory(dbOptions);
+    var awsClientConfig = AwsClientConfig.awsBuilder().build();
+    var factory = new AwsWrapperDataSourceFactory(dbOptions, awsClientConfig);
 
     // Act
     var dataSource = factory.createDataSource(null, null);

@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariConfig;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.AwsJdbcWrapperOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.HikariOptions;
 import java.util.Map;
@@ -11,7 +12,9 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
+import software.amazon.jdbc.HostListProvider;
 import software.amazon.jdbc.HostSpec;
 import software.amazon.jdbc.PropertyDefinition;
 import software.amazon.jdbc.dialect.DialectManager;
@@ -40,6 +43,12 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
 
   /** Used to configure constructed instances. */
   private final DatabaseOptions databaseOptions;
+
+  /**
+   * Configuration settings for {@link RdsClient}s used in the "state aware" {@link
+   * HostListProvider}s.
+   */
+  private final AwsClientConfig awsClientConfig;
 
   @Override
   public AwsWrapperDataSource createDataSource() {
@@ -77,7 +86,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
           customPresetProfile.getName(), customPresetProfile);
     }
 
-    DialectManager.setCustomDialect(new StatusAwareAuroraPgDialect());
+    DialectManager.setCustomDialect(new StateAwareAuroraPgDialect(awsClientConfig));
 
     final var targetDataSourceProps = getProperties(wrapperOptions);
     dataSource.setTargetDataSourceProperties(mergeProperties(properties, targetDataSourceProps));

@@ -214,7 +214,7 @@ public abstract class BaseConfiguration {
           .build();
     } else {
       if (databaseOptions.getDataSourceType() == DataSourceType.AWS_WRAPPER) {
-        return new AwsWrapperDataSourceFactory(databaseOptions);
+        return new AwsWrapperDataSourceFactory(databaseOptions, awsClientConfig);
       }
 
       // dataSourceType should never be null (if it is, it defaults to HIKARI), but this covers all
