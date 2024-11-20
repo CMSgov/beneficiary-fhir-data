@@ -65,12 +65,15 @@ Supported long options:
 EOF
 }
 
+# Force UTC time
+export TZ=UTC
+
 # Either run or print commands depending on dry_run setting.
 dry_run=false
 execute() {
   if [[ $dry_run = "false" ]] ; then
     echo "$@"
-    eval "$@"
+    "$@"
   else
     echo "$@"
   fi
@@ -145,8 +148,8 @@ args=""
 [[ $use_minio == "true" ]] && args="$args -Ds3.local=true"
 [[ $projects != "" ]] && args="$args$projects"
 [[ $include_dependencies = "true" ]] && args="$args -am"
-[[ $test_arg != "" ]] && args="$args -Dtest=\"$test_arg\""
-[[ $it_test_arg != "" ]] && args="$args -Dit.test=\"$it_test_arg\""
+[[ $test_arg != "" ]] && args="$args -Dtest=$test_arg"
+[[ $it_test_arg != "" ]] && args="$args -Dit.test=$it_test_arg"
 [[ $resume_from != "" ]] && args="$args -rf $resume_from"
 [[ $build_image == "true" ]] && args="$args -Djib.skip=false"
 [[ $profile_name != "" ]] && args="$args -P${profile_name}"
