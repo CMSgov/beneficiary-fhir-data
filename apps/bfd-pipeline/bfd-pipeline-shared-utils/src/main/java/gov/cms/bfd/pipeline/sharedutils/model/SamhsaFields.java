@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.sharedutils.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,10 +11,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class SamhsaFields {
+  /** The samhsa code's table. */
+  String table;
+  /** The samhsa code's line num */
+  Short lineNum;
   /** The samhsa code's column for in table. */
   String column;
 
-  /** The samhsa code's get method for a class. */
-  String method;
+  /** The samhsa code. */
+  String code;
 }
