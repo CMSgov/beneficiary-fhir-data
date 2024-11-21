@@ -122,6 +122,9 @@ public class V2Server extends RestfulServer {
     setDefaultResponseEncoding(EncodingEnum.JSON);
     setDefaultPrettyPrint(false);
 
+    // Register the DisallowXmlInterceptor to reject any XML requests
+    registerInterceptor(new DisallowXmlInterceptor());
+
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
     registerInterceptor(new TimerInterceptor());

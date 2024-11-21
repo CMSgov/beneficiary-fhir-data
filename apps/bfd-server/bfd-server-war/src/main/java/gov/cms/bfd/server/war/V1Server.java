@@ -77,6 +77,24 @@ public class V1Server extends RestfulServer {
         new ServerCapabilityStatementProvider();
     capabilityStatementProvider.setPublisher(CAPABILITIES_PUBLISHER);
     setServerConformanceProvider(capabilityStatementProvider);
+
+    //    // Create a custom ServerCapabilityStatementProvider
+    //    ServerCapabilityStatementProvider capabilityStatementProvider1 =
+    //            new ServerCapabilityStatementProvider() {
+    //              @Override
+    //              public CapabilityStatement getCapabilityStatement() {
+    //                CapabilityStatement capabilityStatement = super.get;
+    //
+    //
+    //                // Remove XML from the formats list
+    //                capabilityStatement.getFormat().clear();
+    //                capabilityStatement.getFormat().add("application/fhir+json"); // Only JSON
+    // format
+    //                capabilityStatement.getFormat().add("json"); // Only JSON format
+    //
+    //                return capabilityStatement;
+    //              }
+    //            };
   }
 
   /** {@inheritDoc} */
@@ -121,6 +139,9 @@ public class V1Server extends RestfulServer {
     // Default to XML and pretty printing.
     setDefaultResponseEncoding(EncodingEnum.JSON);
     setDefaultPrettyPrint(false);
+
+    // Register the DisallowXmlInterceptor to reject any XML requests
+    registerInterceptor(new DisallowXmlInterceptor());
 
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
