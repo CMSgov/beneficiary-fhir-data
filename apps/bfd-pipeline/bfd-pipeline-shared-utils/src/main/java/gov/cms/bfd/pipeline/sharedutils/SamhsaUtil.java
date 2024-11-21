@@ -32,7 +32,9 @@ import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.model.rif.samhsa.InpatientTag;
 import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.model.rif.samhsa.SnfTag;
+import gov.cms.bfd.pipeline.sharedutils.model.ClaimSamhsaCodeEntries;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
+import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
 import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import jakarta.persistence.EntityManager;
@@ -58,6 +60,12 @@ import org.apache.logging.log4j.util.Strings;
  * the claim as SAMHSA.
  */
 public class SamhsaUtil {
+  /**
+   * Will contain the list of the methods for each entity to retrieve the fields with possible
+   * SAMHSA codes.
+   */
+  public static final String CLAIM_SAMHSA_METHODS_YAML = "claim_samhsa_methods.yaml";
+
   /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
   private Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
 
@@ -66,6 +74,9 @@ public class SamhsaUtil {
 
   /** The file from which SAMHSA entries are pulled. Must be in the resources folder. */
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
+
+  /** The entries for CLAIM_SAMHSA_METHODS_YAML. */
+  private List<ClaimSamhsaCodeEntries> claimSamhsaCodeMethods;
 
   /**
    * Creates a stream from a file.
@@ -100,10 +111,21 @@ public class SamhsaUtil {
    */
   private SamhsaUtil() throws IOException {
     createSamhsaMap();
+    createClaimSamhsaMethods();
+  }
+
+  /** Loads the yaml file for the claim samhsa methods, and passes it along to be processed. */
+  private void createClaimSamhsaMethods() {
+    InputStream fileStream = getFileInputStream(CLAIM_SAMHSA_METHODS_YAML);
+    try {
+      claimSamhsaCodeMethods = createSamhsaCodeMethodList(fileStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
-   * Gets an InputStream and passes it along to the method to initialize the map of SAMHSA entries.
+   * Gets an input stream from a file in the resources folder.
    *
    * @throws IOException Exception thrown when the resource cannot be loaded.
    */
@@ -121,46 +143,50 @@ public class SamhsaUtil {
    * @param <TClaim> Generic type of the claim.
    */
   public <TClaim> void processClaim(TClaim claim, EntityManager entityManager) {
-    switch (claim) {
-      case RdaFissClaim fissClaim -> {
-        Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-        persistTags(tags, entityManager);
+    try {
+      switch (claim) {
+        case RdaFissClaim fissClaim -> {
+          Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
+          persistTags(tags, entityManager);
+        }
+        case RdaMcsClaim mcsClaim -> {
+          Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
+          persistTags(tags, entityManager);
+        }
+        case CarrierClaim carrierClaim -> {
+          Optional<List<CarrierTag>> tags = Optional.of(checkAndProcessCarrierClaim(carrierClaim));
+          persistTags(tags, entityManager);
+        }
+        case HHAClaim hhaClaim -> {
+          Optional<List<HhaTag>> tags = Optional.of(checkAndProcessHhaClaim(hhaClaim));
+          persistTags(tags, entityManager);
+        }
+        case DMEClaim dmeClaim -> {
+          Optional<List<DmeTag>> tags = Optional.of(checkAndProcessDmeClaim(dmeClaim));
+          persistTags(tags, entityManager);
+        }
+        case HospiceClaim hospiceClaim -> {
+          Optional<List<HospiceTag>> tags = Optional.of(checkAndProcessHospiceClaim(hospiceClaim));
+          persistTags(tags, entityManager);
+        }
+        case OutpatientClaim outpatientClaim -> {
+          Optional<List<OutpatientTag>> tags =
+              Optional.of(checkAndProcessOutpatientClaim(outpatientClaim));
+          persistTags(tags, entityManager);
+        }
+        case InpatientClaim inpatientClaim -> {
+          Optional<List<InpatientTag>> tags =
+              Optional.of(checkAndProcessInpatientClaim(inpatientClaim));
+          persistTags(tags, entityManager);
+        }
+        case SNFClaim snfClaim -> {
+          Optional<List<SnfTag>> tags = Optional.of(checkAndProcessSnfClaim(snfClaim));
+          persistTags(tags, entityManager);
+        }
+        default -> throw new RuntimeException("Error: unknown claim type.");
       }
-      case RdaMcsClaim mcsClaim -> {
-        Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-        persistTags(tags, entityManager);
-      }
-      case CarrierClaim carrierClaim -> {
-        Optional<List<CarrierTag>> tags = Optional.of(checkAndProcessCarrierClaim(carrierClaim));
-        persistTags(tags, entityManager);
-      }
-      case HHAClaim hhaClaim -> {
-        Optional<List<HhaTag>> tags = Optional.of(checkAndProcessHhaClaim(hhaClaim));
-        persistTags(tags, entityManager);
-      }
-      case DMEClaim dmeClaim -> {
-        Optional<List<DmeTag>> tags = Optional.of(checkAndProcessDmeClaim(dmeClaim));
-        persistTags(tags, entityManager);
-      }
-      case HospiceClaim hospiceClaim -> {
-        Optional<List<HospiceTag>> tags = Optional.of(checkAndProcessHospiceClaim(hospiceClaim));
-        persistTags(tags, entityManager);
-      }
-      case OutpatientClaim outpatientClaim -> {
-        Optional<List<OutpatientTag>> tags =
-            Optional.of(checkAndProcessOutpatientClaim(outpatientClaim));
-        persistTags(tags, entityManager);
-      }
-      case InpatientClaim inpatientClaim -> {
-        Optional<List<InpatientTag>> tags =
-            Optional.of(checkAndProcessInpatientClaim(inpatientClaim));
-        persistTags(tags, entityManager);
-      }
-      case SNFClaim snfClaim -> {
-        Optional<List<SnfTag>> tags = Optional.of(checkAndProcessSnfClaim(snfClaim));
-        persistTags(tags, entityManager);
-      }
-      default -> throw new RuntimeException("Error: unknown claim type.");
+    } catch (Exception e) {
+      throw new RuntimeException("There was an error creating SAMHSA tags.", e);
     }
   }
 
@@ -185,7 +211,8 @@ public class SamhsaUtil {
    * @param mcsClaim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim) {
+  private List<McsTag> checkAndProcessMcsClaim(RdaMcsClaim mcsClaim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
     Optional<List<TagDetails>> entries = getPossibleMcsSamhsaFields(mcsClaim);
     if (entries.isPresent()) {
       List<McsTag> mcsTags = new ArrayList<>();
@@ -212,8 +239,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<HhaTag> checkAndProcessHhaClaim(HHAClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleHhaFields(claim);
+  private List<HhaTag> checkAndProcessHhaClaim(HHAClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            HHAClaim.class,
+            HHAClaimLine.class,
+            "HHAClaim",
+            "HHAClaimLine");
     if (entries.isPresent()) {
       List<HhaTag> hhaTags = new ArrayList<>();
       hhaTags.add(
@@ -239,8 +274,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<HospiceTag> checkAndProcessHospiceClaim(HospiceClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleHospiceFields(claim);
+  private List<HospiceTag> checkAndProcessHospiceClaim(HospiceClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            HospiceClaim.class,
+            HospiceClaimLine.class,
+            "HospiceClaim",
+            "HospiceClaimLine");
     if (entries.isPresent()) {
       List<HospiceTag> hospiceTags = new ArrayList<>();
       hospiceTags.add(
@@ -266,8 +309,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<DmeTag> checkAndProcessDmeClaim(DMEClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleDmeFields(claim);
+  private List<DmeTag> checkAndProcessDmeClaim(DMEClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            DMEClaim.class,
+            DMEClaimLine.class,
+            "DMEClaim",
+            "DMEClaimLine");
     if (entries.isPresent()) {
       List<DmeTag> dmeTags = new ArrayList<>();
       dmeTags.add(
@@ -293,8 +344,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<OutpatientTag> checkAndProcessOutpatientClaim(OutpatientClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleOutpatientFields(claim);
+  private List<OutpatientTag> checkAndProcessOutpatientClaim(OutpatientClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            OutpatientClaim.class,
+            OutpatientClaimLine.class,
+            "OutpatientClaim",
+            "OutpatientClaimLine");
     if (entries.isPresent()) {
       List<OutpatientTag> outpatientTags = new ArrayList<>();
       outpatientTags.add(
@@ -320,8 +379,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<InpatientTag> checkAndProcessInpatientClaim(InpatientClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleInpatientFields(claim);
+  private List<InpatientTag> checkAndProcessInpatientClaim(InpatientClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            InpatientClaim.class,
+            InpatientClaimLine.class,
+            "InpatientClaim",
+            "InpatientClaimLine");
     if (entries.isPresent()) {
       List<InpatientTag> inpatientTags = new ArrayList<>();
       inpatientTags.add(
@@ -347,8 +414,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<SnfTag> checkAndProcessSnfClaim(SNFClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleSnfFields(claim);
+  private List<SnfTag> checkAndProcessSnfClaim(SNFClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            SNFClaim.class,
+            SNFClaimLine.class,
+            "SNFClaim",
+            "SNFClaimLine");
     if (entries.isPresent()) {
       List<SnfTag> snfTags = new ArrayList<>();
       snfTags.add(
@@ -369,504 +444,62 @@ public class SamhsaUtil {
   }
 
   /**
-   * Constructs a list of TagDetail objects for a SNF claim.
+   * /** * Constructs a list of TagDetail objects for a CCW claim.
    *
-   * @param claim The claim to check.
+   * @param claim The claim
+   * @param claimLines the claim lines
+   * @param claimClass the class for the claim
+   * @param claimLinesClass the class for th claim lines
+   * @param claimClassName a String containing the name of the claim class
+   * @param lineClassName a string containing the name of the claimLine clas
    * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
+   * @param <TClaim> The type of the claim
+   * @param <TClaimLine> The type of the claim line
+   * @throws NoSuchMethodException if the method doesn't exist
+   * @throws InvocationTargetException on a bad invocation target
+   * @throws IllegalAccessException on illegal access
    */
-  private Optional<List<TagDetails>> getPossibleSnfFields(SNFClaim claim) {
-    Class<?> claimClass = SNFClaim.class;
+  private <TClaim, TClaimLine> Optional<List<TagDetails>> getPossibleCCWFields(
+      TClaim claim,
+      List<TClaimLine> claimLines,
+      Class claimClass,
+      Class claimLinesClass,
+      String claimClassName,
+      String lineClassName)
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisRelatedGroupCd()),
-        "snf_claims",
-        "clm_drg_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "snf_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisAdmittingCode()),
-        "snf_claims",
-        "admtg_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisExternalFirstCode()),
-        "snf_claims",
-        "fst_dgns_e_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "snf_claims",
-            "icd_dgns_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
+    Method fromDateMethod = claimClass.getMethod("getDateFrom");
+    LocalDate serviceDate = (LocalDate) fromDateMethod.invoke(claim);
+    if (serviceDate == null) {
+      serviceDate = LocalDate.parse("1970-01-01");
     }
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "snf_claims",
-            "icd_dgns_e_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
+    Method throughDateMethod = claimClass.getMethod("getDateThrough");
+    LocalDate throughDate = (LocalDate) throughDateMethod.invoke(claim);
+    if (throughDate == null) {
+      throughDate = LocalDate.MAX;
     }
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getProcedure" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "snf_claims",
-            "icd_prcdr_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    for (SNFClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "snf_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
+    Optional<ClaimSamhsaCodeEntries> claimEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals(claimClassName))
+            .findFirst();
+    Optional<ClaimSamhsaCodeEntries> claimLinesEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals(lineClassName))
+            .findFirst();
+    iterateSamhsaMethods(claim, claimEntry, claimClass, null, entries, serviceDate, throughDate);
+    for (TClaimLine claimLine : claimLines) {
+      Method lineNumberMethod = claimLinesClass.getMethod("getLineNumber");
+      short claimLineNumber = (short) lineNumberMethod.invoke(claimLine);
+      iterateSamhsaMethods(
+          claimLine,
+          claimLinesEntry,
+          claimLinesClass,
+          (int) claimLineNumber,
           entries,
           serviceDate,
           throughDate);
     }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
-  }
 
-  /**
-   * Constructs a list of TagDetail objects for a Inpatient claim.
-   *
-   * @param claim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
-   */
-  private Optional<List<TagDetails>> getPossibleInpatientFields(InpatientClaim claim) {
-    Class<?> claimClass = InpatientClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisRelatedGroupCd()),
-        "inpatient_claims",
-        "clm_drg_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "inpatient_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisAdmittingCode()),
-        "inpatient_claims",
-        "admtg_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisExternalFirstCode()),
-        "inpatient_claims",
-        "fst_dgns_e_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "inpatient_claims",
-            "icd_dgns_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "inpatient_claims",
-            "icd_dgns_e_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getProcedure" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "outpatient_claims",
-            "icd_prcdr_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    for (InpatientClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "inpatient_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
-  }
-
-  /**
-   * Constructs a list of TagDetail objects for a Outpatient claim.
-   *
-   * @param claim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
-   */
-  private Optional<List<TagDetails>> getPossibleOutpatientFields(OutpatientClaim claim) {
-    Class<?> claimClass = OutpatientClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "outpatient_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "outpatient_claims",
-            "icd_dgns_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "outpatient_claims",
-            "icd_dgns_e_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getProcedure" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "outpatient_claims",
-            "icd_prcdr_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    for (OutpatientClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "outpatient_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-      buildDetails(
-          getSamhsaCode(line.getApcOrHippsCode()),
-          "outpatient_claim_lines",
-          "rev_cntr_apc_hipps_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
-  }
-
-  /**
-   * Constructs a list of TagDetail objects for a DME claim.
-   *
-   * @param claim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
-   */
-  private Optional<List<TagDetails>> getPossibleDmeFields(DMEClaim claim) {
-    Class<?> claimClass = DMEClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "dme_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "dme_claims",
-            "icd_dgns_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    for (DMEClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "dme_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-      buildDetails(
-          getSamhsaCode(line.getDiagnosisCode()),
-          "dme_claim_lines",
-          "line_icd_dgns_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
-  }
-
-  /**
-   * Constructs a list of TagDetail objects for a Hospice claim.
-   *
-   * @param claim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
-   */
-  private Optional<List<TagDetails>> getPossibleHospiceFields(HospiceClaim claim) {
-    Class<?> claimClass = HospiceClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "hospice_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "hha_claims",
-            "icd_dgns_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "hospice_claims",
-            "icd_dgns_e_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisExternalFirstCode()),
-        "hospice_claims",
-        "fst_dgns_e_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    for (HospiceClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "hospice_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
-  }
-
-  /**
-   * Constructs a list of TagDetail objects for an HHA claim.
-   *
-   * @param claim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
-   */
-  private Optional<List<TagDetails>> getPossibleHhaFields(HHAClaim claim) {
-    Class<?> claimClass = HHAClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "hha_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 25; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "hha_claims",
-            "icd_dgns_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosisExternal" + i + "Code");
-        buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "hha_claims",
-            "icd_dgns_e_cd" + i,
-            null,
-            entries,
-            serviceDate,
-            throughDate);
-      }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
-    }
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisExternalFirstCode()),
-        "hha_claims",
-        "fst_dgns_e_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    for (HHAClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "hha_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-      buildDetails(
-          getSamhsaCode(line.getApcOrHippsCode()),
-          "hha_claim_lines",
-          "apcOrHippsCode",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
     return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
 
@@ -876,8 +509,16 @@ public class SamhsaUtil {
    * @param claim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<CarrierTag> checkAndProcessCarrierClaim(CarrierClaim claim) {
-    Optional<List<TagDetails>> entries = getPossibleCarrierFields(claim);
+  private List<CarrierTag> checkAndProcessCarrierClaim(CarrierClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Optional<List<TagDetails>> entries =
+        getPossibleCCWFields(
+            claim,
+            claim.getLines(),
+            CarrierClaim.class,
+            CarrierClaimLine.class,
+            "CarrierClaim",
+            "CarrierClaimLine");
     if (entries.isPresent()) {
       List<CarrierTag> carrierTags = new ArrayList<>();
       carrierTags.add(
@@ -903,7 +544,8 @@ public class SamhsaUtil {
    * @param fissClaim The claim to check.
    * @return A list of tag entities to persist.
    */
-  private List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim) {
+  private List<FissTag> checkAndProcessFissClaim(RdaFissClaim fissClaim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
     Optional<List<TagDetails>> entries = getPossibleFissSamhsaFields(fissClaim);
     if (entries.isPresent()) {
       List<FissTag> fissTags = new ArrayList<>();
@@ -925,101 +567,110 @@ public class SamhsaUtil {
   }
 
   /**
-   * Constructs a list of TagDetail objects for an Carrier claim.
+   * Creates the list of methods to access SAMHSA codes.
    *
-   * @param claim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
+   * @param stream the file stream of the yaml to process.
+   * @return a list of entries for each table.
+   * @throws IOException if the file cannot be read.
    */
-  private Optional<List<TagDetails>> getPossibleCarrierFields(CarrierClaim claim) {
-    Class<?> claimClass = CarrierClaim.class;
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        claim.getDateFrom() == null ? LocalDate.parse("1970-01-01") : claim.getDateFrom();
-    LocalDate throughDate =
-        claim.getDateThrough() == null ? LocalDate.now() : claim.getDateThrough();
-    buildDetails(
-        getSamhsaCode(claim.getDiagnosisPrincipalCode()),
-        "carrier_claims",
-        "prncpal_dgns_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    try {
-      for (int i = 1; i <= 12; i++) {
-        Method method = claimClass.getMethod("getDiagnosis" + i + "Code");
+  private List<ClaimSamhsaCodeEntries> createSamhsaCodeMethodList(InputStream stream)
+      throws IOException {
+    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    List<ClaimSamhsaCodeEntries> entries =
+        mapper.readValue(
+            stream,
+            mapper
+                .getTypeFactory()
+                .constructCollectionType(List.class, ClaimSamhsaCodeEntries.class));
+    return entries;
+  }
+
+  /**
+   * Iterates over the SAMHSA fields for an entity, and uses reflection to call the entity's get
+   * method for that class.
+   *
+   * @param claim The Claim
+   * @param claimEntry The entry for this claim in the yaml.
+   * @param claimClass The class of the claim.
+   * @param lineNumber The line number of the claim, if this is a ClaimLine class.
+   * @param entries The list to save the tag details to.
+   * @param serviceDate the service date.
+   * @param throughDate the through date.
+   * @param <TClaim> the type of the claim.
+   * @throws NoSuchMethodException throws if method is not found.
+   * @throws IllegalAccessException throws if illegal access.
+   * @throws InvocationTargetException throws if invocationTarget exception.
+   */
+  private <TClaim> void iterateSamhsaMethods(
+      TClaim claim,
+      Optional<ClaimSamhsaCodeEntries> claimEntry,
+      Class<?> claimClass,
+      Integer lineNumber,
+      List<TagDetails> entries,
+      LocalDate serviceDate,
+      LocalDate throughDate)
+      throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    if (claimEntry.isPresent()) {
+      String tableName = claimEntry.get().getTable();
+      for (SamhsaFields field : claimEntry.get().getFields()) {
+        Method method = claimClass.getMethod(field.getMethod());
+        var code = method.invoke(claim);
+        if (!(code instanceof Optional)) {
+          code = Optional.ofNullable(code);
+        }
         buildDetails(
-            (getSamhsaCode((Optional<String>) method.invoke(claim))),
-            "carrier_claims",
-            "icd_dgns_cd" + i,
-            null,
+            getSamhsaCode((Optional<String>) code),
+            tableName,
+            field.getColumn(),
+            lineNumber,
             entries,
             serviceDate,
             throughDate);
       }
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException("There was a problem getting diagnosis codes.", e);
     }
-    for (CarrierClaimLine line : claim.getLines()) {
-      buildDetails(
-          getSamhsaCode(line.getDiagnosisCode()),
-          "carrier_claim_lines",
-          "line_icd_dgns_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-      buildDetails(
-          getSamhsaCode(line.getHcpcsCode()),
-          "carrier_claim_lines",
-          "hcpcs_cd",
-          (int) line.getLineNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
 
   /**
    * Constructs a list of TagDetail objects for an MCS claim.
    *
-   * @param mcsClaim The claim to check.
+   * @param claim The claim to check.
    * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
    */
-  private Optional<List<TagDetails>> getPossibleMcsSamhsaFields(RdaMcsClaim mcsClaim) {
+  private Optional<List<TagDetails>> getPossibleMcsSamhsaFields(RdaMcsClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Class<?> mcsDetailsClass = RdaMcsDetail.class;
+    Class<?> mcsDiagnosisCodeClass = RdaMcsDiagnosisCode.class;
     List<TagDetails> entries = new ArrayList<>();
     LocalDate serviceDate =
-        mcsClaim.getIdrHdrFromDateOfSvc() == null
+        claim.getIdrHdrFromDateOfSvc() == null
             ? LocalDate.parse("1970-01-01")
-            : mcsClaim.getIdrHdrFromDateOfSvc();
+            : claim.getIdrHdrFromDateOfSvc();
     LocalDate throughDate =
-        mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
-    for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
-          "mcs_diagnosis_codes",
-          "idr_diag_code",
-          (int) diagCode.getRdaPosition(),
+        claim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : claim.getIdrHdrToDateOfSvc();
+    Optional<ClaimSamhsaCodeEntries> claimDetailsEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals("RdaMcsDetail"))
+            .findFirst();
+    Optional<ClaimSamhsaCodeEntries> claimDiagnosisEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals("RdaMcsDiagnosisCode"))
+            .findFirst();
+    for (RdaMcsDetail detail : claim.getDetails()) {
+      iterateSamhsaMethods(
+          detail,
+          claimDetailsEntry,
+          mcsDetailsClass,
+          (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
           throughDate);
     }
-    for (RdaMcsDetail detail : mcsClaim.getDetails()) {
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
-          "mcs_details",
-          "idr_dtl_primary_diag_code",
-          (int) detail.getIdrDtlNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
-          "mcs_details",
-          "idr_proc_code",
-          (int) detail.getIdrDtlNumber(),
+    for (RdaMcsDiagnosisCode diagnosis : claim.getDiagCodes()) {
+      iterateSamhsaMethods(
+          diagnosis,
+          claimDiagnosisEntry,
+          mcsDiagnosisCodeClass,
+          (int) diagnosis.getRdaPosition(),
           entries,
           serviceDate,
           throughDate);
@@ -1091,82 +742,72 @@ public class SamhsaUtil {
   /**
    * Constructs a list of TagDetail objects for a Fiss claim.
    *
-   * @param fissClaim The claim to check.
+   * @param claim The claim to check.
    * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
    */
-  private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim fissClaim) {
+  private Optional<List<TagDetails>> getPossibleFissSamhsaFields(RdaFissClaim claim)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    Class<?> fissClaimClass = RdaFissClaim.class;
+    Class<?> fissDiagnosisCodeClass = RdaFissDiagnosisCode.class;
+    Class<?> fissProcCodeClass = RdaFissProcCode.class;
+    Class<?> fissRevenueLineClass = RdaFissRevenueLine.class;
+
     List<TagDetails> entries = new ArrayList<>();
     LocalDate serviceDate =
-        fissClaim.getStmtCovFromDate() == null
+        claim.getStmtCovFromDate() == null
             ? LocalDate.parse("1970-01-01")
-            : fissClaim.getStmtCovFromDate();
+            : claim.getStmtCovFromDate();
     LocalDate throughDate =
-        fissClaim.getStmtCovToDate() == null ? LocalDate.now() : fissClaim.getStmtCovToDate();
-
-    buildDetails(
-        getSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
-        "fiss_claims",
-        "admit_diag_code",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    for (RdaFissRevenueLine revenueLine : fissClaim.getRevenueLines()) {
-      buildDetails(
-          // Ideally, this column should never contain SAMHSA data, but it is
-          // possible that SAMHSA data could end up here due to user error.
-          getSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
-          "fiss_revenue_lines",
-          "apc_hcpcs_apc",
-          (int) revenueLine.getRdaPosition(),
-          entries,
-          serviceDate,
-          throughDate);
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
-          "fiss_revenue_lines",
-          "hcpcs_cd",
-          (int) revenueLine.getRdaPosition(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    buildDetails(
-        getSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
-        "fiss_claims",
-        "drg_cd",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    buildDetails(
-        getSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
-        "fiss_claims",
-        "principle_diag",
-        null,
-        entries,
-        serviceDate,
-        throughDate);
-    for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
-          "fiss_diagnosis_codes",
-          "diag_cd2",
+        claim.getStmtCovToDate() == null ? LocalDate.now() : claim.getStmtCovToDate();
+    Optional<ClaimSamhsaCodeEntries> claimEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals("RdaFissClaim"))
+            .findFirst();
+    Optional<ClaimSamhsaCodeEntries> claimDiagEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals("RdaFissDiagnosisCode"))
+            .findFirst();
+    Optional<ClaimSamhsaCodeEntries> claimProcEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals("RdaFissProcCode"))
+            .findFirst();
+    Optional<ClaimSamhsaCodeEntries> claimRevenueEntry =
+        claimSamhsaCodeMethods.stream()
+            .filter(e -> e.getClaimClass().equals("RdaFissRevenueLine"))
+            .findFirst();
+    iterateSamhsaMethods(
+        claim, claimEntry, fissClaimClass, null, entries, serviceDate, throughDate);
+    for (RdaFissDiagnosisCode diagCode : claim.getDiagCodes()) {
+      iterateSamhsaMethods(
+          diagCode,
+          claimDiagEntry,
+          fissDiagnosisCodeClass,
           (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
           throughDate);
     }
-    for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
-          "fiss_proc_codes",
-          "proc_code",
+    for (RdaFissProcCode procCode : claim.getProcCodes()) {
+      iterateSamhsaMethods(
+          procCode,
+          claimProcEntry,
+          fissProcCodeClass,
           (int) procCode.getRdaPosition(),
           entries,
           serviceDate,
           throughDate);
     }
+    for (RdaFissRevenueLine line : claim.getRevenueLines()) {
+      iterateSamhsaMethods(
+          line,
+          claimRevenueEntry,
+          fissRevenueLineClass,
+          (int) line.getRdaPosition(),
+          entries,
+          serviceDate,
+          throughDate);
+    }
+
     return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
 
