@@ -33,6 +33,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
                 SamhsaFields field = SamhsaFields.builder()
                         .code(code.get())
                         .column("icd_dgns_cd" + i)
+                        .table(table)
                         .build();
                 samhsaFields.add(field);
             }
@@ -45,6 +46,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
                 SamhsaFields field = SamhsaFields.builder()
                         .code(code.get())
                         .column("rsn_visit_cd" + i)
+                        .table(table)
                         .build();
                 samhsaFields.add(field);
             }
@@ -58,6 +60,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
                 SamhsaFields field = SamhsaFields.builder()
                         .code(code.get())
                         .column("icd_prcdr_cd" + i)
+                        .table(table)
                         .build();
                 samhsaFields.add(field);
             }
@@ -77,6 +80,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
                 SamhsaFields field = SamhsaFields.builder()
                         .code(code.get())
                         .column("icd_dgns_e_cd" + i)
+                        .table(table)
                         .build();
                 samhsaFields.add(field);
             }
@@ -97,6 +101,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
                         .column(column)
                         .code(code.get())
                         .lineNum(lineNum)
+                        .table(linesTable)
                         .build();
                 samhsaFields.add(field);
             }
@@ -115,6 +120,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
             SamhsaFields field = SamhsaFields.builder()
                     .column(column)
                     .code(code.get())
+                    .table(table)
                     .build();
             samhsaFields.add(field);
         }

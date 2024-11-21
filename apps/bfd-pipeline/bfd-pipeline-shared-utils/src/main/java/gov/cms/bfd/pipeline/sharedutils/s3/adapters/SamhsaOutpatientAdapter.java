@@ -14,8 +14,8 @@ public class SamhsaOutpatientAdapter extends SamhsaAdapterBase<OutpatientClaim, 
       super(claim, claimLines);
       this.claim = claim;
       this.claimLines = claimLines;
-      this.table = "hospice_claims";
-      this.linesTable = "hospice_claim_lines";
+      this.table = "outpatient_claims";
+      this.linesTable = "outpatient_claim_lines";
    }
    @Override
     public List<SamhsaFields> getFields() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {

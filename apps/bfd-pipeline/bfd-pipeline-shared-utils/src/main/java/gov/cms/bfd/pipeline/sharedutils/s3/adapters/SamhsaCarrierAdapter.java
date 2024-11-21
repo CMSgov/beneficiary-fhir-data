@@ -12,8 +12,8 @@ public class SamhsaCarrierAdapter extends SamhsaAdapterBase<CarrierClaim, Carrie
         super(claim, claimLines);
       this.claim = claim;
       this.claimLines = claimLines;
-      this.table = "hospice_claims";
-      this.linesTable = "hospice_claim_lines";
+      this.table = "carrier_claims";
+      this.linesTable = "carrier_claim_lines";
    }
    @Override
     public List<SamhsaFields> getFields() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {

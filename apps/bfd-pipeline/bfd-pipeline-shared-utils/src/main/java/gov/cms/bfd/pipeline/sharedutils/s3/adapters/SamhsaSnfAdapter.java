@@ -14,8 +14,8 @@ public class SamhsaSnfAdapter extends SamhsaAdapterBase<SNFClaim, SNFClaimLine> 
         super(claim, claimLines);
         this.claim = claim;
       this.claimLines = claimLines;
-      this.table = "hospice_claims";
-      this.linesTable = "hospice_claim_lines";
+      this.table = "snf_claims";
+      this.linesTable = "snf_claim_lines";
    }
    @Override
     public List<SamhsaFields> getFields() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
