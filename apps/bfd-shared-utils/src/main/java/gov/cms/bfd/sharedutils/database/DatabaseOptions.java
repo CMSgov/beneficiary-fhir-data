@@ -293,6 +293,7 @@ public class DatabaseOptions {
                 put("dev", DeveloperConnectionPluginFactory.class);
                 put("fastestResponseStrategy", FastestResponseStrategyPluginFactory.class);
                 put("initialConnection", AuroraInitialConnectionStrategyPluginFactory.class);
+                put("singleNodeHostOverride", SingleNodeHostOverrideConnectionPluginFactory.class);
               }
             };
 

@@ -150,6 +150,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
     targetDataSourceProps.setProperty(
         PropertyDefinition.PROFILE_NAME.name,
         wrapperOptions.useCustomPreset() ? CUSTOM_PRESET_NAME : wrapperOptions.getBasePresetCode());
+    targetDataSourceProps.setProperty(PropertyDefinition.AUTO_SORT_PLUGIN_ORDER.name, "false");
     targetDataSourceProps.setProperty(
         AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name,
         wrapperOptions.getHostSelectorStrategy());
