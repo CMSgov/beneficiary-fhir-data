@@ -1,14 +1,17 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -30,29 +33,21 @@ import software.amazon.jdbc.util.CacheMap;
  * hosts filtered by their API status.
  */
 public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl {
-
-  /** Map of cluster ID to the {@link List} of {@link HostSpec}s within its topology. */
-  private final ConcurrentHashMap<String, List<HostSpec>> clusterToUnfilteredTopologyMap =
-      new ConcurrentHashMap<>();
-
   /**
    * Map of instance ID to the status of the instance returned by the RDS API. Periodically updated
-   * by the {@link InstanceStateMonitoringThread} every {@link #instanceStateMonitorRefreshRateMs}
-   * milliseconds.
+   * by the {@link InstanceStateMonitor} every {@link
+   * StateAwareMonitoringRdsHostListProvider#instanceStateMonitorRefreshRateMs} millisecond(s).
    */
   private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap =
       new ConcurrentHashMap<>();
 
-  /**
-   * Rate at which the {@link InstanceStateMonitoringThread} will update the {@link
-   * #clusterToHostsStateMap} with the status of each RDS instance in a given cluster as reported by
-   * the RDS API.
-   */
-  private final long instanceStateMonitorRefreshRateMs;
+  /** Executor for the periodic {@link InstanceStateMonitor} task. */
+  private final ScheduledExecutorService instanceStateMonitorExecutor =
+      Executors.newSingleThreadScheduledExecutor();
 
   /**
-   * Used by the {@link InstanceStateMonitoringThread} to retrieve the status of RDS instances in a
-   * given cluster.
+   * Used by the {@link InstanceStateMonitor} to retrieve the status of RDS instances in a given
+   * cluster.
    */
   private final RdsClient rdsClient;
 
@@ -79,7 +74,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
    * @param nodeIdQuery the SQL query that returns the instance identifier of the database that is
    *     queried
    * @param instanceStateMonitorRefreshRateMs the rate, in milliseconds, at which the {@link
-   *     InstanceStateMonitoringThread} queries the RDS API for instance status
+   *     InstanceStateMonitor} queries the RDS API for instance status
    * @param rdsClient {@link RdsClient} used to check instance status
    */
   public StateAwareClusterTopologyMonitor(
@@ -112,39 +107,47 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
         topologyQuery,
         writerTopologyQuery,
         nodeIdQuery);
-    this.instanceStateMonitorRefreshRateMs = instanceStateMonitorRefreshRateMs;
     this.rdsClient = rdsClient;
+
+    instanceStateMonitorExecutor.scheduleAtFixedRate(
+        new InstanceStateMonitor(this),
+        0,
+        instanceStateMonitorRefreshRateMs,
+        TimeUnit.MILLISECONDS);
   }
 
   @Override
-  public void run() {
-    final var instanceStateMonitor = new InstanceStateMonitoringThread(this);
-    instanceStateMonitor.start();
+  public void close() throws Exception {
+    instanceStateMonitorExecutor.shutdown();
+    try {
+      if (!instanceStateMonitorExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+        instanceStateMonitorExecutor.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      instanceStateMonitorExecutor.shutdownNow();
+    }
 
-    super.run();
+    super.close();
   }
 
   @Override
   protected List<HostSpec> queryForTopology(Connection conn) throws SQLException {
-    final var dbTopology = super.queryForTopology(conn);
-    // Store the unfiltered topology for the instance state monitoring thread to use as filtering
-    // criteria in the RDS API request
-    clusterToUnfilteredTopologyMap.put(clusterId, dbTopology);
+    final var unfilteredTopology = getUnfilteredTopology(conn);
 
-    // Taken from logic to determine if the monitor is in high refresh rate mode in delay()
+    // Taken from logic to determine if the topologyMonitor is in high refresh rate mode in delay()
     boolean isInHighRefreshRateMode =
         highRefreshRateEndTimeNano > 0 && System.nanoTime() < highRefreshRateEndTimeNano;
     if (isInHighRefreshRateMode || !clusterToHostsStateMap.containsKey(clusterId)) {
       // High refresh rate occurs only after failover, so the worst case has already happened and
       // there is no reason to restrict the hosts that can be connected to based on status. Or, the
       // hosts map is empty, which indicates that this may be the first query for topology.
-      return dbTopology;
+      return unfilteredTopology;
     }
 
     // This ensures that unready instances are not connected to early during scale-out. Other states
     // (like "deleting") are not considered as failover should handle them
     final var currentClusterInstanceStateMap = clusterToHostsStateMap.get(clusterId);
-    return dbTopology.stream()
+    return unfilteredTopology.stream()
         .filter(hostSpec -> currentClusterInstanceStateMap.containsKey(hostSpec.getHostId()))
         .filter(
             hostSpec ->
@@ -155,65 +158,77 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
   }
 
   /**
-   * {@link Thread} spawned on initialization of a {@link StateAwareClusterTopologyMonitor} that
-   * will independently monitor the RDS API status of RDS instances in the current {@link
-   * #clusterId} cluster and concurrently update the {@link #clusterToHostsStateMap} every {@link
-   * #instanceStateMonitorRefreshRateMs} millisecond(s).
+   * Queries the database for the RDS Cluster topology.
+   *
+   * @param conn {@link Connection} to the current database
+   * @return an unfiltered {@link List} of {@link HostSpec}s representing the instances in the RDS
+   *     Cluster as reported by the database topology query
+   * @throws SQLException if there is an issue querying the database
    */
-  @AllArgsConstructor
-  private static class InstanceStateMonitoringThread extends Thread {
+  @VisibleForTesting
+  private List<HostSpec> getUnfilteredTopology(Connection conn) throws SQLException {
+    // The call to the super's queryForTopology has been extracted to this method so that it is
+    // possible to mock the super's queryForTopology() while being able to independently test the
+    // filtering logic in the overridden variant
+    return super.queryForTopology(conn);
+  }
+
+  /**
+   * {@link Runnable} task started in a scheduled {@link Thread} upon initialization of a {@link
+   * StateAwareClusterTopologyMonitor} that will independently topologyMonitor the RDS API status of
+   * RDS instances in the current {@link #clusterId} cluster and concurrently update the {@link
+   * #clusterToHostsStateMap} every {@link
+   * StateAwareMonitoringRdsHostListProvider#instanceStateMonitorRefreshRateMs} millisecond(s).
+   *
+   * @param topologyMonitor {@link StateAwareClusterTopologyMonitor} that spawned this thread.
+   */
+  @VisibleForTesting
+  private record InstanceStateMonitor(StateAwareClusterTopologyMonitor topologyMonitor)
+      implements Runnable {
 
     /** Logger for this class. */
-    static final Logger LOGGER = LoggerFactory.getLogger(InstanceStateMonitoringThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceStateMonitor.class);
 
-    /** {@link StateAwareClusterTopologyMonitor} that spawned this thread. */
-    private final StateAwareClusterTopologyMonitor monitor;
+    /**
+     * {@link Pattern} that matches the cluster ID part of a typical writer or reader cluster
+     * endpoint hostname.
+     *
+     * @implNote This is used to extract the RDS Cluster ID from {@link
+     *     StateAwareClusterTopologyMonitor#clusterId} to properly filter {@link
+     *     RdsClient#describeDBInstances()} calls to the current cluster. Although the field's name
+     *     implies that it is the ID of the Cluster, it is actually the host provided in the
+     *     connection string.
+     */
+    private static final Pattern HOST_CLUSTER_ID_PATTERN =
+        Pattern.compile("^(.*)\\.cluster-(?:ro-)?\\w+\\.[\\w-]+\\.rds\\.amazonaws.com");
 
     @Override
     public void run() {
       try {
-        while (!monitor.stop.get()) {
-          try {
-            List<HostSpec> unfilteredHosts =
-                monitor.clusterToUnfilteredTopologyMap.getOrDefault(monitor.clusterId, List.of());
-            final var dbInstancesDetails =
-                monitor.rdsClient.describeDBInstances(
-                    request -> {
-                      // If the topology hasn't been retrieved yet (likely the case on startup),
-                      // then return the status of all instances in RDS. This should be fine,
-                      // assuming that the IAM Policy is not overly restrictive
-                      if (!unfilteredHosts.isEmpty()) {
-                        final var dbInstanceIdFilter =
-                            Filter.builder()
-                                .name("db-instance-id")
-                                .values(
-                                    unfilteredHosts.stream()
-                                        .map(HostSpec::getHostId)
-                                        .collect(Collectors.toSet()))
-                                .build();
-                        request.filters(dbInstanceIdFilter);
-                      }
-                    });
-
-            final var dbInstancesStateMap =
-                dbInstancesDetails.dbInstances().stream()
-                    .filter(
-                        dbInstance ->
-                            dbInstance.dbInstanceIdentifier() != null
-                                && dbInstance.dbInstanceStatus() != null)
-                    .collect(
-                        Collectors.toUnmodifiableMap(
-                            DBInstance::dbInstanceIdentifier, DBInstance::dbInstanceStatus));
-            monitor.clusterToHostsStateMap.put(monitor.clusterId, dbInstancesStateMap);
-          } catch (AwsServiceException e) {
-            LOGGER.error(
-                "Unable to retrieve instance state of current RDS cluster from RDS API", e);
-          }
-
-          TimeUnit.MILLISECONDS.sleep(monitor.instanceStateMonitorRefreshRateMs);
-        }
-      } catch (InterruptedException ex) {
-        Thread.currentThread().interrupt();
+        final var clusterIdHostnameMatcher =
+            HOST_CLUSTER_ID_PATTERN.matcher(topologyMonitor.clusterId);
+        final var dbInstancesDetails =
+            topologyMonitor.rdsClient.describeDBInstances(
+                request -> {
+                  if (clusterIdHostnameMatcher.find()) {
+                    final var trueClusterId = clusterIdHostnameMatcher.group(1);
+                    final var dbClusterIdFilter =
+                        Filter.builder().name("db-cluster-id").values(trueClusterId).build();
+                    request.filters(dbClusterIdFilter);
+                  }
+                });
+        final var dbInstancesStateMap =
+            dbInstancesDetails.dbInstances().stream()
+                .filter(
+                    dbInstance ->
+                        dbInstance.dbInstanceIdentifier() != null
+                            && dbInstance.dbInstanceStatus() != null)
+                .collect(
+                    Collectors.toUnmodifiableMap(
+                        DBInstance::dbInstanceIdentifier, DBInstance::dbInstanceStatus));
+        topologyMonitor.clusterToHostsStateMap.put(topologyMonitor.clusterId, dbInstancesStateMap);
+      } catch (AwsServiceException e) {
+        LOGGER.error("Unable to retrieve instance state of current RDS cluster from RDS API", e);
       }
     }
   }
