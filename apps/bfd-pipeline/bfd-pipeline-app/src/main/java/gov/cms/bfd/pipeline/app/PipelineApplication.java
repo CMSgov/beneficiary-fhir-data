@@ -29,6 +29,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
+import gov.cms.bfd.pipeline.sharedutils.ec2.Ec2Client;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -462,7 +464,8 @@ public final class PipelineApplication {
 
       final var loadOptions = appConfig.getCcwRifLoadOptions().get();
       final var awsClientConfig = appConfig.getAwsClientConfig();
-      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig, clock);
+      final var job =
+          createCcwRifLoadJob(loadOptions, appState, awsClientConfig, new AwsEc2Client(), clock);
       jobs.add(job);
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
@@ -509,6 +512,7 @@ public final class PipelineApplication {
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @param awsClientConfig AWS client configuration
+   * @param ec2Client ec2Client
    * @param clock used to get current time
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
@@ -516,6 +520,7 @@ public final class PipelineApplication {
       CcwRifLoadOptions loadOptions,
       PipelineApplicationState appState,
       AwsClientConfig awsClientConfig,
+      Ec2Client ec2Client,
       Clock clock)
       throws IOException {
     /*
@@ -560,6 +565,7 @@ public final class PipelineApplication {
             dataSetMonitorListener,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
             loadOptions.getRunInterval(),
+            ec2Client,
             statusReporter);
 
     return ccwRifLoadJob;
