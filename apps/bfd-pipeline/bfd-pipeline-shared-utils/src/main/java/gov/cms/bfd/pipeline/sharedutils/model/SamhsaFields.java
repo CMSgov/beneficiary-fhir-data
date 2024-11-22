@@ -15,8 +15,10 @@ import lombok.Setter;
 public class SamhsaFields {
   /** The samhsa code's table. */
   String table;
-  /** The samhsa code's line num */
+
+  /** The samhsa code's line num. */
   Short lineNum;
+
   /** The samhsa code's column for in table. */
   String column;
 
