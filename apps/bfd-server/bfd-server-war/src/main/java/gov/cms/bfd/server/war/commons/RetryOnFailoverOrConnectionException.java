@@ -40,7 +40,8 @@ public @interface RetryOnFailoverOrConnectionException {
    *     with some jitter to reduce the likelihood of a "thundering herd"
    */
   @AliasFor(annotation = Retryable.class, attribute = "backoff")
-  Backoff backoff() default @Backoff(delay = 300, multiplier = 1.5, maxDelay = 5000, random = true);
+  Backoff backoff() default
+      @Backoff(delay = 1000, multiplier = 1.2, maxDelay = 3000, random = true);
 
   /**
    * Alias for {@link Retryable#stateful()}.
@@ -56,7 +57,7 @@ public @interface RetryOnFailoverOrConnectionException {
    * @return a default of {@code 10} attempts
    */
   @AliasFor(annotation = Retryable.class, attribute = "maxAttempts")
-  int maxAttempts() default 10;
+  int maxAttempts() default 5;
 
   /**
    * Alias for {@link Retryable#listeners()}.
