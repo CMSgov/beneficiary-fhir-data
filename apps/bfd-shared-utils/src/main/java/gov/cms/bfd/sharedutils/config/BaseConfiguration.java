@@ -149,6 +149,14 @@ public abstract class BaseConfiguration {
       "db/wrapper/cluster_topology_refresh_rate_ms";
 
   /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions#instanceStateMonitorRefreshRateMs} value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_INSTANCE_STATE_MONITOR_REFRESH_RATE_MS =
+      "db/wrapper/instance_state_monitor_refresh_rate_ms";
+
+  /**
    * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
    * MetricOptions#getNewRelicMetricKey()} value.
    */
@@ -358,6 +366,8 @@ public abstract class BaseConfiguration {
           config.stringValue(SSM_PATH_DB_WRAPPER_HOST_SELECTOR_STRATEGY, "roundRobin");
       final var wrapperClusterTopologyRefreshRateMs =
           config.intValue(SSM_PATH_DB_WRAPPER_CLUSTER_TOPOLOGY_REFRESH_RATE_MS, 30000);
+      final var wrapperInstanceStateMonitorRefreshRateMs =
+          config.longValue(SSM_PATH_DB_WRAPPER_INSTANCE_STATE_MONITOR_REFRESH_RATE_MS, 5000L);
       final var wrapperOptions =
           DatabaseOptions.AwsJdbcWrapperOptions.builder()
               .useCustomPreset(wrapperUseCustomPreset)
@@ -365,6 +375,7 @@ public abstract class BaseConfiguration {
               .pluginsCsv(wrapperPluginsCsv)
               .hostSelectorStrategy(wrapperHostSelectorStrategy)
               .clusterTopologyRefreshRateMs(wrapperClusterTopologyRefreshRateMs)
+              .instanceStateMonitorRefreshRateMs(wrapperInstanceStateMonitorRefreshRateMs)
               .build();
 
       dbOptionsBuilder.awsJdbcWrapperOptions(wrapperOptions);

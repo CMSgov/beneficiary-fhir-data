@@ -7,13 +7,14 @@ import software.amazon.jdbc.HostListProvider;
 import software.amazon.jdbc.dialect.AuroraPgDialect;
 import software.amazon.jdbc.dialect.Dialect;
 import software.amazon.jdbc.dialect.HostListProviderSupplier;
-import software.amazon.jdbc.plugin.failover2.FailoverConnectionPlugin;
 
 /**
  * Custom {@link Dialect} that is exactly the same as the {@link AuroraPgDialect} in all but the
- * {@link HostListProvider}s it supplies. The custom "state aware" {@link HostListProvider}s
- * provided by this {@link Dialect} query the RDS API and filter any host that is in the {@code
- * creating} status so that the Wrapper does not attempt to make connections to unready hosts.
+ * {@link HostListProvider}s it supplies. The custom {@link StateAwareMonitoringRdsHostListProvider}
+ * provided by this {@link Dialect} spawns a thread that periodically queries the RDS API for the
+ * status of RDS instances. This result is used to filter any host from the cluster topology that is
+ * in the {@code creating} status so that the Wrapper does not attempt to make connections to
+ * unready hosts.
  */
 public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   /**
@@ -48,10 +49,7 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
    */
   private static final String IS_READER_QUERY = "SELECT pg_is_in_recovery()";
 
-  /**
-   * Used for {@link RdsClient#describeDBInstances()} calls by the "state aware" {@link
-   * HostListProvider}s.
-   */
+  /** Used for RDS API calls by the {@link StateAwareMonitoringRdsHostListProvider}. */
   private final RdsClient rdsClient;
 
   /**
@@ -65,10 +63,8 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
 
   @Override
   public HostListProviderSupplier getHostListProvider() {
-    return (properties, initialUrl, hostListProviderService, pluginService) -> {
-      final var failover2Plugin = pluginService.getPlugin(FailoverConnectionPlugin.class);
-      if (failover2Plugin != null) {
-        return new StateAwareMonitoringRdsHostListProvider(
+    return (properties, initialUrl, hostListProviderService, pluginService) ->
+        new StateAwareMonitoringRdsHostListProvider(
             properties,
             initialUrl,
             hostListProviderService,
@@ -78,17 +74,6 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
             IS_WRITER_QUERY,
             pluginService,
             rdsClient);
-      }
-
-      return new StateAwareAuroraHostListProvider(
-          properties,
-          initialUrl,
-          hostListProviderService,
-          TOPOLOGY_QUERY,
-          NODE_ID_QUERY,
-          IS_READER_QUERY,
-          rdsClient);
-    };
   }
 
   /**

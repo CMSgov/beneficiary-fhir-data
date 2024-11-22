@@ -2,6 +2,7 @@ package gov.cms.bfd.sharedutils.database;
 
 import java.util.Properties;
 import software.amazon.awssdk.services.rds.RdsClient;
+import software.amazon.jdbc.AwsWrapperProperty;
 import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.PluginService;
 import software.amazon.jdbc.dialect.Dialect;
@@ -15,6 +16,23 @@ import software.amazon.jdbc.hostlistprovider.monitoring.MonitoringRdsHostListPro
  * #initMonitor()}.
  */
 public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostListProvider {
+
+  /**
+   * AWS Wrapper property that is read from the {@link AwsWrapperDataSource} {@link Properties} that
+   * sets {@link #instanceStateMonitorRefreshRateMs}. Controls the refresh rate of the thread that
+   * monitors the RDS API state of RDS instances retrieved from the cluster topology.
+   */
+  public static final AwsWrapperProperty INSTANCE_STATE_MONITOR_REFRESH_RATE_MS =
+      new AwsWrapperProperty(
+          "instanceStateMonitorRefreshRateMs",
+          "5000",
+          "Refresh rate of the thread that monitors the RDS API state of RDS instances retrieved from the cluster topology.");
+
+  /**
+   * The rate, in milliseconds, at which the {@link StateAwareMonitoringRdsHostListProvider} will
+   * monitor the state of RDS instances in the current cluster as reported by the RDS API.
+   */
+  private final long instanceStateMonitorRefreshRateMs;
 
   /** Used for {@link RdsClient#describeDBInstances()} calls to filter the topology/host list. */
   private final RdsClient rdsClient;
@@ -54,6 +72,8 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
         writerTopologyQuery,
         pluginService);
     this.rdsClient = rdsClient;
+    this.instanceStateMonitorRefreshRateMs =
+        INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.getLong(properties);
   }
 
   @Override
@@ -75,6 +95,7 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
                 topologyQuery,
                 writerTopologyQuery,
                 nodeIdQuery,
+                instanceStateMonitorRefreshRateMs,
                 rdsClient),
         MONITOR_EXPIRATION_NANO);
   }
