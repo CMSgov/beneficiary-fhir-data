@@ -10,13 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
 import software.amazon.awssdk.services.rds.model.Filter;
 import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.HostSpec;
@@ -26,6 +26,7 @@ import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitor;
 import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitorImpl;
 import software.amazon.jdbc.util.CacheMap;
+import software.amazon.jdbc.util.RdsUtils;
 
 /**
  * "State aware" {@link ClusterTopologyMonitor} that extends the default {@link
@@ -175,12 +176,12 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
 
   /**
    * {@link Runnable} task started in a scheduled {@link Thread} upon initialization of a {@link
-   * StateAwareClusterTopologyMonitor} that will independently topologyMonitor the RDS API status of
-   * RDS instances in the current {@link #clusterId} cluster and concurrently update the {@link
-   * #clusterToHostsStateMap} every {@link
+   * StateAwareClusterTopologyMonitor} that will independently monitor the RDS API status of RDS
+   * instances in the current {@link #clusterId} cluster and concurrently update the {@link
+   * StateAwareClusterTopologyMonitor#clusterToHostsStateMap} every {@link
    * StateAwareMonitoringRdsHostListProvider#instanceStateMonitorRefreshRateMs} millisecond(s).
    *
-   * @param topologyMonitor {@link StateAwareClusterTopologyMonitor} that spawned this thread.
+   * @param topologyMonitor {@link StateAwareClusterTopologyMonitor} that spawned this task.
    */
   @VisibleForTesting
   private record InstanceStateMonitor(StateAwareClusterTopologyMonitor topologyMonitor)
@@ -190,33 +191,21 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceStateMonitor.class);
 
     /**
-     * {@link Pattern} that matches the cluster ID part of a typical writer or reader cluster
-     * endpoint hostname.
+     * Used to extract RDS details like Cluster or Instance ID from the hostname given by {@link
+     * StateAwareClusterTopologyMonitor#clusterId}.
      *
-     * @implNote This is used to extract the RDS Cluster ID from {@link
-     *     StateAwareClusterTopologyMonitor#clusterId} to properly filter {@link
-     *     RdsClient#describeDBInstances()} calls to the current cluster. Although the field's name
+     * @implNote Although the name of the field {@link StateAwareClusterTopologyMonitor#clusterId}
      *     implies that it is the ID of the Cluster, it is actually the host provided in the
-     *     connection string.
+     *     original Server database connection string.
      */
-    private static final Pattern HOST_CLUSTER_ID_PATTERN =
-        Pattern.compile("^(.*)\\.cluster-(?:ro-)?\\w+\\.[\\w-]+\\.rds\\.amazonaws.com");
+    private static final RdsUtils RDS_UTILS = new RdsUtils();
 
     @Override
     public void run() {
       try {
-        final var clusterIdHostnameMatcher =
-            HOST_CLUSTER_ID_PATTERN.matcher(topologyMonitor.clusterId);
         final var dbInstancesDetails =
-            topologyMonitor.rdsClient.describeDBInstances(
-                request -> {
-                  if (clusterIdHostnameMatcher.find()) {
-                    final var trueClusterId = clusterIdHostnameMatcher.group(1);
-                    final var dbClusterIdFilter =
-                        Filter.builder().name("db-cluster-id").values(trueClusterId).build();
-                    request.filters(dbClusterIdFilter);
-                  }
-                });
+            topologyMonitor.rdsClient.describeDBInstances(this::applyFilterToRequest);
+
         final var dbInstancesStateMap =
             dbInstancesDetails.dbInstances().stream()
                 .filter(
@@ -226,9 +215,44 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
                 .collect(
                     Collectors.toUnmodifiableMap(
                         DBInstance::dbInstanceIdentifier, DBInstance::dbInstanceStatus));
+        if (dbInstancesStateMap.isEmpty()) {
+          LOGGER.error(
+              "DescribeDBInstances returned no valid results when monitoring instance state");
+          return;
+        }
+
         topologyMonitor.clusterToHostsStateMap.put(topologyMonitor.clusterId, dbInstancesStateMap);
       } catch (AwsServiceException e) {
         LOGGER.error("Unable to retrieve instance state of current RDS cluster from RDS API", e);
+      }
+    }
+
+    /**
+     * Applies a {@code db-cluster-id} or {@code db-instance-id} {@link Filter} to a {@link
+     * DescribeDbInstancesRequest} depending on what type of host URL the {@link
+     * StateAwareClusterTopologyMonitor#clusterId} is. If the {@link
+     * StateAwareClusterTopologyMonitor#clusterId} does not match an Instance or Cluster URL, then
+     * no {@link Filter} is applied.
+     *
+     * @param request the {@link DescribeDbInstancesRequest.Builder} to add the aforementioned
+     *     {@link Filter} to, if applicable
+     */
+    private void applyFilterToRequest(DescribeDbInstancesRequest.Builder request) {
+      final var rdsUrlType = RDS_UTILS.identifyRdsType(topologyMonitor.clusterId);
+      switch (rdsUrlType) {
+        case RDS_READER_CLUSTER, RDS_WRITER_CLUSTER, RDS_CUSTOM_CLUSTER -> {
+          final var trueClusterId = RDS_UTILS.getRdsClusterId(topologyMonitor.clusterId);
+          final var dbClusterIdFilter =
+              Filter.builder().name("db-cluster-id").values(trueClusterId).build();
+          request.filters(dbClusterIdFilter);
+        }
+        case RDS_INSTANCE -> {
+          final var trueInstanceId = RDS_UTILS.getRdsInstanceId(topologyMonitor.clusterId);
+          final var dbInstanceIdFilter =
+              Filter.builder().name("db-instance-id").values(trueInstanceId).build();
+          request.filters(dbInstanceIdFilter);
+        }
+        default -> {}
       }
     }
   }
