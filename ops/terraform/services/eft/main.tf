@@ -713,7 +713,7 @@ resource "aws_transfer_server" "this" {
   identity_provider_type = "SERVICE_MANAGED"
   logging_role           = aws_iam_role.logs.arn
   protocols              = ["SFTP"]
-  security_policy_name   = "TransferSecurityPolicy-2020-06"
+  security_policy_name   = "TransferSecurityPolicy-FIPS-2024-01"
   tags                   = { Name = "${local.full_name}-sftp" }
 
   endpoint_details {
