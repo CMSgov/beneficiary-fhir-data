@@ -1,6 +1,10 @@
 package gov.cms.bfd.sharedutils.database;
 
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.google.common.annotations.VisibleForTesting;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.AwsWrapperProperty;
 import software.amazon.jdbc.HostListProviderService;
@@ -27,6 +31,14 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
           "instanceStateMonitorRefreshRateMs",
           "5000",
           "Refresh rate of the thread that monitors the RDS API state of RDS instances retrieved from the cluster topology.");
+
+  /**
+   * Map {@link #clusterId}s to immutable map of instance ID to the status of the instance returned
+   * by the RDS API. Periodically updated by {@link StateAwareClusterTopologyMonitor}(s) every
+   * {@link #instanceStateMonitorRefreshRateMs} millisecond(s).
+   */
+  private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap =
+      new ConcurrentHashMap<>();
 
   /**
    * The rate, in milliseconds, at which the {@link StateAwareMonitoringRdsHostListProvider} will
@@ -84,6 +96,7 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
             new StateAwareClusterTopologyMonitor(
                 key,
                 topologyCache,
+                clusterToHostsStateMap,
                 initialHostSpec,
                 properties,
                 pluginService,

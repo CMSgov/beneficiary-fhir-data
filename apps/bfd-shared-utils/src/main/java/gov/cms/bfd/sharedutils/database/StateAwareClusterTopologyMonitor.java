@@ -39,8 +39,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
    * by the RDS API. Periodically updated by the {@link InstanceStateMonitor} every {@link
    * StateAwareMonitoringRdsHostListProvider#instanceStateMonitorRefreshRateMs} millisecond(s).
    */
-  private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap =
-      new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap;
 
   /** Executor for the periodic {@link InstanceStateMonitor} task. */
   private final ScheduledExecutorService instanceStateMonitorExecutor =
@@ -57,6 +56,8 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
    *
    * @param clusterId the cluster identifier of the current RDS cluster
    * @param topologyMap the map of cluster to its topology
+   * @param clusterToHostsStateMap the map of cluster IDs to an immutable {@link Map} of instance
+   *     IDs to their status
    * @param initialHostSpec the initial host to connect to (cluster URL)
    * @param properties the {@link AwsWrapperDataSource} properties
    * @param pluginService the {@link PluginService} as provided by the {@link Dialect}
@@ -81,6 +82,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
   public StateAwareClusterTopologyMonitor(
       String clusterId,
       CacheMap<String, List<HostSpec>> topologyMap,
+      ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap,
       HostSpec initialHostSpec,
       Properties properties,
       PluginService pluginService,
@@ -108,6 +110,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
         topologyQuery,
         writerTopologyQuery,
         nodeIdQuery);
+    this.clusterToHostsStateMap = clusterToHostsStateMap;
     this.rdsClient = rdsClient;
 
     instanceStateMonitorExecutor.scheduleAtFixedRate(
@@ -119,26 +122,19 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
 
   @Override
   public void close() throws Exception {
-    instanceStateMonitorExecutor.shutdown();
-    try {
-      if (!instanceStateMonitorExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
-        instanceStateMonitorExecutor.shutdownNow();
-      }
-    } catch (InterruptedException e) {
-      instanceStateMonitorExecutor.shutdownNow();
-    }
+    shutdownInstanceMonitorExecutor();
 
     super.close();
   }
 
   @Override
+  @VisibleForTesting
   protected List<HostSpec> queryForTopology(Connection conn) throws SQLException {
     final var unfilteredTopology = getUnfilteredTopology(conn);
 
-    // Taken from logic to determine if the topologyMonitor is in high refresh rate mode in delay()
-    boolean isInHighRefreshRateMode =
-        highRefreshRateEndTimeNano > 0 && System.nanoTime() < highRefreshRateEndTimeNano;
-    if (isInHighRefreshRateMode || !clusterToHostsStateMap.containsKey(clusterId)) {
+    if (isInHighRefreshRateMode()
+        || !clusterToHostsStateMap.containsKey(clusterId)
+        || clusterToHostsStateMap.get(clusterId).isEmpty()) {
       // High refresh rate occurs only after failover, so the worst case has already happened and
       // there is no reason to restrict the hosts that can be connected to based on status. Or, the
       // hosts map is empty, which indicates that this may be the first query for topology.
@@ -159,18 +155,48 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
   }
 
   /**
+   * Attempt to shut down the {@link #instanceStateMonitorExecutor}.
+   *
+   * @implNote This method was extracted out of {@link #close()} to enable mocking in unit tests
+   */
+  @VisibleForTesting
+  protected void shutdownInstanceMonitorExecutor() {
+    instanceStateMonitorExecutor.shutdown();
+    try {
+      if (!instanceStateMonitorExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+        instanceStateMonitorExecutor.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      instanceStateMonitorExecutor.shutdownNow();
+    }
+  }
+
+  /**
+   * Returns whether the monitor is in "high refresh rate" mode where the topology is queried from
+   * the database at a much faster rate (by default, every 100ms).
+   *
+   * @return {@code true} if in "high refresh rate" mode, {@code false} otherwise
+   */
+  @VisibleForTesting
+  protected boolean isInHighRefreshRateMode() {
+    // Taken from logic to determine if the topologyMonitor is in high refresh rate mode in delay()
+    return highRefreshRateEndTimeNano > 0 && System.nanoTime() < highRefreshRateEndTimeNano;
+  }
+
+  /**
    * Queries the database for the RDS Cluster topology.
    *
    * @param conn {@link Connection} to the current database
    * @return an unfiltered {@link List} of {@link HostSpec}s representing the instances in the RDS
    *     Cluster as reported by the database topology query
    * @throws SQLException if there is an issue querying the database
+   * @implNote The call to the super's {@link #queryForTopology(Connection)} has been extracted to
+   *     this method so that it is possible to mock the super's {@link
+   *     #queryForTopology(Connection)} while being able to independently test the filtering logic
+   *     in the overridden variant
    */
   @VisibleForTesting
-  private List<HostSpec> getUnfilteredTopology(Connection conn) throws SQLException {
-    // The call to the super's queryForTopology has been extracted to this method so that it is
-    // possible to mock the super's queryForTopology() while being able to independently test the
-    // filtering logic in the overridden variant
+  protected List<HostSpec> getUnfilteredTopology(Connection conn) throws SQLException {
     return super.queryForTopology(conn);
   }
 
@@ -184,7 +210,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
    * @param topologyMonitor {@link StateAwareClusterTopologyMonitor} that spawned this task.
    */
   @VisibleForTesting
-  private record InstanceStateMonitor(StateAwareClusterTopologyMonitor topologyMonitor)
+  record InstanceStateMonitor(StateAwareClusterTopologyMonitor topologyMonitor)
       implements Runnable {
 
     /** Logger for this class. */
