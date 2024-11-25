@@ -1,33 +1,3 @@
-resource "aws_iam_policy" "packer_s3" {
-  #FIXME: This policy should be reconsidered before acceptance of BFD-3698. Suggest removal.
-  description = "packer S3 Policy"
-  name        = "bfd-${local.env}-packer-s3"
-  path        = "/"
-  policy      = <<-POLICY
-{
-  "Statement": [
-    {
-      "Action": [
-        "s3:GetObjectAcl",
-        "s3:GetObject",
-        "s3:GetObjectVersionAcl",
-        "s3:GetObjectTagging",
-        "s3:ListBucket",
-        "s3:GetObjectVersion"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:s3:::bfd-packages/*",
-        "arn:aws:s3:::bfd-packages"
-      ],
-      "Sid": "BFDProfile"
-    }
-  ],
-  "Version": "2012-10-17"
-}
-POLICY
-}
-
 resource "aws_iam_policy" "packer_ssm" {
   description = "Policy granting permission for bfd-packer profiled instances to access some common SSM hierarchies"
   name        = "bfd-${local.env}-packer-ssm"
@@ -103,9 +73,7 @@ resource "aws_iam_role" "packer" {
   force_detach_policies = false
   managed_policy_arns = [
     aws_iam_policy.packer_ssm.arn,
-    aws_iam_policy.packer_s3.arn,
     aws_iam_policy.packer_kms.arn,
-    "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess", #FIXME: This should be reconsidered before acceptance of BFD-3698. Suggest removal.
     aws_iam_policy.ec2_instance_tags_ro.arn,
   ]
   max_session_duration = 3600
