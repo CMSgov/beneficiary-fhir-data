@@ -94,7 +94,7 @@ public class SamhsaUtilTest {
     List<CarrierTag> tags = captor.getAllValues();
     assertEquals(
         2, tags.stream().filter(t -> t.getClaim().equals(carrierClaim.getClaimId())).count());
-    assertEquals(4, tags.getFirst().getDetails().size());
+    assertEquals(5, tags.getFirst().getDetails().size());
   }
 
   /** This test should not try to save a tag. */
@@ -248,6 +248,10 @@ public class SamhsaUtilTest {
                         .diagnosisCode("F10.27")
                         .lineNumber((short) 1)
                         .hcpcsCode("H0006")
+                        .build(),
+                    CarrierClaimLine.builder()
+                        .diagnosisCode("F10.27")
+                        .lineNumber((short) 2)
                         .build()))
             .dateFrom(LocalDate.parse("1970-01-01"))
             .dateThrough(LocalDate.now())

@@ -114,6 +114,7 @@ public final class RifLoaderIT {
   /** Tests that SAMHSA tags are properly crated for SAMHSA test claims. */
   @Test
   public void loadSampleASamhsa() {
+
     List<StaticRifResource> sampleResources =
         Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources());
     final var rifFiles =

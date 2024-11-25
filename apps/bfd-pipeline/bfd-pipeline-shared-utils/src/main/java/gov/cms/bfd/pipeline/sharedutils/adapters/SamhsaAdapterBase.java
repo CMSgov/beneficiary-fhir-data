@@ -5,7 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Base class for the SAMHSA Adapters.
@@ -40,6 +42,29 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
   /** The list of samhsa fields for this claims. */
   List<SamhsaFields> samhsaFields = new ArrayList<>();
 
+  /**
+   * Returns the SAMHSA methods for a given claim line.
+   *
+   * @param claimLine The claim line to use.
+   * @return a map of samhsa methods along with the columns.
+   */
+  abstract Map<Supplier<Optional<String>>, String> getClaimLineMethods(TClaimLine claimLine);
+
+  /**
+   * Returns the SAMHSA methods for the current claim.
+   *
+   * @return a map of samhsa methods along with the columns.
+   */
+  abstract Map<Supplier<Optional<String>>, String> getClaimMethods();
+
+  /**
+   * Returns the line number for a claim line.
+   *
+   * @param line the claim line to sue.
+   * @return the line number.
+   */
+  abstract Short getLineNum(TClaimLine line);
+
   /** The class for the claim. */
   Class claimClass;
 
@@ -61,222 +86,36 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
     }
   }
 
-  /**
-   * Checks for a SAMHSA code on a given field.
-   *
-   * @param method The method of the field to process.
-   * @param column the column for the field.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getCode(String method, String column)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    Optional<String> code = (Optional<String>) claimClass.getMethod(method).invoke(claim);
-    if (code.isPresent()) {
-      SamhsaFields field =
-          SamhsaFields.builder().column(column).code(code.get()).table(table).build();
-      samhsaFields.add(field);
+  /** Gets the SAMHSA codes for a claim and its claim lines. */
+  void getCodes() {
+    iterateMethods(getClaimMethods(), table, null);
+    for (TClaimLine line : claimLines) {
+      iterateMethods(getClaimLineMethods(line), linesTable, getLineNum(line));
     }
   }
 
   /**
-   * Checks for SAMHSA data in ICD Diagnosis Codes. Since all of these fields will be similarly
-   * named, we can provide a pattern.
+   * Iterates over a set of methods and sets a SamhsaFields objects with all of the SAMHSA codes.
    *
-   * @param count The number of methods.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
+   * @param methods the methods to loop over.
+   * @param table the table belonging to this set of methods.
+   * @param lineNum the line number for the claim line. Will be null if this is not a claim line.
    */
-  void getIcdDiagnosisCodes(int count)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    String method = "getDiagnosis%dCode";
-    getClaimLoopedNumberedCode(method, "icd_dgns_cd%d", count);
-  }
-
-  /**
-   * Loops through a number of similarly named methods, distinguised by number.
-   *
-   * @param method The method pattern.
-   * @param column The column pattern.
-   * @param count The number of methods.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getClaimLoopedNumberedCode(String method, String column, int count)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    for (int i = 1; i <= count; i++) {
-      Optional<String> code =
-          (Optional<String>) claimClass.getMethod(String.format(method, i)).invoke(claim);
+  void iterateMethods(
+      Map<Supplier<Optional<String>>, String> methods, String table, Short lineNum) {
+    for (Map.Entry<Supplier<Optional<String>>, String> method : methods.entrySet()) {
+      Optional<String> code = method.getKey().get();
       if (code.isPresent()) {
         SamhsaFields field =
             SamhsaFields.builder()
+                .column(method.getValue())
                 .code(code.get())
-                .column(String.format(column, i))
                 .table(table)
-                .build();
-        samhsaFields.add(field);
-      }
-    }
-  }
-
-  /**
-   * Loops through the claim lines for a given method.
-   *
-   * @param method The method for the field to process.
-   * @param column the column for the field.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void claimLinesCode(String method, String column)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    if (claimLineClass == null) {
-      return;
-    }
-    for (TClaimLine claimLine : claimLines) {
-      Optional<String> code = (Optional<String>) claimLineClass.getMethod(method).invoke(claimLine);
-      short lineNum = (short) claimLineClass.getMethod("getLineNumber").invoke(claimLine);
-      if (code.isPresent()) {
-        SamhsaFields field =
-            SamhsaFields.builder()
-                .column(column)
-                .code(code.get())
                 .lineNum(lineNum)
-                .table(linesTable)
                 .build();
         samhsaFields.add(field);
       }
     }
-  }
-
-  /**
-   * Checks for SAMHSA data in Diagnosis Admitting Codes. Since all of these fields will be
-   * similarly named, we can provide a pattern.
-   *
-   * @param count The number of methods.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getDiagnosisAdmittingCodes(int count)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    getClaimLoopedNumberedCode("getDiagnosisAdmission%dCode", "rsn_visit_cd%d", count);
-  }
-
-  /**
-   * Checks for SAMHSA data in Procedure Codes. Since all of these fields will be similarly named,
-   * we can provide a pattern.
-   *
-   * @param count The number of methods.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getProcedureCodes(int count)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    getClaimLoopedNumberedCode("getProcedure%dCode", "icd_prcdr_cd%d", count);
-  }
-
-  /**
-   * Checks for SAMHSA data in the Principal Diagnosis.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getPrincipalDiagnosis()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    getCode("getDiagnosisPrincipalCode", "prncpal_dgns_cd");
-  }
-
-  /**
-   * Checks for SAMHSA data in the external diagnosis first code.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getDiagnosisFirstCode()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    getCode("getDiagnosisExternalFirstCode", "fst_dgns_e_cd");
-  }
-
-  /**
-   * Checks for SAMHSA data in diagnosis external codes. Since all of these fields will be similarly
-   * named, we can provide a pattern.
-   *
-   * @param count The number of methods.
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getDiagnosisExternalCodes(int count)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    getClaimLoopedNumberedCode("getDiagnosisExternal%dCode", "icd_dgns_e_cd%d", count);
-  }
-
-  /**
-   * Checks for SAMHSA data in the HCPCS code.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getHcpcsCode()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    claimLinesCode("getHcpcsCode", "rev_cntr_apc_hipps_cd");
-  }
-
-  /**
-   * Checks for SAMHSA data in the apc hipps code. This would normally not hold SAMHSA data, but it
-   * is checked for accidental entries.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getApcOrHippsCode()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    claimLinesCode("getApcOrHippsCode", "rev_cntr_apc_hipps_cd");
-  }
-
-  /**
-   * Checks for SAMHSA data in the line's diagnosis code.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getDiagnosisCode()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    claimLinesCode("getDiagnosisCode", "line_icd_dgns_cd");
-  }
-
-  /**
-   * Checks for SAMHSA data in the claim's DRG code.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getClaimDRGCode()
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    getCode("getDiagnosisRelatedGroupCd", "clm_drg_cd");
-  }
-
-  /**
-   * Checks for SAMHSA data in the line's diagnosis admitting code.
-   *
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
-   */
-  void getDiagnosisAdmittingCode()
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    getCode("getDiagnosisAdmittingCode", "prncpal_dgns_cd");
   }
 
   /**
