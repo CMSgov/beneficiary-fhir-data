@@ -35,8 +35,8 @@ import software.amazon.jdbc.util.RdsUtils;
  */
 public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl {
   /**
-   * Map of instance ID to the status of the instance returned by the RDS API. Periodically updated
-   * by the {@link InstanceStateMonitor} every {@link
+   * Map {@link #clusterId}s to immutable map of instance ID to the status of the instance returned
+   * by the RDS API. Periodically updated by the {@link InstanceStateMonitor} every {@link
    * StateAwareMonitoringRdsHostListProvider#instanceStateMonitorRefreshRateMs} millisecond(s).
    */
   private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap =
