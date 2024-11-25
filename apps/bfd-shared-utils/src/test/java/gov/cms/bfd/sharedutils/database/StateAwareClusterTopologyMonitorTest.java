@@ -1,24 +1,19 @@
 package gov.cms.bfd.sharedutils.database;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.MockedStatic;
-import software.amazon.awssdk.services.rds.RdsClient;
-import software.amazon.jdbc.HostListProviderService;
-import software.amazon.jdbc.HostSpec;
-import software.amazon.jdbc.HostSpecBuilder;
-import software.amazon.jdbc.PluginService;
-import software.amazon.jdbc.hostavailability.HostAvailability;
-import software.amazon.jdbc.hostavailability.HostAvailabilityStrategy;
-import software.amazon.jdbc.util.CacheMap;
-
-import javax.annotation.Nullable;
+import gov.cms.bfd.sharedutils.database.StateAwareClusterTopologyMonitor.InstanceStateMonitor;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
@@ -29,17 +24,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import javax.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.rds.RdsClient;
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
+import software.amazon.awssdk.services.rds.model.Filter;
+import software.amazon.jdbc.HostListProviderService;
+import software.amazon.jdbc.HostSpec;
+import software.amazon.jdbc.HostSpecBuilder;
+import software.amazon.jdbc.PluginService;
+import software.amazon.jdbc.hostavailability.HostAvailability;
+import software.amazon.jdbc.hostavailability.HostAvailabilityStrategy;
+import software.amazon.jdbc.util.CacheMap;
 
 class StateAwareClusterTopologyMonitorTest {
 
@@ -48,7 +55,7 @@ class StateAwareClusterTopologyMonitorTest {
   public static final String RDS_INSTANCE_STATE_CONFIGURING_LOG_EXPORTS = "configuring-log-exports";
   public static final String RDS_INSTANCE_STATE_CONFIGURING_ENHANCED_MONITORING =
       "configuring-enhanced-monitoring";
-  public static final String MOCK_CLUSTER_ID = "test";
+  public static final String DEFAULT_MOCK_CLUSTER_ID = "test";
   private MockedStatic<Executors> mockedStaticExecutors;
   private final ExecutorService mockTopologyMonitorExecutor = mock(ExecutorService.class);
   private final ScheduledExecutorService mockInstanceStateMonitorExecutor =
@@ -80,7 +87,7 @@ class StateAwareClusterTopologyMonitorTest {
       // Assert
       verify(mockInstanceStateMonitorExecutor, times(1))
           .scheduleAtFixedRate(
-              any(StateAwareClusterTopologyMonitor.InstanceStateMonitor.class),
+              any(InstanceStateMonitor.class),
               eq(0L),
               eq(refreshRateMs),
               eq(TimeUnit.MILLISECONDS));
@@ -101,7 +108,7 @@ class StateAwareClusterTopologyMonitorTest {
   }
 
   @ParameterizedTest(name = "{0}")
-  @MethodSource("provideQueryForTopologyTestArguments")
+  @MethodSource("provideTestQueryForTopologyArguments")
   void testQueryForTopology(
       String testCaseName,
       boolean inHighRefreshRateMode,
@@ -123,7 +130,7 @@ class StateAwareClusterTopologyMonitorTest {
     }
   }
 
-  private static Stream<Arguments> provideQueryForTopologyTestArguments() {
+  private static Stream<Arguments> provideTestQueryForTopologyArguments() {
     return Stream.of(
         Arguments.of(
             "testQueryForTopologyReturnsAllNodesWhenAllNodesAreAvailable",
@@ -207,8 +214,20 @@ class StateAwareClusterTopologyMonitorTest {
   private static StateAwareClusterTopologyMonitor createMonitor(
       ConcurrentHashMap<String, Map<String, String>> instanceStateMap,
       long instanceStateRefreshRateMs) {
+    return createMonitor(instanceStateMap, instanceStateRefreshRateMs, mock(RdsClient.class));
+  }
+
+  private static StateAwareClusterTopologyMonitor createMonitor(
+      ConcurrentHashMap<String, Map<String, String>> instanceStateMap, RdsClient mockRdsClient) {
+    return createMonitor(instanceStateMap, 0L, mockRdsClient);
+  }
+
+  private static StateAwareClusterTopologyMonitor createMonitor(
+      ConcurrentHashMap<String, Map<String, String>> instanceStateMap,
+      long instanceStateRefreshRateMs,
+      RdsClient mockRdsClient) {
     return new StateAwareClusterTopologyMonitor(
-        MOCK_CLUSTER_ID,
+        DEFAULT_MOCK_CLUSTER_ID,
         new CacheMap<>(),
         instanceStateMap,
         mock(HostSpec.class),
@@ -223,14 +242,18 @@ class StateAwareClusterTopologyMonitorTest {
         "",
         "",
         instanceStateRefreshRateMs,
-        mock(RdsClient.class));
+        mockRdsClient);
+  }
+
+  private static ConcurrentHashMap<String, Map<String, String>> createClusterInstanceStateMap() {
+    return createClusterInstanceStateMap(null);
   }
 
   private static ConcurrentHashMap<String, Map<String, String>> createClusterInstanceStateMap(
       @Nullable Map<String, String> instanceStateMap) {
     final ConcurrentHashMap<String, Map<String, String>> mockMap = new ConcurrentHashMap<>();
     if (instanceStateMap != null) {
-      mockMap.put(MOCK_CLUSTER_ID, instanceStateMap);
+      mockMap.put(DEFAULT_MOCK_CLUSTER_ID, instanceStateMap);
     }
     return mockMap;
   }
@@ -247,7 +270,130 @@ class StateAwareClusterTopologyMonitorTest {
         .toList();
   }
 
-  private static List<String> getInstanceIdsFromHostSpecs(Collection<HostSpec> hostSpecs) {
-    return hostSpecs.stream().map(HostSpec::getHostId).toList();
+  @Nested
+  class InstanceStateMonitorTest {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideTestRunArguments")
+    void testRun(
+        String testCaseName,
+        List<InstanceWithState> mockRdsClientInstanceStateResponseMap,
+        Map<String, String> expectedInstanceStateMap)
+        throws Exception {
+      // Arrange
+      final var clusterInstanceStateMap = createClusterInstanceStateMap();
+      final var mockRdsClient =
+          createMockRdsClientWithMockedDescribeDBInstances(mockRdsClientInstanceStateResponseMap);
+      try (var topologyMonitor = createMonitor(clusterInstanceStateMap, mockRdsClient)) {
+        final var instanceMonitor = new InstanceStateMonitor(topologyMonitor);
+
+        // Act
+        instanceMonitor.run();
+
+        // Assert
+        assertEquals(
+            expectedInstanceStateMap, clusterInstanceStateMap.get(DEFAULT_MOCK_CLUSTER_ID));
+      }
+    }
+
+    @Test
+    void testRunShouldPutNothingInClusterStateMapWhenAwsServiceExceptionIsThrown()
+        throws Exception {
+      // Arrange
+      final var clusterInstanceStateMap = createClusterInstanceStateMap();
+      final var mockRdsClient = mock(RdsClient.class);
+      doThrow(AwsServiceException.class)
+          .when(mockRdsClient)
+          .describeDBInstances(any(Consumer.class));
+      try (var topologyMonitor = createMonitor(clusterInstanceStateMap, mockRdsClient)) {
+        final var instanceMonitor = new InstanceStateMonitor(topologyMonitor);
+
+        // Act
+        instanceMonitor.run();
+
+        // Assert
+        assertFalse(clusterInstanceStateMap.containsKey(DEFAULT_MOCK_CLUSTER_ID));
+      }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideTestApplyFilterToRequestArguments")
+    void testApplyFilterToRequest(String testCaseName, String rdsUrl, Filter expectedFilter) {
+      // Act
+      final var actualFilter = InstanceStateMonitor.getDescribeDbInstancesFilterFromUrl(rdsUrl);
+
+      // Assert
+      assertEquals(expectedFilter, actualFilter);
+    }
+
+    private static Stream<Arguments> provideTestRunArguments() {
+      return Stream.of(
+          Arguments.of(
+              "testRunShouldPutAllInstanceStatesInClusterStateMapWhenAllInstancesAreAvailable",
+              List.of(
+                  new InstanceWithState("writer", RDS_INSTANCE_STATE_AVAILABLE),
+                  new InstanceWithState("reader1", RDS_INSTANCE_STATE_AVAILABLE),
+                  new InstanceWithState("reader2", RDS_INSTANCE_STATE_AVAILABLE)),
+              Map.of(
+                  "writer",
+                  RDS_INSTANCE_STATE_AVAILABLE,
+                  "reader1",
+                  RDS_INSTANCE_STATE_AVAILABLE,
+                  "reader2",
+                  RDS_INSTANCE_STATE_AVAILABLE)),
+          Arguments.of(
+              "testRunShouldPutWriterInstanceStateInClusterStateMapWhenResponseHasInvalidValues",
+              List.of(
+                  new InstanceWithState("writer", RDS_INSTANCE_STATE_AVAILABLE),
+                  new InstanceWithState("reader1", null),
+                  new InstanceWithState(null, RDS_INSTANCE_STATE_AVAILABLE),
+                  new InstanceWithState(null, null)),
+              Map.of("writer", RDS_INSTANCE_STATE_AVAILABLE)),
+          Arguments.of(
+              "testRunShouldPutNothingInClusterStateMapWhenNoResponseIsReturned", List.of(), null));
+    }
+
+    private static Stream<Arguments> provideTestApplyFilterToRequestArguments() {
+      return Stream.of(
+          Arguments.of(
+              "testApplyFilterToRequestReturnsClusterIdFilterWhenClusterWriterEndpointIsGiven",
+              String.format(
+                  "%s.cluster-uniqueid.us-east-1.rds.amazonaws.com", DEFAULT_MOCK_CLUSTER_ID),
+              Filter.builder().name("db-cluster-id").values(DEFAULT_MOCK_CLUSTER_ID).build()),
+          Arguments.of(
+              "testApplyFilterToRequestReturnsClusterIdFilterWhenClusterReaderEndpointIsGiven",
+              String.format(
+                  "%s.cluster-ro-uniqueid.us-east-1.rds.amazonaws.com", DEFAULT_MOCK_CLUSTER_ID),
+              Filter.builder().name("db-cluster-id").values(DEFAULT_MOCK_CLUSTER_ID).build()),
+          Arguments.of(
+              "testApplyFilterToRequestReturnsInstanceIdFilterWhenInstanceEndpointIsGiven",
+              String.format("%s.uniqueid.us-east-1.rds.amazonaws.com", "writer-node"),
+              Filter.builder().name("db-instance-id").values("writer-node").build()),
+          Arguments.of(
+              "testApplyFilterToRequestReturnsNullWhenInvalidEndpointIsGiven",
+              "invalid_endpoint",
+              null));
+    }
+
+    private static RdsClient createMockRdsClientWithMockedDescribeDBInstances(
+        List<InstanceWithState> expectedInstancesWithStateResult) {
+      final var mockRdsClient = mock(RdsClient.class);
+      when(mockRdsClient.describeDBInstances(any(Consumer.class)))
+          .thenReturn(
+              DescribeDbInstancesResponse.builder()
+                  .dbInstances(
+                      expectedInstancesWithStateResult.stream()
+                          .map(
+                              instanceWithState ->
+                                  DBInstance.builder()
+                                      .dbInstanceIdentifier(instanceWithState.instanceId())
+                                      .dbInstanceStatus(instanceWithState.instanceState())
+                                      .build())
+                          .toList())
+                  .build());
+      return mockRdsClient;
+    }
+
+    // Necessary as Map.of() disallows null values and keys
+    private record InstanceWithState(String instanceId, String instanceState) {}
   }
 }

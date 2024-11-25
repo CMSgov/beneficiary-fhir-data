@@ -3,8 +3,6 @@ package gov.cms.bfd.sharedutils.database;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.google.common.annotations.VisibleForTesting;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.AwsWrapperProperty;
 import software.amazon.jdbc.HostListProviderService;

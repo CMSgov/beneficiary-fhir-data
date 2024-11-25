@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import software.amazon.jdbc.PluginService;
 
 class SingleNodeHostOverrideConnectionPluginFactoryTest {

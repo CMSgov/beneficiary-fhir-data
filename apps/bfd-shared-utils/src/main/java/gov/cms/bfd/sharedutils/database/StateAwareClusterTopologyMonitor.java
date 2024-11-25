@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DBInstance;
-import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
 import software.amazon.awssdk.services.rds.model.Filter;
 import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.HostSpec;
@@ -230,7 +229,14 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
     public void run() {
       try {
         final var dbInstancesDetails =
-            topologyMonitor.rdsClient.describeDBInstances(this::applyFilterToRequest);
+            topologyMonitor.rdsClient.describeDBInstances(
+                request -> {
+                  final var instanceOrClusterFilter =
+                      getDescribeDbInstancesFilterFromUrl(topologyMonitor.clusterId);
+                  if (instanceOrClusterFilter != null) {
+                    request.filters(instanceOrClusterFilter);
+                  }
+                });
 
         final var dbInstancesStateMap =
             dbInstancesDetails.dbInstances().stream()
@@ -254,32 +260,29 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
     }
 
     /**
-     * Applies a {@code db-cluster-id} or {@code db-instance-id} {@link Filter} to a {@link
-     * DescribeDbInstancesRequest} depending on what type of host URL the {@link
-     * StateAwareClusterTopologyMonitor#clusterId} is. If the {@link
-     * StateAwareClusterTopologyMonitor#clusterId} does not match an Instance or Cluster URL, then
-     * no {@link Filter} is applied.
+     * Returns a {@code db-cluster-id} or {@code db-instance-id} {@link Filter} depending on what
+     * type of host URL the {@code rdsUrl} is. If the {@code rdsUrl} does not match an Instance or
+     * Cluster URL, then no {@link Filter} is returned.
      *
-     * @param request the {@link DescribeDbInstancesRequest.Builder} to add the aforementioned
-     *     {@link Filter} to, if applicable
+     * @param rdsUrl the RDS URL to parse for the Cluster or Instance ID for the {@link Filter}
+     * @return a {@link Filter} filtering for {@code db-cluster-id} or {@code db-instance-id} if
+     *     applicable, {@code null} otherwise
      */
-    private void applyFilterToRequest(DescribeDbInstancesRequest.Builder request) {
-      final var rdsUrlType = RDS_UTILS.identifyRdsType(topologyMonitor.clusterId);
+    @VisibleForTesting
+    static Filter getDescribeDbInstancesFilterFromUrl(String rdsUrl) {
+      final var rdsUrlType = RDS_UTILS.identifyRdsType(rdsUrl);
       switch (rdsUrlType) {
-        case RDS_READER_CLUSTER, RDS_WRITER_CLUSTER, RDS_CUSTOM_CLUSTER -> {
-          final var trueClusterId = RDS_UTILS.getRdsClusterId(topologyMonitor.clusterId);
-          final var dbClusterIdFilter =
-              Filter.builder().name("db-cluster-id").values(trueClusterId).build();
-          request.filters(dbClusterIdFilter);
+        case RDS_READER_CLUSTER, RDS_WRITER_CLUSTER -> {
+          final var trueClusterId = RDS_UTILS.getRdsClusterId(rdsUrl);
+          return Filter.builder().name("db-cluster-id").values(trueClusterId).build();
         }
         case RDS_INSTANCE -> {
-          final var trueInstanceId = RDS_UTILS.getRdsInstanceId(topologyMonitor.clusterId);
-          final var dbInstanceIdFilter =
-              Filter.builder().name("db-instance-id").values(trueInstanceId).build();
-          request.filters(dbInstanceIdFilter);
+          final var trueInstanceId = RDS_UTILS.getRdsInstanceId(rdsUrl);
+          return Filter.builder().name("db-instance-id").values(trueInstanceId).build();
         }
-        default -> {}
       }
+
+      return null;
     }
   }
 }
