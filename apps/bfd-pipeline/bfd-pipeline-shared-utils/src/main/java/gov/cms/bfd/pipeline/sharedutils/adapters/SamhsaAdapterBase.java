@@ -32,9 +32,6 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
    * Retrieves a list of SAMHSA fields.
    *
    * @return {@link SamhsaFields}
-   * @throws InvocationTargetException Thrown when the one of the claim's methods cannot be invoked.
-   * @throws NoSuchMethodException Thrown when one of the claim's method does not exist.
-   * @throws IllegalAccessException Thrown on illegal access invoking the claim's method.
    */
   public abstract List<SamhsaFields> getFields()
       throws InvocationTargetException, NoSuchMethodException, IllegalAccessException;
