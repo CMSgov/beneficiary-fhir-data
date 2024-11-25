@@ -1,4 +1,4 @@
-resource "aws_iam_policy" "ec2_instances_tags_ro" {
+resource "aws_iam_policy" "ec2_instance_tags_ro" {
   description = "Global EC2 Instances and Tags RO Policy"
   name        = "bfd-${local.env}-ec2-instance-tags-ro"
   path        = "/"

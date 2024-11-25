@@ -138,6 +138,6 @@ data "aws_sns_topic" "bfd_notices_slack_alarm" {
   name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
 }
 
-data "aws_iam_policy" "ec2_instances_tags_ro" {
-  name = "bfd-mgmt-ec2-instances-tags-ro"
+data "aws_iam_policy" "ec2_instance_tags_ro" {
+  name = "bfd-mgmt-ec2-instance-tags-ro"
 }

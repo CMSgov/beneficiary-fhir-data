@@ -102,6 +102,6 @@ data "aws_ssm_parameters_by_path" "nonsensitive" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive"
 }
 
-data "aws_iam_policy" "ec2_instances_tags_ro" {
-  name = "bfd-mgmt-ec2-instances-tags-ro"
+data "aws_iam_policy" "ec2_instance_tags_ro" {
+  name = "bfd-mgmt-ec2-instance-tags-ro"
 }

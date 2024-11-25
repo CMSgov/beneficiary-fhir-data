@@ -106,7 +106,7 @@ resource "aws_iam_role" "packer" {
     aws_iam_policy.packer_s3.arn,
     aws_iam_policy.packer_kms.arn,
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess", #FIXME: This should be reconsidered before acceptance of BFD-3698. Suggest removal.
-    aws_iam_policy.ec2_instances_tags_ro.arn,
+    aws_iam_policy.ec2_instance_tags_ro.arn,
   ]
   max_session_duration = 3600
   name                 = "bfd-packer"
