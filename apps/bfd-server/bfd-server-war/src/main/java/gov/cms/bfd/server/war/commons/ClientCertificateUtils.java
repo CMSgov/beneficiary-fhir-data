@@ -7,7 +7,7 @@ import javax.security.auth.x500.X500Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***
+/**
  * Utilities for parsing metadata from client certificates.
  */
 public class ClientCertificateUtils {
