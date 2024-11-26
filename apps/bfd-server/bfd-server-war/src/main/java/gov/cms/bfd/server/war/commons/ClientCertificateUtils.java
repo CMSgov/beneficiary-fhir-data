@@ -7,9 +7,7 @@ import javax.security.auth.x500.X500Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Utilities for parsing metadata from client certificates.
- */
+/** Utilities for parsing metadata from client certificates. */
 public class ClientCertificateUtils {
   /** The logger for this filter. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientCertificateUtils.class);
