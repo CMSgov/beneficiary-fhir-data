@@ -1,7 +1,8 @@
 package gov.cms.bfd.sharedutils.database;
 
-import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.HostListProvider;
@@ -17,6 +18,7 @@ import software.amazon.jdbc.dialect.HostListProviderSupplier;
  * in the {@code creating} status so that the Wrapper does not attempt to make connections to
  * unready hosts.
  */
+@AllArgsConstructor(access = AccessLevel.PROTECTED) // Implies @VisibleForTesting
 public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   /**
    * Query that returns the cluster topology, or the instances in the cluster, from the database
@@ -53,15 +55,6 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   /** Used for RDS API calls by the {@link StateAwareMonitoringRdsHostListProvider}. */
   private final RdsClient rdsClient;
 
-  /**
-   * Creates an instance of {@link StateAwareAuroraPgDialect}.
-   *
-   * @param awsClientConfig client configuration for the {@link RdsClient}
-   */
-  public StateAwareAuroraPgDialect(AwsClientConfig awsClientConfig) {
-    this.rdsClient = getRdsClient(awsClientConfig);
-  }
-
   @Override
   public HostListProviderSupplier getHostListProvider() {
     return (properties, initialUrl, hostListProviderService, pluginService) ->
@@ -78,13 +71,23 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   }
 
   /**
+   * Creates an instance of {@link StateAwareAuroraPgDialect} with the given {@link AwsClientConfig}
+   * used for creating a {@link RdsClient}.
+   *
+   * @param awsClientConfig AWS config used to create a {@link RdsClient}
+   * @return a new {@link StateAwareAuroraPgDialect}
+   */
+  public static StateAwareAuroraPgDialect createWithAwsConfig(AwsClientConfig awsClientConfig) {
+    return new StateAwareAuroraPgDialect(createRdsClient(awsClientConfig));
+  }
+
+  /**
    * Creates a {@link RdsClient}.
    *
    * @param awsClientConfig the AWS client configuration to use for the {@link RdsClient}
    * @return the RDS client
    */
-  @VisibleForTesting
-  protected RdsClient getRdsClient(AwsClientConfig awsClientConfig) {
+  private static RdsClient createRdsClient(AwsClientConfig awsClientConfig) {
     final var rdsClientBuilder = RdsClient.builder();
     awsClientConfig.configureAwsService(rdsClientBuilder);
     rdsClientBuilder.credentialsProvider(DefaultCredentialsProvider.create());
