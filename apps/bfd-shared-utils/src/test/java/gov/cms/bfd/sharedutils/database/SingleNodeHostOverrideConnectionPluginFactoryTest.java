@@ -7,8 +7,13 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.PluginService;
 
+/** Unit tests for {@link SingleNodeHostOverrideConnectionPluginFactory}. */
 class SingleNodeHostOverrideConnectionPluginFactoryTest {
 
+  /**
+   * Tests that {@link SingleNodeHostOverrideConnectionPluginFactory#getInstance(PluginService,
+   * Properties)} returns an instance of {@link SingleNodeHostOverrideConnectionPlugin} when called.
+   */
   @Test
   void testGetInstanceShouldReturnCorrectPluginTypeWhenCalled() {
     // Arrange
