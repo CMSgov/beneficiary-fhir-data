@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /***
- * test.
+ * Filter class to add metadata to the request that says whether clients can see SAMHSA data or not.
  */
 @Component("AllowSamhsaFilterBean")
 public class AllowSamhsaFilter extends OncePerRequestFilter {
