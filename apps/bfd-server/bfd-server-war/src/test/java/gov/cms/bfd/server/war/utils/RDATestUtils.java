@@ -505,7 +505,7 @@ public class RDATestUtils {
             .totalChargeAmount(new BigDecimal("1235.32"))
             .receivedDate(LocalDate.of(1970, 1, 9))
             .currTranDate(LocalDate.of(1970, 1, 13))
-            // SAMHSA diagnosis coe
+            // SAMHSA diagnosis code
             .admitDiagCode("F10.10")
             .principleDiag("princcc")
             .npiNumber("8876543212")
