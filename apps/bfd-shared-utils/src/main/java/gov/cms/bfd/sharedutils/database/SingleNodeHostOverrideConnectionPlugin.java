@@ -144,10 +144,9 @@ public class SingleNodeHostOverrideConnectionPlugin extends AbstractConnectionPl
       return connectFunc.call();
     }
 
-    final var singleNodeHostSpec = allValidHosts.getFirst();
     if (isInitialConnection) {
-      hostListProviderService.setInitialConnectionHostSpec(singleNodeHostSpec);
+      hostListProviderService.setInitialConnectionHostSpec(singleAvailableHost);
     }
-    return pluginService.connect(singleNodeHostSpec, props);
+    return pluginService.connect(singleAvailableHost, props);
   }
 }
