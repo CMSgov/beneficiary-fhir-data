@@ -161,7 +161,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
         FailoverConnectionPlugin.ENABLE_CONNECT_FAILOVER.name, "true");
     targetDataSourceProps.setProperty(
         RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name,
-        Integer.toString(wrapperOptions.getClusterTopologyRefreshRateMs()));
+        Long.toString(wrapperOptions.getClusterTopologyRefreshRateMs()));
     targetDataSourceProps.setProperty(
         StateAwareMonitoringRdsHostListProvider.INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.name,
         Long.toString(wrapperOptions.getInstanceStateMonitorRefreshRateMs()));

@@ -328,7 +328,7 @@ public class DatabaseOptions {
      * {@link Dialect}'s topology query (if applicable) to determine the list of available hosts to
      * connect to.
      */
-    int clusterTopologyRefreshRateMs;
+    long clusterTopologyRefreshRateMs;
 
     /**
      * The rate, in milliseconds, at which the {@link StateAwareMonitoringRdsHostListProvider} will
@@ -360,7 +360,7 @@ public class DatabaseOptions {
         @Nullable String basePresetCode,
         @Nullable String pluginsCsv,
         @Nullable String hostSelectorStrategy,
-        @Nullable Integer clusterTopologyRefreshRateMs,
+        @Nullable Long clusterTopologyRefreshRateMs,
         @Nullable Long instanceStateMonitorRefreshRateMs) {
       this.useCustomPreset = useCustomPreset;
       this.basePresetCode = basePresetCode != null ? basePresetCode : "E";
@@ -374,7 +374,7 @@ public class DatabaseOptions {
       this.hostSelectorStrategy =
           hostSelectorStrategy != null ? hostSelectorStrategy : "roundRobin";
       this.clusterTopologyRefreshRateMs =
-          clusterTopologyRefreshRateMs != null ? clusterTopologyRefreshRateMs : 30000;
+          clusterTopologyRefreshRateMs != null ? clusterTopologyRefreshRateMs : 30000L;
       this.instanceStateMonitorRefreshRateMs =
           instanceStateMonitorRefreshRateMs != null ? instanceStateMonitorRefreshRateMs : 5000L;
     }

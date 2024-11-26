@@ -365,7 +365,7 @@ public abstract class BaseConfiguration {
       final var wrapperHostSelectorStrategy =
           config.stringValue(SSM_PATH_DB_WRAPPER_HOST_SELECTOR_STRATEGY, "roundRobin");
       final var wrapperClusterTopologyRefreshRateMs =
-          config.intValue(SSM_PATH_DB_WRAPPER_CLUSTER_TOPOLOGY_REFRESH_RATE_MS, 30000);
+          config.longValue(SSM_PATH_DB_WRAPPER_CLUSTER_TOPOLOGY_REFRESH_RATE_MS, 30000L);
       final var wrapperInstanceStateMonitorRefreshRateMs =
           config.longValue(SSM_PATH_DB_WRAPPER_INSTANCE_STATE_MONITOR_REFRESH_RATE_MS, 5000L);
       final var wrapperOptions =
