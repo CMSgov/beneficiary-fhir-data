@@ -81,7 +81,7 @@ public final class CommonTransformerUtils {
   private static final String COVERAGE_SIMPLE_CLASSNAME =
       org.hl7.fhir.dstu3.model.Coverage.class.getSimpleName();
 
-  /***
+  /**
    * Constant for setting and retrieving the attribute from the request that determines if the client can see SAMHSA data.
    * */
   public static final String SHOULD_FILTER_SAMHSA = "SHOULD_FILTER_SAMHSA";
