@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.database;
 
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.rds.RdsClient;
@@ -82,7 +83,8 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
    * @param awsClientConfig the AWS client configuration to use for the {@link RdsClient}
    * @return the RDS client
    */
-  private RdsClient getRdsClient(AwsClientConfig awsClientConfig) {
+  @VisibleForTesting
+  protected RdsClient getRdsClient(AwsClientConfig awsClientConfig) {
     final var rdsClientBuilder = RdsClient.builder();
     awsClientConfig.configureAwsService(rdsClientBuilder);
     rdsClientBuilder.credentialsProvider(DefaultCredentialsProvider.create());

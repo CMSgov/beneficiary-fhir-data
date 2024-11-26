@@ -1,11 +1,15 @@
 package gov.cms.bfd.sharedutils.database;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.PluginService;
 import software.amazon.jdbc.dialect.HostListProviderSupplier;
@@ -26,7 +30,8 @@ class StateAwareAuroraPgDialectTest {
     final var mockPluginService = mock(PluginService.class);
     final var mockAwsClientConfig = mock(AwsClientConfig.class);
     final var properties = new Properties();
-    final var dialect = new StateAwareAuroraPgDialect(mockAwsClientConfig);
+    final var dialect = spy(new StateAwareAuroraPgDialect(mockAwsClientConfig));
+    doReturn(mock(RdsClient.class)).when(dialect).getRdsClient(any(AwsClientConfig.class));
     final var supplier = dialect.getHostListProvider();
 
     // Act
