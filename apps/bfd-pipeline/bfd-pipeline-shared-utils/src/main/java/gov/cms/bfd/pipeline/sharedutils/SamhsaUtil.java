@@ -127,6 +127,7 @@ public class SamhsaUtil {
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
    * @param <TClaim> Generic type of the claim.
+   * @return true if a tag was persisted.
    */
   public <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager) {
     boolean persisted = false;
@@ -184,15 +185,17 @@ public class SamhsaUtil {
    * @param tags List of tags to persist.
    * @param entityManager the EntityManager.
    * @param <TTag> Generic type of the tags.
+   * @return true if a tag was persisted.
    */
   private <TTag> boolean persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
+    boolean persisted = false;
     if (tags.isPresent()) {
       for (TTag tag : tags.get()) {
         entityManager.merge(tag);
+        persisted = true;
       }
-      return true;
     }
-    return false;
+    return persisted;
   }
 
   /**
