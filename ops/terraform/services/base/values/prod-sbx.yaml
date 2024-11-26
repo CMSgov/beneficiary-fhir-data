@@ -145,7 +145,7 @@
 /bfd/${env}/server/nonsensitive/500_errors_alerter_log_lookback_seconds: "330"
 /bfd/${env}/server/nonsensitive/500_errors_alerter_slack_webhook: bfd_test
 /bfd/${env}/server/nonsensitive/samhsa_allowed_certificate_aliases_json: |-
-  '[ "bluebutton_root_ca_test", "bluebutton_root_ca_sbx", "bb2_local_client", "performance_tests", "bluebutton_backend_test_samhsa" ]'
+  '[ "bluebutton_root_ca_test", "bluebutton_root_ca_sbx", "bb2_local_client", "bluebutton_backend_test_samhsa" ]'
 /bfd/${env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test: |-
   -----BEGIN CERTIFICATE-----
   MIIFETCCAvmgAwIBAgIEGBhgATANBgkqhkiG9w0BAQsFADA5MTcwNQYDVQQDEy5i
