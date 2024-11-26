@@ -38,14 +38,15 @@ locals {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_prod_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_prod_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/regression_tests"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/regression_tests"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_client"                                 = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"                     = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/ab2d_prod_validation_client"
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test",
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_prod_data_server_client_test"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa"                  = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa"
     }
     prod-sbx = {
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test",
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa"                 = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test"                        = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca_test"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx"                         = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca_sbx"
@@ -55,6 +56,7 @@ locals {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_sbx_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_sbx_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bcda_local_client"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bcda_local_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/regression_tests"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/regression_tests"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_prod_sbx_client"                            = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_prod_sbx_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_test_client"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_test_client"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/dpc_dev_client"                                 = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/dpc_dev_client"
@@ -65,10 +67,11 @@ locals {
       "/bfd/${local.env}/server/nonsensitive/client_certificates/prod_sbx_bfd_cms_gov"                           = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/prod_sbx_bfd_cms_gov"
     }
     test = {
-      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test",
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test" = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_data_server_client_test"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa"                  = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_backend_test_samhsa"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/bluebutton_root_ca"                              = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/bluebutton_root_ca"
       "/bfd/${local.env}/server/nonsensitive/client_certificates/performance_tests"                               = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/performance_tests"
+      "/bfd/${local.env}/server/nonsensitive/client_certificates/regression_tests"                                = "/bfd/${local.seed_env}/server/nonsensitive/client_certificates/regression_tests"
     }
   }
 
@@ -91,6 +94,10 @@ locals {
     "/bfd/${local.env}/server/sensitive/db/password"                                = "/bfd/${local.seed_env}/server/sensitive/db/password"
     "/bfd/${local.env}/server/sensitive/test_client_cert"                           = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
     "/bfd/${local.env}/server/sensitive/test_client_key"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
+    "/bfd/${local.env}/server/sensitive/test_client_cert"                           = "/bfd/${local.seed_env}/server/sensitive/test_client_samhsa_cert"
+    "/bfd/${local.env}/server/sensitive/test_client_key"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_samhsa_key"
+    "/bfd/${local.env}/server/sensitive/server_regression_cert"                     = "/bfd/${local.seed_env}/server/sensitive/server_regression_cert"
+    "/bfd/${local.env}/server/sensitive/server_regression_key"                      = "/bfd/${local.seed_env}/server/sensitive/server_regression_key"
   }, local.seed_env_certs[local.seed_env]) : {}
 }
 

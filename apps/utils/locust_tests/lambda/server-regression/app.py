@@ -148,10 +148,10 @@ def handler(event, context):
             f"/bfd/{environment}/server/sensitive/db/password", with_decrypt=True
         )
         cert_key = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/test_client_key", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/server_regression_key", with_decrypt=True
         )
         cert = get_ssm_parameter(
-            f"/bfd/{environment}/server/sensitive/test_client_cert", with_decrypt=True
+            f"/bfd/{environment}/server/sensitive/server_regression_cert", with_decrypt=True
         )
     except ValueError as exc:
         send_pipeline_signal(
