@@ -8,9 +8,17 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.PluginService;
+import software.amazon.jdbc.dialect.HostListProviderSupplier;
 
+/** Unit tests for {@link StateAwareAuroraPgDialect}. */
 class StateAwareAuroraPgDialectTest {
 
+  /**
+   * Test ensuring that {@link StateAwareAuroraPgDialect#getHostListProvider()} returns a {@link
+   * HostListProviderSupplier} that returns a {@link StateAwareMonitoringRdsHostListProvider} when
+   * its {@link HostListProviderSupplier#getProvider(Properties, String, HostListProviderService,
+   * PluginService)} method is called.
+   */
   @Test
   void testGetHostListProviderReturnsCorrectHostListSupplierWhenCalled() {
     // Arrange
