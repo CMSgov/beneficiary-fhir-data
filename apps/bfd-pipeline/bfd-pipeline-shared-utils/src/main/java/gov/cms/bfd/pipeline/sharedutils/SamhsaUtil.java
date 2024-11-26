@@ -128,52 +128,54 @@ public class SamhsaUtil {
    * @param entityManager the EntityManager used to persist the tag.
    * @param <TClaim> Generic type of the claim.
    */
-  public <TClaim> void processClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager) {
+    boolean persisted = false;
     try {
       switch (claim) {
         case RdaFissClaim fissClaim -> {
           Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case RdaMcsClaim mcsClaim -> {
           Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case CarrierClaim carrierClaim -> {
           Optional<List<CarrierTag>> tags = Optional.of(checkAndProcessCarrierClaim(carrierClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case HHAClaim hhaClaim -> {
           Optional<List<HhaTag>> tags = Optional.of(checkAndProcessHhaClaim(hhaClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case DMEClaim dmeClaim -> {
           Optional<List<DmeTag>> tags = Optional.of(checkAndProcessDmeClaim(dmeClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case HospiceClaim hospiceClaim -> {
           Optional<List<HospiceTag>> tags = Optional.of(checkAndProcessHospiceClaim(hospiceClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case OutpatientClaim outpatientClaim -> {
           Optional<List<OutpatientTag>> tags =
               Optional.of(checkAndProcessOutpatientClaim(outpatientClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case InpatientClaim inpatientClaim -> {
           Optional<List<InpatientTag>> tags =
               Optional.of(checkAndProcessInpatientClaim(inpatientClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         case SNFClaim snfClaim -> {
           Optional<List<SnfTag>> tags = Optional.of(checkAndProcessSnfClaim(snfClaim));
-          persistTags(tags, entityManager);
+          persisted = persistTags(tags, entityManager);
         }
         default -> throw new RuntimeException("Error: unknown claim type.");
       }
     } catch (Exception e) {
       throw new RuntimeException("There was an error creating SAMHSA tags.", e);
     }
+    return persisted;
   }
 
   /**
@@ -183,12 +185,14 @@ public class SamhsaUtil {
    * @param entityManager the EntityManager.
    * @param <TTag> Generic type of the tags.
    */
-  private <TTag> void persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
+  private <TTag> boolean persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
     if (tags.isPresent()) {
       for (TTag tag : tags.get()) {
         entityManager.merge(tag);
       }
+      return true;
     }
+    return false;
   }
 
   /**
