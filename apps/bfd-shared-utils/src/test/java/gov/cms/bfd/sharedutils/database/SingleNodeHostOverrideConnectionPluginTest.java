@@ -155,14 +155,14 @@ class SingleNodeHostOverrideConnectionPluginTest {
   private static Stream<Arguments> provideAllTestConnectsParameters() {
     return Stream.of(
         Arguments.of(
-            "testConnectUsesSingleWriterNodeEndpointWhenOnlyWriterNodeInTopology",
+            "testConnectOverridesToSingleWriterNodeEndpointWhenOnlyWriterNodeInTopology",
             AVAILABLE_CLUSTER_HOST_SPEC,
             List.of(AVAILABLE_WRITER_HOST_SPEC),
             0,
             1,
             AVAILABLE_WRITER_HOST_SPEC),
         Arguments.of(
-            "testConnectUsesSingleWriterNodeEndpointWhenOnlyWriterNodeAvailable",
+            "testConnectOverridesToSingleWriterNodeEndpointWhenOnlyWriterNodeAvailable",
             AVAILABLE_CLUSTER_HOST_SPEC,
             List.of(
                 AVAILABLE_WRITER_HOST_SPEC,
@@ -172,7 +172,7 @@ class SingleNodeHostOverrideConnectionPluginTest {
             1,
             AVAILABLE_WRITER_HOST_SPEC),
         Arguments.of(
-            "testConnectUsesClusterEndpointWhenInstanceEndpointIsUsed",
+            "testConnectUsesInstanceEndpointWhenInstanceEndpointIsUsed",
             AVAILABLE_READER1_HOST_SPEC,
             List.of(
                 AVAILABLE_WRITER_HOST_SPEC,
