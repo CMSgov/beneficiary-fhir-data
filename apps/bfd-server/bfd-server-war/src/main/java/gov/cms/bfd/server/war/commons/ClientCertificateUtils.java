@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * test.
+ * Utilities for parsing metadata from client certificates.
  */
 public class ClientCertificateUtils {
   /** The logger for this filter. */
