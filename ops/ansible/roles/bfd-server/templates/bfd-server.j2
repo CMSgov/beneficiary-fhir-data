@@ -5,15 +5,10 @@
     size 300M
     copytruncate
     compress
-}
-
-"{{ ref_dir }}/access.log" {
-    rotate 1
-    hourly
-    #size of live logfile at time of creation was 30M w/out log rotation
-    size 100M
-    copytruncate
-    compress
+    missingok
+    dateext
+    #force filenames to be unique - rotation will not run if a duplicate filename exists
+    dateformat -%Y%m%d-%s
 }
 
 "{{ ref_dir }}/gc.log" {
@@ -23,6 +18,10 @@
     size 5M
     copytruncate
     compress
+    missingok
+    dateext
+    #force filenames to be unique - rotation will not run if a duplicate filename exists
+    dateformat -%Y%m%d-%s
 }
 
 "{{ ref_dir }}/newrelic_agent.log" {
@@ -32,6 +31,10 @@
     size 15k
     copytruncate
     compress
+    missingok
+    dateext
+    #force filenames to be unique - rotation will not run if a duplicate filename exists
+    dateformat -%Y%m%d-%s
 }
 
 "{{ ref_dir }}/bfd-server-startup.log" {
@@ -41,4 +44,8 @@
     size 1k
     copytruncate
     compress
+    missingok
+    dateext
+    #force filenames to be unique - rotation will not run if a duplicate filename exists
+    dateformat -%Y%m%d-%s
 }
