@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gov.cms.bfd.sharedutils.database.StateAwareClusterTopologyMonitor.InstanceStateMonitor;
+import jakarta.annotation.Nullable;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +27,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -47,20 +47,48 @@ import software.amazon.jdbc.PluginService;
 import software.amazon.jdbc.hostavailability.HostAvailability;
 import software.amazon.jdbc.hostavailability.HostAvailabilityStrategy;
 import software.amazon.jdbc.util.CacheMap;
+import software.amazon.jdbc.util.RdsUrlType;
 
+/** Unit tests for {@link StateAwareClusterTopologyMonitor}. */
 class StateAwareClusterTopologyMonitorTest {
 
-  public static final String RDS_INSTANCE_STATE_AVAILABLE = "available";
-  public static final String RDS_INSTANCE_STATE_CREATING = "creating";
-  public static final String RDS_INSTANCE_STATE_CONFIGURING_LOG_EXPORTS = "configuring-log-exports";
-  public static final String RDS_INSTANCE_STATE_CONFIGURING_ENHANCED_MONITORING =
+  /** String that is returned by the RDS API for an Instance that is available to query. */
+  private static final String RDS_INSTANCE_STATE_AVAILABLE = "available";
+
+  /**
+   * String that is returned by the RDS API for an Instance that is not yet ready and is still being
+   * initialized.
+   */
+  private static final String RDS_INSTANCE_STATE_CREATING = "creating";
+
+  /**
+   * String that is returned by the RDS API for an Instance that is ready but has not finished
+   * configuring its CloudWatch log exporting.
+   */
+  private static final String RDS_INSTANCE_STATE_CONFIGURING_LOG_EXPORTS =
+      "configuring-log-exports";
+
+  /**
+   * String that is returned by the RDS API for an Instance that is ready but has not finished
+   * configuring its Enhanced Monitoring.
+   */
+  private static final String RDS_INSTANCE_STATE_CONFIGURING_ENHANCED_MONITORING =
       "configuring-enhanced-monitoring";
-  public static final String DEFAULT_MOCK_CLUSTER_ID = "test";
+
+  /** Default name for the mock RDS Cluster used in tests. */
+  private static final String DEFAULT_MOCK_CLUSTER_ID = "test";
+
+  /** Static mock used for {@link Executors} methods. */
   private MockedStatic<Executors> mockedStaticExecutors;
+
+  /** Mock for {@link ExecutorService} used by {@link #mockedStaticExecutors}. */
   private final ExecutorService mockTopologyMonitorExecutor = mock(ExecutorService.class);
+
+  /** Mock for {@link ScheduledExecutorService} used by {@link #mockedStaticExecutors}. */
   private final ScheduledExecutorService mockInstanceStateMonitorExecutor =
       mock(ScheduledExecutorService.class);
 
+  /** Sets up the {@link Executors} mocks before each test. */
   @BeforeEach
   void setUp() {
     mockedStaticExecutors = mockStatic(Executors.class);
@@ -72,11 +100,19 @@ class StateAwareClusterTopologyMonitorTest {
         .thenReturn(mockInstanceStateMonitorExecutor);
   }
 
+  /** Closes the static {@link #mockedStaticExecutors} {@link Executors} mock after each test. */
   @AfterEach
   void tearDown() {
     mockedStaticExecutors.close();
   }
 
+  /**
+   * Test ensuring that the {@link StateAwareClusterTopologyMonitor} will start the {@link
+   * InstanceStateMonitor} as a scheduled {@link ScheduledExecutorService} task when the monitor is
+   * created.
+   *
+   * @throws Exception necessary to satisfy compiler, will never throw
+   */
   @Test
   void testItStartsInstanceStateMonitorWhenInitialized() throws Exception {
     // Arrange
@@ -94,6 +130,12 @@ class StateAwareClusterTopologyMonitorTest {
     }
   }
 
+  /**
+   * Test ensuring that {@link StateAwareClusterTopologyMonitor#close()} will also shut down the
+   * {@link InstanceStateMonitor} {@link ScheduledExecutorService}.
+   *
+   * @throws Exception necessary to satisfy compiler, will never throw
+   */
   @Test
   void testItShutsDownInstanceStateMonitorWhenClosed() throws Exception {
     // Arrange
@@ -107,19 +149,37 @@ class StateAwareClusterTopologyMonitorTest {
     verify(monitor, times(1)).shutdownInstanceMonitorExecutor();
   }
 
+  /**
+   * Parameterized test for {@link StateAwareClusterTopologyMonitor#queryForTopology(Connection)}
+   * testing various combinations of topologies and instance states to ensure that the {@link
+   * StateAwareClusterTopologyMonitor} updates the topology map according to Instance state
+   * appropriately.
+   *
+   * @param testCaseName the name of the parameterized test case
+   * @param inHighRefreshRateMode flag indicating whether the {@link
+   *     StateAwareClusterTopologyMonitor} should be in "high refresh rate mode" or not
+   * @param instanceStateMap point-in-time snapshot of map of Instances to their state that will be
+   *     used as the filter for the topology
+   * @param mockUnfilteredTopology point-in-time snapshot of an unfiltered topology map that will be
+   *     filtered based on {@code instanceStateMap}
+   * @param expectedTopology expected, filtered topology assuming that {@link
+   *     StateAwareClusterTopologyMonitor#queryForTopology(Connection)} properly filters the {@code
+   *     mockUnfilteredTopology} using {@code instanceStateMap}
+   * @throws Exception necessary to satisfy compiler, will never throw
+   */
   @ParameterizedTest(name = "{0}")
   @MethodSource("provideTestQueryForTopologyArguments")
   void testQueryForTopology(
       String testCaseName,
       boolean inHighRefreshRateMode,
       Map<String, String> instanceStateMap,
-      List<HostSpec> mockFilteredTopology,
+      List<HostSpec> mockUnfilteredTopology,
       List<HostSpec> expectedTopology)
       throws Exception {
     // Arrange
     final var mockInstancesInCluster = createClusterInstanceStateMap(instanceStateMap);
     try (final var monitor = spy(createMonitor(mockInstancesInCluster))) {
-      doReturn(mockFilteredTopology).when(monitor).getUnfilteredTopology(any(Connection.class));
+      doReturn(mockUnfilteredTopology).when(monitor).getUnfilteredTopology(any(Connection.class));
       doReturn(inHighRefreshRateMode).when(monitor).isInHighRefreshRateMode();
 
       // Act
@@ -130,6 +190,13 @@ class StateAwareClusterTopologyMonitorTest {
     }
   }
 
+  /**
+   * {@link Arguments} provider for the {@link #testQueryForTopology(String, boolean, Map, List,
+   * List)} parameterized test's test cases.
+   *
+   * @return a {@link Stream} of {@link Arguments}, each testing a different scenario with {@link
+   *     StateAwareClusterTopologyMonitor#queryForTopology(Connection)}
+   */
   private static Stream<Arguments> provideTestQueryForTopologyArguments() {
     return Stream.of(
         Arguments.of(
@@ -206,22 +273,56 @@ class StateAwareClusterTopologyMonitorTest {
             getHostSpecsFromInstanceIds(List.of("writer", "reader1", "reader2"))));
   }
 
+  /**
+   * Creates a {@link StateAwareClusterTopologyMonitor} with various mocked parameters.
+   *
+   * @param instanceStateMap point-in-time snapshot of map of Instances to their state that will be
+   *     used as the filter for the topology
+   * @return a stubbed {@link StateAwareClusterTopologyMonitor}
+   */
   private static StateAwareClusterTopologyMonitor createMonitor(
       ConcurrentHashMap<String, Map<String, String>> instanceStateMap) {
     return createMonitor(instanceStateMap, 0L);
   }
 
+  /**
+   * Creates a {@link StateAwareClusterTopologyMonitor} with various mocked parameters.
+   *
+   * @param instanceStateMap point-in-time snapshot of map of Instances to their state that will be
+   *     used as the filter for the topology
+   * @param instanceStateRefreshRateMs refresh rate of the {@link InstanceStateMonitor} {@link
+   *     ScheduledExecutorService}
+   * @return a stubbed {@link StateAwareClusterTopologyMonitor}
+   */
   private static StateAwareClusterTopologyMonitor createMonitor(
       ConcurrentHashMap<String, Map<String, String>> instanceStateMap,
       long instanceStateRefreshRateMs) {
     return createMonitor(instanceStateMap, instanceStateRefreshRateMs, mock(RdsClient.class));
   }
 
+  /**
+   * Creates a {@link StateAwareClusterTopologyMonitor} with various mocked parameters.
+   *
+   * @param instanceStateMap point-in-time snapshot of map of Instances to their state that will be
+   *     used as the filter for the topology
+   * @param mockRdsClient mocked {@link RdsClient}
+   * @return a stubbed {@link StateAwareClusterTopologyMonitor}
+   */
   private static StateAwareClusterTopologyMonitor createMonitor(
       ConcurrentHashMap<String, Map<String, String>> instanceStateMap, RdsClient mockRdsClient) {
     return createMonitor(instanceStateMap, 0L, mockRdsClient);
   }
 
+  /**
+   * Creates a {@link StateAwareClusterTopologyMonitor} with various mocked parameters.
+   *
+   * @param instanceStateMap point-in-time snapshot of map of Instances to their state that will be
+   *     used as the filter for the topology
+   * @param instanceStateRefreshRateMs refresh rate of the {@link InstanceStateMonitor} {@link
+   *     ScheduledExecutorService}
+   * @param mockRdsClient mocked {@link RdsClient}
+   * @return a stubbed {@link StateAwareClusterTopologyMonitor}
+   */
   private static StateAwareClusterTopologyMonitor createMonitor(
       ConcurrentHashMap<String, Map<String, String>> instanceStateMap,
       long instanceStateRefreshRateMs,
@@ -245,10 +346,25 @@ class StateAwareClusterTopologyMonitorTest {
         mockRdsClient);
   }
 
+  /**
+   * Creates an empty Cluster instance state map.
+   *
+   * @return an empty map
+   */
   private static ConcurrentHashMap<String, Map<String, String>> createClusterInstanceStateMap() {
     return createClusterInstanceStateMap(null);
   }
 
+  /**
+   * Creates a Cluster instance state map with a single Cluster entry with {@link
+   * #DEFAULT_MOCK_CLUSTER_ID} as the key and {@code instanceStateMap} as the value, if {@code
+   * instanceStateMap} is not {@code null}.
+   *
+   * @param instanceStateMap point-in-time snapshot of map of Instances to their state that will be
+   *     used as the filter for the topology
+   * @return map with a single Cluster entry, or an empty map if {@code instanceStateMap} is {@code
+   *     null}
+   */
   private static ConcurrentHashMap<String, Map<String, String>> createClusterInstanceStateMap(
       @Nullable Map<String, String> instanceStateMap) {
     final ConcurrentHashMap<String, Map<String, String>> mockMap = new ConcurrentHashMap<>();
@@ -258,6 +374,12 @@ class StateAwareClusterTopologyMonitorTest {
     return mockMap;
   }
 
+  /**
+   * Creates a {@link List} of {@link HostSpec}s given a {@link List} of Instance IDs.
+   *
+   * @param instanceIds {@code List} of Instance IDs to transform
+   * @return a {@link List} of {@link HostSpec}s generated from the {@link List} of Instance IDs
+   */
   private static List<HostSpec> getHostSpecsFromInstanceIds(Collection<String> instanceIds) {
     return instanceIds.stream()
         .map(
@@ -270,8 +392,21 @@ class StateAwareClusterTopologyMonitorTest {
         .toList();
   }
 
+  /** Unit tests for {@link InstanceStateMonitor}. */
   @Nested
   class InstanceStateMonitorTest {
+    /**
+     * Parameterized test for {@link InstanceStateMonitor#run()} testing various RDS Instance state
+     * responses ensuring that only valid responses are put into the {@link
+     * StateAwareClusterTopologyMonitor}'s instance state map.
+     *
+     * @param testCaseName name of the parameterized test case
+     * @param mockRdsClientInstanceStateResponseMap mock response from {@link
+     *     RdsClient#describeDBInstances()}
+     * @param expectedInstanceStateMap expected instance state map for the {@link
+     *     #DEFAULT_MOCK_CLUSTER_ID} Cluster
+     * @throws Exception necessary to satisfy compiler, will never throw
+     */
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideTestRunArguments")
     void testRun(
@@ -295,6 +430,13 @@ class StateAwareClusterTopologyMonitorTest {
       }
     }
 
+    /**
+     * Tests that {@link InstanceStateMonitor#run()} does not modify the {@link
+     * StateAwareClusterTopologyMonitor} instance state map when an {@link AwsServiceException} is
+     * thrown by {@link RdsClient#describeDBInstances()}.
+     *
+     * @throws Exception necessary to satisfy compiler, will never throw
+     */
     @Test
     void testRunShouldPutNothingInClusterStateMapWhenAwsServiceExceptionIsThrown()
         throws Exception {
@@ -315,9 +457,20 @@ class StateAwareClusterTopologyMonitorTest {
       }
     }
 
+    /**
+     * Parameterized test for {@link
+     * InstanceStateMonitor#getDescribeDbInstancesFilterFromUrl(String)} testing that the
+     * appropriate {@link Filter} is generated depending on the {@link RdsUrlType} of the given URL.
+     *
+     * @param testCaseName name of the parameterized test case
+     * @param rdsUrl URL to generate a {@link Filter} from
+     * @param expectedFilter the {@link Filter} that is expected to be created from the {@code
+     *     rdsUrl}
+     */
     @ParameterizedTest(name = "{0}")
-    @MethodSource("provideTestApplyFilterToRequestArguments")
-    void testApplyFilterToRequest(String testCaseName, String rdsUrl, Filter expectedFilter) {
+    @MethodSource("provideGetDescribeDbInstancesFilterFromUrlArguments")
+    void testGetDescribeDbInstancesFilterFromUrl(
+        String testCaseName, String rdsUrl, Filter expectedFilter) {
       // Act
       final var actualFilter = InstanceStateMonitor.getDescribeDbInstancesFilterFromUrl(rdsUrl);
 
@@ -325,6 +478,13 @@ class StateAwareClusterTopologyMonitorTest {
       assertEquals(expectedFilter, actualFilter);
     }
 
+    /**
+     * {@link Arguments} provider for the {@link #testRun(String, List, Map)} parameterized test's
+     * test cases.
+     *
+     * @return a {@link Stream} of {@link Arguments}, each testing a different scenario with {@link
+     *     InstanceStateMonitor#run()}
+     */
     private static Stream<Arguments> provideTestRunArguments() {
       return Stream.of(
           Arguments.of(
@@ -352,7 +512,14 @@ class StateAwareClusterTopologyMonitorTest {
               "testRunShouldPutNothingInClusterStateMapWhenNoResponseIsReturned", List.of(), null));
     }
 
-    private static Stream<Arguments> provideTestApplyFilterToRequestArguments() {
+    /**
+     * {@link Arguments} provider for the {@link #testGetDescribeDbInstancesFilterFromUrl(String,
+     * String, Filter)} parameterized test's test cases.
+     *
+     * @return a {@link Stream} of {@link Arguments}, each testing a different scenario with {@link
+     *     InstanceStateMonitor#getDescribeDbInstancesFilterFromUrl(String)}
+     */
+    private static Stream<Arguments> provideGetDescribeDbInstancesFilterFromUrlArguments() {
       return Stream.of(
           Arguments.of(
               "testApplyFilterToRequestReturnsClusterIdFilterWhenClusterWriterEndpointIsGiven",
@@ -374,6 +541,15 @@ class StateAwareClusterTopologyMonitorTest {
               null));
     }
 
+    /**
+     * Creates a mocked {@link RdsClient} that returns a {@link DescribeDbInstancesResponse} based
+     * on the provided {@link InstanceWithState} {@link List}.
+     *
+     * @param expectedInstancesWithStateResult {@link List} of {@link InstanceWithState}(s) that
+     *     will be used to create a corresponding {@link DescribeDbInstancesResponse}
+     * @return a {@link DescribeDbInstancesResponse} corresponding to {@code
+     *     expectedInstancesWithStateResult}
+     */
     private static RdsClient createMockRdsClientWithMockedDescribeDBInstances(
         List<InstanceWithState> expectedInstancesWithStateResult) {
       final var mockRdsClient = mock(RdsClient.class);
@@ -393,7 +569,14 @@ class StateAwareClusterTopologyMonitorTest {
       return mockRdsClient;
     }
 
-    // Necessary as Map.of() disallows null values and keys
-    private record InstanceWithState(String instanceId, String instanceState) {}
+    /**
+     * Record class used to generate a {@link DescribeDbInstancesResponse}.
+     *
+     * @param instanceId Instance ID
+     * @param instanceState state of the Instance
+     * @implNote this is necessary as using something like {@link Map#of()} would not allow for
+     *     setting {@code null} values and keys
+     */
+    private record InstanceWithState(@Nullable String instanceId, @Nullable String instanceState) {}
   }
 }
