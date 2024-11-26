@@ -94,8 +94,8 @@ locals {
     "/bfd/${local.env}/server/sensitive/db/password"                                = "/bfd/${local.seed_env}/server/sensitive/db/password"
     "/bfd/${local.env}/server/sensitive/test_client_cert"                           = "/bfd/${local.seed_env}/server/sensitive/test_client_cert"
     "/bfd/${local.env}/server/sensitive/test_client_key"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_key"
-    "/bfd/${local.env}/server/sensitive/test_client_cert"                           = "/bfd/${local.seed_env}/server/sensitive/test_client_samhsa_cert"
-    "/bfd/${local.env}/server/sensitive/test_client_key"                            = "/bfd/${local.seed_env}/server/sensitive/test_client_samhsa_key"
+    "/bfd/${local.env}/server/sensitive/test_client_samhsa_cert"                    = "/bfd/${local.seed_env}/server/sensitive/test_client_samhsa_cert"
+    "/bfd/${local.env}/server/sensitive/test_client_samhsa_key"                     = "/bfd/${local.seed_env}/server/sensitive/test_client_samhsa_key"
     "/bfd/${local.env}/server/sensitive/server_regression_cert"                     = "/bfd/${local.seed_env}/server/sensitive/server_regression_cert"
     "/bfd/${local.env}/server/sensitive/server_regression_key"                      = "/bfd/${local.seed_env}/server/sensitive/server_regression_key"
   }, local.seed_env_certs[local.seed_env]) : {}
