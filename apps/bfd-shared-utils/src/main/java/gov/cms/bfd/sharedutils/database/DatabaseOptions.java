@@ -1,5 +1,7 @@
 package gov.cms.bfd.sharedutils.database;
 
+import static java.util.Map.entry;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -7,7 +9,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.Nullable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -268,34 +269,32 @@ public class DatabaseOptions {
      */
     private static final Map<String, Class<? extends ConnectionPluginFactory>>
         pluginFactoriesByCode =
-            new HashMap<>() {
-              {
-                put("executionTime", ExecutionTimeConnectionPluginFactory.class);
-                put("logQuery", LogQueryConnectionPluginFactory.class);
-                put("dataCache", DataCacheConnectionPluginFactory.class);
-                put("efm", HostMonitoringConnectionPluginFactory.class);
-                put(
+            Map.ofEntries(
+                entry("executionTime", ExecutionTimeConnectionPluginFactory.class),
+                entry("logQuery", LogQueryConnectionPluginFactory.class),
+                entry("dataCache", DataCacheConnectionPluginFactory.class),
+                entry("efm", HostMonitoringConnectionPluginFactory.class),
+                entry(
                     "efm2",
-                    software.amazon.jdbc.plugin.efm2.HostMonitoringConnectionPluginFactory.class);
-                put("failover", FailoverConnectionPluginFactory.class);
-                put(
+                    software.amazon.jdbc.plugin.efm2.HostMonitoringConnectionPluginFactory.class),
+                entry("failover", FailoverConnectionPluginFactory.class),
+                entry(
                     "failover2",
-                    software.amazon.jdbc.plugin.failover2.FailoverConnectionPluginFactory.class);
-                put("iam", IamAuthConnectionPluginFactory.class);
-                put("awsSecretsManager", AwsSecretsManagerConnectionPluginFactory.class);
-                put("federatedAuth", FederatedAuthPluginFactory.class);
-                put("okta", OktaAuthPluginFactory.class);
-                put("auroraStaleDns", AuroraStaleDnsPluginFactory.class);
-                put("readWriteSplitting", ReadWriteSplittingPluginFactory.class);
-                put("auroraConnectionTracker", AuroraConnectionTrackerPluginFactory.class);
-                put("driverMetaData", DriverMetaDataConnectionPluginFactory.class);
-                put("connectTime", ConnectTimeConnectionPluginFactory.class);
-                put("dev", DeveloperConnectionPluginFactory.class);
-                put("fastestResponseStrategy", FastestResponseStrategyPluginFactory.class);
-                put("initialConnection", AuroraInitialConnectionStrategyPluginFactory.class);
-                put("singleNodeHostOverride", SingleNodeHostOverrideConnectionPluginFactory.class);
-              }
-            };
+                    software.amazon.jdbc.plugin.failover2.FailoverConnectionPluginFactory.class),
+                entry("iam", IamAuthConnectionPluginFactory.class),
+                entry("awsSecretsManager", AwsSecretsManagerConnectionPluginFactory.class),
+                entry("federatedAuth", FederatedAuthPluginFactory.class),
+                entry("okta", OktaAuthPluginFactory.class),
+                entry("auroraStaleDns", AuroraStaleDnsPluginFactory.class),
+                entry("readWriteSplitting", ReadWriteSplittingPluginFactory.class),
+                entry("auroraConnectionTracker", AuroraConnectionTrackerPluginFactory.class),
+                entry("driverMetaData", DriverMetaDataConnectionPluginFactory.class),
+                entry("connectTime", ConnectTimeConnectionPluginFactory.class),
+                entry("dev", DeveloperConnectionPluginFactory.class),
+                entry("fastestResponseStrategy", FastestResponseStrategyPluginFactory.class),
+                entry("initialConnection", AuroraInitialConnectionStrategyPluginFactory.class),
+                entry(
+                    "singleNodeHostOverride", SingleNodeHostOverrideConnectionPluginFactory.class));
 
     /**
      * Whether a custom preset should be generated based upon the given {@link #basePresetCode} and

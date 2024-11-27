@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +38,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
    * by the RDS API. Periodically updated by the {@link InstanceStateMonitor} every {@link
    * StateAwareMonitoringRdsHostListProvider#instanceStateMonitorRefreshRateMs} millisecond(s).
    */
-  private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap;
+  private final ConcurrentMap<String, Map<String, String>> clusterToHostsStateMap;
 
   /** Executor for the periodic {@link InstanceStateMonitor} task. */
   private final ScheduledExecutorService instanceStateMonitorExecutor =
@@ -81,7 +81,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
   public StateAwareClusterTopologyMonitor(
       String clusterId,
       CacheMap<String, List<HostSpec>> topologyMap,
-      ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap,
+      ConcurrentMap<String, Map<String, String>> clusterToHostsStateMap,
       HostSpec initialHostSpec,
       Properties properties,
       PluginService pluginService,
@@ -159,7 +159,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
    * @implNote This method was extracted out of {@link #close()} to enable mocking in unit tests
    */
   @VisibleForTesting
-  protected void shutdownInstanceMonitorExecutor() {
+  protected void shutdownInstanceMonitorExecutor() throws InterruptedException {
     instanceStateMonitorExecutor.shutdown();
     try {
       if (!instanceStateMonitorExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
@@ -167,6 +167,7 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
       }
     } catch (InterruptedException e) {
       instanceStateMonitorExecutor.shutdownNow();
+      throw e;
     }
   }
 
@@ -280,9 +281,10 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
           final var trueInstanceId = RDS_UTILS.getRdsInstanceId(rdsUrl);
           return Filter.builder().name("db-instance-id").values(trueInstanceId).build();
         }
+        default -> {
+          return null;
+        }
       }
-
-      return null;
     }
   }
 }

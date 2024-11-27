@@ -139,7 +139,7 @@ public class SingleNodeHostOverrideConnectionPlugin extends AbstractConnectionPl
     final var singleAvailableHost = allValidHosts.getFirst();
     final var singleHostType = RDS_UTILS.identifyRdsType(singleAvailableHost.getHost());
     if (singleHostType.isRdsCluster()) {
-      // We haven't yet retrieved the cluster topology so the host is still the Cluster endpoint;
+      // We haven't yet retrieved the cluster topology so the host is still the Cluster endpoint,
       // continue to connect
       return connectFunc.call();
     }

@@ -16,6 +16,11 @@ public final class SpringRetryUtils {
   /** Logger for this class. */
   static final Logger LOGGER = LoggerFactory.getLogger(SpringRetryUtils.class);
 
+  /** Private constructor stopping instantiation of this class. */
+  private SpringRetryUtils() {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * Constant SpEL expression used for {@link Retryable#exceptionExpression()}s that need to invoke
    * the {@link #shouldRetryIfFailoverOrConnectionException(Exception)} method.

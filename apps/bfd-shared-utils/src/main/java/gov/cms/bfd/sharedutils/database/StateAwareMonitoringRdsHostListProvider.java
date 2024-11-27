@@ -3,6 +3,7 @@ package gov.cms.bfd.sharedutils.database;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.AwsWrapperProperty;
 import software.amazon.jdbc.HostListProviderService;
@@ -35,7 +36,7 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
    * by the RDS API. Periodically updated by {@link StateAwareClusterTopologyMonitor}(s) every
    * {@link #instanceStateMonitorRefreshRateMs} millisecond(s).
    */
-  private final ConcurrentHashMap<String, Map<String, String>> clusterToHostsStateMap =
+  private final ConcurrentMap<String, Map<String, String>> clusterToHostsStateMap =
       new ConcurrentHashMap<>();
 
   /**
@@ -90,7 +91,7 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
   protected ClusterTopologyMonitor initMonitor() {
     return monitors.computeIfAbsent(
         this.clusterId,
-        (key) ->
+        key ->
             new StateAwareClusterTopologyMonitor(
                 key,
                 topologyCache,

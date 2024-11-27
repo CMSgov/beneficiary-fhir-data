@@ -53,24 +53,24 @@ public class AwsWrapperDataSourceFactoryTest {
     assertEquals(dataSource.getUser(), dbOptions.getDatabaseUsername());
     assertEquals(dataSource.getPassword(), dbOptions.getDatabasePassword());
     assertEquals(
-        dataSourceProps.get(PropertyDefinition.PROFILE_NAME.name),
-        AwsWrapperDataSourceFactory.CUSTOM_PRESET_NAME);
-    assertEquals(dataSourceProps.get(PropertyDefinition.AUTO_SORT_PLUGIN_ORDER.name), "false");
+        AwsWrapperDataSourceFactory.CUSTOM_PRESET_NAME,
+        dataSourceProps.get(PropertyDefinition.PROFILE_NAME.name));
+    assertEquals("false", dataSourceProps.get(PropertyDefinition.AUTO_SORT_PLUGIN_ORDER.name));
     assertEquals(
+        "leastConnections",
         dataSourceProps.get(
-            AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name),
-        "leastConnections");
+            AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name));
     assertEquals(
-        dataSourceProps.get(FailoverConnectionPlugin.FAILOVER_READER_HOST_SELECTOR_STRATEGY.name),
-        "leastConnections");
+        "leastConnections",
+        dataSourceProps.get(FailoverConnectionPlugin.FAILOVER_READER_HOST_SELECTOR_STRATEGY.name));
     assertEquals(
-        dataSourceProps.get(FailoverConnectionPlugin.ENABLE_CONNECT_FAILOVER.name), "true");
+        "true", dataSourceProps.get(FailoverConnectionPlugin.ENABLE_CONNECT_FAILOVER.name));
     assertEquals(
-        dataSourceProps.get(RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name), "100");
+        "100", dataSourceProps.get(RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name));
     assertEquals(
+        "50",
         dataSourceProps.get(
-            StateAwareMonitoringRdsHostListProvider.INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.name),
-        "50");
+            StateAwareMonitoringRdsHostListProvider.INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.name));
     assertInstanceOf(HikariPooledConnectionProvider.class, customProfile.getConnectionProvider());
   }
 }

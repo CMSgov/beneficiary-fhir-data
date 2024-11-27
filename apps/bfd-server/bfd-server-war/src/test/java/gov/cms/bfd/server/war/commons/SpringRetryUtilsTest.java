@@ -17,7 +17,7 @@ import software.amazon.jdbc.plugin.failover.FailoverSQLException;
 import software.amazon.jdbc.plugin.failover.FailoverSuccessSQLException;
 
 /** Unit tests for {@link SpringRetryUtils}. */
-public class SpringRetryUtilsTest {
+class SpringRetryUtilsTest {
 
   /**
    * Parameterized test verifying that {@link
@@ -28,7 +28,7 @@ public class SpringRetryUtilsTest {
    */
   @ParameterizedTest
   @MethodSource("provideBareFailoverExceptions")
-  public void testItShouldReturnTrueIfExceptionIsFailoverSQLException(Exception ex) {
+  void testItShouldReturnTrueIfExceptionIsFailoverSQLException(Exception ex) {
     assertTrue(SpringRetryUtils.shouldRetryIfFailoverOrConnectionException(ex));
   }
 
@@ -41,7 +41,7 @@ public class SpringRetryUtilsTest {
    */
   @ParameterizedTest
   @MethodSource("provideWrappedFailoverExceptions")
-  public void testItShouldReturnTrueIfExceptionIsWrappedFailoverSQLException(Exception ex) {
+  void testItShouldReturnTrueIfExceptionIsWrappedFailoverSQLException(Exception ex) {
     assertTrue(SpringRetryUtils.shouldRetryIfFailoverOrConnectionException(ex));
   }
 
@@ -56,7 +56,7 @@ public class SpringRetryUtilsTest {
    */
   @ParameterizedTest
   @MethodSource("provideExceptionsThatDontMatch")
-  public void testItShouldReturnFalseIfExceptionIsNotWrappedFailoverSQLException(Exception ex) {
+  void testItShouldReturnFalseIfExceptionIsNotWrappedFailoverSQLException(Exception ex) {
     assertFalse(SpringRetryUtils.shouldRetryIfFailoverOrConnectionException(ex));
   }
 
