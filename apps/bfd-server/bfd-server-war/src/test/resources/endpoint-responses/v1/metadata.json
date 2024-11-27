@@ -6,7 +6,7 @@
   "kind" : "instance",
   "software" : {
     "name" : "Blue Button API: Direct",
-    "version" : "2.165.0-SNAPSHOT"
+    "version" : "2.167.0-SNAPSHOT"
   },
   "implementation" : {
     "description" : "gov.cms.bfd:bfd-server-war",
@@ -34,7 +34,7 @@
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nInexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -57,7 +57,7 @@
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nInexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "excludeSAMHSA",
         "type" : "string",
@@ -112,7 +112,7 @@
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
-        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date"
+        "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nInexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
