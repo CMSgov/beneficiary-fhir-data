@@ -191,7 +191,6 @@ public final class CcwRifLoadJob implements PipelineJob {
    * @param listener the {@link DataSetMonitorListener} to send events to
    * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
    * @param runInterval used to construct the job schedule
-   * @param ec2Client ec2client
    * @param statusReporter used to update external processes with our latest status
    */
   public CcwRifLoadJob(
