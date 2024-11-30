@@ -25,7 +25,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
-import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import jakarta.annotation.Nullable;
 import java.net.URL;
 import java.time.Instant;
@@ -48,9 +47,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
   /** Used to capture status updates from the job. */
   @Mock private CcwRifLoadJobStatusReporter statusReporter;
-
-  /** test. */
-  @Mock private AwsEc2Client ec2Client;
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
@@ -88,7 +84,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         ccwJob.call();
       }
@@ -216,7 +211,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         // Process both sets
         ccwJob.call();
@@ -400,7 +394,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         // process only the first data set
         assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
@@ -514,7 +507,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         ccwJob.call();
       }
@@ -618,7 +610,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         ccwJob.call();
       }
@@ -718,7 +709,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         ccwJob.call();
       }

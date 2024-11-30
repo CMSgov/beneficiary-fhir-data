@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -116,7 +117,7 @@ public class PipelineJobRunnerTest {
     verify(tracker).stoppingNormally(job);
     verify(tracker, times(0)).stoppingDueToInterrupt(any());
     verify(tracker, times(0)).stoppingDueToException(any(), any());
-    verify(tracker).stopped(job);
+    verify(tracker).stopped(eq(job), any());
     verifyNoInteractions(sleeper);
     verify(job).close();
 
@@ -160,7 +161,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingNormally(job);
     verify(tracker).stoppingDueToInterrupt(job);
     verify(tracker, times(0)).stoppingDueToException(any(), any());
-    verify(tracker).stopped(job);
+    verify(tracker).stopped(eq(job), any());
     verifyNoInteractions(sleeper);
     verify(job).close();
 
@@ -205,7 +206,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingDueToInterrupt(any());
     verify(tracker).stoppingDueToException(job, error);
     verify(tracker, times(0)).sleeping(any());
-    verify(tracker).stopped(job);
+    verify(tracker).stopped(eq(job), any());
     verifyNoInteractions(sleeper);
     verify(job).close();
 
@@ -253,7 +254,7 @@ public class PipelineJobRunnerTest {
     verify(tracker).stoppingNormally(job);
     verify(tracker, times(0)).stoppingDueToInterrupt(any());
     verify(tracker, times(0)).stoppingDueToException(any(), any());
-    verify(tracker).stopped(job);
+    verify(tracker).stopped(eq(job), any());
     verify(sleeper, times(2)).accept(repeatMills);
     verify(job).close();
 
@@ -312,7 +313,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingNormally(any());
     verify(tracker).stoppingDueToInterrupt(job);
     verify(tracker, times(0)).stoppingDueToException(any(), any());
-    verify(tracker).stopped(job);
+    verify(tracker).stopped(eq(job), any());
     verify(sleeper, times(2)).accept(repeatMills);
     verify(job).close();
 
@@ -372,7 +373,7 @@ public class PipelineJobRunnerTest {
     verify(tracker, times(0)).stoppingNormally(any());
     verify(tracker, times(0)).stoppingDueToInterrupt(any());
     verify(tracker).stoppingDueToException(job, error);
-    verify(tracker).stopped(job);
+    verify(tracker).stopped(eq(job), any());
     verify(sleeper, times(2)).accept(repeatMills);
     verify(job).close();
 

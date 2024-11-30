@@ -17,7 +17,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.pipeline.sharedutils.ec2.Ec2Client;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.time.Duration;
@@ -176,9 +175,6 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** Used to send status updates to external processes. */
   private final CcwRifLoadJobStatusReporter statusReporter;
 
-  /** test. */
-  private final Ec2Client ec2Client;
-
   /** The queue of S3 data to be processed. */
   private final DataSetQueue dataSetQueue;
 
@@ -205,7 +201,6 @@ public final class CcwRifLoadJob implements PipelineJob {
       DataSetMonitorListener listener,
       boolean isIdempotentMode,
       Optional<Duration> runInterval,
-      Ec2Client ec2Client,
       CcwRifLoadJobStatusReporter statusReporter) {
     this.appState = appState;
     this.appMetrics = appState.getMetrics();
@@ -214,7 +209,6 @@ public final class CcwRifLoadJob implements PipelineJob {
     this.listener = listener;
     this.isIdempotentMode = isIdempotentMode;
     this.runInterval = runInterval;
-    this.ec2Client = ec2Client;
     this.statusReporter = statusReporter;
     downloadService = Executors.newSingleThreadScheduledExecutor();
   }
@@ -250,8 +244,8 @@ public final class CcwRifLoadJob implements PipelineJob {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       listener.noDataAvailable();
       statusReporter.reportNothingToDo();
-      ec2Client.scaleIn();
-      return PipelineJobOutcome.NOTHING_TO_DO;
+
+      return PipelineJobOutcome.SHOULD_TERMINATE;
     }
 
     // We've found the oldest manifest.

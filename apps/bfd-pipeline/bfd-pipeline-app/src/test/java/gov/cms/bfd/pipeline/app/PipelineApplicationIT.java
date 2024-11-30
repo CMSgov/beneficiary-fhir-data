@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.spy;
 
 import com.google.common.collect.ImmutableSet;
@@ -29,6 +30,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.json.JsonConverter;
@@ -46,6 +48,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 import software.amazon.awssdk.utils.StringUtils;
 
 /**
@@ -101,6 +104,19 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   }
 
   /**
+   * Runs the test pipeline.
+   *
+   * @param app app
+   * @return exit code
+   */
+  private int runPipeline(PipelineApplication app) {
+    try (MockedConstruction<AwsEc2Client> ec2Client = mockConstruction(AwsEc2Client.class)) {
+      // Run the app and collect its output.
+      return app.runPipelineAndHandleExceptions();
+    }
+  }
+
+  /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
    * environment variables.
    */
@@ -111,7 +127,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     PipelineApplication app = createApplicationForTest(configLoader);
 
     // Run the app and verify it exited as expected
-    final int exitCode = app.runPipelineAndHandleExceptions();
+    final int exitCode = runPipeline(app);
     assertEquals(PipelineApplication.EXIT_CODE_BAD_CONFIG, exitCode);
   }
 
@@ -128,7 +144,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     PipelineApplication app = createApplicationForTest(configLoader);
 
     // Run the app and collect its output.
-    final int exitCode = app.runPipelineAndHandleExceptions();
+    final int exitCode = runPipeline(app);
     final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
     // Verify the results match expectations
@@ -152,7 +168,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       PipelineApplication app = createApplicationForTest(configLoader);
 
       // Run the app and collect its output.
-      final int exitCode = app.runPipelineAndHandleExceptions();
+      final int exitCode = runPipeline(app);
       final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
       // Verify the results match expectations
@@ -215,7 +231,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       PipelineApplication app = createApplicationForTest(configLoader);
 
       // Run the app and collect its output.
-      final int exitCode = app.runPipelineAndHandleExceptions();
+      final int exitCode = runPipeline(app);
       final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
       // Verify the results match expectations
@@ -272,7 +288,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               PipelineApplication app = createApplicationForTest(configLoader);
 
               // Run the app and collect its output.
-              final int exitCode = app.runPipelineAndHandleExceptions();
+              final int exitCode = runPipeline(app);
               final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
               // Verify the results match expectations
@@ -317,7 +333,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               PipelineApplication app = createApplicationForTest(configLoader);
 
               // Run the app and collect its output.
-              final int exitCode = app.runPipelineAndHandleExceptions();
+              final int exitCode = runPipeline(app);
               final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
               // Verify the results match expectations
@@ -365,7 +381,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
           .createAllJobs(any(), any(), any(), any(), any());
 
       // Run the app and collect its output.
-      final int exitCode = app.runPipelineAndHandleExceptions();
+      final int exitCode = runPipeline(app);
       final List<String> logLines = LOG_FILE.readFileAsIndividualLines();
 
       // Verify the results match expectations

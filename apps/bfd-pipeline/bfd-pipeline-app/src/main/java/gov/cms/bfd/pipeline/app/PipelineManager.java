@@ -3,6 +3,8 @@ package gov.cms.bfd.pipeline.app;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.ec2.Ec2Client;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import jakarta.annotation.Nullable;
 import java.time.Clock;
@@ -51,6 +53,12 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
   /** Recent job results for use by tests. */
   private final LinkedList<PipelineJobRunner.JobRunSummary> completedJobs;
 
+  /** Terminate requested. */
+  private boolean terminateRequested = false;
+
+  /** EC2 client. */
+  private Ec2Client ec2Client;
+
   /**
    * True if all jobs are interruptable. When false we can't interrupt the pool for faster
    * shutdowns.
@@ -81,9 +89,13 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * @param sleeper used by threads to wait for a set period of time
    * @param clock used to determine current time
    * @param jobs the jobs to execute
+   * @param ec2Client ec2client
    */
   public PipelineManager(
-      ThrowingConsumer<Long, InterruptedException> sleeper, Clock clock, List<PipelineJob> jobs) {
+      ThrowingConsumer<Long, InterruptedException> sleeper,
+      Clock clock,
+      List<PipelineJob> jobs,
+      Ec2Client ec2Client) {
     this.sleeper = sleeper;
     this.clock = clock;
     this.jobs = ImmutableList.copyOf(jobs);
@@ -96,6 +108,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     latch = new CountDownLatch(jobs.size());
     completedJobs = new LinkedList<>();
     interruptable = jobs.stream().allMatch(PipelineJob::isInterruptible);
+    this.ec2Client = ec2Client;
   }
 
   /**
@@ -170,6 +183,10 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
       }
     }
     log.info("pool has terminated");
+
+    if (this.terminateRequested) {
+      ec2Client.scaleIn();
+    }
   }
 
   /**
@@ -287,8 +304,11 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * @param job the job that has stopped
    */
   @Override
-  public void stopped(PipelineJob job) {
+  public void stopped(PipelineJob job, PipelineJobOutcome outcome) {
     log.info("Job stopped: " + job.getType());
+    if (outcome == PipelineJobOutcome.SHOULD_TERMINATE) {
+      this.terminateRequested = true;
+    }
     latch.countDown();
   }
 

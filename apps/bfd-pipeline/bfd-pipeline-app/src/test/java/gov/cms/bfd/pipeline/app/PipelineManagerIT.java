@@ -8,6 +8,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
+import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import java.time.Clock;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.AllArgsConstructor;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 /** Integration tests for {@link PipelineManager}. */
 public final class PipelineManagerIT {
@@ -31,13 +33,16 @@ public final class PipelineManagerIT {
   /** We don't care about timestamps in these tests so we can just use system clock. */
   private final Clock clock = Clock.systemUTC();
 
+  /** Mock EC2 client. */
+  @Mock private AwsEc2Client ec2Client;
+
   /** Verifies that {@link PipelineManager} runs a successful mock one-shot job, as expected. */
   @Test
   public void runSuccessfulMockOneshotJob() {
     // Since this has no schedule it will run once and then exit.
     final var mockJob = new MockJob(Optional.empty(), true, () -> PipelineJobOutcome.WORK_DONE);
 
-    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob), ec2Client);
     pipelineManager.start();
     pipelineManager.awaitCompletion();
 
@@ -61,7 +66,7 @@ public final class PipelineManagerIT {
               throw error;
             });
 
-    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob), ec2Client);
     pipelineManager.start();
     pipelineManager.awaitCompletion();
 
@@ -81,7 +86,7 @@ public final class PipelineManagerIT {
             true,
             () -> PipelineJobOutcome.WORK_DONE);
 
-    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob), ec2Client);
     pipelineManager.start();
 
     // Wait until a completed iteration of the mock job can be found.
@@ -128,7 +133,7 @@ public final class PipelineManagerIT {
               }
             });
 
-    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob), ec2Client);
     pipelineManager.start();
     pipelineManager.awaitCompletion();
 
@@ -172,7 +177,7 @@ public final class PipelineManagerIT {
               return PipelineJobOutcome.WORK_DONE;
             });
 
-    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob), ec2Client);
     pipelineManager.start();
 
     // wait until we know the job has started
@@ -202,7 +207,7 @@ public final class PipelineManagerIT {
             false,
             () -> PipelineJobOutcome.WORK_DONE);
 
-    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob));
+    final var pipelineManager = new PipelineManager(SLEEPER, clock, List.of(mockJob), ec2Client);
     pipelineManager.start();
 
     // Wait until the mock job has started.

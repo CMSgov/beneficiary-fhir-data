@@ -194,7 +194,8 @@ public final class PipelineApplication {
     try (HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
       logDatabaseDetails(pooledDataSource);
-      createJobsAndRunPipeline(appConfig, appMeters, appMetrics, pooledDataSource);
+      createJobsAndRunPipeline(
+          appConfig, appMeters, appMetrics, pooledDataSource, new AwsEc2Client());
     }
   }
 
@@ -307,13 +308,15 @@ public final class PipelineApplication {
    * @param appMeters the app meters
    * @param appMetrics the {@link MetricRegistry} to receive metrics
    * @param pooledDataSource our connection pool
+   * @param ec2Client EC2Client
    * @throws FatalAppException if app shutdown required
    */
   private void createJobsAndRunPipeline(
       AppConfiguration appConfig,
       CompositeMeterRegistry appMeters,
       MetricRegistry appMetrics,
-      HikariDataSource pooledDataSource)
+      HikariDataSource pooledDataSource,
+      Ec2Client ec2Client)
       throws FatalAppException, IOException {
     final var clock = Clock.systemUTC();
 
@@ -326,7 +329,7 @@ public final class PipelineApplication {
       throw new FatalAppException("Pipeline smoke test failure", EXIT_CODE_SMOKE_TEST_FAILURE);
     }
 
-    final var pipelineManager = new PipelineManager(Thread::sleep, clock, jobs);
+    final var pipelineManager = new PipelineManager(Thread::sleep, clock, jobs, ec2Client);
     registerShutdownHook(appMetrics, pipelineManager);
 
     pipelineManager.start();
@@ -464,8 +467,7 @@ public final class PipelineApplication {
 
       final var loadOptions = appConfig.getCcwRifLoadOptions().get();
       final var awsClientConfig = appConfig.getAwsClientConfig();
-      final var job =
-          createCcwRifLoadJob(loadOptions, appState, awsClientConfig, new AwsEc2Client(), clock);
+      final var job = createCcwRifLoadJob(loadOptions, appState, awsClientConfig, clock);
       jobs.add(job);
       LOGGER.info("Registered CcwRifLoadJob.");
     } else {
@@ -512,7 +514,6 @@ public final class PipelineApplication {
    * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @param awsClientConfig AWS client configuration
-   * @param ec2Client ec2Client
    * @param clock used to get current time
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
@@ -520,7 +521,6 @@ public final class PipelineApplication {
       CcwRifLoadOptions loadOptions,
       PipelineApplicationState appState,
       AwsClientConfig awsClientConfig,
-      Ec2Client ec2Client,
       Clock clock)
       throws IOException {
     /*
@@ -565,7 +565,6 @@ public final class PipelineApplication {
             dataSetMonitorListener,
             loadOptions.getLoadOptions().isIdempotencyRequired(),
             loadOptions.getRunInterval(),
-            ec2Client,
             statusReporter);
 
     return ccwRifLoadJob;

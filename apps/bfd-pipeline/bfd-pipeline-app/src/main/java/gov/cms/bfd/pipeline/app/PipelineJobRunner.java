@@ -8,8 +8,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  * it can be submitted to an {@link java.util.concurrent.ExecutorService}.
  */
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PipelineJobRunner implements Runnable {
   /** Object that tracks the status of all job runs. */
   private final Tracker tracker;
@@ -31,6 +31,9 @@ public class PipelineJobRunner implements Runnable {
   /** Used to get timestamps. Parameterized for use by unit tests. */
   private final Clock clock;
 
+  /** Terminate requested. */
+  private boolean terminateRequested = false;
+
   /**
    * Runs the job according to its schedule. If the job has no schedule simply runs the job once.
    * Any uncaught exception thrown by the job terminates the loop. Our status is always updated in
@@ -39,9 +42,10 @@ public class PipelineJobRunner implements Runnable {
    */
   @Override
   public void run() {
+    PipelineJobOutcome outcome = null;
     try {
       // This try-with-resources guarantees job's close method is called.
-      // Nested within the outer try because we don't want stoppingNormally to be
+      // Nested within the outer try because we don't want stopping normally to be
       // called if closing the job throws an exception.
       try (job) {
         final Long repeatMillis =
@@ -50,8 +54,12 @@ public class PipelineJobRunner implements Runnable {
                 .map(Duration::toMillis)
                 .orElse(0L);
         while (tracker.jobsCanRun()) {
-          runJob();
-          if (repeatMillis <= 0 || !tracker.jobsCanRun()) {
+          outcome = runJob();
+          boolean shouldTerminate = outcome == PipelineJobOutcome.SHOULD_TERMINATE;
+          if (shouldTerminate) {
+            this.terminateRequested = true;
+          }
+          if (this.terminateRequested || repeatMillis <= 0 || !tracker.jobsCanRun()) {
             break;
           }
           tracker.sleeping(job);
@@ -64,16 +72,17 @@ public class PipelineJobRunner implements Runnable {
     } catch (Exception ex) {
       tracker.stoppingDueToException(job, ex);
     } finally {
-      tracker.stopped(job);
+      tracker.stopped(job, outcome);
     }
   }
 
   /**
    * Runs the job once and reports its outcome to the {@link Tracker}.
    *
+   * @return PipelineJobOutcome outcome
    * @throws Exception passed through if the job terminates with an exception
    */
-  private void runJob() throws Exception {
+  private PipelineJobOutcome runJob() throws Exception {
     final long id = tracker.beginningRun(job);
     final Instant startTime = clock.instant();
     PipelineJobOutcome outcome = null;
@@ -99,6 +108,8 @@ public class PipelineJobRunner implements Runnable {
     if (exception != null) {
       throw exception;
     }
+
+    return outcome;
   }
 
   /** Summarizes the results of a job run. */
@@ -237,7 +248,8 @@ public class PipelineJobRunner implements Runnable {
      * Notifies the tracker that a job has stopped.
      *
      * @param job the job that has stopped
+     * @param outcome job outcome
      */
-    void stopped(PipelineJob job);
+    void stopped(PipelineJob job, PipelineJobOutcome outcome);
   }
 }

@@ -32,7 +32,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -57,9 +56,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
 
   /** Used to capture status updates from the job. */
   @Mock private CcwRifLoadJobStatusReporter statusReporter;
-
-  /** test. */
-  @Mock private AwsEc2Client ec2Client;
 
   /**
    * Ensures that each test case here starts with a clean/empty database, with the right schema.
@@ -173,7 +169,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               false,
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         // Process dataset
         ccwJob.call();
@@ -325,7 +320,6 @@ final class SyntheaRifLoadJobIT extends AbstractLocalStackS3Test {
               listener,
               true, // run in idempotent mode
               Optional.empty(),
-              ec2Client,
               statusReporter)) {
         // Process dataset
         ccwJob.call();
