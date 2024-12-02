@@ -667,7 +667,7 @@
       },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
-        "id" : "1",
+        "id" : "IGNORED_FIELD",
         "status" : "completed",
         "subject" : {
           "reference" : "Patient/567834"
@@ -690,7 +690,7 @@
         } ]
       }, {
         "resourceType" : "Observation",
-        "id" : "2",
+        "id" : "IGNORED_FIELD",
         "status" : "unknown",
         "code" : {
           "coding" : [ {
@@ -808,7 +808,7 @@
         "end" : "2014-02-03"
       },
       "referral" : {
-        "reference" : "#1"
+        "reference" : "#d28f5253-5550-40f3-b100-058fc63f7ca2"
       },
       "disposition" : "01",
       "information" : [ {
@@ -937,7 +937,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
           "valueReference" : {
-            "reference" : "#2"
+            "reference" : "#60aa4035-eb99-41a6-ab5a-7c0fb8a0b1f6"
           }
         }, {
           "url" : "http://hl7.org/fhir/sid/ndc",
@@ -3565,7 +3565,7 @@
       },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
-        "id" : "1",
+        "id" : "IGNORED_FIELD",
         "status" : "completed",
         "subject" : {
           "reference" : "Patient/567834"
@@ -3586,7 +3586,7 @@
         } ]
       }, {
         "resourceType" : "Observation",
-        "id" : "2",
+        "id" : "IGNORED_FIELD",
         "status" : "unknown",
         "code" : {
           "coding" : [ {
@@ -3708,7 +3708,7 @@
         "end" : "1999-10-27"
       },
       "referral" : {
-        "reference" : "#1"
+        "reference" : "#437ca5db-b860-4fa4-b7df-a8718d9842dd"
       },
       "disposition" : "1",
       "information" : [ {
@@ -3862,7 +3862,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
           "valueReference" : {
-            "reference" : "#2"
+            "reference" : "#44cca6f7-04f7-41a8-bf89-f3d9c45ffa19"
           }
         }, {
           "url" : "http://hl7.org/fhir/sid/ndc",

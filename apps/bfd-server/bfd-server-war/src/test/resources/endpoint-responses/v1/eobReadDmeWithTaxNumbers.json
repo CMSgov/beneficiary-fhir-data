@@ -6,7 +6,7 @@
   },
   "contained" : [ {
     "resourceType" : "ReferralRequest",
-    "id" : "1",
+    "id" : "IGNORED_FIELD",
     "status" : "completed",
     "subject" : {
       "reference" : "Patient/567834"
@@ -29,7 +29,7 @@
     } ]
   }, {
     "resourceType" : "Observation",
-    "id" : "2",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -147,7 +147,7 @@
     "end" : "2014-02-03"
   },
   "referral" : {
-    "reference" : "#1"
+    "reference" : "#a66f1fb4-6514-49c7-b662-fa113735e6b4"
   },
   "disposition" : "01",
   "information" : [ {
@@ -292,7 +292,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#2"
+        "reference" : "#a957a1b7-f6f3-484e-ae77-5f13a1d134ba"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",

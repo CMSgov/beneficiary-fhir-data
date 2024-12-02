@@ -6,7 +6,7 @@
   },
   "contained" : [ {
     "resourceType" : "ReferralRequest",
-    "id" : "1",
+    "id" : "IGNORED_FIELD",
     "status" : "completed",
     "subject" : {
       "reference" : "Patient/567834"
@@ -27,7 +27,7 @@
     } ]
   }, {
     "resourceType" : "Observation",
-    "id" : "2",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -41,7 +41,7 @@
     }
   }, {
     "resourceType" : "Observation",
-    "id" : "3",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -55,7 +55,7 @@
     }
   }, {
     "resourceType" : "Observation",
-    "id" : "4",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -69,7 +69,7 @@
     }
   }, {
     "resourceType" : "Observation",
-    "id" : "5",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -83,7 +83,7 @@
     }
   }, {
     "resourceType" : "Observation",
-    "id" : "6",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -97,7 +97,7 @@
     }
   }, {
     "resourceType" : "Observation",
-    "id" : "7",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -111,7 +111,7 @@
     }
   }, {
     "resourceType" : "Observation",
-    "id" : "8",
+    "id" : "IGNORED_FIELD",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -233,7 +233,7 @@
     "end" : "1999-10-27"
   },
   "referral" : {
-    "reference" : "#1"
+    "reference" : "#daeb19c1-8786-4ea5-bf7c-ac75509d991f"
   },
   "disposition" : "1",
   "information" : [ {
@@ -387,7 +387,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#2"
+        "reference" : "#9ab21e9b-c4a5-481b-96c1-f0e7fc47d8c2"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -641,7 +641,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#3"
+        "reference" : "#5b9c9774-469d-407a-ae0b-7770e354e850"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -895,7 +895,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#4"
+        "reference" : "#e33054c6-d3dc-45c4-90d2-d73cf3898eba"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1149,7 +1149,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#5"
+        "reference" : "#0d5b3b89-e5ce-4c61-ab42-4d974bfcedb6"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1403,7 +1403,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#6"
+        "reference" : "#25b7c628-8509-4130-976c-980c0c3348e6"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1657,7 +1657,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#7"
+        "reference" : "#9b65cf0f-2395-4067-b1c5-c84a58af259c"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1911,7 +1911,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#8"
+        "reference" : "#3c922323-db23-4dda-b6e2-038c64ae39fa"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
