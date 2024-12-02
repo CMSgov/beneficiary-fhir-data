@@ -28,7 +28,7 @@ import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
@@ -202,7 +202,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Read
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) {
       throw new InvalidRequestException("Resource ID can not be null");
@@ -394,7 +394,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
           @Description(

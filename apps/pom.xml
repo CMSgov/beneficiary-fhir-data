@@ -1124,6 +1124,27 @@
                         See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
                      -->
                     <notimestamp>true</notimestamp>
+                    <!-- Enables the @apiNote, @implSpec, and @implNote tags with their corresponding
+                         headings. These tags are used within the JDK and are real JavaDoc tags, they
+                         just seem to be unsupported by default.
+                    -->
+                    <tags>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>API Note:</head>
+                        </tag>
+                        <tag>
+                            <name>implSpec</name>
+                            <placement>a</placement>
+                            <head>Implementation Specification:</head>
+                        </tag>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>Implementation Note:</head>
+                        </tag>
+                    </tags>
                 </configuration>
                 <executions>
                     <execution>
