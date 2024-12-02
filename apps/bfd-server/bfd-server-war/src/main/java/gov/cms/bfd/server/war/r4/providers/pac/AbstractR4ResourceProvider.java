@@ -26,6 +26,7 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
@@ -443,7 +444,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
-      boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
+      boolean excludeSamhsa = CommonTransformerUtils.shouldFilterSamhsa(samhsa, requestDetails);
       boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
       OffsetLinkBuilder paging =

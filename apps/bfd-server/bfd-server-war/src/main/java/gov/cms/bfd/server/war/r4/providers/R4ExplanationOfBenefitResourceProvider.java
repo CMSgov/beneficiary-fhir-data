@@ -343,7 +343,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     Long beneficiaryId = Long.parseLong(patient.getIdPart());
     Set<ClaimType> claimTypesRequested = CommonTransformerUtils.parseTypeParam(type);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
-    boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
+    boolean filterSamhsa = CommonTransformerUtils.shouldFilterSamhsa(excludeSamhsa, requestDetails);
     Map<String, String> operationOptions = new HashMap<>();
     operationOptions.put("by", "patient");
     operationOptions.put("IncludeTaxNumbers", String.valueOf(includeTaxNumbers));
