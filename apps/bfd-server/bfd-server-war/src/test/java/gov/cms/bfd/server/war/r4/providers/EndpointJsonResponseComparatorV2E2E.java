@@ -176,6 +176,12 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             Pattern.compile(
                 "[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
     replaceIgnoredFieldsWithFillerText(
+        jsonNode,
+        "reference",
+        Optional.of(
+            Pattern.compile(
+                "#[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
+    replaceIgnoredFieldsWithFillerText(
         jsonNode, "url", Optional.of(Pattern.compile("(https://localhost:)(\\d+(?=/))(.*)")));
     replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
     replaceIgnoredFieldsWithFillerText(jsonNode, "created", Optional.empty());

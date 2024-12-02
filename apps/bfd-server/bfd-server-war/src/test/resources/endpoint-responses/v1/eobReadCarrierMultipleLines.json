@@ -233,7 +233,7 @@
     "end" : "1999-10-27"
   },
   "referral" : {
-    "reference" : "#daeb19c1-8786-4ea5-bf7c-ac75509d991f"
+    "reference" : "IGNORED_FIELD"
   },
   "disposition" : "1",
   "information" : [ {
@@ -387,7 +387,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#9ab21e9b-c4a5-481b-96c1-f0e7fc47d8c2"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -641,7 +641,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#5b9c9774-469d-407a-ae0b-7770e354e850"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -895,7 +895,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#e33054c6-d3dc-45c4-90d2-d73cf3898eba"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1149,7 +1149,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#0d5b3b89-e5ce-4c61-ab42-4d974bfcedb6"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1403,7 +1403,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#25b7c628-8509-4130-976c-980c0c3348e6"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1657,7 +1657,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#9b65cf0f-2395-4067-b1c5-c84a58af259c"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -1911,7 +1911,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#3c922323-db23-4dda-b6e2-038c64ae39fa"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",

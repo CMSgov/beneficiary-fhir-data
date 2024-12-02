@@ -149,7 +149,7 @@
     "end" : "1999-10-27"
   },
   "referral" : {
-    "reference" : "#671e34cb-9824-49d1-a1e8-9d024d4a4803"
+    "reference" : "IGNORED_FIELD"
   },
   "disposition" : "1",
   "information" : [ {
@@ -319,7 +319,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#bf2fe84f-e779-4882-82ea-990851ea1666"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",

@@ -147,7 +147,7 @@
     "end" : "2014-02-03"
   },
   "referral" : {
-    "reference" : "#02c74303-e61f-4e32-ac88-ef77f512818a"
+    "reference" : "IGNORED_FIELD"
   },
   "disposition" : "01",
   "information" : [ {
@@ -276,7 +276,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#38ca0fb6-fa13-4ce8-91d4-499e25d1592e"
+        "reference" : "IGNORED_FIELD"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",

@@ -802,7 +802,7 @@
         "end" : "2014-02-03"
       },
       "referral" : {
-        "reference" : "#aca3b90f-b176-473e-a3c6-95c7569b3f55"
+        "reference" : "IGNORED_FIELD"
       },
       "disposition" : "01",
       "information" : [ {
@@ -931,7 +931,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
           "valueReference" : {
-            "reference" : "#847b3ce0-b98d-46b3-a71d-6296e206e3fc"
+            "reference" : "IGNORED_FIELD"
           }
         }, {
           "url" : "http://hl7.org/fhir/sid/ndc",
@@ -3702,7 +3702,7 @@
         "end" : "1999-10-27"
       },
       "referral" : {
-        "reference" : "#b01e2264-1327-4d53-a62b-c6986494095e"
+        "reference" : "IGNORED_FIELD"
       },
       "disposition" : "1",
       "information" : [ {
@@ -3856,7 +3856,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
           "valueReference" : {
-            "reference" : "#ea66ac63-d00b-4cc0-b155-4e533d22ceb2"
+            "reference" : "IGNORED_FIELD"
           }
         }, {
           "url" : "http://hl7.org/fhir/sid/ndc",
