@@ -320,6 +320,71 @@ public class ClaimE2E extends ServerRequiredTest {
   }
 
   /**
+   * Verify the response totals are accurate when SAMHSA data is excluded and the client is not
+   * allowed to see SAMHSA data.
+   */
+  @Test
+  public void testClaimFindByPatientWithExcludeSamhsaTrue() {
+    String requestString =
+        claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&excludeSAMHSA=true";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // since we start on the last item's index with 2 items per page, 1 item returned
+        .body("entry.size()", equalTo(4))
+        // 4 items total reported on all pages
+        .body("total", equalTo(4))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verify the response totals are accurate when SAMHSA data is not excluded and the client is
+   * allowed to see SAMHSA data.
+   */
+  @Test
+  public void testClaimFindByPatientWithSamhsaAllowed() {
+    String requestString = claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH;
+
+    given()
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // since we start on the last item's index with 2 items per page, 1 item returned
+        .body("entry.size()", equalTo(6))
+        // 4 items total reported on all pages
+        .body("total", equalTo(6))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Verify the response totals are accurate when SAMHSA data is excluded and the client is allowed
+   * to see SAMHSA data.
+   */
+  @Test
+  public void testClaimFindByPatientWithSamhsaAllowedAndExcludeSamhsaTrue() {
+    String requestString =
+        claimEndpoint + "?mbi=" + RDATestUtils.MBI_OLD_HASH + "&excludeSAMHSA=true";
+
+    given()
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // since we start on the last item's index with 2 items per page, 1 item returned
+        .body("entry.size()", equalTo(4))
+        // 4 items total reported on all pages
+        .body("total", equalTo(4))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
+  /**
    * Verify that Claim logs nonsensitive MBI identifiers (hash and ID) to the MDC log when receiving
    * a valid Claim request.
    */

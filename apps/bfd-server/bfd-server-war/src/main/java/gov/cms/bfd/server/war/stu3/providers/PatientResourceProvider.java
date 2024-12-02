@@ -40,7 +40,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -156,7 +156,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Read(version = false)
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
@@ -220,7 +220,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -285,7 +285,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(
@@ -741,7 +741,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(shortDefinition = "The patient identifier to search for")
