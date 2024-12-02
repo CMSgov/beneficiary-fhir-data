@@ -33,7 +33,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -192,7 +192,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     Matcher eobIdMatcher =
@@ -282,7 +282,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
