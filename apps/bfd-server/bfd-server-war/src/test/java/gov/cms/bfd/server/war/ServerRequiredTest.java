@@ -42,6 +42,10 @@ public class ServerRequiredTest {
   @GuardedBy("class synchronized")
   protected static RequestSpecification requestAuth;
 
+  /** SAMHSA keystore filename. */
+  @GuardedBy("class synchronized")
+  protected static final String SAMHSA_KEYSTORE = "test-samhsa-keystore.p12";
+
   /** The Server test utils instance, for convenience and brevity. */
   protected ServerTestUtils testUtils = ServerTestUtils.get();
 
@@ -72,17 +76,23 @@ public class ServerRequiredTest {
       boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
       assertTrue(startedServer, "Could not startup server for tests.");
       baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
-      setRequestAuth();
-      // Setup a shutdown hook to shut down the server when we are finished with all tests
+      requestAuth = getRequestAuth("test-keystore.p12");
+
+      // Set up a shutdown hook to shut down the server when we are finished with all tests
       Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     }
   }
 
-  /** Sets the request auth (security certs) used in calls to the local server. */
-  private static void setRequestAuth() {
+  /**
+   * Sets the request auth (security certs) used in calls to the local server.
+   *
+   * @param keystoreFilename keystore filename
+   * @return The authenticated {@link RequestSpecification}
+   */
+  protected static RequestSpecification getRequestAuth(String keystoreFilename) {
     // Get the certs for the test
     String trustStorePath = "src/test/resources/certs/test-truststore.jks";
-    String keyStorePath = "src/test/resources/certs/test-keystore.p12";
+    String keyStorePath = "src/test/resources/certs/" + keystoreFilename;
     String testPassword = "changeit";
     String keystoreType = "pkcs12";
     // Set up the cert for the calls
@@ -96,8 +106,7 @@ public class ServerRequiredTest {
                 .keyStoreType(keystoreType)
                 .trustStoreType(keystoreType)
                 .allowAllHostnames());
-    requestAuth =
-        new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
+    return new RequestSpecBuilder().setBaseUri(baseServerUrl).setAuth(testCertificate).build();
   }
 
   /**

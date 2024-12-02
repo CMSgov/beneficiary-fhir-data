@@ -2,10 +2,13 @@ package gov.cms.bfd.sharedutils.database;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import org.junit.jupiter.api.Test;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
+import software.amazon.jdbc.PropertyDefinition;
+import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
-import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
+import software.amazon.jdbc.plugin.failover2.FailoverConnectionPlugin;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
 
 /** Unit tests for {@link AwsWrapperDataSourceFactory}. */
@@ -30,9 +33,13 @@ public class AwsWrapperDataSourceFactoryTest {
                     .basePresetCode("E")
                     .useCustomPreset(true)
                     .pluginsCsv("efm2,failover")
+                    .hostSelectorStrategy("leastConnections")
+                    .clusterTopologyRefreshRateMs(100L)
+                    .instanceStateMonitorRefreshRateMs(50L)
                     .build())
             .build();
-    var factory = new AwsWrapperDataSourceFactory(dbOptions);
+    var awsClientConfig = AwsClientConfig.awsBuilder().build();
+    var factory = new AwsWrapperDataSourceFactory(dbOptions, awsClientConfig);
 
     // Act
     var dataSource = factory.createDataSource(null, null);
@@ -46,14 +53,24 @@ public class AwsWrapperDataSourceFactoryTest {
     assertEquals(dataSource.getUser(), dbOptions.getDatabaseUsername());
     assertEquals(dataSource.getPassword(), dbOptions.getDatabasePassword());
     assertEquals(
-        dataSourceProps.get("wrapperProfileName"), AwsWrapperDataSourceFactory.CUSTOM_PRESET_NAME);
+        AwsWrapperDataSourceFactory.CUSTOM_PRESET_NAME,
+        dataSourceProps.get(PropertyDefinition.PROFILE_NAME.name));
+    assertEquals("false", dataSourceProps.get(PropertyDefinition.AUTO_SORT_PLUGIN_ORDER.name));
     assertEquals(
+        "leastConnections",
         dataSourceProps.get(
-            AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name),
-        dbOptions.getAwsJdbcWrapperOptions().getHostSelectionStrategy());
+            AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name));
     assertEquals(
-        dataSourceProps.get(ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name),
-        dbOptions.getAwsJdbcWrapperOptions().getInitialConnectionStrategy());
+        "leastConnections",
+        dataSourceProps.get(FailoverConnectionPlugin.FAILOVER_READER_HOST_SELECTOR_STRATEGY.name));
+    assertEquals(
+        "true", dataSourceProps.get(FailoverConnectionPlugin.ENABLE_CONNECT_FAILOVER.name));
+    assertEquals(
+        "100", dataSourceProps.get(RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name));
+    assertEquals(
+        "50",
+        dataSourceProps.get(
+            StateAwareMonitoringRdsHostListProvider.INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.name));
     assertInstanceOf(HikariPooledConnectionProvider.class, customProfile.getConnectionProvider());
   }
 }
