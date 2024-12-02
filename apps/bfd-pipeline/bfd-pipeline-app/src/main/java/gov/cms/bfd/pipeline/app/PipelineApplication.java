@@ -30,6 +30,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillJob;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
@@ -180,11 +181,9 @@ public final class PipelineApplication {
       LOGGER.warn("Invalid app configuration.", e);
       throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
-
     final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var appMeters = new CompositeMeterRegistry();
     final var appMetrics = new MetricRegistry();
-
     configureMetrics(metricOptions, configLoader, appMeters, appMetrics);
 
     // Create a pooled data source for use by any registered jobs.
@@ -427,6 +426,34 @@ public final class PipelineApplication {
   }
 
   /**
+   * Creates the pipeline job for the SAMHSA backfill.
+   *
+   * @param appConfig The App Configuration.
+   * @param appMeters The meter registry.
+   * @param appMetrics The metrics registry.
+   * @param pooledDataSource The Hikari data source.
+   * @param clock Clock.
+   * @return The Pipeline job.
+   */
+  PipelineJob createBackfillJob(
+      AppConfiguration appConfig,
+      MeterRegistry appMeters,
+      MetricRegistry appMetrics,
+      HikariDataSource pooledDataSource,
+      Clock clock) {
+    final var jobs = new ArrayList<PipelineJob>();
+    final PipelineApplicationState appState =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+            clock);
+    final var job = new SamhsaBackfillJob(appState, clock);
+    return job;
+  }
+
+  /**
    * Create all pipeline jobs and return them in a list.
    *
    * @param appConfig our {@link AppConfiguration} for configuring jobs
@@ -482,7 +509,15 @@ public final class PipelineApplication {
               clock);
 
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
-
+      final Optional<BackfillConfigOptions> backfillConfigOptions =
+          appConfig.getBackfillConfigOptions();
+      if (backfillConfigOptions.isPresent()) {
+        if (backfillConfigOptions.get().isEnabled()) {
+          final var backfillJob =
+              createBackfillJob(appConfig, appMeters, appMetrics, pooledDataSource, clock);
+          jobs.add(backfillJob);
+        }
+      }
       final Optional<RdaServerJob> mockServerJob = rdaLoadOptions.createRdaServerJob();
       if (mockServerJob.isPresent()) {
         jobs.add(mockServerJob.get());

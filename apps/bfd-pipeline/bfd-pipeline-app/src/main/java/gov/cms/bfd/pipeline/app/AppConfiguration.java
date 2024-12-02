@@ -375,11 +375,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
+  /** Config value for SAMHSA backfill enabled. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_ENABLED = "rda/samhsa/backfill/enabled";
+
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
    */
   @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
+
+  /** Configuration for Backfill Config. */
+  @Nullable private final BackfillConfigOptions backfillConfigOptions;
 
   /**
    * The RDA rif load options. This can be null if the RDA job is not configured, Optional is not
@@ -405,6 +411,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
+          .put(SSM_PATH_SAMHSA_BACKFILL_ENABLED, "true")
           .build();
 
   /**
@@ -415,16 +422,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @param awsClientConfig used to configure AWS services
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
+   * @param backFillConfigOptions the value to use fo {@link #getBackfillConfigOptions()}
    */
   private AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
       AwsClientConfig awsClientConfig,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
-      @Nullable RdaLoadOptions rdaLoadOptions) {
+      @Nullable RdaLoadOptions rdaLoadOptions,
+      @Nullable BackfillConfigOptions backFillConfigOptions) {
     super(metricOptions, databaseOptions, awsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
+    this.backfillConfigOptions = backFillConfigOptions;
   }
 
   /**
@@ -443,6 +453,15 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
     return Optional.ofNullable(rdaLoadOptions);
+  }
+
+  /**
+   * returns the {@link #backfillConfigOptions}.
+   *
+   * @return the {@link BackfillConfigOptions}
+   */
+  public Optional<BackfillConfigOptions> getBackfillConfigOptions() {
+    return Optional.ofNullable(backfillConfigOptions);
   }
 
   @Override
@@ -485,6 +504,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
+   * Loads Backfill Configuration.
+   *
+   * @param config Config loader
+   * @return {@link BackfillConfigOptions}
+   */
+  public static BackfillConfigOptions loadBackfillConfigOptions(ConfigLoader config) {
+    boolean enabled = config.booleanOption(SSM_PATH_SAMHSA_BACKFILL_ENABLED).orElse(false);
+    BackfillConfigOptions backfillConfigOptions =
+        BackfillConfigOptions.builder().enabled(enabled).build();
+    return backfillConfigOptions;
+  }
+
+  /**
    * Load configuration variables using the provided {@link ConfigLoader} instance and build an
    * {@link AppConfiguration} instance from them.
    *
@@ -501,7 +533,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
     int hicnHashIterations = config.positiveIntValue(SSM_PATH_HICN_HASH_ITERATIONS);
     byte[] hicnHashPepper = config.hexBytes(SSM_PATH_HICN_HASH_PEPPER);
     int hicnHashCacheSize = config.intValue(SSM_PATH_HICN_HASH_CACHE_SIZE);
-
     final boolean idempotencyRequired = config.booleanValue(SSM_PATH_IDEMPOTENCY_REQUIRED);
 
     final var benePerformanceSettings = loadBeneficiaryPerformanceSettings(config);
@@ -511,7 +542,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
         Math.max(
             benePerformanceSettings.getLoaderThreads(),
             claimPerformanceSettings.getLoaderThreads());
-
+    BackfillConfigOptions backfillConfigOptions = loadBackfillConfigOptions(config);
     MetricOptions metricOptions = loadMetricOptions(config);
     DatabaseOptions databaseOptions = loadDatabaseOptions(config, maxLoaderThreads);
 
@@ -531,7 +562,12 @@ public final class AppConfiguration extends BaseAppConfiguration {
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
     AwsClientConfig awsClientConfig = BaseAppConfiguration.loadAwsClientConfig(config);
     return new AppConfiguration(
-        metricOptions, databaseOptions, awsClientConfig, ccwRifLoadOptions, rdaLoadOptions);
+        metricOptions,
+        databaseOptions,
+        awsClientConfig,
+        ccwRifLoadOptions,
+        rdaLoadOptions,
+        backfillConfigOptions);
   }
 
   /**
