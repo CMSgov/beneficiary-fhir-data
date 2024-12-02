@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -79,6 +80,12 @@ public final class CommonTransformerUtils {
    */
   private static final String COVERAGE_SIMPLE_CLASSNAME =
       org.hl7.fhir.dstu3.model.Coverage.class.getSimpleName();
+
+  /**
+   * Constant for setting and retrieving the attribute from the request that determines if the
+   * client can see SAMHSA data.
+   */
+  public static final String SHOULD_FILTER_SAMHSA = "SHOULD_FILTER_SAMHSA";
 
   /**
    * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
@@ -784,5 +791,25 @@ public final class CommonTransformerUtils {
     }
 
     return claimTypes;
+  }
+
+  /**
+   * Determines if SAMHSA data should be filtered based on the client's identity and the
+   * "excludeSAMHSA" request parameter.
+   *
+   * @param excludeSamhsa the value of the "excludeSAMHSA" parameter
+   * @param requestDetails the {@link RequestDetails} containing the authentication info
+   * @return whether to filter SAMHSA
+   */
+  public static boolean shouldFilterSamhsa(String excludeSamhsa, RequestDetails requestDetails) {
+
+    if (Boolean.parseBoolean(excludeSamhsa)) {
+      return true;
+    }
+    Object shouldFilterSamhsa = requestDetails.getAttribute(SHOULD_FILTER_SAMHSA);
+    if (shouldFilterSamhsa == null) {
+      throw new BadCodeMonkeyException(SHOULD_FILTER_SAMHSA + " attribute missing from request");
+    }
+    return (boolean) shouldFilterSamhsa;
   }
 }

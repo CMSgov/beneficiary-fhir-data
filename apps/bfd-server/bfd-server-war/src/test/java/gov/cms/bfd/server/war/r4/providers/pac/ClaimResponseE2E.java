@@ -167,6 +167,51 @@ public class ClaimResponseE2E extends ServerRequiredTest {
   }
 
   /**
+   * Tests to see if the response size is accurate when SAMHSA is not excluded and the client can
+   * see SAMHSA data.
+   */
+  @Test
+  void shouldGetClaimResponseResourcesByMbiHashWithSamhsaAllowed() {
+    String requestString =
+        claimResponseEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_OLD_HASH
+            + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
+
+    // Test passes as long as we get a 200 with an entry and not an error
+    given()
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
+        .expect()
+        .statusCode(200)
+        .body("entry.size()", equalTo(3))
+        .when()
+        .get(requestString);
+  }
+
+  /**
+   * Tests to see if the response size is accurate when SAMHSA is excluded and the client can see
+   * SAMHSA data.
+   */
+  @Test
+  void shouldGetClaimResponseResourcesByMbiHashWithSamhsaAllowedAndExcludeSamhsaTrue() {
+    String requestString =
+        claimResponseEndpoint
+            + "?mbi="
+            + RDATestUtils.MBI_OLD_HASH
+            + "&service-date=gt1970-07-18&service-date=lt1970-07-25"
+            + "&excludeSAMHSA=true";
+
+    // Test passes as long as we get a 200 with an entry and not an error
+    given()
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
+        .expect()
+        .statusCode(200)
+        .body("entry.size()", equalTo(2))
+        .when()
+        .get(requestString);
+  }
+
+  /**
    * Tests to see if the correct paginated response is given when a search is done for {@link
    * ClaimResponse}s using given mbi and service-date range. In this test case the query finds the
    * matched claims because their from dates are within the date range even though their to dates

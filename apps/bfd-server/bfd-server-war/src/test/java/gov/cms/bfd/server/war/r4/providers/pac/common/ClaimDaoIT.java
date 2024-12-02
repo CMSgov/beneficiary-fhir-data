@@ -59,7 +59,7 @@ public class ClaimDaoIT {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
     testUtils.seedData(false);
     var claims = runFissMbiQuery(claimDao, RDATestUtils.MBI);
-    assertEquals(2, claims.size());
+    assertEquals(3, claims.size());
   }
 
   /** Verifies that doing a claims search with an unknown MBI will return no claims. */
@@ -80,7 +80,7 @@ public class ClaimDaoIT {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
     testUtils.seedData(false);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
-    assertEquals(2, claims.size());
+    assertEquals(3, claims.size());
   }
 
   /** Verifies that doing a claims search with an unknown MBI hash will return no claims. */
@@ -113,7 +113,7 @@ public class ClaimDaoIT {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
-    assertEquals(2, claims.size());
+    assertEquals(3, claims.size());
   }
 
   /**
@@ -125,7 +125,7 @@ public class ClaimDaoIT {
     ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
-    assertEquals(2, claims.size());
+    assertEquals(3, claims.size());
   }
 
   /**
@@ -154,7 +154,10 @@ public class ClaimDaoIT {
             goodMbiHash,
             null,
             null,
-            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID, RDATestUtils.FISS_CLAIM_B_CLAIM_ID)),
+            List.of(
+                RDATestUtils.FISS_CLAIM_A_CLAIM_ID,
+                RDATestUtils.FISS_CLAIM_B_CLAIM_ID,
+                RDATestUtils.FISS_CLAIM_C_CLAIM_ID)),
         new ServiceDateQueryParam(
             "bad-mbi-matches-none-no-dates", badMbiHash, null, null, List.of()),
         new ServiceDateQueryParam(
@@ -187,7 +190,10 @@ public class ClaimDaoIT {
             goodMbiHash,
             new DateRangeParam(new DateParam("ge1970-08-01T00:00:00Z"), null),
             new DateRangeParam(new DateParam("ge1970-01-01"), null),
-            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID, RDATestUtils.FISS_CLAIM_B_CLAIM_ID)),
+            List.of(
+                RDATestUtils.FISS_CLAIM_A_CLAIM_ID,
+                RDATestUtils.FISS_CLAIM_B_CLAIM_ID,
+                RDATestUtils.FISS_CLAIM_C_CLAIM_ID)),
         new ServiceDateQueryParam(
             "serviceDate-matches-1-from",
             goodMbiHash,
@@ -199,13 +205,16 @@ public class ClaimDaoIT {
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("gt1970-08-01"), null),
-            List.of(RDATestUtils.FISS_CLAIM_B_CLAIM_ID)),
+            List.of(RDATestUtils.FISS_CLAIM_B_CLAIM_ID, RDATestUtils.FISS_CLAIM_C_CLAIM_ID)),
         new ServiceDateQueryParam(
             "serviceDate-matches-2",
             goodMbiHash,
             null,
             new DateRangeParam(new DateParam("ge1970-07-19"), new DateParam("lt1970-08-01")),
-            List.of(RDATestUtils.FISS_CLAIM_A_CLAIM_ID, RDATestUtils.FISS_CLAIM_B_CLAIM_ID)));
+            List.of(
+                RDATestUtils.FISS_CLAIM_A_CLAIM_ID,
+                RDATestUtils.FISS_CLAIM_B_CLAIM_ID,
+                RDATestUtils.FISS_CLAIM_C_CLAIM_ID)));
   }
 
   /**
