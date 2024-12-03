@@ -4,7 +4,14 @@ import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
+import gov.cms.bfd.model.rif.samhsa.HhaTag;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import jakarta.persistence.EntityManager;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,12 +23,10 @@ public class SamhsaHHAAdapter extends SamhsaAdapterBase<HHAClaim, HHAClaimLine> 
    * Constructor.
    *
    * @param claim The claim to process.
-   * @param claimLines The claim's claim lines.
    */
-  public SamhsaHHAAdapter(HHAClaim claim, List<HHAClaimLine> claimLines) {
-    super(claim, claimLines);
+  public SamhsaHHAAdapter(HHAClaim claim) {
+    super(claim, claim.getLines());
     this.claim = claim;
-    this.claimLines = claimLines;
     this.table = "hha_claims";
     this.linesTable = "hha_claim_lines";
   }
@@ -94,5 +99,30 @@ public class SamhsaHHAAdapter extends SamhsaAdapterBase<HHAClaim, HHAClaimLine> 
         entry(claim::getDiagnosisExternal11Code, "icd_dgns_e_cd11"),
         entry(claim::getDiagnosisExternal12Code, "icd_dgns_e_cd12"),
         entry(claim::getDiagnosisExternalFirstCode, "fst_dgns_e_cd"));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean checkAndProcessClaim(EntityManager entityManager)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+    Optional<List<TagDetails>> entries = buildDetails();
+    if (entries.isPresent()) {
+      List<HhaTag> tags = new ArrayList<>();
+      tags.add(
+          HhaTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode._42CFRPart2.toString())
+              .details(entries.get())
+              .build());
+      tags.add(
+          HhaTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode.R.toString())
+              .details(entries.get())
+              .build());
+      return SamhsaUtil.persistTags(Optional.of(tags), entityManager);
+    }
+    return false;
   }
 }

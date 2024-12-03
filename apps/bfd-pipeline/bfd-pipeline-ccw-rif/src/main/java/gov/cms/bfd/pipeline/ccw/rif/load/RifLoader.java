@@ -412,7 +412,7 @@ public final class RifLoader {
         }
       } else throw new BadCodeMonkeyException();
       if (Arrays.asList(POSSIBLE_SAMHSA_CLAIMS).contains(rifFileType)) {
-        samhsaUtil.processClaim(record, entityManager);
+        samhsaUtil.processCcwClaim(record, entityManager);
       }
       LOGGER.trace("Loaded '{}' record.", rifFileType);
 

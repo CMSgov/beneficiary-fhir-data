@@ -410,7 +410,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
                 var metaData = createMetaData(change);
                 entityManager.merge(metaData);
                 entityManager.merge(change.getClaim());
-                samhsaUtil.processClaim(change.getClaim(), entityManager);
+                samhsaUtil.processRdaClaim(change.getClaim(), entityManager);
                 insertCount += getInsertCount(change.getClaim());
               } else {
                 // We would expect this to have been filtered by the RdaSource so it is safe

@@ -5,7 +5,14 @@ import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
+import gov.cms.bfd.model.rif.samhsa.SnfTag;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import jakarta.persistence.EntityManager;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,12 +24,10 @@ public class SamhsaSnfAdapter extends SamhsaAdapterBase<SNFClaim, SNFClaimLine> 
    * Constructor.
    *
    * @param claim The claim to process.
-   * @param claimLines The claim's claim lines.
    */
-  public SamhsaSnfAdapter(SNFClaim claim, List<SNFClaimLine> claimLines) {
-    super(claim, claimLines);
+  public SamhsaSnfAdapter(SNFClaim claim) {
+    super(claim, claim.getLines());
     this.claim = claim;
-    this.claimLines = claimLines;
     this.table = "snf_claims";
     this.linesTable = "snf_claim_lines";
   }
@@ -120,5 +125,30 @@ public class SamhsaSnfAdapter extends SamhsaAdapterBase<SNFClaim, SNFClaimLine> 
   @Override
   Short getLineNum(SNFClaimLine snfClaimLine) {
     return snfClaimLine.getLineNumber();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean checkAndProcessClaim(EntityManager entityManager)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+    Optional<List<TagDetails>> entries = buildDetails();
+    if (entries.isPresent()) {
+      List<SnfTag> tags = new ArrayList<>();
+      tags.add(
+          SnfTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode._42CFRPart2.toString())
+              .details(entries.get())
+              .build());
+      tags.add(
+          SnfTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode.R.toString())
+              .details(entries.get())
+              .build());
+      return SamhsaUtil.persistTags(Optional.of(tags), entityManager);
+    }
+    return false;
   }
 }
