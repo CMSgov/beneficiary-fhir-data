@@ -19,6 +19,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
@@ -378,6 +379,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /** Config value for SAMHSA backfill enabled. */
   public static final String SSM_PATH_SAMHSA_BACKFILL_ENABLED = "rda/samhsa/backfill/enabled";
 
+  /** Config value for SAMHSA backfill batch size. */
+  public static final String SSM_PATH_SAMHSA_BAKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
+
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
@@ -411,7 +415,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
-          .put(SSM_PATH_SAMHSA_BACKFILL_ENABLED, "true")
+          .put(SSM_PATH_SAMHSA_BACKFILL_ENABLED, "false")
+          .put(SSM_PATH_SAMHSA_BAKFILL_BATCH_SIZE, String.valueOf(10000))
           .build();
 
   /**
@@ -507,12 +512,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * Loads Backfill Configuration.
    *
    * @param config Config loader
+   * @param ccwPipelineEnabled True if the CCW pipeline is enabled in this instance.
    * @return {@link BackfillConfigOptions}
    */
-  public static BackfillConfigOptions loadBackfillConfigOptions(ConfigLoader config) {
+  public static BackfillConfigOptions loadBackfillConfigOptions(
+      ConfigLoader config, boolean ccwPipelineEnabled) {
     boolean enabled = config.booleanOption(SSM_PATH_SAMHSA_BACKFILL_ENABLED).orElse(false);
+    // We don't want to run if we're on a CCW Pipeline instance
+    if (!enabled || ccwPipelineEnabled) {
+      return null;
+    }
+    int batchSize = config.intValue(SSM_PATH_SAMHSA_BAKFILL_BATCH_SIZE, 10000);
     BackfillConfigOptions backfillConfigOptions =
-        BackfillConfigOptions.builder().enabled(enabled).build();
+        BackfillConfigOptions.builder().enabled(enabled).batchSize(batchSize).build();
     return backfillConfigOptions;
   }
 
@@ -542,7 +554,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
         Math.max(
             benePerformanceSettings.getLoaderThreads(),
             claimPerformanceSettings.getLoaderThreads());
-    BackfillConfigOptions backfillConfigOptions = loadBackfillConfigOptions(config);
     MetricOptions metricOptions = loadMetricOptions(config);
     DatabaseOptions databaseOptions = loadDatabaseOptions(config, maxLoaderThreads);
 
@@ -558,8 +569,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
             claimPerformanceSettings);
 
     CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
-
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
+    BackfillConfigOptions backfillConfigOptions =
+        loadBackfillConfigOptions(config, ccwRifLoadOptions != null);
     AwsClientConfig awsClientConfig = BaseAppConfiguration.loadAwsClientConfig(config);
     return new AppConfiguration(
         metricOptions,

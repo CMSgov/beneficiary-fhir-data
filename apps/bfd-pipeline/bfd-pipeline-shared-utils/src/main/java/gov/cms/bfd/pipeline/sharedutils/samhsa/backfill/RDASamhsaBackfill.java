@@ -10,9 +10,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   /** The tables. */
   private final List<String> TABLES = List.of("rda.fiss_claims", "rda.mcs_claims");
 
-  /** The limit of records to pull at one time. */
-  int RECORD_LIMIT = 1000;
-
   /** The column name for the fiss claim id. */
   private String FISS_CLAIM_ID_COLUMN = "claim_id";
 
@@ -23,9 +20,10 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
    * Constructor.
    *
    * @param transactionManager The transaction manager.
+   * @param batchSize the query batch size.
    */
-  public RDASamhsaBackfill(TransactionManager transactionManager) {
-    super(transactionManager);
+  public RDASamhsaBackfill(TransactionManager transactionManager, int batchSize) {
+    super(transactionManager, batchSize);
   }
 
   /** {@inheritDoc} */
@@ -46,12 +44,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
       }
       default -> throw new RuntimeException("Unknown RDA table name.");
     }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected Integer getRecordLimit() {
-    return RECORD_LIMIT;
   }
 
   /** {@inheritDoc} */

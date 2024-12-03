@@ -43,13 +43,18 @@ public abstract class AbstractSamhsaBackfill {
    */
   SamhsaUtil samhsaUtil;
 
+  /** query batch size. */
+  int batchSize;
+
   /**
    * Constructor.
    *
    * @param transactionManager The transaction manager.
+   * @param batchSize the query batch size.
    */
-  public AbstractSamhsaBackfill(TransactionManager transactionManager) {
+  public AbstractSamhsaBackfill(TransactionManager transactionManager, int batchSize) {
     this.transactionManager = transactionManager;
+    this.batchSize = batchSize;
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
   }
 
@@ -116,13 +121,6 @@ public abstract class AbstractSamhsaBackfill {
   protected abstract String getClaimIdColumnName(String table);
 
   /**
-   * Gets the record limit for each iteration.
-   *
-   * @return The record limit for each iteration.
-   */
-  protected abstract Integer getRecordLimit();
-
-  /**
    * Gets the claim id of a claim.
    *
    * @param claim The Claim to check.
@@ -168,37 +166,36 @@ public abstract class AbstractSamhsaBackfill {
    * @param <TClaim> The type of the claim.
    */
   private <TClaim> Long executeForTable(String table) {
-    Query query =
-        buildQuery(Optional.empty(), table, getClaimIdColumnName(table), getRecordLimit());
-    List<TClaim> claims = executeQuery(query);
     long totalSaved = 0L;
     long totalProcessed = 0L;
-    for (TClaim claim : claims) {
-      boolean persisted = samhsaUtil.processClaim(claim, transactionManager.getEntityManager());
-      if (persisted) {
-        totalSaved++;
-      }
-    }
-    totalProcessed += claims.size();
-
-    while (claims.size() == getRecordLimit()) {
-      String lastClaimId = getClaimId(claims.getLast());
-      query =
+    String lastClaimId = null;
+    List<TClaim> claims;
+    do {
+      Query query =
           buildQuery(
-              Optional.of(lastClaimId), table, getClaimIdColumnName(table), getRecordLimit());
+              Optional.ofNullable(lastClaimId), table, getClaimIdColumnName(table), batchSize);
       claims = executeQuery(query);
+      int savedInBatch = 0;
       for (TClaim claim : claims) {
         boolean persisted = samhsaUtil.processClaim(claim, transactionManager.getEntityManager());
         if (persisted) {
-          totalSaved++;
+          savedInBatch++;
         }
       }
+      totalSaved += savedInBatch;
+      LOGGER.info(
+          String.format(
+              "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
+              batchSize, table, savedInBatch));
       totalProcessed += claims.size();
-    }
+      lastClaimId = !claims.isEmpty() ? getClaimId(claims.getLast()) : null;
+      // If the number of returned claims is not equal to the requested batch size, then the table
+      // is done being processed.
+    } while (claims.size() == batchSize);
     LOGGER.info(
         String.format(
-            "Processed %d claims from table %s. %d of them had SAMHSA codes.",
-            totalProcessed, table, totalSaved));
+            "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
+            table, totalProcessed, totalSaved));
 
     return totalSaved;
   }

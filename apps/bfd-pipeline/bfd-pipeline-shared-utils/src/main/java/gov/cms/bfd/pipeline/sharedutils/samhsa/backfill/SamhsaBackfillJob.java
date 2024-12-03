@@ -24,6 +24,9 @@ public class SamhsaBackfillJob implements PipelineJob {
   /** Clock. */
   Clock clock;
 
+  /** Batch size. */
+  int batchSize;
+
   /** The logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(SamhsaBackfillJob.class);
 
@@ -31,11 +34,11 @@ public class SamhsaBackfillJob implements PipelineJob {
    * Constructor.
    *
    * @param appState The PipelineApplicationState
-   * @param clock Clock.
+   * @param batchSize the query batch size.
    */
-  public SamhsaBackfillJob(PipelineApplicationState appState, Clock clock) {
+  public SamhsaBackfillJob(PipelineApplicationState appState, int batchSize) {
     this.appState = appState;
-    this.clock = clock;
+    this.batchSize = batchSize;
     runningSemaphore = new Semaphore(1);
   }
 
@@ -88,7 +91,8 @@ public class SamhsaBackfillJob implements PipelineJob {
    * @return The number of SAMHSA tags created.
    */
   Long callBackfillService() {
-    SamhsaBackfillService backfillService = SamhsaBackfillService.createBackfillService(appState);
+    SamhsaBackfillService backfillService =
+        SamhsaBackfillService.createBackfillService(appState, batchSize);
     Long processedCount = backfillService.startBackFill();
     return processedCount;
   }

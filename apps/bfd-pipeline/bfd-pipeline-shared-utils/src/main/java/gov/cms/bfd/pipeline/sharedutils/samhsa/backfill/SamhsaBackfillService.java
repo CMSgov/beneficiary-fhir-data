@@ -20,15 +20,20 @@ public class SamhsaBackfillService {
   /** Class to backfill CCW data. */
   AbstractSamhsaBackfill ccwSamhsaBackfill;
 
+  /** Batch size. */
+  int batchSize;
+
   /**
    * Creates the Singleton for this service.
    *
-   * @param appState The PipelineApplicationState
+   * @param appState The PipelineApplicationState.
+   * @param batchSize The query batch size.
    * @return the service singleton.
    */
-  public static SamhsaBackfillService createBackfillService(PipelineApplicationState appState) {
+  public static SamhsaBackfillService createBackfillService(
+      PipelineApplicationState appState, int batchSize) {
     if (service == null) {
-      service = new SamhsaBackfillService(appState);
+      service = new SamhsaBackfillService(appState, batchSize);
     }
     return service;
   }
@@ -37,11 +42,12 @@ public class SamhsaBackfillService {
    * Constructor.
    *
    * @param appState The PipelineApplicationState.
+   * @param batchSize The query batch size.
    */
-  private SamhsaBackfillService(PipelineApplicationState appState) {
+  private SamhsaBackfillService(PipelineApplicationState appState, int batchSize) {
     transactionManager = new TransactionManager(appState.getEntityManagerFactory());
-    rdaSamhsaBackfill = new RDASamhsaBackfill(transactionManager);
-    ccwSamhsaBackfill = new CCWSamhsaBackfill(transactionManager);
+    rdaSamhsaBackfill = new RDASamhsaBackfill(transactionManager, batchSize);
+    ccwSamhsaBackfill = new CCWSamhsaBackfill(transactionManager, batchSize);
   }
 
   /**

@@ -12,6 +12,7 @@ import java.util.List;
 
 /** CCW implementation for AbstractSamhsaBackfill. */
 public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
+
   /** The list of tables. */
   private final List<String> TABLES =
       List.of(
@@ -26,16 +27,14 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The name of the claim id column. */
   private final String CLAIM_ID_COLUMN_NAME = "clm_id";
 
-  /** The limit of records to pull at one time. */
-  int RECORD_LIMIT = 1000;
-
   /**
    * Constructor.
    *
    * @param transactionManager Transaction manager.
+   * @param batchSize the query batch size.
    */
-  public CCWSamhsaBackfill(TransactionManager transactionManager) {
-    super(transactionManager);
+  public CCWSamhsaBackfill(TransactionManager transactionManager, int batchSize) {
+    super(transactionManager, batchSize);
   }
 
   /** {@inheritDoc} */
@@ -71,12 +70,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   @Override
   protected String getClaimIdColumnName(String table) {
     return CLAIM_ID_COLUMN_NAME;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected Integer getRecordLimit() {
-    return RECORD_LIMIT;
   }
 
   /** {@inheritDoc} */
