@@ -181,52 +181,6 @@ public class SamhsaUtil {
   }
 
   /**
-   * Constructs a list of TagDetail objects for an MCS claim.
-   *
-   * @param mcsClaim The claim to check.
-   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
-   */
-  private Optional<List<TagDetails>> getPossibleMcsSamhsaFields(RdaMcsClaim mcsClaim) {
-    List<TagDetails> entries = new ArrayList<>();
-    LocalDate serviceDate =
-        mcsClaim.getIdrHdrFromDateOfSvc() == null
-            ? LocalDate.parse("1970-01-01")
-            : mcsClaim.getIdrHdrFromDateOfSvc();
-    LocalDate throughDate =
-        mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
-    for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
-          "mcs_diagnosis_codes",
-          "idr_diag_code",
-          (int) diagCode.getRdaPosition(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    for (RdaMcsDetail detail : mcsClaim.getDetails()) {
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
-          "mcs_details",
-          "idr_dtl_primary_diag_code",
-          (int) detail.getIdrDtlNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-
-      buildDetails(
-          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
-          "mcs_details",
-          "idr_proc_code",
-          (int) detail.getIdrDtlNumber(),
-          entries,
-          serviceDate,
-          throughDate);
-    }
-    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
-  }
-
-  /**
    * Checks for SAMHSA codes in an MCS claim and constructs the tags.
    *
    * @param mcsClaim The claim to check.
@@ -278,6 +232,52 @@ public class SamhsaUtil {
       return fissTags;
     }
     return Collections.emptyList();
+  }
+
+  /**
+   * Constructs a list of TagDetail objects for an MCS claim.
+   *
+   * @param mcsClaim The claim to check.
+   * @return a list of TagDetail objects, one for each SAMHSA code found in the claim.
+   */
+  private Optional<List<TagDetails>> getPossibleMcsSamhsaFields(RdaMcsClaim mcsClaim) {
+    List<TagDetails> entries = new ArrayList<>();
+    LocalDate serviceDate =
+        mcsClaim.getIdrHdrFromDateOfSvc() == null
+            ? LocalDate.parse("1970-01-01")
+            : mcsClaim.getIdrHdrFromDateOfSvc();
+    LocalDate throughDate =
+        mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
+    for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
+      buildDetails(
+          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
+          "mcs_diagnosis_codes",
+          "idr_diag_code",
+          (int) diagCode.getRdaPosition(),
+          entries,
+          serviceDate,
+          throughDate);
+    }
+    for (RdaMcsDetail detail : mcsClaim.getDetails()) {
+      buildDetails(
+          getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
+          "mcs_details",
+          "idr_dtl_primary_diag_code",
+          (int) detail.getIdrDtlNumber(),
+          entries,
+          serviceDate,
+          throughDate);
+
+      buildDetails(
+          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
+          "mcs_details",
+          "idr_proc_code",
+          (int) detail.getIdrDtlNumber(),
+          entries,
+          serviceDate,
+          throughDate);
+    }
+    return entries.isEmpty() ? Optional.empty() : Optional.of(entries);
   }
 
   /**
