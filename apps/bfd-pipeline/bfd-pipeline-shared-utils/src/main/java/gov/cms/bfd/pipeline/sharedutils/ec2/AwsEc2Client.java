@@ -4,7 +4,10 @@ import software.amazon.awssdk.awscore.defaultsmode.DefaultsMode;
 import software.amazon.awssdk.imds.Ec2MetadataClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.PutScheduledUpdateGroupActionRequest;
 import software.amazon.awssdk.services.autoscaling.model.SetDesiredCapacityRequest;
+
+import java.time.Instant;
 
 /** test. */
 public class AwsEc2Client implements Ec2Client {
@@ -13,6 +16,12 @@ public class AwsEc2Client implements Ec2Client {
 
   /** test. */
   private final AutoScalingGroup autoScalingGroup;
+
+  /** test. */
+  private static final String SCALE_IN_ACTION_NAME = "scale_in_pipeline_finished";
+
+  /** test. */
+  private static final int CLEANUP_GRACE_PERIOD_SECONDS = 30;
 
   /** test. */
   public AwsEc2Client() {
@@ -33,10 +42,13 @@ public class AwsEc2Client implements Ec2Client {
   }
 
   /** test. */
-  public void scaleIn() {
-    autoScalingClient.setDesiredCapacity(
-        SetDesiredCapacityRequest.builder()
+  public void scheduleScaleIn() {
+
+    autoScalingClient.putScheduledUpdateGroupAction(
+        PutScheduledUpdateGroupActionRequest.builder()
             .autoScalingGroupName(autoScalingGroup.autoScalingGroupName())
+            .scheduledActionName(SCALE_IN_ACTION_NAME)
+            .startTime(Instant.now().plusSeconds(CLEANUP_GRACE_PERIOD_SECONDS))
             .desiredCapacity(0)
             .build());
   }

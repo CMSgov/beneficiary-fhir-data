@@ -185,7 +185,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     log.info("pool has terminated");
 
     if (this.terminateRequested) {
-      ec2Client.scaleIn();
+      ec2Client.scheduleScaleIn();
     }
   }
 
