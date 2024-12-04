@@ -1,14 +1,13 @@
 package gov.cms.bfd.pipeline.sharedutils.ec2;
 
-import java.time.Instant;
 import software.amazon.awssdk.awscore.defaultsmode.DefaultsMode;
 import software.amazon.awssdk.imds.Ec2MetadataClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
-import software.amazon.awssdk.services.autoscaling.model.PutScheduledUpdateGroupActionRequest;
+import software.amazon.awssdk.services.autoscaling.model.SetDesiredCapacityRequest;
 
 /** test. */
-public class AwsEc2Client implements Ec2Client {
+public class AwsEc2Client {
   /** test. */
   private final AutoScalingClient autoScalingClient;
 
@@ -40,13 +39,10 @@ public class AwsEc2Client implements Ec2Client {
   }
 
   /** test. */
-  public void scheduleScaleIn() {
-
-    autoScalingClient.putScheduledUpdateGroupAction(
-        PutScheduledUpdateGroupActionRequest.builder()
+  public void scaleInNow() {
+    autoScalingClient.setDesiredCapacity(
+        SetDesiredCapacityRequest.builder()
             .autoScalingGroupName(autoScalingGroup.autoScalingGroupName())
-            .scheduledActionName(SCALE_IN_ACTION_NAME)
-            .startTime(Instant.now().plusSeconds(CLEANUP_GRACE_PERIOD_SECONDS))
             .desiredCapacity(0)
             .build());
   }

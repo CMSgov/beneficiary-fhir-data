@@ -29,8 +29,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.PipelineOutcome;
 import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
-import gov.cms.bfd.pipeline.sharedutils.ec2.Ec2Client;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,8 +79,12 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
  * the specified S3 bucket, parse it, and push it to the specified database server. See {@link
  * #main(String[])}.
  */
+@RequiredArgsConstructor
 public final class PipelineApplication {
   static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
+
+  /** test. */
+  private final AwsEc2Client ec2Client;
 
   /** This {@link System#exit(int)} value should be used when the application exits successfully. */
   static final int EXIT_CODE_SUCCESS = 0;
@@ -116,7 +121,7 @@ public final class PipelineApplication {
    *     variables)
    */
   public static void main(String[] args) {
-    int exitCode = new PipelineApplication().runPipelineAndHandleExceptions();
+    int exitCode = new PipelineApplication(new AwsEc2Client()).runPipelineAndHandleExceptions();
     System.exit(exitCode);
   }
 
@@ -129,7 +134,14 @@ public final class PipelineApplication {
   @VisibleForTesting
   int runPipelineAndHandleExceptions() {
     try {
-      runPipeline();
+      PipelineOutcome outcome = runPipeline();
+      if (outcome == PipelineOutcome.TERMINATE_INSTANCE) {
+        // When we trigger a scale-in, the instance gets terminated very quickly
+        // so we should call this at the last minute after all log messages are flushed.
+        // We can't schedule a scale-in in the future without causing a race condition that may
+        // prevent the next scale-out from happening.
+        ec2Client.scaleInNow();
+      }
       return EXIT_CODE_SUCCESS;
     } catch (FatalAppException ex) {
       if (ex.getCause() != null) {
@@ -165,7 +177,7 @@ public final class PipelineApplication {
    * @throws IOException for I/O errors
    * @throws SQLException for database errors
    */
-  private void runPipeline() throws FatalAppException, SQLException, IOException {
+  private PipelineOutcome runPipeline() throws FatalAppException, SQLException, IOException {
 
     LOGGER.info("Application starting up!");
     logTempDirectory();
@@ -194,8 +206,7 @@ public final class PipelineApplication {
     try (HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
       logDatabaseDetails(pooledDataSource);
-      createJobsAndRunPipeline(
-          appConfig, appMeters, appMetrics, pooledDataSource, new AwsEc2Client());
+      return createJobsAndRunPipeline(appConfig, appMeters, appMetrics, pooledDataSource);
     }
   }
 
@@ -308,15 +319,14 @@ public final class PipelineApplication {
    * @param appMeters the app meters
    * @param appMetrics the {@link MetricRegistry} to receive metrics
    * @param pooledDataSource our connection pool
-   * @param ec2Client EC2Client
+   * @return pipeline outcome
    * @throws FatalAppException if app shutdown required
    */
-  private void createJobsAndRunPipeline(
+  private PipelineOutcome createJobsAndRunPipeline(
       AppConfiguration appConfig,
       CompositeMeterRegistry appMeters,
       MetricRegistry appMetrics,
-      HikariDataSource pooledDataSource,
-      Ec2Client ec2Client)
+      HikariDataSource pooledDataSource)
       throws FatalAppException, IOException {
     final var clock = Clock.systemUTC();
 
@@ -329,18 +339,20 @@ public final class PipelineApplication {
       throw new FatalAppException("Pipeline smoke test failure", EXIT_CODE_SMOKE_TEST_FAILURE);
     }
 
-    final var pipelineManager = new PipelineManager(Thread::sleep, clock, jobs, ec2Client);
+    final var pipelineManager = new PipelineManager(Thread::sleep, clock, jobs);
     registerShutdownHook(appMetrics, pipelineManager);
 
     pipelineManager.start();
     LOGGER.info("Job processing started.");
 
-    pipelineManager.awaitCompletion();
+    PipelineOutcome pipelineOutcome = pipelineManager.awaitCompletion();
 
     if (pipelineManager.getError() != null) {
       throw new FatalAppException(
           "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
     }
+
+    return pipelineOutcome;
   }
 
   /**

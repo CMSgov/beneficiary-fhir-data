@@ -48,6 +48,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import software.amazon.awssdk.utils.StringUtils;
 
@@ -78,6 +79,9 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
   /** Used to communicate with the localstack SQS service. */
   private SqsDao sqsDao;
+
+  /** test. */
+  @Mock private AwsEc2Client ec2Client;
 
   /**
    * Locks and truncates the log file so that each test case can read only its own messages from the
@@ -572,7 +576,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
    */
   private PipelineApplication createApplicationForTest(ConfigLoader configLoader) {
     // using a spy lets us override and verify method calls
-    PipelineApplication app = spy(new PipelineApplication());
+    PipelineApplication app = spy(new PipelineApplication(ec2Client));
 
     // override the default app logic with our own config
     doReturn(configLoader).when(app).createConfigLoader();
