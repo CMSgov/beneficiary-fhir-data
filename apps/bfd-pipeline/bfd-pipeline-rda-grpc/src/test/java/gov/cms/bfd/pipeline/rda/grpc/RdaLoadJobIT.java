@@ -146,7 +146,7 @@ public class RdaLoadJobIT {
           }
           List<FissTag> fissTags = getRdaFissTags(transactionManager);
           // There should be one matching claim, with two FissTag entries.
-          assertEquals(fissTags.size(), 2);
+          assertEquals(2, fissTags.size());
           assertTrue(fissTags.stream().anyMatch(f -> f.getCode().equals("42CFRPart2")));
           assertTrue(fissTags.stream().anyMatch(f -> f.getCode().equals("R")));
           // There should be five hits for SAMHSA codes in this claim (one for each revenueLine).

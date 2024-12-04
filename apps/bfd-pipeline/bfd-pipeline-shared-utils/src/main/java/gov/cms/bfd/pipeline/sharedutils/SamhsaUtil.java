@@ -11,6 +11,21 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaAdapterBase;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaCarrierAdapter;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaDmeAdapter;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaHHAAdapter;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaHospiceAdapter;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaInpatientAdapter;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaOutpatientAdapter;
+import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaSnfAdapter;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
@@ -35,8 +50,14 @@ import org.apache.logging.log4j.util.Strings;
  * the claim as SAMHSA.
  */
 public class SamhsaUtil {
+  /**
+   * Will contain the list of the methods for each entity to retrieve the fields with possible
+   * SAMHSA codes.
+   */
+  public static final String CLAIM_SAMHSA_METHODS_YAML = "claim_samhsa_methods.yaml";
+
   /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
-  private Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
+  private static Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
 
   /** Instance of this class. Will be a singleton. */
   private static SamhsaUtil samhsaUtil;
@@ -80,24 +101,24 @@ public class SamhsaUtil {
   }
 
   /**
-   * Gets an InputStream and passes it along to the method to initialize the map of SAMHSA entries.
+   * Gets an input stream from a file in the resources folder.
    *
    * @throws IOException Exception thrown when the resource cannot be loaded.
    */
-  public void createSamhsaMap() throws IOException {
+  public static void createSamhsaMap() throws IOException {
     InputStream is = getFileInputStream(SAMHSA_LIST_RESOURCE);
     samhsaMap = initializeSamhsaMap(is);
   }
 
   /**
-   * Process a claim to check for SAMHSA codes. This will be the external entry point for other
+   * Process am RDA claim to check for SAMHSA codes. This will be the external entry point for other
    * parts of the application.
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
    * @param <TClaim> Generic type of the claim.
    */
-  public <TClaim> void processClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> void processRdaClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
         Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
@@ -117,12 +138,45 @@ public class SamhsaUtil {
    * @param tags List of tags to persist.
    * @param entityManager the EntityManager.
    * @param <TTag> Generic type of the tags.
+   * @return True if tags were merged.
    */
-  private <TTag> void persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
+  public static <TTag> boolean persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
+    boolean persisted = false;
     if (tags.isPresent()) {
       for (TTag tag : tags.get()) {
         entityManager.merge(tag);
+        persisted = true;
       }
+    }
+    return persisted;
+  }
+
+  /**
+   * Process a CCW claim to check for SAMHSA codes. This will be the external entry point for other
+   * parts of the application.
+   *
+   * @param claim The claim to process.
+   * @param entityManager the EntityManager used to persist the tag.
+   * @param <TClaim> Generic type of the claim.
+   * @return true if a tag was persisted.
+   */
+  public <TClaim> boolean processCcwClaim(TClaim claim, EntityManager entityManager) {
+    boolean persisted = false;
+    try {
+      SamhsaAdapterBase adapter =
+          switch (claim) {
+            case CarrierClaim carrierClaim -> new SamhsaCarrierAdapter(carrierClaim);
+            case HHAClaim hhaClaim -> new SamhsaHHAAdapter(hhaClaim);
+            case DMEClaim dmeClaim -> new SamhsaDmeAdapter(dmeClaim);
+            case HospiceClaim hospiceClaim -> new SamhsaHospiceAdapter(hospiceClaim);
+            case OutpatientClaim outpatientClaim -> new SamhsaOutpatientAdapter(outpatientClaim);
+            case InpatientClaim inpatientClaim -> new SamhsaInpatientAdapter(inpatientClaim);
+            case SNFClaim snfClaim -> new SamhsaSnfAdapter(snfClaim);
+            default -> throw new RuntimeException("Error: unknown claim type.");
+          };
+      return adapter.checkAndProcessClaim(entityManager);
+    } catch (Exception e) {
+      throw new RuntimeException("There was an error creating SAMHSA tags.", e);
     }
   }
 
@@ -234,13 +288,13 @@ public class SamhsaUtil {
    * @param dateToTest the date that's being tested
    * @return true if dateToTest is outside the range of the two other dates.
    */
-  private boolean isDateOutsideOfRange(
+  public static boolean isDateOutsideOfRange(
       LocalDate earlyDate, LocalDate laterDate, LocalDate dateToTest) {
     return dateToTest.isBefore(earlyDate) || dateToTest.isAfter(laterDate);
   }
 
   /**
-   * Builds a TagDetails object, and adds it to a list of TagDetails.
+   * Builds a TagDetails object for an RDA claim, and adds it to a list of TagDetails.
    *
    * @param entry The SamhsaEntry that holds information about the SAMHSA code.
    * @param table The table that the code belongs to
@@ -375,7 +429,7 @@ public class SamhsaUtil {
    * @param code the code to check.
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
-  public Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
+  public static Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
     if (!code.isPresent()) {
       return Optional.empty();
     }
@@ -399,7 +453,8 @@ public class SamhsaUtil {
    * @return a Map of SAMHSA entries.
    * @throws IOException IOException if the stream cannot be read.
    */
-  private Map<String, SamhsaEntry> initializeSamhsaMap(InputStream stream) throws IOException {
+  private static Map<String, SamhsaEntry> initializeSamhsaMap(InputStream stream)
+      throws IOException {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     List<SamhsaEntry> entries =
         mapper.readValue(
