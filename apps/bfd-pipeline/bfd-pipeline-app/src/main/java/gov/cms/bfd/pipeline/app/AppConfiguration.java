@@ -380,7 +380,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String SSM_PATH_SAMHSA_BACKFILL_ENABLED = "rda/samhsa/backfill/enabled";
 
   /** Config value for SAMHSA backfill batch size. */
-  public static final String SSM_PATH_SAMHSA_BAKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
+  public static final String SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
 
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
@@ -416,7 +416,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
           .put(SSM_PATH_SAMHSA_BACKFILL_ENABLED, "false")
-          .put(SSM_PATH_SAMHSA_BAKFILL_BATCH_SIZE, String.valueOf(10000))
+          .put(SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE, String.valueOf(10000))
           .build();
 
   /**
@@ -522,7 +522,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
     if (!enabled || ccwPipelineEnabled) {
       return null;
     }
-    int batchSize = config.intValue(SSM_PATH_SAMHSA_BAKFILL_BATCH_SIZE, 10000);
+    int batchSize = config.intValue(SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE, 10000);
     BackfillConfigOptions backfillConfigOptions =
         BackfillConfigOptions.builder().enabled(enabled).batchSize(batchSize).build();
     return backfillConfigOptions;

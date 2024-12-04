@@ -97,7 +97,7 @@ claim_batch_size=
 claim_queue_multiple=
 kubernetes=false
 temp_dir=
-
+max_claims=2500
 usage() {
   cat 1>&2 <<EOF
 Runs a BFD pipeline.  Use command line options to change behaviors.
@@ -116,6 +116,7 @@ $(basename $0) [options] run_mode
 -t threads                Number of threads for RIF/RDA jobs.
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
+-m max_claims             The maximum RDA claims to send.
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
 Supported long options:
@@ -148,7 +149,7 @@ Option defaults:
 EOF
 }
 
-while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
+while getopts "m:b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   case $option in
   b) batch_size=$OPTARG ;;
   c) cache_size=$OPTARG ;;
@@ -161,6 +162,7 @@ while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   I) idempotency_mode=true ;;
   k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
+  m) max_claims=$OPTARG ;;
   r) interval_seconds=$OPTARG ;;
   R) IFS=':' read h p t <<<"$OPTARG"
      rda_host=${h:=$rda_host}
@@ -397,7 +399,7 @@ setvar rda/samhsa/backfill/enabled "false"
 case $run_mode in
   backfill)
     setvar rda/samhsa/backfill/enabled "true"
-    setvar rda/samhsa/backfill/batch_size "100"
+    setvar rda/samhsa/backfill/batch_size "10000"
     ;;
   rif)
     setvar ccw/job/enabled "true"
@@ -407,7 +409,7 @@ case $run_mode in
     setvar rda/grpc/server_type "InProcess"
     setvar rda/grpc/inprocess_server/mode "Random"
     setvar rda/grpc/inprocess_server/random/seed "42"
-    setvar rda/grpc/inprocess_server/random/max_claims "2500"
+    setvar rda/grpc/inprocess_server/random/max_claims "$max_claims"
     ;;
   rda)
     setvar rda/job/enabled "true"

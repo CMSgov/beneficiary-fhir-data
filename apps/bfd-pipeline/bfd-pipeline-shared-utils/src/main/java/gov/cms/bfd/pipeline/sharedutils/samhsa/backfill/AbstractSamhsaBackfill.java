@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,8 @@ public abstract class AbstractSamhsaBackfill {
   protected String QUERY_WITH_STARTING_CLAIM =
       " SELECT * FROM ${tableName} t "
           + " WHERE ${claimColumn} > ${startingClaim} "
+          + " AND NOT EXISTS "
+          + " (SELECT 1 FROM ${tagTableName} g where t.${claimColumn} = g.clm_id) "
           + " ORDER BY ${claimColumn} ASC "
           + " LIMIT ${limit};";
 
@@ -32,7 +36,11 @@ public abstract class AbstractSamhsaBackfill {
    * to continue off of.
    */
   protected String QUERY_WITH_NO_STARTING_CLAIM =
-      " SELECT * FROM ${tableName} t " + " ORDER BY ${claimColumn} ASC " + " LIMIT ${limit};";
+      " SELECT * FROM ${tableName} t "
+          + " WHERE NOT EXISTS "
+          + " (SELECT 1 FROM ${tagTableName} g where t.${claimColumn} = g.clm_id) "
+          + " ORDER BY ${claimColumn} ASC "
+          + " LIMIT ${limit};";
 
   /** The transaction manager. */
   TransactionManager transactionManager;
@@ -80,13 +88,11 @@ public abstract class AbstractSamhsaBackfill {
    *
    * @param startingClaim The claim to start at. If this is empty, the version of the query with no
    *     starting claim will be used.
-   * @param table The table to query.
-   * @param claimColumn The column for the claim id.
+   * @param tableEntry The TableEntry pojo for this table.
    * @param limit the number of claims to pull at a time.
    * @return Query to run.
    */
-  private Query buildQuery(
-      Optional<String> startingClaim, String table, String claimColumn, int limit) {
+  private Query buildQuery(Optional<String> startingClaim, TableEntry tableEntry, int limit) {
     AtomicReference<Query> atomicQuery = new AtomicReference<>();
 
     transactionManager.executeProcedure(
@@ -94,11 +100,13 @@ public abstract class AbstractSamhsaBackfill {
           Map<String, String> params =
               Map.of(
                   "tableName",
-                  table,
+                  tableEntry.getClaimTable(),
                   "claimColumn",
-                  claimColumn,
+                  tableEntry.getClaimColumnName(),
                   "startingClaim",
-                  startingClaim.isPresent() ? String.valueOf(startingClaim.get()) : "",
+                  startingClaim.orElse(""),
+                  "tagTableName",
+                  tableEntry.getTagTable(),
                   "limit",
                   String.valueOf(limit));
           StringSubstitutor strSub = new StringSubstitutor(params);
@@ -107,18 +115,10 @@ public abstract class AbstractSamhsaBackfill {
                   startingClaim.isPresent()
                       ? QUERY_WITH_STARTING_CLAIM
                       : QUERY_WITH_NO_STARTING_CLAIM);
-          atomicQuery.set(entityManager.createNativeQuery(queryStr, getTableClass(table)));
+          atomicQuery.set(entityManager.createNativeQuery(queryStr, tableEntry.getClaimClass()));
         });
     return atomicQuery.get();
   }
-
-  /**
-   * Gets the claim id column for a given table.
-   *
-   * @param table The table.
-   * @return The name of the claim id table.
-   */
-  protected abstract String getClaimIdColumnName(String table);
 
   /**
    * Gets the claim id of a claim.
@@ -133,15 +133,7 @@ public abstract class AbstractSamhsaBackfill {
    *
    * @return The list of tables.
    */
-  protected abstract List<String> getTables();
-
-  /**
-   * Gets the class for a claim table.
-   *
-   * @param table the claim table.
-   * @return the table's class.
-   */
-  protected abstract Class getTableClass(String table);
+  protected abstract List<TableEntry> getTables();
 
   /**
    * Entry point.
@@ -150,13 +142,25 @@ public abstract class AbstractSamhsaBackfill {
    */
   public Long execute() {
     long total = 0L;
-    for (String table : getTables()) {
-      Long tableTotal = executeForTable(table);
-      LOGGER.info(String.format("Created tags for %d claims in table %s", tableTotal, table));
+    for (TableEntry tableEntry : getTables()) {
+      Long tableTotal = executeForTable(tableEntry);
+      LOGGER.info(
+          String.format(
+              "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
       total += tableTotal;
     }
     return total;
   }
+
+  /**
+   * Processes a claim with SamhsaUtil.
+   *
+   * @param claim the claim to process
+   * @param entityManager The entity manager.
+   * @return true if a claim was persisted.
+   * @param <TClaim> Type of the claim.
+   */
+  abstract <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager);
 
   /**
    * Iterates over all of the claims in a table, and checks for SAMHSA data.
@@ -165,19 +169,17 @@ public abstract class AbstractSamhsaBackfill {
    * @return The number of claims for which tags were created.
    * @param <TClaim> The type of the claim.
    */
-  private <TClaim> Long executeForTable(String table) {
+  private <TClaim> Long executeForTable(TableEntry table) {
     long totalSaved = 0L;
     long totalProcessed = 0L;
     String lastClaimId = null;
     List<TClaim> claims;
     do {
-      Query query =
-          buildQuery(
-              Optional.ofNullable(lastClaimId), table, getClaimIdColumnName(table), batchSize);
+      Query query = buildQuery(Optional.ofNullable(lastClaimId), table, batchSize);
       claims = executeQuery(query);
       int savedInBatch = 0;
       for (TClaim claim : claims) {
-        boolean persisted = samhsaUtil.processClaim(claim, transactionManager.getEntityManager());
+        boolean persisted = processClaim(claim, transactionManager.getEntityManager());
         if (persisted) {
           savedInBatch++;
         }
@@ -186,7 +188,7 @@ public abstract class AbstractSamhsaBackfill {
       LOGGER.info(
           String.format(
               "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
-              batchSize, table, savedInBatch));
+              batchSize, table.getClaimTable(), savedInBatch));
       totalProcessed += claims.size();
       lastClaimId = !claims.isEmpty() ? getClaimId(claims.getLast()) : null;
       // If the number of returned claims is not equal to the requested batch size, then the table
@@ -195,7 +197,7 @@ public abstract class AbstractSamhsaBackfill {
     LOGGER.info(
         String.format(
             "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
-            table, totalProcessed, totalSaved));
+            table.getClaimTable(), totalProcessed, totalSaved));
 
     return totalSaved;
   }

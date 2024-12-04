@@ -4,7 +4,14 @@ import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
+import gov.cms.bfd.model.rif.samhsa.CarrierTag;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import jakarta.persistence.EntityManager;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,12 +24,10 @@ public class SamhsaCarrierAdapter extends SamhsaAdapterBase<CarrierClaim, Carrie
    * Constructor.
    *
    * @param claim The claim to process.
-   * @param claimLines The claim's claim lines.
    */
-  public SamhsaCarrierAdapter(CarrierClaim claim, List<CarrierClaimLine> claimLines) {
-    super(claim, claimLines);
+  public SamhsaCarrierAdapter(CarrierClaim claim) {
+    super(claim, claim.getLines());
     this.claim = claim;
-    this.claimLines = claimLines;
     this.table = "carrier_claims";
     this.linesTable = "carrier_claim_lines";
   }
@@ -39,6 +44,7 @@ public class SamhsaCarrierAdapter extends SamhsaAdapterBase<CarrierClaim, Carrie
   }
 
   /** {@inheritDoc} */
+  @Override
   public Map<Supplier<Optional<String>>, String> getClaimMethods() {
     return Map.ofEntries(
         entry(claim::getDiagnosisPrincipalCode, "prncpal_dgns_cd"),
@@ -67,5 +73,30 @@ public class SamhsaCarrierAdapter extends SamhsaAdapterBase<CarrierClaim, Carrie
   public Map<Supplier<Optional<String>>, String> getClaimLineMethods(CarrierClaimLine line) {
     return Map.ofEntries(
         entry(line::getDiagnosisCode, "line_icd_dgns_cd"), entry(line::getHcpcsCode, "hcpcs_cd"));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean checkAndProcessClaim(EntityManager entityManager)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+    Optional<List<TagDetails>> entries = buildDetails();
+    if (entries.isPresent()) {
+      List<CarrierTag> tags = new ArrayList<>();
+      tags.add(
+          CarrierTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode._42CFRPart2.toString())
+              .details(entries.get())
+              .build());
+      tags.add(
+          CarrierTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode.R.toString())
+              .details(entries.get())
+              .build());
+      return SamhsaUtil.persistTags(Optional.of(tags), entityManager);
+    }
+    return false;
   }
 }

@@ -18,13 +18,6 @@ import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
-import gov.cms.bfd.model.rif.samhsa.DmeTag;
-import gov.cms.bfd.model.rif.samhsa.HhaTag;
-import gov.cms.bfd.model.rif.samhsa.HospiceTag;
-import gov.cms.bfd.model.rif.samhsa.InpatientTag;
-import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
-import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaAdapterBase;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaCarrierAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaDmeAdapter;
@@ -34,13 +27,11 @@ import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaInpatientAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaOutpatientAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaSnfAdapter;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
-import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
 import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -66,7 +57,7 @@ public class SamhsaUtil {
   public static final String CLAIM_SAMHSA_METHODS_YAML = "claim_samhsa_methods.yaml";
 
   /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
-  private Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
+  private static Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
 
   /** Instance of this class. Will be a singleton. */
   private static SamhsaUtil samhsaUtil;
@@ -107,7 +98,6 @@ public class SamhsaUtil {
    */
   private SamhsaUtil() throws IOException {
     createSamhsaMap();
-    // createClaimSamhsaMethods();
   }
 
   /**
@@ -115,68 +105,32 @@ public class SamhsaUtil {
    *
    * @throws IOException Exception thrown when the resource cannot be loaded.
    */
-  public void createSamhsaMap() throws IOException {
+  public static void createSamhsaMap() throws IOException {
     InputStream is = getFileInputStream(SAMHSA_LIST_RESOURCE);
     samhsaMap = initializeSamhsaMap(is);
   }
 
   /**
-   * Process a claim to check for SAMHSA codes. This will be the external entry point for other
+   * Process am RDA claim to check for SAMHSA codes. This will be the external entry point for other
    * parts of the application.
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
+   * @return true if a claim was persisted.
    * @param <TClaim> Generic type of the claim.
-   * @return true if a tag was persisted.
    */
-  public <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager) {
-    boolean persisted = false;
-    try {
-      switch (claim) {
-        case RdaFissClaim fissClaim -> {
-          Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case RdaMcsClaim mcsClaim -> {
-          Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case CarrierClaim carrierClaim -> {
-          Optional<List<CarrierTag>> tags = Optional.of(checkAndProcessCarrierClaim(carrierClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case HHAClaim hhaClaim -> {
-          Optional<List<HhaTag>> tags = Optional.of(checkAndProcessHhaClaim(hhaClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case DMEClaim dmeClaim -> {
-          Optional<List<DmeTag>> tags = Optional.of(checkAndProcessDmeClaim(dmeClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case HospiceClaim hospiceClaim -> {
-          Optional<List<HospiceTag>> tags = Optional.of(checkAndProcessHospiceClaim(hospiceClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case OutpatientClaim outpatientClaim -> {
-          Optional<List<OutpatientTag>> tags =
-              Optional.of(checkAndProcessOutpatientClaim(outpatientClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case InpatientClaim inpatientClaim -> {
-          Optional<List<InpatientTag>> tags =
-              Optional.of(checkAndProcessInpatientClaim(inpatientClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        case SNFClaim snfClaim -> {
-          Optional<List<SnfTag>> tags = Optional.of(checkAndProcessSnfClaim(snfClaim));
-          persisted = persistTags(tags, entityManager);
-        }
-        default -> throw new RuntimeException("Error: unknown claim type. " + claim.getClass());
+  public <TClaim> boolean processRdaClaim(TClaim claim, EntityManager entityManager) {
+    switch (claim) {
+      case RdaFissClaim fissClaim -> {
+        Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
+        return persistTags(tags, entityManager);
       }
-    } catch (Exception e) {
-      throw new RuntimeException("There was an error creating SAMHSA tags.", e);
+      case RdaMcsClaim mcsClaim -> {
+        Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
+        return persistTags(tags, entityManager);
+      }
+      default -> throw new RuntimeException("Unknown claim type.");
     }
-    return persisted;
   }
 
   /**
@@ -185,9 +139,9 @@ public class SamhsaUtil {
    * @param tags List of tags to persist.
    * @param entityManager the EntityManager.
    * @param <TTag> Generic type of the tags.
-   * @return true if a tag was persisted.
+   * @return True if tags were merged.
    */
-  private <TTag> boolean persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
+  public static <TTag> boolean persistTags(Optional<List<TTag>> tags, EntityManager entityManager) {
     boolean persisted = false;
     if (tags.isPresent()) {
       for (TTag tag : tags.get()) {
@@ -196,6 +150,34 @@ public class SamhsaUtil {
       }
     }
     return persisted;
+  }
+
+  /**
+   * Process a CCW claim to check for SAMHSA codes. This will be the external entry point for other
+   * parts of the application.
+   *
+   * @param claim The claim to process.
+   * @param entityManager the EntityManager used to persist the tag.
+   * @param <TClaim> Generic type of the claim.
+   * @return true if a tag was persisted.
+   */
+  public <TClaim> boolean processCcwClaim(TClaim claim, EntityManager entityManager) {
+    try {
+      SamhsaAdapterBase adapter =
+          switch (claim) {
+            case CarrierClaim carrierClaim -> new SamhsaCarrierAdapter(carrierClaim);
+            case HHAClaim hhaClaim -> new SamhsaHHAAdapter(hhaClaim);
+            case DMEClaim dmeClaim -> new SamhsaDmeAdapter(dmeClaim);
+            case HospiceClaim hospiceClaim -> new SamhsaHospiceAdapter(hospiceClaim);
+            case OutpatientClaim outpatientClaim -> new SamhsaOutpatientAdapter(outpatientClaim);
+            case InpatientClaim inpatientClaim -> new SamhsaInpatientAdapter(inpatientClaim);
+            case SNFClaim snfClaim -> new SamhsaSnfAdapter(snfClaim);
+            default -> throw new RuntimeException("Error: unknown claim type.");
+          };
+      return adapter.checkAndProcessClaim(entityManager);
+    } catch (Exception e) {
+      throw new RuntimeException("There was an error creating SAMHSA tags.", e);
+    }
   }
 
   /**
@@ -221,210 +203,6 @@ public class SamhsaUtil {
               .details(entries.get())
               .build());
       return mcsTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in an HHA claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<HhaTag> checkAndProcessHhaClaim(HHAClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-    SamhsaHHAAdapter adapter = new SamhsaHHAAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<HhaTag> hhaTags = new ArrayList<>();
-      hhaTags.add(
-          HhaTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      hhaTags.add(
-          HhaTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return hhaTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in an Hospice claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<HospiceTag> checkAndProcessHospiceClaim(HospiceClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SamhsaHospiceAdapter adapter = new SamhsaHospiceAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<HospiceTag> hospiceTags = new ArrayList<>();
-      hospiceTags.add(
-          HospiceTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      hospiceTags.add(
-          HospiceTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return hospiceTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in an DME claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<DmeTag> checkAndProcessDmeClaim(DMEClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SamhsaDmeAdapter adapter = new SamhsaDmeAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<DmeTag> dmeTags = new ArrayList<>();
-      dmeTags.add(
-          DmeTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      dmeTags.add(
-          DmeTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return dmeTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in an Outpatient claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<OutpatientTag> checkAndProcessOutpatientClaim(OutpatientClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SamhsaOutpatientAdapter adapter = new SamhsaOutpatientAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<OutpatientTag> outpatientTags = new ArrayList<>();
-      outpatientTags.add(
-          OutpatientTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      outpatientTags.add(
-          OutpatientTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return outpatientTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in an Inpatient claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<InpatientTag> checkAndProcessInpatientClaim(InpatientClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SamhsaInpatientAdapter adapter = new SamhsaInpatientAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<InpatientTag> inpatientTags = new ArrayList<>();
-      inpatientTags.add(
-          InpatientTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      inpatientTags.add(
-          InpatientTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return inpatientTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in an SNF claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<SnfTag> checkAndProcessSnfClaim(SNFClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SamhsaSnfAdapter adapter = new SamhsaSnfAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<SnfTag> snfTags = new ArrayList<>();
-      snfTags.add(
-          SnfTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      snfTags.add(
-          SnfTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return snfTags;
-    }
-    return Collections.emptyList();
-  }
-
-  /**
-   * Checks for SAMHSA codes in a carrier claim and constructs the tags.
-   *
-   * @param claim The claim to check.
-   * @return A list of tag entities to persist.
-   */
-  private List<CarrierTag> checkAndProcessCarrierClaim(CarrierClaim claim)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    SamhsaCarrierAdapter adapter = new SamhsaCarrierAdapter(claim, claim.getLines());
-    Optional<List<TagDetails>> entries = buildDetails(adapter);
-    if (entries.isPresent()) {
-      List<CarrierTag> carrierTags = new ArrayList<>();
-      carrierTags.add(
-          CarrierTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode._42CFRPart2.toString())
-              .details(entries.get())
-              .build());
-      carrierTags.add(
-          CarrierTag.builder()
-              .claim(claim.getClaimId())
-              .code(TagCode.R.toString())
-              .details(entries.get())
-              .build());
-      return carrierTags;
     }
     return Collections.emptyList();
   }
@@ -510,7 +288,7 @@ public class SamhsaUtil {
    * @param dateToTest the date that's being tested
    * @return true if dateToTest is outside the range of the two other dates.
    */
-  private boolean isDateOutsideOfRange(
+  public static boolean isDateOutsideOfRange(
       LocalDate earlyDate, LocalDate laterDate, LocalDate dateToTest) {
     return dateToTest.isBefore(earlyDate) || dateToTest.isAfter(laterDate);
   }
@@ -561,61 +339,6 @@ public class SamhsaUtil {
           TagDetails.builder().table(table).column(column).clm_line_num(lineNum).type(type).build();
       detailsList.add(detail);
     }
-  }
-
-  /**
-   * Builds a TagDetails object for a CCW claim, and adds it to a list of TagDetails.
-   *
-   * @param adapter The SamhsaAdapter for this claim
-   * @param <TClaim> Claim type
-   * @param <TClaimLine> ClaimLine type
-   * @return Optional list of tag details.
-   */
-  private <TClaim, TClaimLine> Optional<List<TagDetails>> buildDetails(
-      SamhsaAdapterBase<TClaim, TClaimLine> adapter)
-      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-    Optional<SamhsaEntry> entry;
-    List<TagDetails> detailsList = new ArrayList<>();
-    LocalDate serviceDate = adapter.getFromDate();
-    LocalDate throughDate = adapter.getThroughDate();
-
-    List<SamhsaFields> fields = adapter.getFields();
-    for (SamhsaFields field : fields) {
-      entry = getSamhsaCode(Optional.ofNullable(field.getCode()));
-      if (entry.isPresent()) {
-        try {
-          LocalDate startDate = LocalDate.parse(entry.get().getStartDate());
-          LocalDate endDate =
-              entry.get().getEndDate().equalsIgnoreCase("Active")
-                  ? LocalDate.MAX
-                  : LocalDate.parse(entry.get().getEndDate());
-
-          // if the throughDate is not between the start and end date,
-          // and the serviceDate is not between the start and end date,
-          // then the claim falls outside the date range of the SAMHSA code.
-          if (isDateOutsideOfRange(startDate, endDate, throughDate)
-              && isDateOutsideOfRange(startDate, endDate, serviceDate)) {
-            continue;
-          }
-        } catch (DateTimeParseException ignore) {
-          // Parsing the date from the SamhsaEntry failed, so the tag should be created by default.
-        }
-        // Use the last part of the system path as the type
-        String type =
-            Arrays.stream(entry.get().getSystem().split("/"))
-                .reduce((first, second) -> second)
-                .orElse(Strings.EMPTY);
-        TagDetails detail =
-            TagDetails.builder()
-                .table(field.getTable())
-                .column(field.getColumn())
-                .clm_line_num(field.getLineNum() != null ? (int) field.getLineNum() : null)
-                .type(type)
-                .build();
-        detailsList.add(detail);
-      }
-    }
-    return detailsList.isEmpty() ? Optional.empty() : Optional.of(detailsList);
   }
 
   /**
@@ -706,7 +429,7 @@ public class SamhsaUtil {
    * @param code the code to check.
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
-  public Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
+  public static Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
     if (!code.isPresent()) {
       return Optional.empty();
     }
@@ -730,7 +453,8 @@ public class SamhsaUtil {
    * @return a Map of SAMHSA entries.
    * @throws IOException IOException if the stream cannot be read.
    */
-  private Map<String, SamhsaEntry> initializeSamhsaMap(InputStream stream) throws IOException {
+  private static Map<String, SamhsaEntry> initializeSamhsaMap(InputStream stream)
+      throws IOException {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     List<SamhsaEntry> entries =
         mapper.readValue(

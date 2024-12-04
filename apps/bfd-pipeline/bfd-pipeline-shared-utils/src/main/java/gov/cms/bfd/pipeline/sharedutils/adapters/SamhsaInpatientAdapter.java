@@ -4,7 +4,14 @@ import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
+import gov.cms.bfd.model.rif.samhsa.InpatientTag;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import jakarta.persistence.EntityManager;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,12 +23,10 @@ public class SamhsaInpatientAdapter extends SamhsaAdapterBase<InpatientClaim, In
    * Constructor.
    *
    * @param claim The claim to process.
-   * @param claimLines The claim's claim lines.
    */
-  public SamhsaInpatientAdapter(InpatientClaim claim, List<InpatientClaimLine> claimLines) {
-    super(claim, claimLines);
+  public SamhsaInpatientAdapter(InpatientClaim claim) {
+    super(claim, claim.getLines());
     this.claim = claim;
-    this.claimLines = claimLines;
     this.table = "inpatient_claims";
     this.linesTable = "inpatient_claim_lines";
   }
@@ -115,5 +120,30 @@ public class SamhsaInpatientAdapter extends SamhsaAdapterBase<InpatientClaim, In
         entry(claim::getProcedure23Code, "icd_prcdr_cd23"),
         entry(claim::getProcedure24Code, "icd_prcdr_cd24"),
         entry(claim::getProcedure25Code, "icd_prcdr_cd25"));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean checkAndProcessClaim(EntityManager entityManager)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+    Optional<List<TagDetails>> entries = buildDetails();
+    if (entries.isPresent()) {
+      List<InpatientTag> tags = new ArrayList<>();
+      tags.add(
+          InpatientTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode._42CFRPart2.toString())
+              .details(entries.get())
+              .build());
+      tags.add(
+          InpatientTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode.R.toString())
+              .details(entries.get())
+              .build());
+      return SamhsaUtil.persistTags(Optional.of(tags), entityManager);
+    }
+    return false;
   }
 }

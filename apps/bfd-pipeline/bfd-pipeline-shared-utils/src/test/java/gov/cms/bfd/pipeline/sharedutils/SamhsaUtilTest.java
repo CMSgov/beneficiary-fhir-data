@@ -57,7 +57,7 @@ public class SamhsaUtilTest {
   public void shouldSaveFissTags() {
     ArgumentCaptor<FissTag> captor = ArgumentCaptor.forClass(FissTag.class);
     RdaFissClaim fissClaim = getSAMHSAFissClaim();
-    samhsaUtil.processClaim(fissClaim, entityManager);
+    samhsaUtil.processRdaClaim(fissClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
     List<FissTag> tags = captor.getAllValues();
     assertEquals(tags.stream().filter(t -> t.getClaim().equals(fissClaim.getClaimId())).count(), 2);
@@ -68,7 +68,7 @@ public class SamhsaUtilTest {
   public void shouldNotSaveFissTag() {
     RdaFissClaim fissClaim = getNonSAMHSAFissClaim();
     ArgumentCaptor<FissTag> captor = ArgumentCaptor.forClass(FissTag.class);
-    samhsaUtil.processClaim(fissClaim, entityManager);
+    samhsaUtil.processRdaClaim(fissClaim, entityManager);
     verify(entityManager, times(0)).merge(captor.capture());
   }
 
@@ -77,7 +77,7 @@ public class SamhsaUtilTest {
   public void shouldSaveMcsTag() {
     RdaMcsClaim mcsClaim = getSAMHSAMcsClaim();
     ArgumentCaptor<McsTag> captor = ArgumentCaptor.forClass(McsTag.class);
-    samhsaUtil.processClaim(mcsClaim, entityManager);
+    samhsaUtil.processRdaClaim(mcsClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
     List<McsTag> tags = captor.getAllValues();
     assertEquals(
@@ -89,7 +89,7 @@ public class SamhsaUtilTest {
   public void shouldSaveCarrierTag() {
     CarrierClaim carrierClaim = getSamhsaCarrierClaim();
     ArgumentCaptor<CarrierTag> captor = ArgumentCaptor.forClass(CarrierTag.class);
-    samhsaUtil.processClaim(carrierClaim, entityManager);
+    samhsaUtil.processCcwClaim(carrierClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
     List<CarrierTag> tags = captor.getAllValues();
     assertEquals(
@@ -102,7 +102,7 @@ public class SamhsaUtilTest {
   public void shouldNotSaveCarrierTag() {
     CarrierClaim carrierClaim = getNonSamhsaCarrierClaim();
     ArgumentCaptor<CarrierTag> captor = ArgumentCaptor.forClass(CarrierTag.class);
-    samhsaUtil.processClaim(carrierClaim, entityManager);
+    samhsaUtil.processCcwClaim(carrierClaim, entityManager);
     verify(entityManager, times(0)).merge(captor.capture());
   }
 
@@ -111,7 +111,7 @@ public class SamhsaUtilTest {
   public void shouldNotSaveMcsTag() {
     RdaMcsClaim mcsClaim = getNonSAMHSAMcsClaim();
     ArgumentCaptor<McsTag> captor = ArgumentCaptor.forClass(McsTag.class);
-    samhsaUtil.processClaim(mcsClaim, entityManager);
+    samhsaUtil.processRdaClaim(mcsClaim, entityManager);
     verify(entityManager, times(0)).merge(captor.capture());
   }
 

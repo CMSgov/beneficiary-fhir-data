@@ -4,7 +4,14 @@ import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
+import gov.cms.bfd.model.rif.samhsa.DmeTag;
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import jakarta.persistence.EntityManager;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,12 +23,10 @@ public class SamhsaDmeAdapter extends SamhsaAdapterBase<DMEClaim, DMEClaimLine> 
    * Constructor.
    *
    * @param claim The claim to process.
-   * @param claimLines The claim's claim lines.
    */
-  public SamhsaDmeAdapter(DMEClaim claim, List<DMEClaimLine> claimLines) {
-    super(claim, claimLines);
+  public SamhsaDmeAdapter(DMEClaim claim) {
+    super(claim, claim.getLines());
     this.claim = claim;
-    this.claimLines = claimLines;
     this.table = "dme_claims";
     this.linesTable = "dme_claim_lines";
   }
@@ -63,8 +68,34 @@ public class SamhsaDmeAdapter extends SamhsaAdapterBase<DMEClaim, DMEClaimLine> 
   }
 
   /** {@inheritDoc} */
+  @Override
   public Map<Supplier<Optional<String>>, String> getClaimLineMethods(DMEClaimLine line) {
     return Map.ofEntries(
         entry(line::getDiagnosisCode, "line_icd_dgns_cd"), entry(line::getHcpcsCode, "hcpcs_cd"));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean checkAndProcessClaim(EntityManager entityManager)
+      throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+    Optional<List<TagDetails>> entries = buildDetails();
+    if (entries.isPresent()) {
+      List<DmeTag> tags = new ArrayList<>();
+      tags.add(
+          DmeTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode._42CFRPart2.toString())
+              .details(entries.get())
+              .build());
+      tags.add(
+          DmeTag.builder()
+              .claim(claim.getClaimId())
+              .code(TagCode.R.toString())
+              .details(entries.get())
+              .build());
+      return SamhsaUtil.persistTags(Optional.of(tags), entityManager);
+    }
+    return false;
   }
 }
