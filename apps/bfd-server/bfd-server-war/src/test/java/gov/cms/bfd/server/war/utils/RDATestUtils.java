@@ -73,11 +73,17 @@ public class RDATestUtils {
   /** Test fiss claim (DCN). */
   public static final String FISS_CLAIM_B_DCN = "123457d";
 
+  /** Test fiss claim (DCN). */
+  public static final String FISS_CLAIM_C_DCN = "234567d";
+
   /** Test fiss claim (ClaimId). */
   public static final String FISS_CLAIM_A_CLAIM_ID = "123456";
 
   /** Test fiss claim (ClaimId). */
   public static final String FISS_CLAIM_B_CLAIM_ID = "123457";
+
+  /** Test fiss claim (ClaimId). */
+  public static final String FISS_CLAIM_C_CLAIM_ID = "234567";
 
   /** The entity manager. */
   private EntityManager entityManager;
@@ -147,8 +153,10 @@ public class RDATestUtils {
                       .build());
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
+          em.merge(fissTestDataC(mbi));
           em.merge(mcsTestDataA(mbi));
           em.merge(mcsTestDataB(mbi));
+          em.merge(mcsTestDataC(mbi));
         });
   }
 
@@ -475,6 +483,130 @@ public class RDATestUtils {
   }
 
   /**
+   * One FISS claim for testing.
+   *
+   * @param mbi the mbi
+   * @return The FISS test claim C
+   */
+  private RdaFissClaim fissTestDataC(Mbi mbi) {
+    final var lastUpdated = LocalDateTime.of(1970, 8, 7, 0, 0, 0).toInstant(ZoneOffset.UTC);
+    RdaFissClaim claim =
+        RdaFissClaim.builder()
+            .sequenceNumber(2L)
+            .claimId(FISS_CLAIM_C_CLAIM_ID)
+            .dcn(FISS_CLAIM_C_DCN)
+            .intermediaryNb("99999")
+            .hicNo("hicnumbe3")
+            .currStatus('0')
+            .currLoc1('r')
+            .currLoc2("Somdb")
+            .medaProvId("meda12346")
+            .fedTaxNumber("tax12345")
+            .totalChargeAmount(new BigDecimal("1235.32"))
+            .receivedDate(LocalDate.of(1970, 1, 9))
+            .currTranDate(LocalDate.of(1970, 1, 13))
+            // SAMHSA diagnosis code
+            .admitDiagCode("F10.10")
+            .principleDiag("princcc")
+            .npiNumber("8876543212")
+            .mbiRecord(mbi)
+            .fedTaxNumber("abc124")
+            .lobCd("k")
+            .lastUpdated(lastUpdated)
+            .stmtCovFromDate(LocalDate.of(1970, 7, 30))
+            .stmtCovToDate(LocalDate.of(1970, 8, 3))
+            .servTypeCd("A")
+            .freqCd("C")
+            .clmTypInd("1")
+            .drgCd("drgd")
+            .groupCode("rg")
+            .build();
+
+    Set<RdaFissProcCode> procCodes =
+        Set.of(
+            RdaFissProcCode.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 1)
+                .procCode("CODEABD")
+                .procFlag("FLAC")
+                .procDate(LocalDate.of(1970, 7, 31))
+                .build());
+
+    Set<RdaFissDiagnosisCode> diagnosisCodes =
+        Set.of(
+            RdaFissDiagnosisCode.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 1)
+                .diagCd2("princcc")
+                .diagPoaInd("Y")
+                .build(),
+            RdaFissDiagnosisCode.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 2)
+                .diagCd2("other2")
+                .diagPoaInd("w")
+                .build(),
+            RdaFissDiagnosisCode.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 3)
+                .diagCd2("admitcc")
+                .diagPoaInd("1")
+                .build());
+
+    Set<RdaFissPayer> payers =
+        Set.of(
+            RdaFissPayer.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 1)
+                .beneFirstName("alice")
+                .beneMidInit("r")
+                .beneLastName("smith")
+                .beneSex("f")
+                .beneDob(LocalDate.of(1981, 8, 13))
+                .payerType(RdaFissPayer.PayerType.BeneZ)
+                .payersName("MEDICARE")
+                .build(),
+            RdaFissPayer.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 2)
+                .insuredName("SMITH  ALICE  R")
+                .payerType(RdaFissPayer.PayerType.Insured)
+                .payersName("BCBS KC")
+                .build());
+
+    Set<RdaFissRevenueLine> revenueLines =
+        Set.of(
+            RdaFissRevenueLine.builder()
+                .claimId(claim.getClaimId())
+                .rdaPosition((short) 1)
+                .serviceDate(LocalDate.of(1990, 12, 11))
+                .serviceDateText("1990-12-11")
+                .revUnitsBilled(9)
+                .revServUnitCnt(1)
+                .revCd("dcba")
+                .nonBillRevCode("D")
+                .hcpcCd("54321")
+                .hcpcInd("C")
+                .acoRedRarc("crar")
+                .acoRedCarc("rac")
+                .acoRedCagc("ac")
+                .hcpcModifier("1m")
+                .hcpcModifier2("2m")
+                .hcpcModifier3("3m")
+                .hcpcModifier4("4m")
+                .hcpcModifier5("5m")
+                .apcHcpcsApc("00002")
+                .build());
+
+    claim.setPayers(payers);
+    claim.setProcCodes(procCodes);
+    claim.setDiagCodes(diagnosisCodes);
+    claim.setRevenueLines(revenueLines);
+
+    return claim;
+  }
+
+  /**
    * One MCS claim for testing.
    *
    * @param mbi the mbi
@@ -609,6 +741,75 @@ public class RDATestUtils {
         Set.of(
             new RdaMcsDiagnosisCode("654323", (short) 1, "0", "HF3IJIF"),
             new RdaMcsDiagnosisCode("654323", (short) 2, "9", "HF3IJIG")));
+
+    return claim;
+  }
+
+  /**
+   * One MCS claim for testing.
+   *
+   * @param mbi the mbi
+   * @return The MCS test claim C
+   */
+  private RdaMcsClaim mcsTestDataC(Mbi mbi) {
+    RdaMcsClaim claim =
+        RdaMcsClaim.builder()
+            .sequenceNumber(1L)
+            .idrClmHdIcn("876543")
+            .idrContrId("contr")
+            .idrHic("HicValue")
+            .idrClaimType("R")
+            .idrDtlCnt(56)
+            .idrBeneLast_1_6("SMITH")
+            .idrBeneFirstInit("J")
+            .idrBeneMidInit("D")
+            .idrBeneSex("M")
+            .idrStatusCode("5")
+            .idrStatusDate(LocalDate.of(1970, 1, 3))
+            .idrBillProvNpi("9876789102")
+            .idrBillProvNum("4444422222")
+            .idrBillProvEin("1231231231")
+            .idrBillProvType("AB")
+            .idrBillProvSpec("BA")
+            .idrBillProvGroupInd("A")
+            .idrBillProvPriceSpec("FF")
+            .idrBillProvCounty("GG")
+            .idrBillProvLoc("HH")
+            .idrTotAllowed(new BigDecimal("224.41"))
+            .idrCoinsurance(new BigDecimal("14.32"))
+            .idrDeductible(new BigDecimal("11.00"))
+            .idrBillProvStatusCd(null)
+            .idrTotBilledAmt(new BigDecimal("23.00"))
+            .idrClaimReceiptDate(LocalDate.of(1970, 2, 24))
+            .mbiRecord(mbi)
+            .idrHdrFromDateOfSvc(LocalDate.of(1970, 7, 18))
+            .idrHdrToDateOfSvc(LocalDate.of(1970, 7, 20))
+            .lastUpdated(Instant.ofEpochMilli(4000))
+            .build();
+
+    Set<RdaMcsDetail> details =
+        Set.of(
+            RdaMcsDetail.builder()
+                .idrDtlNumber((short) 1)
+                .idrClmHdIcn("876543")
+                .idrDtlToDate(LocalDate.of(1970, 7, 28))
+                // SAMHSA HCPCS code
+                .idrProcCode("4320F")
+                .idrModOne("A")
+                .build(),
+            RdaMcsDetail.builder()
+                .idrDtlNumber((short) 2)
+                .idrClmHdIcn("654323")
+                .idrProcCode("FDAAA")
+                .idrModTwo("B")
+                .build());
+
+    claim.setDetails(details);
+
+    claim.setDiagCodes(
+        Set.of(
+            new RdaMcsDiagnosisCode("876543", (short) 1, "0", "HF3IJIF"),
+            new RdaMcsDiagnosisCode("876543", (short) 2, "9", "HF3IJIG")));
 
     return claim;
   }
