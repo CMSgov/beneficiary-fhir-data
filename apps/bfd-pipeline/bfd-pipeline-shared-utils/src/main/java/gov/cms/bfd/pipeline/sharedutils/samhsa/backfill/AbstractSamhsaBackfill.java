@@ -13,13 +13,14 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Does the actual work of backfilling the SAMHSA tags. */
+/** Abstract class to backfill the SAMHSA tags. This will iterate through each of the tables, pull any claims that don't
+ * already have SAMHSA tags, and checks them for SAMHSA codes, using SamhsaUtil. */
 public abstract class AbstractSamhsaBackfill {
   /** The Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSamhsaBackfill.class);
 
   /**
-   * Query to retrieve a list of claims objects. Will start at a given claim id, and limit the
+   * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags. Will start at a given claim id, and limit the
    * results to a given limit.
    */
   protected String QUERY_WITH_STARTING_CLAIM =
@@ -31,7 +32,7 @@ public abstract class AbstractSamhsaBackfill {
           + " LIMIT ${limit};";
 
   /**
-   * Query to retrieve a list of claims objects. Starts at the beginning of the sorted list of
+   * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags. Starts at the beginning of the sorted list of
    * claims. This query will be run on the first iteration on a table when we have no original claim
    * to continue off of.
    */
@@ -58,7 +59,7 @@ public abstract class AbstractSamhsaBackfill {
    * Constructor.
    *
    * @param transactionManager The transaction manager.
-   * @param batchSize the query batch size.
+   * @param batchSize the query batch size. This is the limit of claims to be pulled with each query.
    */
   public AbstractSamhsaBackfill(TransactionManager transactionManager, int batchSize) {
     this.transactionManager = transactionManager;
@@ -84,7 +85,7 @@ public abstract class AbstractSamhsaBackfill {
   }
 
   /**
-   * Builds a query.
+   * Builds a query object by taking a SQL query string and replacing the parameter placeholders with appropriate values.
    *
    * @param startingClaim The claim to start at. If this is empty, the version of the query with no
    *     starting claim will be used.
@@ -165,17 +166,17 @@ public abstract class AbstractSamhsaBackfill {
   /**
    * Iterates over all of the claims in a table, and checks for SAMHSA data.
    *
-   * @param table The table to iterate over.
+   * @param tableEntry Contains information about the tables and entities for this claim type.
    * @return The number of claims for which tags were created.
    * @param <TClaim> The type of the claim.
    */
-  private <TClaim> Long executeForTable(TableEntry table) {
+  private <TClaim> Long executeForTable(TableEntry tableEntry) {
     long totalSaved = 0L;
     long totalProcessed = 0L;
     String lastClaimId = null;
     List<TClaim> claims;
     do {
-      Query query = buildQuery(Optional.ofNullable(lastClaimId), table, batchSize);
+      Query query = buildQuery(Optional.ofNullable(lastClaimId), tableEntry, batchSize);
       claims = executeQuery(query);
       int savedInBatch = 0;
       for (TClaim claim : claims) {
@@ -188,7 +189,7 @@ public abstract class AbstractSamhsaBackfill {
       LOGGER.info(
           String.format(
               "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
-              batchSize, table.getClaimTable(), savedInBatch));
+              batchSize, tableEntry.getClaimTable(), savedInBatch));
       totalProcessed += claims.size();
       lastClaimId = !claims.isEmpty() ? getClaimId(claims.getLast()) : null;
       // If the number of returned claims is not equal to the requested batch size, then the table
@@ -197,7 +198,7 @@ public abstract class AbstractSamhsaBackfill {
     LOGGER.info(
         String.format(
             "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
-            table.getClaimTable(), totalProcessed, totalSaved));
+            tableEntry.getClaimTable(), totalProcessed, totalSaved));
 
     return totalSaved;
   }
