@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Force UTC time
+export TZ=UTC
+
 # The launcher picks up its config from environment variables, so set those.
 export BFD_PORT='{{ service_port }}'
 export BFD_PATHS_FILES_KEYSTORE='{{ ref_dir }}/bluebutton-appserver-keystore.pfx'
