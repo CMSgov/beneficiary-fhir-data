@@ -64,29 +64,15 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** {@inheritDoc} */
   @Override
   protected String getClaimId(Object claim) {
-    switch (claim) {
-      case CarrierClaim carrierClaim -> {
-        return String.valueOf(carrierClaim.getClaimId());
-      }
-      case HHAClaim hhaClaim -> {
-        return String.valueOf(hhaClaim.getClaimId());
-      }
-      case DMEClaim dmeClaim -> {
-        return String.valueOf(dmeClaim.getClaimId());
-      }
-      case HospiceClaim hospiceClaim -> {
-        return String.valueOf(hospiceClaim.getClaimId());
-      }
-      case OutpatientClaim outpatientClaim -> {
-        return String.valueOf(outpatientClaim.getClaimId());
-      }
-      case InpatientClaim inpatientClaim -> {
-        return String.valueOf(inpatientClaim.getClaimId());
-      }
-      case SNFClaim snfClaim -> {
-        return String.valueOf(snfClaim.getClaimId());
-      }
+    return switch (claim) {
+      case CarrierClaim carrierClaim -> String.valueOf(carrierClaim.getClaimId());
+      case HHAClaim hhaClaim -> String.valueOf(hhaClaim.getClaimId());
+      case DMEClaim dmeClaim -> String.valueOf(dmeClaim.getClaimId());
+      case HospiceClaim hospiceClaim -> String.valueOf(hospiceClaim.getClaimId());
+      case OutpatientClaim outpatientClaim -> String.valueOf(outpatientClaim.getClaimId());
+      case InpatientClaim inpatientClaim -> String.valueOf(inpatientClaim.getClaimId());
+      case SNFClaim snfClaim -> String.valueOf(snfClaim.getClaimId());
       default -> throw new RuntimeException("Unknown claim type.");
-    }
+    };
   }
 }

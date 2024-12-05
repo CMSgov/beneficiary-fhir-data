@@ -34,15 +34,11 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** {@inheritDoc} */
   protected String getClaimId(Object claim) {
-    switch (claim) {
-      case RdaMcsClaim mcsClaim -> {
-        return String.format("'%s'", mcsClaim.getIdrClmHdIcn());
-      }
-      case RdaFissClaim fissClaim -> {
-        return String.format("'%s'", fissClaim.getClaimId());
-      }
+    return switch (claim) {
+      case RdaMcsClaim mcsClaim -> String.format("'%s'", mcsClaim.getIdrClmHdIcn());
+      case RdaFissClaim fissClaim -> String.format("'%s'", fissClaim.getClaimId());
       default -> throw new RuntimeException("Unknown claim type.");
-    }
+    };
   }
 
   /** {@inheritDoc} */
