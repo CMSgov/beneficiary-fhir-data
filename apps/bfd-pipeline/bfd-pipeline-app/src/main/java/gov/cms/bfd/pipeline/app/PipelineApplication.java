@@ -429,7 +429,6 @@ public final class PipelineApplication {
   /**
    * Creates the pipeline job for the SAMHSA backfill.
    *
-   * @param appConfig The App Configuration.
    * @param batchSize The query batch size.
    * @param appMeters The meter registry.
    * @param appMetrics The metrics registry.
