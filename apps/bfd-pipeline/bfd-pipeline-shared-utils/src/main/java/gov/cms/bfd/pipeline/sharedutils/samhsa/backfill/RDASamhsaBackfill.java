@@ -4,7 +4,6 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 
 /** RDA implementation of AbstractSamhsaBackfill. */
@@ -46,13 +45,16 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   protected List<TableEntry> getTables() {
     return TABLES;
   }
 
+  /** {@inheritDoc} */
   @Override
-  <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager) {
-    return samhsaUtil.processRdaClaim(claim, transactionManager.getEntityManager());
+  protected <TClaim> boolean processClaim(TClaim claim) {
+    return transactionManager.executeFunction(
+        entityManager -> samhsaUtil.processRdaClaim(claim, transactionManager.getEntityManager()));
   }
 }

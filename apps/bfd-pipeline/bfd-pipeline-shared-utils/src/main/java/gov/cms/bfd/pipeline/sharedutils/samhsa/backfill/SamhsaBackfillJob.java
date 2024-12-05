@@ -7,7 +7,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
-import java.time.Clock;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
@@ -20,9 +19,6 @@ public class SamhsaBackfillJob implements PipelineJob {
 
   /** The PipelineApplicationState. */
   PipelineApplicationState appState;
-
-  /** Clock. */
-  Clock clock;
 
   /** Batch size. */
   int batchSize;

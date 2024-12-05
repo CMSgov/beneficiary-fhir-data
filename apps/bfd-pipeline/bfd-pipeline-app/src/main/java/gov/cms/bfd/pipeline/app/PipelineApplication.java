@@ -438,7 +438,6 @@ public final class PipelineApplication {
    * @return The Pipeline job.
    */
   PipelineJob createBackfillJob(
-      AppConfiguration appConfig,
       int batchSize,
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
@@ -533,7 +532,6 @@ public final class PipelineApplication {
     if (backfillConfigOptions.isPresent()) {
       final var backfillJob =
           createBackfillJob(
-              appConfig,
               backfillConfigOptions.get().getBatchSize(),
               appMeters,
               appMetrics,
