@@ -1,14 +1,19 @@
 package gov.cms.bfd.server.war;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -58,8 +63,8 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
         ServerTestUtils.readFile(
             ServerTestUtils.generatePathForEndpointJsonFile(
                 getExpectedJsonResponseDir(), endpointId));
-    AssertUtils.assertJsonEquals(
-        expectedJson, endpointResponse, ServerTestUtils.JSON_COMPARE_IGNORED_PATHS);
+    String replacedResponse = replaceIgnoredFieldsWithFillerText(endpointId, endpointResponse);
+    assertEquals(expectedJson, replacedResponse);
   }
 
   /**
@@ -111,12 +116,64 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
   /**
    * Replaces ignored fields with filler text.
    *
+   * @param endpointId the {@link String} endpoint
+   * @param endpointResponse the {@link String} endpoint response JSON
+   * @return the replaced string
+   */
+  protected static String replaceIgnoredFieldsWithFillerText(
+      String endpointId, String endpointResponse) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode jsonNode;
+    try {
+      jsonNode = mapper.readTree(endpointResponse);
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
+    }
+
+    replaceIgnoredFieldsWithFillerText(
+        jsonNode,
+        "id",
+        Optional.of(
+            Pattern.compile(
+                "[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
+    replaceIgnoredFieldsWithFillerText(
+        jsonNode,
+        "reference",
+        Optional.of(
+            Pattern.compile(
+                "#[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
+    replaceIgnoredFieldsWithFillerText(
+        jsonNode, "url", Optional.of(Pattern.compile("(https://localhost:)(\\d+(?=/))(.*)")));
+    replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
+    replaceIgnoredFieldsWithFillerText(jsonNode, "created", Optional.empty());
+
+    if (endpointId.equals("metadata")) {
+      replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
+      replaceIgnoredFieldsWithFillerText(
+          jsonNode, "version", Optional.of(Pattern.compile("\\d+\\.\\d+\\.\\d+-SNAPSHOT")));
+    }
+
+    String jsonResponse;
+    try {
+      jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+    } catch (JsonProcessingException e) {
+      throw new UncheckedIOException(
+          "Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
+    }
+    return jsonResponse;
+  }
+
+  /**
+   * Replaces ignored fields with filler text.
+   *
    * @param parent the {@link JsonNode} on which to perform the replacement
    * @param fieldName the {@link String} name of the field that is being replaced
    * @param pattern an optional {@link Pattern} pattern to correctly identify fields needing to be
    *     replaced
    */
-  protected static void replaceIgnoredFieldsWithFillerText(
+  private static void replaceIgnoredFieldsWithFillerText(
       JsonNode parent, String fieldName, Optional<Pattern> pattern) {
     if (parent.has(fieldName)) {
       if (pattern.isPresent()) {

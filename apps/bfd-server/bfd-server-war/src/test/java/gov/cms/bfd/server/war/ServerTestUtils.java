@@ -143,24 +143,6 @@ public final class ServerTestUtils {
   /** The server's base url. */
   private final String serverBaseUrl;
 
-  /** A set of ignored paths for json comparison testing. */
-  public static final Set<String> JSON_COMPARE_IGNORED_PATHS =
-      ImmutableSet.of(
-          "/id",
-          "/date",
-          "/created",
-          "/link/[0-9]/url",
-          "/implementation/url",
-          "/entry/[0-9]/fullUrl",
-          "/meta",
-          "/meta/lastUpdated",
-          "/entry/[0-9]/resource/meta/lastUpdated",
-          "/entry/[0-9]/resource/meta",
-          "/entry/[0-9]/resource/created",
-          "/procedure/[0-9]/date",
-          "/entry/[0-9]/resource/procedure/[0-9]/date",
-          "/software/version");
-
   /**
    * Constructs a new {@link ServerTestUtils} instance. Marked <code>private</code>; use {@link
    * #get()}, instead.
