@@ -53,11 +53,18 @@ public class SamhsaBackfillService {
   /**
    * Starts the backfill.
    *
+   * @param ccw Backfill CCW claims
+   * @param rda Backfill RDA claims
    * @return the total number of SAMHSA tags created.
    */
-  public Long startBackFill() {
-    Long total = rdaSamhsaBackfill.execute();
-    total += ccwSamhsaBackfill.execute();
+  public Long startBackFill(boolean ccw, boolean rda) {
+    Long total = 0L;
+    if (rda) {
+      total = rdaSamhsaBackfill.execute();
+    }
+    if (ccw) {
+      total += ccwSamhsaBackfill.execute();
+    }
     return total;
   }
 }

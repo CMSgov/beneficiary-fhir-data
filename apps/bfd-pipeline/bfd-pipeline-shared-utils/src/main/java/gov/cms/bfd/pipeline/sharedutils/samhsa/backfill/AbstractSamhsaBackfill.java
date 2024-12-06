@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import java.util.List;
@@ -93,8 +94,7 @@ public abstract class AbstractSamhsaBackfill {
    * @param <TClaim> The type of the claim.
    */
   private <TClaim> List<TClaim> executeQuery(Query query) {
-    return transactionManager.executeFunction(
-        entityManager -> (List<TClaim>) query.getResultList());
+    return (List<TClaim>) query.getResultList();
   }
 
   /**
@@ -105,31 +105,31 @@ public abstract class AbstractSamhsaBackfill {
    *     starting claim will be used.
    * @param tableEntry The TableEntry pojo for this table.
    * @param limit the number of claims to pull at a time.
+   * @param entityManager The entity manager.
    * @return Query to run.
    */
-  private Query buildQuery(Optional<String> startingClaim, TableEntry tableEntry, int limit) {
-    return transactionManager.executeFunction(
-        entityManager -> {
-          Map<String, String> params =
-              Map.of(
-                  "tableName",
-                  tableEntry.getClaimTable(),
-                  "claimColumn",
-                  tableEntry.getClaimColumnName(),
-                  "startingClaim",
-                  startingClaim.orElse(""),
-                  "tagTableName",
-                  tableEntry.getTagTable(),
-                  "limit",
-                  String.valueOf(limit));
-          StringSubstitutor strSub = new StringSubstitutor(params);
-          String queryStr =
-              strSub.replace(
-                  startingClaim.isPresent()
-                      ? QUERY_WITH_STARTING_CLAIM
-                      : QUERY_WITH_NO_STARTING_CLAIM);
-          return entityManager.createNativeQuery(queryStr, tableEntry.getClaimClass());
-        });
+  private Query buildQuery(
+      Optional<String> startingClaim,
+      TableEntry tableEntry,
+      int limit,
+      EntityManager entityManager) {
+    Map<String, String> params =
+        Map.of(
+            "tableName",
+            tableEntry.getClaimTable(),
+            "claimColumn",
+            tableEntry.getClaimColumnName(),
+            "startingClaim",
+            startingClaim.orElse(""),
+            "tagTableName",
+            tableEntry.getTagTable(),
+            "limit",
+            String.valueOf(limit));
+    StringSubstitutor strSub = new StringSubstitutor(params);
+    String queryStr =
+        strSub.replace(
+            startingClaim.isPresent() ? QUERY_WITH_STARTING_CLAIM : QUERY_WITH_NO_STARTING_CLAIM);
+    return entityManager.createNativeQuery(queryStr, tableEntry.getClaimClass());
   }
 
   /**
@@ -168,10 +168,11 @@ public abstract class AbstractSamhsaBackfill {
    * Processes a claim with SamhsaUtil to check for SAMHSA codes.
    *
    * @param claim the claim to process
+   * @param entityManager The entity manager.
    * @return true if a claim was persisted.
    * @param <TClaim> Type of the claim.
    */
-  protected abstract <TClaim> boolean processClaim(TClaim claim);
+  protected abstract <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager);
 
   /**
    * Iterates over all of the claims in a table, and checks for SAMHSA data.
@@ -181,48 +182,54 @@ public abstract class AbstractSamhsaBackfill {
    * @param <TClaim> The type of the claim.
    */
   private <TClaim> Long executeForTable(TableEntry tableEntry) {
-    long totalSaved = 0L;
-    long totalProcessed = 0L;
-    Optional<String> lastClaimId = getLastClaimId(tableEntry.getClaimTable());
-    if (lastClaimId.isPresent()) {
-      LOGGER.info(
-          String.format(
-              "Starting processing of table %s at claim %s",
-              tableEntry.getClaimTable(), lastClaimId.get()));
-    } else {
-      LOGGER.info(
-          String.format(
-              "Starting processing of table %s from the beginning.", tableEntry.getClaimTable()));
-    }
-    List<TClaim> claims;
-    do {
-      Query query = buildQuery(lastClaimId, tableEntry, batchSize);
-      claims = executeQuery(query);
-      int savedInBatch = 0;
-      for (TClaim claim : claims) {
-        boolean persisted = processClaim(claim);
-        if (persisted) {
-          savedInBatch++;
-        }
-      }
-      totalSaved += savedInBatch;
-      LOGGER.info(
-          String.format(
-              "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
-              batchSize, tableEntry.getClaimTable(), savedInBatch));
-      totalProcessed += claims.size();
-      lastClaimId =
-          !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty();
-      saveProgress(tableEntry.getClaimTable(), lastClaimId);
-      // If the number of returned claims is not equal to the requested batch size, then the table
-      // is done being processed.
-    } while (claims.size() == batchSize);
-    LOGGER.info(
-        String.format(
-            "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
-            tableEntry.getClaimTable(), totalProcessed, totalSaved));
+    return transactionManager.executeFunction(
+        entityManager -> {
+          long totalSaved = 0L;
+          long totalProcessed = 0L;
+          Optional<String> lastClaimId = getLastClaimId(tableEntry.getClaimTable(), entityManager);
+          if (lastClaimId.isPresent()) {
+            LOGGER.info(
+                String.format(
+                    "Starting processing of table %s at claim %s",
+                    tableEntry.getClaimTable(), lastClaimId.get()));
+          } else {
+            LOGGER.info(
+                String.format(
+                    "Starting processing of table %s from the beginning.",
+                    tableEntry.getClaimTable()));
+          }
+          List<TClaim> claims;
 
-    return totalSaved;
+          do {
+            Query query = buildQuery(lastClaimId, tableEntry, batchSize, entityManager);
+            claims = executeQuery(query);
+            int savedInBatch = 0;
+            for (TClaim claim : claims) {
+              boolean persisted = processClaim(claim, entityManager);
+              if (persisted) {
+                savedInBatch++;
+              }
+            }
+            totalSaved += savedInBatch;
+            LOGGER.info(
+                String.format(
+                    "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
+                    batchSize, tableEntry.getClaimTable(), savedInBatch));
+            totalProcessed += claims.size();
+            lastClaimId =
+                !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty();
+            saveProgress(tableEntry.getClaimTable(), lastClaimId, entityManager);
+            // If the number of returned claims is not equal to the requested batch size, then the
+            // table
+            // is done being processed.
+          } while (claims.size() == batchSize);
+
+          LOGGER.info(
+              String.format(
+                  "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
+                  tableEntry.getClaimTable(), totalProcessed, totalSaved));
+          return totalSaved;
+        });
   }
 
   /**
@@ -231,37 +238,31 @@ public abstract class AbstractSamhsaBackfill {
    *
    * @param table The table in question.
    * @param lastClaimId The last claim id processed.
+   * @param entityManager The entity manager.
    */
-  private void saveProgress(String table, Optional<String> lastClaimId) {
-    if (lastClaimId.isPresent()) {
-      transactionManager.executeProcedure(
-          entityManager -> {
-            Query query =
-                Objects.requireNonNull(entityManager).createNativeQuery(UPSERT_PROGRESS_QUERY);
-            query.setParameter("tableName", table);
-            query.setParameter("lastClaim", lastClaimId.get());
-            query.executeUpdate();
-          });
-    }
+  private void saveProgress(
+      String table, Optional<String> lastClaimId, EntityManager entityManager) {
+    Query query = Objects.requireNonNull(entityManager).createNativeQuery(UPSERT_PROGRESS_QUERY);
+    query.setParameter("tableName", table);
+    query.setParameter("lastClaim", lastClaimId.get());
+    query.executeUpdate();
   }
 
   /**
    * Rims a query to get the last claim id processed.
    *
    * @param table The claim table in question.
+   * @param entityManager The entity manager.
    * @return The last claim id processed for the given table.
    */
-  private Optional<String> getLastClaimId(String table) {
-    return transactionManager.executeFunction(
-        entityManager -> {
-          Query query = Objects.requireNonNull(entityManager).createNativeQuery(GET_PROGRESS_QUERY);
-          query.setParameter("tableName", table);
-          try {
-            String claimId = (String) query.getSingleResult();
-            return Optional.of(claimId);
-          } catch (NoResultException e) {
-            return Optional.empty();
-          }
-        });
+  private Optional<String> getLastClaimId(String table, EntityManager entityManager) {
+    Query query = Objects.requireNonNull(entityManager).createNativeQuery(GET_PROGRESS_QUERY);
+    query.setParameter("tableName", table);
+    try {
+      String claimId = (String) query.getSingleResult();
+      return Optional.of(claimId);
+    } catch (NoResultException e) {
+      return Optional.empty();
+    }
   }
 }

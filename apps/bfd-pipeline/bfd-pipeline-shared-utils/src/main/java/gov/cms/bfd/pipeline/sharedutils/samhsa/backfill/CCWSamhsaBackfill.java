@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 
 /** CCW implementation for AbstractSamhsaBackfill. */
@@ -56,9 +57,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** {@inheritDoc} */
   @Override
-  protected <TClaim> boolean processClaim(TClaim claim) {
-    return transactionManager.executeFunction(
-        entityManager -> samhsaUtil.processCcwClaim(claim, transactionManager.getEntityManager()));
+  protected <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager) {
+    return samhsaUtil.processCcwClaim(claim, entityManager);
   }
 
   /** {@inheritDoc} */

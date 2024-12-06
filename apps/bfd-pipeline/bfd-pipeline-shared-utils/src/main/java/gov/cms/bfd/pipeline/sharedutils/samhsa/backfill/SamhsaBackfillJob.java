@@ -89,7 +89,7 @@ public class SamhsaBackfillJob implements PipelineJob {
   Long callBackfillService() {
     SamhsaBackfillService backfillService =
         SamhsaBackfillService.createBackfillService(appState, batchSize);
-    Long processedCount = backfillService.startBackFill();
+    Long processedCount = backfillService.startBackFill(true, true);
     return processedCount;
   }
 
