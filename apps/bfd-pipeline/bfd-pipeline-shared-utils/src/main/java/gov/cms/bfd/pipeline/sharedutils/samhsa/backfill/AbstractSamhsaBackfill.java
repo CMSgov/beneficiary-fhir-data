@@ -249,7 +249,7 @@ public abstract class AbstractSamhsaBackfill {
   }
 
   /**
-   * Rims a query to get the last claim id processed.
+   * executes a query to get the last claim id processed.
    *
    * @param table The claim table in question.
    * @param entityManager The entity manager.
