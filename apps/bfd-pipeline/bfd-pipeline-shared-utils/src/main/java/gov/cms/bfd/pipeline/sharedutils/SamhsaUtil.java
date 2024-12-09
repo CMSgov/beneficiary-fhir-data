@@ -116,17 +116,18 @@ public class SamhsaUtil {
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
+   * @return true if a claim was persisted.
    * @param <TClaim> Generic type of the claim.
    */
-  public <TClaim> void processRdaClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> boolean processRdaClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
         Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-        persistTags(tags, entityManager);
+        return persistTags(tags, entityManager);
       }
       case RdaMcsClaim mcsClaim -> {
         Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-        persistTags(tags, entityManager);
+        return persistTags(tags, entityManager);
       }
       default -> throw new RuntimeException("Unknown claim type.");
     }
@@ -161,7 +162,6 @@ public class SamhsaUtil {
    * @return true if a tag was persisted.
    */
   public <TClaim> boolean processCcwClaim(TClaim claim, EntityManager entityManager) {
-    boolean persisted = false;
     try {
       SamhsaAdapterBase adapter =
           switch (claim) {

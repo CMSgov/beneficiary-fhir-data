@@ -83,7 +83,7 @@ rda_token=
 s3_required=false
 s3_mode=local
 s3_bucket="bfd-pipeline"
-s3_directory=test
+s3_directory="test"
 threads=20
 install=true
 image_tag=
@@ -97,7 +97,7 @@ claim_batch_size=
 claim_queue_multiple=
 kubernetes=false
 temp_dir=
-
+max_claims=2500
 usage() {
   cat 1>&2 <<EOF
 Runs a BFD pipeline.  Use command line options to change behaviors.
@@ -116,9 +116,9 @@ $(basename $0) [options] run_mode
 -t threads                Number of threads for RIF/RDA jobs.
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
+-m max_claims             The maximum RDA claims to send.
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
-
 Supported long options:
 
 --bene-load-options threads:batch_size:queue_multiple
@@ -131,10 +131,11 @@ Supported long options:
   Sets the java.io.tmpdir property.
 
 Run mode options: 
-  rif     RIF pipeline only.
-  random  RDA pipeline only.  Using in-process random API server.
-  s3      RDA pipeline only.  Using in-process S3 API server.
-  rda     RDA pipeline only.  Using remote RDA API server with host/port/token from command line.
+  backfill SAMHSA backfill only.
+  rif      RIF pipeline only.
+  random   RDA pipeline only.  Using in-process random API server.
+  s3       RDA pipeline only.  Using in-process S3 API server.
+  rda      RDA pipeline only.  Using remote RDA API server with host/port/token from command line.
 
 Option defaults:
   -b $batch_size
@@ -148,7 +149,7 @@ Option defaults:
 EOF
 }
 
-while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
+while getopts "m:b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   case $option in
   b) batch_size=$OPTARG ;;
   c) cache_size=$OPTARG ;;
@@ -161,6 +162,7 @@ while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   I) idempotency_mode=true ;;
   k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
+  m) max_claims=$OPTARG ;;
   r) interval_seconds=$OPTARG ;;
   R) IFS=':' read h p t <<<"$OPTARG"
      rda_host=${h:=$rda_host}
@@ -236,12 +238,13 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
   export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
   SSM_PARAMETER_PATH=/bfd-pipeline
-  export CONFIG_SETTINGS_JSON=$(cat <<EOF
+  CONFIG_SETTINGS_JSON=$(cat <<EOF
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
 EOF
 )
+export CONFIG_SETTINGS_JSON
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -332,7 +335,6 @@ if [[ $install = "true" ]] ; then
   jar_file=${exec_dir}/${app_name}.jar
   [[ -r $jar_file ]] && rm -f $jar_file
   [[ -d $lib_dir ]] && rm -rf $lib_dir
-  [[ -r $run_script ]] && rm -f $run_script
   mv $unzip_dir/* $exec_dir
   rmdir $unzip_dir
   if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then
@@ -393,8 +395,12 @@ setvar micrometer_cw/jmx_enabled "true"
 # Command line option below determines which jobs to run.
 setvar ccw/job/enabled "false"
 setvar rda/job/enabled "false"
-
+setvar rda/samhsa/backfill/enabled "false"
 case $run_mode in
+  backfill)
+    setvar rda/samhsa/backfill/enabled "true"
+    setvar rda/samhsa/backfill/batch_size "10000"
+    ;;
   rif)
     setvar ccw/job/enabled "true"
     ;;
@@ -403,7 +409,7 @@ case $run_mode in
     setvar rda/grpc/server_type "InProcess"
     setvar rda/grpc/inprocess_server/mode "Random"
     setvar rda/grpc/inprocess_server/random/seed "42"
-    setvar rda/grpc/inprocess_server/random/max_claims "2500"
+    setvar rda/grpc/inprocess_server/random/max_claims "$max_claims"
     ;;
   rda)
     setvar rda/job/enabled "true"
