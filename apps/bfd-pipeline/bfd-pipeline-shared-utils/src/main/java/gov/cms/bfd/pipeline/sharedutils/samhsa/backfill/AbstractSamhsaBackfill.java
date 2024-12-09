@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class to backfill the SAMHSA tags. This will iterate through each of the tables, pull
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractSamhsaBackfill {
   /** The Logger. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSamhsaBackfill.class);
+  private final Logger logger;
 
   /**
    * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags. Will
@@ -79,15 +80,18 @@ public abstract class AbstractSamhsaBackfill {
    * @param transactionManager The transaction manager.
    * @param batchSize the query batch size. This is the limit of claims to be pulled with each
    *     query.
+   * @param logger The logger.
    */
-  public AbstractSamhsaBackfill(TransactionManager transactionManager, int batchSize) {
+  public AbstractSamhsaBackfill(
+      TransactionManager transactionManager, int batchSize, Logger logger) {
+    this.logger = logger;
     this.transactionManager = transactionManager;
     this.batchSize = batchSize;
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
   }
 
   /**
-   * Executes the query using the trnasaction manager.
+   * Executes the query using the transaction manager.
    *
    * @param query The query to execute.
    * @return a list of claims.
@@ -156,7 +160,7 @@ public abstract class AbstractSamhsaBackfill {
     long total = 0L;
     for (TableEntry tableEntry : getTables()) {
       Long tableTotal = executeForTable(tableEntry);
-      LOGGER.info(
+      logger.info(
           String.format(
               "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
       total += tableTotal;
@@ -182,27 +186,28 @@ public abstract class AbstractSamhsaBackfill {
    * @param <TClaim> The type of the claim.
    */
   private <TClaim> Long executeForTable(TableEntry tableEntry) {
-    return transactionManager.executeFunction(
-        entityManager -> {
-          long totalSaved = 0L;
-          long totalProcessed = 0L;
-          Optional<String> lastClaimId = getLastClaimId(tableEntry.getClaimTable(), entityManager);
-          if (lastClaimId.isPresent()) {
-            LOGGER.info(
-                String.format(
-                    "Starting processing of table %s at claim %s",
-                    tableEntry.getClaimTable(), lastClaimId.get()));
-          } else {
-            LOGGER.info(
-                String.format(
-                    "Starting processing of table %s from the beginning.",
-                    tableEntry.getClaimTable()));
-          }
-          List<TClaim> claims;
+    // making these final Atomic objects allow us to use them inside of executeProcedure lambda.
+    final AtomicLong totalSaved = new AtomicLong(0L);
+    final AtomicLong totalProcessed = new AtomicLong(0L);
+    final AtomicLong claimsSize = new AtomicLong(0L);
+    Optional<String> id = getLastClaimId(tableEntry.getClaimTable());
+    final AtomicReference<Optional<String>> lastClaimId = new AtomicReference<>(id);
+    if (lastClaimId.get().isPresent()) {
+      logger.info(
+          String.format(
+              "Starting processing of table %s at claim %s",
+              tableEntry.getClaimTable(), lastClaimId.get()));
+    } else {
+      logger.info(
+          String.format(
+              "Starting processing of table %s from the beginning.", tableEntry.getClaimTable()));
+    }
 
-          do {
-            Query query = buildQuery(lastClaimId, tableEntry, batchSize, entityManager);
-            claims = executeQuery(query);
+    do {
+      transactionManager.executeProcedure(
+          entityManager -> {
+            Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
+            List<TClaim> claims = executeQuery(query);
             int savedInBatch = 0;
             for (TClaim claim : claims) {
               boolean persisted = processClaim(claim, entityManager);
@@ -210,26 +215,28 @@ public abstract class AbstractSamhsaBackfill {
                 savedInBatch++;
               }
             }
-            totalSaved += savedInBatch;
-            LOGGER.info(
+            totalSaved.accumulateAndGet(savedInBatch, Long::sum);
+            logger.info(
                 String.format(
                     "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
                     batchSize, tableEntry.getClaimTable(), savedInBatch));
-            totalProcessed += claims.size();
-            lastClaimId =
-                !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty();
-            saveProgress(tableEntry.getClaimTable(), lastClaimId, entityManager);
-            // If the number of returned claims is not equal to the requested batch size, then the
-            // table
-            // is done being processed.
-          } while (claims.size() == batchSize);
+            totalProcessed.accumulateAndGet(claims.size(), Long::sum);
+            lastClaimId.set(
+                !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty());
+            saveProgress(tableEntry.getClaimTable(), lastClaimId.get(), entityManager);
 
-          LOGGER.info(
-              String.format(
-                  "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
-                  tableEntry.getClaimTable(), totalProcessed, totalSaved));
-          return totalSaved;
-        });
+            claimsSize.set(claims.size());
+          });
+      // If the number of returned claims is not equal to the requested batch size, then the
+      // table
+      // is done being processed.
+    } while (claimsSize.get() == batchSize);
+
+    logger.info(
+        String.format(
+            "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
+            tableEntry.getClaimTable(), totalProcessed.get(), totalSaved.get()));
+    return totalSaved.get();
   }
 
   /**
@@ -242,27 +249,33 @@ public abstract class AbstractSamhsaBackfill {
    */
   private void saveProgress(
       String table, Optional<String> lastClaimId, EntityManager entityManager) {
-    Query query = Objects.requireNonNull(entityManager).createNativeQuery(UPSERT_PROGRESS_QUERY);
-    query.setParameter("tableName", table);
-    query.setParameter("lastClaim", lastClaimId.get());
-    query.executeUpdate();
+    // In some cases, it's possible for lastClaimId to be empty. This isn't an error, it just means
+    // that no results were returned in the last query.
+    if (lastClaimId.isPresent()) {
+      Query query = Objects.requireNonNull(entityManager).createNativeQuery(UPSERT_PROGRESS_QUERY);
+      query.setParameter("tableName", table);
+      query.setParameter("lastClaim", lastClaimId.get());
+      query.executeUpdate();
+    }
   }
 
   /**
    * executes a query to get the last claim id processed.
    *
    * @param table The claim table in question.
-   * @param entityManager The entity manager.
    * @return The last claim id processed for the given table.
    */
-  private Optional<String> getLastClaimId(String table, EntityManager entityManager) {
-    Query query = Objects.requireNonNull(entityManager).createNativeQuery(GET_PROGRESS_QUERY);
-    query.setParameter("tableName", table);
-    try {
-      String claimId = (String) query.getSingleResult();
-      return Optional.of(claimId);
-    } catch (NoResultException e) {
-      return Optional.empty();
-    }
+  private Optional<String> getLastClaimId(String table) {
+    return transactionManager.executeFunction(
+        entityManager -> {
+          Query query = Objects.requireNonNull(entityManager).createNativeQuery(GET_PROGRESS_QUERY);
+          query.setParameter("tableName", table);
+          try {
+            String claimId = (String) query.getSingleResult();
+            return Optional.of(claimId);
+          } catch (NoResultException e) {
+            return Optional.empty();
+          }
+        });
   }
 }

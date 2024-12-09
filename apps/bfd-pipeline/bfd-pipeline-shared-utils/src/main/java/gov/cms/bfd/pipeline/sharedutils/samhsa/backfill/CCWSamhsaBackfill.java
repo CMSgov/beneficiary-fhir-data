@@ -11,9 +11,13 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** CCW implementation for AbstractSamhsaBackfill. */
 public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
+  /** The Logger. */
+  static final Logger LOGGER = LoggerFactory.getLogger(CCWSamhsaBackfill.class);
 
   /** The name of the claim id column. */
   private final String CLAIM_ID_COLUMN_NAME = "clm_id";
@@ -46,7 +50,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
    * @param batchSize the query batch size.
    */
   public CCWSamhsaBackfill(TransactionManager transactionManager, int batchSize) {
-    super(transactionManager, batchSize);
+    super(transactionManager, batchSize, LOGGER);
   }
 
   /** {@inheritDoc} */

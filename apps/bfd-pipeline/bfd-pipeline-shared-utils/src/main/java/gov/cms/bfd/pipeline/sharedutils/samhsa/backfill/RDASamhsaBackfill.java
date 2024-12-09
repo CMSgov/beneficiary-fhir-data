@@ -6,9 +6,13 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** RDA implementation of AbstractSamhsaBackfill. */
 public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
+  /** The Logger. */
+  static final Logger LOGGER = LoggerFactory.getLogger(RDASamhsaBackfill.class);
 
   /** The column name for the fiss claim id. */
   private String FISS_CLAIM_ID_COLUMN = "claim_id";
@@ -30,7 +34,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
    * @param batchSize the query batch size.
    */
   public RDASamhsaBackfill(TransactionManager transactionManager, int batchSize) {
-    super(transactionManager, batchSize);
+    super(transactionManager, batchSize, LOGGER);
   }
 
   /** {@inheritDoc} */
