@@ -71,7 +71,8 @@ resource "aws_lambda_function" "node" {
       BFD_ENVIRONMENT      = local.env
       SQS_QUEUE_NAME       = aws_sqs_queue.this.name
       AWS_CURRENT_REGION   = data.aws_region.current.name
-      ASG_NAME             = data.aws_autoscaling_group.asg.name
+      ASG_NAME             = local.active_asg_this_env
+                          #data.aws_autoscaling_group.asg.name
       COASTING_TIME        = var.coasting_time
       WARM_INSTANCE_TARGET = var.warm_instance_target
       STOP_ON_SCALING      = var.stop_on_scaling
@@ -122,7 +123,8 @@ resource "aws_instance" "this" {
     env                = local.env
     seed_env           = local.seed_env
     aws_current_region = data.aws_region.current.name
-    asg_name           = data.aws_autoscaling_group.asg.name
+    asg_name           = local.active_asg_this_env
+                      # data.aws_autoscaling_group.asg.name
 
     sqs_queue_name            = var.sqs_queue_name
     node_lambda_name          = var.node_lambda_name

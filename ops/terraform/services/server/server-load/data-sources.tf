@@ -66,9 +66,18 @@ data "aws_launch_template" "template" {
   name = "bfd-${local.env}-fhir"
 }
 
-data "aws_autoscaling_group" "asg" {
-  name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
+# BFD-3789
+# data "aws_autoscaling_group" "asg" {
+#   name = "${data.aws_launch_template.template.name}-${data.aws_launch_template.template.latest_version}"
+# }
+
+locals {
+  latest_ltv                     = tonumber(data.aws_launch_template.template.latest_version)
+  #is_latest_launch_template_odd  = local.latest_ltv % 2 == 1
+  is_latest_launch_template_even = local.latest_ltv % 2 == 0
+  active_asg_this_env            = local.is_latest_launch_template_even == 1 ? "${data.aws_launch_template.template.name}-even" : "${data.aws_launch_template.template.name}-odd"
 }
+## END BFD-3789
 
 data "aws_ecr_repository" "ecr_node" {
   name = "bfd-mgmt-${local.service}-node"

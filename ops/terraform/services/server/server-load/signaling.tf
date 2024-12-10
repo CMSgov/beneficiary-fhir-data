@@ -13,7 +13,8 @@ resource "aws_autoscaling_notification" "this" {
   topic_arn = aws_sns_topic.this.arn
 
   group_names = [
-    data.aws_autoscaling_group.asg.name,
+    #data.aws_autoscaling_group.asg.name,
+    local.active_asg_this_env,
   ]
 
   notifications = [
