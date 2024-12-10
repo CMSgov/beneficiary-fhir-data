@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.CCWSamhsaBackfill.CCW_TABLES;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.RDASamhsaBackfill.RDA_TABLES;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -15,20 +17,20 @@ import java.util.concurrent.Future;
  * existing data. This class will create a Callable for each claim table, and run each
  * simultaneously in a different thread.
  */
-public class SamhsaBackfillService implements Callable {
+public class SamhsaBackfillService {
   /** List of RDA tables. */
-  private final List<String> RDA_TABLES = List.of("rda.fiss_claims", "rda.mcs_claims");
+  private final List<RDA_TABLES> rdaTables = List.of(RDA_TABLES.FISS_CLAIMS, RDA_TABLES.MCS_CLAIMS);
 
   /** List of CCW tables. */
-  private final List<String> CCW_TABLES =
+  private final List<CCW_TABLES> ccwTables =
       List.of(
-          "ccw.carrier_claims",
-          "ccw.dme_claims",
-          "ccw.hha_claims",
-          "ccw.hospice_claims",
-          "ccw.inpatient_claims",
-          "ccw.outpatient_claims",
-          "ccw.snf_claims");
+          CCW_TABLES.CARRIER_CLAIMS,
+          CCW_TABLES.DME_CLAIMS,
+          CCW_TABLES.HHA_CLAIMS,
+          CCW_TABLES.HOSPICE_CLAIMS,
+          CCW_TABLES.INPATIENT_CLAIMS,
+          CCW_TABLES.OUTPATIENT_CLAIMS,
+          CCW_TABLES.SNF_CLAIMS);
 
   /** Contains the list of callables for RDA. Each callable will be a different table. */
   List<Callable> rdaCallables;
@@ -66,9 +68,9 @@ public class SamhsaBackfillService implements Callable {
    * @param tables The RDA tables to use.
    * @return A list of callables
    */
-  private List<Callable> createRdaCallables(List<String> tables) {
+  private List<Callable> createRdaCallables(List<RDA_TABLES> tables) {
     List<Callable> callables = new ArrayList<>();
-    for (String table : tables) {
+    for (RDASamhsaBackfill.RDA_TABLES table : tables) {
       callables.add(new RDASamhsaBackfill(transactionManager, batchSize, table));
     }
     return callables;
@@ -80,9 +82,9 @@ public class SamhsaBackfillService implements Callable {
    * @param tables The CCW tables to use.
    * @return A list of callables
    */
-  private List<Callable> createCcwCallables(List<String> tables) {
+  private List<Callable> createCcwCallables(List<CCW_TABLES> tables) {
     List<Callable> callables = new ArrayList<>();
-    for (String table : tables) {
+    for (CCW_TABLES table : tables) {
       callables.add(new CCWSamhsaBackfill(transactionManager, batchSize, table));
     }
     return callables;
@@ -97,8 +99,8 @@ public class SamhsaBackfillService implements Callable {
   private SamhsaBackfillService(PipelineApplicationState appState, int batchSize) {
     transactionManager = new TransactionManager(appState.getEntityManagerFactory());
     this.batchSize = batchSize;
-    rdaCallables = createRdaCallables(RDA_TABLES);
-    ccwCallables = createCcwCallables(CCW_TABLES);
+    rdaCallables = createRdaCallables(rdaTables);
+    ccwCallables = createCcwCallables(ccwTables);
   }
 
   /**
@@ -138,10 +140,5 @@ public class SamhsaBackfillService implements Callable {
                 })
             .sum();
     return total;
-  }
-
-  @Override
-  public Object call() throws Exception {
-    return null;
   }
 }

@@ -10,8 +10,6 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import jakarta.persistence.EntityManager;
-import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,50 +19,78 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   static final Logger LOGGER = LoggerFactory.getLogger(CCWSamhsaBackfill.class);
 
   /** The name of the claim id column. */
-  private final String CLAIM_ID_COLUMN_NAME = "clm_id";
+  private static final String CLAIM_ID_COLUMN_NAME = "clm_id";
 
-  /** List ot tables that we want to process in this instance. */
-  private final String claimTable;
+  /** The table to process in this thread. */
+  private final TableEntry tableEntry;
 
   /** The list of table entries for CCW claims. */
-  private final List<TableEntry> TABLES =
-      List.of(
-          new TableEntry(
-              "ccw.carrier_claims", CarrierClaim.class, "ccw.carrier_tags", CLAIM_ID_COLUMN_NAME),
-          new TableEntry("ccw.dme_claims", DMEClaim.class, "ccw.dme_tags", CLAIM_ID_COLUMN_NAME),
-          new TableEntry("ccw.hha_claims", HHAClaim.class, "ccw.hha_tags", CLAIM_ID_COLUMN_NAME),
-          new TableEntry(
-              "ccw.hospice_claims", HospiceClaim.class, "ccw.hospice_tags", CLAIM_ID_COLUMN_NAME),
-          new TableEntry(
-              "ccw.inpatient_claims",
-              InpatientClaim.class,
-              "ccw.inpatient_tags",
-              CLAIM_ID_COLUMN_NAME),
-          new TableEntry(
-              "ccw.outpatient_claims",
-              OutpatientClaim.class,
-              "ccw.outpatient_tags",
-              CLAIM_ID_COLUMN_NAME),
-          new TableEntry("ccw.snf_claims", SNFClaim.class, "ccw.snf_tags", CLAIM_ID_COLUMN_NAME));
+  public enum CCW_TABLES {
+    /** Carrier Claim. */
+    CARRIER_CLAIMS(
+        new TableEntry(
+            "ccw.carrier_claims", CarrierClaim.class, "ccw.carrier_tags", CLAIM_ID_COLUMN_NAME)),
+    /** DME Claim. */
+    DME_CLAIMS(
+        new TableEntry("ccw.dme_claims", DMEClaim.class, "ccw.dme_tags", CLAIM_ID_COLUMN_NAME)),
+    /** HHA Claim. */
+    HHA_CLAIMS(
+        new TableEntry("ccw.hha_claims", HHAClaim.class, "ccw.hha_tags", CLAIM_ID_COLUMN_NAME)),
+    /** Hospice Claim. */
+    HOSPICE_CLAIMS(
+        new TableEntry(
+            "ccw.hospice_claims", HospiceClaim.class, "ccw.hospice_tags", CLAIM_ID_COLUMN_NAME)),
+    /** Inpatient Claim. */
+    INPATIENT_CLAIMS(
+        new TableEntry(
+            "ccw.inpatient_claims",
+            InpatientClaim.class,
+            "ccw.inpatient_tags",
+            CLAIM_ID_COLUMN_NAME)),
+    /** Outpatient Claim. */
+    OUTPATIENT_CLAIMS(
+        new TableEntry(
+            "ccw.outpatient_claims",
+            OutpatientClaim.class,
+            "ccw.outpatient_tags",
+            CLAIM_ID_COLUMN_NAME)),
+    /** SNF Claim. */
+    SNF_CLAIMS(
+        new TableEntry("ccw.snf_claims", SNFClaim.class, "ccw.snf_tags", CLAIM_ID_COLUMN_NAME));
+
+    /** The table entry. */
+    private TableEntry entry;
+
+    /**
+     * Constructor.
+     *
+     * @param entry The tableEntry.
+     */
+    CCW_TABLES(TableEntry entry) {
+      this.entry = entry;
+    }
+
+    /**
+     * Returns the table entry.
+     *
+     * @return The tableEntry.
+     */
+    TableEntry getEntry() {
+      return entry;
+    }
+  }
 
   /**
    * Constructor.
    *
    * @param transactionManager Transaction manager.
    * @param batchSize the query batch size.
-   * @param claimTable The table to use in this thread.
+   * @param tableEntry The table to use in this thread.
    */
   public CCWSamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, String claimTable) {
-    super(transactionManager, batchSize, LOGGER);
-    this.claimTable = claimTable;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected Optional<TableEntry> getTable() {
-    // Get the entry for the table that we're using in this thread.
-    return TABLES.stream().filter(table -> claimTable.equals(table.getClaimTable())).findFirst();
+      TransactionManager transactionManager, int batchSize, CCW_TABLES tableEntry) {
+    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry());
+    this.tableEntry = tableEntry.getEntry();
   }
 
   /** {@inheritDoc} */

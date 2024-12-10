@@ -24,6 +24,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /** The Logger. */
   private final Logger logger;
 
+  /** The table to use for this thread. */
+  protected final TableEntry tableEntry;
+
   /**
    * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags. Will
    * start at a given claim id, and limit the results to a given limit.
@@ -81,12 +84,14 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param batchSize the query batch size. This is the limit of claims to be pulled with each
    *     query.
    * @param logger The logger.
+   * @param tableEntry the table Entry for this thread.
    */
   public AbstractSamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, Logger logger) {
+      TransactionManager transactionManager, int batchSize, Logger logger, TableEntry tableEntry) {
     this.logger = logger;
     this.transactionManager = transactionManager;
     this.batchSize = batchSize;
+    this.tableEntry = tableEntry;
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
   }
 
@@ -145,13 +150,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   protected abstract String getClaimId(Object claim);
 
   /**
-   * Gets the table to use for this thread.
-   *
-   * @return The list of tables.
-   */
-  protected abstract Optional<TableEntry> getTable();
-
-  /**
    * Entry point.
    *
    * @return The total number of claims for which tags were created.
@@ -159,14 +157,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   @Override
   public Long call() {
     long total = 0L;
-    Optional<TableEntry> table = getTable();
-    if (table.isPresent()) {
-      Long tableTotal = executeForTable(table.get());
-      logger.info(
-          String.format(
-              "Created tags for %d claims in table %s", tableTotal, table.get().getClaimTable()));
-      total += tableTotal;
-    }
+    Long tableTotal = executeForTable(tableEntry);
+    logger.info(
+        String.format(
+            "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
+    total += tableTotal;
     return total;
   }
 
