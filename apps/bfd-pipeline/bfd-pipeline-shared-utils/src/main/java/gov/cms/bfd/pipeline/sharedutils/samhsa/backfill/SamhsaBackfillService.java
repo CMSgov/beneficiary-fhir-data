@@ -126,13 +126,17 @@ public class SamhsaBackfillService implements Callable {
         totals.add(executor.submit(callable));
       }
     }
-    try {
-      for (Future<Long> futureTotal : totals) {
-        total += futureTotal.get();
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      throw new RuntimeException(e);
-    }
+    total =
+        totals.stream()
+            .mapToLong(
+                f -> {
+                  try {
+                    return f.get();
+                  } catch (InterruptedException | ExecutionException ex) {
+                    throw new RuntimeException(ex);
+                  }
+                })
+            .sum();
     return total;
   }
 
