@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,10 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The name of the claim id column. */
   private final String CLAIM_ID_COLUMN_NAME = "clm_id";
 
-  /** The list of tables. */
+  /** List ot tables that we want to process in this instance. */
+  private final String claimTable;
+
+  /** The list of table entries for CCW claims. */
   private final List<TableEntry> TABLES =
       List.of(
           new TableEntry(
@@ -48,15 +52,19 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
    *
    * @param transactionManager Transaction manager.
    * @param batchSize the query batch size.
+   * @param claimTable The table to use in this thread.
    */
-  public CCWSamhsaBackfill(TransactionManager transactionManager, int batchSize) {
+  public CCWSamhsaBackfill(
+      TransactionManager transactionManager, int batchSize, String claimTable) {
     super(transactionManager, batchSize, LOGGER);
+    this.claimTable = claimTable;
   }
 
   /** {@inheritDoc} */
   @Override
-  protected List<TableEntry> getTables() {
-    return TABLES;
+  protected Optional<TableEntry> getTable() {
+    // Get the entry for the table that we're using in this thread.
+    return TABLES.stream().filter(table -> claimTable.equals(table.getClaimTable())).findFirst();
   }
 
   /** {@inheritDoc} */

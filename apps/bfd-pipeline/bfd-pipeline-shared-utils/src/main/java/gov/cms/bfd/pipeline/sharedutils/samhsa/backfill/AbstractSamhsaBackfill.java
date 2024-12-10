@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 
 /**
- * Abstract class to backfill the SAMHSA tags. This will iterate through each of the tables, pull
- * any claims that don't already have SAMHSA tags, and checks them for SAMHSA codes, using
- * SamhsaUtil.
+ * Abstract class to backfill the SAMHSA tags. This will iterate through the claims in a table, and
+ * create SAMHSA tags for any claims that do not already have them.
  */
-public abstract class AbstractSamhsaBackfill {
+public abstract class AbstractSamhsaBackfill implements Callable {
   /** The Logger. */
   private final Logger logger;
 
@@ -145,24 +145,26 @@ public abstract class AbstractSamhsaBackfill {
   protected abstract String getClaimId(Object claim);
 
   /**
-   * Gets the list of tables to iterate over.
+   * Gets the table to use for this thread.
    *
    * @return The list of tables.
    */
-  protected abstract List<TableEntry> getTables();
+  protected abstract Optional<TableEntry> getTable();
 
   /**
    * Entry point.
    *
    * @return The total number of claims for which tags were created.
    */
-  public Long execute() {
+  @Override
+  public Long call() {
     long total = 0L;
-    for (TableEntry tableEntry : getTables()) {
-      Long tableTotal = executeForTable(tableEntry);
+    Optional<TableEntry> table = getTable();
+    if (table.isPresent()) {
+      Long tableTotal = executeForTable(table.get());
       logger.info(
           String.format(
-              "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
+              "Created tags for %d claims in table %s", tableTotal, table.get().getClaimTable()));
       total += tableTotal;
     }
     return total;
@@ -196,7 +198,7 @@ public abstract class AbstractSamhsaBackfill {
       logger.info(
           String.format(
               "Starting processing of table %s at claim %s",
-              tableEntry.getClaimTable(), lastClaimId.get()));
+              tableEntry.getClaimTable(), lastClaimId.get().get()));
     } else {
       logger.info(
           String.format(
