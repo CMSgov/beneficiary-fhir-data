@@ -1,0 +1,278 @@
+package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
+
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.text.StringSubstitutor;
+import org.slf4j.Logger;
+
+/**
+ * Abstract class to backfill the SAMHSA tags. This will iterate through the claims in a table, and
+ * create SAMHSA tags for any claims that do not already have them.
+ */
+public abstract class AbstractSamhsaBackfill implements Callable {
+  /** The Logger. */
+  private final Logger logger;
+
+  /** The table to use for this thread. */
+  protected final TableEntry tableEntry;
+
+  /**
+   * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags. Will
+   * start at a given claim id, and limit the results to a given limit.
+   */
+  protected String QUERY_WITH_STARTING_CLAIM =
+      " SELECT * FROM ${tableName} t "
+          + " WHERE ${claimColumn} > ${startingClaim} "
+          + " AND NOT EXISTS "
+          + " (SELECT 1 FROM ${tagTableName} g where t.${claimColumn} = g.clm_id) "
+          + " ORDER BY ${claimColumn} ASC "
+          + " LIMIT ${limit};";
+
+  /**
+   * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags.
+   * Starts at the beginning of the sorted list of claims. This query will be run on the first
+   * iteration on a table when we have no original claim to continue off of.
+   */
+  protected String QUERY_WITH_NO_STARTING_CLAIM =
+      " SELECT * FROM ${tableName} t "
+          + " WHERE NOT EXISTS "
+          + " (SELECT 1 FROM ${tagTableName} g where t.${claimColumn} = g.clm_id) "
+          + " ORDER BY ${claimColumn} ASC "
+          + " LIMIT ${limit};";
+
+  /** Query to perform upsert on the backfill progress table for a given claim table. */
+  protected String UPSERT_PROGRESS_QUERY =
+      " INSERT INTO ccw.samhsa_backfill_progress "
+          + " (claim_table, last_processed_claim) "
+          + " VALUES (:tableName, :lastClaim) "
+          + " ON CONFLICT (claim_table) "
+          + " DO UPDATE SET "
+          + "   last_processed_claim = :lastClaim ";
+
+  /** Query to get the backfill progress from the database for a given claim table. */
+  protected String GET_PROGRESS_QUERY =
+      " SELECT last_processed_claim FROM ccw.samhsa_backfill_progress "
+          + " WHERE claim_table = :tableName ";
+
+  /** The transaction manager. */
+  TransactionManager transactionManager;
+
+  /**
+   * SamhsaUtil class. This will be used to check the claims for SAMHSA data, and create the tags if
+   * necessary.
+   */
+  SamhsaUtil samhsaUtil;
+
+  /** query batch size. */
+  int batchSize;
+
+  /**
+   * Constructor.
+   *
+   * @param transactionManager The transaction manager.
+   * @param batchSize the query batch size. This is the limit of claims to be pulled with each
+   *     query.
+   * @param logger The logger.
+   * @param tableEntry the table Entry for this thread.
+   */
+  public AbstractSamhsaBackfill(
+      TransactionManager transactionManager, int batchSize, Logger logger, TableEntry tableEntry) {
+    this.logger = logger;
+    this.transactionManager = transactionManager;
+    this.batchSize = batchSize;
+    this.tableEntry = tableEntry;
+    samhsaUtil = SamhsaUtil.getSamhsaUtil();
+  }
+
+  /**
+   * Executes the query using the transaction manager.
+   *
+   * @param query The query to execute.
+   * @return a list of claims.
+   * @param <TClaim> The type of the claim.
+   */
+  private <TClaim> List<TClaim> executeQuery(Query query) {
+    return (List<TClaim>) query.getResultList();
+  }
+
+  /**
+   * Builds a query object by taking a SQL query string and replacing the parameter placeholders
+   * with appropriate values.
+   *
+   * @param startingClaim The claim to start at. If this is empty, the version of the query with no
+   *     starting claim will be used.
+   * @param tableEntry The TableEntry pojo for this table.
+   * @param limit the number of claims to pull at a time.
+   * @param entityManager The entity manager.
+   * @return Query to run.
+   */
+  private Query buildQuery(
+      Optional<String> startingClaim,
+      TableEntry tableEntry,
+      int limit,
+      EntityManager entityManager) {
+    Map<String, String> params =
+        Map.of(
+            "tableName",
+            tableEntry.getClaimTable(),
+            "claimColumn",
+            tableEntry.getClaimColumnName(),
+            "startingClaim",
+            startingClaim.orElse(""),
+            "tagTableName",
+            tableEntry.getTagTable(),
+            "limit",
+            String.valueOf(limit));
+    StringSubstitutor strSub = new StringSubstitutor(params);
+    String queryStr =
+        strSub.replace(
+            startingClaim.isPresent() ? QUERY_WITH_STARTING_CLAIM : QUERY_WITH_NO_STARTING_CLAIM);
+    return entityManager.createNativeQuery(queryStr, tableEntry.getClaimClass());
+  }
+
+  /**
+   * Gets the claim id of a claim.
+   *
+   * @param claim The Claim to check.
+   * @return the claim id.
+   */
+  protected abstract String getClaimId(Object claim);
+
+  /**
+   * Entry point.
+   *
+   * @return The total number of claims for which tags were created.
+   */
+  @Override
+  public Long call() {
+    long total = 0L;
+    Long tableTotal = executeForTable(tableEntry);
+    logger.info(
+        String.format(
+            "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
+    total += tableTotal;
+    return total;
+  }
+
+  /**
+   * Processes a claim with SamhsaUtil to check for SAMHSA codes.
+   *
+   * @param claim the claim to process
+   * @param entityManager The entity manager.
+   * @return true if a claim was persisted.
+   * @param <TClaim> Type of the claim.
+   */
+  protected abstract <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager);
+
+  /**
+   * Iterates over all of the claims in a table, and checks for SAMHSA data.
+   *
+   * @param tableEntry Contains information about the tables and entities for this claim type.
+   * @return The number of claims for which tags were created.
+   * @param <TClaim> The type of the claim.
+   */
+  private <TClaim> Long executeForTable(TableEntry tableEntry) {
+    // making these final Atomic objects allow us to use them inside of executeProcedure lambda.
+    final AtomicLong totalSaved = new AtomicLong(0L);
+    final AtomicLong totalProcessed = new AtomicLong(0L);
+    final AtomicLong claimsSize = new AtomicLong(0L);
+    Optional<String> id = getLastClaimId(tableEntry.getClaimTable());
+    final AtomicReference<Optional<String>> lastClaimId = new AtomicReference<>(id);
+    if (lastClaimId.get().isPresent()) {
+      logger.info(
+          String.format(
+              "Starting processing of table %s at claim %s",
+              tableEntry.getClaimTable(), lastClaimId.get().get()));
+    } else {
+      logger.info(
+          String.format(
+              "Starting processing of table %s from the beginning.", tableEntry.getClaimTable()));
+    }
+
+    do {
+      transactionManager.executeProcedure(
+          entityManager -> {
+            Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
+            List<TClaim> claims = executeQuery(query);
+            int savedInBatch = 0;
+            for (TClaim claim : claims) {
+              boolean persisted = processClaim(claim, entityManager);
+              if (persisted) {
+                savedInBatch++;
+              }
+            }
+            totalSaved.accumulateAndGet(savedInBatch, Long::sum);
+            logger.info(
+                String.format(
+                    "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
+                    batchSize, tableEntry.getClaimTable(), savedInBatch));
+            totalProcessed.accumulateAndGet(claims.size(), Long::sum);
+            lastClaimId.set(
+                !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty());
+            saveProgress(tableEntry.getClaimTable(), lastClaimId.get(), entityManager);
+
+            claimsSize.set(claims.size());
+          });
+      // If the number of returned claims is not equal to the requested batch size, then the
+      // table
+      // is done being processed.
+    } while (claimsSize.get() == batchSize);
+
+    logger.info(
+        String.format(
+            "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
+            tableEntry.getClaimTable(), totalProcessed.get(), totalSaved.get()));
+    return totalSaved.get();
+  }
+
+  /**
+   * Saves the progress in processing the given table by writing the last processed claim id to the
+   * database.
+   *
+   * @param table The table in question.
+   * @param lastClaimId The last claim id processed.
+   * @param entityManager The entity manager.
+   */
+  private void saveProgress(
+      String table, Optional<String> lastClaimId, EntityManager entityManager) {
+    // In some cases, it's possible for lastClaimId to be empty. This isn't an error, it just means
+    // that no results were returned in the last query.
+    if (lastClaimId.isPresent()) {
+      Query query = Objects.requireNonNull(entityManager).createNativeQuery(UPSERT_PROGRESS_QUERY);
+      query.setParameter("tableName", table);
+      query.setParameter("lastClaim", lastClaimId.get());
+      query.executeUpdate();
+    }
+  }
+
+  /**
+   * executes a query to get the last claim id processed.
+   *
+   * @param table The claim table in question.
+   * @return The last claim id processed for the given table.
+   */
+  private Optional<String> getLastClaimId(String table) {
+    return transactionManager.executeFunction(
+        entityManager -> {
+          Query query = Objects.requireNonNull(entityManager).createNativeQuery(GET_PROGRESS_QUERY);
+          query.setParameter("tableName", table);
+          try {
+            String claimId = (String) query.getSingleResult();
+            return Optional.of(claimId);
+          } catch (NoResultException e) {
+            return Optional.empty();
+          }
+        });
+  }
+}
