@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.samhsa.FissTag;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import jakarta.persistence.EntityManager;
@@ -14,20 +16,19 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   static final Logger LOGGER = LoggerFactory.getLogger(RDASamhsaBackfill.class);
 
   /** The column name for the fiss claim id. */
-  private static String FISS_CLAIM_ID_COLUMN = "claim_id";
+  private static String FISS_CLAIM_ID_FIELD = "claimId";
 
   /** The column name for the mcs claim id. */
-  private static String MCS_CLAIM_ID_COLUMN = "idr_clm_hd_icn";
+  private static String MCS_CLAIM_ID_FIELD = "idrClmHdIcn";
 
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {
     /** Fiss Claim. */
     FISS_CLAIMS(
-        new TableEntry(
-            "rda.fiss_claims", RdaFissClaim.class, "rda.fiss_Tags", FISS_CLAIM_ID_COLUMN)),
+        new TableEntry("rda.fiss_claims", RdaFissClaim.class, FissTag.class, FISS_CLAIM_ID_FIELD)),
     /** MCS Claim. */
     MCS_CLAIMS(
-        new TableEntry("rda.mcs_claims", RdaMcsClaim.class, "rda.mcs_tags", MCS_CLAIM_ID_COLUMN));
+        new TableEntry("rda.mcs_claims", RdaMcsClaim.class, McsTag.class, MCS_CLAIM_ID_FIELD));
 
     /** The tableEntry. */
     TableEntry entry;

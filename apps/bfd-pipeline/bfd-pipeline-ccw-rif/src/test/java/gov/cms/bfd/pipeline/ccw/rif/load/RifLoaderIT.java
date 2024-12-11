@@ -164,7 +164,7 @@ public final class RifLoaderIT {
     validateSamhsaTagsInDatabase(0, SnfTag.class);
     SamhsaBackfillService backfill =
         SamhsaBackfillService.createBackfillService(
-            PipelineTestUtils.get().getPipelineApplicationState(), 100);
+            PipelineTestUtils.get().getPipelineApplicationState(), null, 100);
     backfill.startBackFill(true, false);
 
     validateSamhsaTagsInDatabase(124, CarrierTag.class);

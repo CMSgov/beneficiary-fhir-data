@@ -98,6 +98,8 @@ claim_queue_multiple=
 kubernetes=false
 temp_dir=
 max_claims=2500
+db_password=InsecureLocalDev
+db_user=bfd
 usage() {
   cat 1>&2 <<EOF
 Runs a BFD pipeline.  Use command line options to change behaviors.
@@ -119,6 +121,8 @@ $(basename $0) [options] run_mode
 -m max_claims             The maximum RDA claims to send.
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
+-p password               DB password
+-u username               DB Username
 Supported long options:
 
 --bene-load-options threads:batch_size:queue_multiple
@@ -130,7 +134,7 @@ Supported long options:
 --temp directory
   Sets the java.io.tmpdir property.
 
-Run mode options: 
+Run mode options:
   backfill SAMHSA backfill only.
   rif      RIF pipeline only.
   random   RDA pipeline only.  Using in-process random API server.
@@ -149,7 +153,7 @@ Option defaults:
 EOF
 }
 
-while getopts "m:b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
+while getopts "p:u:m:b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   case $option in
   b) batch_size=$OPTARG ;;
   c) cache_size=$OPTARG ;;
@@ -177,6 +181,8 @@ while getopts "m:b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
      unset m b d
      ;;
   t) threads=$OPTARG ;;
+  u) db_user=$OPTARG ;;
+  p) db_password=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
   Z) debug_enabled=true ; debug_suspend=y ;;
@@ -357,8 +363,8 @@ setvar ccw/s3_bucket_name "$s3_bucket"
 setvar hicn_hash/iterations "1000"  # The minimum number of iterations recommended by NIST is 1000.
 setvar hicn_hash/pepper "6f6e7474656865726c61657070707265" # nottherealpepper
 setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
-setvar db/username "bfd"
-setvar db/password "InsecureLocalDev"
+setvar db/username "$db_user"
+setvar db/password "$db_password"
 
 # For testing RIF performance.
 if [[ x$bene_threads = x ]] ; then

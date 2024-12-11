@@ -442,14 +442,22 @@ public final class PipelineApplication {
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource,
       Clock clock) {
-    final PipelineApplicationState appState =
+    final PipelineApplicationState appStateCcw =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            clock);
+    final PipelineApplicationState appStateRda =
         new PipelineApplicationState(
             appMeters,
             appMetrics,
             pooledDataSource,
             PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
             clock);
-    return new SamhsaBackfillJob(appState, batchSize);
+
+    return new SamhsaBackfillJob(appStateCcw, appStateRda, batchSize);
   }
 
   /**

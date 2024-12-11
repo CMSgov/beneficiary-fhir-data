@@ -7,6 +7,13 @@ import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
+import gov.cms.bfd.model.rif.samhsa.CarrierTag;
+import gov.cms.bfd.model.rif.samhsa.DmeTag;
+import gov.cms.bfd.model.rif.samhsa.HhaTag;
+import gov.cms.bfd.model.rif.samhsa.HospiceTag;
+import gov.cms.bfd.model.rif.samhsa.InpatientTag;
+import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
+import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import jakarta.persistence.EntityManager;
@@ -19,7 +26,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   static final Logger LOGGER = LoggerFactory.getLogger(CCWSamhsaBackfill.class);
 
   /** The name of the claim id column. */
-  private static final String CLAIM_ID_COLUMN_NAME = "clm_id";
+  private static final String CLAIM_ID_FIELD = "claimId";
 
   /** The table to process in this thread. */
   private final TableEntry tableEntry;
@@ -28,35 +35,24 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   public enum CCW_TABLES {
     /** Carrier Claim. */
     CARRIER_CLAIMS(
-        new TableEntry(
-            "ccw.carrier_claims", CarrierClaim.class, "ccw.carrier_tags", CLAIM_ID_COLUMN_NAME)),
+        new TableEntry("ccw.carrier_claims", CarrierClaim.class, CarrierTag.class, CLAIM_ID_FIELD)),
     /** DME Claim. */
-    DME_CLAIMS(
-        new TableEntry("ccw.dme_claims", DMEClaim.class, "ccw.dme_tags", CLAIM_ID_COLUMN_NAME)),
+    DME_CLAIMS(new TableEntry("ccw.dme_claims", DMEClaim.class, DmeTag.class, CLAIM_ID_FIELD)),
     /** HHA Claim. */
-    HHA_CLAIMS(
-        new TableEntry("ccw.hha_claims", HHAClaim.class, "ccw.hha_tags", CLAIM_ID_COLUMN_NAME)),
+    HHA_CLAIMS(new TableEntry("ccw.hha_claims", HHAClaim.class, HhaTag.class, CLAIM_ID_FIELD)),
     /** Hospice Claim. */
     HOSPICE_CLAIMS(
-        new TableEntry(
-            "ccw.hospice_claims", HospiceClaim.class, "ccw.hospice_tags", CLAIM_ID_COLUMN_NAME)),
+        new TableEntry("ccw.hospice_claims", HospiceClaim.class, HospiceTag.class, CLAIM_ID_FIELD)),
     /** Inpatient Claim. */
     INPATIENT_CLAIMS(
         new TableEntry(
-            "ccw.inpatient_claims",
-            InpatientClaim.class,
-            "ccw.inpatient_tags",
-            CLAIM_ID_COLUMN_NAME)),
+            "ccw.inpatient_claims", InpatientClaim.class, InpatientTag.class, CLAIM_ID_FIELD)),
     /** Outpatient Claim. */
     OUTPATIENT_CLAIMS(
         new TableEntry(
-            "ccw.outpatient_claims",
-            OutpatientClaim.class,
-            "ccw.outpatient_tags",
-            CLAIM_ID_COLUMN_NAME)),
+            "ccw.outpatient_claims", OutpatientClaim.class, OutpatientTag.class, CLAIM_ID_FIELD)),
     /** SNF Claim. */
-    SNF_CLAIMS(
-        new TableEntry("ccw.snf_claims", SNFClaim.class, "ccw.snf_tags", CLAIM_ID_COLUMN_NAME));
+    SNF_CLAIMS(new TableEntry("ccw.snf_claims", SNFClaim.class, SnfTag.class, CLAIM_ID_FIELD));
 
     /** The table entry. */
     private TableEntry entry;

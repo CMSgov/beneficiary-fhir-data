@@ -32,12 +32,12 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * start at a given claim id, and limit the results to a given limit.
    */
   protected String QUERY_WITH_STARTING_CLAIM =
-      " SELECT * FROM ${tableName} t "
-          + " WHERE ${claimColumn} > ${startingClaim} "
+      " SELECT e FROM ${entityName} e "
+          + " WHERE e.${claimField} > ${startingClaim} "
           + " AND NOT EXISTS "
-          + " (SELECT 1 FROM ${tagTableName} g where t.${claimColumn} = g.clm_id) "
-          + " ORDER BY ${claimColumn} ASC "
-          + " LIMIT ${limit};";
+          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
+          + " ORDER BY e.${claimField} ASC "
+          + " LIMIT ${limit}";
 
   /**
    * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags.
@@ -45,11 +45,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * iteration on a table when we have no original claim to continue off of.
    */
   protected String QUERY_WITH_NO_STARTING_CLAIM =
-      " SELECT * FROM ${tableName} t "
+      " SELECT e FROM ${entityName} e "
           + " WHERE NOT EXISTS "
-          + " (SELECT 1 FROM ${tagTableName} g where t.${claimColumn} = g.clm_id) "
-          + " ORDER BY ${claimColumn} ASC "
-          + " LIMIT ${limit};";
+          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
+          + " ORDER BY e.${claimField} ASC "
+          + " LIMIT ${limit}";
 
   /** Query to perform upsert on the backfill progress table for a given claim table. */
   protected String UPSERT_PROGRESS_QUERY =
@@ -126,19 +126,21 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         Map.of(
             "tableName",
             tableEntry.getClaimTable(),
-            "claimColumn",
-            tableEntry.getClaimColumnName(),
+            "claimField",
+            tableEntry.getClaimField(),
             "startingClaim",
             startingClaim.orElse(""),
-            "tagTableName",
-            tableEntry.getTagTable(),
+            "tagClass",
+            tableEntry.getTagClass().getSimpleName(),
             "limit",
-            String.valueOf(limit));
+            String.valueOf(limit),
+            "entityName",
+            tableEntry.getClaimClass().getSimpleName());
     StringSubstitutor strSub = new StringSubstitutor(params);
     String queryStr =
         strSub.replace(
             startingClaim.isPresent() ? QUERY_WITH_STARTING_CLAIM : QUERY_WITH_NO_STARTING_CLAIM);
-    return entityManager.createNativeQuery(queryStr, tableEntry.getClaimClass());
+    return entityManager.createQuery(queryStr, tableEntry.getClaimClass());
   }
 
   /**
@@ -201,29 +203,33 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     }
 
     do {
-      transactionManager.executeProcedure(
-          entityManager -> {
-            Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
-            List<TClaim> claims = executeQuery(query);
-            int savedInBatch = 0;
-            for (TClaim claim : claims) {
-              boolean persisted = processClaim(claim, entityManager);
-              if (persisted) {
-                savedInBatch++;
+      try {
+        transactionManager.executeProcedure(
+            entityManager -> {
+              Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
+              List<TClaim> claims = executeQuery(query);
+              int savedInBatch = 0;
+              for (TClaim claim : claims) {
+                boolean persisted = processClaim(claim, entityManager);
+                if (persisted) {
+                  savedInBatch++;
+                }
               }
-            }
-            totalSaved.accumulateAndGet(savedInBatch, Long::sum);
-            logger.info(
-                String.format(
-                    "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
-                    batchSize, tableEntry.getClaimTable(), savedInBatch));
-            totalProcessed.accumulateAndGet(claims.size(), Long::sum);
-            lastClaimId.set(
-                !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty());
-            saveProgress(tableEntry.getClaimTable(), lastClaimId.get(), entityManager);
+              totalSaved.accumulateAndGet(savedInBatch, Long::sum);
+              logger.info(
+                  String.format(
+                      "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
+                      batchSize, tableEntry.getClaimTable(), savedInBatch));
+              totalProcessed.accumulateAndGet(claims.size(), Long::sum);
+              lastClaimId.set(
+                  !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty());
+              saveProgress(tableEntry.getClaimTable(), lastClaimId.get(), entityManager);
 
-            claimsSize.set(claims.size());
-          });
+              claimsSize.set(claims.size());
+            });
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
       // If the number of returned claims is not equal to the requested batch size, then the
       // table
       // is done being processed.

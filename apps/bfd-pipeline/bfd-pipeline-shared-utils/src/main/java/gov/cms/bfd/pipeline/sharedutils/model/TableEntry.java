@@ -16,8 +16,8 @@ public class TableEntry {
   Class claimClass;
 
   /** The tag table associated with this claim. */
-  String tagTable;
+  Class tagClass;
 
   /** The column that contains the claim id. */
-  String claimColumnName;
+  String claimField;
 }

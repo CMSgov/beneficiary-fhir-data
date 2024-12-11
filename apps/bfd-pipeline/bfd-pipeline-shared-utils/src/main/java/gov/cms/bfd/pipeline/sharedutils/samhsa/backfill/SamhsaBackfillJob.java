@@ -17,8 +17,11 @@ public class SamhsaBackfillJob implements PipelineJob {
   /** Sempaphore to ensure that only one instance of this job is running. */
   private final Semaphore runningSemaphore;
 
-  /** The PipelineApplicationState. */
-  PipelineApplicationState appState;
+  /** The CCW PipelineApplicationState. */
+  PipelineApplicationState appStateCcw;
+
+  /** The RDA PipelineApplicationState. */
+  PipelineApplicationState appStateRda;
 
   /** Batch size. */
   int batchSize;
@@ -29,11 +32,14 @@ public class SamhsaBackfillJob implements PipelineJob {
   /**
    * Constructor.
    *
-   * @param appState The PipelineApplicationState
+   * @param appStateCcw The CCW PipelineApplicationState
+   * @param appStateRda The RDA PipelineApplicationState
    * @param batchSize the query batch size.
    */
-  public SamhsaBackfillJob(PipelineApplicationState appState, int batchSize) {
-    this.appState = appState;
+  public SamhsaBackfillJob(
+      PipelineApplicationState appStateCcw, PipelineApplicationState appStateRda, int batchSize) {
+    this.appStateCcw = appStateCcw;
+    this.appStateRda = appStateRda;
     this.batchSize = batchSize;
     runningSemaphore = new Semaphore(1);
   }
@@ -88,8 +94,8 @@ public class SamhsaBackfillJob implements PipelineJob {
    */
   Long callBackfillService() {
     SamhsaBackfillService backfillService =
-        SamhsaBackfillService.createBackfillService(appState, batchSize);
-    Long processedCount = backfillService.startBackFill(true, true);
+        SamhsaBackfillService.createBackfillService(appStateCcw, appStateRda, batchSize);
+    Long processedCount = backfillService.startBackFill(appStateCcw != null, appStateRda != null);
     return processedCount;
   }
 
