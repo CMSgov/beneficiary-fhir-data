@@ -34,8 +34,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   protected String QUERY_WITH_STARTING_CLAIM =
       " SELECT e FROM ${entityName} e "
           + " WHERE e.${claimField} > ${startingClaim} "
-          + " AND NOT EXISTS "
-          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
+          //          + " AND NOT EXISTS "
+          //          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
           + " ORDER BY e.${claimField} ASC "
           + " LIMIT ${limit}";
 
@@ -46,8 +46,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected String QUERY_WITH_NO_STARTING_CLAIM =
       " SELECT e FROM ${entityName} e "
-          + " WHERE NOT EXISTS "
-          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
+          //          + " WHERE NOT EXISTS "
+          //          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
           + " ORDER BY e.${claimField} ASC "
           + " LIMIT ${limit}";
 
