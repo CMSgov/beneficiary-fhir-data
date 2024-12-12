@@ -10,7 +10,10 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.samhsa.DmeTag;
+import gov.cms.bfd.model.rif.samhsa.HhaTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -22,6 +25,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -36,6 +40,10 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
+
+  /** Injecting lookUpSamhsaSecurityTags. */
+  @Autowired
+  private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /**
    * Instantiates a new transformer.
@@ -197,6 +205,16 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     }
 
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
+
+    String securityTag =
+            lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+                    String.valueOf(claimGroup.getClaimId()), HhaTag.class);
+
+    eob.getMeta()
+            .addSecurity()
+            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
+            .setCode(securityTag)
+            .setDisplay(securityTag);
     return eob;
   }
 }

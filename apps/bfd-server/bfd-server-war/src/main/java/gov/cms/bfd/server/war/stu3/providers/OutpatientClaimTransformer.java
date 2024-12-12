@@ -10,7 +10,10 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.samhsa.InpatientTag;
+import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -19,6 +22,7 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,6 +41,10 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform");
+
+  /** Injecting lookUpSamhsaSecurityTags. */
+  @Autowired
+  private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /**
    * Instantiates a new transformer.
@@ -316,6 +324,16 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
       }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
+
+    String securityTag =
+            lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+                    String.valueOf(claimGroup.getClaimId()), OutpatientTag.class);
+
+    eob.getMeta()
+            .addSecurity()
+            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
+            .setCode(securityTag)
+            .setDisplay(securityTag);
     return eob;
   }
 }
