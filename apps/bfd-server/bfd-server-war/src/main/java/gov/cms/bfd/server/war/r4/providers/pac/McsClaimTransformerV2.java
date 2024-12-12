@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
@@ -36,6 +37,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -43,6 +45,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class McsClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
+
+  /** Injecting lookUpSamhsaSecurityTags. */
+  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /** The metric name. */
   private static final String METRIC_NAME =
@@ -129,7 +134,26 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     claim.setItem(getItems(claimGroup));
 
     claim.setCreated(new Date());
-    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
+
+    String securityTag =
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+            claim.getType(), claim.getIdElement().getIdPart());
+
+    // Create a list of Coding objects to match the required type
+    List<Coding> securityTags = new ArrayList<>();
+
+    // Create a Coding object for the security level
+    Coding securityTagCoding =
+        new Coding()
+            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
+            .setCode(securityTag)
+            .setDisplay(securityTag);
+
+    // Add the Coding to the list
+    securityTags.add(securityTagCoding);
+    Meta meta = new Meta();
+    claim.setMeta(meta.setSecurity(securityTags));
+    claim.setMeta(meta.setLastUpdated(Date.from(claimGroup.getLastUpdated())));
 
     return claim;
   }

@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
@@ -16,11 +17,13 @@ import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
@@ -34,6 +37,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+
+  /** Injecting lookUpSamhsaSecurityTags. */
+  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -128,7 +134,24 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
+    String securityTag =
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getType(), claim.getIdPart());
+
+    // Create a list of Coding objects to match the required type
+    List<Coding> securityTags = new ArrayList<>();
+
+    // Create a Coding object for the security level
+    Coding securityTagCoding =
+        new Coding()
+            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
+            .setCode(securityTag)
+            .setDisplay(securityTag);
+
+    // Add the Coding to the list
+    securityTags.add(securityTagCoding);
+    Meta meta = new Meta();
+    claim.setMeta(meta.setSecurity(securityTags));
+    claim.setMeta(meta.setLastUpdated(Date.from(claimGroup.getLastUpdated())));
     claim.setCreated(new Date());
 
     return claim;
