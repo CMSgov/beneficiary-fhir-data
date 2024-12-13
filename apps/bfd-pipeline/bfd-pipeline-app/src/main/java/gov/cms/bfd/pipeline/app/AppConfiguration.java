@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -373,7 +374,10 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * auto-generated aggregate metric names with suffixes like {@code .avg}.
    */
   public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
-      Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
+      Set.of(
+          "FissClaimRdaSink.change.latency.millis",
+          "McsClaimRdaSink.change.latency.millis",
+          CcwRifLoadJob.Metrics.DATA_PROCESSING_TIMER_NAME);
 
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
