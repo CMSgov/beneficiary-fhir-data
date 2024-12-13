@@ -19,7 +19,14 @@ import java.util.concurrent.Future;
  */
 public class SamhsaBackfillService {
   /** List of RDA tables. */
-  private final List<RDA_TABLES> rdaTables = List.of(RDA_TABLES.FISS_CLAIMS, RDA_TABLES.MCS_CLAIMS);
+  private final List<RDA_TABLES> rdaTables =
+      List.of(
+          RDA_TABLES.FISS_CLAIMS,
+          RDA_TABLES.FISS_REVENUE_LINES,
+          RDA_TABLES.FISS_PROC_CODES,
+          RDA_TABLES.FISS_DIAGNOSIS_CODES,
+          RDA_TABLES.MCS_DIAGNOSIS_CODES,
+          RDA_TABLES.MCS_DETAILS);
 
   /** List of CCW tables. */
   private final List<CCW_TABLES> ccwTables =
@@ -126,6 +133,8 @@ public class SamhsaBackfillService {
     Future<Long> totalCcw = null;
     Long total = 0L;
     Integer threadPoolSize = 0;
+    ccw = ccw && ccwCallables != null;
+    rda = rda && rdaCallables != null;
     if (ccw) {
       threadPoolSize += ccwCallables.size();
     }

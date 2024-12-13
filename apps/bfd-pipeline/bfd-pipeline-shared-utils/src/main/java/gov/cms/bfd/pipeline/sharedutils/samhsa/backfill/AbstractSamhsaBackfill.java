@@ -1,11 +1,18 @@
 package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.GT_CLAIM_LINE;
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.TAG_UPSERT_QUERY;
+
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 
@@ -26,30 +34,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   /** The table to use for this thread. */
   protected final TableEntry tableEntry;
-
-  /**
-   * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags. Will
-   * start at a given claim id, and limit the results to a given limit.
-   */
-  protected String QUERY_WITH_STARTING_CLAIM =
-      " SELECT e FROM ${entityName} e "
-          + " WHERE e.${claimField} > ${startingClaim} "
-          //          + " AND NOT EXISTS "
-          //          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
-          + " ORDER BY e.${claimField} ASC "
-          + " LIMIT ${limit}";
-
-  /**
-   * Query to retrieve a list of claims objects, ignoring claims that already have SAMHSA tags.
-   * Starts at the beginning of the sorted list of claims. This query will be run on the first
-   * iteration on a table when we have no original claim to continue off of.
-   */
-  protected String QUERY_WITH_NO_STARTING_CLAIM =
-      " SELECT e FROM ${entityName} e "
-          //          + " WHERE NOT EXISTS "
-          //          + " (SELECT 1 FROM ${tagClass} g where g.claim = e.${claimField}) "
-          + " ORDER BY e.${claimField} ASC "
-          + " LIMIT ${limit}";
 
   /** Query to perform upsert on the backfill progress table for a given claim table. */
   protected String UPSERT_PROGRESS_QUERY =
@@ -100,10 +84,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    *
    * @param query The query to execute.
    * @return a list of claims.
-   * @param <TClaim> The type of the claim.
    */
-  private <TClaim> List<TClaim> executeQuery(Query query) {
-    return (List<TClaim>) query.getResultList();
+  private List<Object[]> executeQuery(Query query) {
+    return (List<Object[]>) query.getResultList();
   }
 
   /**
@@ -122,34 +105,29 @@ public abstract class AbstractSamhsaBackfill implements Callable {
       TableEntry tableEntry,
       int limit,
       EntityManager entityManager) {
+    StringSubstitutor strSub;
     Map<String, String> params =
         Map.of(
-            "tableName",
-            tableEntry.getClaimTable(),
+            "gtClaimLine",
+            startingClaim.isPresent() ? GT_CLAIM_LINE : "",
             "claimField",
-            tableEntry.getClaimField(),
-            "startingClaim",
-            startingClaim.orElse(""),
-            "tagClass",
-            tableEntry.getTagClass().getSimpleName(),
-            "limit",
-            String.valueOf(limit),
-            "entityName",
-            tableEntry.getClaimClass().getSimpleName());
-    StringSubstitutor strSub = new StringSubstitutor(params);
-    String queryStr =
-        strSub.replace(
-            startingClaim.isPresent() ? QUERY_WITH_STARTING_CLAIM : QUERY_WITH_NO_STARTING_CLAIM);
-    return entityManager.createQuery(queryStr, tableEntry.getClaimClass());
+            tableEntry.getClaimField());
+    strSub = new StringSubstitutor(params);
+    String queryStr = strSub.replace(tableEntry.getQuery());
+    Query query = entityManager.createNativeQuery(queryStr);
+    startingClaim.ifPresent(s -> query.setParameter("startingClaim", convertClaimId(s)));
+    query.setParameter("limit", limit);
+    return query;
   }
 
   /**
-   * Gets the claim id of a claim.
+   * Converts the String value of the claimId to the correct type for the table.
    *
    * @param claim The Claim to check.
+   * @param <TClaimId> Type of the claimId. Will be Long or String.
    * @return the claim id.
    */
-  protected abstract String getClaimId(Object claim);
+  protected abstract <TClaimId> TClaimId convertClaimId(String claim);
 
   /**
    * Entry point.
@@ -173,9 +151,25 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param claim the claim to process
    * @param entityManager The entity manager.
    * @return true if a claim was persisted.
-   * @param <TClaim> Type of the claim.
    */
-  protected abstract <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager);
+  protected boolean processClaim(Object[] claim, EntityManager entityManager) {
+    Object claimId = claim[0];
+    LocalDate coverageStartDate =
+        claim[1] == null ? LocalDate.parse("1970-01-01") : ((Date) claim[1]).toLocalDate();
+    LocalDate coverageEndDate =
+        claim[2] == null ? LocalDate.now() : ((Date) claim[2]).toLocalDate();
+    List<String> codes =
+        Arrays.asList(claim).subList(3, claim.length).stream()
+            .filter(Objects::nonNull)
+            .map(code -> (String) code)
+            .collect(Collectors.toList());
+    boolean persisted = samhsaUtil.processCodeList(codes, coverageStartDate, coverageEndDate);
+    if (persisted) {
+      writeEntry(claimId, tableEntry.getTagTable(), entityManager);
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Iterates over all of the claims in a table, and checks for SAMHSA data.
@@ -207,22 +201,25 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         transactionManager.executeProcedure(
             entityManager -> {
               Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
-              List<TClaim> claims = executeQuery(query);
+              List<Object[]> claims = executeQuery(query);
               int savedInBatch = 0;
-              for (TClaim claim : claims) {
+              for (Object[] claim : claims) {
                 boolean persisted = processClaim(claim, entityManager);
                 if (persisted) {
                   savedInBatch++;
                 }
               }
               totalSaved.accumulateAndGet(savedInBatch, Long::sum);
+              totalProcessed.accumulateAndGet(claims.size(), Long::sum);
               logger.info(
                   String.format(
-                      "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes.",
-                      batchSize, tableEntry.getClaimTable(), savedInBatch));
-              totalProcessed.accumulateAndGet(claims.size(), Long::sum);
+                      "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes. Total processed so far: %d",
+                      batchSize, tableEntry.getClaimTable(), savedInBatch, totalProcessed.get()));
+
               lastClaimId.set(
-                  !claims.isEmpty() ? Optional.of(getClaimId(claims.getLast())) : Optional.empty());
+                  !claims.isEmpty()
+                      ? Optional.of(String.valueOf(claims.getLast()[0]))
+                      : Optional.empty());
               saveProgress(tableEntry.getClaimTable(), lastClaimId.get(), entityManager);
 
               claimsSize.set(claims.size());
@@ -240,6 +237,25 @@ public abstract class AbstractSamhsaBackfill implements Callable {
             "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
             tableEntry.getClaimTable(), totalProcessed.get(), totalSaved.get()));
     return totalSaved.get();
+  }
+
+  /**
+   * Writes the tag entry to the database.
+   *
+   * @param claimId claim id.
+   * @param table tag table to use.
+   * @param entityManager The entity manager.
+   */
+  protected void writeEntry(Object claimId, String table, EntityManager entityManager) {
+    Map<String, String> params = Map.of("tagTable", table);
+    StringSubstitutor strSub = new StringSubstitutor(params);
+    String queryStr = strSub.replace(TAG_UPSERT_QUERY);
+    Query query = entityManager.createNativeQuery(queryStr);
+    query.setParameter("code", TagCode.R.toString());
+    query.setParameter("claimId", claimId);
+    query.executeUpdate();
+    query.setParameter("code", TagCode._42CFRPart2.toString());
+    query.executeUpdate();
   }
 
   /**

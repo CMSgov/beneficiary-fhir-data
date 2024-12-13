@@ -9,15 +9,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class TableEntry {
-  /** The claim table. */
-  String claimTable;
-
-  /** The class of the claim. */
-  Class claimClass;
+  /** The query table. */
+  String Query;
 
   /** The tag table associated with this claim. */
-  Class tagClass;
+  String tagTable;
 
   /** The column that contains the claim id. */
   String claimField;
+
+  /** Claim table. */
+  String claimTable;
 }

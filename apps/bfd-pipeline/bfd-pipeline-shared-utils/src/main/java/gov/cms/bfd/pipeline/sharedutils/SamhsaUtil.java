@@ -111,6 +111,39 @@ public class SamhsaUtil {
   }
 
   /**
+   * Process a list of codes. Does not use Entities.
+   *
+   * @param codes The list of codes.
+   * @param coverageStartDate The coverage start date.
+   * @param coverageEndDate The coverage end date.
+   * @return true if a SAMHSA tag should be created.
+   */
+  public boolean processCodeList(
+      List<String> codes, LocalDate coverageStartDate, LocalDate coverageEndDate) {
+    for (String code : codes) {
+      if (samhsaMap.containsKey(code)) {
+        SamhsaEntry entry = samhsaMap.get(code);
+        LocalDate startDate = LocalDate.parse(entry.getStartDate());
+        LocalDate endDate =
+            entry.getEndDate().equalsIgnoreCase("Active")
+                ? LocalDate.MAX
+                : LocalDate.parse(entry.getEndDate());
+
+        // if the throughDate is not between the start and end date,
+        // and the serviceDate is not between the start and end date,
+        // then the claim falls outside the date range of the SAMHSA code.
+        if (isDateOutsideOfRange(startDate, endDate, coverageEndDate)
+            && isDateOutsideOfRange(startDate, endDate, coverageStartDate)) {
+          continue;
+        }
+        // This is a valid code, we can stop here.
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Process am RDA claim to check for SAMHSA codes. This will be the external entry point for other
    * parts of the application.
    *

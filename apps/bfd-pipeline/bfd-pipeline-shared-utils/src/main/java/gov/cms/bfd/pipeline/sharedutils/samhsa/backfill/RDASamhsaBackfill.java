@@ -1,12 +1,9 @@
 package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
-import gov.cms.bfd.model.rda.entities.RdaFissClaim;
-import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
-import gov.cms.bfd.model.rda.samhsa.FissTag;
-import gov.cms.bfd.model.rda.samhsa.McsTag;
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
+
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
-import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +13,43 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   static final Logger LOGGER = LoggerFactory.getLogger(RDASamhsaBackfill.class);
 
   /** The column name for the fiss claim id. */
-  private static String FISS_CLAIM_ID_FIELD = "claimId";
+  private static String FISS_CLAIM_ID_FIELD = "fc.claim_id";
 
   /** The column name for the mcs claim id. */
-  private static String MCS_CLAIM_ID_FIELD = "idrClmHdIcn";
+  private static String MCS_CLAIM_ID_FIELD = "mc.idr_clm_hd_icn";
 
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {
-    /** Fiss Claim. */
+    /** Fiss Claims. */
     FISS_CLAIMS(
-        new TableEntry("rda.fiss_claims", RdaFissClaim.class, FissTag.class, FISS_CLAIM_ID_FIELD)),
-    /** MCS Claim. */
-    MCS_CLAIMS(
-        new TableEntry("rda.mcs_claims", RdaMcsClaim.class, McsTag.class, MCS_CLAIM_ID_FIELD));
+        new TableEntry(FISS_SAMHSA_QUERY, "rda.fiss_tags", FISS_CLAIM_ID_FIELD, "rda.fiss_claims")),
+    /** Fiss proc codes. */
+    FISS_PROC_CODES(
+        new TableEntry(
+            FISS_PROC_SAMHSA_QUERY, "rda.fiss_tags", FISS_CLAIM_ID_FIELD, "rda.fiss_proc_codes")),
+    /** Fiss diagnosis codes. */
+    FISS_DIAGNOSIS_CODES(
+        new TableEntry(
+            FISS_DIAGNOSIS_SAMHSA_QUERY,
+            "rda.fiss_tags",
+            FISS_CLAIM_ID_FIELD,
+            "rda.fiss_diagnosis_codes")),
+    /** Fiss revenue lines. */
+    FISS_REVENUE_LINES(
+        new TableEntry(
+            FISS_REVENUE_SAMHSA_QUERY,
+            "rda.fiss_tags",
+            FISS_CLAIM_ID_FIELD,
+            "rda.fiss_revenue_lines")),
+
+    /** MCS diagnosis codes. */
+    MCS_DIAGNOSIS_CODES(
+        new TableEntry(
+            MCS_DIAG_SAMHSA_QUERY, "rda.mcs_tags", MCS_CLAIM_ID_FIELD, "rda.mcs_diagnosis_codes")),
+    /** MCS details. */
+    MCS_DETAILS(
+        new TableEntry(
+            MCS_DETAILS_SAMHSA_QUERY, "rda.mcs_tags", MCS_CLAIM_ID_FIELD, "rda.mcs_details"));
 
     /** The tableEntry. */
     TableEntry entry;
@@ -65,17 +86,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   }
 
   /** {@inheritDoc} */
-  protected String getClaimId(Object claim) {
-    return switch (claim) {
-      case RdaMcsClaim mcsClaim -> String.format("'%s'", mcsClaim.getIdrClmHdIcn());
-      case RdaFissClaim fissClaim -> String.format("'%s'", fissClaim.getClaimId());
-      default -> throw new RuntimeException("Unknown claim type.");
-    };
-  }
-
-  /** {@inheritDoc} */
   @Override
-  protected <TClaim> boolean processClaim(TClaim claim, EntityManager entityManager) {
-    return samhsaUtil.processRdaClaim(claim, entityManager);
+  protected String convertClaimId(String claimId) {
+    // Already a string, do nothing.
+    return claimId;
   }
 }
