@@ -32,12 +32,19 @@ public class SamhsaBackfillService {
   private final List<CCW_TABLES> ccwTables =
       List.of(
           CCW_TABLES.CARRIER_CLAIMS,
+          CCW_TABLES.CARRIER_CLAIM_LINES,
           CCW_TABLES.DME_CLAIMS,
+          CCW_TABLES.DME_CLAIM_LINES,
           CCW_TABLES.HHA_CLAIMS,
+          CCW_TABLES.HHA_CLAIM_LINES,
           CCW_TABLES.HOSPICE_CLAIMS,
+          CCW_TABLES.HOSPICE_CLAIM_LINES,
           CCW_TABLES.INPATIENT_CLAIMS,
+          CCW_TABLES.INPATIENT_CLAIM_LINES,
           CCW_TABLES.OUTPATIENT_CLAIMS,
-          CCW_TABLES.SNF_CLAIMS);
+          CCW_TABLES.OUTPATIENT_CLAIM_LINES,
+          CCW_TABLES.SNF_CLAIMS,
+          CCW_TABLES.SNF_CLAIM_LINES);
 
   /** Contains the list of callables for RDA. Each callable will be a different table. */
   List<Callable> rdaCallables;

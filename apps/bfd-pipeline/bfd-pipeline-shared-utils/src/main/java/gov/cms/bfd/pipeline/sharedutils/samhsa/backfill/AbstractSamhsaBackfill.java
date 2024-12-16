@@ -242,7 +242,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /**
    * Writes the tag entry to the database.
    *
-   * @param claimId claim id.
+   * @param claimId claim id -- Could be a Long or a String.
    * @param table tag table to use.
    * @param entityManager The entity manager.
    */
