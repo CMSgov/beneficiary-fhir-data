@@ -563,6 +563,9 @@ public final class CcwRifLoadJob implements PipelineJob {
     /** Tag indicating which {@link RifFileType} was associated with the measured metric. */
     private static final String TAG_RIF_FILE = "rif_file";
 
+    /** Tag indicating which {@link DataSetManifest} was associated with the measured metric. */
+    public static final String TAG_MANIFEST = "manifest";
+
     /**
      * {@link Map} storing a given {@link DataSetManifest} to its corresponding, per-{@link
      * DataSetManifestEntry}/{@link RifFileType} {@link LongTaskTimer}s that measure the duration of
@@ -625,8 +628,9 @@ public final class CcwRifLoadJob implements PipelineJob {
      * based on its corresponding {@link DataSetManifest} and {@link RifFileType}.
      *
      * @param manifest {@link DataSetManifest} from which the values of {@link
-     *     DataSetManifest#getTimestampText()} and {@link DataSetManifest#isSyntheticData()} will be
-     *     used to set the {@link #TAG_DATA_SET_TIMESTAMP} and {@link #TAG_IS_SYNTHETIC} {@link
+     *     DataSetManifest#getTimestampText()}, {@link DataSetManifest#isSyntheticData()} and {@link
+     *     DataSetManifest#getIncomingS3Key()} will be used to set the {@link
+     *     #TAG_DATA_SET_TIMESTAMP}, {@link #TAG_IS_SYNTHETIC} and {@link #TAG_MANIFEST} {@link
      *     Tag}s, respectively
      * @param rif {@link RifFileType} from which its {@link RifFileType#name()} will be used to set
      *     the value of the {@link #TAG_RIF_FILE} {@link Tag}
@@ -634,10 +638,14 @@ public final class CcwRifLoadJob implements PipelineJob {
      *     and {@code rif}
      */
     private List<Tag> getTags(DataSetManifest manifest, RifFileType rif) {
+      final var manifestFullpath = manifest.getIncomingS3Key();
+      final var manifestFilename =
+          manifestFullpath.substring(manifestFullpath.lastIndexOf("/") + 1);
       return List.of(
           Tag.of(TAG_DATA_SET_TIMESTAMP, manifest.getTimestampText()),
           Tag.of(TAG_IS_SYNTHETIC, Boolean.toString(manifest.isSyntheticData())),
-          Tag.of(TAG_RIF_FILE, rif.name().toLowerCase()));
+          Tag.of(TAG_RIF_FILE, rif.name().toLowerCase()),
+          Tag.of(TAG_MANIFEST, manifestFilename));
     }
   }
 }
