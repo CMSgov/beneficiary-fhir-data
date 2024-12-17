@@ -111,22 +111,56 @@ public class SamhsaUtil {
   }
 
   /**
+   * Process a list of codes. Does not use Entities.
+   *
+   * @param codes The list of codes.
+   * @param coverageStartDate The coverage start date.
+   * @param coverageEndDate The coverage end date.
+   * @return true if a SAMHSA tag should be created.
+   */
+  public boolean processCodeList(
+      List<String> codes, LocalDate coverageStartDate, LocalDate coverageEndDate) {
+    for (String code : codes) {
+      if (samhsaMap.containsKey(code)) {
+        SamhsaEntry entry = samhsaMap.get(code);
+        LocalDate startDate = LocalDate.parse(entry.getStartDate());
+        LocalDate endDate =
+            entry.getEndDate().equalsIgnoreCase("Active")
+                ? LocalDate.MAX
+                : LocalDate.parse(entry.getEndDate());
+
+        // if the throughDate is not between the start and end date,
+        // and the serviceDate is not between the start and end date,
+        // then the claim falls outside the date range of the SAMHSA code.
+        if (isDateOutsideOfRange(startDate, endDate, coverageEndDate)
+            && isDateOutsideOfRange(startDate, endDate, coverageStartDate)) {
+          continue;
+        }
+        // This is a valid code, we can stop here.
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Process am RDA claim to check for SAMHSA codes. This will be the external entry point for other
    * parts of the application.
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
+   * @return true if a claim was persisted.
    * @param <TClaim> Generic type of the claim.
    */
-  public <TClaim> void processRdaClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> boolean processRdaClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
         Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-        persistTags(tags, entityManager);
+        return persistTags(tags, entityManager);
       }
       case RdaMcsClaim mcsClaim -> {
         Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-        persistTags(tags, entityManager);
+        return persistTags(tags, entityManager);
       }
       default -> throw new RuntimeException("Unknown claim type.");
     }
@@ -161,7 +195,6 @@ public class SamhsaUtil {
    * @return true if a tag was persisted.
    */
   public <TClaim> boolean processCcwClaim(TClaim claim, EntityManager entityManager) {
-    boolean persisted = false;
     try {
       SamhsaAdapterBase adapter =
           switch (claim) {

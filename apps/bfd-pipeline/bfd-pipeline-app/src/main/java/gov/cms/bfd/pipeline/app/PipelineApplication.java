@@ -30,6 +30,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillJob;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
@@ -180,11 +182,9 @@ public final class PipelineApplication {
       LOGGER.warn("Invalid app configuration.", e);
       throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
-
     final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var appMeters = new CompositeMeterRegistry();
     final var appMetrics = new MetricRegistry();
-
     configureMetrics(metricOptions, configLoader, appMeters, appMetrics);
 
     // Create a pooled data source for use by any registered jobs.
@@ -427,6 +427,40 @@ public final class PipelineApplication {
   }
 
   /**
+   * Creates the pipeline job for the SAMHSA backfill.
+   *
+   * @param batchSize The query batch size.
+   * @param appMeters The meter registry.
+   * @param appMetrics The metrics registry.
+   * @param pooledDataSource The Hikari data source.
+   * @param clock Clock.
+   * @return The Pipeline job.
+   */
+  PipelineJob createBackfillJob(
+      int batchSize,
+      MeterRegistry appMeters,
+      MetricRegistry appMetrics,
+      HikariDataSource pooledDataSource,
+      Clock clock) {
+    final PipelineApplicationState appStateCcw =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            clock);
+    final PipelineApplicationState appStateRda =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+            clock);
+
+    return new SamhsaBackfillJob(appStateCcw, appStateRda, batchSize);
+  }
+
+  /**
    * Create all pipeline jobs and return them in a list.
    *
    * @param appConfig our {@link AppConfiguration} for configuring jobs
@@ -499,6 +533,21 @@ public final class PipelineApplication {
       LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");
+    }
+    final Optional<BackfillConfigOptions> backfillConfigOptions =
+        appConfig.getBackfillConfigOptions();
+    if (backfillConfigOptions.isPresent()) {
+      final var backfillJob =
+          createBackfillJob(
+              backfillConfigOptions.get().getBatchSize(),
+              appMeters,
+              appMetrics,
+              pooledDataSource,
+              clock);
+      jobs.add(backfillJob);
+      LOGGER.warn("Registered SAMHSA backfill job.");
+    } else {
+      LOGGER.info("SAMHSA backfill job is disabled.");
     }
     return jobs;
   }
