@@ -53,10 +53,10 @@ spec:
     imagePullPolicy: Always
     resources:
       requests:
-        memory: '8192Mi'
+        memory: '16384Mi'
         cpu: '4000m'
       limits:
-        memory: '8192Mi'
+        memory: '16384Mi'
         cpu: '4000m'
 """
         }
