@@ -5,6 +5,7 @@ import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.TA
 
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.pipeline.sharedutils.model.BackfillProgress;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import jakarta.persistence.EntityManager;
@@ -38,15 +39,15 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /** Query to perform upsert on the backfill progress table for a given claim table. */
   protected String UPSERT_PROGRESS_QUERY =
       " INSERT INTO ccw.samhsa_backfill_progress "
-          + " (claim_table, last_processed_claim) "
-          + " VALUES (:tableName, :lastClaim) "
+          + " (claim_table, last_processed_claim, total_processed, total_tags) "
+          + " VALUES (:tableName, :lastClaim, :totalProcessed, :totalTags) "
           + " ON CONFLICT (claim_table) "
           + " DO UPDATE SET "
-          + "   last_processed_claim = :lastClaim ";
+          + "   last_processed_claim = :lastClaim, total_processed = :totalProcessed, total_tags = :totalTags ";
 
   /** Query to get the backfill progress from the database for a given claim table. */
   protected String GET_PROGRESS_QUERY =
-      " SELECT last_processed_claim FROM ccw.samhsa_backfill_progress "
+      " SELECT claim_table, last_processed_claim, total_processed, total_tags FROM ccw.samhsa_backfill_progress "
           + " WHERE claim_table = :tableName ";
 
   /** The transaction manager. */
@@ -180,10 +181,19 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   private <TClaim> Long executeForTable(TableEntry tableEntry) {
     // making these final Atomic objects allow us to use them inside of executeProcedure lambda.
-    final AtomicLong totalSaved = new AtomicLong(0L);
-    final AtomicLong totalProcessed = new AtomicLong(0L);
     final AtomicLong claimsSize = new AtomicLong(0L);
-    Optional<String> id = getLastClaimId(tableEntry.getClaimTable());
+    Optional<BackfillProgress> progress = getLastClaimId(tableEntry.getClaimTable());
+    final AtomicLong totalSaved =
+        new AtomicLong(
+            progress.isPresent() && progress.get().getTotalTags() != null
+                ? progress.get().getTotalTags()
+                : 0L);
+    final AtomicLong totalProcessed =
+        new AtomicLong(
+            progress.isPresent() && progress.get().getTotalProcessed() != null
+                ? progress.get().getTotalProcessed()
+                : 0L);
+    Optional<String> id = progress.map(BackfillProgress::getLastClaimId);
     final AtomicReference<Optional<String>> lastClaimId = new AtomicReference<>(id);
     if (lastClaimId.get().isPresent()) {
       logger.info(
@@ -220,7 +230,12 @@ public abstract class AbstractSamhsaBackfill implements Callable {
                   !claims.isEmpty()
                       ? Optional.of(String.valueOf(claims.getLast()[0]))
                       : Optional.empty());
-              saveProgress(tableEntry.getClaimTable(), lastClaimId.get(), entityManager);
+              saveProgress(
+                  tableEntry.getClaimTable(),
+                  lastClaimId.get(),
+                  totalProcessed.get(),
+                  totalSaved.get(),
+                  entityManager);
 
               claimsSize.set(claims.size());
             });
@@ -264,16 +279,24 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    *
    * @param table The table in question.
    * @param lastClaimId The last claim id processed.
+   * @param totalProcessed Total progress so far.
+   * @param totalTags The total number of tags created so far.
    * @param entityManager The entity manager.
    */
   private void saveProgress(
-      String table, Optional<String> lastClaimId, EntityManager entityManager) {
+      String table,
+      Optional<String> lastClaimId,
+      Long totalProcessed,
+      Long totalTags,
+      EntityManager entityManager) {
     // In some cases, it's possible for lastClaimId to be empty. This isn't an error, it just means
     // that no results were returned in the last query.
     if (lastClaimId.isPresent()) {
       Query query = Objects.requireNonNull(entityManager).createNativeQuery(UPSERT_PROGRESS_QUERY);
       query.setParameter("tableName", table);
       query.setParameter("lastClaim", lastClaimId.get());
+      query.setParameter("totalProcessed", totalProcessed);
+      query.setParameter("totalTags", totalTags);
       query.executeUpdate();
     }
   }
@@ -284,14 +307,16 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param table The claim table in question.
    * @return The last claim id processed for the given table.
    */
-  private Optional<String> getLastClaimId(String table) {
+  private Optional<BackfillProgress> getLastClaimId(String table) {
     return transactionManager.executeFunction(
         entityManager -> {
-          Query query = Objects.requireNonNull(entityManager).createNativeQuery(GET_PROGRESS_QUERY);
+          Query query =
+              Objects.requireNonNull(entityManager)
+                  .createNativeQuery(GET_PROGRESS_QUERY, BackfillProgress.class);
           query.setParameter("tableName", table);
           try {
-            String claimId = (String) query.getSingleResult();
-            return Optional.of(claimId);
+            BackfillProgress progress = (BackfillProgress) query.getSingleResult();
+            return Optional.of(progress);
           } catch (NoResultException e) {
             return Optional.empty();
           }
