@@ -206,6 +206,10 @@
                                 <from>${project.build.directory}/nr-java</from>
                                 <into>/usr/local/bfd-server/newrelic</into>
                             </path>
+                            <path>
+                                <from>${project.build.directory}/../../bfd-server-launcher/src/main/assembly/bin</from>
+                                <into>/usr/local/bfd-server/bin</into>
+                            </path>
                         </paths>
                         <permissions>
                             <permission>
