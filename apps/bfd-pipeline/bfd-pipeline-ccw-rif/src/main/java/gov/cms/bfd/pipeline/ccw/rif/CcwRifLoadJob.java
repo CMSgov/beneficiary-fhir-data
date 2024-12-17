@@ -547,7 +547,7 @@ public final class CcwRifLoadJob implements PipelineJob {
 
     /** Name of the per-{@link RifFileType} data processing timers. */
     public static final String DATA_PROCESSING_TIMER_NAME =
-        String.format("%s.data_processing.duration.millis", CcwRifLoadJob.class.getSimpleName());
+        String.format("%s.data_processing.duration", CcwRifLoadJob.class.getSimpleName());
 
     /**
      * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
