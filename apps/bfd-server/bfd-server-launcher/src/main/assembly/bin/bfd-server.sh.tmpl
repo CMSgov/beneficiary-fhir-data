@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+# COMBINE bfd-server.sh and bfd-server-launcher.sh
+# The launcher picks up its config from environment variables, so set those.
+export BFD_PORT='${SERVICE_PORT}'
+export BFD_PATHS_FILES_KEYSTORE='${REF_DIR}/bluebutton-appserver-keystore.pfx'
+export BFD_PATHS_FILES_TRUSTSTORE='${REF_DIR}/bluebutton-appserver-truststore.pfx'
+# shellcheck disable=SC1083,SC2155
+export BFD_PATHS_FILES_WAR="$(find ${REF_DIR} -type f -name 'bfd-server-war-*.war')"
+###
+export BFD_TMP_DIR='${REF_DIR}/tmp'
+
+# The WAR picks up its config from Java system properties, so set some variables we can use for
+# those.
+##export BFD_DB_URL='${DB_URL}'
+export BFD_DB_URL="jdbc:postgresql://${READER_ENDPOINT}:5432/fhirdb&ApplicationName=bfd-server?logServerErrorDetail=false"
+# shellcheck disable=SC1054,SC1064,SC1065,SC1072,SC1073
+if [ "${DB_PASSWORD_OVERRIDE}" != "" ]
+then
+    export BFD_DB_PASSWORD='${DB_PASSWORD_OVERRIDE}'
+    # application defaults to ssm db/password
+fi
+#
+if [ "${DB_USERNAME_OVERRIDE}" != "" ]
+then
+    export BFD_DB_USERNAME='${DB_USERNAME_OVERRIDE}'
+    # application defaults to ssm db/username
+fi
+
+# The New Relic agent running in the WAR needs some additional environment variables, so set those.
+if [ "${NR_LICENSE_KEY}" != "" ]
+then
+    export NEW_RELIC_HOST='gov-collector.newrelic.com'
+    export NEW_RELIC_LICENSE_KEY='${NR_LICENSE_KEY}'
+    export NEW_RELIC_LOG_FILE_PATH='${NR_LOGDIR}'
+    if [ "${NR_HIGH_SECURITY_ENABLED}" != "" ]
+    then
+        export NEW_RELIC_HIGH_SECURITY='${NR_HIGH_SECURITY_ENABLED}'
+    fi
+    export NEW_RELIC_EXTENSIONS_DIR='${REF_DIR}/newrelic/extensions/'
+    if [ "${NR_PROXY_HOST}" != "" ]
+    then
+        export NEW_RELIC_PROXY_HOST='${NR_PROXY_HOST}'
+    fi
+    if [ "${NR_PROXY_PORT}" != "" ]
+    then
+        export NEW_RELIC_PROXY_PORT='${NR_PROXY_PORT}'
+    fi
+    export NEW_RELIC_APP_NAME='${NR_APP_NAME}'
+    export NEW_RELIC_ENVIRONMENT='${NR_ENVIRONMENT}'
+fi
+
+# Begin smoke testing startup routine
+STARTUP_TESTING_REQ_TIMEOUT='${SMOKE_REQ_TIMEOUT}'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='${SMOKE_REQ_BACKOFF}'
+STARTUP_TESTING_BENE_ID='${SMOKE_BENE_ID}'
+# Lifecycle hook name, used to signal to the ASG that this instance has warmed-up and is ready for
+# traffic
+##if ${launch_lifecycle_hook}
+##then
+##    LAUNCH_LIFECYCLE_HOOK="${launch_lifecycle_hook}"
+##fi
+
+##
+# Prints out the specified message.
+#
+# Params:
+# * $1: the message to log
+##
+log() {
+  echo "$(date +%F\ %T): $1"
+}
+
+##
+# Verifies that the specified endpoint/query can be queried via curl without error and produced the expected output.
+#
+# Params:
+# * $1: the full URL to query via curl
+# * $2: the value to confirm is present in the curl output; if not found, then the query should be regarded as unsuccessful
+##
+check_endpoint() {
+  set -o pipefail
+  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "${REF_DIR}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
+}
+
+##
+# Runs test queries to verify that the server is working as expected before allowing traffic in the firewall.
+##
+
+service_startup_check() {
+  # Reject all external traffic to service port until the application has started successfully
+  ##sudo iptables -A INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
+
+  while true; do
+    log "Checking V1 metadata endpoint"
+    check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status"
+    STARTUP_TESTING_CHECK_V1_METADATA_EXIT=$?
+
+    log "Checking V2 metadata endpoint"
+    check_endpoint "https://localhost:${BFD_PORT}/v2/fhir/metadata?_format=application%2Fjson%2Bfhir" "status"
+    STARTUP_TESTING_CHECK_V2_METADATA_EXIT=$?
+
+    log "Checking V1 Coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
+    check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id"
+    STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT=$?
+
+    log "Checking V2 Coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
+    check_endpoint "https://localhost:${BFD_PORT}/v2/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id"
+    STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT=$?
+
+    log "Checking V1 EOB resource endpoint for bene $STARTUP_TESTING_BENE_ID"
+    check_endpoint "https://localhost:${BFD_PORT}/v1/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id"
+    STARTUP_TESTING_CHECK_V1_EOB_EXIT=$?
+
+    log "Checking V2 EOB resource endpoint for bene $STARTUP_TESTING_BENE_ID"
+    check_endpoint "https://localhost:${BFD_PORT}/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id"
+    STARTUP_TESTING_CHECK_V2_EOB_EXIT=$?
+
+    if [[ $STARTUP_TESTING_CHECK_V1_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_EOB_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_EOB_EXIT == 0 ]]; then
+      # Effectively allow traffic from external sources to reach service port
+      ##sudo iptables -D INPUT -p tcp ! -i lo --dport "$BFD_PORT" -j REJECT
+      log "Server started properly"
+
+      ##if [[ -z "$LAUNCH_LIFECYCLE_HOOK" ]]; then
+      ##  return 0
+      ##fi
+
+      ##log "Launch Lifecycle Hook $LAUNCH_LIFECYCLE_HOOK is enabled"
+      ##instance_id="$(ec2-metadata --instance-id | sed 's/instance-id: \(.*\)$/\1/')"
+      ##region="$(ec2-metadata --availability-zone | sed 's/placement: \(.*\).$/\1/')"
+      ##if [[ -z "$instance_id" || -z "$region" ]]; then
+      ##  log "Instance ID or region not found from IMDS; is BFD Server running on an EC2 Instance?"
+      ##  return 0
+      ##fi
+
+      # Capturing the ASG name from Terraform -> User Data Init -> Ansible is not possible, as the
+      # ASG name (as of writing) is based upon the Launch Template name and latest version. Trying
+      # to pass this data within the launch template's Terraform resource definition would result in
+      # a circular reference. Instead, we rely on AWS's default tagging behavior to get the ASG's
+      # name
+      ##asg_name="$(
+      ##  aws ec2 describe-tags \
+      ##    --filters "Name=resource-id,Values=$instance_id" "Name=key,Values=aws:autoscaling:groupName" \
+      ##    --region "$region" |
+      ##    jq -r '.Tags | .[] | .Value'
+      ##)"
+      ##if [[ -z "$asg_name" ]]; then
+      ##  log "ASG name not found in instance tags; was instance launched within an ASG?"
+      ##  return 0
+      ##fi
+
+      ##log "ASG Name: $asg_name; Instance ID: $instance_id"
+      ##log "Completing Lifecycle Action for Hook $LAUNCH_LIFECYCLE_HOOK..."
+      ##aws autoscaling complete-lifecycle-action \
+      ##  --lifecycle-action-result CONTINUE \
+      ##  --instance-id "$instance_id" \
+      ##  --lifecycle-hook-name "$LAUNCH_LIFECYCLE_HOOK" \
+      ##  --auto-scaling-group-name "$asg_name" \
+      ##  --region "$region" 1>/dev/null 2>/dev/null &&
+      ##  log "Lifecycle Action completed with result CONTINUE for hook $LAUNCH_LIFECYCLE_HOOK" ||
+      ##  log "Failed to complete Lifecycle Action for hook $LAUNCH_LIFECYCLE_HOOK"
+      ##return 0
+    else
+      log "Server failed to start properly, retrying..."
+      sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
+    fi
+  done
+}
+
+### (service_startup_check >>"${REF_DIR}/logs/bfd-server-startup.log" 2>&1) &
+### MOVE SMOKE TESTING to external post-startup health-check logic
+# End smoke testing startup routine
+
+# Set some additional variables.
+##JVM_ARGS="-Xms${JVM_HEAP_MEM_MB}m -Xmx${JVM_HEAP_MEM_MB}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:${LOG_DIR}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0"
+##SERVICE_SCRIPT="$(find ${REF_DIR} -type f -name bfd-server-launcher.sh)"
+
+CONFIG_SETTINGS_JSON=$(cat <<EOF
+{"ssmHierarchies": [
+    "/bfd/${NR_ENVIRONMENT}/common/sensitive/new_relic/",
+    "/bfd/${NR_ENVIRONMENT}/common/nonsensitive/",
+    "/bfd/${NR_ENVIRONMENT}/server/sensitive/",
+    "/bfd/${NR_ENVIRONMENT}/server/nonsensitive/"
+]}
+EOF
+)
+export CONFIG_SETTINGS_JSON
+
+# 3... 2... 1... launch!
+$(find ${REF_DIR} -type f -name bfd-server-launcher.sh) \
+  -javaagent:${REF_DIR}/newrelic/newrelic.jar \
+  "-Xms${JVM_HEAP_MEM_MB}m -Xmx${JVM_HEAP_MEM_MB}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:${LOG_DIR}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0" \
+  "-DbfdServer.logs.dir=${LOG_DIR}" \
+  "-Djava.io.tmpdir=${BFD_TMP_DIR}" \
+  "-Dorg.jboss.logging.provider=slf4j" \
+  >>"${LOG_DIR}/bluebutton-server-app-log.json" 2>&1

@@ -20,6 +20,7 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>${project.groupId}:${project.artifactId}:jar:*</include>
+				<include>${project.groupId}:${project.artifactId}:sh:*</include>
 			</includes>
 		</dependencySet>
 		<dependencySet>

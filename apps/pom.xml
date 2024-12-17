@@ -4,6 +4,7 @@
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
     <version>2.170.0-SNAPSHOT</version>
+
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -197,7 +198,10 @@
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
         <jib.version>3.4.0</jib.version>
         <!-- The base image (FROM) used to build images with jib. -->
-        <jib.from>amazoncorretto:21.0.1-alpine</jib.from>
+        <!-- 
+            <jib.from>amazoncorretto:21.0.1-alpine</jib.from>
+        -->
+        <jib.from>registry1.dso.mil/ironbank/redhat/openjdk/openjdk21-runtime-ubi9-slim@sha256:13ccec365b355d8aee266340e7a5bdf3d4482bc798d6ba5dcece1ecd91dc17eb</jib.from>
         <!--
           The goal to use with the jib plugin.   Override on command line to change behavior:
           dockerBuild: build on local docker only
@@ -207,9 +211,10 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>latest</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <!--  <jib.namespace />  -->
+        <jib.namespace>577373831711.dkr.ecr.us-east-1.amazonaws.com</jib.namespace>
         <!-- Skip by default.  Override to allow images to be built. -->
-        <jib.skip>true</jib.skip>
+        <jib.skip>false</jib.skip>
 
         <!-- Skip by default.  Override to let open api documents be generated. -->
         <apidocgen.skip>true</apidocgen.skip>
@@ -983,17 +988,32 @@
                     <version>${jib.version}</version>
                     <configuration>
                         <to>
-                            <image>${jib.namespace}${project.artifactId}:${project.version}</image>
+                            <image>${jib.namespace}/${project.artifactId}:${project.version}</image>
                             <tags>
                                 <tag>${jib.tag}</tag>
                             </tags>
                         </to>
                         <from>
                             <image>${jib.from}</image>
+                            <platforms>
+                                <platform>
+                                    <architecture>amd64</architecture>
+                                    <os>linux</os>
+                                </platform>
+                            </platforms>
                         </from>
                         <containerizingMode>packaged</containerizingMode>
                         <container>
+                            <appRoot>/usr/local/${project.artifactId}</appRoot>
+                            <environment>
+                                <BFD_VERSION>${project.version}</BFD_VERSION>
+                            </environment>
+                            <entrypoint>/usr/local/${project.artifactId}/bin/${project.artifactId}.sh</entrypoint>
                             <jvmFlags>-Dorg.jboss.logging.provider=slf4j</jvmFlags>
+                            <ports>
+                                <port>7443</port>
+                            </ports>
+                            <workingDirectory>/usr/local/${project.artifactId}</workingDirectory>
                         </container>
                     </configuration>
                 </plugin>
