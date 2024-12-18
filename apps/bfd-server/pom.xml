@@ -107,6 +107,136 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <!-- BFD-3767 -->
+        <build>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <?m2e execute onConfiguration,onIncremental?>
+                        <id>download-nr</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>/usr/bin/curl</executable>
+                            <arguments>
+                                <argument>-o</argument>
+                                <argument>${project.build.directory}/newrelic-java.zip</argument>
+                                <argument>https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip </argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unzip-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>unzip</executable>
+                            <arguments>
+                                <argument>${project.build.directory}/newrelic-java.zip</argument>
+                                <argument>-d</argument>
+                                <argument>${project.build.directory}/nr-java</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>template-server-script</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.build.directory}/bfd-server-launcher/src/main/assembly/bin/fill-template.sh</executable>
+                            <arguments>
+                                <argument>${project.build.directory}/bfd-server-launcher/src/main/assembly/bin/bfd-server.sh.tmpl</argument>
+                                <argument>${project.build.directory}/bfd-server-launcher/src/main/assembly/bin/bfd-server.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Used to build docker image for the project. -->
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <configuration>
+                    <to>
+                        <image>${jib.namespace}/bfd-server:${project.version}</image>
+                        <tags>
+                            <tag>${jib.tag}</tag>
+                        </tags>
+                    </to>
+                    <from>
+                        <image>${jib.from}</image>
+                        <platforms>
+                            <platform>
+                                <architecture>amd64</architecture>
+                                <os>linux</os>
+                            </platform>
+                        </platforms>
+                    </from>
+                    <container>
+                        <!-- <mainClass>gov.cms.bfd.server.launcher.DataServerLauncherApp</mainClass> -->
+                        <!--  <ports><port>6500</port></ports>  -->
+                        <appRoot>/usr/local/bfd-server</appRoot>
+                        <environment>
+                            <BFD_VERSION>${project.version}</BFD_VERSION>
+                        </environment>
+                        <entrypoint>/usr/local/bfd-server/bin/bfd-server.sh</entrypoint>
+                        <jvmFlags>-Dorg.jboss.logging.provider=slf4j</jvmFlags>
+                        <ports>
+                            <port>7443</port>
+                        </ports>
+                        <workingDirectory>/usr/local/bfd-server</workingDirectory>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <!-- Copies war file into /app directory in container -->
+                            <path>
+                                <from>${project.build.directory}/war-file</from>
+                                <!--  <into>/app</into>  -->
+                                <into>/usr/local/bfd-server</into>
+                            </path>
+                            <!-- Copies Launcher artifacts into /app directory in container -->
+                            <path>
+                                <from>${project.build.directory}/server-launcher</from>
+                                <!--  <into>/app</into>  -->
+                                <into>/usr/local/bfd-server/server-launcher</into>
+                            </path>
+                            <path>
+                                <from>${project.build.directory}/nr-java</from>
+                                <into>/usr/local/bfd-server/newrelic</into>
+                            </path>
+                            <path>
+                                <from>${project.build.directory}/bfd-server-launcher/src/main/assembly/bin</from>
+                                <into>/usr/local/bfd-server/bin</into>
+                            </path>
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/usr/local/bfd-server/bin/*.sh</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>${jib.goal}</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </build>
     </build>
 
 </project>
