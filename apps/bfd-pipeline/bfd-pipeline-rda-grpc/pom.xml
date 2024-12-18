@@ -180,7 +180,8 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>${jakarta.persistence-api.version}</version>
+            <!-- NOTE: persistence-api 3.2.0 is required here, as opposed to the inherited bfd-parent's 3.1.0 -->
+            <version>3.2.0</version>
         </dependency>
 
         <dependency>
@@ -204,11 +205,6 @@
             <groupId>software.amazon.awssdk.crt</groupId>
             <artifactId>aws-crt</artifactId>
             <version>${aws.crt.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.2.0-M2</version>
         </dependency>
     </dependencies>
 
