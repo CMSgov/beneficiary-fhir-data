@@ -134,10 +134,12 @@ EOF
 
     dir ('apps') {
         quietFlags = verboseMaven ? '' : '--quiet --batch-mode'
-        if (runTests) {
-            sh "mvn ${quietFlags} --threads 1C -Dmaven.javadoc.skip=true -Dcheckstyle.skip -Dmaven.build.cache.enabled=false -Dmaven.jacoco.skip=false clean install"
-        } else {
-            sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
+        withEnv(['MAVEN_OPTS=-Xms1024m -Xmx1024m']) {
+            if (runTests) {
+                sh "mvn ${quietFlags} --threads 1C -Dmaven.javadoc.skip=true -Dcheckstyle.skip -Dmaven.build.cache.enabled=false -Dmaven.jacoco.skip=false clean install"
+            } else {
+                sh "mvn ${quietFlags} --threads 1C --update-snapshots -DskipITs -DskipTests -Dmaven.javadoc.skip=true -Dmaven.build.cache.enabled=false clean verify"
+            }
         }
     }
 

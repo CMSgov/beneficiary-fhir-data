@@ -22,6 +22,10 @@ fi
 #
 # BEGIN Local environment configuration.
 #
+
+# Force UTC time
+export TZ=UTC
+
 project_dir=$BFD_PATH/apps
 
 # Directory to store binaries and data files when running.
@@ -190,7 +194,7 @@ function setvar() {
 ARGS="-Xms${max_heap} -Xmx${max_heap}"
 ARGS="$ARGS -Dorg.jboss.logging.provider=slf4j"
 
-# If debug_enabled is true an IDE can connect its debugger on port ${debug_port} to debug the pipeline.
+# If debug_enabled is true an IDE can connect its debugger on port $debug_port to debug the pipeline.
 # If debug_suspend is y the pipeline app will wait for a debugger to connect before doing any work.
 if [[ $debug_enabled = "true" ]] ; then
   ARGS="$ARGS -agentlib:jdwp=transport=dt_socket,server=y,suspend=${debug_suspend},address=*:${debug_port}"
@@ -265,7 +269,7 @@ setvar db/password $password
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
 setvar c4dic/enabled false
-setvar samhsa_allowed_certificates_json '["client-local-dev-samhsa"]'
+setvar samhsa_allowed_certificate_aliases_json '["client-local-dev-samhsa"]'
 
 classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"
