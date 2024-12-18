@@ -377,7 +377,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
       Set.of(
           "FissClaimRdaSink.change.latency.millis",
           "McsClaimRdaSink.change.latency.millis",
-          CcwRifLoadJob.Metrics.DATA_PROCESSING_TIMER_NAME);
+          CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_TIMER_NAME,
+          DefaultDataSetMonitorListener.Metrics.RIF_FILE_PROCESSING_TIMER_NAME);
 
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not

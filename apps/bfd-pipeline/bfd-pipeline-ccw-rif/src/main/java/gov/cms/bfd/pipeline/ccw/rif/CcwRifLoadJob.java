@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
@@ -27,9 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -361,11 +358,11 @@ public final class CcwRifLoadJob implements PipelineJob {
        */
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsStarted(manifestRecord);
-      loadJobMetrics.startTimersForManifest(manifestToProcess);
+      final var timer = loadJobMetrics.startTimerForManifest(manifestToProcess);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsProcessed(manifestRecord);
-      loadJobMetrics.stopTimersForManifest(manifestToProcess);
+      loadJobMetrics.stopTimer(timer);
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -545,9 +542,9 @@ public final class CcwRifLoadJob implements PipelineJob {
   @RequiredArgsConstructor
   public static final class Metrics {
 
-    /** Name of the per-{@link RifFileType} data processing timers. */
-    public static final String DATA_PROCESSING_TIMER_NAME =
-        String.format("%s.data_processing.duration", CcwRifLoadJob.class.getSimpleName());
+    /** Name of the per-{@link DataSetManifest} data processing timers. */
+    public static final String MANIFEST_PROCESSING_TIMER_NAME =
+        String.format("%s.manifest_processing.duration", CcwRifLoadJob.class.getSimpleName());
 
     /**
      * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
@@ -560,91 +557,59 @@ public final class CcwRifLoadJob implements PipelineJob {
      */
     private static final String TAG_IS_SYNTHETIC = "is_synthetic";
 
-    /** Tag indicating which {@link RifFileType} was associated with the measured metric. */
-    private static final String TAG_RIF_FILE = "rif_file";
-
     /** Tag indicating which {@link DataSetManifest} was associated with the measured metric. */
-    public static final String TAG_MANIFEST = "manifest";
-
-    /**
-     * {@link Map} storing a given {@link DataSetManifest} to its corresponding, per-{@link
-     * DataSetManifestEntry}/{@link RifFileType} {@link LongTaskTimer}s that measure the duration of
-     * processing for each.
-     */
-    private final Map<DataSetManifest, List<LongTaskTimer>> perManifestTimersMap = new HashMap<>();
+    private static final String TAG_MANIFEST = "manifest";
 
     /** Micrometer {@link MeterRegistry} for the Pipeline application. */
     private final MeterRegistry appMetrics;
 
     /**
-     * Starts all per-{@link RifFileType} {@link LongTaskTimer}(s) for a given {@link
-     * DataSetManifest} so that the time it takes to process a given RIF is measured. Should be
-     * called prior to processing a {@link DataSetManifest}.
+     * Start a {@link LongTaskTimer}(s) for a given {@link DataSetManifest} so that the time it
+     * takes to process the manifest is measured. Should be called prior to processing a {@link
+     * DataSetManifest}.
      *
-     * @param manifest the {@link DataSetManifest} for which {@link LongTaskTimer}(s) will be
-     *     started
+     * @param manifest the {@link DataSetManifest} to time
+     * @return the started {@link LongTaskTimer} measuring the time taken to load the {@link
+     *     DataSetManifest}
      */
-    void startTimersForManifest(DataSetManifest manifest) {
-      if (perManifestTimersMap.containsKey(manifest)) {
-        return;
-      }
-
-      final var manifestProcessingTimers =
-          manifest.getEntries().stream()
-              .map(DataSetManifestEntry::getType)
-              .map(
-                  rifType -> {
-                    final var timer =
-                        LongTaskTimer.builder(DATA_PROCESSING_TIMER_NAME)
-                            .tags(getTags(manifest, rifType))
-                            .register(appMetrics);
-                    timer.start();
-                    return timer;
-                  })
-              .toList();
-      perManifestTimersMap.put(manifest, manifestProcessingTimers);
+    LongTaskTimer startTimerForManifest(DataSetManifest manifest) {
+      final var timer =
+          LongTaskTimer.builder(MANIFEST_PROCESSING_TIMER_NAME)
+              .tags(getTags(manifest))
+              .register(appMetrics);
+      timer.start();
+      return timer;
     }
 
     /**
-     * Stops all {@link LongTaskTimer}(s) associated with a given {@link DataSetManifest}, if any.
-     * Should be called after a given {@link DataSetManifest} has finished processing and its
-     * corresponding RIFs have been loaded into the database.
+     * Stops the provided {@link LongTaskTimer} and removes it from the Pipeline application's
+     * {@link MeterRegistry}.
      *
-     * @param manifest the {@link DataSetManifest} for which its corresponding {@link
-     *     LongTaskTimer}(s) will be stopped
+     * @param timer the {@link LongTaskTimer} to stop.
      */
-    void stopTimersForManifest(DataSetManifest manifest) {
-      perManifestTimersMap
-          .getOrDefault(manifest, List.of())
-          .forEach(
-              timer -> {
-                timer.close();
-                appMetrics.remove(timer);
-              });
+    void stopTimer(LongTaskTimer timer) {
+      timer.close();
+      appMetrics.remove(timer);
     }
 
     /**
      * Returns a {@link List} of default {@link Tag}s that is used to disambiguate a given metric
-     * based on its corresponding {@link DataSetManifest} and {@link RifFileType}.
+     * based on its corresponding {@link DataSetManifest}.
      *
      * @param manifest {@link DataSetManifest} from which the values of {@link
      *     DataSetManifest#getTimestampText()}, {@link DataSetManifest#isSyntheticData()} and {@link
      *     DataSetManifest#getIncomingS3Key()} will be used to set the {@link
      *     #TAG_DATA_SET_TIMESTAMP}, {@link #TAG_IS_SYNTHETIC} and {@link #TAG_MANIFEST} {@link
      *     Tag}s, respectively
-     * @param rif {@link RifFileType} from which its {@link RifFileType#name()} will be used to set
-     *     the value of the {@link #TAG_RIF_FILE} {@link Tag}
      * @return a {@link List} of {@link Tag}s including relevant information from {@code manifest}
-     *     and {@code rif}
      */
-    private List<Tag> getTags(DataSetManifest manifest, RifFileType rif) {
+    private List<Tag> getTags(DataSetManifest manifest) {
       final var manifestFullpath = manifest.getIncomingS3Key();
       final var manifestFilename =
           manifestFullpath.substring(manifestFullpath.lastIndexOf("/") + 1);
       return List.of(
           Tag.of(TAG_DATA_SET_TIMESTAMP, manifest.getTimestampText()),
           Tag.of(TAG_IS_SYNTHETIC, Boolean.toString(manifest.isSyntheticData())),
-          Tag.of(TAG_RIF_FILE, rif.name().toLowerCase()),
           Tag.of(TAG_MANIFEST, manifestFilename));
     }
   }
