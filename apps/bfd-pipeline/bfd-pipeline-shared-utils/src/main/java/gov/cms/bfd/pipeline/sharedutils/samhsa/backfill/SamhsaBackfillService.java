@@ -18,6 +18,9 @@ import java.util.concurrent.Future;
  * simultaneously in a different thread.
  */
 public class SamhsaBackfillService {
+  /** The number of threads per table. */
+  private final Integer THREADS_PER_TABLE = 5;
+
   /** List of RDA tables. */
   private final List<RDA_TABLES> rdaTables =
       List.of(
@@ -103,7 +106,10 @@ public class SamhsaBackfillService {
   private List<Callable> createCcwCallables(List<CCW_TABLES> tables) {
     List<Callable> callables = new ArrayList<>();
     for (CCW_TABLES table : tables) {
-      callables.add(new CCWSamhsaBackfill(transactionManagerCcw, batchSize, table));
+      for (int i = 0; i < THREADS_PER_TABLE; i++) {
+        callables.add(
+            new CCWSamhsaBackfill(transactionManagerCcw, batchSize, table, i, THREADS_PER_TABLE));
+      }
     }
     return callables;
   }

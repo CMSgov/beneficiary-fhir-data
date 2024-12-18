@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.GT_CLAIM_LINE;
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.TAG_UPSERT_QUERY;
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
@@ -36,19 +35,25 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /** The table to use for this thread. */
   protected final TableEntry tableEntry;
 
+  /** The thread number for this instance. */
+  protected final int threadNumber;
+
+  /** The total threads per table. */
+  protected final int totalThreads;
+
   /** Query to perform upsert on the backfill progress table for a given claim table. */
   protected String UPSERT_PROGRESS_QUERY =
       " INSERT INTO ccw.samhsa_backfill_progress "
-          + " (claim_table, last_processed_claim, total_processed, total_tags) "
-          + " VALUES (:tableName, :lastClaim, :totalProcessed, :totalTags) "
-          + " ON CONFLICT (claim_table) "
+          + " (claim_table, last_processed_claim, total_processed, total_tags, table_thread_number) "
+          + " VALUES (:tableName, :lastClaim, :totalProcessed, :totalTags, :threadNumber) "
+          + " ON CONFLICT (claim_table, table_thread_number) "
           + " DO UPDATE SET "
-          + "   last_processed_claim = :lastClaim, total_processed = :totalProcessed, total_tags = :totalTags ";
+          + "   last_processed_claim = :lastClaim, total_processed = :totalProcessed, total_tags = :totalTags, table_thread_number = :threadNumber ";
 
   /** Query to get the backfill progress from the database for a given claim table. */
   protected String GET_PROGRESS_QUERY =
-      " SELECT claim_table, last_processed_claim, total_processed, total_tags FROM ccw.samhsa_backfill_progress "
-          + " WHERE claim_table = :tableName ";
+      " SELECT claim_table, table_thread_number, last_processed_claim, total_processed, total_tags FROM ccw.samhsa_backfill_progress "
+          + " WHERE claim_table = :tableName AND table_thread_number = :threadNumber";
 
   /** The transaction manager. */
   TransactionManager transactionManager;
@@ -70,13 +75,22 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    *     query.
    * @param logger The logger.
    * @param tableEntry the table Entry for this thread.
+   * @param threadNumber The thread number for this instance.
+   * @param totalThreads The total threads per table.
    */
   public AbstractSamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, Logger logger, TableEntry tableEntry) {
+      TransactionManager transactionManager,
+      int batchSize,
+      Logger logger,
+      TableEntry tableEntry,
+      int threadNumber,
+      int totalThreads) {
     this.logger = logger;
     this.transactionManager = transactionManager;
     this.batchSize = batchSize;
     this.tableEntry = tableEntry;
+    this.threadNumber = threadNumber;
+    this.totalThreads = totalThreads;
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
   }
 
@@ -111,6 +125,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         Map.of(
             "gtClaimLine",
             startingClaim.isPresent() ? GT_CLAIM_LINE : "",
+            "gtClaimLineWhere",
+            startingClaim.isPresent() ? GT_CLAIM_LINE_WHERE : "",
             "claimField",
             tableEntry.getClaimField());
     strSub = new StringSubstitutor(params);
@@ -118,6 +134,10 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     Query query = entityManager.createNativeQuery(queryStr);
     startingClaim.ifPresent(s -> query.setParameter("startingClaim", convertClaimId(s)));
     query.setParameter("limit", limit);
+    if (totalThreads > 1) {
+      query.setParameter("threadNumber", threadNumber);
+      query.setParameter("totalThreads", totalThreads);
+    }
     return query;
   }
 
@@ -297,6 +317,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
       query.setParameter("lastClaim", lastClaimId.get());
       query.setParameter("totalProcessed", totalProcessed);
       query.setParameter("totalTags", totalTags);
+      query.setParameter("threadNumber", threadNumber);
       query.executeUpdate();
     }
   }
@@ -314,6 +335,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               Objects.requireNonNull(entityManager)
                   .createNativeQuery(GET_PROGRESS_QUERY, BackfillProgress.class);
           query.setParameter("tableName", table);
+          query.setParameter("threadNumber", threadNumber);
           try {
             BackfillProgress progress = (BackfillProgress) query.getSingleResult();
             return Optional.of(progress);

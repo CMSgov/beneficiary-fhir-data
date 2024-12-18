@@ -18,6 +18,10 @@ public class BackfillProgress {
   @Column(name = "claim_table")
   String claimTable;
 
+  /** The thread number. */
+  @Column(name = "table_thread_number")
+  String threadNumber;
+
   /** The last processed claim of this table. */
   @Column(name = "last_processed_claim")
   String lastClaimId;

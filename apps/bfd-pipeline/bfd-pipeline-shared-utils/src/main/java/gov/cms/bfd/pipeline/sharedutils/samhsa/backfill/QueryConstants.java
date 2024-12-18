@@ -16,7 +16,7 @@ public class QueryConstants {
         SELECT mc.idr_clm_hd_icn, mc.idr_hdr_from_date_of_svc, mc.idr_hdr_to_date_of_svc, dc.idr_diag_code
             FROM rda.mcs_diagnosis_codes dc
             JOIN rda.mcs_claims mc ON mc.idr_clm_hd_icn = dc.idr_clm_hd_icn
-            ${gtClaimLine}
+            ${gtClaimLineWhere}
             ORDER BY idr_clm_hd_icn ASC
             limit :limit
         """;
@@ -27,7 +27,7 @@ public class QueryConstants {
         SELECT mc.idr_clm_hd_icn, mc.idr_hdr_from_date_of_svc, mc.idr_hdr_to_date_of_svc, dt.idr_dtl_primary_diag_code, dt.idr_proc_code
             FROM rda.mcs_details dt
             JOIN rda.mcs_claims mc ON mc.idr_clm_hd_icn = dt.idr_clm_hd_icn
-            ${gtClaimLine}
+            ${gtClaimLineWhere}
             ORDER BY idr_clm_hd_icn ASC
             limit :limit
         """;
@@ -37,7 +37,7 @@ public class QueryConstants {
       """
         SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fc.admit_diag_code, fc.drg_cd, fc.principle_diag
         FROM rda.fiss_claims fc
-        ${gtClaimLine}
+        ${gtClaimLineWhere}
         ORDER BY claim_id ASC
         limit :limit
     """;
@@ -48,7 +48,7 @@ public class QueryConstants {
             SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fr.apc_hcpcs_apc, fr.hcpc_cd
             FROM rda.fiss_revenue_lines fr
             JOIN rda.fiss_claims fc on fc.claim_id = fr.claim_id
-            ${gtClaimLine}
+            ${gtClaimLineWhere}
             ORDER BY claim_id ASC
             limit :limit
         """;
@@ -59,7 +59,7 @@ public class QueryConstants {
             SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fd.diag_cd2
             FROM rda.fiss_diagnosis_codes fd
             JOIN rda.fiss_claims fc on fc.claim_id = fd.claim_id
-            ${gtClaimLine}
+            ${gtClaimLineWhere}
             ORDER BY claim_id ASC
             limit :limit
         """;
@@ -70,7 +70,7 @@ public class QueryConstants {
             SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fp.proc_code
             FROM rda.fiss_proc_codes fp
             JOIN rda.fiss_claims fc on fc.claim_id = fp.claim_id
-            ${gtClaimLine}
+            ${gtClaimLineWhere}
             ORDER BY fc.claim_id ASC
             limit :limit
         """;
@@ -83,6 +83,7 @@ public class QueryConstants {
               cc.icd_dgns_cd4, cc.icd_dgns_cd5, cc.icd_dgns_cd6, cc.icd_dgns_cd7,
               cc.icd_dgns_cd8, cc.icd_dgns_cd9, cc.icd_dgns_cd10, cc.icd_dgns_cd11, cc.icd_dgns_cd12
             FROM ccw.carrier_claims cc
+            WHERE abs(cc.clm_id % :totalThreads) = :threadNumber
             ${gtClaimLine}
             ORDER BY cc.clm_id ASC
             limit :limit
@@ -95,6 +96,7 @@ public class QueryConstants {
               ccl.line_icd_dgns_cd, ccl.hcpcs_cd
             FROM ccw.carrier_claim_lines ccl
             JOIN ccw.carrier_claims cc ON cc.clm_id = ccl.clm_id
+            WHERE abs(cc.clm_id % :totalThreads) = :threadNumber
             ${gtClaimLine}
             ORDER BY cc.clm_id ASC
             limit :limit
@@ -108,6 +110,7 @@ public class QueryConstants {
              dc.icd_dgns_cd4, dc.icd_dgns_cd5, dc.icd_dgns_cd6, dc.icd_dgns_cd7, dc.icd_dgns_cd8,
              dc.icd_dgns_cd9, dc.icd_dgns_cd10, dc.icd_dgns_cd11, dc.icd_dgns_cd12
            FROM ccw.dme_claims dc
+           WHERE abs(dc.clm_id % :totalThreads) = :threadNumber
            ${gtClaimLine}
            ORDER BY dc.clm_id ASC
            limit :limit
@@ -120,6 +123,7 @@ public class QueryConstants {
                   dcl.line_icd_dgns_cd, dcl.hcpcs_cd
                 FROM ccw.dme_claim_lines dcl
                 JOIN ccw.dme_claims dc ON dc.clm_id = dcl.clm_id
+                WHERE abs(dc.clm_id % :totalThreads) = :threadNumber
                 ${gtClaimLine}
                 ORDER BY dc.clm_id ASC
                 limit :limit
@@ -138,6 +142,7 @@ public class QueryConstants {
             hc.icd_dgns_e_cd4, hc.icd_dgns_e_cd5, hc.icd_dgns_e_cd6, hc.icd_dgns_e_cd7, hc.icd_dgns_e_cd8,
             hc.icd_dgns_e_cd9, hc.icd_dgns_e_cd10, hc.icd_dgns_e_cd11, hc.icd_dgns_e_cd12, hc.fst_dgns_e_cd
           FROM ccw.hospice_claims hc
+          WHERE abs(hc.clm_id % :totalThreads) = :threadNumber
           ${gtClaimLine}
           ORDER BY hc.clm_id ASC
           limit :limit
@@ -150,6 +155,7 @@ public class QueryConstants {
                   hcl.hcpcs_cd
                 FROM ccw.hospice_claim_lines hcl
                 JOIN ccw.hospice_claims hc ON hc.clm_id = hcl.clm_id
+                WHERE abs(hc.clm_id % :totalThreads) = :threadNumber
                 ${gtClaimLine}
                 ORDER BY hc.clm_id ASC
                 limit :limit
@@ -168,6 +174,7 @@ public class QueryConstants {
             hc.icd_dgns_e_cd4, hc.icd_dgns_e_cd5, hc.icd_dgns_e_cd6, hc.icd_dgns_e_cd7, hc.icd_dgns_e_cd8,
             hc.icd_dgns_e_cd9, hc.icd_dgns_e_cd10, hc.icd_dgns_e_cd11, hc.icd_dgns_e_cd12, hc.fst_dgns_e_cd
         FROM ccw.hha_claims hc
+        WHERE abs(hc.clm_id % :totalThreads) = :threadNumber
         ${gtClaimLine}
         ORDER BY hc.clm_id ASC
         limit :limit
@@ -180,6 +187,7 @@ public class QueryConstants {
                   hcl.hcpcs_cd, hcl.rev_cntr_apc_hipps_cd
                 FROM ccw.hha_claim_lines hcl
                 JOIN ccw.hha_claims hc ON hc.clm_id = hcl.clm_id
+                WHERE abs(hc.clm_id % :totalThreads) = :threadNumber
                 ${gtClaimLine}
                 ORDER BY hc.clm_id ASC
                 limit :limit
@@ -204,6 +212,7 @@ public class QueryConstants {
             sc.icd_prcdr_cd19, sc.icd_prcdr_cd20, sc.icd_prcdr_cd21, sc.icd_prcdr_cd22, sc.icd_prcdr_cd23,
             sc.icd_prcdr_cd24, sc.icd_prcdr_cd25
         FROM ccw.snf_claims sc
+        WHERE abs(sc.clm_id % :totalThreads) = :threadNumber
         ${gtClaimLine}
         ORDER BY sc.clm_id ASC
         limit :limit
@@ -216,6 +225,7 @@ public class QueryConstants {
                   scl.hcpcs_cd
                 FROM ccw.snf_claim_lines scl
                 JOIN ccw.snf_claims sc ON sc.clm_id = scl.clm_id
+                WHERE abs(sc.clm_id % :totalThreads) = :threadNumber
                 ${gtClaimLine}
                 ORDER BY sc.clm_id ASC
                 limit :limit
@@ -238,6 +248,7 @@ public class QueryConstants {
            ic.icd_prcdr_cd18, ic.icd_prcdr_cd19, ic.icd_prcdr_cd20, ic.icd_prcdr_cd21, ic.icd_prcdr_cd22, ic.icd_prcdr_cd23,
            ic.icd_prcdr_cd24, ic.icd_prcdr_cd25
        FROM ccw.inpatient_claims ic
+       WHERE abs(ic.clm_id % :totalThreads) = :threadNumber
        ${gtClaimLine}
        ORDER BY ic.clm_id ASC
        limit :limit
@@ -250,6 +261,7 @@ public class QueryConstants {
                   icl.hcpcs_cd
                 FROM ccw.inpatient_claim_lines icl
                 JOIN ccw.inpatient_claims ic ON ic.clm_id = icl.clm_id
+                WHERE abs(ic.clm_id % :totalThreads) = :threadNumber
                 ${gtClaimLine}
                 ORDER BY ic.clm_id ASC
                 limit :limit
@@ -272,6 +284,7 @@ public class QueryConstants {
        oc.icd_prcdr_cd19, oc.icd_prcdr_cd20, oc.icd_prcdr_cd21, oc.icd_prcdr_cd22, oc.icd_prcdr_cd23, oc.icd_prcdr_cd24,
        oc.icd_prcdr_cd25
        FROM ccw.outpatient_claims oc
+       WHERE abs(oc.clm_id % :totalThreads) = :threadNumber
        ${gtClaimLine}
        ORDER BY oc.clm_id ASC
        limit :limit
@@ -284,11 +297,15 @@ public class QueryConstants {
                   ocl.hcpcs_cd, ocl.rev_cntr_apc_hipps_cd
                 FROM ccw.outpatient_claim_lines ocl
                 JOIN ccw.outpatient_claims oc ON oc.clm_id = ocl.clm_id
+                WHERE abs(oc.clm_id % :totalThreads) = :threadNumber
                 ${gtClaimLine}
                 ORDER BY oc.clm_id ASC
                 limit :limit
           """;
 
-  /** Line fo Greater Than claimId. */
-  public static final String GT_CLAIM_LINE = "WHERE ${claimField} >= :startingClaim";
+  /** Line for Greater Than claimId. Starts with AND. */
+  public static final String GT_CLAIM_LINE = "AND ${claimField} >= :startingClaim";
+
+  /** Line for Greater Than claimId -- starts with WHERE. */
+  public static final String GT_CLAIM_LINE_WHERE = "WHERE ${claimField} >= :startingClaim";
 }

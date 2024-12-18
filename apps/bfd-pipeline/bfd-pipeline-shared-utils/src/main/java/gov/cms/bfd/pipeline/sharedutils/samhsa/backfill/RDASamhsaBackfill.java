@@ -82,7 +82,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
    */
   public RDASamhsaBackfill(
       TransactionManager transactionManager, int batchSize, RDA_TABLES tableEntry) {
-    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry());
+    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry(), 0, 1);
   }
 
   /** {@inheritDoc} */

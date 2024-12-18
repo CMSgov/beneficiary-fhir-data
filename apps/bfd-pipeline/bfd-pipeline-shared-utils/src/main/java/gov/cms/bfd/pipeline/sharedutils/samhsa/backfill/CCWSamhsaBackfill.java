@@ -109,10 +109,16 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
    * @param transactionManager Transaction manager.
    * @param batchSize the query batch size.
    * @param tableEntry The table to use in this thread.
+   * @param threadNumber The thread number for this instance.
+   * @param totalThreads the total number of threads per table.
    */
   public CCWSamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, CCW_TABLES tableEntry) {
-    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry());
+      TransactionManager transactionManager,
+      int batchSize,
+      CCW_TABLES tableEntry,
+      int threadNumber,
+      int totalThreads) {
+    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry(), threadNumber, totalThreads);
     this.tableEntry = tableEntry.getEntry();
   }
 
