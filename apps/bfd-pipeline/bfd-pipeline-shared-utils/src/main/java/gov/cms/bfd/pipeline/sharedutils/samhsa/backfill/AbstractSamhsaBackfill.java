@@ -161,7 +161,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     Long tableTotal = executeForTable(tableEntry);
     logger.info(
         String.format(
-            "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
+            "Created tags for %d claims in table %s in thread %d",
+            tableTotal, tableEntry.getClaimTable(), threadNumber));
     total += tableTotal;
     return total;
   }
@@ -243,8 +244,12 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               totalProcessed.accumulateAndGet(claims.size(), Long::sum);
               logger.info(
                   String.format(
-                      "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes. Total processed so far: %d",
-                      batchSize, tableEntry.getClaimTable(), savedInBatch, totalProcessed.get()));
+                      "Processed Batch of %d claims from table %s in thread %d. %d of them had SAMHSA codes. Total processed so far: %d",
+                      batchSize,
+                      tableEntry.getClaimTable(),
+                      threadNumber,
+                      savedInBatch,
+                      totalProcessed.get()));
 
               lastClaimId.set(
                   !claims.isEmpty()
@@ -269,8 +274,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
     logger.info(
         String.format(
-            "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
-            tableEntry.getClaimTable(), totalProcessed.get(), totalSaved.get()));
+            "Finished processing table %s in thread %d. Processed %d claims, and %d of them had SAMHSA codes.",
+            tableEntry.getClaimTable(), threadNumber, totalProcessed.get(), totalSaved.get()));
     return totalSaved.get();
   }
 
