@@ -10,7 +10,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.model.rif.samhsa.DmeTag;
 import gov.cms.bfd.model.rif.samhsa.HhaTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
@@ -42,8 +41,7 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
       MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
 
   /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired
-  private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /**
    * Instantiates a new transformer.
@@ -207,14 +205,14 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
     String securityTag =
-            lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-                    String.valueOf(claimGroup.getClaimId()), HhaTag.class);
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+            String.valueOf(claimGroup.getClaimId()), HhaTag.class);
 
     eob.getMeta()
-            .addSecurity()
-            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-            .setCode(securityTag)
-            .setDisplay(securityTag);
+        .addSecurity()
+        .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
+        .setCode(securityTag)
+        .setDisplay(securityTag);
     return eob;
   }
 }

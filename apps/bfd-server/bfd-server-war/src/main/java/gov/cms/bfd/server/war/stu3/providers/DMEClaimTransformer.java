@@ -9,7 +9,6 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
 import gov.cms.bfd.model.rif.samhsa.DmeTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
@@ -43,8 +42,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
       MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform");
 
   /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired
-  private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /**
    * Instantiates a new transformer.
@@ -313,14 +311,14 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
     String securityTag =
-            lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-                    String.valueOf(claimGroup.getClaimId()), DmeTag.class);
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+            String.valueOf(claimGroup.getClaimId()), DmeTag.class);
 
     eob.getMeta()
-            .addSecurity()
-            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-            .setCode(securityTag)
-            .setDisplay(securityTag);
+        .addSecurity()
+        .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
+        .setCode(securityTag)
+        .setDisplay(securityTag);
     return eob;
   }
 }
