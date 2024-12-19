@@ -85,7 +85,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
-      final LongTaskTimer micrometerTimer = metrics.startTimerForRif(rifFile);
+      final LongTaskTimer.Sample micrometerTimer = metrics.createTimerForRif(rifFile).start();
 
       try {
         LOGGER.info("Processing file {}", rifFile.getDisplayName());
@@ -103,7 +103,7 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
         failure = e;
       }
 
-      metrics.stopTimer(micrometerTimer);
+      micrometerTimer.stop();
 
       dataSetFileMetricsReporter.stop();
       dataSetFileMetricsReporter.report();
@@ -163,31 +163,17 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
     private final MeterRegistry micrometerMetrics;
 
     /**
-     * Start a {@link LongTaskTimer}(s) for a given {@link RifFile} so that the time it takes to
-     * process the RIF is measured. Should be called prior to processing a {@link RifFile}.
+     * Creates a {@link LongTaskTimer} for a given {@link RifFile} so that the time it takes to
+     * process the RIF can be measured. Should be called prior to processing a {@link RifFile}.
      *
      * @param rifFile the {@link RifFile} to time
-     * @return the started {@link LongTaskTimer} measuring the time taken to load the {@link
-     *     RifFile}
+     * @return the {@link LongTaskTimer} that will be used to measure the time taken to load the
+     *     {@link RifFile}
      */
-    LongTaskTimer startTimerForRif(RifFile rifFile) {
-      final var timer =
-          LongTaskTimer.builder(RIF_FILE_PROCESSING_TIMER_NAME)
-              .tags(getTags(rifFile))
-              .register(micrometerMetrics);
-      timer.start();
-      return timer;
-    }
-
-    /**
-     * Stops the provided {@link LongTaskTimer} and removes it from the Pipeline application's
-     * {@link MeterRegistry}.
-     *
-     * @param timer the {@link LongTaskTimer} to stop.
-     */
-    void stopTimer(LongTaskTimer timer) {
-      timer.close();
-      micrometerMetrics.remove(timer);
+    LongTaskTimer createTimerForRif(RifFile rifFile) {
+      return LongTaskTimer.builder(RIF_FILE_PROCESSING_TIMER_NAME)
+          .tags(getTags(rifFile))
+          .register(micrometerMetrics);
     }
 
     /**

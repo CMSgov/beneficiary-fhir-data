@@ -356,13 +356,13 @@ public final class CcwRifLoadJob implements PipelineJob {
        * processing multiple data sets in parallel (which would lead to data
        * consistency problems).
        */
+      final var processingTimer = loadJobMetrics.createTimerForManifest(manifestToProcess).start();
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsStarted(manifestRecord);
-      final var timer = loadJobMetrics.startTimerForManifest(manifestToProcess);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsProcessed(manifestRecord);
-      loadJobMetrics.stopTimer(timer);
+      processingTimer.stop();
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -564,32 +564,18 @@ public final class CcwRifLoadJob implements PipelineJob {
     private final MeterRegistry appMetrics;
 
     /**
-     * Start a {@link LongTaskTimer}(s) for a given {@link DataSetManifest} so that the time it
-     * takes to process the manifest is measured. Should be called prior to processing a {@link
+     * Creates a {@link LongTaskTimer} for a given {@link DataSetManifest} so that the time it takes
+     * to process the manifest is measured. Should be called prior to processing a {@link
      * DataSetManifest}.
      *
      * @param manifest the {@link DataSetManifest} to time
-     * @return the started {@link LongTaskTimer} measuring the time taken to load the {@link
-     *     DataSetManifest}
+     * @return the {@link LongTaskTimer} that will be used to measure the time taken to load the
+     *     {@link DataSetManifest}
      */
-    LongTaskTimer startTimerForManifest(DataSetManifest manifest) {
-      final var timer =
-          LongTaskTimer.builder(MANIFEST_PROCESSING_TIMER_NAME)
-              .tags(getTags(manifest))
-              .register(appMetrics);
-      timer.start();
-      return timer;
-    }
-
-    /**
-     * Stops the provided {@link LongTaskTimer} and removes it from the Pipeline application's
-     * {@link MeterRegistry}.
-     *
-     * @param timer the {@link LongTaskTimer} to stop.
-     */
-    void stopTimer(LongTaskTimer timer) {
-      timer.close();
-      appMetrics.remove(timer);
+    LongTaskTimer createTimerForManifest(DataSetManifest manifest) {
+      return LongTaskTimer.builder(MANIFEST_PROCESSING_TIMER_NAME)
+          .tags(getTags(manifest))
+          .register(appMetrics);
     }
 
     /**
