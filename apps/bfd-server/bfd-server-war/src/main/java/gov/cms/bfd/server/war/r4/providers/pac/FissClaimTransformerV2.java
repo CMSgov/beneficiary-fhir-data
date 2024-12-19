@@ -144,7 +144,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
         lookUpSamhsaSecurityTags.getClaimSecurityLevel(
             claim.getType(), claim.getIdElement().getIdPart());
 
-    // Create a list of Coding objects to match the required type
     List<Coding> securityTags = new ArrayList<>();
 
     // Create a Coding object for the security level

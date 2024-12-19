@@ -15,19 +15,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/** LookUpSamhsaSecurityTags test. */
 class LookUpSamhsaSecurityTagsTest {
 
+  /** The EntityManager. */
   @Mock private EntityManager entityManager;
 
+  /** Query. */
   @Mock private Query query;
 
+  /** LookUpSamhsaSecurityTags. */
   @InjectMocks private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
+  /** Set up the mocks and the validator being tested. */
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this); // Initialize mocks
   }
 
+  /** testGetClaimSecurityLevel_Inpatient. */
   @Test
   void testGetClaimSecurityLevel_Inpatient() {
     CodeableConcept type = new CodeableConcept();
@@ -45,6 +51,7 @@ class LookUpSamhsaSecurityTagsTest {
         "Security level should be 'Restricted' for Inpatient claim with 'R' tag");
   }
 
+  /** testGetClaimSecurityLevel_Outpatient. */
   @Test
   void testGetClaimSecurityLevel_Outpatient() {
     CodeableConcept type = new CodeableConcept();

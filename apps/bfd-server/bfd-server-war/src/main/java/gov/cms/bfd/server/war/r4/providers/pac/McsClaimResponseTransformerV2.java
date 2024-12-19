@@ -137,7 +137,6 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     String securityTag =
         lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getType(), claim.getIdPart());
 
-    // Create a list of Coding objects to match the required type
     List<Coding> securityTags = new ArrayList<>();
 
     // Create a Coding object for the security level

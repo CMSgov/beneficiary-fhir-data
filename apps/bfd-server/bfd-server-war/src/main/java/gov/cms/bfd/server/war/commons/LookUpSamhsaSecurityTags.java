@@ -86,19 +86,16 @@ public final class LookUpSamhsaSecurityTags {
         // No tags for unrecognized claim type
         break;
     }
-
-    // Determine the security level based on the collected tags
     return determineSecurityLevel(securityTags);
   }
 
   /**
-   * Helper method to get the claim type from the FHIR Claim resource.
+   * Retrieves the claim type from the Claim resource.
    *
    * @param type the FHIR Claim resource
    * @return the claim type (e.g., "Inpatient", "Outpatient", etc.)
    */
   private String getClaimType(CodeableConcept type) {
-    // Retrieve the claim type from the Claim resource
     //    CodeableConcept type = claim.getType();
     if (type != null && type.hasCoding()) {
 
@@ -130,7 +127,7 @@ public final class LookUpSamhsaSecurityTags {
   }
 
   /**
-   * Helper method to query tags for a specific claim from a specific table.
+   * Query tags for a specific claim from a specific table.
    *
    * @param claimId the name of the variable
    * @param tagClass the name of the tag class
@@ -143,9 +140,12 @@ public final class LookUpSamhsaSecurityTags {
     if (FissTag.class.equals(tagClass) || McsTag.class.equals(tagClass)) {
       // For FissTag and McsTag, claimId is a String
       sql = "SELECT t.code FROM " + tagClass.getSimpleName() + " t WHERE t.claim = :claim";
+      //      tagCodes.add("42CFRPart2");
+      //      tagCodes.add("R");
     } else {
       // For other tags (CarrierTag, DmeTag, etc.), claimId is a Long
       sql = "SELECT t.code FROM " + tagClass.getSimpleName() + " t WHERE t.claim = :claim";
+      //      tagCodes.add("NormalTag");
     }
 
     Query query = entityManager.createQuery(sql);
@@ -154,13 +154,12 @@ public final class LookUpSamhsaSecurityTags {
     @SuppressWarnings("unchecked")
     List<String> resultList = query.getResultList();
 
-    // Use a parameterized constructor to initialize the Set with the List
     tagCodes = new HashSet<>(resultList);
     return tagCodes;
   }
 
   /**
-   * Helper method to determine the security level based on the collected tags.
+   * Determines the security level based on the collected tags.
    *
    * @param securityTags value of securityTags
    * @return SecurityLevel
@@ -178,7 +177,7 @@ public final class LookUpSamhsaSecurityTags {
   }
 
   /**
-   * Helper method to determine the security level based on the collected tags.
+   * Determines the security level based on the collected tags.
    *
    * @param claimId value of claimId
    * @param tagClass value of tagClass
