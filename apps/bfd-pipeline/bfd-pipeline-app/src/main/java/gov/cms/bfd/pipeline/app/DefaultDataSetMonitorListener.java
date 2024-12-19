@@ -9,9 +9,16 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFileRecords;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +34,15 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
   public static final String TIMER_PROCESSING =
       MetricRegistry.name(PipelineApplication.class.getSimpleName(), "dataSet", "processed");
 
+  /** Name of the {@link LongTaskTimer} started when a RIF file has started processing. */
+  public static final String RIF_FILE_PROCESSING_TIMER_NAME =
+      String.format("%s.rif_file_processing.duration", CcwRifLoadJob.class.getSimpleName());
+
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
+
+  /** Micrometer metrics for this class. */
+  private final Metrics metrics;
 
   /** Handles processing of new RIF files. */
   private final RifFilesProcessor rifProcessor;
@@ -40,14 +54,19 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
    * Initializes the instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the application
+   * @param micrometerMetrics the {@link MeterRegistry} for the application
    * @param rifProcessor the {@link RifFilesProcessor} for the application
    * @param rifLoader the {@link RifLoader} for the application
    */
   DefaultDataSetMonitorListener(
-      MetricRegistry appMetrics, RifFilesProcessor rifProcessor, RifLoader rifLoader) {
+      MetricRegistry appMetrics,
+      MeterRegistry micrometerMetrics,
+      RifFilesProcessor rifProcessor,
+      RifLoader rifLoader) {
     this.appMetrics = appMetrics;
     this.rifProcessor = rifProcessor;
     this.rifLoader = rifLoader;
+    this.metrics = new Metrics(micrometerMetrics);
   }
 
   @Override
@@ -66,6 +85,8 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
+      final LongTaskTimer.Sample micrometerTimer = metrics.createTimerForRif(rifFile).start();
+
       try {
         LOGGER.info("Processing file {}", rifFile.getDisplayName());
         rifFile.markAsStarted();
@@ -81,6 +102,8 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
         LOGGER.error("Exception while processing file {}", rifFile.getDisplayName());
         failure = e;
       }
+
+      micrometerTimer.stop();
 
       dataSetFileMetricsReporter.stop();
       dataSetFileMetricsReporter.report();
@@ -103,5 +126,79 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
   @Override
   public void noDataAvailable() {
     // Nothing to do here.
+  }
+
+  /** Metrics for the {@link DefaultDataSetMonitorListener}'s operations. */
+  @RequiredArgsConstructor
+  public static final class Metrics {
+    /**
+     * Name of the per-{@link RifFile} data processing timers.
+     *
+     * @implNote We use the class name of {@link CcwRifLoadJob} as the metric prefix instead of
+     *     {@link DefaultDataSetMonitorListener} as there are other CCW RIF-related metrics
+     *     generated from the {@link CcwRifLoadJob}. Additionally, {@link
+     *     DefaultDataSetMonitorListener} is indirectly invoked by {@link CcwRifLoadJob}
+     */
+    public static final String RIF_FILE_PROCESSING_TIMER_NAME =
+        String.format("%s.rif_file_processing.duration", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
+     */
+    private static final String TAG_DATA_SET_TIMESTAMP = "data_set_timestamp";
+
+    /** Tag indicating which RIF file a given metric measured. */
+    private static final String TAG_RIF_FILE = "rif_file";
+
+    /**
+     * Tag indicating whether the data load associated with the measured metric was synthetic or
+     * not.
+     */
+    private static final String TAG_IS_SYNTHETIC = "is_synthetic";
+
+    /** Tag indicating which {@link DataSetManifest} was associated with the measured metric. */
+    private static final String TAG_MANIFEST = "manifest";
+
+    /** Micrometer {@link MeterRegistry} for the Pipeline application. */
+    private final MeterRegistry micrometerMetrics;
+
+    /**
+     * Creates a {@link LongTaskTimer} for a given {@link RifFile} so that the time it takes to
+     * process the RIF can be measured. Should be called prior to processing a {@link RifFile}.
+     *
+     * @param rifFile the {@link RifFile} to time
+     * @return the {@link LongTaskTimer} that will be used to measure the time taken to load the
+     *     {@link RifFile}
+     */
+    LongTaskTimer createTimerForRif(RifFile rifFile) {
+      return LongTaskTimer.builder(RIF_FILE_PROCESSING_TIMER_NAME)
+          .tags(getTags(rifFile))
+          .register(micrometerMetrics);
+    }
+
+    /**
+     * Returns a {@link List} of default {@link Tag}s that is used to disambiguate a given metric
+     * based on its corresponding {@link DataSetManifest}.
+     *
+     * @param rifFile {@link RifFile} from which several properties will be used to set relevant
+     *     {@link Tag}s
+     * @return a {@link List} of {@link Tag}s including relevant information from {@code rifFile}
+     */
+    private List<Tag> getTags(RifFile rifFile) {
+      final var rifFileTag = Tag.of(TAG_RIF_FILE, rifFile.getFileType().name().toLowerCase());
+      if (rifFile instanceof S3RifFile s3RifFile) {
+        final var manifest = s3RifFile.getManifestEntry().getParentManifest();
+        final var manifestFullpath = manifest.getIncomingS3Key();
+        final var manifestFilename =
+            manifestFullpath.substring(manifestFullpath.lastIndexOf("/") + 1);
+        return List.of(
+            Tag.of(TAG_DATA_SET_TIMESTAMP, manifest.getTimestampText()),
+            Tag.of(TAG_IS_SYNTHETIC, Boolean.toString(manifest.isSyntheticData())),
+            rifFileTag,
+            Tag.of(TAG_MANIFEST, manifestFilename));
+      }
+
+      return List.of(rifFileTag);
+    }
   }
 }
