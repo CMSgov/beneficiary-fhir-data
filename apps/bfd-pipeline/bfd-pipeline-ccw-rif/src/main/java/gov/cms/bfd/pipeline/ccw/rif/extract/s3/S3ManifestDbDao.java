@@ -113,6 +113,64 @@ public class S3ManifestDbDao {
   }
 
   /**
+   * test.
+   *
+   * @param manifestKeys test
+   * @return test
+   */
+  public boolean hasIncompleteManifests(Set<String> manifestKeys) {
+    // Need to use createNativeQuery because createQuery doesn't seem to support the unnest(array[])
+    // syntax
+    final String query =
+        """
+        select exists(
+          select 1
+          from unnest(array[:manifestKeys]) a(id)
+          where not exists(
+            select 1
+            from ccw.s3_manifest_files m
+            where m.s3_key = a.id
+            and m.status != 'COMPLETED'
+          )
+        )
+        """;
+    return (boolean)
+        transactionManager.executeFunction(
+            entityManager ->
+                entityManager
+                    .createNativeQuery(query, boolean.class)
+                    .setParameter("manifestKeys", manifestKeys)
+                    .getSingleResult());
+  }
+
+  /**
+   * test.
+   *
+   * @param manifestTimestamps test
+   * @param cutoff test
+   * @return test
+   */
+  public boolean hasMissingManifestLists(Set<String> manifestTimestamps, Instant cutoff) {
+    final String query =
+        """
+            select exists(
+              select 1
+              from S3ManifestFile m
+              where m.manifestTimestamp > :cutoff
+              and m.s3Key not like 'Synthetic/%'
+              and m.manifestTimestamp not in :manifestTimestamps
+            )
+            """;
+    return transactionManager.executeFunction(
+        entityManager ->
+            entityManager
+                .createQuery(query, boolean.class)
+                .setParameter("manifestTimestamps", manifestTimestamps)
+                .setParameter("cutoff", cutoff)
+                .getSingleResult());
+  }
+
+  /**
    * Finds a record matching the given S3 key and returns an entity representing it. Returns null if
    * no record exists.
    *

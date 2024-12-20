@@ -149,6 +149,57 @@ public class DataSetQueue implements AutoCloseable {
   }
 
   /**
+   * test.
+   *
+   * @param minimumAllowedManifestTimestamp test.
+   * @return test
+   */
+  public List<FinalManifestList> readFinalManifestLists(Instant minimumAllowedManifestTimestamp) {
+    final String manifestListName = "manifestlist.done";
+    return s3Files
+        // Purposefully excluding synthetic prefix here because synthetic loads don't have a final
+        // manifest
+        .scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)
+        .filter(
+            s ->
+                s.getKey().toLowerCase().endsWith(manifestListName)
+                    && s.getLastModified().isAfter(minimumAllowedManifestTimestamp))
+        .map(
+            s -> {
+              String key = s.getKey();
+
+              try {
+                DownloadedFile downloadedFile = downloadFileAndCheckMD5(key);
+                return new FinalManifestList(downloadedFile.getBytes().read(), key);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            })
+        .toList();
+  }
+
+  /**
+   * test.
+   *
+   * @param manifestKeys test
+   * @return test
+   */
+  public boolean hasIncompleteManifests(Set<String> manifestKeys) {
+    return s3Records.hasIncompleteManifests(manifestKeys);
+  }
+
+  /**
+   * test.
+   *
+   * @param manifestListTimestamps test
+   * @param cutoff test
+   * @return test
+   */
+  public boolean hasMissingManifests(Set<String> manifestListTimestamps, Instant cutoff) {
+    return s3Records.hasMissingManifestLists(manifestListTimestamps, cutoff);
+  }
+
+  /**
    * Downloads the data file from S3 and confirms its MD5 checksum.
    *
    * @param entryRecord database record corresponding to the entry

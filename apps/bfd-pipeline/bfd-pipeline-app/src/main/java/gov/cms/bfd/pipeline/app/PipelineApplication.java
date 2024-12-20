@@ -176,6 +176,7 @@ public final class PipelineApplication {
    * @throws FatalAppException if app shutdown required
    * @throws IOException for I/O errors
    * @throws SQLException for database errors
+   * @return test
    */
   private PipelineOutcome runPipeline() throws FatalAppException, SQLException, IOException {
 

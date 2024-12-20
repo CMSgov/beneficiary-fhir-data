@@ -491,6 +491,6 @@ public class DataSetQueueTest {
    * @return the object summary
    */
   private S3Dao.S3ObjectSummary createSummaryForS3Key(String s3Key) {
-    return new S3Dao.S3ObjectSummary(s3Key, "some-etag", 100L);
+    return new S3Dao.S3ObjectSummary(s3Key, "some-etag", 100L, Instant.now());
   }
 }

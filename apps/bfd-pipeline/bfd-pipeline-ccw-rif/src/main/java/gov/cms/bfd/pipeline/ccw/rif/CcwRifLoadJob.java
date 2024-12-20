@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.FinalManifestList;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
@@ -31,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +78,9 @@ public final class CcwRifLoadJob implements PipelineJob {
    * queries reasonable.
    */
   public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(60);
+
+  /** test. */
+  private static final Instant FINAL_MANIFEST_CUTOFF = Instant.parse("2024-12-12T00:00:00Z");
 
   /**
    * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
@@ -241,8 +246,22 @@ public final class CcwRifLoadJob implements PipelineJob {
     // If no manifest was found, we're done (until next time).
     if (eligibleManifests.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
+      final List<FinalManifestList> finalManifestLists = readFinalManifestLists();
+      final Set<String> allManifests =
+          finalManifestLists.stream()
+              .flatMap(l -> l.getManifests().stream())
+              .collect(Collectors.toSet());
+      final Set<String> finalManifestTimestamps =
+          finalManifestLists.stream()
+              .map(FinalManifestList::getTimestamp)
+              .collect(Collectors.toSet());
+
       listener.noDataAvailable();
       statusReporter.reportNothingToDo();
+      if (dataSetQueue.hasIncompleteManifests(allManifests)
+          || dataSetQueue.hasMissingManifests(finalManifestTimestamps, FINAL_MANIFEST_CUTOFF)) {
+        return PipelineJobOutcome.NOTHING_TO_DO;
+      }
 
       return PipelineJobOutcome.SHOULD_TERMINATE;
     }
@@ -488,6 +507,15 @@ public final class CcwRifLoadJob implements PipelineJob {
   private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
     final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
     return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
+  }
+
+  /**
+   * test.
+   *
+   * @return test.
+   */
+  private List<FinalManifestList> readFinalManifestLists() {
+    return dataSetQueue.readFinalManifestLists(FINAL_MANIFEST_CUTOFF);
   }
 
   /**

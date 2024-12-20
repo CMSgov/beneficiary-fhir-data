@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
@@ -170,7 +171,7 @@ public class S3Dao implements AutoCloseable {
             .metadata(metaData)
             .build();
     PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, requestBody);
-    return new S3ObjectSummary(s3Key, objectSize, putObjectResponse);
+    return new S3ObjectSummary(s3Key, objectSize, Instant.now(), putObjectResponse);
   }
 
   /**
@@ -428,6 +429,9 @@ public class S3Dao implements AutoCloseable {
     /** The object's size. */
     private final long size;
 
+    /** test. */
+    private Instant lastModified;
+
     /**
      * Initializes an instance from a {@link S3Object}.
      *
@@ -437,6 +441,7 @@ public class S3Dao implements AutoCloseable {
       key = object.key();
       eTag = object.eTag();
       size = object.size();
+      lastModified = object.lastModified();
     }
 
     /**
@@ -444,12 +449,15 @@ public class S3Dao implements AutoCloseable {
      *
      * @param key The object's key
      * @param size The object's size
+     * @param lastModified test
      * @param response object returned by S3 API
      */
-    private S3ObjectSummary(String key, long size, PutObjectResponse response) {
+    private S3ObjectSummary(
+        String key, long size, Instant lastModified, PutObjectResponse response) {
       this.key = key;
       eTag = response.eTag();
       this.size = size;
+      this.lastModified = lastModified;
     }
   }
 
@@ -473,6 +481,9 @@ public class S3Dao implements AutoCloseable {
     /** The object's size. */
     private final long size;
 
+    /** test. */
+    private final Instant lastModified;
+
     /** Key/value pairs of metadata from the object. */
     private final Map<String, String> metaData;
 
@@ -486,6 +497,7 @@ public class S3Dao implements AutoCloseable {
       this.key = key;
       eTag = response.eTag();
       size = response.contentLength();
+      lastModified = response.lastModified();
       metaData = Map.copyOf(response.metadata());
     }
 
@@ -499,6 +511,7 @@ public class S3Dao implements AutoCloseable {
       this.key = key;
       eTag = response.eTag();
       size = response.contentLength();
+      lastModified = response.lastModified();
       metaData = Map.copyOf(response.metadata());
     }
   }
