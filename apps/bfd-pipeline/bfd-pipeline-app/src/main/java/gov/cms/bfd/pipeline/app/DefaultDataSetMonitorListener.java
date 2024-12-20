@@ -34,10 +34,6 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
   public static final String TIMER_PROCESSING =
       MetricRegistry.name(PipelineApplication.class.getSimpleName(), "dataSet", "processed");
 
-  /** Name of the {@link LongTaskTimer} started when a RIF file has started processing. */
-  public static final String RIF_FILE_PROCESSING_TIMER_NAME =
-      String.format("%s.rif_file_processing.duration", CcwRifLoadJob.class.getSimpleName());
-
   /** Metrics for this class. */
   private final MetricRegistry appMetrics;
 
