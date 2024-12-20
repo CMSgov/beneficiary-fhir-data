@@ -81,7 +81,9 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
           Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build();
       dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
-      final LongTaskTimer.Sample micrometerTimer = metrics.createTimerForRif(rifFile).start();
+      final LongTaskTimer.Sample activeTimer = metrics.createActiveTimerForRif(rifFile).start();
+      final io.micrometer.core.instrument.Timer.Sample totalTimer =
+          io.micrometer.core.instrument.Timer.start();
 
       try {
         LOGGER.info("Processing file {}", rifFile.getDisplayName());
@@ -99,7 +101,8 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
         failure = e;
       }
 
-      micrometerTimer.stop();
+      activeTimer.stop();
+      totalTimer.stop(metrics.createTotalTimerForRif(rifFile));
 
       dataSetFileMetricsReporter.stop();
       dataSetFileMetricsReporter.report();
@@ -128,15 +131,29 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
   @RequiredArgsConstructor
   public static final class Metrics {
     /**
-     * Name of the per-{@link RifFile} data processing timers.
+     * Name of the per-{@link RifFile} data processing {@link LongTaskTimer}s that actively, at each
+     * Micrometer reporting interval, records and reports the duration of processing of a given
+     * {@link RifFile}.
      *
      * @implNote We use the class name of {@link CcwRifLoadJob} as the metric prefix instead of
      *     {@link DefaultDataSetMonitorListener} as there are other CCW RIF-related metrics
      *     generated from the {@link CcwRifLoadJob}. Additionally, {@link
      *     DefaultDataSetMonitorListener} is indirectly invoked by {@link CcwRifLoadJob}
      */
-    public static final String RIF_FILE_PROCESSING_TIMER_NAME =
-        String.format("%s.rif_file_processing.duration", CcwRifLoadJob.class.getSimpleName());
+    public static final String RIF_FILE_PROCESSING_ACTIVE_TIMER_NAME =
+        String.format("%s.rif_file_processing.active", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Name of the per-{@link RifFile} data processing {@link Timer}s that report the final duration
+     * of processing once the {@link RifFile} is processed.
+     *
+     * @implNote We use the class name of {@link CcwRifLoadJob} as the metric prefix instead of
+     *     {@link DefaultDataSetMonitorListener} as there are other CCW RIF-related metrics
+     *     generated from the {@link CcwRifLoadJob}. Additionally, {@link
+     *     DefaultDataSetMonitorListener} is indirectly invoked by {@link CcwRifLoadJob}
+     */
+    public static final String RIF_FILE_PROCESSING_TOTAL_TIMER_NAME =
+        String.format("%s.rif_file_processing.total", CcwRifLoadJob.class.getSimpleName());
 
     /**
      * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
@@ -160,14 +177,32 @@ public final class DefaultDataSetMonitorListener implements DataSetMonitorListen
 
     /**
      * Creates a {@link LongTaskTimer} for a given {@link RifFile} so that the time it takes to
-     * process the RIF can be measured. Should be called prior to processing a {@link RifFile}.
+     * process the RIF can be measured while processing is ongoing. Should be called prior to
+     * processing a {@link RifFile}.
      *
      * @param rifFile the {@link RifFile} to time
-     * @return the {@link LongTaskTimer} that will be used to measure the time taken to load the
+     * @return the {@link LongTaskTimer} that will be used to measure the ongoing load time of the
      *     {@link RifFile}
      */
-    LongTaskTimer createTimerForRif(RifFile rifFile) {
-      return LongTaskTimer.builder(RIF_FILE_PROCESSING_TIMER_NAME)
+    LongTaskTimer createActiveTimerForRif(RifFile rifFile) {
+      return LongTaskTimer.builder(RIF_FILE_PROCESSING_ACTIVE_TIMER_NAME)
+          .tags(getTags(rifFile))
+          .register(micrometerMetrics);
+    }
+
+    /**
+     * Creates a {@link io.micrometer.core.instrument.Timer} for a given {@link RifFile} so that the
+     * total time it takes to process the RIF can be recorded once a {@link RifFile} is done
+     * processing. Should be used with {@link
+     * io.micrometer.core.instrument.Timer.Sample#stop(io.micrometer.core.instrument.Timer)} after
+     * processing a {@link RifFile} to record the total duration.
+     *
+     * @param rifFile the {@link RifFile} to time
+     * @return the {@link LongTaskTimer} that will be used to measure the total time taken to load
+     *     the {@link RifFile}
+     */
+    io.micrometer.core.instrument.Timer createTotalTimerForRif(RifFile rifFile) {
+      return io.micrometer.core.instrument.Timer.builder(RIF_FILE_PROCESSING_TOTAL_TIMER_NAME)
           .tags(getTags(rifFile))
           .register(micrometerMetrics);
     }

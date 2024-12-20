@@ -21,6 +21,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -356,13 +357,16 @@ public final class CcwRifLoadJob implements PipelineJob {
        * processing multiple data sets in parallel (which would lead to data
        * consistency problems).
        */
-      final var processingTimer = loadJobMetrics.createTimerForManifest(manifestToProcess).start();
+      final var activeTimer =
+          loadJobMetrics.createActiveTimerForManifest(manifestToProcess).start();
+      final var totalTimer = Timer.start();
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsStarted(manifestRecord);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsProcessed(manifestRecord);
-      processingTimer.stop();
+      activeTimer.stop();
+      totalTimer.stop(loadJobMetrics.createTotalTimerForManifest(manifestToProcess));
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -542,9 +546,20 @@ public final class CcwRifLoadJob implements PipelineJob {
   @RequiredArgsConstructor
   public static final class Metrics {
 
-    /** Name of the per-{@link DataSetManifest} data processing timers. */
-    public static final String MANIFEST_PROCESSING_TIMER_NAME =
-        String.format("%s.manifest_processing.duration", CcwRifLoadJob.class.getSimpleName());
+    /**
+     * Name of the per-{@link DataSetManifest} {@link LongTaskTimer}s that actively, at each
+     * Micrometer reporting interval, records and reports the duration of processing of a given
+     * {@link DataSetManifest}.
+     */
+    public static final String MANIFEST_PROCESSING_ACTIVE_TIMER_NAME =
+        String.format("%s.manifest_processing.active", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Name of the per-{@link DataSetManifest} {@link Timer}s that report the final duration of
+     * processing once the {@link DataSetManifest} is processed.
+     */
+    public static final String MANIFEST_PROCESSING_TOTAL_TIMER_NAME =
+        String.format("%s.manifest_processing.total", CcwRifLoadJob.class.getSimpleName());
 
     /**
      * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
@@ -565,15 +580,30 @@ public final class CcwRifLoadJob implements PipelineJob {
 
     /**
      * Creates a {@link LongTaskTimer} for a given {@link DataSetManifest} so that the time it takes
-     * to process the manifest is measured. Should be called prior to processing a {@link
-     * DataSetManifest}.
+     * to process the manifest can be measured and recorded while processing is ongoing. Should be
+     * called prior to processing a {@link DataSetManifest}.
      *
      * @param manifest the {@link DataSetManifest} to time
-     * @return the {@link LongTaskTimer} that will be used to measure the time taken to load the
-     *     {@link DataSetManifest}
+     * @return the {@link LongTaskTimer} that will be used to actively measure and record the time
+     *     taken to load the {@link DataSetManifest}
      */
-    LongTaskTimer createTimerForManifest(DataSetManifest manifest) {
-      return LongTaskTimer.builder(MANIFEST_PROCESSING_TIMER_NAME)
+    LongTaskTimer createActiveTimerForManifest(DataSetManifest manifest) {
+      return LongTaskTimer.builder(MANIFEST_PROCESSING_ACTIVE_TIMER_NAME)
+          .tags(getTags(manifest))
+          .register(appMetrics);
+    }
+
+    /**
+     * Creates a {@link Timer} for a given {@link DataSetManifest} so that the total time it takes
+     * to process the manifest can be recorded. Should be used with {@link Timer.Sample#stop(Timer)}
+     * after processing a {@link DataSetManifest} to record the total duration.
+     *
+     * @param manifest the {@link DataSetManifest} to time
+     * @return the {@link LongTaskTimer} that will be used to record the total time taken to load
+     *     the {@link DataSetManifest}
+     */
+    Timer createTotalTimerForManifest(DataSetManifest manifest) {
+      return Timer.builder(MANIFEST_PROCESSING_TOTAL_TIMER_NAME)
           .tags(getTags(manifest))
           .register(appMetrics);
     }
