@@ -57,7 +57,7 @@ public final class DataSetMoveTask implements Callable<Void> {
             .collect(Collectors.toList());
     s3KeySuffixesToMove.add(
         String.format("%s/%d_manifest.xml", manifest.getTimestampText(), manifest.getSequenceId()));
-
+    s3KeySuffixesToMove.add(String.format("%s/ManifestList.done", manifest.getTimestampText()));
     /*
      * Then, loop through each of those objects and copy them (S3 has no
      * bulk copy operation).
