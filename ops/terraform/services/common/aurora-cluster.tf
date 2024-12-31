@@ -153,3 +153,11 @@ resource "aws_rds_cluster_instance" "writer" {
   publicly_accessible             = false
   tags                            = { Layer = "data" }
 }
+
+module "enhanced_monitoring_lambda" {
+  source = "./modules/bfd_common_rds_enhanced_monitoring_lambda"
+
+  kms_key_alias           = local.kms_key_alias
+  db_cluster_identifier   = aws_rds_cluster.aurora_cluster.id
+  rds_monitoring_role_arn = data.aws_iam_role.monitoring.arn
+}
