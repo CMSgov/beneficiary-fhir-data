@@ -43,9 +43,9 @@ In addition to the [Requirements (below)](#requirements), you (or the automation
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_disable_rds_scheduling_override"></a> [disable\_rds\_scheduling\_override](#input\_disable\_rds\_scheduling\_override) | If true, RDS off hours scheduled scale-in actions will be disabled for this environment. Defaults<br>  to false. | `bool` | `false` | no |
+| <a name="input_disable_rds_scheduling_override"></a> [disable\_rds\_scheduling\_override](#input\_disable\_rds\_scheduling\_override) | If true, RDS off hours scheduled scale-in actions will be disabled for this environment. Defaults<br/>  to false. | `bool` | `false` | no |
 | <a name="input_rds_apply_immediately"></a> [rds\_apply\_immediately](#input\_rds\_apply\_immediately) | Apply any changes to an rds cluster immediately. Use caution as this may cause downtime. Defaults to false. | `bool` | `false` | no |
-| <a name="input_rds_deletion_protection_override"></a> [rds\_deletion\_protection\_override](#input\_rds\_deletion\_protection\_override) | RDS Deletion Protection Override: `true` to enable deletion protection, `false` to disable deletion protection. The<br>  default `null` will use whatever the default value is for the given environment. For example, normally we disable<br>  deletion protection for ephemeral clusters; setting this to `true` would enable it. | `bool` | `null` | no |
+| <a name="input_rds_deletion_protection_override"></a> [rds\_deletion\_protection\_override](#input\_rds\_deletion\_protection\_override) | RDS Deletion Protection Override: `true` to enable deletion protection, `false` to disable deletion protection. The<br/>  default `null` will use whatever the default value is for the given environment. For example, normally we disable<br/>  deletion protection for ephemeral clusters; setting this to `true` would enable it. | `bool` | `null` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
@@ -62,6 +62,7 @@ In addition to the [Requirements (below)](#requirements), you (or the automation
 | [aws_appautoscaling_scheduled_action.work_hours_scale_out](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_scheduled_action) | resource |
 | [aws_appautoscaling_target.dynamic_replicas](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target) | resource |
 | [aws_appautoscaling_target.static_replicas](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target) | resource |
+| [aws_cloudwatch_log_group.gha_ci_static_site](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.var_log_messages](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.var_log_secure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_db_parameter_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_parameter_group) | resource |
