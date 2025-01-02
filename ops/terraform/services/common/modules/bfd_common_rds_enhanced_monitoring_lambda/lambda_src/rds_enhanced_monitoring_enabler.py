@@ -31,7 +31,7 @@ BOTO_CONFIG = Config(
         "mode": "adaptive",
     },
 )
-DESCRIBE_INSTANCE_STATUS_INTERVAL_SEC = 5
+TRY_MODIFY_DB_INSTANCE_INTERVAL_SEC = 5
 
 logger = Logger()
 
@@ -71,7 +71,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:
             datetime.now(UTC)
             + timedelta(milliseconds=context.get_remaining_time_in_millis())
             # Give some headroom for the loop to exit properly before the configured Lambda timeout
-            - timedelta(seconds=DESCRIBE_INSTANCE_STATUS_INTERVAL_SEC * 2)
+            - timedelta(seconds=TRY_MODIFY_DB_INSTANCE_INTERVAL_SEC * 2)
         )
         rds_client = boto3.client("rds", config=BOTO_CONFIG)
         try_num = 0
@@ -80,7 +80,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:
             "enable RDS Enhanced Monitoring every %d second(s) for %s (until %s)...",
             parsed_event.source_instance,
             parsed_event.date.isoformat(),
-            DESCRIBE_INSTANCE_STATUS_INTERVAL_SEC,
+            TRY_MODIFY_DB_INSTANCE_INTERVAL_SEC,
             stop_time - datetime.now(UTC),
             stop_time.isoformat(),
         )
@@ -108,9 +108,9 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:
                     "Monitoring cannot be enabled. Sleeping for %d second(s)...",
                     try_num,
                     parsed_event.source_instance,
-                    DESCRIBE_INSTANCE_STATUS_INTERVAL_SEC,
+                    TRY_MODIFY_DB_INSTANCE_INTERVAL_SEC,
                 )
-                time.sleep(DESCRIBE_INSTANCE_STATUS_INTERVAL_SEC)
+                time.sleep(TRY_MODIFY_DB_INSTANCE_INTERVAL_SEC)
                 try_num += 1
 
         # If we get here, the Lambda was unable to enable Enhanced Monitoring (the timeout was
