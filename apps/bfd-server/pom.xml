@@ -108,7 +108,7 @@
             </plugins>
         </pluginManagement>
         <!-- BFD-3767 -->
-        <build>
+        <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -236,7 +236,7 @@
                     </execution>
                 </executions>
             </plugin>
-        </build>
+        </plugins>
     </build>
 
 </project>
