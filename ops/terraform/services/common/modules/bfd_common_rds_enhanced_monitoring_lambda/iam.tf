@@ -44,9 +44,12 @@ data "aws_iam_policy_document" "rds_policy_doc" {
 }
 
 resource "aws_iam_policy" "rds" {
-  name        = "${local.lambda_full_name}-rds"
-  description = "Permissions to modify Application AutoScaling DB Instances in ${var.db_cluster_identifier}"
-  policy      = data.aws_iam_policy_document.rds_policy_doc.json
+  name = "${local.lambda_full_name}-rds"
+  description = join("", [
+    "Permissions for the ${local.lambda_full_name} Lambda to modify Application AutoScaling DB ",
+    "Instances in ${var.db_cluster_identifier}"
+  ])
+  policy = data.aws_iam_policy_document.rds_policy_doc.json
 }
 
 data "aws_iam_policy_document" "kms_policy_doc" {
@@ -66,8 +69,8 @@ data "aws_iam_policy_document" "kms_policy_doc" {
 resource "aws_iam_policy" "kms" {
   name = "${local.lambda_full_name}-kms"
   description = join("", [
-    "Permissions to decrypt config KMS keys and encrypt and decrypt master KMS keys for ",
-    "${local.env}"
+    "Permissions for the ${local.lambda_full_name} Lambda to encrypt and decrypt master KMS keys ",
+    "for ${local.env}"
   ])
 
   policy = data.aws_iam_policy_document.kms_policy_doc.json
