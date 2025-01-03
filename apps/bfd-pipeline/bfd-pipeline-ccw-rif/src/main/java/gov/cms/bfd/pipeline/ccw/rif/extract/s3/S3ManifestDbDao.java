@@ -84,7 +84,7 @@ public class S3ManifestDbDao {
           final var records =
               entityManager
                   .createQuery(
-                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
+                       "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
                       String.class)
                   .setParameter("minTimestamp", minTimestamp)
                   .setParameter(
@@ -119,16 +119,13 @@ public class S3ManifestDbDao {
    * @return test
    */
   public boolean hasIncompleteManifests(Set<String> manifestKeys) {
-    if (manifestKeys.isEmpty()) {
-      return false;
-    }
     // Need to use createNativeQuery because createQuery doesn't seem to support the unnest(array[])
     // syntax
     final String query =
         """
         select exists(
           select 1
-          from unnest(array[:manifestKeys]) a(id)
+          from unnest(:manifestKeys\\:\\:varchar[]) a(id)
           where not exists(
             select 1
             from ccw.s3_manifest_files m
@@ -156,14 +153,14 @@ public class S3ManifestDbDao {
   public boolean hasMissingManifestLists(Set<String> manifestTimestamps, Instant cutoff) {
     final String query =
         """
-            select exists(
-              select 1
-              from S3ManifestFile m
-              where m.manifestTimestamp > :cutoff
-              and m.s3Key not like 'Synthetic/%'
-              and m.manifestTimestamp not in :manifestTimestamps
-            )
-            """;
+        select exists(
+          select 1
+          from S3ManifestFile m
+          where m.manifestTimestamp > :cutoff
+          and m.s3Key not like 'Synthetic/%'
+          and m.manifestTimestamp not in :manifestTimestamps
+        )
+        """;
     return transactionManager.executeFunction(
         entityManager ->
             entityManager
