@@ -7,6 +7,7 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
+import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -121,7 +122,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
 
     // claim.getType(), claim.getIdElement().getIdPart()
     String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getType(), claim.getIdPart());
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getId(), FissTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 

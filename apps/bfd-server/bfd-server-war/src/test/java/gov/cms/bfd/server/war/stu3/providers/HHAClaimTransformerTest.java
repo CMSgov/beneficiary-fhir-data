@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -46,6 +47,9 @@ public final class HHAClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The lookUpSamhsaSecurityTags. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -63,7 +67,8 @@ public final class HHAClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hhaClaimTransformer =
-        new HHAClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new HHAClaimTransformer(
+            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
   }
 
   /** Releases the static mock NPIOrgLookup. */

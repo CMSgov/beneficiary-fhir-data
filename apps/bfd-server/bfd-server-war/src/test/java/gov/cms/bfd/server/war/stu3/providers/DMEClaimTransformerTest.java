@@ -22,6 +22,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
@@ -55,6 +56,9 @@ public final class DMEClaimTransformerTest {
   /** The FDA drug lookup to use for the test. */
   @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
 
+  /** The lookUpSamhsaSecurityTags. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -70,7 +74,8 @@ public final class DMEClaimTransformerTest {
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 
-    dmeClaimTransformer = new DMEClaimTransformer(metricRegistry, drugDisplayLookup);
+    dmeClaimTransformer =
+        new DMEClaimTransformer(metricRegistry, drugDisplayLookup, lookUpSamhsaSecurityTags);
   }
 
   /**

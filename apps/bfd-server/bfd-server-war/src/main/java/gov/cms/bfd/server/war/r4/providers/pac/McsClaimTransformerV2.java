@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
@@ -135,9 +136,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
     claim.setCreated(new Date());
 
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            claim.getType(), claim.getIdElement().getIdPart());
+    String claimId = claim.getId().replaceAll("\\D", "");
+    String securityTag = lookUpSamhsaSecurityTags.getClaimSecurityLevel(claimId, McsTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 

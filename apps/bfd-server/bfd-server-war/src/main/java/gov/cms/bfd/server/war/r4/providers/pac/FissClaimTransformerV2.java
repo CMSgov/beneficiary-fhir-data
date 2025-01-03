@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissPayer;
 import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
+import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -141,8 +142,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setItem(getClaimItems(claimGroup));
 
     String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            claim.getType(), claim.getIdElement().getIdPart());
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getId(), FissTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 

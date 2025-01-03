@@ -3,6 +3,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+import gov.cms.bfd.model.rif.samhsa.CarrierTag;
+import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -44,7 +46,8 @@ class LookUpSamhsaSecurityTagsTest {
     when(entityManager.createQuery(anyString())).thenReturn(query);
     when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
 
-    String securityLevel = lookUpSamhsaSecurityTags.getClaimSecurityLevel(type, "12345");
+    String securityLevel =
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel("12345", CarrierTag.class);
     assertEquals(
         "Restricted",
         securityLevel,
@@ -62,7 +65,8 @@ class LookUpSamhsaSecurityTagsTest {
     when(entityManager.createQuery(anyString())).thenReturn(query);
     when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
 
-    String securityLevel = lookUpSamhsaSecurityTags.getClaimSecurityLevel(type, "67890");
+    String securityLevel =
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel("67890", HospiceTag.class);
     assertEquals(
         "Normal",
         securityLevel,

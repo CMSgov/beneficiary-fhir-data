@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -52,6 +53,9 @@ public final class HospiceClaimTransformerTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  /** The lookUpSamhsaSecurityTags. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
@@ -63,7 +67,8 @@ public final class HospiceClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new HospiceClaimTransformer(
+            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
   }
 
   /** Releases the static mock NPIOrgLookup. */

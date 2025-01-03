@@ -54,10 +54,15 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
+   * @param lookUpSamhsaSecurityTags SamhsaSecurityTag lookup
    */
-  public SNFClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+  public SNFClaimTransformer(
+      MetricRegistry metricRegistry,
+      NPIOrgLookup npiOrgLookup,
+      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**

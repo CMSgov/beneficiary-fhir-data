@@ -18,6 +18,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -51,6 +52,9 @@ public final class OutpatientClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The SamhsaSecurityTag lookup. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -68,7 +72,8 @@ public final class OutpatientClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     outpatientClaimTransformer =
-        new OutpatientClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new OutpatientClaimTransformer(
+            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
   }
 
   /** Releases the static mock NPIOrgLookup. */

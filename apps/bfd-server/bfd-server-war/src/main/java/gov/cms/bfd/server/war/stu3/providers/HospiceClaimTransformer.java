@@ -50,10 +50,15 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
+   * @param lookUpSamhsaSecurityTags lookUpSamhsaSecurityTags
    */
-  public HospiceClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+  public HospiceClaimTransformer(
+      MetricRegistry metricRegistry,
+      NPIOrgLookup npiOrgLookup,
+      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**

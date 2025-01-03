@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
@@ -135,7 +136,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
     String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getType(), claim.getIdPart());
+        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getId(), McsTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 
