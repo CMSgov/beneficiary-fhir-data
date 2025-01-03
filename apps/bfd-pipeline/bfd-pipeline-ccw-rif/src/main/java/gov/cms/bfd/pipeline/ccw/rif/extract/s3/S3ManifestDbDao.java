@@ -84,7 +84,7 @@ public class S3ManifestDbDao {
           final var records =
               entityManager
                   .createQuery(
-                       "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
+                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
                       String.class)
                   .setParameter("minTimestamp", minTimestamp)
                   .setParameter(
