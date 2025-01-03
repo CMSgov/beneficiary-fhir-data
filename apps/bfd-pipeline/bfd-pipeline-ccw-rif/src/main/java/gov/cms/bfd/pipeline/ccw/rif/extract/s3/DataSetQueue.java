@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a queue of data sets (manifest file plus entry files) by combining the current
@@ -34,6 +36,9 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class DataSetQueue implements AutoCloseable {
+  /** test. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetQueue.class);
+
   /**
    * Name of S3 meta data field used by CCW to communicate an expected MD5 checksum value for every
    * file they upload to the S3 bucket for processing.
@@ -161,9 +166,11 @@ public class DataSetQueue implements AutoCloseable {
         // manifest
         .scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)
         .filter(
-            s ->
-                s.getKey().toLowerCase().endsWith(manifestListName)
-                    && s.getLastModified().isAfter(minimumAllowedManifestTimestamp))
+            s -> {
+              LOGGER.info(String.format("checking key: %s", s.getKey()));
+              return s.getKey().toLowerCase().endsWith(manifestListName)
+                  && s.getLastModified().isAfter(minimumAllowedManifestTimestamp);
+            })
         .map(
             s -> {
               String key = s.getKey();
