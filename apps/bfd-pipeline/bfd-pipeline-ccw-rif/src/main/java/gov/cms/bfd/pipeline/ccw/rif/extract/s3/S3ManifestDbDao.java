@@ -119,6 +119,9 @@ public class S3ManifestDbDao {
    * @return test
    */
   public boolean hasIncompleteManifests(Set<String> manifestKeys) {
+    if (manifestKeys.isEmpty()) {
+      return false;
+    }
     // Need to use createNativeQuery because createQuery doesn't seem to support the unnest(array[])
     // syntax
     final String query =
