@@ -258,8 +258,13 @@ public final class CcwRifLoadJob implements PipelineJob {
 
       listener.noDataAvailable();
       statusReporter.reportNothingToDo();
-      if (dataSetQueue.hasIncompleteManifests(allManifests)
-          || dataSetQueue.hasMissingManifests(finalManifestTimestamps, FINAL_MANIFEST_CUTOFF)) {
+      if (dataSetQueue.hasIncompleteManifests(allManifests)) {
+        LOGGER.info("Incomplete manifests found");
+        return PipelineJobOutcome.NOTHING_TO_DO;
+      }
+
+      if (dataSetQueue.hasMissingManifests(finalManifestTimestamps, FINAL_MANIFEST_CUTOFF)) {
+        LOGGER.info("Missing manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
 
