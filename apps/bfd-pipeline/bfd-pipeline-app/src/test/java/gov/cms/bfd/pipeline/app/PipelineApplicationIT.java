@@ -7,8 +7,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.DataSourceComponents;
@@ -48,8 +50,11 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import software.amazon.awssdk.utils.StringUtils;
 
 /**
@@ -60,6 +65,8 @@ import software.amazon.awssdk.utils.StringUtils;
  * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   /**
    * Name of log file that will contain log output from the app. This has to match the value in our
@@ -114,10 +121,8 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
    * @return exit code
    */
   private int runPipeline(PipelineApplication app) {
-    try (MockedConstruction<AwsEc2Client> ec2Client = mockConstruction(AwsEc2Client.class)) {
-      // Run the app and collect its output.
-      return app.runPipelineAndHandleExceptions();
-    }
+    // Run the app and collect its output.
+    return app.runPipelineAndHandleExceptions();
   }
 
   /**
@@ -154,6 +159,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // Verify the results match expectations
     assertEquals(PipelineApplication.EXIT_CODE_JOB_FAILED, exitCode);
     assertCcwRifLoadJobFailed(logLines);
+    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -185,6 +191,8 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
               CcwRifLoadJobStatusEvent.JobStage.NothingToDo),
           readStatusEventsFromSQSQueue());
+      verify(ec2Client).scaleInNow();
+      verifyNoMoreInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -264,6 +272,8 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles,
               CcwRifLoadJobStatusEvent.JobStage.CompletedManifest),
           readStatusEventsFromSQSQueue());
+
+      verifyNoInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -310,6 +320,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
                   RdaMcsClaimLoadJob.class,
                   "MCS job processed all claims");
             });
+    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -355,6 +366,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
                   RdaMcsClaimLoadJob.class,
                   "MCS job terminated by grpc exception");
             });
+    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -391,6 +403,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       // Verify the results match expectations
       assertEquals(PipelineApplication.EXIT_CODE_SMOKE_TEST_FAILURE, exitCode);
       assertASmokeTestFailureWasLogged(logLines);
+      verifyNoInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);

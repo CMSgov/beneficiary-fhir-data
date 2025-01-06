@@ -9,10 +9,10 @@ import software.amazon.awssdk.services.autoscaling.model.SetDesiredCapacityReque
 /** test. */
 public class AwsEc2Client {
   /** test. */
-  private final AutoScalingClient autoScalingClient;
+  private AutoScalingClient autoScalingClient;
 
   /** test. */
-  private final AutoScalingGroup autoScalingGroup;
+  private AutoScalingGroup autoScalingGroup;
 
   /** test. */
   private static final String SCALE_IN_ACTION_NAME = "scale_in_pipeline_finished";
@@ -22,24 +22,31 @@ public class AwsEc2Client {
 
   /** test. */
   public AwsEc2Client() {
-
     AutoScalingClient autoScalingClient =
         AutoScalingClient.builder().defaultsMode(DefaultsMode.STANDARD).build();
 
     try (Ec2MetadataClient metadataClient = Ec2MetadataClient.create()) {
-      String instanceId = metadataClient.get("/latest/meta-data/instance-id").asString();
-      AutoScalingGroup autoScalingGroup =
-          autoScalingClient.describeAutoScalingGroups().autoScalingGroups().stream()
-              .filter(a -> a.instances().stream().anyMatch(i -> i.instanceId().equals(instanceId)))
-              .findFirst()
-              .get();
-      this.autoScalingClient = autoScalingClient;
-      this.autoScalingGroup = autoScalingGroup;
+      try {
+        String instanceId = metadataClient.get("/latest/meta-data/instance-id").asString();
+        AutoScalingGroup autoScalingGroup =
+            autoScalingClient.describeAutoScalingGroups().autoScalingGroups().stream()
+                .filter(
+                    a -> a.instances().stream().anyMatch(i -> i.instanceId().equals(instanceId)))
+                .findFirst()
+                .get();
+        this.autoScalingClient = autoScalingClient;
+        this.autoScalingGroup = autoScalingGroup;
+      } catch (Exception ex) {
+        this.autoScalingClient = null;
+      }
     }
   }
 
   /** test. */
   public void scaleInNow() {
+    if (autoScalingClient == null) {
+      return;
+    }
     autoScalingClient.setDesiredCapacity(
         SetDesiredCapacityRequest.builder()
             .autoScalingGroupName(autoScalingGroup.autoScalingGroupName())

@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -65,6 +66,25 @@ public class DataSetTestUtilities {
       S3Dao s3Dao, String bucket, DataSetManifest manifest, String location) {
     String keyPrefix = keyPrefixForManifest(location, manifest);
     return putObject(s3Dao, bucket, keyPrefix, manifest);
+  }
+
+  /**
+   * test.
+   *
+   * @param s3Dao test
+   * @param bucket test
+   * @param manifest test
+   * @param location test
+   * @return test
+   */
+  public static String putManifestList(
+      S3Dao s3Dao, String bucket, DataSetManifest manifest, String location) {
+    String keyPrefix = keyPrefixForManifest(location, manifest);
+    String manifestName = String.format("%d_%s", manifest.getSequenceId(), "manifest.xml");
+    String objectKey = String.format("%s/ManifestList.done", keyPrefix);
+    return s3Dao
+        .putObject(bucket, objectKey, manifestName.getBytes(StandardCharsets.UTF_8), Map.of())
+        .getKey();
   }
 
   /**

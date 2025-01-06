@@ -202,7 +202,7 @@ public class DataSetQueue implements AutoCloseable {
    * @param cutoff test
    * @return test
    */
-  public boolean hasMissingManifests(Set<String> manifestListTimestamps, Instant cutoff) {
+  public boolean hasMissingManifests(Set<Instant> manifestListTimestamps, Instant cutoff) {
     return s3Records.hasMissingManifestLists(manifestListTimestamps, cutoff);
   }
 

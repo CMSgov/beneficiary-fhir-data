@@ -130,7 +130,7 @@ public class S3ManifestDbDao {
             select 1
             from ccw.s3_manifest_files m
             where m.s3_key = a.id
-            and m.status != 'COMPLETED'
+            and m.status = 'COMPLETED'
           )
         )
         """;
@@ -139,7 +139,7 @@ public class S3ManifestDbDao {
             entityManager ->
                 entityManager
                     .createNativeQuery(query, boolean.class)
-                    .setParameter("manifestKeys", manifestKeys)
+                    .setParameter("manifestKeys", "{" + String.join(",", manifestKeys) + "}")
                     .getSingleResult());
   }
 
@@ -150,7 +150,7 @@ public class S3ManifestDbDao {
    * @param cutoff test
    * @return test
    */
-  public boolean hasMissingManifestLists(Set<String> manifestTimestamps, Instant cutoff) {
+  public boolean hasMissingManifestLists(Set<Instant> manifestTimestamps, Instant cutoff) {
     final String query =
         """
         select exists(

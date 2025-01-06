@@ -251,7 +251,7 @@ public final class CcwRifLoadJob implements PipelineJob {
           finalManifestLists.stream()
               .flatMap(l -> l.getManifests().stream())
               .collect(Collectors.toSet());
-      final Set<String> finalManifestTimestamps =
+      final Set<Instant> finalManifestTimestamps =
           finalManifestLists.stream()
               .map(FinalManifestList::getTimestamp)
               .collect(Collectors.toSet());

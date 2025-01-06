@@ -36,6 +36,7 @@ public abstract class AbstractLocalStackS3Test extends AbstractLocalStackTest {
             .build();
     s3ClientFactory = new AwsS3ClientFactory(s3ClientConfig);
     s3Dao = s3ClientFactory.createS3Dao();
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /** Closes the {@link #s3Dao}. */

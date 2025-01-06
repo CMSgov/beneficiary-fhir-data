@@ -136,7 +136,7 @@ public final class PipelineApplication {
     try {
       PipelineOutcome outcome = runPipeline();
       if (outcome == PipelineOutcome.TERMINATE_INSTANCE) {
-        // When we trigger a scale-in, the instance gets terminated very quickly
+        // When we trigger a scale-in, the instance gets terminated very quickly,
         // so we should call this at the last minute after all log messages are flushed.
         // We can't schedule a scale-in in the future without causing a race condition that may
         // prevent the next scale-out from happening.

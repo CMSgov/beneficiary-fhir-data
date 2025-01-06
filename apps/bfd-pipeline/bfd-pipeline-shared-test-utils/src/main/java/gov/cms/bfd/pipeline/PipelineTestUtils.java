@@ -320,9 +320,9 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Pause of a number milliseconds.
+   * Pause for a number of milliseconds.
    *
-   * @param millis to sleap
+   * @param millis to sleep
    */
   public void pauseMillis(long millis) {
     try {

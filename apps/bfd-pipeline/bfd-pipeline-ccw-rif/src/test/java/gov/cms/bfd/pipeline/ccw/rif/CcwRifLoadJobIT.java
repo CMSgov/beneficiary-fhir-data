@@ -85,7 +85,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               false,
               Optional.empty(),
               statusReporter)) {
-        ccwJob.call();
+        assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
       }
 
       // Verify that no data sets were generated.
@@ -118,7 +118,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
         List.of(
             StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
-            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
+        true);
   }
 
   /**
@@ -134,7 +135,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
         List.of(
             StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
-            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()),
+        false);
   }
 
   /**
@@ -213,8 +215,8 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               Optional.empty(),
               statusReporter)) {
         // Process both sets
-        ccwJob.call();
-        ccwJob.call();
+        assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+        assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -508,7 +510,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               false,
               Optional.empty(),
               statusReporter)) {
-        ccwJob.call();
+        assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -611,7 +613,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               false,
               Optional.empty(),
               statusReporter)) {
-        ccwJob.call();
+        assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -660,10 +662,15 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param expectedOutputLocation the expected output location (bucket key) where files are
    *     expected to be moved after processing
    * @param fileList the file list
+   * @param addManifestList test
    * @throws Exception the exception
    */
   private void validateLoadAtLocations(
-      String inputLocation, String expectedOutputLocation, List<URL> fileList) throws Exception {
+      String inputLocation,
+      String expectedOutputLocation,
+      List<URL> fileList,
+      boolean addManifestList)
+      throws Exception {
     String bucket = null;
     try {
       /*
@@ -710,7 +717,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               false,
               Optional.empty(),
               statusReporter)) {
-        ccwJob.call();
+        assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
       }
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -722,7 +729,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       verifyManifestFileStatus(s3FilesDao, manifestS3Key, S3ManifestFile.ManifestStatus.COMPLETED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
 
@@ -738,6 +745,21 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
           expectedOutputLocation,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
+      if (addManifestList) {
+        putFinalManifestListInTestBucket(bucket, manifest);
+        try (CcwRifLoadJob ccwJob =
+            new CcwRifLoadJob(
+                pipelineAppState,
+                options,
+                dataSetQueue,
+                listener,
+                false,
+                Optional.empty(),
+                statusReporter)) {
+          assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
+        }
+      }
+
       // TODO END remove once S3 file moves are no longer necessary.
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
@@ -785,5 +807,16 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       index++;
     }
     return manifestKey;
+  }
+
+  /**
+   * test.
+   *
+   * @param bucket test
+   * @param manifest test
+   */
+  private void putFinalManifestListInTestBucket(String bucket, DataSetManifest manifest) {
+    DataSetTestUtilities.putManifestList(
+        s3Dao, bucket, manifest, CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
   }
 }
