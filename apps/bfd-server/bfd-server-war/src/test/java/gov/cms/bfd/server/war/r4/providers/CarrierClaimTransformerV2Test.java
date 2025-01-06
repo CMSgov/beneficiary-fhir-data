@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -127,10 +129,14 @@ public class CarrierClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
+    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(
-            metricRegistry, drugCodeDisplayLookup, NPIOrgLookup.createNpiOrgLookup());
+            metricRegistry,
+            drugCodeDisplayLookup,
+            NPIOrgLookup.createNpiOrgLookup(),
+            lookUpSamhsaSecurityTags);
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);

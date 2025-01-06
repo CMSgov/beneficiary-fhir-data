@@ -29,6 +29,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -71,6 +72,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -82,6 +84,9 @@ import org.mockito.quality.Strictness;
 public class TransformerUtilsV2Test {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
+
+  /** The SamhsaSecurityTag lookup. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
@@ -896,6 +901,7 @@ public class TransformerUtilsV2Test {
   public void createBundleWithoutPagingWithASizeOf2() throws IOException {
 
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
+    //    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
@@ -918,7 +924,7 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup);
+        new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -933,7 +939,8 @@ public class TransformerUtilsV2Test {
             .get();
     hospiceClaim.setLastUpdated(Instant.now());
 
-    claimTransformerInterface = new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup);
+    claimTransformerInterface =
+        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
     genEob = claimTransformerInterface.transform(hospiceClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -952,7 +959,10 @@ public class TransformerUtilsV2Test {
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     claimTransformerInterface =
         new DMEClaimTransformerV2(
-            new MetricRegistry(), new FdaDrugCodeDisplayLookup(npiDataStream), npiOrgLookup);
+            new MetricRegistry(),
+            new FdaDrugCodeDisplayLookup(npiDataStream),
+            npiOrgLookup,
+            lookUpSamhsaSecurityTags);
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -966,7 +976,9 @@ public class TransformerUtilsV2Test {
             .get();
     inpatientClaim.setLastUpdated(Instant.now());
 
-    claimTransformerInterface = new InpatientClaimTransformerV2(new MetricRegistry(), npiOrgLookup);
+    claimTransformerInterface =
+        new InpatientClaimTransformerV2(
+            new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
     genEob = claimTransformerInterface.transform(inpatientClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -1093,7 +1105,8 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(new MetricRegistry(), NPIOrgLookup.createNpiOrgLookup());
+        new HHAClaimTransformerV2(
+            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);

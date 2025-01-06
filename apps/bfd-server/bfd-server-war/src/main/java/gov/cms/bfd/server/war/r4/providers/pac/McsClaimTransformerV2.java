@@ -78,9 +78,12 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
    */
-  public McsClaimTransformerV2(MetricRegistry metricRegistry) {
+  public McsClaimTransformerV2(
+      MetricRegistry metricRegistry, LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = metricRegistry;
+    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
   }
 
   /**

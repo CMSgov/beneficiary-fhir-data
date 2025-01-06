@@ -80,9 +80,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
    */
-  public FissClaimTransformerV2(MetricRegistry metricRegistry) {
+  public FissClaimTransformerV2(
+      MetricRegistry metricRegistry, LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
+    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
   }
 
   /**

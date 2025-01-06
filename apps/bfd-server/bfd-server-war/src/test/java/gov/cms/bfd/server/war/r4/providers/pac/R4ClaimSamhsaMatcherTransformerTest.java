@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
@@ -11,6 +12,7 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -56,6 +58,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
   /** A date to use for ICD10 testing. */
   private static final LocalDate ICD_10_DATE = LocalDate.of(2020, 1, 1);
 
+  //    /** The SamhsaSecurityTag lookup. */
+  //    @Mock
+  //    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
   /**
    * Data method for the fissTest. Used automatically via the MethodSource annotation.
    *
@@ -359,6 +364,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       boolean expectedResult,
       String errorMessagePostFix) {
     RdaFissClaim entity = new RdaFissClaim();
+    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
 
     entity.setLastUpdated(Instant.ofEpochMilli(1));
     entity.setStmtCovToDate(toDate);
@@ -398,8 +404,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     entity.setProcCodes(procedures);
     entity.setRevenueLines(Set.of(line));
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry());
-    McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
+        new FissClaimTransformerV2(new MetricRegistry(), lookUpSamhsaSecurityTags);
+    McsClaimTransformerV2 mcsClaimTransformerV2 =
+        new McsClaimTransformerV2(new MetricRegistry(), lookUpSamhsaSecurityTags);
 
     Claim claim = fissClaimTransformerV2.transform(entity, true);
 
@@ -495,6 +502,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       boolean expectedResult,
       String errorMessagePostFix) {
     RdaMcsClaim entity = new RdaMcsClaim();
+    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
 
     entity.setLastUpdated(Instant.ofEpochMilli(1));
 
@@ -535,8 +543,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     entity.setDetails(procedures);
 
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry());
-    McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
+        new FissClaimTransformerV2(new MetricRegistry(), lookUpSamhsaSecurityTags);
+    McsClaimTransformerV2 mcsClaimTransformerV2 =
+        new McsClaimTransformerV2(new MetricRegistry(), lookUpSamhsaSecurityTags);
 
     Claim claim = mcsClaimTransformerV2.transform(entity, true);
 

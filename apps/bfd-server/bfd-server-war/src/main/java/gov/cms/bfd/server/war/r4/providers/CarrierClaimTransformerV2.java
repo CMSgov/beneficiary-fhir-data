@@ -64,14 +64,17 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
+   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
    */
   public CarrierClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**

@@ -22,6 +22,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -86,6 +87,9 @@ public final class HospiceClaimTransformerV2Test {
   /** The metrics registry. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The SamhsaSecurityTag lookup. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -107,7 +111,8 @@ public final class HospiceClaimTransformerV2Test {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformerV2(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new HospiceClaimTransformerV2(
+            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 

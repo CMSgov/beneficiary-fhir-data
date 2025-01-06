@@ -62,14 +62,17 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi display lookup
+   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
    */
   DMEClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = npiOrgLookup;
+    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
   }
 
   /**

@@ -18,7 +18,12 @@
         "resourceType": "Claim",
         "id": "f-123456",
         "meta": {
-          "lastUpdated": "1970-08-01T00:00:00.000+00:00"
+          "lastUpdated": "1970-08-01T00:00:00.000+00:00",
+          "security" : [ {
+            "code" : "Normal",
+            "display" : "Normal",
+            "system" : "https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html"
+          } ]
         },
         "contained": [
           {
@@ -505,7 +510,12 @@
         "resourceType": "Claim",
         "id": "m-654323",
         "meta": {
-          "lastUpdated": "1970-01-01T00:00:04.000+00:00"
+          "lastUpdated": "1970-01-01T00:00:04.000+00:00",
+          "security" : [ {
+            "code" : "Normal",
+            "display" : "Normal",
+            "system" : "https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html"
+          } ]
         },
         "contained": [
           {

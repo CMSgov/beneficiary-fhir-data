@@ -21,6 +21,7 @@ import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
@@ -88,6 +89,9 @@ public final class DMEClaimTransformerV2Test {
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
 
+  /** The SamhsaSecurityTag lookup. */
+  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -121,7 +125,8 @@ public final class DMEClaimTransformerV2Test {
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(any()))
         .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
     dmeClaimTransformer =
-        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
+        new DMEClaimTransformerV2(
+            metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup, lookUpSamhsaSecurityTags);
     claim = generateClaim();
     ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
