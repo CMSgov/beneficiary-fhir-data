@@ -80,7 +80,11 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((SNFClaim) claim);
+      SNFClaim snfClaim = (SNFClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(snfClaim.getClaimId()), SnfTag.class);
+      eob = transformClaim(snfClaim, securityTag);
     }
     return eob;
   }
@@ -89,10 +93,11 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link SNFClaim} to transform
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -250,10 +255,6 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), SnfTag.class);
 
     eob.getMeta()
         .addSecurity()

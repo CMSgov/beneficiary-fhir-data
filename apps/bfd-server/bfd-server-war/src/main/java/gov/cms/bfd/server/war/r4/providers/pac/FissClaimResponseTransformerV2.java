@@ -93,7 +93,10 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaFissClaim) claimEntity);
+      RdaFissClaim rdaFissClaim = (RdaFissClaim) claimEntity;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
+      return transformClaim(rdaFissClaim, securityTag);
     }
   }
 
@@ -101,10 +104,11 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
    * Transforms an {@link RdaFissClaim} to a FHIR {@link ClaimResponse}.
    *
    * @param claimGroup the {@link RdaFissClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
    *     RdaFissClaim}
    */
-  private ClaimResponse transformClaim(RdaFissClaim claimGroup) {
+  private ClaimResponse transformClaim(RdaFissClaim claimGroup, String securityTag) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getClaimId());
@@ -119,10 +123,6 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/f-%s", claimGroup.getClaimId())));
     claim.setItem(getClaimItems(claimGroup));
-
-    // claim.getType(), claim.getIdElement().getIdPart()
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getId(), FissTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 

@@ -79,7 +79,11 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((OutpatientClaim) claim);
+      OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
+      eob = transformClaim(outpatientClaim, securityTag);
     }
     return eob;
   }
@@ -88,10 +92,11 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link OutpatientClaim} to transform
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -327,10 +332,6 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
       }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), OutpatientTag.class);
 
     eob.getMeta()
         .addSecurity()

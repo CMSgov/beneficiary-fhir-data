@@ -79,7 +79,11 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((DMEClaim) claim, includeTaxNumber);
+      DMEClaim dmeClaim = (DMEClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
+      eob = transformClaim(dmeClaim, includeTaxNumber, securityTag);
     }
     return eob;
   }
@@ -89,10 +93,12 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    *
    * @param claimGroup the {@link DMEClaim} to use
    * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
+  private ExplanationOfBenefit transformClaim(
+      DMEClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -313,10 +319,6 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
       }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), DmeTag.class);
 
     eob.getMeta()
         .addSecurity()

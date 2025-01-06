@@ -80,7 +80,11 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((HHAClaim) claim);
+      HHAClaim hhaClaim = (HHAClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
+      eob = transformClaim(hhaClaim, securityTag);
     }
     return eob;
   }
@@ -89,18 +93,15 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HHAClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobNonclinicianUrl());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), HhaTag.class);
     eob.getMeta()
         .addSecurity()
         .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")

@@ -72,7 +72,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = npiOrgLookup;
-    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**
@@ -91,7 +91,11 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((DMEClaim) claim, includeTaxNumber);
+      DMEClaim dmeClaim = (DMEClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
+      eob = transformClaim(dmeClaim, includeTaxNumber, securityTag);
     }
     return eob;
   }
@@ -101,18 +105,17 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
    * @param claimGroup the CCW {@link DMEClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
+  private ExplanationOfBenefit transformClaim(
+      DMEClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
 
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), DmeTag.class);
     eob.getMeta()
         .addSecurity()
         .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")

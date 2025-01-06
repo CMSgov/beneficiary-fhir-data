@@ -108,7 +108,11 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaMcsClaim) claimEntity);
+      RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claimEntity;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              rdaMcsClaim.getIdrClmHdIcn(), McsTag.class);
+      return transformClaim(rdaMcsClaim, securityTag);
     }
   }
 
@@ -116,9 +120,10 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * Transforms a {@link RdaMcsClaim} into a FHIR {@link Claim}.
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link RdaMcsClaim}
    */
-  private ClaimResponse transformClaim(RdaMcsClaim claimGroup) {
+  private ClaimResponse transformClaim(RdaMcsClaim claimGroup, String securityTag) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -135,11 +140,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getId(), McsTag.class);
-
     List<Coding> securityTags = new ArrayList<>();
-
     // Create a Coding object for the security level
     Coding securityTagCoding =
         new Coding()

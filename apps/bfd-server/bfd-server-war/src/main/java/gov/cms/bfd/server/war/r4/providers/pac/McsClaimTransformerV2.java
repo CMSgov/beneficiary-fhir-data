@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -83,7 +85,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
   public McsClaimTransformerV2(
       MetricRegistry metricRegistry, LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = metricRegistry;
-    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**
@@ -101,7 +103,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaMcsClaim) claimEntity, includeTaxNumbers);
+      RdaMcsClaim claim = (RdaMcsClaim) claimEntity;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getIdrClmHdIcn(), McsTag.class);
+      return transformClaim(claim, includeTaxNumbers, securityTag);
     }
   }
 
@@ -110,9 +115,11 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaMcsClaim}
    */
-  private Claim transformClaim(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
+  private Claim transformClaim(
+      RdaMcsClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -138,9 +145,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     claim.setItem(getItems(claimGroup));
 
     claim.setCreated(new Date());
-
-    String claimId = claim.getId().replaceAll("\\D", "");
-    String securityTag = lookUpSamhsaSecurityTags.getClaimSecurityLevel(claimId, McsTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 

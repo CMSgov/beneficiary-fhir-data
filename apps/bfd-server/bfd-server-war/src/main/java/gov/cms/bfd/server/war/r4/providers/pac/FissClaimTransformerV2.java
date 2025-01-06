@@ -85,7 +85,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   public FissClaimTransformerV2(
       MetricRegistry metricRegistry, LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**
@@ -102,7 +102,10 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaFissClaim) claimEntity, includeTaxNumbers);
+      RdaFissClaim rdaFissClaim = (RdaFissClaim) claimEntity;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
+      return transformClaim(rdaFissClaim, includeTaxNumbers, securityTag);
     }
   }
 
@@ -111,9 +114,11 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param claimGroup the {@link RdaFissClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaFissClaim}
    */
-  private Claim transformClaim(RdaFissClaim claimGroup, boolean includeTaxNumbers) {
+  private Claim transformClaim(
+      RdaFissClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
     Claim claim = new Claim();
 
     boolean isIcd9 =
@@ -143,9 +148,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setProcedure(getProcedure(claimGroup, isIcd9));
     claim.setInsurance(getInsurance(claimGroup));
     claim.setItem(getClaimItems(claimGroup));
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getId(), FissTag.class);
 
     List<Coding> securityTags = new ArrayList<>();
 

@@ -78,7 +78,11 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((HHAClaim) claim);
+      HHAClaim hhaClaim = (HHAClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
+      eob = transformClaim(hhaClaim, securityTag);
     }
     return eob;
   }
@@ -87,10 +91,11 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HHAClaim} to transform
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -208,10 +213,6 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     }
 
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), HhaTag.class);
 
     eob.getMeta()
         .addSecurity()

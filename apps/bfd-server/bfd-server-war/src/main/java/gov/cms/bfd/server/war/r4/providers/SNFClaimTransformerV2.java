@@ -84,7 +84,11 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((SNFClaim) claim);
+      SNFClaim snfClaim = (SNFClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(snfClaim.getClaimId()), SnfTag.class);
+      eob = transformClaim(snfClaim, securityTag);
     }
     return eob;
   }
@@ -93,18 +97,15 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a specified {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link SNFClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), SnfTag.class);
     eob.getMeta()
         .addSecurity()
         .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")

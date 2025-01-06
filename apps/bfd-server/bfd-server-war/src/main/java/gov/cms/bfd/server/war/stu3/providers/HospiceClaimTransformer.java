@@ -76,7 +76,11 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((HospiceClaim) claim);
+      HospiceClaim hospiceClaim = (HospiceClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(hospiceClaim.getClaimId()), HospiceTag.class);
+      eob = transformClaim(hospiceClaim, securityTag);
     }
     return eob;
   }
@@ -85,10 +89,11 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link HospiceClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HospiceClaim} to transform
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
-  private ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(HospiceClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -208,10 +213,6 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), HospiceTag.class);
 
     eob.getMeta()
         .addSecurity()

@@ -92,7 +92,12 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((OutpatientClaim) claim);
+
+      OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
+      eob = transformClaim(outpatientClaim, securityTag);
     }
     return eob;
   }
@@ -101,18 +106,15 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobOutpatientUrl());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), OutpatientTag.class);
     eob.getMeta()
         .addSecurity()
         .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")

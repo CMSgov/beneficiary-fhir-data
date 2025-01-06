@@ -57,7 +57,7 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
       LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**
@@ -75,7 +75,11 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((InpatientClaim) claim);
+      InpatientClaim inpatientClaim = (InpatientClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(inpatientClaim.getClaimId()), InpatientTag.class);
+      eob = transformClaim(inpatientClaim, securityTag);
     }
     return eob;
   }
@@ -84,10 +88,11 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -288,10 +293,6 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), InpatientTag.class);
 
     eob.getMeta()
         .addSecurity()

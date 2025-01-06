@@ -66,7 +66,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
       LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**
@@ -85,7 +85,11 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((InpatientClaim) claim);
+      InpatientClaim inpatientClaim = (InpatientClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(inpatientClaim.getClaimId()), InpatientTag.class);
+      eob = transformClaim(inpatientClaim, securityTag);
     }
     return eob;
   }
@@ -94,18 +98,15 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), InpatientTag.class);
     eob.getMeta()
         .addSecurity()
         .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")

@@ -68,7 +68,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.lookUpSamhsaSecurityTags = lookUpSamhsaSecurityTags;
+    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
   }
 
   /**
@@ -86,7 +86,11 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
+      CarrierClaim carrierClaim = (CarrierClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(carrierClaim.getClaimId()), CarrierTag.class);
+      eob = transformClaim(carrierClaim, includeTaxNumber, securityTag);
     }
     return eob;
   }
@@ -96,10 +100,12 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param securityTag securityTag tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, boolean includeTaxNumbers) {
+  private ExplanationOfBenefit transformClaim(
+      CarrierClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -323,10 +329,6 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     }
 
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), CarrierTag.class);
 
     eob.getMeta()
         .addSecurity()

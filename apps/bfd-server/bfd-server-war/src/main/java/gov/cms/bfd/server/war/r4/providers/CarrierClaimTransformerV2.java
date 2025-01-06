@@ -92,7 +92,11 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
+      CarrierClaim carrierClaim = (CarrierClaim) claim;
+      String securityTag =
+          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+              String.valueOf(carrierClaim.getClaimId()), CarrierTag.class);
+      eob = transformClaim(carrierClaim, includeTaxNumber, securityTag);
     }
     return eob;
   }
@@ -102,18 +106,17 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param securityTag securityTag of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, boolean includeTaxNumbers) {
+  private ExplanationOfBenefit transformClaim(
+      CarrierClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobNonclinicianUrl());
 
-    String securityTag =
-        lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-            String.valueOf(claimGroup.getClaimId()), CarrierTag.class);
     eob.getMeta()
         .addSecurity()
         .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
