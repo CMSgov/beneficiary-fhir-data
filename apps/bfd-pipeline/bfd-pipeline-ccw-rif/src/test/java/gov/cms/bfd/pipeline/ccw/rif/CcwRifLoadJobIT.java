@@ -26,8 +26,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import jakarta.annotation.Nullable;
-
-import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
