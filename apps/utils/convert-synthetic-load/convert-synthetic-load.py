@@ -5,18 +5,21 @@ from os import listdir
 from shutil import copyfile
 
 parser = argparse.ArgumentParser()
-parser.add_argument("bucket")
-parser.add_argument("prefix")
+parser.add_argument("-s", "--source-bucket", required=True)
+parser.add_argument("-d", "--destination-bucket", required=True)
+parser.add_argument("-p", "--source-prefix", required=True)
 
 args = parser.parse_args()
-print(args.bucket)
+print(args.destination_bucket)
+
+source_bucket = args.source_bucket
+destination_bucket = args.destination_bucket
+source_prefix = args.source_prefix
 
 client = boto3.client("s3")
 
-s3 = boto3.resource("s3")
-bucket = s3.Bucket(args.bucket)
 
-timestamp = [i for i in args.prefix.split("/") if i != ""][-1]
+timestamp = [i for i in source_prefix.split("/") if i != ""][-1]
 
 files = Path("./files")
 files.mkdir(exist_ok=True)
@@ -24,11 +27,12 @@ files.mkdir(exist_ok=True)
 new_incoming = Path(f"./Incoming/{timestamp}")
 new_incoming.mkdir(parents=True, exist_ok=True)
 
-
-response = client.list_objects_v2(Bucket=args.bucket, Delimiter="/", Prefix=args.prefix)
+response = client.list_objects_v2(
+    Bucket=source_bucket, Delimiter="/", Prefix=source_prefix
+)
 for item in response["Contents"]:
     client.download_file(
-        args.bucket, item["Key"], f"./{files.name}/{item["Key"].split("/")[-1]}"
+        source_bucket, item["Key"], f"./{files.name}/{item["Key"].split("/")[-1]}"
     )
 
 manifest_template = open("./manifest-template.xml", "r").read()
@@ -61,6 +65,6 @@ for f_name in listdir(new_incoming.absolute()):
     full_path = f"{new_incoming.absolute()}/{f_name}"
     client.upload_file(
         full_path,
-        args.bucket,
+        destination_bucket,
         f"Incoming/{timestamp}/{f_name}",
     )
