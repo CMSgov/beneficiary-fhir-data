@@ -778,6 +778,16 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         putFinalManifestListInTestBucket(bucket, List.of(manifestC));
         assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
 
+        // Manifest entry before the manifest list was implemented should not prevent shutdown
+        S3ManifestFile dummyManifest = new S3ManifestFile();
+        dummyManifest.setStatus(S3ManifestFile.ManifestStatus.COMPLETED);
+        dummyManifest.setManifestTimestamp(Instant.parse("2024-12-11T00:00:00Z"));
+        dummyManifest.setDiscoveryTimestamp(Instant.now());
+        dummyManifest.setStatusTimestamp(Instant.now());
+        dummyManifest.setS3Key("test");
+        PipelineTestUtils.get().insertManifest(dummyManifest);
+        assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
+
         // Should return NOTHING_TO_DO if not all manifests are completed
         PipelineTestUtils.get().markRandomManifestAsNotCompleted();
         assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());

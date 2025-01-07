@@ -253,6 +253,19 @@ public final class PipelineTestUtils {
   }
 
   /**
+   * test.
+   *
+   * @param manifest test
+   */
+  public void insertManifest(S3ManifestFile manifest) {
+    try (EntityManager entityManager =
+        pipelineApplicationState.getEntityManagerFactory().createEntityManager()) {
+
+      entityManager.persist(manifest);
+    }
+  }
+
+  /**
    * Normalize the schema names by removing any quotes.
    *
    * @param schemaNameSpecifier name of a schema from a hibernate annotation
