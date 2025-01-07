@@ -26,6 +26,8 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import jakarta.annotation.Nullable;
+
+import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -98,7 +100,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
     } finally {
@@ -118,8 +120,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
         List.of(
             StaticRifResource.SAMPLE_A_BENES.getResourceUrl(),
-            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
-        true);
+            StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
   }
 
   /**
@@ -135,8 +136,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
         CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
         List.of(
             StaticRifResource.SAMPLE_SYNTHEA_BENES2011.getResourceUrl(),
-            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()),
-        false);
+            StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
   }
 
   /**
@@ -237,7 +237,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verifyManifestFileStatus(s3FilesDao, manifest1Key, S3ManifestFile.ManifestStatus.COMPLETED);
       verifyManifestFileStatus(s3FilesDao, manifest2Key, S3ManifestFile.ManifestStatus.COMPLETED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
 
@@ -418,7 +418,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verifyManifestFileStatus(s3FilesDao, manifestAKey, S3ManifestFile.ManifestStatus.COMPLETED);
       verifyManifestFileStatus(s3FilesDao, manifestBKey, S3ManifestFile.ManifestStatus.DISCOVERED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
 
@@ -525,7 +525,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.DISCOVERED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
 
@@ -629,7 +629,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify that the data set was not processed.
       verifyManifestFileStatus(s3FilesDao, manifestKey, null);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
 
@@ -654,6 +654,303 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
     }
   }
 
+  @Test
+  public void completeManifestList() throws Exception {
+    String bucket = null;
+    try {
+      /*
+       * Create the (empty) bucket to run against, and populate it with
+       * two data sets.
+       */
+      bucket = s3Dao.createTestBucket();
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
+      DataSetManifest manifestA =
+          new DataSetManifest(
+              Instant.now().minus(1L, ChronoUnit.HOURS),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestA);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestA,
+          manifestA.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetManifest manifestB =
+          new DataSetManifest(
+              manifestA.getTimestampText(),
+              1,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("pde.rif", RifFileType.PDE));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestB);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestB,
+          manifestB.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetManifest manifestC =
+          new DataSetManifest(
+              Instant.now(),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestC);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestC,
+          manifestC.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
+
+      // Run the job.
+
+      List<DataSetManifest> manifests = List.of(manifestA, manifestB, manifestC);
+      int totalCount = 0;
+      for (DataSetManifest manifest : manifests) {
+        final var listener = new MockDataSetMonitorListener();
+        final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
+        final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+        final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+        final var s3FileCache =
+            spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+        final var dataSetQueue =
+            new DataSetQueue(
+                pipelineAppState.getClock(),
+                pipelineAppState.getMetrics(),
+                s3FilesDao,
+                s3FileCache,
+                s3TaskManager);
+        try (CcwRifLoadJob ccwJob =
+            new CcwRifLoadJob(
+                pipelineAppState,
+                options,
+                dataSetQueue,
+                listener,
+                false,
+                Optional.empty(),
+                statusReporter)) {
+          assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+
+          totalCount += manifest.getEntries().size() + 1;
+          DataSetTestUtilities.waitForBucketObjectCount(
+              s3Dao,
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              totalCount,
+              java.time.Duration.ofSeconds(10));
+        }
+      }
+
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
+      final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+      final var dataSetQueue =
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
+      try (CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              pipelineAppState,
+              options,
+              dataSetQueue,
+              listener,
+              false,
+              Optional.empty(),
+              statusReporter)) {
+        // Should return NOTHING_TO_DO until all manifests are accounted for in the manifest list
+        assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());
+        putFinalManifestListInTestBucket(bucket, List.of(manifestA, manifestB));
+        assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());
+
+        putFinalManifestListInTestBucket(bucket, List.of(manifestC));
+        assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
+
+        // Should return NOTHING_TO_DO if not all manifests are completed
+        PipelineTestUtils.get().markRandomManifestAsNotCompleted();
+        assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());
+      }
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
+      /*
+       * Verify that the first data set was renamed and the second is
+       * still there.
+       */
+
+      // TODO END remove once S3 file moves are no longer necessary.
+    } finally {
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
+    }
+  }
+
+  @Test
+  public void completeManifestListDelayed() throws Exception {
+    String bucket = null;
+    try {
+      /*
+       * Create the (empty) bucket to run against, and populate it with
+       * two data sets.
+       */
+      bucket = s3Dao.createTestBucket();
+      ExtractionOptions options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
+      LOGGER.info("Bucket created: '{}:{}'", s3Dao.readListBucketsOwner(), bucket);
+      DataSetManifest manifestA =
+          new DataSetManifest(
+              Instant.now().minus(1L, ChronoUnit.HOURS),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestA);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestA,
+          manifestA.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetManifest manifestB =
+          new DataSetManifest(
+              manifestA.getTimestampText(),
+              1,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("pde.rif", RifFileType.PDE));
+
+      DataSetManifest manifestC =
+          new DataSetManifest(
+              Instant.now(),
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestC);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestC,
+          manifestC.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
+
+      // Run the job.
+
+      // Process manifest A and C first with B coming later
+      List<DataSetManifest> manifests = List.of(manifestA, manifestC);
+      int totalCount = 0;
+      for (DataSetManifest manifest : manifests) {
+        final var listener = new MockDataSetMonitorListener();
+        final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
+        final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+        final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+        final var s3FileCache =
+            spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+        final var dataSetQueue =
+            new DataSetQueue(
+                pipelineAppState.getClock(),
+                pipelineAppState.getMetrics(),
+                s3FilesDao,
+                s3FileCache,
+                s3TaskManager);
+        try (CcwRifLoadJob ccwJob =
+            new CcwRifLoadJob(
+                pipelineAppState,
+                options,
+                dataSetQueue,
+                listener,
+                false,
+                Optional.empty(),
+                statusReporter)) {
+          assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+
+          totalCount += manifest.getEntries().size() + 1;
+          DataSetTestUtilities.waitForBucketObjectCount(
+              s3Dao,
+              bucket,
+              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+              totalCount,
+              java.time.Duration.ofSeconds(10));
+        }
+      }
+
+      final var listener = new MockDataSetMonitorListener();
+      final var s3TaskManager = spy(new S3TaskManager(options, s3ClientFactory));
+      final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+      final var dataSetQueue =
+          new DataSetQueue(
+              pipelineAppState.getClock(),
+              pipelineAppState.getMetrics(),
+              s3FilesDao,
+              s3FileCache,
+              s3TaskManager);
+      try (CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              pipelineAppState,
+              options,
+              dataSetQueue,
+              listener,
+              false,
+              Optional.empty(),
+              statusReporter)) {
+        // Should return NOTHING_TO_DO until all manifests are accounted for
+        // The manifest list includes manifest B which is not uploaded yet, so we shouldn't
+        // terminate yet
+        putFinalManifestListInTestBucket(bucket, List.of(manifestA, manifestB));
+        assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());
+        putFinalManifestListInTestBucket(bucket, List.of(manifestC));
+        assertEquals(PipelineJobOutcome.NOTHING_TO_DO, ccwJob.call());
+
+        DataSetTestUtilities.putObject(s3Dao, bucket, manifestB);
+        DataSetTestUtilities.putObject(
+            s3Dao,
+            bucket,
+            manifestB,
+            manifestB.getEntries().getFirst(),
+            StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+        assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+
+        DataSetTestUtilities.waitForBucketObjectCount(
+            s3Dao,
+            bucket,
+            CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
+            totalCount + 1 + manifestB.getEntries().size(),
+            java.time.Duration.ofSeconds(10));
+        // Can terminate after processing all three manifests
+        assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
+      }
+
+      // TODO BEGIN remove once S3 file moves are no longer necessary.
+      // Expected to be changed as part of BFD-3129.
+      /*
+       * Verify that the first data set was renamed and the second is
+       * still there.
+       */
+
+      // TODO END remove once S3 file moves are no longer necessary.
+    } finally {
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
+    }
+  }
+
   /**
    * Validate load given the input location to load files and output location to look for the files
    * once they're loaded.
@@ -662,15 +959,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
    * @param expectedOutputLocation the expected output location (bucket key) where files are
    *     expected to be moved after processing
    * @param fileList the file list
-   * @param addManifestList test
    * @throws Exception the exception
    */
   private void validateLoadAtLocations(
-      String inputLocation,
-      String expectedOutputLocation,
-      List<URL> fileList,
-      boolean addManifestList)
-      throws Exception {
+      String inputLocation, String expectedOutputLocation, List<URL> fileList) throws Exception {
     String bucket = null;
     try {
       /*
@@ -718,11 +1010,29 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
               Optional.empty(),
               statusReporter)) {
         assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+
+        // Verify what was handed off to the DataSetMonitorListener.
+        assertEquals(0, listener.getNoDataAvailableEvents());
+        assertEquals(1, listener.getDataEvents().size());
+
+        // TODO BEGIN remove once S3 file moves are no longer necessary.
+        // Expected to be changed as part of BFD-3129.
+        // Verify that the data set was renamed.
+        DataSetTestUtilities.waitForBucketObjectCount(
+            s3Dao, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
+        DataSetTestUtilities.waitForBucketObjectCount(
+            s3Dao,
+            bucket,
+            expectedOutputLocation,
+            1 + manifest.getEntries().size(),
+            java.time.Duration.ofSeconds(10));
+
+        if (inputLocation.equals(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)) {
+          putFinalManifestListInTestBucket(bucket, List.of(manifest));
+        }
+        assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
       }
 
-      // Verify what was handed off to the DataSetMonitorListener.
-      assertEquals(0, listener.getNoDataAvailableEvents());
-      assertEquals(1, listener.getDataEvents().size());
       assertEquals(manifest.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       assertEquals(
           manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
@@ -732,33 +1042,6 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // verifies that close was called on AutoCloseable dependencies
       verify(s3TaskManager).close();
       verify(s3FileCache).close();
-
-      // TODO BEGIN remove once S3 file moves are no longer necessary.
-      // Expected to be changed as part of BFD-3129.
-      // Verify that the data set was renamed.
-      DataSetTestUtilities.waitForBucketObjectCount(
-          s3Dao, bucket, inputLocation, 0, java.time.Duration.ofSeconds(10));
-
-      DataSetTestUtilities.waitForBucketObjectCount(
-          s3Dao,
-          bucket,
-          expectedOutputLocation,
-          1 + manifest.getEntries().size(),
-          java.time.Duration.ofSeconds(10));
-      if (addManifestList) {
-        putFinalManifestListInTestBucket(bucket, manifest);
-        try (CcwRifLoadJob ccwJob =
-            new CcwRifLoadJob(
-                pipelineAppState,
-                options,
-                dataSetQueue,
-                listener,
-                false,
-                Optional.empty(),
-                statusReporter)) {
-          assertEquals(PipelineJobOutcome.SHOULD_TERMINATE, ccwJob.call());
-        }
-      }
 
       // TODO END remove once S3 file moves are no longer necessary.
     } finally {
@@ -813,10 +1096,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
    * test.
    *
    * @param bucket test
-   * @param manifest test
+   * @param manifests test
    */
-  private void putFinalManifestListInTestBucket(String bucket, DataSetManifest manifest) {
+  private void putFinalManifestListInTestBucket(String bucket, List<DataSetManifest> manifests) {
     DataSetTestUtilities.putManifestList(
-        s3Dao, bucket, manifest, CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
+        s3Dao, bucket, manifests, CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
   }
 }

@@ -24,9 +24,9 @@ public abstract class AbstractLocalStackS3Test extends AbstractLocalStackTest {
   /** A {@link S3Dao} connected to the localstack container for use in test methods. */
   protected S3Dao s3Dao;
 
-  /** Initializes S3 related fields before each test runs. */
+  /** Initializes S3 related fields and resets the database before each test runs. */
   @BeforeEach
-  void initializeS3Fields() {
+  void initializeS3FieldsAndResetDatabase() {
     s3ClientConfig =
         S3ClientConfig.s3Builder()
             .region(Region.of(localstack.getRegion()))

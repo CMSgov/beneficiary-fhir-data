@@ -38,6 +38,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Table;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -226,6 +227,28 @@ public final class PipelineTestUtils {
       LOGGER.info("Removed all application data from database.");
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * test.
+   *
+   * @throws SQLException test
+   */
+  public void markRandomManifestAsNotCompleted() throws SQLException {
+    try (EntityManager entityManager =
+        pipelineApplicationState.getEntityManagerFactory().createEntityManager()) {
+      EntityTransaction transaction = entityManager.getTransaction();
+      transaction.begin();
+      entityManager
+          .createNativeQuery(
+              """
+              UPDATE ccw.s3_manifest_files
+              SET status = 'DISCOVERED'
+              WHERE manifest_id = (SELECT manifest_id FROM ccw.s3_manifest_files LIMIT 1)
+              """)
+          .executeUpdate();
+      transaction.commit();
     }
   }
 
