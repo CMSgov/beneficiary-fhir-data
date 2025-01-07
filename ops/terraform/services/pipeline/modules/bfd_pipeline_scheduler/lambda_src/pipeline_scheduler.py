@@ -13,7 +13,6 @@ from urllib.parse import unquote
 import boto3
 from botocore.config import Config
 
-SCALE_IN_FIVE_MINUTES_ACTION_NAME = "scale_in_in_five_minutes"
 SCALE_OUT_IMMEDIATELY_ACTION_NAME = "scale_out_immediately"
 SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX = "scale_out_at_"
 
@@ -302,28 +301,6 @@ def handler(event: Any, context: Any):
         # a future load or immediately if the load is timestamped in the past
 
         if not is_future_load:
-            # We also need to ensure that there are no near-future scale-in scheduled
-            # actions on the ASG so that we can avoid scaling-out and then prematurely
-            # scaling-in
-            print(
-                "Attempting to delete any near-future scale-in actions on"
-                f" {PIPELINE_ASG_NAME} to avoid premature scale-in..."
-            )
-            try:
-                autoscaling_client.delete_scheduled_action(
-                    AutoScalingGroupName=PIPELINE_ASG_NAME,
-                    ScheduledActionName=SCALE_IN_FIVE_MINUTES_ACTION_NAME,
-                )
-                print(
-                    f"Scheduled action {SCALE_IN_FIVE_MINUTES_ACTION_NAME} successfully"
-                    " deleted. Continuing..."
-                )
-            except autoscaling_client.exceptions.ClientError as ex:
-                print(
-                    f"No near-future scale-in actions scheduled on {PIPELINE_ASG_NAME}."
-                    " Continuing..."
-                )
-
             # For immediate scale outs we do not want to set a scheduled action if the
             # desired capacity is already at 1; so, if this is not a future load we check
             # the desired capacity and exit if it's already at 1
@@ -399,64 +376,6 @@ def handler(event: Any, context: Any):
                 f" {invalid_scheduled_action_name}. It is likely that this scheduled action"
                 f" had already been invoked and the data load {data_load.name} has already"
                 " been loaded successfully."
-            )
-    elif (
-        pipeline_data_status == PipelineDataStatus.DONE and event_type == S3EventType.OBJECT_CREATED
-    ):
-        # If the invoking event was from a file being created in Done, we can assume that a
-        # Pipeline Data Load is either in-progress or being completed (as the Pipeline will move
-        # Incoming files to Done when they are finished loading); we only want to schedule the
-        # Pipeline to scale-in when there is no ongoing data load and there are no upcoming
-        # future loads in the _immediate_ future
-
-        if not _is_incoming_folder_empty(data_load=data_load):
-            # If the invoking file's data load has corresponding data yet to still be loaded
-            # waiting in Incoming/, that means that this particular data load is not yet
-            # finished and there's no further work to do. This avoids the relatively expensive
-            # operation of scanning all data loads that's done below since we _know_ this data
-            # load is not done yet
-            print(f"The data load {data_load.name} has not yet been fully loaded. Exiting...")
-            return
-
-        five_minutes_from_now = datetime.utcnow() + timedelta(minutes=5)
-        if _get_all_valid_incoming_loads_before_date(time_cutoff=five_minutes_from_now):
-            # If there are any valid incoming data loads (or future loads within the next 5
-            # minutes), then the Pipeline still has work to do and should not be scaled-in
-            print("The Pipeline is still loading data from Incoming, exiting...")
-            return
-
-        # If there are no valid incoming data loads/groups that should be loaded within the next
-        # five minutes in any of the Incoming folders, then we know that the Pipeline has
-        # successfully loaded everything it needs to (since this Lambda was invoked by the
-        # Pipeline moving the last file to the Done folder). We can now tell the Pipeline to
-        # scale-in within the next five minutes:
-        print(
-            "No valid, non-future data loads were discovered to be ingested by the Pipeline"
-            " within the next five minutes. Trying to schedule an action to scale-in the"
-            " Pipeline to stop it..."
-        )
-
-        # This is a temporary workaround for a lack of good signaling between the Pipeline and
-        # its ASG as to when the Pipeline instance can gracefully be stopped. Until such a time
-        # that the Pipeline can signal that it has finished, we give the Pipeline 5 minutes to
-        # run any final tasks it needs to after finishing data load before scaling it in
-        # TODO: Replace this when the Pipeline is able to signal it can be stopped
-        current_desired_capacity = autoscaling_client.describe_auto_scaling_groups(
-            AutoScalingGroupNames=[PIPELINE_ASG_NAME]
-        )["AutoScalingGroups"][0]["DesiredCapacity"]
-        if current_desired_capacity != 0 and _try_schedule_pipeline_asg_action(
-            scheduled_action_name=SCALE_IN_FIVE_MINUTES_ACTION_NAME,
-            start_time=five_minutes_from_now,
-            desired_capacity=0,
-        ):
-            print(
-                f"Scheduled the Pipeline to scale-in at {five_minutes_from_now.isoformat()} UTC"
-                " as all valid, non-future Incoming data loads have been completed"
-            )
-        else:
-            print(
-                "The Pipeline is already scheduled to scale-in within the next five minutes or"
-                " its ASG's desired capacity is already set to 0"
             )
     else:
         print(
