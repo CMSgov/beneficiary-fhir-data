@@ -177,7 +177,7 @@ public class DataSetQueue implements AutoCloseable {
                 DownloadedFile downloadedFile = downloadFileAndCheckMD5(key);
                 return new FinalManifestList(downloadedFile.getBytes().read(), key);
               } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Error downloading key from S3: " + key, e);
               }
             })
         .toList();

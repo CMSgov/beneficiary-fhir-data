@@ -1,6 +1,6 @@
 [tool.poetry]
 package-mode = false
-name = "convert-load-converter"
+name = "synthetic-load-converter"
 
 [tool.poetry.dependencies]
 python = "^3.12"
