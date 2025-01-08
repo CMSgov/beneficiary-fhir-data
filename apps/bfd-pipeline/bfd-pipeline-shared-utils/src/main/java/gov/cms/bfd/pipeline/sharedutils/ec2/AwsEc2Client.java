@@ -34,7 +34,7 @@ public class AwsEc2Client {
 
     } catch (Exception ex) {
       LOGGER.warn(
-          "Error creating EC2 autoscaling client. This is expect if the application is not running in EC2",
+          "Error creating EC2 autoscaling client. This is expected if the application is not running in EC2",
           ex);
     }
   }

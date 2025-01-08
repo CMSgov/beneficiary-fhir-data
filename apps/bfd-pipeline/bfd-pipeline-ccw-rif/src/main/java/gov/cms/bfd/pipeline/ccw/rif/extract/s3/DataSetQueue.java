@@ -157,7 +157,7 @@ public class DataSetQueue implements AutoCloseable {
    * Searches S3 for all manifest lists created after the minimum allowed timestamp.
    *
    * @param minimumAllowedManifestTimestamp minimum allowed creation timestamp
-   * @return test
+   * @return the manifest lists
    */
   public List<FinalManifestList> readFinalManifestLists(Instant minimumAllowedManifestTimestamp) {
     final String manifestListName = "manifestlist.done";

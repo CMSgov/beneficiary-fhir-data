@@ -42,7 +42,7 @@ public class PipelineJobRunner implements Runnable {
     PipelineJobOutcome outcome = null;
     try {
       // This try-with-resources guarantees job's close method is called.
-      // Nested within the outer try because we don't want stopping normally to be
+      // Nested within the outer try because we don't want stoppingNormally to be
       // called if closing the job throws an exception.
       try (job) {
         final Long repeatMillis =

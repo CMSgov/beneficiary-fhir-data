@@ -449,7 +449,7 @@ public class S3Dao implements AutoCloseable {
      *
      * @param key The object's key
      * @param size The object's size
-     * @param lastModified test
+     * @param lastModified the object's last modified date
      * @param response object returned by S3 API
      */
     private S3ObjectSummary(

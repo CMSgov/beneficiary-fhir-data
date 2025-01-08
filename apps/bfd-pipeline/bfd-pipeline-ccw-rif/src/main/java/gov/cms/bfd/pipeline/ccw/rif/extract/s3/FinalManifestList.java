@@ -20,7 +20,7 @@ public class FinalManifestList {
    * Creates a new instance from a downloaded file.
    *
    * @param downloadedFileContent file contents
-   * @param key test
+   * @param key S3 key
    */
   public FinalManifestList(byte[] downloadedFileContent, String key) {
     String fileString = new String(downloadedFileContent, StandardCharsets.UTF_8);

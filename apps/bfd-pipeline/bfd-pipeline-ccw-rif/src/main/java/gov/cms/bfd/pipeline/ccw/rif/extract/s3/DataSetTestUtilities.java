@@ -76,7 +76,7 @@ public class DataSetTestUtilities {
    * @param s3Dao s3dao
    * @param bucket s3 bucket
    * @param manifests list of manifests
-   * @param location test@param location the location to store the manifest, should be {@link
+   * @param location the location to store the manifest, should be {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
    *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
    */
