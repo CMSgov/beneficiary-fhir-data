@@ -83,7 +83,7 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 public final class PipelineApplication {
   static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
 
-  /** test. */
+  /** EC2 client. */
   private final AwsEc2Client ec2Client;
 
   /** This {@link System#exit(int)} value should be used when the application exits successfully. */

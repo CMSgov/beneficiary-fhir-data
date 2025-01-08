@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
-/** test. */
+/** Defines the desired behavior when the pipeline finishes running. */
 public enum PipelineOutcome {
-  /** test. */
+  /** The pipeline service should shut down. */
   STOP_SERVICE,
-  /** test. */
+  /** The underlying EC2 instance should terminate. */
   TERMINATE_INSTANCE
 }

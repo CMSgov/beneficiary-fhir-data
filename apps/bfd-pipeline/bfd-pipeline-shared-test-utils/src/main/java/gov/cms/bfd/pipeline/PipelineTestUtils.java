@@ -230,12 +230,8 @@ public final class PipelineTestUtils {
     }
   }
 
-  /**
-   * test.
-   *
-   * @throws SQLException test
-   */
-  public void markRandomManifestAsNotCompleted() throws SQLException {
+  /** Marks a random manifest as not completed. */
+  public void markRandomManifestAsNotCompleted() {
     try (EntityManager entityManager =
         pipelineApplicationState.getEntityManagerFactory().createEntityManager()) {
       EntityTransaction transaction = entityManager.getTransaction();
@@ -253,9 +249,9 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * test.
+   * Inserts a new manifest entry into the database.
    *
-   * @param manifest test
+   * @param manifest manifest
    */
   public void insertManifest(S3ManifestFile manifest) {
     try (EntityManager entityManager =

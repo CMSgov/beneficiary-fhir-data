@@ -50,7 +50,7 @@ public class AwsEc2Client {
     return asg.instances().stream().anyMatch(i -> i.instanceId().equals(instanceId));
   }
 
-  /** test. */
+  /** Scales in the EC2 instance. */
   public void scaleInNow() {
     if (autoScalingGroup == null) {
       return;

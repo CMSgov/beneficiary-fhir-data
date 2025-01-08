@@ -71,15 +71,16 @@ public class DataSetTestUtilities {
   }
 
   /**
-   * test.
+   * Uploads the manifest list to S3.
    *
-   * @param s3Dao test
-   * @param bucket test
-   * @param manifests test
-   * @param location test
-   * @return test
+   * @param s3Dao s3dao
+   * @param bucket s3 bucket
+   * @param manifests list of manifests
+   * @param location test@param location the location to store the manifest, should be {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
    */
-  public static String putManifestList(
+  public static void putManifestList(
       S3Dao s3Dao, String bucket, List<DataSetManifest> manifests, String location) {
     String keyPrefix = keyPrefixForManifest(location, manifests.get(0));
     String manifestListContent =
@@ -88,10 +89,8 @@ public class DataSetTestUtilities {
             .collect(Collectors.joining("\n"));
 
     String objectKey = String.format("%s/ManifestList.done", keyPrefix);
-    return s3Dao
-        .putObject(
-            bucket, objectKey, manifestListContent.getBytes(StandardCharsets.UTF_8), Map.of())
-        .getKey();
+    s3Dao.putObject(
+        bucket, objectKey, manifestListContent.getBytes(StandardCharsets.UTF_8), Map.of());
   }
 
   /**

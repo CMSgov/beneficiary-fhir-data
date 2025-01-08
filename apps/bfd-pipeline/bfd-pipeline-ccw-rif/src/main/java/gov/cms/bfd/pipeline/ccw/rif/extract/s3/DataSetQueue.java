@@ -36,11 +36,11 @@ import org.slf4j.LoggerFactory;
  */
 @AllArgsConstructor
 public class DataSetQueue implements AutoCloseable {
-  /** test. */
+  /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DataSetQueue.class);
 
   /**
-   * Name of S3 meta data field used by CCW to communicate an expected MD5 checksum value for every
+   * Name of S3 metadata field used by CCW to communicate an expected MD5 checksum value for every
    * file they upload to the S3 bucket for processing.
    */
   public static final String MD5_CHECKSUM_META_DATA_FIELD = "md5chksum";
@@ -154,9 +154,9 @@ public class DataSetQueue implements AutoCloseable {
   }
 
   /**
-   * test.
+   * Searches S3 for all manifest lists created after the minimum allowed timestamp.
    *
-   * @param minimumAllowedManifestTimestamp test.
+   * @param minimumAllowedManifestTimestamp minimum allowed creation timestamp
    * @return test
    */
   public List<FinalManifestList> readFinalManifestLists(Instant minimumAllowedManifestTimestamp) {
@@ -184,24 +184,25 @@ public class DataSetQueue implements AutoCloseable {
   }
 
   /**
-   * test.
+   * Returns whether any of the given manifest keys are not marked as completed in the database.
    *
-   * @param manifestKeys test
-   * @return test
+   * @param manifestKeys list of manifest keys
+   * @return boolean
    */
   public boolean hasIncompleteManifests(Set<String> manifestKeys) {
     return s3Records.hasIncompleteManifests(manifestKeys);
   }
 
   /**
-   * test.
+   * Checks if there are any manifest entries in the database that were created after the given
+   * cutoff and are not contained in the given list of timestamps.
    *
-   * @param manifestListTimestamps test
-   * @param cutoff test
-   * @return test
+   * @param manifestTimestamps list of timestamps to compare
+   * @param cutoff cutoff for checking the database entries
+   * @return boolean
    */
-  public boolean hasMissingManifests(Set<Instant> manifestListTimestamps, Instant cutoff) {
-    return s3Records.hasMissingManifestLists(manifestListTimestamps, cutoff);
+  public boolean additionalManifestsExist(Set<Instant> manifestTimestamps, Instant cutoff) {
+    return s3Records.additionalManifestsExist(manifestTimestamps, cutoff);
   }
 
   /**

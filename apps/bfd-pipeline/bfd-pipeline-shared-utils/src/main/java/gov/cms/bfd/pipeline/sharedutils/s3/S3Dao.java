@@ -429,7 +429,7 @@ public class S3Dao implements AutoCloseable {
     /** The object's size. */
     private final long size;
 
-    /** test. */
+    /** The object's last modified date. */
     private Instant lastModified;
 
     /**
@@ -481,7 +481,7 @@ public class S3Dao implements AutoCloseable {
     /** The object's size. */
     private final long size;
 
-    /** test. */
+    /** The object's last modified date. */
     private final Instant lastModified;
 
     /** Key/value pairs of metadata from the object. */

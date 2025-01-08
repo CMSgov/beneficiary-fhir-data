@@ -53,8 +53,8 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
   /** Recent job results for use by tests. */
   private final LinkedList<PipelineJobRunner.JobRunSummary> completedJobs;
 
-  /** Terminate requested. */
-  private boolean terminateRequested = false;
+  /** Termination requested. */
+  private boolean terminationRequested = false;
 
   /**
    * True if all jobs are interruptable. When false we can't interrupt the pool for faster
@@ -178,7 +178,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
     }
     log.info("pool has terminated");
 
-    if (this.terminateRequested) {
+    if (this.terminationRequested) {
       return PipelineOutcome.TERMINATE_INSTANCE;
     } else {
       return PipelineOutcome.STOP_SERVICE;
@@ -303,7 +303,7 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
   public void stopped(PipelineJob job, PipelineJobOutcome outcome) {
     log.info("Job stopped: " + job.getType());
     if (outcome == PipelineJobOutcome.SHOULD_TERMINATE) {
-      this.terminateRequested = true;
+      this.terminationRequested = true;
     }
     latch.countDown();
   }

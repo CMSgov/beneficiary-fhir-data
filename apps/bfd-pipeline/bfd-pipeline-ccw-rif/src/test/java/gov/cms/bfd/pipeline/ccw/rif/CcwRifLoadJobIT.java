@@ -653,12 +653,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   }
 
   /**
-   * test.
+   * Tests that the pipeline shuts down when the manifest list is created.
    *
-   * @throws Exception test
+   * @throws Exception exception
    */
   @Test
-  public void completeManifestList() throws Exception {
+  public void shutdownWithManifestList() throws Exception {
     String bucket = null;
     try {
       /*
@@ -812,12 +812,12 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   }
 
   /**
-   * test.
+   * Tests that the pipeline shuts down when the manifest list is created later.
    *
-   * @throws Exception test
+   * @throws Exception exception
    */
   @Test
-  public void completeManifestListDelayed() throws Exception {
+  public void shutdownWithManifestListDelayed() throws Exception {
     String bucket = null;
     try {
       /*
@@ -1111,10 +1111,10 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
   }
 
   /**
-   * test.
+   * Uploads the manifest list.
    *
-   * @param bucket test
-   * @param manifests test
+   * @param bucket bucket
+   * @param manifests manifests
    */
   private void putFinalManifestListInTestBucket(String bucket, List<DataSetManifest> manifests) {
     DataSetTestUtilities.putManifestList(

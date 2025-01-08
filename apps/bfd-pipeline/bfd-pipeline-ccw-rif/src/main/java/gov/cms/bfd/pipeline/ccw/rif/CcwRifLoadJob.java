@@ -79,7 +79,10 @@ public final class CcwRifLoadJob implements PipelineJob {
    */
   public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(60);
 
-  /** test. */
+  /**
+   * The date when the final manifest list was implemented. Pipeline runs before this date won't
+   * have a manifest list.
+   */
   private static final Instant FINAL_MANIFEST_CUTOFF = Instant.parse("2024-12-12T00:00:00Z");
 
   /**
@@ -263,7 +266,7 @@ public final class CcwRifLoadJob implements PipelineJob {
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
 
-      if (dataSetQueue.hasMissingManifests(finalManifestTimestamps, FINAL_MANIFEST_CUTOFF)) {
+      if (dataSetQueue.additionalManifestsExist(finalManifestTimestamps, FINAL_MANIFEST_CUTOFF)) {
         LOGGER.info("Missing manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
@@ -515,9 +518,9 @@ public final class CcwRifLoadJob implements PipelineJob {
   }
 
   /**
-   * test.
+   * Searches S3 for all manifest lists.
    *
-   * @return test.
+   * @return the manifest lists
    */
   private List<FinalManifestList> readFinalManifestLists() {
     return dataSetQueue.readFinalManifestLists(FINAL_MANIFEST_CUTOFF);

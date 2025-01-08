@@ -84,7 +84,8 @@ public class S3ManifestDbDao {
           final var records =
               entityManager
                   .createQuery(
-                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
+                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >="
+                          + " :minTimestamp) and (m.status not in :okStatus)",
                       String.class)
                   .setParameter("minTimestamp", minTimestamp)
                   .setParameter(
@@ -113,26 +114,26 @@ public class S3ManifestDbDao {
   }
 
   /**
-   * test.
+   * Returns whether any of the given manifest keys are not marked as completed in the database.
    *
-   * @param manifestKeys test
-   * @return test
+   * @param manifestKeys list of manifest keys
+   * @return boolean
    */
   public boolean hasIncompleteManifests(Set<String> manifestKeys) {
-    // Need to use createNativeQuery because createQuery doesn't seem to support the unnest(array[])
+    // Need to use createNativeQuery because createQuery doesn't seem to support the unnest()
     // syntax
     final String query =
         """
-        select exists(
-          select 1
-          from unnest(:manifestKeys\\:\\:varchar[]) a(id)
-          where not exists(
-            select 1
-            from ccw.s3_manifest_files m
-            where m.s3_key = a.id
-            and m.status = 'COMPLETED'
-          )
-        )
+        SELECT EXISTS(
+           SELECT 1
+           FROM UNNEST(:manifestKeys\\:\\:VARCHAR[]) a(id)
+           WHERE NOT EXISTS(
+             SELECT 1
+             FROM ccw.s3_manifest_files m
+             WHERE m.s3_key = a.id
+             AND m.status = 'COMPLETED'
+           )
+         )
         """;
     return (boolean)
         transactionManager.executeFunction(
@@ -144,21 +145,22 @@ public class S3ManifestDbDao {
   }
 
   /**
-   * test.
+   * Checks if there are any manifest entries in the database that were created after the given
+   * cutoff and are not contained in the given list of timestamps.
    *
-   * @param manifestTimestamps test
-   * @param cutoff test
-   * @return test
+   * @param manifestTimestamps list of timestamps to compare
+   * @param cutoff cutoff for checking the database entries
+   * @return boolean
    */
-  public boolean hasMissingManifestLists(Set<Instant> manifestTimestamps, Instant cutoff) {
+  public boolean additionalManifestsExist(Set<Instant> manifestTimestamps, Instant cutoff) {
     final String query =
         """
-        select exists(
-          select 1
-          from S3ManifestFile m
-          where m.manifestTimestamp > :cutoff
-          and m.s3Key not like 'Synthetic/%'
-          and m.manifestTimestamp not in :manifestTimestamps
+        SELECT EXISTS(
+          SELECT 1
+          FROM S3ManifestFile m
+          WHERE m.manifestTimestamp > :cutoff
+          AND m.s3Key NOT LIKE 'Synthetic/%'
+          AND m.manifestTimestamp NOT IN :manifestTimestamps
         )
         """;
     return transactionManager.executeFunction(
