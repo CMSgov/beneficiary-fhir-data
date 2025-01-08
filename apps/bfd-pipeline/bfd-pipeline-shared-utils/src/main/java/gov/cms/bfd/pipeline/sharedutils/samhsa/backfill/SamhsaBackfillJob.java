@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
@@ -18,10 +19,13 @@ public class SamhsaBackfillJob implements PipelineJob {
   private final Semaphore runningSemaphore;
 
   /** The CCW PipelineApplicationState. */
-  PipelineApplicationState appStateCcw;
+  List<PipelineApplicationState> appStateCcw;
 
   /** The RDA PipelineApplicationState. */
-  PipelineApplicationState appStateRda;
+  List<PipelineApplicationState> appStateRda;
+
+  /** The log reporting interval. */
+  Long logInterval;
 
   /** Batch size. */
   int batchSize;
@@ -35,12 +39,17 @@ public class SamhsaBackfillJob implements PipelineJob {
    * @param appStateCcw The CCW PipelineApplicationState
    * @param appStateRda The RDA PipelineApplicationState
    * @param batchSize the query batch size.
+   * @param logInterval The Log reporting interval.
    */
   public SamhsaBackfillJob(
-      PipelineApplicationState appStateCcw, PipelineApplicationState appStateRda, int batchSize) {
+      List<PipelineApplicationState> appStateCcw,
+      List<PipelineApplicationState> appStateRda,
+      int batchSize,
+      Long logInterval) {
     this.appStateCcw = appStateCcw;
     this.appStateRda = appStateRda;
     this.batchSize = batchSize;
+    this.logInterval = logInterval;
     runningSemaphore = new Semaphore(1);
   }
 
@@ -94,7 +103,8 @@ public class SamhsaBackfillJob implements PipelineJob {
    */
   Long callBackfillService() {
     SamhsaBackfillService backfillService =
-        SamhsaBackfillService.createBackfillService(appStateCcw, appStateRda, batchSize);
+        SamhsaBackfillService.createBackfillService(
+            appStateCcw, appStateRda, batchSize, logInterval);
     Long processedCount = backfillService.startBackFill(appStateCcw != null, appStateRda != null);
     return processedCount;
   }

@@ -405,7 +405,8 @@ setvar rda/samhsa/backfill/enabled "false"
 case $run_mode in
   backfill)
     setvar rda/samhsa/backfill/enabled "true"
-    setvar rda/samhsa/backfill/batch_size "10000"
+    setvar rda/samhsa/backfill/batch_size "100000"
+    setvar rda/samhsa/backfill/log_interval "15"
     ;;
   rif)
     setvar ccw/job/enabled "true"

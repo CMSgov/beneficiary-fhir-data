@@ -382,6 +382,10 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /** Config value for SAMHSA backfill batch size. */
   public static final String SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
 
+  /** Config value for SAMHSA backfill log interval. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL =
+      "rda/samhsa/backfill/log_interval";
+
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
@@ -417,6 +421,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
           .put(SSM_PATH_SAMHSA_BACKFILL_ENABLED, "false")
           .put(SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE, String.valueOf(10000))
+          .put(SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL, String.valueOf(3600))
           .build();
 
   /**
@@ -523,8 +528,13 @@ public final class AppConfiguration extends BaseAppConfiguration {
       return null;
     }
     int batchSize = config.intValue(SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE, 10000);
+    Long logInterval = config.longValue(SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL, 3600);
     BackfillConfigOptions backfillConfigOptions =
-        BackfillConfigOptions.builder().enabled(enabled).batchSize(batchSize).build();
+        BackfillConfigOptions.builder()
+            .enabled(enabled)
+            .batchSize(batchSize)
+            .logInterval(logInterval)
+            .build();
     return backfillConfigOptions;
   }
 

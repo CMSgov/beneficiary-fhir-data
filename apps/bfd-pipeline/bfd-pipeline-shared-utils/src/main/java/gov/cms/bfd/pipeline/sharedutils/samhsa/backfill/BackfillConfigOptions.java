@@ -19,4 +19,7 @@ public class BackfillConfigOptions {
    * query.
    */
   int batchSize;
+
+  /** The log interval. */
+  Long logInterval;
 }

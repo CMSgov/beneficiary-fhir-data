@@ -78,11 +78,15 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
    *
    * @param transactionManager The transaction manager.
    * @param batchSize the query batch size.
+   * @param logInterval The log interval.
    * @param tableEntry The table to process in this thread.
    */
   public RDASamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, RDA_TABLES tableEntry) {
-    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry());
+      TransactionManager transactionManager,
+      int batchSize,
+      Long logInterval,
+      RDA_TABLES tableEntry) {
+    super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
   }
 
   /** {@inheritDoc} */

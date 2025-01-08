@@ -12,7 +12,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import java.sql.Date;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +65,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /** query batch size. */
   int batchSize;
 
+  /** The log interval. */
+  Long logInterval;
+
   /**
    * Constructor.
    *
@@ -69,11 +75,17 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param batchSize the query batch size. This is the limit of claims to be pulled with each
    *     query.
    * @param logger The logger.
+   * @param logInterval The log interval.
    * @param tableEntry the table Entry for this thread.
    */
   public AbstractSamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, Logger logger, TableEntry tableEntry) {
+      TransactionManager transactionManager,
+      int batchSize,
+      Logger logger,
+      Long logInterval,
+      TableEntry tableEntry) {
     this.logger = logger;
+    this.logInterval = logInterval;
     this.transactionManager = transactionManager;
     this.batchSize = batchSize;
     this.tableEntry = tableEntry;
@@ -205,7 +217,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
           String.format(
               "Starting processing of table %s from the beginning.", tableEntry.getClaimTable()));
     }
-
+    AtomicReference<Instant> startTime = new AtomicReference<>(Instant.now());
+    AtomicLong totalProcessedInInterval = new AtomicLong(0L);
     do {
       try {
         transactionManager.executeProcedure(
@@ -220,12 +233,20 @@ public abstract class AbstractSamhsaBackfill implements Callable {
                 }
               }
               totalSaved.accumulateAndGet(savedInBatch, Long::sum);
+              totalProcessedInInterval.accumulateAndGet(claims.size(), Long::sum);
               totalProcessed.accumulateAndGet(claims.size(), Long::sum);
-              logger.info(
-                  String.format(
-                      "Processed Batch of %d claims from table %s. %d of them had SAMHSA codes. Total processed so far: %d",
-                      batchSize, tableEntry.getClaimTable(), savedInBatch, totalProcessed.get()));
-
+              if (startTime.get().plus(logInterval, ChronoUnit.SECONDS).isBefore(Instant.now())) {
+                logger.info(
+                    String.format(
+                        "Processed %d claims from table %s, %d in the last %d seconds. and saved %d SAMHSA tags.",
+                        totalProcessed.get(),
+                        tableEntry.getClaimTable(),
+                        totalProcessedInInterval.get(),
+                        Duration.between(startTime.get(), Instant.now()).getSeconds(),
+                        totalSaved.get()));
+                startTime.set(Instant.now());
+                totalProcessedInInterval.set(0L);
+              }
               lastClaimId.set(
                   !claims.isEmpty()
                       ? Optional.of(String.valueOf(claims.getLast()[0]))

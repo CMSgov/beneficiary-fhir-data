@@ -108,11 +108,15 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
    *
    * @param transactionManager Transaction manager.
    * @param batchSize the query batch size.
+   * @param logInterval The log interval.
    * @param tableEntry The table to use in this thread.
    */
   public CCWSamhsaBackfill(
-      TransactionManager transactionManager, int batchSize, CCW_TABLES tableEntry) {
-    super(transactionManager, batchSize, LOGGER, tableEntry.getEntry());
+      TransactionManager transactionManager,
+      int batchSize,
+      Long logInterval,
+      CCW_TABLES tableEntry) {
+    super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
     this.tableEntry = tableEntry.getEntry();
   }
 

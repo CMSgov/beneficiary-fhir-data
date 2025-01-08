@@ -32,6 +32,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillJob;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillService;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
@@ -430,6 +431,7 @@ public final class PipelineApplication {
    * Creates the pipeline job for the SAMHSA backfill.
    *
    * @param batchSize The query batch size.
+   * @param logInterval The log interval.
    * @param appMeters The meter registry.
    * @param appMetrics The metrics registry.
    * @param pooledDataSource The Hikari data source.
@@ -438,26 +440,33 @@ public final class PipelineApplication {
    */
   PipelineJob createBackfillJob(
       int batchSize,
+      Long logInterval,
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource,
       Clock clock) {
-    final PipelineApplicationState appStateCcw =
-        new PipelineApplicationState(
-            appMeters,
-            appMetrics,
-            pooledDataSource,
-            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
-            clock);
-    final PipelineApplicationState appStateRda =
-        new PipelineApplicationState(
-            appMeters,
-            appMetrics,
-            pooledDataSource,
-            PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-            clock);
+    List<PipelineApplicationState> ccwAppStates = new ArrayList<>();
+    for (int i = 0; i < SamhsaBackfillService.ccwTables.size(); i++) {
+      ccwAppStates.add(
+          new PipelineApplicationState(
+              appMeters,
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+              clock));
+    }
+    List<PipelineApplicationState> rdaStates = new ArrayList<>();
+    for (int i = 0; i < SamhsaBackfillService.rdaTables.size(); i++) {
+      rdaStates.add(
+          new PipelineApplicationState(
+              appMeters,
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+              clock));
+    }
 
-    return new SamhsaBackfillJob(appStateCcw, appStateRda, batchSize);
+    return new SamhsaBackfillJob(ccwAppStates, rdaStates, batchSize, logInterval);
   }
 
   /**
@@ -540,6 +549,7 @@ public final class PipelineApplication {
       final var backfillJob =
           createBackfillJob(
               backfillConfigOptions.get().getBatchSize(),
+              backfillConfigOptions.get().getLogInterval(),
               appMeters,
               appMetrics,
               pooledDataSource,
