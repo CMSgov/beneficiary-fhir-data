@@ -1,2 +1,4 @@
 _site
 _data/data-dictionary*.json
+assets/open-api.yaml
+swagger-tmp

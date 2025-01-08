@@ -1,54 +1,71 @@
 #!/bin/bash
+# shellcheck disable=SC2154,SC2016
+
 set -e
 
 # add a timestamp to this scripts log output and redirect to both console and logfile
 exec > >(
+    # shellcheck disable=SC2034
 	while read line; do
-	    echo $(date +"%Y-%m-%d %H:%M:%S")" - $${line}" | tee -a /var/log/user_data.log 2>&1
+	    echo "$(date +"%Y-%m-%d %H:%M:%S")"" - $${line}" | tee -a /var/log/user_data.log 2>&1
 	done
 )
 
 cd /beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-# TODO: Consider injecting ansible variables with more modern ansible versions. BFD-1890.
-# SSM parameters with hierarchical leaf nodes will have those nodes transformed from "one/two/three"
-# to "one_two_three" by the jq expression below
 aws ssm get-parameters-by-path \
     --with-decryption \
     --path "/bfd/${env}/server/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5:]|join("_")): .Value})|add' > server_vars.json
+    --query 'Parameters[? !contains(@.Name, `client_certificates`)]' \
+    | jq 'map({(.Name|split("/")|last): .Value})|add' > server_vars.json
 
-# the previous ssm get-parameter will also pick the certs up due to the 'recursive' arg;.
-# we'll process the ".../client_certs/" path separately.
 aws ssm get-parameters-by-path \
---path "/bfd/${env}/server/nonsensitive/client_certificates/" \
---recursive --region us-east-1 \
---query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")[6]), "certificate": .Value}' \
-| jq -s '{ "data_server_ssl_client_certificates": . }' > client_certificates.json
+    --path "/bfd/${env}/server/nonsensitive/client_certificates/" \
+    --recursive --region us-east-1 \
+    --query 'Parameters' | jq '.[] | {"alias": (.Name|split("/")|last), "certificate": .Value}' \
+    | jq -s '{ "client_certificates": . }' > client_certificates.json
+
+new_relic_sensitive="$(aws ssm get-parameters-by-path \
+    --with-decryption \
+    --path "/bfd/${env}/common/sensitive/new_relic/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add')"
+
+new_relic_nonsensitive="$(aws ssm get-parameters-by-path \
+    --path "/bfd/${env}/common/nonsensitive/" \
+    --recursive \
+    --region us-east-1 \
+    --query 'Parameters[? contains(@.Name, `new_relic`)]' | jq 'map({(.Name|split("/")|last): .Value})|add')"
+
+jq -s 'add | . ' <(echo "$new_relic_nonsensitive") <(echo "$new_relic_sensitive") > new_relic_vars.json
 
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")[5]): .Value})|add' > common_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
 
 cat <<EOF > extra_vars.json
 {
-  "data_server_appserver_jvmargs": "-Xms{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -Xmx{{ ((ansible_memtotal_mb * 0.80) | int) - 2048 }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ data_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer -Dsun.net.inetaddr.ttl=0",
-  "data_server_new_relic_app_name": "BFD Server ({{ env_name_std }})",
-  "data_server_new_relic_environment": "{{ env_name_std }}",
-  "data_server_tmp_dir": "{{ data_server_dir }}/tmp",
-  "data_server_db_url": "${data_server_db_url}",
+  "db_url": "${reader_endpoint}",
   "env": "${env}",
+  "env_name_std": "${env}",
   "launch_lifecycle_hook": "${launch_lifecycle_hook}"
 }
 EOF
 
 mkdir -p logs
 
-ansible-playbook --extra-vars '@server_vars.json' --extra-vars '@client_certificates.json' --extra-vars '@common_vars.json' --extra-vars '@extra_vars.json' --tags "post-ami" launch_bfd-server.yml
+ansible-playbook \
+    --extra-vars '@server_vars.json' \
+    --extra-vars '@client_certificates.json' \
+    --extra-vars '@common_vars.json' \
+    --extra-vars '@new_relic_vars.json' \
+    --extra-vars '@extra_vars.json' \
+    --tags "post-ami" launch_bfd-server.yml
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins

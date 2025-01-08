@@ -54,6 +54,17 @@ data "aws_ssm_parameter" "cpm_aws_account_arn" {
   with_decryption = true
 }
 
-data "aws_ssm_parameters_by_path" "common_sensitive" {
-  path = "/bfd/${local.env}/common/sensitive"
+data "aws_ssm_parameters_by_path" "params" {
+  for_each = toset(local.ssm_hierarchies)
+
+  recursive       = true
+  path            = each.value
+  with_decryption = true
+}
+
+data "aws_ec2_managed_prefix_list" "vpn" {
+  filter {
+    name   = "prefix-list-name"
+    values = ["cmscloud-vpn"]
+  }
 }

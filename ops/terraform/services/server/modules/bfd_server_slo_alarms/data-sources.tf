@@ -1,28 +1,18 @@
 data "aws_region" "current" {}
 
+data "aws_sns_topic" "high_alert_sns" {
+  count = local.env_sns.high_alert != "null" ? 1 : 0
+  name  = local.env_sns.high_alert
+}
+
 data "aws_sns_topic" "alert_sns" {
-  count = local.alert_sns_name != null ? 1 : 0
-  name  = local.alert_sns_name
+  count = local.env_sns.alert != "null" ? 1 : 0
+  name  = local.env_sns.alert
 }
 
 data "aws_sns_topic" "warning_sns" {
-  count = local.warning_sns_name != null ? 1 : 0
-  name  = local.warning_sns_name
-}
-
-data "aws_sns_topic" "alert_ok_sns" {
-  count = local.alert_ok_sns_name != null ? 1 : 0
-  name  = local.alert_ok_sns_name
-}
-
-data "aws_sns_topic" "warning_ok_sns" {
-  count = local.warning_ok_sns_name != null ? 1 : 0
-  name  = local.warning_ok_sns_name
-}
-
-# FUTURE: Remove when patient by_contract=false SLO is reevaluated
-data "aws_sns_topic" "bfd_test_sns" {
-  name = local.bfd_test_slack_sns
+  count = local.env_sns.warning != "null" ? 1 : 0
+  name  = local.env_sns.warning
 }
 
 data "external" "client_ssls_by_partner" {

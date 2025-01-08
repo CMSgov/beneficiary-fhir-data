@@ -27,8 +27,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -182,6 +185,32 @@ public final class CoverageTransformerV2Test {
               Coding coding = (Coding) colorExtension.getValue();
               return expectedColors.contains(coding.getCode());
             });
+
+    Set<Extension> addInfoExtension =
+        extensions.stream()
+            .filter(
+                extension -> extension.getUrl().equals(TransformerConstants.C4DIC_ADD_INFO_EXT_URL))
+            .collect(Collectors.toSet());
+    assertEquals(1, addInfoExtension.size());
+    boolean containsAddInfoText =
+        addInfoExtension.stream()
+            .anyMatch(
+                extension -> {
+                  Annotation valueAnnotation = (Annotation) extension.getValue();
+                  return valueAnnotation.getText().equals(TransformerConstants.C4DIC_ADD_INFO);
+                });
+    assertTrue(containsAddInfoText);
+
+    boolean containsLogo =
+        extensions.stream()
+            .anyMatch(
+                extension ->
+                    extension.getUrl().equals(TransformerConstants.C4DIC_LOGO_EXT_URL)
+                        && extension
+                            .getValue()
+                            .toString()
+                            .equals(TransformerConstants.C4DIC_LOGO_URL));
+    assertTrue(containsLogo);
   }
 
   // ==================
@@ -442,7 +471,7 @@ public final class CoverageTransformerV2Test {
 
   /** Tests that the expected extensions exist. */
   private static void verifyExtensionsPartC() {
-    assertEquals(57, coverage.getExtension().size());
+    assertEquals(61, coverage.getExtension().size());
 
     // ptc_cntrct_id_01 thru ptc_cntrct_id_12
     for (int i = 1; i < 13; i++) {
@@ -556,7 +585,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetExtensionsPartD() {
     coverage = coverageTransformer.transform(MedicareSegment.PART_D, beneficiary, Profile.C4BB);
-    verifyExtensionsPartD(72);
+    verifyExtensionsPartD(74);
   }
 
   /**

@@ -31,7 +31,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -141,7 +141,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
@@ -213,6 +213,11 @@ public class R4CoverageResourceProvider implements IResourceProvider {
 
     Coverage coverage =
         coverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity, profileUsed);
+
+    if (coverage == null) {
+      throw new ResourceNotFoundException(coverageId);
+    }
+
     return coverage;
   }
 
@@ -238,7 +243,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(

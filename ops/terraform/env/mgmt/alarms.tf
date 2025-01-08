@@ -1,7 +1,8 @@
 locals {
-  victor_ops_url                                = local.sensitive_common_config["victor_ops_url"]
-  ec2_failing_instances_runbook_url             = local.sensitive_common_config["alarm_ec2_failing_instances_runbook_url"]
-  ec2_instance_script_failing_start_runbook_url = local.sensitive_common_config["alarm_ec2_instance_script_failing_start_runbook_url"]
+  victor_ops_url                                = local.ssm_config["/bfd/common/victor_ops_url"]
+  ec2_failing_instances_runbook_url             = local.ssm_config["/bfd/common/alarm_ec2_failing_instances_runbook_url"]
+  ec2_instance_script_failing_start_runbook_url = local.ssm_config["/bfd/common/alarm_ec2_instance_script_failing_start_runbook_url"]
+  lambda_error_stats_runbook_url                = local.ssm_config["/bfd/common/alarm_lambda_error_stats_runbook_url"]
 
   cloudwatch_sns_topic_policy_spec = <<-EOF
 {
@@ -158,7 +159,10 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   actions_enabled     = true
   treat_missing_data  = "ignore"
 
-  alarm_description = "Alarm that is defined to send alerts to the BFD-Warnings/Alerts slack channel that notify us of any reported Lambda failures"
+  alarm_description = join("", [
+    "Alarm that is defined to send alerts to the BFD-Warnings/Alerts slack channel on reported Lambda failures\n",
+    "See ${local.lambda_error_stats_runbook_url} for instructions on investigating this alert."
+  ])
 
   metric_name = "Errors"
   namespace   = "AWS/Lambda"

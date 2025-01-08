@@ -117,10 +117,13 @@ public class R4PatientResourceProviderTest {
           TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
           "7004708ca44c2ff45b663ef661059ac98131ccb90b4a7e53917e3af7f50c4c56");
 
-  /** US-MBI search identifier using a made-up MBI value. */
+  /**
+   * US-MBI search identifier using sample MBI value from
+   * https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi.pdf.
+   */
   private final TokenParam unhashedMbiIdentifier =
       new TokenParam(
-          TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9X99XX9XX99");
+          TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "1EG4TE5MK73");
 
   /** A 'valid' contract id to use in tests. */
   private final TokenParam contractId = new TokenParam("2001/PTDCNTRCT10", "abcde");

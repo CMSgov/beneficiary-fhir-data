@@ -296,12 +296,19 @@ spec:
                         def serverAmiId = params.server_ami_override?.trim() ?: amiIds.bfdServerAmiId
                         def terraformVars = [ami_id_override: serverAmiId]
                         lock(resource: lockResource) {
-                            // Deploy the Server
+                            // Initial `server` terraservice deployment (scale-out)
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(
-                                    env: trimmedEnv,
-                                    directory: 'ops/terraform/services/server',
-                                    tfVars: terraformVars
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server',
+                                tfVars: terraformVars
+                            )
+                            // Secondary `server` terraservice deployment (scale-in)
+                            awsAuth.assumeRole()
+                            terraform.deployTerraservice(
+                                env: trimmedEnv,
+                                directory: 'ops/terraform/services/server',
+                                tfVars: terraformVars
                             )
                             awsAuth.assumeRole()
                             terraform.deployTerraservice(

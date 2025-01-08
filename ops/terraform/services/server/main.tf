@@ -142,13 +142,12 @@ module "lb_alarms" {
 module "fhir_asg" {
   source = "./modules/bfd_server_asg"
 
-  kms_key_alias  = local.kms_key_alias
-  env_config     = local.env_config
-  role           = local.legacy_service
-  layer          = "app"
-  lb_config      = module.fhir_lb.lb_config
-  seed_env       = local.seed_env
-  db_environment = local.db_environment
+  kms_key_alias = local.kms_key_alias
+  env_config    = local.env_config
+  role          = local.legacy_service
+  layer         = "app"
+  lb_config     = module.fhir_lb.lb_config
+  seed_env      = local.seed_env
 
   # Initial size is one server per AZ
   asg_config = {
@@ -216,7 +215,7 @@ module "bfd_server_log_alarms" {
   source = "./modules/bfd_server_log_alarms"
 }
 
-## This is where cloudwatch dashboards are managed. 
+## This is where cloudwatch dashboards are managed.
 #
 module "bfd_dashboards" {
   count = local.create_server_dashboards ? 1 : 0
@@ -228,6 +227,8 @@ module "disk_usage_alarms" {
   count = local.create_server_disk_alarms ? 1 : 0
 
   source = "./modules/bfd_server_disk_alarms"
+
+  asg_names = module.fhir_asg.asg_ids
 }
 
 module "bfd_server_error_alerts" {

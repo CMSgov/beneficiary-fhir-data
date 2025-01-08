@@ -81,22 +81,22 @@ def handler(event, context):
         )
         username = get_ssm_parameter(
             ssm_client=ssm_client,
-            name=f"/bfd/{environment}/server/sensitive/data_server_db_username",
+            name=f"/bfd/{environment}/server/sensitive/db/username",
             with_decrypt=True,
         )
         raw_password = get_ssm_parameter(
             ssm_client=ssm_client,
-            name=f"/bfd/{environment}/server/sensitive/data_server_db_password",
+            name=f"/bfd/{environment}/server/sensitive/db/password",
             with_decrypt=True,
         )
         cert_key = get_ssm_parameter(
             ssm_client=ssm_client,
-            name=f"/bfd/{environment}/server/sensitive/test_client_key",
+            name=f"/bfd/{environment}/server/sensitive/server_regression_key",
             with_decrypt=True,
         )
         cert = get_ssm_parameter(
             ssm_client=ssm_client,
-            name=f"/bfd/{environment}/server/sensitive/test_client_cert",
+            name=f"/bfd/{environment}/server/sensitive/server_regression_cert",
             with_decrypt=True,
         )
     except ValueError as exc:

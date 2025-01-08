@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Query Lambda Error Metrics from CloudWatch.
+# Returns string of (a) json object(s).
+#
+# Usage: ./lambda-error-metrics [review_days]
+#   review_days: optional, defaults to 1. The number of days in the past to query for lambda errors.
+#
+# Requirements:
+#   - awscli
+#   - jq
+#   - GNU 'date' (via coreutils or otherwise; e.g. 'gdate' on Darwin)
+#
+# Examples:
+#   ./lambda-error-metrics
+#     >> queries metrics for the previous 24 hours
+#   ./lambda-error-metrics 4 #
+#     >> queries metrics for the previous 96 hours
+#
+
+# shellcheck disable=SC3040,SC3044
+set -euo pipefail
+shopt -s expand_aliases
+
+if [ "$(uname)" == 'Darwin' ]
+then
+  if ! command -v gdate >/dev/null 
+  then
+    echo "'gdate' not found; please install via 'brew install coreutils'"
+    exit 1
+  else
+    alias date="gdate"
+  fi
+fi
+
+review_days="${1:-1}"
+metric_queries="$(cat  <<EOF
+  [{
+    "Id": "e1",
+    "Expression": "SEARCH('{AWS/Lambda,FunctionName} (\"Errors\")', 'Sum', 300)",
+    "Label": "Expression1",
+    "ReturnData": true
+  }]
+EOF
+)"
+
+jq_query="$(cat <<'EOF'
+  .MetricDataResults
+    | map({ Lambda: (.Label
+      | ltrimstr("Expression1 ")), HitsInUTC: [ .Timestamps as $ts
+        | .Values as $vals
+        | [ range(0; $ts | length)
+        | select ($vals[.] > 0)
+        | { ($ts[.]) : $vals[.]} ] | add ]
+    })  | .[] | select(.HitsInUTC[])
+EOF
+)"
+
+aws cloudwatch get-metric-data \
+  --metric-data-queries "$metric_queries" \
+  --start-time "$(date --utc --date="-${review_days} days" "+%Y-%m-%dT%H:%M:%S")" \
+  --end-time "$(date --utc "+%Y-%m-%dT%H:%M:%S")" \
+  --output json \
+  | jq "$jq_query" \
+  | jq -s .

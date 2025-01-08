@@ -167,6 +167,7 @@ resource "aws_iam_policy" "ssm" {
           "Effect" : "Allow",
           "Resource" : [
             "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/mgmt/common/sensitive/user/*",
+            "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/new_relic/*",
             "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
             "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
             "arn:aws:ssm:us-east-1:${local.account_id}:parameter/bfd/${local.env}/${local.service}/*"
@@ -209,6 +210,7 @@ EOF
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess",
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
     "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
+    data.aws_iam_policy.ec2_instance_tags_ro.arn,
   ]
   max_session_duration = 3600
   name                 = "bfd-${local.env}-bfd_${local.service}-role"

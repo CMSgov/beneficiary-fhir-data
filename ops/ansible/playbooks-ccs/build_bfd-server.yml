@@ -8,7 +8,7 @@
   remote_user: ec2-user
   gather_facts: no
   vars:
-    data_server_dir: '/usr/local/bfd-server'
+    ref_dir: '/usr/local/bfd-server'
     # TODO: Remove this when CloudWatch Agent role is properly removed from build tasks
     env: "test"
 
@@ -29,7 +29,7 @@
       import_role:
         name: bfd-server
       vars:
-        data_server_tmp_dir: "{{ data_server_dir }}/tmp"
+        tmp: "{{ ref_dir }}/tmp"
 
     # TODO: This role is _probably_ unused in favor of the CW Agent that is installed during launch -- remove it
     - name: Apply base Cloudwatch Agent Role

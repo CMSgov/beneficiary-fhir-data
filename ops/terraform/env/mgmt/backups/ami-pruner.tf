@@ -7,7 +7,7 @@ locals {
     log_retention_days        = 30
     log_group                 = "/aws/lambda/bfd-${local.env}-backups-ami-pruner"
     log_level                 = 20 # 10 = DEBUG, 20 = INFO, 30 = WARNING, 40 = ERROR, 50 = CRITICAL
-    retention_policy_ssm_path = "/bfd/${local.env}/common/sensitive/backups/ami"
+    retention_policy_ssm_path = "/bfd/${local.env}/common/nonsensitive/backups/ami"
   }
 }
 

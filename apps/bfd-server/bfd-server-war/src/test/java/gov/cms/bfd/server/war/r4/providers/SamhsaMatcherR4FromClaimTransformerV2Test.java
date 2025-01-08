@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -130,7 +131,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
-        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     CarrierClaimTransformerV2 carrierClaimTransformerV2 =
         new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     HHAClaimTransformerV2 hhaClaimTransformerV2 =
@@ -140,7 +141,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
         new OutpatientClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     PartDEventTransformerV2 partDEventTransformer =
-        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     SNFClaimTransformerV2 snfClaimTransformerV2 =
         new SNFClaimTransformerV2(metricRegistry, npiOrgLookup);
 
@@ -529,6 +530,43 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the
+   * SupportingInfo contains a blacklisted package DRG code, the matcher returns a SAMHSA match.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("data")
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasSupportingInfoWithBlacklistedDrgCodeExpectMatch(
+          String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
+    // PDE, CARRIER, DME, HHA, AND HOSPICE do not check supportingInfo
+    boolean expectMatch =
+        !(Set.of(PART_D_EVENT_CLAIM, CARRIER_CLAIM, DME_CLAIM, HHA_CLAIM, HOSPICE_CLAIM)
+            .contains(claimType));
+
+    verifySamhsaMatcherForSupportingInfo(
+        BLACKLISTED_DRG_DIAGNOSIS_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the
+   * supporting info contains a non-blacklisted package DRG code, the matcher returns false.
+   *
+   * @param claimType the claim type to test
+   * @param loadedExplanationOfBenefit the loaded explanation of benefit
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("data")
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasSupportingInfoWithNonBlacklistedDrgCodeExpectNoMatch(
+          String claimType, ExplanationOfBenefit loadedExplanationOfBenefit) {
+    verifySamhsaMatcherForSupportingInfo(
+        NON_BLACKLISTED_DRG_DIAGNOSIS_CODE, false, loadedExplanationOfBenefit);
+  }
+
+  /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
    * contains a non-blacklisted package DRG code, the matcher returns false.
    *
@@ -880,6 +918,41 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     }
 
     // Set procedure to empty so we dont check it for matches
+    for (ExplanationOfBenefit.ProcedureComponent diagnosisComponent : modifiedEob.getProcedure()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getProcedureCodeableConcept();
+      ArrayList<Coding> codingList = new ArrayList<>();
+      codeableConcept.setCoding(codingList);
+    }
+
+    // Set item coding to non-SAMHSA so we dont check it for matches
+    List<Coding> codings = new ArrayList<>();
+    Coding coding = new Coding();
+    coding.setSystem(TransformerConstants.CODING_SYSTEM_HCPCS);
+    coding.setCode(NON_SAMHSA_HCPCS_CODE);
+    codings.add(coding);
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
+
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
+  }
+
+  /**
+   * Verify SAMHSA matcher for supportingInfo with the given system, code and if the expectation is
+   * that there should be a match for this combination.
+   *
+   * @param code the code
+   * @param shouldMatch if the matcher should match on this combination
+   * @param explanationOfBenefit the explanation of benefit
+   */
+  private void verifySamhsaMatcherForSupportingInfo(
+      String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
+
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
+    // Set supporting info DRG
+    TransformerUtilsV2.addInformationWithCode(
+        modifiedEob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, code);
+
+    // Set procedure to empty so we don't check it for matches
     for (ExplanationOfBenefit.ProcedureComponent diagnosisComponent : modifiedEob.getProcedure()) {
       CodeableConcept codeableConcept = diagnosisComponent.getProcedureCodeableConcept();
       ArrayList<Coding> codingList = new ArrayList<>();
