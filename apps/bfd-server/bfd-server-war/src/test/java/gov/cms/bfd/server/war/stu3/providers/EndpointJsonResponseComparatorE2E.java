@@ -31,9 +31,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -153,37 +151,8 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
     // Call the server endpoint and save its result out to a file corresponding to
     // the endpoint Id.
     String endpointResponse = endpointOperation.get();
+    String jsonResponse = replaceIgnoredFieldsWithFillerText(endpointId, endpointResponse);
 
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode jsonNode;
-    try {
-      jsonNode = mapper.readTree(endpointResponse);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
-    }
-
-    replaceIgnoredFieldsWithFillerText(
-        jsonNode,
-        "id",
-        Optional.of(
-            Pattern.compile(
-                "[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
-    replaceIgnoredFieldsWithFillerText(
-        jsonNode, "url", Optional.of(Pattern.compile("(https://localhost:)(\\d+(?=/))(.*)")));
-    replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
-
-    if (endpointId.equals("metadata")) {
-      replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
-    }
-
-    String jsonResponse;
-    try {
-      jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
-    } catch (JsonProcessingException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
-    }
     ServerTestUtils.writeFile(
         jsonResponse,
         ServerTestUtils.generatePathForEndpointJsonFile(approvedResponseDir, endpointId));

@@ -1,5 +1,7 @@
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    version="3.0"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
 
     <!-- Manage the MDC context and ensure that the app's NDJSON-formatted HTTP
         access log is populated. -->
@@ -10,6 +12,20 @@
     <filter-mapping>
         <filter-name>RequestResponsePopulateMdcFilter</filter-name>
         <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>AllowSamhsaFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetBeanName</param-name>
+            <param-value>AllowSamhsaFilterBean</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>AllowSamhsaFilter</filter-name>
+        <url-pattern>/v1/fhir/*</url-pattern>
+        <url-pattern>/v2/fhir/*</url-pattern>
     </filter-mapping>
 
     <!-- Ensures that metrics on status codes, active requests, and request

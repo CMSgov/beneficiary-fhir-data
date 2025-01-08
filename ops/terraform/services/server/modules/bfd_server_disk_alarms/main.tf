@@ -25,19 +25,14 @@ locals {
   alarms_ok_sns = var.alarm_ok_sns_override
 }
 
-# TODO: This SNS topic (and related resources below) mostly duplicates a similar topic used for
-# server-load; consolidate these in the future
 resource "aws_sns_topic" "this" {
   name              = local.topic_name
   kms_master_key_id = local.kms_key_id
 }
 
 resource "aws_autoscaling_notification" "this" {
-  topic_arn = aws_sns_topic.this.arn
-
-  group_names = [
-    data.aws_autoscaling_group.asg.name,
-  ]
+  topic_arn   = aws_sns_topic.this.arn
+  group_names = var.asg_names
 
   notifications = [
     "autoscaling:EC2_INSTANCE_LAUNCH",

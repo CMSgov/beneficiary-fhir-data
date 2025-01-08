@@ -35,7 +35,7 @@ def get_table_columns(session, params, table_name):
     # Get the first keyname from the very first list item.
     keyname = [a for a, b in result_list[0].items()][0]
 
-    split_regex = re.compile(r"(\w+)\s*(date\s|int\s|bigint\s|string\s)\s+$")
+    split_regex = re.compile(r"(\w+)\s*(date\s|int\s|bigint\s|string\s|boolean\s)\s+$")
 
     columns_list = []
 

@@ -57,7 +57,7 @@ usage: run_bridge sourceDir [-a <arg>] [-b <arg>] [-e <arg>] [-f <arg>] [-g
     -f inpatient.csv \
     -f outpatient.csv \
     -m carrier.csv \
-    -b beneficiary_history.csv \
+    -b beneficiaries.csv \
     -a true \
     -x 1000
     -t attribution-template.sql \

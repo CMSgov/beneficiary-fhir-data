@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
+# Force UTC time
+export TZ=UTC
 
-{{ '#' if db_url|default('', true)|length<1 else '' }}export BFD_DB_URL='{{ db_url|default('', true) }}'
-
+export BFD_DB_URL='{{ db_url }}'
 # OPERATIONAL OVERRIDES
 ## The expression {{ '#' if foo|default('', true)|length<1 else '' }} prepends exports with '#' to prevent
 ## undefined or empty 'foo' variable from entering the environment. Maintains the existing templating
 ## strategy and remains flexible for manual manipulation of resultant script in development and
 ## troubleshooting scenarios.
+# shellcheck disable=SC1054,SC1064,SC1065,SC1072,SC1073
 {{ '#' if db_password_override|default('', true)|length<1 else '' }}export BFD_DB_PASSWORD='{{ db_password_override|default('', true) }}'
 {{ '#' if db_username_override|default('', true)|length<1 else '' }}export BFD_DB_USERNAME='{{ db_username_override|default('', true) }}'
 {{ '#' if db_auth_type_override|default('', true)|length<1 else '' }}export BFD_DB_AUTH_TYPE='{{ db_auth_type_override|default('', true) }}'
@@ -20,6 +22,8 @@
 
 CONFIG_SETTINGS_JSON=$(cat <<EOF
 {"ssmHierarchies": [
+    "/bfd/{{ env_name_std }}/common/sensitive/new_relic/",
+    "/bfd/{{ env_name_std }}/common/nonsensitive/",
     "/bfd/{{ env_name_std }}/migrator/sensitive/",
     "/bfd/{{ env_name_std }}/migrator/nonsensitive/"
 ]}

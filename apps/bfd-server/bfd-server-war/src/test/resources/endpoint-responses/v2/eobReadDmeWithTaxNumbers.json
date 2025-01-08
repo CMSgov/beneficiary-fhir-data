@@ -186,6 +186,10 @@
     },
     "qualification" : {
       "coding" : [ {
+        "system" : "http://nucc.org/provider-taxonomy",
+        "code" : "207ZH0000X",
+        "display" : "Hematology (Pathology) Physician"
+      }, {
         "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
         "code" : "A5",
         "display" : "Pharmacy (DMERC)"

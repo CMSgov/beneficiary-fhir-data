@@ -21,22 +21,27 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -198,7 +203,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Read
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) {
       throw new InvalidRequestException("Resource ID can not be null");
@@ -231,6 +236,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(claimId);
     }
+
+    Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity);
+    if (claimEntityMbi != null) logMbiIdentifiersToMdc(claimEntityMbi);
 
     return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);
   }
@@ -280,6 +288,41 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     } else {
       throw new InvalidRequestException("Invalid claim id type, cannot get claim data");
     }
+  }
+
+  /**
+   * Returns the {@link Mbi} associated with the given {@link RdaFissClaim} or {@link RdaMcsClaim},
+   * depending on resource type.
+   *
+   * @param <T> generic type extending {@link IBaseResource}
+   * @param claimIdType the {@link ResourceTypeV2} indicating what the claim's type is (either fiss
+   *     or mcs)
+   * @param claimEntity the claim entity itself; either a {@link RdaFissClaim} or {@link
+   *     RdaMcsClaim}
+   * @return the {@link Mbi} associated with the given claim entity
+   * @throws IllegalArgumentException if the given {@link ResourceTypeV2} does not indicate either a
+   *     FISS or MCS claim ID type
+   */
+  private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
+      ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
+    return switch (claimIdType.getTypeLabel()) {
+      case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
+      case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
+      default -> throw new IllegalArgumentException(
+          "Invalid claim ID type '" + claimIdType.getTypeLabel() + "', cannot get claim data");
+    };
+  }
+
+  /**
+   * Logs relevant identifiers (hash, ID) from a given {@link Mbi} to the MDC.
+   *
+   * @param mbi the {@link Mbi} to log
+   */
+  private void logMbiIdentifiersToMdc(Mbi mbi) {
+    requireNonNull(mbi);
+
+    BfdMDC.put(BfdMDC.MBI_HASH, mbi.getHash());
+    BfdMDC.put(BfdMDC.MBI_ID, mbi.getMbiId().toString());
   }
 
   /**
@@ -352,7 +395,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
           @Description(
@@ -401,16 +444,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
-      boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
+      boolean excludeSamhsa = CommonTransformerUtils.shouldFilterSamhsa(samhsa, requestDetails);
       boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
       OffsetLinkBuilder paging =
           new OffsetLinkBuilder(
               requestDetails, String.format("/%s?", resourceType.getSimpleName()));
-
-      if (isHashed) {
-        TransformerUtilsV2.logMbiHashToMdc(mbiString);
-      }
 
       BundleOptions bundleOptions = new BundleOptions(isHashed, excludeSamhsa, includeTaxNumbers);
 
@@ -449,24 +488,40 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       DateRangeParam serviceDate,
       OffsetLinkBuilder paging,
       BundleOptions bundleOptions) {
-    List<T> resources = new ArrayList<>();
+    var entitiesWithType =
+        resourceTypes.stream()
+            // There may be multiple resource types which will each result in a list of claim
+            // entities. So, to ensure that we have a flat list of entities to their type, we use
+            // flatMap
+            .flatMap(
+                type ->
+                    claimDao
+                        .findAllByMbiAttribute(
+                            type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate)
+                        .stream()
+                        .map(e -> new ImmutablePair<>(e, type)))
+            .toList();
 
-    for (ResourceTypeV2<T, ?> type : resourceTypes) {
-      List<?> entities;
+    // Log nonsensitive MBI identifiers for a given Claim/ClaimResponse request for use in
+    // historical analysis
+    entitiesWithType.stream()
+        .map(pair -> getClaimEntityMbi(pair.right, pair.left))
+        .filter(Objects::nonNull)
+        // We choose the first MBI from the first, valid claim entity (technically, all entities
+        // should fit these criteria or something is very wrong) in the Stream as the MBI
+        // will be the same for all returned claims, so there is no reason to evaluate the entire
+        // Stream
+        .findFirst()
+        .ifPresent(this::logMbiIdentifiersToMdc);
 
-      entities =
-          claimDao.findAllByMbiAttribute(
-              type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate);
-
-      resources.addAll(
-          entities.stream()
-              .filter(e -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(e))
-              .map(e -> transformEntity(type, e, bundleOptions.includeTaxNumbers))
-              .collect(Collectors.toList()));
-    }
-
-    // Enforces a specific sorting for pagination that parities the EOB resource sorting.
-    resources.sort(Comparator.comparing(r -> r.getIdElement().getIdPart()));
+    List<T> resources =
+        entitiesWithType.stream()
+            .filter(
+                pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
+            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
+            // Enforces a specific sorting for pagination that parities the EOB resource sorting.
+            .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
+            .collect(Collectors.toList());
 
     Bundle bundle = new Bundle();
     bundle.setTotal(resources.size());

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# This script can be used to generate a new cert for use with the BFD server integration tests.
+# The cert will be moved into this directory and will be automatically added to the server truststore.
+set -e
+
+if [[ "$BFD_PATH" = "" ]]; then
+  echo "Please set BFD_PATH environment variable to root of source tree." 1>&2
+  echo "It should be the directory containing the ops and apps subdirectories." 1>&1
+  exit 1
+fi
+
+ARGV=("$@")
+nArgs="${#ARGV[@]}"
+
+if [[ "$nArgs" != "2" ]]; then
+  echo 'Error: invalid arguments'
+  echo 'Usage: generate-test-client-certs "$name" "$keystoreName"' 1>&2
+  echo 'Example: generate-test-client-certs myCert my-keystore.p12' 1>&2
+  exit 1
+fi
+
+name="${ARGV[0]}"
+keystoreName="${ARGV[1]}"
+
+keytool -genkey -v -alias "$name" -keyalg RSA -storetype PKCS12 -keystore "$keystoreName" \
+  -dname "CN=$name" -storepass changeit -keypass changeit
+
+keytool -importkeystore \
+        -deststorepass changeit -destkeypass changeit -destkeystore "$BFD_PATH/apps/bfd-server/dev/ssl-stores/server-truststore.pfx" \
+        -srckeystore "$keystoreName" -srcstoretype PKCS12 -srcstorepass changeit
+
+mv "$keystoreName" "$BFD_PATH/apps/bfd-server/bfd-server-war/src/test/resources/certs"

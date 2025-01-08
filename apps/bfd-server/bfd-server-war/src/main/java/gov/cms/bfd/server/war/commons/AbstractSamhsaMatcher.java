@@ -49,17 +49,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   /** The list of CPT codes. */
   private final Set<String> cptCodes;
 
-  /** The list of ICD9 Procedure codes. */
-  private final Set<String> icd9ProcedureCodes;
+  /** The list of ICD Diagnosis codes. */
+  private final Set<String> icdDiagnosisCodes;
 
-  /** The list of ICD9 Diagnosis codes. */
-  private final Set<String> icd9DiagnosisCodes;
-
-  /** The list of ICD10 Procedure codes. */
-  private final Set<String> icd10ProcedureCodes;
-
-  /** The list of ICD10 Diagnosis codes. */
-  private final Set<String> icd10DiagnosisCodes;
+  // private final Set<String> icd10ProcedureCodes;
+  /** The list of Procedure codes. */
+  private final Set<String> icdProcedureCodes;
 
   /**
    * Constructs a new {@link AbstractSamhsaMatcher}, loading the lists of SAMHSA-related codes from
@@ -74,29 +69,38 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
         resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
             .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
             .collect(Collectors.toUnmodifiableSet());
-    this.icd9ProcedureCodes =
+    // Note: we're adding ICD 9 and ICD 10 codes to both lists here because we can't rely on the
+    // data coming in from RDA to be categorized correctly.
+    // Ideally, we would be able to ignore ICD 9 codes entirely, but there are still some
+    // circumstances where ICD 9 codes are valid even with new data.
+    // See https://www.cms.gov/medicare/coordination-benefits-recovery/overview/icd-code-lists
+
+    // In ICD 9, both procedures and diagnoses were under ICD 9 CM, but they were split under ICD 10
+    Set<String> procdureCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableSet());
-    this.icd9DiagnosisCodes =
-        resourceCsvColumnToList(
-                "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
-            .stream()
-            .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableSet());
-    this.icd10ProcedureCodes =
+            .collect(Collectors.toSet());
+    procdureCodes.addAll(
         resourceCsvColumnToList(
                 "samhsa-related-codes/codes-icd-10-procedure.csv", "ICD-10-PCS Code")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableSet());
-    this.icd10DiagnosisCodes =
+            .collect(Collectors.toSet()));
+    Set<String> diagnosisCodes =
+        resourceCsvColumnToList(
+                "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
+            .stream()
+            .map(AbstractSamhsaMatcher::normalizeIcdCode)
+            .collect(Collectors.toSet());
+    diagnosisCodes.addAll(
         resourceCsvColumnToList(
                 "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toSet()));
+    this.icdDiagnosisCodes = diagnosisCodes.stream().collect(Collectors.toUnmodifiableSet());
+    this.icdProcedureCodes = procdureCodes.stream().collect(Collectors.toUnmodifiableSet());
   }
 
   /**
@@ -118,10 +122,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
       Set<String> icd10DiagnosisCodes) {
     this.cptCodes = cptCodes;
     this.drgCodes = drgCodes;
-    this.icd9ProcedureCodes = icd9ProcedureCodes;
-    this.icd9DiagnosisCodes = icd9DiagnosisCodes;
-    this.icd10ProcedureCodes = icd10ProcedureCodes;
-    this.icd10DiagnosisCodes = icd10DiagnosisCodes;
+    Set<String> procedureCodes = icd9ProcedureCodes;
+    procedureCodes.addAll(icd10ProcedureCodes);
+    this.icdProcedureCodes = procedureCodes;
+    Set<String> diagnosisCodes = icd9DiagnosisCodes;
+    diagnosisCodes.addAll(icd10DiagnosisCodes);
+    this.icdDiagnosisCodes = diagnosisCodes;
   }
 
   /**
@@ -151,8 +157,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param procedure the {@link ProcedureComponent}s to check
    * @return <code>true</code> if any of the specified {@link ProcedureComponent}s match any of the
-   *     {@link AbstractSamhsaMatcher#icd9ProcedureCodes} or {@link
-   *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if they all do not
+   *     {@link AbstractSamhsaMatcher#icdProcedureCodes} entries, <code>false</code> if they all do
+   *     not
    */
   protected boolean containsSamhsaIcdProcedureCode(List<ProcedureComponent> procedure) {
     return procedure.stream().anyMatch(this::isSamhsaIcdProcedure);
@@ -175,8 +181,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param diagnoses the {@link DiagnosisComponent}s to check
    * @return <code>true</code> if any of the specified {@link DiagnosisComponent}s match any of the
-   *     {@link AbstractSamhsaMatcher#icd9DiagnosisCodes} or {@link
-   *     AbstractSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if they all do not
+   *     {@link AbstractSamhsaMatcher#icdDiagnosisCodes} entries, <code>false</code> if they all do
+   *     not
    */
   protected boolean containsSamhsaIcdDiagnosisCode(List<DiagnosisComponent> diagnoses) {
     return diagnoses.stream().anyMatch(this::isSamhsaDiagnosis);
@@ -198,8 +204,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param procedure the {@link ProcedureComponent} to check
    * @return <code>true</code> if the specified {@link ProcedureComponent} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd9ProcedureCodes} or {@link
-   *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdProcedureCodes} entries, <code>false</code> if it does not
    */
   @VisibleForTesting
   boolean isSamhsaIcdProcedure(ProcedureComponent procedure) {
@@ -219,9 +224,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param diagnosis the {@link DiagnosisComponent} to check
    * @return <code>true</code> if the specified {@link DiagnosisComponent} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd9DiagnosisCodes} or {@link
-   *     AbstractSamhsaMatcher#icd10DiagnosisCodes}, or {@link AbstractSamhsaMatcher#drgCodes}
-   *     entries, <code>
+   *     AbstractSamhsaMatcher#icdDiagnosisCodes} {@link AbstractSamhsaMatcher#drgCodes} entries,
+   *     <code>
    *     false</code> if it does not
    */
   @VisibleForTesting
@@ -346,12 +350,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd9DiagnosisCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdDiagnosisCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD9
    */
   @VisibleForTesting
   boolean isSamhsaIcd9Diagnosis(Coding coding) {
-    return isSamhsaCodingForSystem(coding, icd9DiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_9);
+    return isSamhsaCodingForSystem(coding, icdDiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_9);
   }
 
   /**
@@ -359,12 +363,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the procedure {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
-   *     #icd9ProcedureCodes} entries, <code>false</code> if it does not
+   *     #icdProcedureCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD9
    */
   @VisibleForTesting
   boolean isSamhsaIcd9Procedure(Coding coding) {
-    return isSamhsaCodingForSystem(coding, icd9ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_9);
+    return isSamhsaCodingForSystem(coding, icdProcedureCodes, IcdCode.CODING_SYSTEM_ICD_9);
   }
 
   /**
@@ -373,13 +377,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd9ProcedureCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdProcedureCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD9 Medicare
    */
   @VisibleForTesting
   boolean isSamhsaIcd9MedicareProcedure(Coding coding) {
-    return isSamhsaCodingForSystem(
-        coding, icd9ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_9_MEDICARE);
+    return isSamhsaCodingForSystem(coding, icdProcedureCodes, IcdCode.CODING_SYSTEM_ICD_9_MEDICARE);
   }
 
   /**
@@ -389,12 +392,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdDiagnosisCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10
    */
   @VisibleForTesting
   boolean isSamhsaIcd10Diagnosis(Coding coding) {
-    return isSamhsaCodingForSystem(coding, icd10DiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_10);
+    return isSamhsaCodingForSystem(coding, icdDiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_10);
   }
 
   /**
@@ -403,12 +406,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdDiagnosisCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10-CM
    */
   @VisibleForTesting
   boolean isSamhsaIcd10CmDiagnosis(Coding coding) {
-    return isSamhsaCodingForSystem(coding, icd10DiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_10_CM);
+    return isSamhsaCodingForSystem(coding, icdDiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_10_CM);
   }
 
   /**
@@ -418,12 +421,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdProcedureCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10
    */
   @VisibleForTesting
   boolean isSamhsaIcd10Procedure(Coding coding) {
-    return isSamhsaCodingForSystem(coding, icd10ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10);
+    return isSamhsaCodingForSystem(coding, icdProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10);
   }
 
   /**
@@ -432,13 +435,13 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icdProcedureCodes} entries, <code>false</code> if it does not
    * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10 Medicare
    */
   @VisibleForTesting
   boolean isSamhsaIcd10MedicareProcedure(Coding coding) {
     return isSamhsaCodingForSystem(
-        coding, icd10ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10_MEDICARE);
+        coding, icdProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10_MEDICARE);
   }
 
   /**

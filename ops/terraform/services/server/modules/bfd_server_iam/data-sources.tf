@@ -26,3 +26,7 @@ data "aws_iam_policy" "cloudwatch_agent_policy" {
 data "aws_iam_policy" "cloudwatch_xray_policy" {
   arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }
+
+data "aws_iam_policy" "ec2_instance_tags_ro" {
+  name = "bfd-mgmt-ec2-instance-tags-ro"
+}

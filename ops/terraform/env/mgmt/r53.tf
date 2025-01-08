@@ -1,14 +1,14 @@
 locals {
   hosted_zones = {
-    for zone in jsondecode(local.sensitive_common_config["r53_hosted_zones_json"]) :
+    for zone in jsondecode(local.ssm_config["/bfd/common/r53_hosted_zones_json"]) :
     zone => {
-      domain  = local.sensitive_common_config["r53_hosted_zone_${zone}_domain"]
-      comment = local.sensitive_common_config["r53_hosted_zone_${zone}_comment"]
+      domain  = local.ssm_config["/bfd/common/r53_hosted_zone_${zone}_domain"]
+      comment = local.ssm_config["/bfd/common/r53_hosted_zone_${zone}_comment"]
       # If a hosted zone does not specify any VPC associations, it is considered a Public zone. If
       # any VPCs are specified, it is considered Private. We handle the case where VPCs are not
       # specified in configuration by returning an empty list.
-      internal_vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_${zone}_internal_vpcs_json", "[]"))
-      external_vpc_ids = jsondecode(lookup(local.sensitive_common_config, "r53_hosted_zone_${zone}_external_vpcs_json", "[]"))
+      internal_vpc_ids = jsondecode(lookup(local.ssm_config, "/bfd/common/r53_hosted_zone_${zone}_internal_vpcs_json", "[]"))
+      external_vpc_ids = jsondecode(lookup(local.ssm_config, "/bfd/common/r53_hosted_zone_${zone}_external_vpcs_json", "[]"))
     }
   }
   all_internal_r53_vpcs = flatten([for hz_label, hz_config in local.hosted_zones : hz_config.internal_vpc_ids])

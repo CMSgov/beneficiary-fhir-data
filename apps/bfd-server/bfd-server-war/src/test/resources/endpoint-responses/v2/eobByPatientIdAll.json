@@ -180,6 +180,13 @@
             "code" : "attending",
             "display" : "Attending"
           } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207R00000X",
+            "display" : "Internal Medicine Physician"
+          } ]
         }
       }, {
         "sequence" : 2,
@@ -200,6 +207,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "operating",
             "display" : "Operating"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207T00000X",
+            "display" : "Neurological Surgery Physician"
           } ]
         }
       }, {
@@ -222,6 +236,13 @@
             "code" : "otheroperating",
             "display" : "Other Operating"
           } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "204D00000X",
+            "display" : "Neuromusculoskeletal Medicine & OMM Physician"
+          } ]
         }
       }, {
         "sequence" : 4,
@@ -242,6 +263,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "performing",
             "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
           } ]
         }
       } ],
@@ -1053,6 +1081,10 @@
         },
         "qualification" : {
           "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
+          }, {
             "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
             "code" : "A5",
             "display" : "Pharmacy (DMERC)"
@@ -1753,6 +1785,13 @@
             "code" : "attending",
             "display" : "Attending"
           } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207R00000X",
+            "display" : "Internal Medicine Physician"
+          } ]
         }
       }, {
         "sequence" : 2,
@@ -1773,6 +1812,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "performing",
             "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
           } ]
         }
       } ],
@@ -2452,6 +2498,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "performing",
             "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
           } ]
         }
       } ],
@@ -3494,6 +3547,13 @@
             "code" : "attending",
             "display" : "Attending"
           } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207R00000X",
+            "display" : "Internal Medicine Physician"
+          } ]
         }
       }, {
         "sequence" : 2,
@@ -3514,6 +3574,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "operating",
             "display" : "Operating"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207T00000X",
+            "display" : "Neurological Surgery Physician"
           } ]
         }
       }, {
@@ -3556,6 +3623,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "performing",
             "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
           } ]
         }
       } ],
@@ -5760,6 +5834,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "performing",
             "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
           } ]
         }
       } ],

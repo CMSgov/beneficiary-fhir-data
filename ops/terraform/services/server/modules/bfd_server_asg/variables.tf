@@ -6,12 +6,6 @@ variable "env_config" {
 variable "seed_env" {
   description = "The solution's source environment. For established environments this is equal to the environment's name"
   sensitive   = false
-}
-
-# TODO: Move this into the db_config object instead
-variable "db_environment" {
-  description = "FIXME: Environment name."
-  sensitive   = false
   type        = string
 }
 
@@ -68,10 +62,4 @@ variable "jdbc_suffix" {
   default     = "?logServerErrorDetail=false"
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
-}
-
-variable "scaling_request_count_interval" {
-  description = "The distinct interval for each scaling range, based on the ELB metric RequestCount"
-  type        = number
-  default     = 5000
 }

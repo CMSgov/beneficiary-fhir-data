@@ -14,11 +14,9 @@ locals {
     role  = local.service
     SaaS  = "Cloudfront"
   }
-  env                = module.terraservice.env
-  seed_env           = module.terraservice.seed_env
-  is_ephemeral_env   = module.terraservice.is_ephemeral_env
-  latest_bfd_release = module.terraservice.latest_bfd_release
-  bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
+
+  env      = module.terraservice.env
+  seed_env = module.terraservice.seed_env
 
   service   = "static-site"
   layer     = "data"

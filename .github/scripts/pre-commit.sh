@@ -57,11 +57,19 @@ runShellCheckForCommitFiles() {
     git diff --cached --name-only --diff-filter=ACM >"$tmpfile"
     commits=$(cat "$tmpfile")
     for file in $commits; do
-      firstTwo=$( sed 's/^\(..\).*/\1/;q' "$file" )
       filename=$(basename -- "$file")
       extension="${filename##*.}"
+
+      # Skip binary formats
+      case "$extension" in
+        "zip" | "p12" | "pfx" | "cer" | "pem")
+          continue ;;
+        *) ;;
+      esac
+
+      firstTwo=$( sed 's/^\(..\).*/\1/;q' "$file" )
       # check for a hashbang or a .sh extension to determine if this is a shell script.
-      if [ "$firstTwo" == "#!" ] || [ "$extension" == "sh" ]; then
+      if [ "$firstTwo" == "#!" ] && [ "$filename" != "Jenkinsfile" ] || [ "$extension" == "sh" ]; then
         # run shellcheck with severity level warning, and suppress warnings about invalid hashbangs (allows it to ignore other types of scripts, e.g. python)
         if ! shellcheck -e SC1071,SC2239 -S warning "$file"; then
           echo "Please fix errors before continuing."
@@ -74,5 +82,19 @@ runShellCheckForCommitFiles() {
     exit 1
   fi
 }
+
+checkGitleaks() {
+  echo "Attempting to execute gitleaks. This may take a minute..."
+  if ! command -v gitleaks >/dev/null; then
+    echo "'gitleaks' not found. Install gitleaks before pushing your changes."
+    return 1
+  fi
+  if gitleaks protect --staged --verbose; then
+    return 0
+  else
+    return 1
+  fi
+}
 checkSecretFilesForPlainText
 runShellCheckForCommitFiles
+checkGitleaks

@@ -18,6 +18,10 @@ fi
 #
 # BEGIN Local environment configuration.
 #
+
+# Force UTC time
+export TZ=UTC
+
 project_dir=$BFD_PATH/apps
 
 # Directory to store binaries and data files when running.

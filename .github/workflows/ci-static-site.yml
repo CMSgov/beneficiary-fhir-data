@@ -97,6 +97,7 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
           repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set environment variables
         run: |
@@ -134,14 +135,17 @@ jobs:
           cw-log-group: ${{ inputs.cw-log-group-override || env.DEFAULT_LOG_GROUP }}
           cw-log-stream: ${{ inputs.cw-log-stream-override || env.DEFAULT_LOG_STREAM }}
 
-      - name: Pull data dictionaries
+      - name: Pull data dictionaries and OpenAPI spec
         run: |
           mkdir -p "${{ github.workspace }}/dist"
           cd "${{ github.workspace }}/dist"
 
-          readarray -t assets < <(echo "$CA_ASSETS" | jq -r -c '.[]')
-          for asset in "${assets[@]}"
+          readarray -t assets < <(echo "$CA_ASSETS" | jq -r -c 'to_entries | .[].key')
+          readarray -t renamed_assets < <(echo "$CA_ASSETS" | jq -r -c 'to_entries | .[].value')
+          for i in "${!assets[@]}"
           do
+            asset="${assets[$i]}"
+            renamed_asset="${renamed_assets[$i]}"
             aws codeartifact get-package-version-asset \
               --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
               --domain "$CA_DOMAIN" \
@@ -152,16 +156,17 @@ jobs:
               --namespace "$CA_NAMESPACE" \
               --format maven \
               --region "$AWS_REGION" \
-              "${asset/$CA_PACKAGE-${BFD_RELEASE}-v/V}" 1>/dev/null
+              "${asset/$asset/$renamed_asset}" 1>/dev/null
           done
         env:
           CA_NAMESPACE: gov.cms.bfd
           CA_PACKAGE: bfd-server-war
           CA_ASSETS: |
-            [
-              "bfd-server-war-${{ env.BFD_RELEASE }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ env.BFD_RELEASE }}-v2-data-dictionary.json"
-            ]
+            {
+              "bfd-server-war-${{ env.BFD_RELEASE }}-v1-data-dictionary.json": "V1-data-dictionary.json",
+              "bfd-server-war-${{ env.BFD_RELEASE }}-v2-data-dictionary.json": "V2-data-dictionary.json",
+              "bfd-server-war-${{ env.BFD_RELEASE }}-openapi.yaml": "OpenAPI.yaml"
+            }
 
       - name: Setup Ruby and install dependencies
         uses: ruby/setup-ruby@v1

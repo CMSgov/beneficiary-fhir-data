@@ -105,6 +105,7 @@ resource "aws_iam_policy" "ssm" {
           "Resource" : [
             "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/user/*",
             "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/nonsensitive/*",
+            "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/common/sensitive/new_relic/*",
             "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/${local.env}/${var.service}/*"
           ]
         },
@@ -211,4 +212,28 @@ resource "aws_iam_policy" "asg" {
 resource "aws_iam_role_policy_attachment" "asg" {
   role       = aws_iam_role.instance.id
   policy_arn = aws_iam_policy.asg.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_instance_tags_ro" {
+  role       = aws_iam_role.instance.id
+  policy_arn = data.aws_iam_policy.ec2_instance_tags_ro.arn
+}
+
+data "aws_iam_policy_document" "rds_policy_doc" {
+  statement {
+    actions   = ["rds:DescribeDBInstances"]
+    resources = ["arn:aws:rds:${local.region}:${local.account_id}:db:*"]
+  }
+}
+
+resource "aws_iam_policy" "rds" {
+  description = "Policy granting BFD Server in ${local.env} environment access to describe RDS instances"
+  name        = "bfd-${local.env}-${var.service}-rds"
+  path        = "/"
+  policy      = data.aws_iam_policy_document.rds_policy_doc.json
+}
+
+resource "aws_iam_role_policy_attachment" "rds" {
+  role       = aws_iam_role.instance.id
+  policy_arn = aws_iam_policy.rds.arn
 }
