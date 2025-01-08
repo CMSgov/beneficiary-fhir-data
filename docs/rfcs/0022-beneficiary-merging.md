@@ -25,8 +25,12 @@ This is a fairly rare scenario, with ~400,000 out of the ~65,000,000 beneficiari
 
 ## Status
 
-* Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Rejected <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
+
+This work was abandoned due to the level of complexity it would require - not just for BFD itself, but also BFD's consumers.
+Further, CCW was unable to find a large percentage of the missing beneficiary information, meaning this added complexity would not
+be enough to solve the problem in all cases. Overall, it was decided that the costs outweighed the benefits.
 
 ## Table of Contents
 
