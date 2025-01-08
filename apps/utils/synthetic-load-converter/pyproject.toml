@@ -1,14 +1,11 @@
 [tool.poetry]
-name = "convert-synthetic-load"
-version = "0.1.0"
-description = ""
-authors = []
+package-mode = false
+name = "convert-load-converter"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 boto3 = "^1.35.93"
-types-boto3 = {extras = ["essential"], version = "^1.35.93"}
-
+types-boto3 = { extras = ["essential"], version = "^1.35.93" }
 
 [build-system]
 requires = ["poetry-core"]
