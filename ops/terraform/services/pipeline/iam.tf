@@ -142,24 +142,24 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
       "Sid": "BFDPipelineRWS3RIFReadWriteObjects"
     },
     {
-			"Action": [
-				"autoscaling:DescribeAutoScalingGroups"
-			],
-			"Effect": "Allow",
-			"Resource": "*",
-			"Sid": "BFDPipelineRWS3RIFDescribeAutoScalingGroups"
-		},
-		{
-			"Action": [
-				"autoscaling:SetDesiredCapacity"
-			],
-			"Effect": "Allow",
-			"Resource": "*",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Effect": "Allow",
+      "Resource": "*",
+      "Sid": "BFDPipelineRWS3RIFDescribeAutoScalingGroups"
+    },
+    {
+      "Action": [
+        "autoscaling:SetDesiredCapacity"
+      ],
+      "Effect": "Allow",
+      "Resource": "*",
       "Condition": {
         "StringEquals": {"aws:ResourceTag/Environment": "${local.seed_env}"}
       },
-			"Sid": "BFDPipelineRWS3RIFUpdateAutoscalingGroup"
-		}
+      "Sid": "BFDPipelineRWS3RIFUpdateAutoscalingGroup"
+    }
   ],
   "Version": "2012-10-17"
 }

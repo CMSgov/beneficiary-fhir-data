@@ -652,6 +652,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
     }
   }
 
+  /**
+   * test.
+   *
+   * @throws Exception test
+   */
   @Test
   public void completeManifestList() throws Exception {
     String bucket = null;
@@ -806,6 +811,11 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
     }
   }
 
+  /**
+   * test.
+   *
+   * @throws Exception test
+   */
   @Test
   public void completeManifestListDelayed() throws Exception {
     String bucket = null;

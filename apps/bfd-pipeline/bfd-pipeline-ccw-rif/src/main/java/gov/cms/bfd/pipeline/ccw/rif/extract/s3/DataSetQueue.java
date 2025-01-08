@@ -166,11 +166,9 @@ public class DataSetQueue implements AutoCloseable {
         // manifest
         .scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)
         .filter(
-            s -> {
-              LOGGER.info(String.format("checking key: %s", s.getKey()));
-              return s.getKey().toLowerCase().endsWith(manifestListName)
-                  && s.getLastModified().isAfter(minimumAllowedManifestTimestamp);
-            })
+            s ->
+                s.getKey().toLowerCase().endsWith(manifestListName)
+                    && s.getLastModified().isAfter(minimumAllowedManifestTimestamp))
         .map(
             s -> {
               String key = s.getKey();

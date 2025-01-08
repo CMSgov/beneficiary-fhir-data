@@ -31,9 +31,6 @@ public class PipelineJobRunner implements Runnable {
   /** Used to get timestamps. Parameterized for use by unit tests. */
   private final Clock clock;
 
-  /** Terminate requested. */
-  private boolean terminateRequested = false;
-
   /**
    * Runs the job according to its schedule. If the job has no schedule simply runs the job once.
    * Any uncaught exception thrown by the job terminates the loop. Our status is always updated in
@@ -56,10 +53,7 @@ public class PipelineJobRunner implements Runnable {
         while (tracker.jobsCanRun()) {
           outcome = runJob();
           boolean shouldTerminate = outcome == PipelineJobOutcome.SHOULD_TERMINATE;
-          if (shouldTerminate) {
-            this.terminateRequested = true;
-          }
-          if (this.terminateRequested || repeatMillis <= 0 || !tracker.jobsCanRun()) {
+          if (shouldTerminate || repeatMillis <= 0 || !tracker.jobsCanRun()) {
             break;
           }
           tracker.sleeping(job);
