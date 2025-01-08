@@ -84,8 +84,7 @@ public class S3ManifestDbDao {
           final var records =
               entityManager
                   .createQuery(
-                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >="
-                          + " :minTimestamp) and (m.status not in :okStatus)",
+                      "select m.s3Key from S3ManifestFile m where (m.discoveryTimestamp >= :minTimestamp) and (m.status not in :okStatus)",
                       String.class)
                   .setParameter("minTimestamp", minTimestamp)
                   .setParameter(
@@ -152,7 +151,8 @@ public class S3ManifestDbDao {
    * @param cutoff cutoff for checking the database entries
    * @return boolean
    */
-  public boolean additionalManifestsExist(Set<Instant> manifestTimestamps, Instant cutoff) {
+  public boolean additionalNonSyntheticManifestsExist(
+      Set<Instant> manifestTimestamps, Instant cutoff) {
     final String query =
         """
         SELECT EXISTS(

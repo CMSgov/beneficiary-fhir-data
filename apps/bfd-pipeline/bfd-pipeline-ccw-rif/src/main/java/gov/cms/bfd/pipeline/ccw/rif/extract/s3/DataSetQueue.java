@@ -201,8 +201,9 @@ public class DataSetQueue implements AutoCloseable {
    * @param cutoff cutoff for checking the database entries
    * @return boolean
    */
-  public boolean additionalManifestsExist(Set<Instant> manifestTimestamps, Instant cutoff) {
-    return s3Records.additionalManifestsExist(manifestTimestamps, cutoff);
+  public boolean additionalNonSyntheticManifestsExist(
+      Set<Instant> manifestTimestamps, Instant cutoff) {
+    return s3Records.additionalNonSyntheticManifestsExist(manifestTimestamps, cutoff);
   }
 
   /**

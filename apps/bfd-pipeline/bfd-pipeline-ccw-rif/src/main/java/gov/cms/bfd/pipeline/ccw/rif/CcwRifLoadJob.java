@@ -266,7 +266,8 @@ public final class CcwRifLoadJob implements PipelineJob {
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
 
-      if (dataSetQueue.additionalManifestsExist(finalManifestTimestamps, FINAL_MANIFEST_CUTOFF)) {
+      // Synthetic loads don't have manifest lists
+      if (additionalNonSyntheticManifestsExist(finalManifestTimestamps)) {
         LOGGER.info("Missing manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
@@ -524,6 +525,18 @@ public final class CcwRifLoadJob implements PipelineJob {
    */
   private List<FinalManifestList> readFinalManifestLists() {
     return dataSetQueue.readFinalManifestLists(FINAL_MANIFEST_CUTOFF);
+  }
+
+  /**
+   * Checks if there are any manifest entries in the database that were created after the given
+   * cutoff and are not contained in the given list of timestamps.
+   *
+   * @param finalManifestTimestamps list of timestamps to compare
+   * @return boolean
+   */
+  private boolean additionalNonSyntheticManifestsExist(Set<Instant> finalManifestTimestamps) {
+    return dataSetQueue.additionalNonSyntheticManifestsExist(
+        finalManifestTimestamps, FINAL_MANIFEST_CUTOFF);
   }
 
   /**
