@@ -12,7 +12,6 @@ parser.add_argument("-d", "--destination-bucket", required=True)
 parser.add_argument("-p", "--source-prefix", required=True)
 
 args = parser.parse_args()
-print(args.destination_bucket)
 
 source_bucket = args.source_bucket
 destination_bucket = args.destination_bucket

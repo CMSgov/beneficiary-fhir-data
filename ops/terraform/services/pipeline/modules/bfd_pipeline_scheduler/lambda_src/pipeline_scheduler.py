@@ -15,6 +15,7 @@ from botocore.config import Config
 
 SCALE_OUT_IMMEDIATELY_ACTION_NAME = "scale_out_immediately"
 SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX = "scale_out_at_"
+INCOMING = "Incoming"
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
@@ -51,27 +52,14 @@ class S3EventType(StrEnum):
 
 class PipelineLoadType(StrEnum):
     """Represents the possible types of data loads: either the data load is non-synthetic, meaning
-    that it contains production data and was placed within the root-level Incoming/Done folders of
+    that it contains production data and was placed within the root-level Incoming folders of
     the ETL bucket, or it is synthetic, meaning that it contains non-production, testing data and
-    was placed within the Incoming/Done folders within the Synthetic folder of the ETL bucket. The
-    value of each enum represents the name of the Incoming/Done folders' parent directory, with
+    was placed within the Incoming folders within the Synthetic folder of the ETL bucket. The
+    value of each enum represents the name of the Incoming folders' parent directory, with
     empty string indicating that those paths have no parent"""
 
     NON_SYNTHETIC = ""
     SYNTHETIC = "Synthetic"
-
-
-class PipelineDataStatus(StrEnum):
-    """Represents the possible states of data: either data is available to load, or has been loaded
-    by the ETL pipeline. The value of each enum is the parent directory of the incoming file,
-    indicating status"""
-
-    INCOMING = "Incoming"
-    DONE = "Done"
-
-    @classmethod
-    def match_str(cls) -> str:
-        return "|".join([e.value for e in cls])
 
 
 class RifFileType(StrEnum):
@@ -111,64 +99,12 @@ class TimestampedDataLoad:
         return datetime.fromisoformat(self.name.removesuffix("Z"))
 
 
-def _get_all_valid_incoming_loads_before_date(
-    time_cutoff: Optional[datetime] = None,
-) -> set[TimestampedDataLoad]:
-    incoming_bucket_prefixes = [
-        "/".join(filter(None, [load_type.value, PipelineDataStatus.INCOMING])) + "/"
-        for load_type in PipelineLoadType
-    ]
-    # We get all objects in both the non-synthetic and synthetic incoming folders within the S3
-    # Bucket; chain() will flatten the resulting iterable so that it's a single iterable of bucket
-    # objects
-    incoming_objects = itertools.chain.from_iterable(
-        etl_bucket.objects.filter(Prefix=prefix) for prefix in incoming_bucket_prefixes
-    )
-    # We then filter out any objects that are not valid RIF files
-    incoming_rifs = [
-        str(object.key)
-        for object in incoming_objects
-        if re.match(
-            pattern=rf".*({RifFileType.match_str()}).*(txt|csv)",
-            string=str(object.key),
-        )
-        is not None
-    ]
-    # Finally, valid data loads/groups are extracted by regex matching the data load timestamp
-    # folder within each object's key and taking the match. Using a set automatically ensures the
-    # resulting loads are unique
-    valid_data_loads = {
-        TimestampedDataLoad(
-            load_type=(
-                PipelineLoadType.SYNTHETIC
-                if object_key.startswith(PipelineLoadType.SYNTHETIC)
-                else PipelineLoadType.NON_SYNTHETIC
-            ),
-            name=group_name_match.group(1),
-        )
-        for object_key in incoming_rifs
-        if (
-            group_name_match := re.search(
-                pattern=rf"({TimestampedDataLoad.match_str()})/", string=object_key
-            )
-        )
-        is not None
-    }
-
-    # If no time cutoff was specified we return all data loads, including future data loads
-    if not time_cutoff:
-        return valid_data_loads
-
-    # Else, we return only valid data loads that should be loaded prior to the given time cutoff
-    return {d for d in valid_data_loads if d.timestamp < time_cutoff}
-
-
 def _is_incoming_folder_empty(data_load: TimestampedDataLoad) -> bool:
     incoming_key_prefix = (
         "/".join(
             filter(
                 None,
-                [data_load.load_type, PipelineDataStatus.INCOMING, data_load.name],
+                [data_load.load_type, INCOMING, data_load.name],
             )
         )
         + "/"
@@ -262,11 +198,11 @@ def handler(event: Any, context: Any):
     print(f"S3 Event Type: {event_type.name}, Specific Event Name: {event_type_str}")
 
     # The incoming file's key should match an expected format, as follows:
-    # "<Synthetic/>/<Incoming/Done>/<ISO date format>/<file name>".
+    # "<Synthetic/>/<Incoming>/<ISO date format>/<file name>".
     match = re.search(
         pattern=(
             rf"^({PipelineLoadType.SYNTHETIC}){{0,1}}/{{0,1}}"
-            rf"({PipelineDataStatus.match_str()})/"
+            rf"({INCOMING})/"
             rf"({TimestampedDataLoad.match_str()})/"
             rf".*({RifFileType.match_str()}).*(txt|csv)$"
         ),
@@ -281,21 +217,16 @@ def handler(event: Any, context: Any):
         return
 
     pipeline_load_type = PipelineLoadType(match.group(1) or "")
-    pipeline_data_status = PipelineDataStatus(match.group(2))
     data_load = TimestampedDataLoad(load_type=pipeline_load_type, name=match.group(3))
     is_future_load = data_load.timestamp >= datetime.utcnow()
 
     # Log data extracted from S3 object key now that we know this is a valid RIF file within a valid
     # data load
     print(f"RIF type: {RifFileType(match.group(4)).name}")
-    print(f"Load Status: {pipeline_data_status.name}")
     print(f"Load Type: {pipeline_load_type.name}")
     print(f"Data Load: {data_load.name}")
 
-    if (
-        pipeline_data_status == PipelineDataStatus.INCOMING
-        and event_type == S3EventType.OBJECT_CREATED
-    ):
+    if event_type == S3EventType.OBJECT_CREATED:
         # A load was added to Incoming (or files were added to a new load, the distinction
         # doesn't really matter); add a scheduled action for scale-out in the future if it's
         # a future load or immediately if the load is timestamped in the past
@@ -336,10 +267,7 @@ def handler(event: Any, context: Any):
                 f"The scheduled action {scheduled_action_name} was already scheduled on the"
                 f" Pipeline's ASG for data load {data_load.name}. Exiting..."
             )
-    elif (
-        pipeline_data_status == PipelineDataStatus.INCOMING
-        and event_type == S3EventType.OBJECT_REMOVED
-    ):
+    elif event_type == S3EventType.OBJECT_REMOVED:
         # If an object is removed from Incoming, that could mean that the Pipeline loaded
         # the data load it was from _or_ an operator removed the data load manually. Either
         # case, we want to check if this load is now completely gone from Incoming and
