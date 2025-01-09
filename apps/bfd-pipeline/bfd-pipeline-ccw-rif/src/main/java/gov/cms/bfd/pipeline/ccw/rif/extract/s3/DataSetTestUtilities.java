@@ -27,9 +27,8 @@ public class DataSetTestUtilities {
    * Computes the key prefix for a given manifest's contents within an S3 bucket.
    *
    * @param location the location to find the object, should be {@link
-   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS}, {@link
-   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}, or {@link
-   *     CcwRifLoadJob#S3_PREFIX_COMPLETED_DATA_SETS}
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
    * @param manifest the {@link DataSetManifest} to push as an object
    * @return the computed key prefix
    */
