@@ -23,7 +23,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
@@ -518,17 +517,6 @@ public final class PipelineApplication {
       AwsClientConfig awsClientConfig,
       Clock clock)
       throws IOException {
-    /*
-     * Create the services that will be used to handle each stage in the extract, transform, and
-     * load process.  The task manager will be automatically closed by the job.
-     * TODO The task manager should be removed once s3 file movement is no longer necessary.
-     */
-    // Tell SQ it's ok not to use try-finally here since this will be closed by the DataSetQueue.
-    @SuppressWarnings("java:S2095")
-    final var s3TaskManager =
-        new S3TaskManager(
-            loadOptions.getExtractionOptions(),
-            new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
@@ -549,8 +537,7 @@ public final class PipelineApplication {
             new S3FileManager(
                 appState.getMetrics(),
                 s3Factory.createS3Dao(),
-                loadOptions.getExtractionOptions().getS3BucketName()),
-            s3TaskManager);
+                loadOptions.getExtractionOptions().getS3BucketName()));
     var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(

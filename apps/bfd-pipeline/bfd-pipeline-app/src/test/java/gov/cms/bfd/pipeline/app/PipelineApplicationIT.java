@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.FileBasedAssertionHelper;
@@ -29,7 +28,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.json.JsonConverter;
 import gov.cms.bfd.sharedutils.sqs.SqsDao;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
@@ -193,7 +190,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               0,
               false,
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
@@ -222,19 +218,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       assertEquals(PipelineApplication.EXIT_CODE_SUCCESS, exitCode);
       assertCcwRifLoadJobCompleted(logLines);
       assertADataSetBeenProcessed(logLines);
-
-      // Verify all files were moved into the done "folder".
-      final String keyPrefix =
-          DataSetTestUtilities.keyPrefixForManifest(
-                  CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS, manifest)
-              + "/";
-      final Set<String> completedFiles =
-          s3Dao
-              .listObjects(bucket, keyPrefix)
-              .map(S3Dao.S3ObjectSummary::getKey)
-              .map(key -> key.substring(keyPrefix.length()))
-              .collect(ImmutableSet.toImmutableSet());
-      assertEquals(Set.of("0_manifest.xml", "beneficiaries.rif", "carrier.rif"), completedFiles);
 
       // Verify we successfully posted the expected events to the SQS queue.
       assertEquals(

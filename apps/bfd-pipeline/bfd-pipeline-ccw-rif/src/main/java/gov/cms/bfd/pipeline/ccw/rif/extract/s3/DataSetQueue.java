@@ -10,7 +10,6 @@ import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
@@ -76,19 +75,10 @@ public class DataSetQueue implements AutoCloseable {
   /** Used to download files from S3 to a local cache for processing. */
   private final S3FileManager s3Files;
 
-  /**
-   * Used only for the soon to be obsolete S3 file move task.
-   *
-   * <p>TODO Remove this when file moves are no longer necessary. Expected to be changed as part of
-   * BFD-3129.
-   */
-  private final S3TaskManager s3TaskManager;
-
   @Override
   public void close() throws Exception {
     final var closer = new MultiCloser();
     closer.close(s3Files::close);
-    closer.close(s3TaskManager::close);
     closer.finish();
   }
 
@@ -260,21 +250,8 @@ public class DataSetQueue implements AutoCloseable {
   }
 
   /**
-   * Starts a background thread that moves all of the files associated with the specified manifest
-   * from the Incoming tree to the Done tree.
-   *
-   * <p>TODO Remove this method (and {@link #s3TaskManager} once S3 file movement is no longer
-   * necessary. Expected to be changed as part of BFD-3129.
-   *
-   * @param manifest the manifest to move
-   */
-  public void moveManifestFilesInS3(DataSetManifest manifest) {
-    s3TaskManager.moveManifestFilesInS3(manifest);
-  }
-
-  /**
-   * Download a file from S3 and confirm that its MD5 checksum matches that in the S3 file's meta
-   * data.
+   * Download a file from S3 and confirm that its MD5 checksum matches that in the S3 file's
+   * metadata.
    *
    * @param s3Key identifies file to download in S3 bucket
    * @return object containing information about downloaded file
@@ -356,10 +333,8 @@ public class DataSetQueue implements AutoCloseable {
       if (manifestS3Key.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
         manifest.setManifestKeyIncomingLocation(
             CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS);
-        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
       } else {
         manifest.setManifestKeyIncomingLocation(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
-        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
       }
 
       return manifest;

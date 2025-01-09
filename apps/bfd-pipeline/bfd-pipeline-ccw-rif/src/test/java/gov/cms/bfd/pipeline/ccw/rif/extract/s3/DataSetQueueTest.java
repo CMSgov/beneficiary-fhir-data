@@ -21,7 +21,6 @@ import com.google.common.io.ByteSource;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -76,9 +75,6 @@ public class DataSetQueueTest {
   /** Used to download files from S3 to a local cache for processing. */
   @Mock private S3FileManager s3Files;
 
-  /** Used only for the soon to be obsolete S3 file move task. */
-  @Mock private S3TaskManager s3TaskManager;
-
   /** Used to confirm timers are created as expected. */
   @Spy private MetricRegistry appMetrics;
 
@@ -93,7 +89,7 @@ public class DataSetQueueTest {
     doAnswer(i -> Instant.ofEpochMilli(clockMillis.getAndAdd(1_000L))).when(clock).instant();
 
     // object being tested just uses our mocks
-    dataSetQueue = spy(new DataSetQueue(clock, appMetrics, s3Records, s3Files, s3TaskManager));
+    dataSetQueue = spy(new DataSetQueue(clock, appMetrics, s3Records, s3Files));
   }
 
   /**
@@ -447,8 +443,6 @@ public class DataSetQueueTest {
     assertEquals(s3Key, manifest.getIncomingS3Key());
     assertEquals(
         CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getManifestKeyIncomingLocation());
-    assertEquals(
-        CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS, manifest.getManifestKeyDoneLocation());
   }
 
   /** Parses a manifest from a synthetic directory and ensures key locations are set properly. */
@@ -466,9 +460,6 @@ public class DataSetQueueTest {
     assertEquals(
         CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS,
         manifest.getManifestKeyIncomingLocation());
-    assertEquals(
-        CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS,
-        manifest.getManifestKeyDoneLocation());
   }
 
   /**
