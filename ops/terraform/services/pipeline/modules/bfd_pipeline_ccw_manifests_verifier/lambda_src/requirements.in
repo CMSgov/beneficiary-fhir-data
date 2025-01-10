@@ -1,0 +1,5 @@
+aws-lambda-powertools[all]
+boto3
+psycopg[binary]
+pydantic
+setuptools>=70.0.0

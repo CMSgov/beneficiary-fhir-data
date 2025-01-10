@@ -1,0 +1,50 @@
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_vpc" "main" {
+  filter {
+    name   = "tag:Name"
+    values = [var.vpc_name]
+  }
+}
+
+data "aws_kms_key" "cmk" {
+  key_id = var.kms_key_alias
+}
+
+data "aws_kms_key" "config_cmk" {
+  key_id = var.kms_config_key_alias
+}
+
+data "aws_ecr_repository" "ecr" {
+  name = "bfd-mgmt-${local.lambda_name}-lambda"
+}
+
+data "aws_ecr_image" "this" {
+  repository_name = data.aws_ecr_repository.ecr.name
+  image_tag       = var.bfd_version
+}
+
+data "aws_subnets" "main" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+  filter {
+    name   = "tag:Layer"
+    values = [local.layer]
+  }
+}
+
+data "aws_security_group" "rds" {
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [var.db_cluster_identifier]
+  }
+}
+
+data "aws_rds_cluster" "cluster" {
+  cluster_identifier = var.db_cluster_identifier
+}
