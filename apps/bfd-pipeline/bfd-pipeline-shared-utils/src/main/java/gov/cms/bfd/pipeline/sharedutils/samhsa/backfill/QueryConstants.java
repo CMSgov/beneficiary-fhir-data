@@ -13,9 +13,8 @@ public class QueryConstants {
   /** Query for MCS Diagnosis codes. */
   public static final String MCS_DIAG_SAMHSA_QUERY =
       """
-        SELECT mc.idr_clm_hd_icn, mc.idr_hdr_from_date_of_svc, mc.idr_hdr_to_date_of_svc, dc.idr_diag_code
+        SELECT dc.idr_clm_hd_icn, dc.idr_diag_code
             FROM rda.mcs_diagnosis_codes dc
-            JOIN rda.mcs_claims mc ON mc.idr_clm_hd_icn = dc.idr_clm_hd_icn
             ${gtClaimLine}
             ORDER BY idr_clm_hd_icn ASC
             limit :limit
@@ -24,9 +23,8 @@ public class QueryConstants {
   /** Query for MCS Details. */
   public static final String MCS_DETAILS_SAMHSA_QUERY =
       """
-        SELECT mc.idr_clm_hd_icn, mc.idr_hdr_from_date_of_svc, mc.idr_hdr_to_date_of_svc, dt.idr_dtl_primary_diag_code, dt.idr_proc_code
+        SELECT dt.idr_clm_hd_icn, dt.idr_dtl_primary_diag_code, dt.idr_proc_code
             FROM rda.mcs_details dt
-            JOIN rda.mcs_claims mc ON mc.idr_clm_hd_icn = dt.idr_clm_hd_icn
             ${gtClaimLine}
             ORDER BY idr_clm_hd_icn ASC
             limit :limit
@@ -45,9 +43,8 @@ public class QueryConstants {
   /** Query for Fiss revenue lines. */
   public static final String FISS_REVENUE_SAMHSA_QUERY =
       """
-            SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fr.apc_hcpcs_apc, fr.hcpc_cd
+            SELECT fr.claim_id, fr.apc_hcpcs_apc, fr.hcpc_cd
             FROM rda.fiss_revenue_lines fr
-            JOIN rda.fiss_claims fc on fc.claim_id = fr.claim_id
             ${gtClaimLine}
             ORDER BY claim_id ASC
             limit :limit
@@ -56,9 +53,8 @@ public class QueryConstants {
   /** Query for Fiss diagnosis codes. */
   public static final String FISS_DIAGNOSIS_SAMHSA_QUERY =
       """
-            SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fd.diag_cd2
+            SELECT fd.claim_id, fd.diag_cd2
             FROM rda.fiss_diagnosis_codes fd
-            JOIN rda.fiss_claims fc on fc.claim_id = fd.claim_id
             ${gtClaimLine}
             ORDER BY claim_id ASC
             limit :limit
@@ -67,9 +63,8 @@ public class QueryConstants {
   /** Query for Fiss proc codes. */
   public static final String FISS_PROC_SAMHSA_QUERY =
       """
-            SELECT fc.claim_id, fc.stmt_cov_from_date, fc.stmt_cov_to_date, fp.proc_code
+            SELECT fp.claim_id, fp.proc_code
             FROM rda.fiss_proc_codes fp
-            JOIN rda.fiss_claims fc on fc.claim_id = fp.claim_id
             ${gtClaimLine}
             ORDER BY fc.claim_id ASC
             limit :limit
@@ -91,12 +86,11 @@ public class QueryConstants {
   /** Query for Carrier Claim Lines. */
   public static final String CARRIER_CLAIM_LINES_SAMHSA_QUERY =
       """
-            SELECT cc.clm_id, cc.clm_from_dt, cc.clm_thru_dt,
+            SELECT ccl.clm_id,
               ccl.line_icd_dgns_cd, ccl.hcpcs_cd
             FROM ccw.carrier_claim_lines ccl
-            JOIN ccw.carrier_claims cc ON cc.clm_id = ccl.clm_id
             ${gtClaimLine}
-            ORDER BY cc.clm_id ASC
+            ORDER BY ccl.clm_id ASC
             limit :limit
       """;
 
@@ -116,12 +110,11 @@ public class QueryConstants {
   /** Query for DME Claim Lines. */
   public static final String DME_CLAIM_LINES_SAMHSA_QUERY =
       """
-                SELECT dc.clm_id, dc.clm_from_dt, dc.clm_thru_dt,
+                SELECT dcl.clm_id,
                   dcl.line_icd_dgns_cd, dcl.hcpcs_cd
                 FROM ccw.dme_claim_lines dcl
-                JOIN ccw.dme_claims dc ON dc.clm_id = dcl.clm_id
                 ${gtClaimLine}
-                ORDER BY dc.clm_id ASC
+                ORDER BY dcl.clm_id ASC
                 limit :limit
           """;
 
@@ -146,12 +139,11 @@ public class QueryConstants {
   /** Query for Hospice Claim Lines. */
   public static final String HOSPICE_CLAIM_LINES_SAMHSA_QUERY =
       """
-                SELECT hc.clm_id, hc.clm_from_dt, hc.clm_thru_dt,
+                SELECT hcl.clm_id,
                   hcl.hcpcs_cd
                 FROM ccw.hospice_claim_lines hcl
-                JOIN ccw.hospice_claims hc ON hc.clm_id = hcl.clm_id
                 ${gtClaimLine}
-                ORDER BY hc.clm_id ASC
+                ORDER BY hcl.clm_id ASC
                 limit :limit
           """;
 
@@ -176,12 +168,11 @@ public class QueryConstants {
   /** Query for HHA Claim Lines. */
   public static final String HHA_CLAIM_LINES_SAMHSA_QUERY =
       """
-                SELECT hc.clm_id, hc.clm_from_dt, hc.clm_thru_dt,
+                SELECT hcl.clm_id,
                   hcl.hcpcs_cd, hcl.rev_cntr_apc_hipps_cd
                 FROM ccw.hha_claim_lines hcl
-                JOIN ccw.hha_claims hc ON hc.clm_id = hcl.clm_id
                 ${gtClaimLine}
-                ORDER BY hc.clm_id ASC
+                ORDER BY hcl.clm_id ASC
                 limit :limit
           """;
 
@@ -212,12 +203,11 @@ public class QueryConstants {
   /** Query for SNF Claim Lines. */
   public static final String SNF_CLAIM_LINES_SAMHSA_QUERY =
       """
-                SELECT sc.clm_id, sc.clm_from_dt, sc.clm_thru_dt,
+                SELECT scl.clm_id,
                   scl.hcpcs_cd
                 FROM ccw.snf_claim_lines scl
-                JOIN ccw.snf_claims sc ON sc.clm_id = scl.clm_id
                 ${gtClaimLine}
-                ORDER BY sc.clm_id ASC
+                ORDER BY scl.clm_id ASC
                 limit :limit
           """;
 
@@ -246,12 +236,11 @@ public class QueryConstants {
   /** Query for Inpatient Claim Lines. */
   public static final String INPATIENT_CLAIM_LINES_SAMHSA_QUERY =
       """
-                SELECT ic.clm_id, ic.clm_from_dt, ic.clm_thru_dt,
+                SELECT icl.clm_id,
                   icl.hcpcs_cd
                 FROM ccw.inpatient_claim_lines icl
-                JOIN ccw.inpatient_claims ic ON ic.clm_id = icl.clm_id
                 ${gtClaimLine}
-                ORDER BY ic.clm_id ASC
+                ORDER BY icl.clm_id ASC
                 limit :limit
           """;
 
@@ -280,15 +269,26 @@ public class QueryConstants {
   /** Query for Outpatient Claim Lines. */
   public static final String OUTPATIENT_CLAIM_LINES_SAMHSA_QUERY =
       """
-                SELECT oc.clm_id, oc.clm_from_dt, oc.clm_thru_dt,
+                SELECT ocl.clm_id,
                   ocl.hcpcs_cd, ocl.rev_cntr_apc_hipps_cd
                 FROM ccw.outpatient_claim_lines ocl
-                JOIN ccw.outpatient_claims oc ON oc.clm_id = ocl.clm_id
                 ${gtClaimLine}
-                ORDER BY oc.clm_id ASC
+                ORDER BY ocl.clm_id ASC
                 limit :limit
           """;
 
   /** Line fo Greater Than claimId. */
   public static final String GT_CLAIM_LINE = "WHERE ${claimField} >= :startingClaim";
+
+  /** Gets the date ranges for a claim in a line item table from its parent table. */
+  public static final String GET_CLAIM_DATES =
+      "SELECT clm_from_dt, clm_thru_dt from ${claimTable} where ${claimField} = :claimId ";
+
+  /** Gets the date ranges for a claim in a line item table from its parent table. */
+  public static final String GET_CLAIM_DATES_FISS =
+      "SELECT stmt_cov_from_date, stmt_cov_to_date from ${claimTable} where ${claimField} = :claimId ";
+
+  /** Gets the date ranges for a claim in a line item table from its parent table. */
+  public static final String GET_CLAIM_DATES_MCS =
+      "SELECT mc.idr_hdr_from_date_of_svc, mc.idr_hdr_to_date_of_svc from ${claimTable} where ${claimField} = :claimId ";
 }

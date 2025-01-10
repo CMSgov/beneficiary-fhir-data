@@ -13,43 +13,74 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   static final Logger LOGGER = LoggerFactory.getLogger(RDASamhsaBackfill.class);
 
   /** The column name for the fiss claim id. */
-  private static String FISS_CLAIM_ID_FIELD = "fc.claim_id";
+  private static String FISS_CLAIM_ID_FIELD = "claim_id";
 
   /** The column name for the mcs claim id. */
-  private static String MCS_CLAIM_ID_FIELD = "mc.idr_clm_hd_icn";
+  private static String MCS_CLAIM_ID_FIELD = "idr_clm_hd_icn";
 
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {
     /** Fiss Claims. */
     FISS_CLAIMS(
-        new TableEntry(FISS_SAMHSA_QUERY, "rda.fiss_tags", FISS_CLAIM_ID_FIELD, "rda.fiss_claims")),
+        new TableEntry(
+            FISS_SAMHSA_QUERY,
+            GET_CLAIM_DATES_FISS,
+            "rda.fiss_tags",
+            FISS_CLAIM_ID_FIELD,
+            "rda.fiss_claims",
+            "rda.fiss_claims",
+            false)),
     /** Fiss proc codes. */
     FISS_PROC_CODES(
         new TableEntry(
-            FISS_PROC_SAMHSA_QUERY, "rda.fiss_tags", FISS_CLAIM_ID_FIELD, "rda.fiss_proc_codes")),
+            FISS_PROC_SAMHSA_QUERY,
+            GET_CLAIM_DATES_FISS,
+            "rda.fiss_tags",
+            FISS_CLAIM_ID_FIELD,
+            "rda.fiss_proc_codes",
+            "rda.fiss_claims",
+            true)),
     /** Fiss diagnosis codes. */
     FISS_DIAGNOSIS_CODES(
         new TableEntry(
             FISS_DIAGNOSIS_SAMHSA_QUERY,
+            GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
-            "rda.fiss_diagnosis_codes")),
+            "rda.fiss_diagnosis_codes",
+            "rda.fiss_claims",
+            true)),
     /** Fiss revenue lines. */
     FISS_REVENUE_LINES(
         new TableEntry(
             FISS_REVENUE_SAMHSA_QUERY,
+            GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
-            "rda.fiss_revenue_lines")),
+            "rda.fiss_revenue_lines",
+            "rda.fiss_claims",
+            true)),
 
     /** MCS diagnosis codes. */
     MCS_DIAGNOSIS_CODES(
         new TableEntry(
-            MCS_DIAG_SAMHSA_QUERY, "rda.mcs_tags", MCS_CLAIM_ID_FIELD, "rda.mcs_diagnosis_codes")),
+            MCS_DIAG_SAMHSA_QUERY,
+            GET_CLAIM_DATES_MCS,
+            "rda.mcs_tags",
+            MCS_CLAIM_ID_FIELD,
+            "rda.mcs_diagnosis_codes",
+            "rda.mcs_claims",
+            true)),
     /** MCS details. */
     MCS_DETAILS(
         new TableEntry(
-            MCS_DETAILS_SAMHSA_QUERY, "rda.mcs_tags", MCS_CLAIM_ID_FIELD, "rda.mcs_details"));
+            MCS_DETAILS_SAMHSA_QUERY,
+            GET_CLAIM_DATES_MCS,
+            "rda.mcs_tags",
+            MCS_CLAIM_ID_FIELD,
+            "rda.mcs_details",
+            "rda.mcs_claims",
+            true));
 
     /** The tableEntry. */
     TableEntry entry;

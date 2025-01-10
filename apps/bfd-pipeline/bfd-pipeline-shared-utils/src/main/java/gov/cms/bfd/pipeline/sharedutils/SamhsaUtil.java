@@ -27,11 +27,14 @@ import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaInpatientAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaOutpatientAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaSnfAdapter;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
+import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.util.Strings;
 
 /**
@@ -111,17 +115,62 @@ public class SamhsaUtil {
   }
 
   /**
+   * Gets the date ranges for a line item table from its parent table.
+   *
+   * @param claimId The claim Id.
+   * @param tableEntry The table entry.
+   * @param entityManager The entity manager.
+   * @return the date ranges.
+   */
+  private Object[] getClaimDates(
+      Object claimId, TableEntry tableEntry, EntityManager entityManager) {
+    Map<String, String> params =
+        Map.of("claimTable", tableEntry.getParentTable(), "claimField", tableEntry.getClaimField());
+    StringSubstitutor strSub = new StringSubstitutor(params);
+    String queryStr = strSub.replace(tableEntry.getDatesQuery());
+    Query query = entityManager.createNativeQuery(queryStr);
+    query.setParameter("claimId", claimId);
+    Object[] dates = (Object[]) query.getSingleResult();
+    return dates;
+  }
+
+  /**
    * Process a list of codes. Does not use Entities.
    *
    * @param codes The list of codes.
-   * @param coverageStartDate The coverage start date.
-   * @param coverageEndDate The coverage end date.
+   * @param tableEntry The tableEntry object for this table.
+   * @param claimId The claim id for this claim.
+   * @param dates If present, contains the active dates for this claim.
+   * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
+   *     claim has more than one lineitem.
+   * @param entityManager The entity manager.
    * @return true if a SAMHSA tag should be created.
    */
   public boolean processCodeList(
-      List<String> codes, LocalDate coverageStartDate, LocalDate coverageEndDate) {
+      List<String> codes,
+      TableEntry tableEntry,
+      Object claimId,
+      Optional<Object[]> dates,
+      HashMap<String, Object[]> datesMap,
+      EntityManager entityManager) {
     for (String code : codes) {
+      // Found a samhsa code
       if (samhsaMap.containsKey(code)) {
+        Object[] datesObject;
+        if (dates.isPresent()) {
+          datesObject = dates.get();
+        } else {
+          datesObject = getClaimDates(claimId, tableEntry, entityManager);
+          // Put the dates in a map, in case any other line items with the same id have samhsa
+          // codes.
+          datesMap.put(claimId.toString(), datesObject);
+        }
+        LocalDate coverageStartDate =
+            datesObject[0] == null
+                ? LocalDate.parse("1970-01-01")
+                : ((Date) datesObject[0]).toLocalDate();
+        LocalDate coverageEndDate =
+            datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
         SamhsaEntry entry = samhsaMap.get(code);
         LocalDate startDate = LocalDate.parse(entry.getStartDate());
         LocalDate endDate =

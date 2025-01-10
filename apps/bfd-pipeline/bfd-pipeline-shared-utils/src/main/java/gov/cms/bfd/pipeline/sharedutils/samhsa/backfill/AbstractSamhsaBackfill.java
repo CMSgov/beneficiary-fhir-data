@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.GT_CLAIM_LINE;
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.TAG_UPSERT_QUERY;
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
@@ -11,12 +10,11 @@ import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
-import java.sql.Date;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -162,21 +160,30 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * Processes a claim with SamhsaUtil to check for SAMHSA codes.
    *
    * @param claim the claim to process
+   * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
+   *     claim has more than one lineitem.
    * @param entityManager The entity manager.
    * @return true if a claim was persisted.
    */
-  protected boolean processClaim(Object[] claim, EntityManager entityManager) {
+  protected boolean processClaim(
+      Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
     Object claimId = claim[0];
-    LocalDate coverageStartDate =
-        claim[1] == null ? LocalDate.parse("1970-01-01") : ((Date) claim[1]).toLocalDate();
-    LocalDate coverageEndDate =
-        claim[2] == null ? LocalDate.now() : ((Date) claim[2]).toLocalDate();
+    int codesOffset = 1;
+    Optional<Object[]> dates = Optional.empty();
+    if (!tableEntry.getLineItem()) {
+      dates = Optional.of(new Object[] {claim[1], claim[2]});
+      codesOffset = 3;
+    } else if (datesMap.containsKey(claimId.toString())) {
+      dates = Optional.of(datesMap.get(claimId.toString()));
+    }
+
     List<String> codes =
-        Arrays.asList(claim).subList(3, claim.length).stream()
+        Arrays.asList(claim).subList(codesOffset, claim.length).stream()
             .filter(Objects::nonNull)
             .map(code -> (String) code)
             .collect(Collectors.toList());
-    boolean persisted = samhsaUtil.processCodeList(codes, coverageStartDate, coverageEndDate);
+    boolean persisted =
+        samhsaUtil.processCodeList(codes, tableEntry, claimId, dates, datesMap, entityManager);
     if (persisted) {
       writeEntry(claimId, tableEntry.getTagTable(), entityManager);
       return true;
@@ -226,8 +233,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
               List<Object[]> claims = executeQuery(query);
               int savedInBatch = 0;
+              HashMap<String, Object[]> datesMap = new HashMap<>();
               for (Object[] claim : claims) {
-                boolean persisted = processClaim(claim, entityManager);
+                boolean persisted = processClaim(claim, datesMap, entityManager);
                 if (persisted) {
                   savedInBatch++;
                 }

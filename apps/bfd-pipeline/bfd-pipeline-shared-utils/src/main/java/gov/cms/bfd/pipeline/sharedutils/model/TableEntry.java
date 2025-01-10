@@ -9,8 +9,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class TableEntry {
-  /** The query table. */
+  /** The query for the table. */
   String Query;
+
+  /** The query to get the dates from the parent table. */
+  String datesQuery;
 
   /** The tag table associated with this claim. */
   String tagTable;
@@ -20,4 +23,10 @@ public class TableEntry {
 
   /** Claim table. */
   String claimTable;
+
+  /** Parent table. */
+  String parentTable;
+
+  /** True if this is a line item table. */
+  Boolean lineItem;
 }
