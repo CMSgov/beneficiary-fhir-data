@@ -382,7 +382,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /** Config value for SAMHSA backfill batch size. */
   public static final String SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
 
-  /** Config value for SAMHSA backfill log interval. */
+  /** Config value for SAMHSA backfill log reporting interval. */
   public static final String SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL =
       "rda/samhsa/backfill/log_interval";
 
