@@ -254,7 +254,8 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
 }
 EOF
 )
-export CONFIG_SETTINGS_JSON
+  export CONFIG_SETTINGS_JSON
+fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
 # parameter in SSM if we are using it.  Used to allow localstack based config to simulate using
