@@ -66,7 +66,7 @@ public class QueryConstants {
             SELECT fp.claim_id, fp.proc_code
             FROM rda.fiss_proc_codes fp
             ${gtClaimLine}
-            ORDER BY fc.claim_id ASC
+            ORDER BY fp.claim_id ASC
             limit :limit
         """;
 
