@@ -290,5 +290,5 @@ public class QueryConstants {
 
   /** Gets the date ranges for a claim in a line item table from its parent table. */
   public static final String GET_CLAIM_DATES_MCS =
-      "SELECT mc.idr_hdr_from_date_of_svc, mc.idr_hdr_to_date_of_svc from ${claimTable} where ${claimField} = :claimId ";
+      "SELECT idr_hdr_from_date_of_svc, idr_hdr_to_date_of_svc from ${claimTable} where ${claimField} = :claimId ";
 }
