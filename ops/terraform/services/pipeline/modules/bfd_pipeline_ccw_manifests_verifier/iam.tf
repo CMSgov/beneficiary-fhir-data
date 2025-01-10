@@ -94,6 +94,20 @@ data "aws_iam_policy_document" "lambda_role_assume_policy_doc" {
   }
 }
 
+data "aws_iam_policy_document" "sns_policy_doc" {
+  statement {
+    sid       = "AllowPublish"
+    actions   = ["SNS:Publish"]
+    resources = [data.aws_sns_topic.alert_topic.arn]
+  }
+}
+
+resource "aws_iam_policy" "sns" {
+  name        = "${local.lambda_full_name}-sns"
+  description = "Permissions for the ${aws_lambda_function.this.function_name} to publish to the ${data.aws_sns_topic.alert_topic.name} SNS Topic"
+  policy      = data.aws_iam_policy_document.sns_policy_doc.json
+}
+
 resource "aws_iam_role" "this" {
   name                  = local.lambda_full_name
   path                  = "/"
@@ -108,6 +122,7 @@ resource "aws_iam_role_policy_attachment" "this" {
     ssm  = aws_iam_policy.ssm.arn,
     rds  = aws_iam_policy.rds.arn
     kms  = aws_iam_policy.kms.arn,
+    sns  = aws_iam_policy.sns.arn,
     vpc  = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
   }
 

@@ -71,6 +71,7 @@ resource "aws_lambda_function" "this" {
       BFD_ENVIRONMENT = local.env
       DB_CLUSTER_NAME = var.db_cluster_identifier
       ETL_BUCKET_ID   = var.etl_bucket_id
+      ALERT_TOPIC_ARN = data.aws_sns_topic.alert_topic.arn
     }
   }
 
