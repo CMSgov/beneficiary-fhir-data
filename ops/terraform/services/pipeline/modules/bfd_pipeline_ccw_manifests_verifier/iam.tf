@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "rds_policy_doc" {
 
 resource "aws_iam_policy" "rds" {
   name        = "${local.lambda_full_name}-rds"
-  description = "Permissions describe instances and the ${data.aws_rds_cluster.cluster.cluster_identifier} cluster"
+  description = "Permissions for the ${local.lambda_full_name} to describe the ${data.aws_rds_cluster.cluster.cluster_identifier} cluster"
   policy      = data.aws_iam_policy_document.rds_policy_doc.json
 }
 
@@ -77,8 +77,8 @@ data "aws_iam_policy_document" "kms_policy_doc" {
 resource "aws_iam_policy" "kms" {
   name = "${local.lambda_full_name}-kms"
   description = join("", [
-    "Permissions to decrypt config KMS keys and encrypt and decrypt master KMS keys for ",
-    "${local.env}"
+    "Permissions for the ${local.lambda_full_name} to decrypt config KMS keys and encrypt and ",
+    "decrypt master KMS keys for ${local.env}"
   ])
 
   policy = data.aws_iam_policy_document.kms_policy_doc.json
@@ -104,7 +104,7 @@ data "aws_iam_policy_document" "sns_policy_doc" {
 
 resource "aws_iam_policy" "sns" {
   name        = "${local.lambda_full_name}-sns"
-  description = "Permissions for the ${aws_lambda_function.this.function_name} to publish to the ${data.aws_sns_topic.alert_topic.name} SNS Topic"
+  description = "Permissions for the ${local.lambda_full_name} to publish to the ${data.aws_sns_topic.alert_topic.name} SNS Topic"
   policy      = data.aws_iam_policy_document.sns_policy_doc.json
 }
 
