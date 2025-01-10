@@ -22,6 +22,10 @@ fi
 #
 # BEGIN Local environment configuration.
 #
+
+# Force UTC time
+export TZ=UTC
+
 project_dir=$BFD_PATH/apps
 
 # Directory to store binaries and data files when running.
@@ -83,7 +87,7 @@ rda_token=
 s3_required=false
 s3_mode=local
 s3_bucket="bfd-pipeline"
-s3_directory=test
+s3_directory="test"
 threads=20
 install=true
 image_tag=
@@ -236,12 +240,13 @@ if lsof -Pi :4566 -sTCP:LISTEN -t >/dev/null ; then
   export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
   export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
   SSM_PARAMETER_PATH=/bfd-pipeline
-  export CONFIG_SETTINGS_JSON=$(cat <<EOF
+  CONFIG_SETTINGS_JSON=$(cat <<EOF
 {
   "ssmHierarchies": [ "$SSM_PARAMETER_PATH" ]
 }
 EOF
 )
+  export CONFIG_SETTINGS_JSON
 fi
 
 # Either export an environment variable (if not using SSM for config) or set the appropriate
@@ -332,7 +337,6 @@ if [[ $install = "true" ]] ; then
   jar_file=${exec_dir}/${app_name}.jar
   [[ -r $jar_file ]] && rm -f $jar_file
   [[ -d $lib_dir ]] && rm -rf $lib_dir
-  [[ -r $run_script ]] && rm -f $run_script
   mv $unzip_dir/* $exec_dir
   rmdir $unzip_dir
   if [[ ! -r $jar_file ]] || [[ ! -d $lib_dir ]] ; then

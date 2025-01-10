@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.zaxxer.hikari.HikariConfig;
+import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.AwsJdbcWrapperOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.HikariOptions;
 import java.util.Map;
@@ -11,14 +12,21 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.HikariPooledConnectionProvider;
+import software.amazon.jdbc.HostListProvider;
 import software.amazon.jdbc.HostSpec;
+import software.amazon.jdbc.PropertyDefinition;
+import software.amazon.jdbc.dialect.DialectManager;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
+import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPlugin;
-import software.amazon.jdbc.plugin.readwritesplitting.ReadWriteSplittingPlugin;
+import software.amazon.jdbc.plugin.failover2.FailoverConnectionPlugin;
 import software.amazon.jdbc.profile.ConfigurationProfile;
 import software.amazon.jdbc.profile.ConfigurationProfileBuilder;
 import software.amazon.jdbc.profile.DriverConfigurationProfiles;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectCodes;
+import software.amazon.jdbc.targetdriverdialect.TargetDriverDialectManager;
 
 /**
  * This class implements a {@link DataSourceFactory} that creates {@link AwsWrapperDataSource}
@@ -35,6 +43,12 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
 
   /** Used to configure constructed instances. */
   private final DatabaseOptions databaseOptions;
+
+  /**
+   * Configuration settings for {@link RdsClient}s used in the "state aware" {@link
+   * HostListProvider}s.
+   */
+  private final AwsClientConfig awsClientConfig;
 
   @Override
   public AwsWrapperDataSource createDataSource() {
@@ -71,6 +85,8 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
       DriverConfigurationProfiles.addOrReplaceProfile(
           customPresetProfile.getName(), customPresetProfile);
     }
+
+    DialectManager.setCustomDialect(StateAwareAuroraPgDialect.createWithAwsConfig(awsClientConfig));
 
     final var targetDataSourceProps = getProperties(wrapperOptions);
     dataSource.setTargetDataSourceProperties(mergeProperties(properties, targetDataSourceProps));
@@ -130,14 +146,25 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
   private static Properties getProperties(AwsJdbcWrapperOptions wrapperOptions) {
     final var targetDataSourceProps = new Properties();
     targetDataSourceProps.setProperty(
-        "wrapperProfileName",
+        TargetDriverDialectManager.TARGET_DRIVER_DIALECT.name, TargetDriverDialectCodes.PG_JDBC);
+    targetDataSourceProps.setProperty(
+        PropertyDefinition.PROFILE_NAME.name,
         wrapperOptions.useCustomPreset() ? CUSTOM_PRESET_NAME : wrapperOptions.getBasePresetCode());
+    targetDataSourceProps.setProperty(PropertyDefinition.AUTO_SORT_PLUGIN_ORDER.name, "false");
     targetDataSourceProps.setProperty(
         AuroraInitialConnectionStrategyPlugin.READER_HOST_SELECTOR_STRATEGY.name,
-        wrapperOptions.getInitialConnectionStrategy());
+        wrapperOptions.getHostSelectorStrategy());
     targetDataSourceProps.setProperty(
-        ReadWriteSplittingPlugin.READER_HOST_SELECTOR_STRATEGY.name,
-        wrapperOptions.getHostSelectionStrategy());
+        FailoverConnectionPlugin.FAILOVER_READER_HOST_SELECTOR_STRATEGY.name,
+        wrapperOptions.getHostSelectorStrategy());
+    targetDataSourceProps.setProperty(
+        FailoverConnectionPlugin.ENABLE_CONNECT_FAILOVER.name, "true");
+    targetDataSourceProps.setProperty(
+        RdsHostListProvider.CLUSTER_TOPOLOGY_REFRESH_RATE_MS.name,
+        Long.toString(wrapperOptions.getClusterTopologyRefreshRateMs()));
+    targetDataSourceProps.setProperty(
+        StateAwareMonitoringRdsHostListProvider.INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.name,
+        Long.toString(wrapperOptions.getInstanceStateMonitorRefreshRateMs()));
     return targetDataSourceProps;
   }
 

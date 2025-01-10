@@ -1,25 +1,28 @@
 package gov.cms.bfd.sharedutils.database;
 
+import static java.util.Map.entry;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import jakarta.annotation.Nullable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
 import software.amazon.jdbc.ConnectionPluginFactory;
+import software.amazon.jdbc.dialect.Dialect;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
+import software.amazon.jdbc.hostlistprovider.RdsHostListProvider;
 import software.amazon.jdbc.plugin.AuroraConnectionTrackerPluginFactory;
 import software.amazon.jdbc.plugin.AuroraInitialConnectionStrategyPluginFactory;
 import software.amazon.jdbc.plugin.AwsSecretsManagerConnectionPluginFactory;
@@ -266,38 +269,39 @@ public class DatabaseOptions {
      */
     private static final Map<String, Class<? extends ConnectionPluginFactory>>
         pluginFactoriesByCode =
-            new HashMap<>() {
-              {
-                put("executionTime", ExecutionTimeConnectionPluginFactory.class);
-                put("logQuery", LogQueryConnectionPluginFactory.class);
-                put("dataCache", DataCacheConnectionPluginFactory.class);
-                put("efm", HostMonitoringConnectionPluginFactory.class);
-                put(
+            Map.ofEntries(
+                entry("executionTime", ExecutionTimeConnectionPluginFactory.class),
+                entry("logQuery", LogQueryConnectionPluginFactory.class),
+                entry("dataCache", DataCacheConnectionPluginFactory.class),
+                entry("efm", HostMonitoringConnectionPluginFactory.class),
+                entry(
                     "efm2",
-                    software.amazon.jdbc.plugin.efm2.HostMonitoringConnectionPluginFactory.class);
-                put("failover", FailoverConnectionPluginFactory.class);
-                put("iam", IamAuthConnectionPluginFactory.class);
-                put("awsSecretsManager", AwsSecretsManagerConnectionPluginFactory.class);
-                put("federatedAuth", FederatedAuthPluginFactory.class);
-                put("okta", OktaAuthPluginFactory.class);
-                put("auroraStaleDns", AuroraStaleDnsPluginFactory.class);
-                put("readWriteSplitting", ReadWriteSplittingPluginFactory.class);
-                put("auroraConnectionTracker", AuroraConnectionTrackerPluginFactory.class);
-                put("driverMetaData", DriverMetaDataConnectionPluginFactory.class);
-                put("connectTime", ConnectTimeConnectionPluginFactory.class);
-                put("dev", DeveloperConnectionPluginFactory.class);
-                put("fastestResponseStrategy", FastestResponseStrategyPluginFactory.class);
-                put("initialConnection", AuroraInitialConnectionStrategyPluginFactory.class);
-              }
-            };
+                    software.amazon.jdbc.plugin.efm2.HostMonitoringConnectionPluginFactory.class),
+                entry("failover", FailoverConnectionPluginFactory.class),
+                entry(
+                    "failover2",
+                    software.amazon.jdbc.plugin.failover2.FailoverConnectionPluginFactory.class),
+                entry("iam", IamAuthConnectionPluginFactory.class),
+                entry("awsSecretsManager", AwsSecretsManagerConnectionPluginFactory.class),
+                entry("federatedAuth", FederatedAuthPluginFactory.class),
+                entry("okta", OktaAuthPluginFactory.class),
+                entry("auroraStaleDns", AuroraStaleDnsPluginFactory.class),
+                entry("readWriteSplitting", ReadWriteSplittingPluginFactory.class),
+                entry("auroraConnectionTracker", AuroraConnectionTrackerPluginFactory.class),
+                entry("driverMetaData", DriverMetaDataConnectionPluginFactory.class),
+                entry("connectTime", ConnectTimeConnectionPluginFactory.class),
+                entry("dev", DeveloperConnectionPluginFactory.class),
+                entry("fastestResponseStrategy", FastestResponseStrategyPluginFactory.class),
+                entry("initialConnection", AuroraInitialConnectionStrategyPluginFactory.class),
+                entry(
+                    "singleNodeHostOverride", SingleNodeHostOverrideConnectionPluginFactory.class));
 
     /**
      * Whether a custom preset should be generated based upon the given {@link #basePresetCode} and
      * configuration values from this class and {@link HikariOptions}. If {@literal false}, the
      * preset specified by {@link #basePresetCode} will be used, and all configuration (including
-     * {@link HikariOptions}) besides {@link #hostSelectionStrategy} and {@link
-     * #initialConnectionStrategy} will be ignored in favor of the defaults provided by the
-     * specified preset.
+     * {@link HikariOptions}) besides {@link #hostSelectorStrategy} will be ignored in favor of the
+     * defaults provided by the specified preset.
      */
     @Accessors(fluent = true)
     boolean useCustomPreset;
@@ -312,16 +316,24 @@ public class DatabaseOptions {
     ImmutableList<Class<? extends ConnectionPluginFactory>> plugins;
 
     /**
-     * The host selection strategy determining how the internal connection pooling mechanisms of the
-     * {@link AwsWrapperDataSource} will choose a node to connect to.
+     * The strategy determining how the host selection mechanisms of the {@link
+     * AwsWrapperDataSource} will choose which node to initially connect to and which to failover
+     * to.
      */
-    String hostSelectionStrategy;
+    String hostSelectorStrategy;
 
     /**
-     * The initial connection strategy determining how the internal connection pooling mechanisms of
-     * the {@link AwsWrapperDataSource} will choose which node to initially connect to.
+     * The rate, in milliseconds, at which the {@link RdsHostListProvider} will execute the current
+     * {@link Dialect}'s topology query (if applicable) to determine the list of available hosts to
+     * connect to.
      */
-    String initialConnectionStrategy;
+    long clusterTopologyRefreshRateMs;
+
+    /**
+     * The rate, in milliseconds, at which the {@link StateAwareMonitoringRdsHostListProvider} will
+     * monitor the state of RDS instances in the current cluster as reported by the RDS API.
+     */
+    long instanceStateMonitorRefreshRateMs;
 
     /**
      * Initializes an instance. The builder class generated by lombok calls this constructor.
@@ -332,18 +344,23 @@ public class DatabaseOptions {
      * @param pluginsCsv comma-separated list of plugin codes that will be used to populate {@link
      *     #plugins}. Invalid plugin codes will be discarded. If unspecified no plugins will be
      *     loaded
-     * @param hostSelectionStrategy the value to use for {@link #hostSelectionStrategy}. If
+     * @param hostSelectorStrategy the value to use for {@link #hostSelectorStrategy}. If
      *     unspecified the "roundRobin" strategy is chosen
-     * @param initialConnectionStrategy the value to use for {@link #initialConnectionStrategy}. If
-     *     unspecified the "roundRobin" strategy is chosen
+     * @param clusterTopologyRefreshRateMs the value to use for {@link
+     *     #clusterTopologyRefreshRateMs}. If unspecified the default of 30000 (30 seconds) is
+     *     chosen
+     * @param instanceStateMonitorRefreshRateMs the value to use for {@link
+     *     #instanceStateMonitorRefreshRateMs}. If unspecified the default of 5000 (5 seconds) is
+     *     chosen
      */
     @Builder()
     private AwsJdbcWrapperOptions(
         boolean useCustomPreset,
         @Nullable String basePresetCode,
         @Nullable String pluginsCsv,
-        @Nullable String hostSelectionStrategy,
-        @Nullable String initialConnectionStrategy) {
+        @Nullable String hostSelectorStrategy,
+        @Nullable Long clusterTopologyRefreshRateMs,
+        @Nullable Long instanceStateMonitorRefreshRateMs) {
       this.useCustomPreset = useCustomPreset;
       this.basePresetCode = basePresetCode != null ? basePresetCode : "E";
       this.plugins =
@@ -353,10 +370,12 @@ public class DatabaseOptions {
                   .filter(Objects::nonNull)
                   .collect(ImmutableList.toImmutableList())
               : ImmutableList.of();
-      this.hostSelectionStrategy =
-          hostSelectionStrategy != null ? hostSelectionStrategy : "roundRobin";
-      this.initialConnectionStrategy =
-          initialConnectionStrategy != null ? initialConnectionStrategy : "roundRobin";
+      this.hostSelectorStrategy =
+          hostSelectorStrategy != null ? hostSelectorStrategy : "roundRobin";
+      this.clusterTopologyRefreshRateMs =
+          clusterTopologyRefreshRateMs != null ? clusterTopologyRefreshRateMs : 30000L;
+      this.instanceStateMonitorRefreshRateMs =
+          instanceStateMonitorRefreshRateMs != null ? instanceStateMonitorRefreshRateMs : 5000L;
     }
   }
 }

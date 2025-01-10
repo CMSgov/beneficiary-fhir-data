@@ -32,10 +32,11 @@ locals {
   }
   # In the event this module is being applied in a non-established environment (i.e. an ephemeral
   # environment) this lookup will ensure that an empty configuration will be returned
+  # by allowing successful evaluation of this module from the parent
   env_sns = lookup(local.topic_names_by_env, local.env, {
-    high_alert = null
-    alert      = null
-    warning    = null
+    high_alert = "null"
+    alert      = "null"
+    warning    = "null"
   })
   # Use Terraform's "splat" operator to automatically return either an empty list, if no
   # SNS topic was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that

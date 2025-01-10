@@ -135,18 +135,26 @@ public abstract class BaseConfiguration {
   /**
    * The path of the SSM parameter that should be used to provide the {@link
    * DatabaseOptions.AwsJdbcWrapperOptions} {@link
-   * DatabaseOptions.AwsJdbcWrapperOptions#hostSelectionStrategy} value.
+   * DatabaseOptions.AwsJdbcWrapperOptions#hostSelectorStrategy} value.
    */
-  public static final String SSM_PATH_DB_WRAPPER_HOST_SELECTION_STRATEGY =
-      "db/wrapper/host_selection_strategy";
+  public static final String SSM_PATH_DB_WRAPPER_HOST_SELECTOR_STRATEGY =
+      "db/wrapper/host_selector_strategy";
 
   /**
    * The path of the SSM parameter that should be used to provide the {@link
    * DatabaseOptions.AwsJdbcWrapperOptions} {@link
-   * DatabaseOptions.AwsJdbcWrapperOptions#initialConnectionStrategy} value.
+   * DatabaseOptions.AwsJdbcWrapperOptions#clusterTopologyRefreshRateMs} value.
    */
-  public static final String SSM_PATH_DB_WRAPPER_INIT_CONNECTION_STRATEGY =
-      "db/wrapper/init_connection_strategy";
+  public static final String SSM_PATH_DB_WRAPPER_CLUSTER_TOPOLOGY_REFRESH_RATE_MS =
+      "db/wrapper/cluster_topology_refresh_rate_ms";
+
+  /**
+   * The path of the SSM parameter that should be used to provide the {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions} {@link
+   * DatabaseOptions.AwsJdbcWrapperOptions#instanceStateMonitorRefreshRateMs} value.
+   */
+  public static final String SSM_PATH_DB_WRAPPER_INSTANCE_STATE_MONITOR_REFRESH_RATE_MS =
+      "db/wrapper/instance_state_monitor_refresh_rate_ms";
 
   /**
    * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
@@ -214,7 +222,7 @@ public abstract class BaseConfiguration {
           .build();
     } else {
       if (databaseOptions.getDataSourceType() == DataSourceType.AWS_WRAPPER) {
-        return new AwsWrapperDataSourceFactory(databaseOptions);
+        return new AwsWrapperDataSourceFactory(databaseOptions, awsClientConfig);
       }
 
       // dataSourceType should never be null (if it is, it defaults to HIKARI), but this covers all
@@ -354,17 +362,20 @@ public abstract class BaseConfiguration {
       final var wrapperPluginsCsv =
           config.stringValue(
               SSM_PATH_DB_WRAPPER_PLUGINS_CSV, "auroraConnectionTracker,failover,efm2");
-      final var wrapperHostSelectionStrategy =
-          config.stringValue(SSM_PATH_DB_WRAPPER_HOST_SELECTION_STRATEGY, "roundRobin");
-      final var wrapperInitConnectionStrategy =
-          config.stringValue(SSM_PATH_DB_WRAPPER_INIT_CONNECTION_STRATEGY, "roundRobin");
+      final var wrapperHostSelectorStrategy =
+          config.stringValue(SSM_PATH_DB_WRAPPER_HOST_SELECTOR_STRATEGY, "roundRobin");
+      final var wrapperClusterTopologyRefreshRateMs =
+          config.longValue(SSM_PATH_DB_WRAPPER_CLUSTER_TOPOLOGY_REFRESH_RATE_MS, 30000L);
+      final var wrapperInstanceStateMonitorRefreshRateMs =
+          config.longValue(SSM_PATH_DB_WRAPPER_INSTANCE_STATE_MONITOR_REFRESH_RATE_MS, 5000L);
       final var wrapperOptions =
           DatabaseOptions.AwsJdbcWrapperOptions.builder()
               .useCustomPreset(wrapperUseCustomPreset)
               .basePresetCode(wrapperBasePresetCode)
               .pluginsCsv(wrapperPluginsCsv)
-              .hostSelectionStrategy(wrapperHostSelectionStrategy)
-              .initialConnectionStrategy(wrapperInitConnectionStrategy)
+              .hostSelectorStrategy(wrapperHostSelectorStrategy)
+              .clusterTopologyRefreshRateMs(wrapperClusterTopologyRefreshRateMs)
+              .instanceStateMonitorRefreshRateMs(wrapperInstanceStateMonitorRefreshRateMs)
               .build();
 
       dbOptionsBuilder.awsJdbcWrapperOptions(wrapperOptions);
