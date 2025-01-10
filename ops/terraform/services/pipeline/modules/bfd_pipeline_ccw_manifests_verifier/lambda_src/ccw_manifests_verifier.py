@@ -99,10 +99,9 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
                 etl_bucket.objects.filter(Prefix="Synthetic/Incoming/"),
             )
             recent_s3_manifest_keys = [
-                str(object.key)
+                object.key
                 for object in all_incoming_objects
-                if "manifest" in str(object.key)
-                and object.last_modified.astimezone(UTC) > two_weeks_ago
+                if "manifest" in object.key and object.last_modified.astimezone(UTC) > two_weeks_ago
             ]
 
             # Retrieve all manifests and their state that were discovered in the past 2 weeks from
