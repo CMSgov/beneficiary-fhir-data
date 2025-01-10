@@ -205,14 +205,14 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
                 logger.info("All manifests in S3 have been loaded by the Pipeline. Stopping")
                 return
 
-            # If we get here, there are unprocessed manifests. We need to send an alert the alert
+            # If we get here, there are unprocessed manifests. We need to send an alert to the alert
             # topic
             logger.info(
                 "%d manifest(s) failed to load over the weekend; publishing notification to %s "
-                "(manifests: %s)",
+                "(manifest(s): %s)",
                 len(unprocessed_manifests),
                 ALERT_TOPIC_ARN,
-                unprocessed_manifests,
+                ", ".join(unprocessed_manifests),
             )
             sns_client = boto3.client("sns", config=BOTO_CONFIG)
             sns_message = create_splunk_sns_notification(
