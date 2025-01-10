@@ -73,7 +73,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param batchSize the query batch size. This is the limit of claims to be pulled with each
    *     query.
    * @param logger The logger.
-   * @param logInterval The log interval.
+   * @param logInterval The log reporting interval, in seconds.
    * @param tableEntry the table Entry for this thread.
    */
   public AbstractSamhsaBackfill(
@@ -117,6 +117,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
       int limit,
       EntityManager entityManager) {
     StringSubstitutor strSub;
+    // GT_CLAIM_LINE allows the query to start at a given claim number.
     Map<String, String> params =
         Map.of(
             "gtClaimLine",
@@ -170,13 +171,18 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     Object claimId = claim[0];
     int codesOffset = 1;
     Optional<Object[]> dates = Optional.empty();
+    // Line item tables pull the active dates with a separate query, while parent tables use the
+    // original query.
     if (!tableEntry.getLineItem()) {
       dates = Optional.of(new Object[] {claim[1], claim[2]});
       codesOffset = 3;
     } else if (datesMap.containsKey(claimId.toString())) {
+      // The active dates for this claim were previously saved for a different record with the same
+      // claim id.
       dates = Optional.of(datesMap.get(claimId.toString()));
     }
 
+    // Create an array that contains only the SAMHSA codes for this record.
     List<String> codes =
         Arrays.asList(claim).subList(codesOffset, claim.length).stream()
             .filter(Objects::nonNull)
@@ -233,6 +239,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
               List<Object[]> claims = executeQuery(query);
               int savedInBatch = 0;
+              // This Map will allow us to save the active dates for a claim to be used in multiple
+              // records with the same claim id.
               HashMap<String, Object[]> datesMap = new HashMap<>();
               for (Object[] claim : claims) {
                 boolean persisted = processClaim(claim, datesMap, entityManager);
@@ -243,6 +251,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               totalSaved.accumulateAndGet(savedInBatch, Long::sum);
               totalProcessedInInterval.accumulateAndGet(claims.size(), Long::sum);
               totalProcessed.accumulateAndGet(claims.size(), Long::sum);
+              // Only write progress to the log at a given interval.
               if (startTime.get().plus(logInterval, ChronoUnit.SECONDS).isBefore(Instant.now())) {
                 logger.info(
                     String.format(
@@ -259,6 +268,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
                   !claims.isEmpty()
                       ? Optional.of(String.valueOf(claims.getLast()[0]))
                       : Optional.empty());
+              // Write progress to the progress table, so that we can restart at the last processed
+              // claim id if interrupted.
               saveProgress(
                   tableEntry.getClaimTable(),
                   lastClaimId.get(),
@@ -284,7 +295,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Writes the tag entry to the database.
+   * Writes the tag entry to the database. Due to a performance trade-off, the details column will
+   * not be written to.
    *
    * @param claimId claim id -- Could be a Long or a String.
    * @param table tag table to use.

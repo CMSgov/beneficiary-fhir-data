@@ -28,7 +28,8 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
             "rda.fiss_claims",
-            "rda.fiss_claims",
+            "rda.fiss_claims", // Should not be used, since is already a parent table. Included out
+                               // of an abundance of caution.
             false)),
     /** Fiss proc codes. */
     FISS_PROC_CODES(
@@ -109,7 +110,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
    *
    * @param transactionManager The transaction manager.
    * @param batchSize the query batch size.
-   * @param logInterval The log interval.
+   * @param logInterval The log reporting interval, in seconds.
    * @param tableEntry The table to process in this thread.
    */
   public RDASamhsaBackfill(

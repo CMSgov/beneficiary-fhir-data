@@ -15,7 +15,10 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The table to process in this thread. */
   private final TableEntry tableEntry;
 
-  /** The list of table entries for CCW claims. */
+  /**
+   * The list of table entries for CCW claims. This is mostly used in building the queries for the
+   * tables.
+   */
   public enum CCW_TABLES {
     /** Carrier Claim. */
     CARRIER_CLAIMS(
@@ -25,7 +28,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.carrier_tags",
             "cc.clm_id",
             "ccw.carrier_claims",
-            "ccw.carrier_claims",
+            "ccw.carrier_claims", // Should not be used, since is already a parent table. Included
+                                  // out of an abundance of caution.
             false)),
     /** Carrier Claim Lines. */
     CARRIER_CLAIM_LINES(
@@ -46,7 +50,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.dme_tags",
             "dc.clm_id",
             "ccw.dme_claims",
-            "ccw.dme_claims",
+            "ccw.dme_claims", // Should not be used, since is already a parent table. Included out
+                              // of an abundance of caution.
             false)),
     /** DME Claim Lines. */
     DME_CLAIM_LINES(
@@ -66,7 +71,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.hha_tags",
             "hc.clm_id",
             "ccw.hha_claims",
-            "ccw.hha_claims",
+            "ccw.hha_claims", // Should not be used, since is already a parent table. Included out
+                              // of an abundance of caution.
             false)),
     /** HHA Claim Lines. */
     HHA_CLAIM_LINES(
@@ -86,7 +92,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.hospice_tags",
             "hc.clm_id",
             "ccw.hospice_claims",
-            "ccw.hospice_claims",
+            "ccw.hospice_claims", // Should not be used, since is already a parent table. Included
+                                  // out of an abundance of caution.
             false)),
     /** Hospice Claim Lines. */
     HOSPICE_CLAIM_LINES(
@@ -106,7 +113,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.inpatient_tags",
             "ic.clm_id",
             "ccw.inpatient_claims",
-            "ccw.inpatient_claims",
+            "ccw.inpatient_claims", // Should not be used, since is already a parent table. Included
+                                    // out of an abundance of caution.
             false)),
     /** Inpatient Claim Lines. */
     INPATIENT_CLAIM_LINES(
@@ -126,7 +134,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.outpatient_tags",
             "oc.clm_id",
             "ccw.outpatient_claims",
-            "ccw.outpatient_claims",
+            "ccw.outpatient_claims", // Should not be used, since is already a parent table.
+                                     // Included out of an abundance of caution.
             false)),
     /** Outpatient Claim Lines. */
     OUTPATIENT_CLAIM_LINES(
@@ -146,7 +155,8 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ccw.snf_tags",
             "sc.clm_id",
             "ccw.snf_claims",
-            "ccw.snf_claims",
+            "ccw.snf_claims", // Should not be used, since is already a parent table. Included out
+                              // of an abundance of caution.
             false)),
     /** SNF Claim Lines. */
     SNF_CLAIM_LINES(
@@ -186,7 +196,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
    *
    * @param transactionManager Transaction manager.
    * @param batchSize the query batch size.
-   * @param logInterval The log interval.
+   * @param logInterval The log reporting interval, in seconds.
    * @param tableEntry The table to use in this thread.
    */
   public CCWSamhsaBackfill(
