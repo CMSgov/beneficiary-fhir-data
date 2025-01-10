@@ -1,9 +1,14 @@
-"""Source code for ccw-manifests-verifier Lambda."""
+"""Source code for ccw-manifests-verifier Lambda.
+
+This Lambda verifies that all recently modified CCW manifests in S3 are marked as "COMPLETED" in the
+database. If any are not, this Lambda will send an alert to the provided alert SNS Topic (expected
+to be the Splunk On Call Topic in prod).
+"""
 
 import itertools
 import os
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Annotated, Any
 
 import boto3
 import psycopg
@@ -12,12 +17,13 @@ from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 from psycopg.rows import dict_row
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, Field, TypeAdapter
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 DB_CLUSTER_NAME = os.environ.get("DB_CLUSTER_NAME", "")
 ETL_BUCKET_ID = os.environ.get("ETL_BUCKET_ID", "")
+ALERT_TOPIC_ARN = os.environ.get("ALERT_TOPIC_ARN", "")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -31,8 +37,51 @@ logger = Logger()
 
 
 class ManifestFilesResultModel(BaseModel):
+    """Pydantic model modeling columns returned from the s3_manifest_files database table."""
+
     s3_key: str
     status: str
+
+
+class SplunkOnCallNotificationModel(BaseModel):
+    """Pydantic model modeling the message that Splunk On Call expects from AWS alerts.
+
+    The Splunk On Call integration we use to send alerts from AWS expects that alerts originate from
+    CloudWatch Alarms. This is true for every alert except this one, so rather than installing
+    another integration we simply create a fake CloudWatch Alarm message. This is why the serialized
+    fields are named strangely and all but the "alert_message" field default to unusual values.
+    Additionally, this Lambda is mostly relevant for prod for which alerts will be sent to the
+    corresponding Splunk On Call Topic
+    """
+
+    alert_message: Annotated[str, Field(serialization_alias="NewStateReason")]
+    alert_name: Annotated[
+        str,
+        Field(serialization_alias="AlarmName", default="weekend_data_load_availability_failure"),
+    ]
+    state: Annotated[str, Field(serialization_alias="NewStateValue", default="ALARM")]
+    change_time: Annotated[
+        datetime,
+        Field(serialization_alias="StateChangeTime", default_factory=lambda: datetime.now(UTC)),
+    ]
+
+
+def create_splunk_sns_notification(
+    unprocessed_manifests: list[str],
+) -> SplunkOnCallNotificationModel:
+    """Create a SplunkOnCallNotificationModel with an appropriate alert message.
+
+    :param unprocessed_manifests: List of unprocessed manifests to alert upon
+    :type unprocessed_manifests: list[str]
+    :return: A model with a message indicating the unprocessed manifests
+    :rtype: SplunkOnCallNotificationModel
+    """
+    return SplunkOnCallNotificationModel.model_validate({
+        "alert_message": (
+            f"{BFD_ENVIRONMENT} CCW Pipeline failed to load {len(unprocessed_manifests)}"
+            f" manifest(s) over the weekend: {', '.join(unprocessed_manifests)}"
+        )
+    })
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
@@ -47,7 +96,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
         RuntimeError: If any AWS API operations fail
     """
     try:
-        if not all([REGION, BFD_ENVIRONMENT, DB_CLUSTER_NAME, ETL_BUCKET_ID]):
+        if not all([REGION, BFD_ENVIRONMENT, DB_CLUSTER_NAME, ETL_BUCKET_ID, ALERT_TOPIC_ARN]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         rds_client = boto3.client("rds", config=BOTO_CONFIG)
@@ -92,6 +141,10 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
 
             # Retrieve all manifests in the Incoming paths in s3 that were recently modified in the
             # past 2 weeks. These manifests will be reconciled against their status in the database
+            logger.info(
+                "Discovering manifest(s) last modified after %s from S3 in Incoming...",
+                two_weeks_ago.isoformat(),
+            )
             s3_resource = boto3.resource("s3", config=BOTO_CONFIG)
             etl_bucket = s3_resource.Bucket(ETL_BUCKET_ID)
             all_incoming_objects = itertools.chain(
@@ -101,12 +154,22 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
             recent_s3_manifest_keys = [
                 object.key
                 for object in all_incoming_objects
-                if "manifest" in object.key and object.last_modified.astimezone(UTC) > two_weeks_ago
+                if "manifest.xml" in object.key
+                and object.last_modified.astimezone(UTC) > two_weeks_ago
             ]
+            logger.info(
+                "Discovered %d S3 manifest(s) modified after %s",
+                len(recent_s3_manifest_keys),
+                two_weeks_ago.isoformat(),
+            )
 
             # Retrieve all manifests and their state that were discovered in the past 2 weeks from
             # the database. This list will be the source of truth against which the manifests in s3
             # will be verified against
+            logger.info(
+                "Retrieving manifest(s) discovered since %s from the database",
+                two_weeks_ago.isoformat(),
+            )
             raw_results = curs.execute(
                 """
                 SELECT s3_key, status FROM ccw.s3_manifest_files
@@ -117,11 +180,19 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
             db_manifest_files = TypeAdapter(list[ManifestFilesResultModel]).validate_python(
                 raw_results
             )
+            logger.info(
+                "Retrieved %d manifest(s) from the database discovered after %s",
+                len(db_manifest_files),
+                two_weeks_ago.isoformat(),
+            )
 
             # Reconcile the retrieved recently modified s3 manifests in Incoming with the manifests
             # and their state in the database. If any s3 manifests either are not in the COMPLETED
             # state or simply aren't in the database, the Pipeline failed to finish loading over the
             # weekend and we should alert
+            logger.info(
+                "Verifying all %d S3 manifest(s) have been loaded...", len(recent_s3_manifest_keys)
+            )
             unprocessed_manifests = [
                 s3_manifest
                 for s3_manifest in recent_s3_manifest_keys
@@ -130,11 +201,27 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
                     for db_manifest in db_manifest_files
                 )
             ]
-            if unprocessed_manifests:
+            if len(unprocessed_manifests) == 0:
                 logger.info("All manifests in S3 have been loaded by the Pipeline. Stopping")
                 return
 
-            # TODO: Alerting
+            # If we get here, there are unprocessed manifests. We need to send an alert the alert
+            # topic
+            logger.info(
+                "%d manifest(s) failed to load over the weekend; publishing notification to %s "
+                "(manifests: %s)",
+                len(unprocessed_manifests),
+                ALERT_TOPIC_ARN,
+                unprocessed_manifests,
+            )
+            sns_client = boto3.client("sns", config=BOTO_CONFIG)
+            sns_message = create_splunk_sns_notification(
+                unprocessed_manifests=unprocessed_manifests
+            ).model_dump_json(by_alias=True)
+            sns_client.publish(
+                TopicArn=ALERT_TOPIC_ARN,
+                Message=sns_message,
+            )
     except Exception:
         logger.exception("Unrecoverable exception raised")
         raise
