@@ -29,7 +29,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "cc.clm_id",
             "ccw.carrier_claims",
             "ccw.carrier_claims", // Should not be used, since is already a parent table. Included
-                                  // out of an abundance of caution.
+            // out of an abundance of caution.
             false)),
     /** Carrier Claim Lines. */
     CARRIER_CLAIM_LINES(
@@ -51,7 +51,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "dc.clm_id",
             "ccw.dme_claims",
             "ccw.dme_claims", // Should not be used, since is already a parent table. Included out
-                              // of an abundance of caution.
+            // of an abundance of caution.
             false)),
     /** DME Claim Lines. */
     DME_CLAIM_LINES(
@@ -72,7 +72,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "hc.clm_id",
             "ccw.hha_claims",
             "ccw.hha_claims", // Should not be used, since is already a parent table. Included out
-                              // of an abundance of caution.
+            // of an abundance of caution.
             false)),
     /** HHA Claim Lines. */
     HHA_CLAIM_LINES(
@@ -93,7 +93,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "hc.clm_id",
             "ccw.hospice_claims",
             "ccw.hospice_claims", // Should not be used, since is already a parent table. Included
-                                  // out of an abundance of caution.
+            // out of an abundance of caution.
             false)),
     /** Hospice Claim Lines. */
     HOSPICE_CLAIM_LINES(
@@ -114,7 +114,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "ic.clm_id",
             "ccw.inpatient_claims",
             "ccw.inpatient_claims", // Should not be used, since is already a parent table. Included
-                                    // out of an abundance of caution.
+            // out of an abundance of caution.
             false)),
     /** Inpatient Claim Lines. */
     INPATIENT_CLAIM_LINES(
@@ -135,7 +135,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "oc.clm_id",
             "ccw.outpatient_claims",
             "ccw.outpatient_claims", // Should not be used, since is already a parent table.
-                                     // Included out of an abundance of caution.
+            // Included out of an abundance of caution.
             false)),
     /** Outpatient Claim Lines. */
     OUTPATIENT_CLAIM_LINES(
@@ -156,7 +156,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             "sc.clm_id",
             "ccw.snf_claims",
             "ccw.snf_claims", // Should not be used, since is already a parent table. Included out
-                              // of an abundance of caution.
+            // of an abundance of caution.
             false)),
     /** SNF Claim Lines. */
     SNF_CLAIM_LINES(

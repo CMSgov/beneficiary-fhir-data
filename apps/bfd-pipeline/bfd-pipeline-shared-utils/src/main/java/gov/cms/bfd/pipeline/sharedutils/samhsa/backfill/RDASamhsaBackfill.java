@@ -29,7 +29,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             FISS_CLAIM_ID_FIELD,
             "rda.fiss_claims",
             "rda.fiss_claims", // Should not be used, since is already a parent table. Included out
-                               // of an abundance of caution.
+            // of an abundance of caution.
             false)),
     /** Fiss proc codes. */
     FISS_PROC_CODES(
