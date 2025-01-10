@@ -38,8 +38,8 @@ on:
         default: us-east-1
         type: choice
         options:
-         - us-east-1
-         - us-west-2
+          - us-east-1
+          - us-west-2
         required: true
 
 permissions:
@@ -63,6 +63,11 @@ jobs:
               name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
               dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
               contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
+            },
+            {
+              name: "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
+              dockerfile: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
+              contextDir: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
             },
           ]
     runs-on: ubuntu-latest
