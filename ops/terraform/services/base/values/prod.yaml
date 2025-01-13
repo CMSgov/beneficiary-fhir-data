@@ -141,7 +141,7 @@
 /bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: "25"
 /bfd/${env}/pipeline/nonsensitive/ccw/slis_repeater_lambda_invoke_rate: 1 minutes
 /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
-/bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topic: bfd-prod-cloudwatch-alarms
+/bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-prod-cloudwatch-alarms,bfd-prod-cloudwatch-alarms-slack-bfd-alerts
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/max_idle_seconds: "600"
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/server_type: Remote
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/mode: UNDEFINED

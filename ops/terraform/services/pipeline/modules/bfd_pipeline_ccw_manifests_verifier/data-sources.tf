@@ -49,10 +49,11 @@ data "aws_rds_cluster" "cluster" {
   cluster_identifier = var.db_cluster_identifier
 }
 
-data "aws_ssm_parameter" "alert_topic" {
-  name = "/bfd/${local.env}/${local.service}/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topic"
+data "aws_ssm_parameter" "alert_topics" {
+  name = "/bfd/${local.env}/${local.service}/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics"
 }
 
 data "aws_sns_topic" "alert_topic" {
-  name = nonsensitive(data.aws_ssm_parameter.alert_topic.value)
+  for_each = toset(local.alert_topics)
+  name     = each.key
 }

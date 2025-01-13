@@ -98,13 +98,13 @@ data "aws_iam_policy_document" "sns_policy_doc" {
   statement {
     sid       = "AllowPublish"
     actions   = ["SNS:Publish"]
-    resources = [data.aws_sns_topic.alert_topic.arn]
+    resources = data.aws_sns_topic.alert_topic[*].arn
   }
 }
 
 resource "aws_iam_policy" "sns" {
   name        = "${local.lambda_full_name}-sns"
-  description = "Permissions for the ${local.lambda_full_name} to publish to the ${data.aws_sns_topic.alert_topic.name} SNS Topic"
+  description = "Permissions for the ${local.lambda_full_name} to publish to the configured SNS Topic(s)"
   policy      = data.aws_iam_policy_document.sns_policy_doc.json
 }
 

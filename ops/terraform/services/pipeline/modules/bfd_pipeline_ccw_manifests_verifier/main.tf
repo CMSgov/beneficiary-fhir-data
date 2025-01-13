@@ -19,6 +19,8 @@ locals {
   lambda_full_name = "${local.service_name_prefix}-${local.lambda_name}"
   lambda_src       = replace(local.lambda_name, "-", "_")
   lambda_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${var.bfd_version}"
+
+  alert_topics = [for v in split(",", nonsensitive(data.aws_ssm_parameter.alert_topics)) : trimspace(v)]
 }
 
 
@@ -68,10 +70,10 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      DB_CLUSTER_NAME = var.db_cluster_identifier
-      ETL_BUCKET_ID   = var.etl_bucket_id
-      ALERT_TOPIC_ARN = data.aws_sns_topic.alert_topic.arn
+      BFD_ENVIRONMENT  = local.env
+      DB_CLUSTER_NAME  = var.db_cluster_identifier
+      ETL_BUCKET_ID    = var.etl_bucket_id
+      ALERT_TOPIC_ARNS = join(",", data.aws_sns_topic.alert_topic[*].arn)
     }
   }
 
