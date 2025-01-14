@@ -210,6 +210,7 @@ EOF
     "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess",
     "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
     "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess",
+    data.aws_iam_policy.ec2_instance_tags_ro.arn,
   ]
   max_session_duration = 3600
   name                 = "bfd-${local.env}-bfd_${local.service}-role"

@@ -98,6 +98,7 @@ resource "aws_iam_role" "this" {
     data.aws_iam_policy.cloudwatch_agent_xray_policy.arn,
     aws_iam_policy.sqs.arn,
     aws_iam_policy.ssm.arn,
+    data.aws_iam_policy.ec2_instance_tags_ro.arn,
   ]
 }
 

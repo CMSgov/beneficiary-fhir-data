@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.166.0-SNAPSHOT</version>
+    <version>2.171.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -65,7 +65,7 @@
         <!-- The version of Java that we'll use for everything. -->
         <javaSourceVersion>21</javaSourceVersion>
 
-        <project.build.outputTimestamp>2024-11-14T22:13:21Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-12-18T13:29:22Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -140,7 +140,7 @@
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
-        <hapi-fhir.version>7.4.4</hapi-fhir.version>
+        <hapi-fhir.version>7.6.0</hapi-fhir.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
         <org.apache.poi.version>5.3.0</org.apache.poi.version>
@@ -1124,6 +1124,27 @@
                         See https://maven.apache.org/guides/mini/guide-reproducible-builds.html
                      -->
                     <notimestamp>true</notimestamp>
+                    <!-- Enables the @apiNote, @implSpec, and @implNote tags with their corresponding
+                         headings. These tags are used within the JDK and are real JavaDoc tags, they
+                         just seem to be unsupported by default.
+                    -->
+                    <tags>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>API Note:</head>
+                        </tag>
+                        <tag>
+                            <name>implSpec</name>
+                            <placement>a</placement>
+                            <head>Implementation Specification:</head>
+                        </tag>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>Implementation Note:</head>
+                        </tag>
+                    </tags>
                 </configuration>
                 <executions>
                     <execution>

@@ -2,8 +2,8 @@ package gov.cms.bfd.sharedutils.database;
 
 import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
+import jakarta.annotation.Nullable;
 import java.util.Properties;
-import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 
