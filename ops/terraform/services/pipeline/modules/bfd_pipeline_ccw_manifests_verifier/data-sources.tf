@@ -18,7 +18,7 @@ data "aws_kms_key" "config_cmk" {
 }
 
 data "aws_ecr_repository" "ecr" {
-  name = "bfd-mgmt-${local.lambda_name}-lambda"
+  name = "bfd-mgmt-${local.service}-${local.lambda_name}-lambda"
 }
 
 data "aws_ecr_image" "this" {
