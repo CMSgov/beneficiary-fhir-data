@@ -19,8 +19,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class SNFClaimTransformerV2Test {
   @Mock MetricRegistry metricRegistry;
 
   /** The SamhsaSecurityTag lookup. */
-  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  @Mock SecurityTagManager securityTagManager;
 
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
@@ -131,7 +131,7 @@ public class SNFClaimTransformerV2Test {
 
     snfClaimTransformer =
         new SNFClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
+            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

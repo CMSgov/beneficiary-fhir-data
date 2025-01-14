@@ -14,17 +14,19 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +52,8 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
   private static final String METRIC_NAME =
       MetricRegistry.name(OutpatientClaimTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.
@@ -63,17 +65,17 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
-   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
   public OutpatientClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
-      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -94,10 +96,10 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
 
       OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(
               String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
-      eob = transformClaim(outpatientClaim, securityTag);
+      eob = transformClaim(outpatientClaim, securityTags);
     }
     return eob;
   }
@@ -106,20 +108,17 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
-   * @param securityTag securityTag of the claim
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup, String securityTag) {
+  private ExplanationOfBenefit transformClaim(
+      OutpatientClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobOutpatientUrl());
-    eob.getMeta()
-        .addSecurity()
-        .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-        .setCode(securityTag)
-        .setDisplay(securityTag);
+    eob.getMeta().setSecurity(securityTags);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

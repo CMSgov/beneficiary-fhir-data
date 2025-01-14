@@ -12,13 +12,15 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +43,8 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform");
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.
@@ -53,15 +55,15 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
-   * @param lookUpSamhsaSecurityTags SamhsaSecurityTag lookup
+   * @param securityTagManager SamhsaSecurityTag lookup
    */
   public OutpatientClaimTransformer(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -80,10 +82,10 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(
               String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
-      eob = transformClaim(outpatientClaim, securityTag);
+      eob = transformClaim(outpatientClaim, securityTags);
     }
     return eob;
   }
@@ -92,11 +94,12 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link OutpatientClaim} to transform
-   * @param securityTag securityTag tag of a claim
+   * @param securityTags securityTags tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(OutpatientClaim claimGroup, String securityTag) {
+  private ExplanationOfBenefit transformClaim(
+      OutpatientClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -333,11 +336,7 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
-    eob.getMeta()
-        .addSecurity()
-        .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-        .setCode(securityTag)
-        .setDisplay(securityTag);
+    eob.getMeta().setSecurity(securityTags);
     return eob;
   }
 }

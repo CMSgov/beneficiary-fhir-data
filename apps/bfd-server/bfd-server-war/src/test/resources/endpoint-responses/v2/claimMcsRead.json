@@ -4,9 +4,9 @@
   "meta": {
     "lastUpdated": "1970-01-01T00:00:04.000+00:00",
     "security" : [ {
-      "code" : "Normal",
+      "code" : "N",
       "display" : "Normal",
-      "system" : "https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html"
+      "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality"
     } ]
   },
   "contained": [

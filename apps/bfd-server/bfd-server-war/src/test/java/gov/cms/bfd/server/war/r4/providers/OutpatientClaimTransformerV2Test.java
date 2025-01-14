@@ -20,8 +20,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public final class OutpatientClaimTransformerV2Test {
   @Mock Timer metricsTimer;
 
   /** The SamhsaSecurityTag lookup. */
-  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  @Mock SecurityTagManager securityTagManager;
 
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
@@ -131,7 +131,7 @@ public final class OutpatientClaimTransformerV2Test {
             metricRegistry,
             drugCodeDisplayLookup,
             NPIOrgLookup.createNpiOrgLookup(),
-            lookUpSamhsaSecurityTags);
+            securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

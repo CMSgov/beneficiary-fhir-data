@@ -12,16 +12,18 @@ import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.samhsa.HhaTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Quantity;
@@ -42,8 +44,8 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.
@@ -54,15 +56,15 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
-   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
   public HHAClaimTransformerV2(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -81,10 +83,10 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HHAClaim hhaClaim = (HHAClaim) claim;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(
               String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
-      eob = transformClaim(hhaClaim, securityTag);
+      eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;
   }
@@ -93,20 +95,17 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HHAClaim} to transform
-   * @param securityTag securityTag of the claim
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup, String securityTag) {
+  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobNonclinicianUrl());
-    eob.getMeta()
-        .addSecurity()
-        .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-        .setCode(securityTag)
-        .setDisplay(securityTag);
+    eob.getMeta().setSecurity(securityTags);
+
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id
     // CLM_ID => ExplanationOfBenefit.identifier

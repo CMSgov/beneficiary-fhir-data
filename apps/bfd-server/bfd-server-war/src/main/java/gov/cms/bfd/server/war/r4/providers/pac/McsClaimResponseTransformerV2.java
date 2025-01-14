@@ -7,7 +7,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
@@ -39,8 +39,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -109,10 +109,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claimEntity;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
-              rdaMcsClaim.getIdrClmHdIcn(), McsTag.class);
-      return transformClaim(rdaMcsClaim, securityTag);
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(rdaMcsClaim.getIdrClmHdIcn(), McsTag.class);
+      return transformClaim(rdaMcsClaim, securityTags);
     }
   }
 
@@ -120,10 +119,10 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * Transforms a {@link RdaMcsClaim} into a FHIR {@link Claim}.
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
-   * @param securityTag securityTag of the claim
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link RdaMcsClaim}
    */
-  private ClaimResponse transformClaim(RdaMcsClaim claimGroup, String securityTag) {
+  private ClaimResponse transformClaim(RdaMcsClaim claimGroup, List<Coding> securityTags) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -140,19 +139,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    List<Coding> securityTags = new ArrayList<>();
-    // Create a Coding object for the security level
-    Coding securityTagCoding =
-        new Coding()
-            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-            .setCode(securityTag)
-            .setDisplay(securityTag);
-
-    // Add the Coding to the list
-    securityTags.add(securityTagCoding);
-    Meta meta = new Meta();
-    claim.setMeta(meta.setSecurity(securityTags));
-    claim.setMeta(meta.setLastUpdated(Date.from(claimGroup.getLastUpdated())));
+    Meta meta =
+        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    claim.setMeta(meta);
     claim.setCreated(new Date());
 
     return claim;

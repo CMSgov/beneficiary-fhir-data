@@ -28,8 +28,8 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -1605,7 +1605,7 @@ public final class TransformerTestUtilsV2 {
    * @param includeTaxNumbers if tax numbers should be included in the response
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
-   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
@@ -1614,36 +1614,36 @@ public final class TransformerTestUtilsV2 {
       boolean includeTaxNumbers,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
-      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
+      SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterfaceV2 claimTransformerInterface = null;
     if (rifRecord instanceof CarrierClaim) {
       claimTransformerInterface =
           new CarrierClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, lookUpSamhsaSecurityTags);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof DMEClaim) {
       claimTransformerInterface =
           new DMEClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, lookUpSamhsaSecurityTags);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface =
-          new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+          new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof HospiceClaim) {
       claimTransformerInterface =
-          new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+          new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof InpatientClaim) {
       claimTransformerInterface =
-          new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+          new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof OutpatientClaim) {
       claimTransformerInterface =
           new OutpatientClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, lookUpSamhsaSecurityTags);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof PartDEvent) {
       claimTransformerInterface =
           new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
     } else if (rifRecord instanceof SNFClaim) {
       claimTransformerInterface =
-          new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+          new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }

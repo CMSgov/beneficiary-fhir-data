@@ -11,7 +11,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
@@ -49,8 +49,8 @@ import org.springframework.stereotype.Component;
 public class McsClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /** The metric name. */
   private static final String METRIC_NAME =
@@ -80,12 +80,12 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param lookUpSamhsaSecurityTags SamhsaSecurityTags lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
   public McsClaimTransformerV2(
-      MetricRegistry metricRegistry, LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
+      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
     this.metricRegistry = metricRegistry;
-    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -104,9 +104,9 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       RdaMcsClaim claim = (RdaMcsClaim) claimEntity;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(claim.getIdrClmHdIcn(), McsTag.class);
-      return transformClaim(claim, includeTaxNumbers, securityTag);
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(claim.getIdrClmHdIcn(), McsTag.class);
+      return transformClaim(claim, includeTaxNumbers, securityTags);
     }
   }
 
@@ -115,11 +115,11 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
-   * @param securityTag securityTag tag of a claim
+   * @param securityTags securityTags tag of a claim
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaMcsClaim}
    */
   private Claim transformClaim(
-      RdaMcsClaim claimGroup, boolean includeTaxNumbers, String securityTag) {
+      RdaMcsClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -146,21 +146,9 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
     claim.setCreated(new Date());
 
-    List<Coding> securityTags = new ArrayList<>();
-
-    // Create a Coding object for the security level
-    Coding securityTagCoding =
-        new Coding()
-            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-            .setCode(securityTag)
-            .setDisplay(securityTag);
-
-    // Add the Coding to the list
-    securityTags.add(securityTagCoding);
-    Meta meta = new Meta();
-    claim.setMeta(meta.setSecurity(securityTags));
-    claim.setMeta(meta.setLastUpdated(Date.from(claimGroup.getLastUpdated())));
-
+    Meta meta =
+        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    claim.setMeta(meta);
     return claim;
   }
 

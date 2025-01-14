@@ -29,11 +29,11 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
@@ -86,7 +86,7 @@ public class TransformerUtilsV2Test {
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
   /** The SamhsaSecurityTag lookup. */
-  @Mock LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  @Mock SecurityTagManager securityTagManager;
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
@@ -901,7 +901,6 @@ public class TransformerUtilsV2Test {
   public void createBundleWithoutPagingWithASizeOf2() throws IOException {
 
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
-    //    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
@@ -924,7 +923,7 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
+        new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -940,7 +939,7 @@ public class TransformerUtilsV2Test {
     hospiceClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
+        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
     genEob = claimTransformerInterface.transform(hospiceClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -962,7 +961,7 @@ public class TransformerUtilsV2Test {
             new MetricRegistry(),
             new FdaDrugCodeDisplayLookup(npiDataStream),
             npiOrgLookup,
-            lookUpSamhsaSecurityTags);
+            securityTagManager);
     genEob = claimTransformerInterface.transform(dmeClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -977,8 +976,7 @@ public class TransformerUtilsV2Test {
     inpatientClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new InpatientClaimTransformerV2(
-            new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
+        new InpatientClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
     genEob = claimTransformerInterface.transform(inpatientClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -1106,7 +1104,7 @@ public class TransformerUtilsV2Test {
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookup(), lookUpSamhsaSecurityTags);
+            new MetricRegistry(), NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);

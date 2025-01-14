@@ -11,12 +11,14 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
 import gov.cms.bfd.model.rif.samhsa.InpatientTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +39,8 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(InpatientClaimTransformer.class.getSimpleName(), "transform");
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.
@@ -49,15 +51,15 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
-   * @param lookUpSamhsaSecurityTags SamhsaSecurityTag lookup
+   * @param securityTagManager SamhsaSecurityTag lookup
    */
   public InpatientClaimTransformer(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags) {
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.lookUpSamhsaSecurityTags = requireNonNull(lookUpSamhsaSecurityTags);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -76,10 +78,10 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       InpatientClaim inpatientClaim = (InpatientClaim) claim;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(
               String.valueOf(inpatientClaim.getClaimId()), InpatientTag.class);
-      eob = transformClaim(inpatientClaim, securityTag);
+      eob = transformClaim(inpatientClaim, securityTags);
     }
     return eob;
   }
@@ -88,11 +90,12 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
-   * @param securityTag securityTag tag of a claim
+   * @param securityTags securityTags tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup, String securityTag) {
+  private ExplanationOfBenefit transformClaim(
+      InpatientClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -294,11 +297,8 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
-    eob.getMeta()
-        .addSecurity()
-        .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-        .setCode(securityTag)
-        .setDisplay(securityTag);
+    eob.getMeta().setSecurity(securityTags);
+
     return eob;
   }
 }

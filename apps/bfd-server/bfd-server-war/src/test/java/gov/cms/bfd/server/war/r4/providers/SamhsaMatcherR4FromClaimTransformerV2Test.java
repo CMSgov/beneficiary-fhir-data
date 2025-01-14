@@ -22,7 +22,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -132,24 +132,24 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
     NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
-    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
+    SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
         new DMEClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, lookUpSamhsaSecurityTags);
+            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     CarrierClaimTransformerV2 carrierClaimTransformerV2 =
         new CarrierClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, lookUpSamhsaSecurityTags);
+            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     HHAClaimTransformerV2 hhaClaimTransformerV2 =
-        new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+        new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
     InpatientClaimTransformerV2 inpatientClaimTransformerV2 =
-        new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+        new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
     OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
         new OutpatientClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, lookUpSamhsaSecurityTags);
+            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     PartDEventTransformerV2 partDEventTransformer =
         new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
     SNFClaimTransformerV2 snfClaimTransformerV2 =
-        new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, lookUpSamhsaSecurityTags);
+        new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
 
     ExplanationOfBenefit inpatientEob =
         inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class), false);
@@ -166,7 +166,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, lookUpSamhsaSecurityTags);
+        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
     ExplanationOfBenefit hospiceEob =
         hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();

@@ -24,8 +24,8 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -129,14 +129,14 @@ public class CarrierClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
-    LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags = mock(LookUpSamhsaSecurityTags.class);
+    SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(
             metricRegistry,
             drugCodeDisplayLookup,
             NPIOrgLookup.createNpiOrgLookup(),
-            lookUpSamhsaSecurityTags);
+            securityTagManager);
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);

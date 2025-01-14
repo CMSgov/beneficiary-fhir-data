@@ -19,7 +19,7 @@ import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IcdCode;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -55,8 +55,8 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class Stu3EobSamhsaMatcherTest {
 
-  /** The lookUpSamhsaSecurityTags. */
-  @Mock private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** The securityTagManager. */
+  @Mock private SecurityTagManager securityTagManager;
 
   /** The SAMHSA CPT code. */
   public static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
@@ -87,8 +87,6 @@ public final class Stu3EobSamhsaMatcherTest {
   @BeforeEach
   void setup() {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-    //    when(lookUpSamhsaSecurityTags.getClaimSecurityLevel(anyString(), eq(HhaTag.class)))
-    //            .thenReturn("Normal");
   }
 
   /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
@@ -197,7 +195,7 @@ public final class Stu3EobSamhsaMatcherTest {
                         false,
                         fdaDrugCodeDisplayLookup,
                         localNpiLookup,
-                        lookUpSamhsaSecurityTags);
+                        securityTagManager);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -879,7 +877,7 @@ public final class Stu3EobSamhsaMatcherTest {
               false,
               RDATestUtils.fdaDrugCodeDisplayLookup(),
               NPIOrgLookup.createNpiOrgLookup(),
-              lookUpSamhsaSecurityTags);
+              securityTagManager);
 
       return sampleEobForClaimType;
     }

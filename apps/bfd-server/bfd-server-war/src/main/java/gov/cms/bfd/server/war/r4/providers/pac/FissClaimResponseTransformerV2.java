@@ -9,7 +9,7 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
-import gov.cms.bfd.server.war.commons.LookUpSamhsaSecurityTags;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
@@ -44,8 +44,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting lookUpSamhsaSecurityTags. */
-  @Autowired private LookUpSamhsaSecurityTags lookUpSamhsaSecurityTags;
+  /** Injecting securityTagManager. */
+  @Autowired private SecurityTagManager securityTagManager;
 
   /**
    * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
@@ -94,9 +94,9 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       RdaFissClaim rdaFissClaim = (RdaFissClaim) claimEntity;
-      String securityTag =
-          lookUpSamhsaSecurityTags.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
-      return transformClaim(rdaFissClaim, securityTag);
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
+      return transformClaim(rdaFissClaim, securityTags);
     }
   }
 
@@ -104,11 +104,11 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
    * Transforms an {@link RdaFissClaim} to a FHIR {@link ClaimResponse}.
    *
    * @param claimGroup the {@link RdaFissClaim} to transform
-   * @param securityTag securityTag of the claim
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
    *     RdaFissClaim}
    */
-  private ClaimResponse transformClaim(RdaFissClaim claimGroup, String securityTag) {
+  private ClaimResponse transformClaim(RdaFissClaim claimGroup, List<Coding> securityTags) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getClaimId());
@@ -124,20 +124,11 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setRequest(new Reference(String.format("Claim/f-%s", claimGroup.getClaimId())));
     claim.setItem(getClaimItems(claimGroup));
 
-    List<Coding> securityTags = new ArrayList<>();
-
-    // Create a Coding object for the security level
-    Coding securityTagCoding =
-        new Coding()
-            .setSystem("https://terminology.hl7.org/6.1.0/CodeSystem-v3-Confidentiality.html")
-            .setCode(securityTag)
-            .setDisplay(securityTag);
-
     // Add the Coding to the list
-    securityTags.add(securityTagCoding);
-    Meta meta = new Meta();
-    claim.setMeta(meta.setSecurity(securityTags));
-    claim.setMeta(meta.setLastUpdated(Date.from(claimGroup.getLastUpdated())));
+    Meta meta =
+        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    claim.setMeta(meta);
     claim.setCreated(new Date());
 
     return claim;
