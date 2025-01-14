@@ -405,6 +405,14 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Resource = "*"
         },
         {
+          Sid    = "AllowPolicyManagementOfAllKeys"
+          Effect = "Allow"
+          Action = [
+            "kms:PutKeyPolicy",
+          ]
+          Resource = "*"
+        },
+        {
           Sid    = "AllowSNS"
           Effect = "Allow"
           Action = [
@@ -428,7 +436,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Action = [
             "iam:Get*",
             "iam:List*",
-            "iam:DeletePolicyVersion"
+            "iam:DeletePolicyVersion",
+            "iam:CreatePolicyVersion"
           ]
           Resource = "*"
         },
