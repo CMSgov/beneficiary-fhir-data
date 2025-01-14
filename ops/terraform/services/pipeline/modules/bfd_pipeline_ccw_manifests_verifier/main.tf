@@ -37,7 +37,7 @@ resource "aws_scheduler_schedule" "this" {
   }
 
   # Schedule specifies to run every Monday at 9 AM ET
-  schedule_expression          = "cron(0 9 * * MON *)"
+  schedule_expression          = "cron(0 9 ? * MON *)"
   schedule_expression_timezone = "America/New_York"
 
   target {
