@@ -57,3 +57,7 @@ data "aws_sns_topic" "alert_topic" {
   count = length(local.alert_topics)
   name  = local.alert_topics[count.index]
 }
+
+data "aws_s3_bucket" "etl_bucket" {
+  bucket = var.etl_bucket_id
+}

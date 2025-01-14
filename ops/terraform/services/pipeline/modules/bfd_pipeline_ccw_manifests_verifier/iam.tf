@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "ssm_policy_doc" {
 
 resource "aws_iam_policy" "ssm" {
   name        = "${local.lambda_full_name}-ssm"
-  description = "Permissions to get relevant SSM parameters"
+  description = "Permissions for the ${local.lambda_full_name} Lambda to get relevant SSM parameters"
   policy      = data.aws_iam_policy_document.ssm_policy_doc.json
 }
 
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "rds_policy_doc" {
 
 resource "aws_iam_policy" "rds" {
   name        = "${local.lambda_full_name}-rds"
-  description = "Permissions for the ${local.lambda_full_name} to describe the ${data.aws_rds_cluster.cluster.cluster_identifier} cluster"
+  description = "Permissions for the ${local.lambda_full_name} Lambda to describe the ${data.aws_rds_cluster.cluster.cluster_identifier} cluster"
   policy      = data.aws_iam_policy_document.rds_policy_doc.json
 }
 
@@ -77,21 +77,24 @@ data "aws_iam_policy_document" "kms_policy_doc" {
 resource "aws_iam_policy" "kms" {
   name = "${local.lambda_full_name}-kms"
   description = join("", [
-    "Permissions for the ${local.lambda_full_name} to decrypt config KMS keys and encrypt and ",
-    "decrypt master KMS keys for ${local.env}"
+    "Permissions for the ${local.lambda_full_name} Lambda to decrypt config KMS keys and encrypt ",
+    "and decrypt master KMS keys for ${local.env}"
   ])
 
   policy = data.aws_iam_policy_document.kms_policy_doc.json
 }
 
-data "aws_iam_policy_document" "lambda_role_assume_policy_doc" {
+data "aws_iam_policy_document" "s3_policy_doc" {
   statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
+    actions   = ["s3:ListBucket"]
+    resources = [data.aws_s3_bucket.etl_bucket.arn]
   }
+}
+
+resource "aws_iam_policy" "s3" {
+  name        = "${local.lambda_full_name}-s3"
+  description = "Permissions for the ${local.lambda_full_name} Lambda to list objects in the ${var.etl_bucket_id} Bucket"
+  policy      = data.aws_iam_policy_document.s3_policy_doc.json
 }
 
 data "aws_iam_policy_document" "sns_policy_doc" {
@@ -104,8 +107,18 @@ data "aws_iam_policy_document" "sns_policy_doc" {
 
 resource "aws_iam_policy" "sns" {
   name        = "${local.lambda_full_name}-sns"
-  description = "Permissions for the ${local.lambda_full_name} to publish to the configured SNS Topic(s)"
+  description = "Permissions for the ${local.lambda_full_name} Lambda to publish to the configured SNS Topic(s)"
   policy      = data.aws_iam_policy_document.sns_policy_doc.json
+}
+
+data "aws_iam_policy_document" "lambda_role_assume_policy_doc" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
 }
 
 resource "aws_iam_role" "this" {
@@ -122,6 +135,7 @@ resource "aws_iam_role_policy_attachment" "this" {
     ssm  = aws_iam_policy.ssm.arn,
     rds  = aws_iam_policy.rds.arn
     kms  = aws_iam_policy.kms.arn,
+    s3   = aws_iam_policy.s3.arn,
     sns  = aws_iam_policy.sns.arn,
     vpc  = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
   }
