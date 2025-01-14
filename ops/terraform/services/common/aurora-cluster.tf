@@ -83,6 +83,32 @@ resource "aws_rds_cluster" "aurora_cluster" {
     data.aws_security_group.vpn.id,
   ]
 
+  # Autoscaled reader nodes, by default, are not configured with Performance Insights. Until
+  # recently, the only option for enabling Performance Insights for those nodes would be to enable
+  # it after they scale-out and reach the "available" state. However, it seems that it is now
+  # possible to enable both Performance Insights and Enhanced Monitoring at the Cluster level for
+  # Aurora Clusters, avoiding such a workaround. Unfortunately, the Terraform AWS Provider does not
+  # properly support enabling both Performance Insights and Enhanced Monitoring at the Cluster level
+  # as of 01/25, thus necessitating this local-exec provisioner. Fortunately, once enabled, the
+  # settings for these cannot be changed, so we only need them to be enabled at creation-time.
+  provisioner "local-exec" {
+    environment = {
+      DB_CLUSTER_ID                    = self.cluster_identifier
+      KMS_KEY_ID                       = self.kms_key_id
+      ENHANCED_MONITORING_INTERVAL     = 15
+      ENHANCED_MONITORING_IAM_ROLE_ARN = data.aws_iam_role.monitoring.arn
+    }
+    command     = <<-EOF
+    aws rds modify-db-cluster --db-cluster-identifier "$DB_CLUSTER_ID" \
+      --performance-insights-kms-key-id "$KMS_KEY_ID" \
+      --enable-performance-insights \
+      --monitoring-interval "$ENHANCED_MONITORING_INTERVAL" \
+      --monitoring-role-arn "$ENHANCED_MONITORING_IAM_ROLE_ARN" 1>/dev/null &&
+      echo "Performance Insights and Enhanced Monitoring enabled for $DB_CLUSTER_ID"
+    EOF
+    interpreter = ["/bin/bash", "-c"]
+  }
+
   # Autoscaled reader nodes are not managed by Terraform and Terraform is unable to destroy a
   # cluster with nodes still within it. To support simply running "terraform destroy" in
   # environments with autoscaling enabled, a helper script is used that will automatically mark all
