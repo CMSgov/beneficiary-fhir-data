@@ -161,17 +161,21 @@ resource "aws_db_parameter_group" "aurora_cluster" {
 }
 
 resource "aws_rds_cluster_instance" "writer" {
-  auto_minor_version_upgrade   = true
-  ca_cert_identifier           = "rds-ca-rsa4096-g1"
-  cluster_identifier           = aws_rds_cluster.aurora_cluster.id
-  copy_tags_to_snapshot        = true
-  db_subnet_group_name         = aws_rds_cluster.aurora_cluster.db_subnet_group_name
-  db_parameter_group_name      = aws_rds_cluster.aurora_cluster.db_instance_parameter_group_name
-  engine                       = aws_rds_cluster.aurora_cluster.engine
-  engine_version               = aws_rds_cluster.aurora_cluster.engine_version
-  identifier                   = "${aws_rds_cluster.aurora_cluster.id}-writer-node"
-  instance_class               = local.rds_instance_class
-  preferred_maintenance_window = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
-  publicly_accessible          = false
-  tags                         = { Layer = "data" }
+  auto_minor_version_upgrade      = true
+  ca_cert_identifier              = "rds-ca-rsa4096-g1"
+  cluster_identifier              = aws_rds_cluster.aurora_cluster.id
+  copy_tags_to_snapshot           = true
+  db_subnet_group_name            = aws_rds_cluster.aurora_cluster.db_subnet_group_name
+  db_parameter_group_name         = aws_rds_cluster.aurora_cluster.db_instance_parameter_group_name
+  engine                          = aws_rds_cluster.aurora_cluster.engine
+  engine_version                  = aws_rds_cluster.aurora_cluster.engine_version
+  identifier                      = "${aws_rds_cluster.aurora_cluster.id}-writer-node"
+  instance_class                  = local.rds_instance_class
+  monitoring_interval             = 15
+  monitoring_role_arn             = data.aws_iam_role.monitoring.arn
+  performance_insights_enabled    = true
+  performance_insights_kms_key_id = aws_rds_cluster.aurora_cluster.kms_key_id
+  preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
+  publicly_accessible             = false
+  tags                            = { Layer = "data" }
 }
