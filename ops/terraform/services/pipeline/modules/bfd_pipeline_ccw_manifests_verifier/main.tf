@@ -20,7 +20,7 @@ locals {
   lambda_src       = replace(local.lambda_name, "-", "_")
   lambda_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${var.bfd_version}"
 
-  alert_topics = [for v in split(",", nonsensitive(data.aws_ssm_parameter.alert_topics)) : trimspace(v)]
+  alert_topics = [for v in split(",", nonsensitive(data.aws_ssm_parameter.alert_topics.value)) : trimspace(v)]
 }
 
 

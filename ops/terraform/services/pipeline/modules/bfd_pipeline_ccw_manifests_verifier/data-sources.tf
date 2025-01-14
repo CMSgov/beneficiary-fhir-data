@@ -54,6 +54,6 @@ data "aws_ssm_parameter" "alert_topics" {
 }
 
 data "aws_sns_topic" "alert_topic" {
-  for_each = toset(local.alert_topics)
-  name     = each.key
+  count = length(local.alert_topics)
+  name  = local.alert_topics[count.index]
 }
