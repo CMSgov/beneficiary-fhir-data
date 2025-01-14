@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
@@ -190,6 +191,13 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    *     ProcessingException
    */
   int writeClaims(Collection<TClaim> objects) throws ProcessingException;
+
+  /**
+   * test.
+   *
+   * @param sequenceNumberRange test
+   */
+  void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange);
 
   /**
    * Return count of records processed since the most recent call to a write method or this method.

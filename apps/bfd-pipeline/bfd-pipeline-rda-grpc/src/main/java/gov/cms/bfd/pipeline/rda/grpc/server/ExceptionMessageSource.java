@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import java.util.function.Supplier;
 
 /**
@@ -60,6 +61,11 @@ public class ExceptionMessageSource<T> implements MessageSource<T> {
     }
     remainingBeforeThrow -= 1;
     return source.next();
+  }
+
+  @Override
+  public ClaimSequenceNumberRange getSequenceNumberRange() {
+    return ClaimSequenceNumberRange.newBuilder().setLower(0).setUpper(remainingBeforeThrow).build();
   }
 
   @Override

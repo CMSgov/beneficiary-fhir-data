@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.base.Preconditions;
+import com.google.protobuf.Empty;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
@@ -44,5 +46,14 @@ public class FissClaimStreamCaller extends GrpcStreamCaller<FissClaimChange> {
     final Iterator<FissClaimChange> apiResults =
         ClientCalls.blockingServerStreamingCall(call, request);
     return new GrpcResponseStream<>(call, apiResults);
+  }
+
+  @Override
+  public ClaimSequenceNumberRange callSequenceNumberRangeService(
+      ManagedChannel channel, CallOptions callOptions) {
+    final MethodDescriptor<Empty, ClaimSequenceNumberRange> method =
+        RDAServiceGrpc.getGetFissClaimsSequenceNumberRangeMethod();
+    final ClientCall<Empty, ClaimSequenceNumberRange> call = channel.newCall(method, callOptions);
+    return ClientCalls.blockingUnaryCall(call, Empty.getDefaultInstance());
   }
 }

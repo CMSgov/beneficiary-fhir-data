@@ -8,6 +8,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -224,6 +225,9 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
                 } else if (sink.isValidMessage(result)) {
                   batch.put(sink.getClaimIdForMessage(result), result);
                   if (batch.size() >= maxPerBatch) {
+                    ClaimSequenceNumberRange sequenceNumberRange =
+                        caller.callSequenceNumberRangeService(channel, callOptionsFactory.get());
+                    sink.updateSequenceNumberRange(sequenceNumberRange);
                     processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
                   }
                   lastProcessedTime = clock.millis();

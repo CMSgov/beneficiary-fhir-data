@@ -51,6 +51,44 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   }
 
   @Override
+  public void getFissClaimsSequenceNumberRange(
+      com.google.protobuf.Empty request,
+      StreamObserver<gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange> responseObserver) {
+    LOGGER.info("start getFissClaimsSequenceNumberRange");
+    try {
+      responseObserver.onNext(
+          messageSourceFactory.createFissMessageSource(0).getSequenceNumberRange());
+      responseObserver.onCompleted();
+      LOGGER.info("end getFissClaimsSequenceNumberRange");
+    } catch (Exception ex) {
+      responseObserver.onError(Status.fromThrowable(ex).asException());
+      LOGGER.error(
+          "end getFissClaimsSequenceNumberRange call - call failed with exception: message={}",
+          ex.getMessage(),
+          ex);
+    }
+  }
+
+  @Override
+  public void getMcsClaimsSequenceNumberRange(
+      com.google.protobuf.Empty request,
+      StreamObserver<gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange> responseObserver) {
+    LOGGER.info("start getMcsClaimsSequenceNumberRange");
+    try {
+      responseObserver.onNext(
+          messageSourceFactory.createFissMessageSource(0).getSequenceNumberRange());
+      responseObserver.onCompleted();
+      LOGGER.info("end getMcsClaimsSequenceNumberRange");
+    } catch (Exception ex) {
+      responseObserver.onError(Status.fromThrowable(ex).asException());
+      LOGGER.error(
+          "end getMcsClaimsSequenceNumberRange call - call failed with exception: message={}",
+          ex.getMessage(),
+          ex);
+    }
+  }
+
+  @Override
   public void getFissClaims(
       ClaimRequest request, StreamObserver<FissClaimChange> responseObserver) {
     LOGGER.info("start getFissClaims call with since={}", request.getSince());

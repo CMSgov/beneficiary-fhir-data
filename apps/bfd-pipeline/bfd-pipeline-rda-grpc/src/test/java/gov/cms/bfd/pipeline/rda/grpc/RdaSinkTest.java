@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
@@ -85,6 +86,9 @@ public class RdaSinkTest {
     public long getSequenceNumberForObject(Integer object) {
       return object;
     }
+
+    @Override
+    public void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange) {}
 
     /** {@inheritDoc} */
     @Override
