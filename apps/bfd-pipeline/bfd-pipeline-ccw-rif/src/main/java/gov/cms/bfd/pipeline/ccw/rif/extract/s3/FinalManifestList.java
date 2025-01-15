@@ -13,6 +13,9 @@ public class FinalManifestList {
   /** Contained list of manifests. */
   private final Set<String> manifests;
 
+  /** Timestamp text extracted from the S3 prefix. */
+  private final String timestampText;
+
   /** Timestamp from the S3 prefix. */
   private final Instant timestamp;
 
@@ -28,8 +31,9 @@ public class FinalManifestList {
     String prefix = key.substring(0, key.lastIndexOf('/'));
 
     String[] components = prefix.split("/");
-    timestamp = Instant.parse(components[components.length - 1]);
-    manifests =
+    this.timestampText = components[components.length - 1];
+    this.timestamp = Instant.parse(this.timestampText);
+    this.manifests =
         Arrays.stream(fileString.split("\n"))
             .filter(l -> !l.isBlank())
             .map(l -> prefix + "/" + l)
