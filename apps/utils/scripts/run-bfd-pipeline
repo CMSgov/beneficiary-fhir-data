@@ -122,7 +122,7 @@ $(basename $0) [options] run_mode
 -t threads                Number of threads for RIF/RDA jobs.
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
--m max_claims             The maximum RDA claims to send.
+-m max_claims             The maximum RDA claims to send in random run mode.
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
 -p password               DB password
@@ -410,7 +410,7 @@ case $run_mode in
   backfill)
     setvar rda/samhsa/backfill/enabled "true"
     setvar rda/samhsa/backfill/batch_size "100000"
-    setvar rda/samhsa/backfill/log_interval "15"
+    setvar rda/samhsa/backfill/log_interval "15" #in seconds
     ;;
   rif)
     setvar ccw/job/enabled "true"

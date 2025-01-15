@@ -28,7 +28,11 @@ import org.slf4j.Logger;
 
 /**
  * Abstract class to backfill the SAMHSA tags. This will iterate through the claims in a table, and
- * create SAMHSA tags for any claims that do not already have them.
+ * create SAMHSA tags for any claims that do not already have them. It stores progress in the
+ * ccw.samhsa_backfill_progress table, so that if the job is stopped, it can pick up where it left
+ * off on its next run. In order to start the job over from the beginning, the
+ * ccw.samhsa_backfill_progress table must be cleared of all rows (or just the rows for the tables
+ * to start from the beginning).
  */
 public abstract class AbstractSamhsaBackfill implements Callable {
   /** The Logger. */
@@ -36,20 +40,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   /** The table to use for this thread. */
   protected final TableEntry tableEntry;
-
-  /** Query to perform upsert on the backfill progress table for a given claim table. */
-  protected String UPSERT_PROGRESS_QUERY =
-      " INSERT INTO ccw.samhsa_backfill_progress "
-          + " (claim_table, last_processed_claim, total_processed, total_tags) "
-          + " VALUES (:tableName, :lastClaim, :totalProcessed, :totalTags) "
-          + " ON CONFLICT (claim_table) "
-          + " DO UPDATE SET "
-          + "   last_processed_claim = :lastClaim, total_processed = :totalProcessed, total_tags = :totalTags ";
-
-  /** Query to get the backfill progress from the database for a given claim table. */
-  protected String GET_PROGRESS_QUERY =
-      " SELECT claim_table, last_processed_claim, total_processed, total_tags FROM ccw.samhsa_backfill_progress "
-          + " WHERE claim_table = :tableName ";
 
   /** The transaction manager. */
   TransactionManager transactionManager;
@@ -164,9 +154,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
    *     claim has more than one lineitem.
    * @param entityManager The entity manager.
-   * @return true if a claim was persisted.
+   * @return The total number of tags saved.
    */
-  protected boolean processClaim(
+  protected int processClaim(
       Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
     Object claimId = claim[0];
     int codesOffset = 1;
@@ -188,13 +178,35 @@ public abstract class AbstractSamhsaBackfill implements Callable {
             .filter(Objects::nonNull)
             .map(code -> (String) code)
             .collect(Collectors.toList());
-    boolean persisted =
+    boolean persist =
         samhsaUtil.processCodeList(codes, tableEntry, claimId, dates, datesMap, entityManager);
-    if (persisted) {
-      writeEntry(claimId, tableEntry.getTagTable(), entityManager);
-      return true;
+    if (persist) {
+      return writeEntry(claimId, tableEntry.getTagTable(), entityManager);
     }
-    return false;
+    return 0;
+  }
+
+  /**
+   * Builds the SAMHSA query strings.
+   *
+   * @param table The table.
+   * @param claimField The claim id field.
+   * @param columns The columns to check.
+   * @return The query string for a particular table.
+   */
+  protected static String buildQueryString(String table, String claimField, String... columns) {
+    String concatColumns = String.join(", ", columns);
+    StringBuilder builder = new StringBuilder();
+    builder.append("SELECT ");
+    builder.append(claimField);
+    builder.append(", ");
+    builder.append(concatColumns);
+    builder.append(" FROM ");
+    builder.append(table);
+    builder.append(" ${gtClaimLine} ORDER BY ");
+    builder.append(claimField);
+    builder.append(" limit :limit");
+    return builder.toString();
   }
 
   /**
@@ -220,6 +232,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
                 : 0L);
     Optional<String> id = progress.map(BackfillProgress::getLastClaimId);
     final AtomicReference<Optional<String>> lastClaimId = new AtomicReference<>(id);
+    // lastClaimId will only be present if this is the second or later run of the job. */
     if (lastClaimId.get().isPresent()) {
       logger.info(
           String.format(
@@ -242,11 +255,10 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               // This Map will allow us to save the active dates for a claim to be used in multiple
               // records with the same claim id.
               HashMap<String, Object[]> datesMap = new HashMap<>();
+              // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
+              // codes. */
               for (Object[] claim : claims) {
-                boolean persisted = processClaim(claim, datesMap, entityManager);
-                if (persisted) {
-                  savedInBatch++;
-                }
+                savedInBatch += processClaim(claim, datesMap, entityManager);
               }
               totalSaved.accumulateAndGet(savedInBatch, Long::sum);
               totalProcessedInInterval.accumulateAndGet(claims.size(), Long::sum);
@@ -255,7 +267,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
               if (startTime.get().plus(logInterval, ChronoUnit.SECONDS).isBefore(Instant.now())) {
                 logger.info(
                     String.format(
-                        "Processed %d claims from table %s, %d in the last %d seconds. and saved %d SAMHSA tags.",
+                        "Processed %d claims from table %s, %d in the last %d seconds. %d SAMHSA tags saved total.",
                         totalProcessed.get(),
                         tableEntry.getClaimTable(),
                         totalProcessedInInterval.get(),
@@ -301,17 +313,19 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param claimId claim id -- Could be a Long or a String.
    * @param table tag table to use.
    * @param entityManager The entity manager.
+   * @return the total number of records saved.
    */
-  protected void writeEntry(Object claimId, String table, EntityManager entityManager) {
+  protected int writeEntry(Object claimId, String table, EntityManager entityManager) {
     Map<String, String> params = Map.of("tagTable", table);
     StringSubstitutor strSub = new StringSubstitutor(params);
     String queryStr = strSub.replace(TAG_UPSERT_QUERY);
     Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("code", TagCode.R.toString());
     query.setParameter("claimId", claimId);
-    query.executeUpdate();
+    int total = query.executeUpdate();
     query.setParameter("code", TagCode._42CFRPart2.toString());
-    query.executeUpdate();
+    total += query.executeUpdate();
+    return total;
   }
 
   /**
@@ -343,7 +357,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * executes a query to get the last claim id processed.
+   * Executes a query to get the last claim id processed.
    *
    * @param table The claim table in question.
    * @return The last claim id processed for the given table.

@@ -18,12 +18,61 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   /** The column name for the mcs claim id. */
   private static String MCS_CLAIM_ID_FIELD = "idr_clm_hd_icn";
 
+  /** Columns for mcs_diagnosis. */
+  private static String[] MCS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {"idr_diag_code"};
+
+  /** Columns for mcs_details. */
+  private static String[] MCS_DETAILS_SAMHSA_COLUMNS =
+      new String[] {"idr_dtl_primary_diag_code", "idr_proc_code"};
+
+  /** Columns for fiss. */
+  private static String[] FISS_SAMHSA_COLUMNS =
+      new String[] {
+        "stmt_cov_from_date", "stmt_cov_to_date", "admit_diag_code", "drg_cd", "principle_diag"
+      };
+
+  /** Columns for fiss revenue lines. */
+  private static String[] FISS_REVENUE_LINES_SAMHSA_COLUMNS =
+      new String[] {"apc_hcpcs_apc", "hcpc_cd"};
+
+  /** Columns for fiss_diagnosis_codes. */
+  private static String[] FISS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {"diag_cd2"};
+
+  /** Columns for fiss_proc_codes. */
+  private static String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {"proc_code"};
+
+  /** mcs_diagnosis_codes query. */
+  private static String MCS_DIAGNOSIS_QUERY =
+      buildQueryString("rda.mcs_diagnosis_codes", MCS_CLAIM_ID_FIELD, MCS_DIAGNOSIS_SAMHSA_COLUMNS);
+
+  /** mcs_details query. */
+  private static String MCS_DETAILS_QUERY =
+      buildQueryString("rda.mcs_details", MCS_CLAIM_ID_FIELD, MCS_DETAILS_SAMHSA_COLUMNS);
+
+  /** fiss_claims query. */
+  private static String FISS_QUERY =
+      buildQueryString("rda.fiss_claims", FISS_CLAIM_ID_FIELD, FISS_SAMHSA_COLUMNS);
+
+  /** fiss_revenue_lines query. */
+  private static String FISS_REVENUE_QUERY =
+      buildQueryString(
+          "rda.fiss_revenue_lines", FISS_CLAIM_ID_FIELD, FISS_REVENUE_LINES_SAMHSA_COLUMNS);
+
+  /** fiss_diagnosis_codes query. */
+  private static String FISS_DIAGNOSIS_QUERY =
+      buildQueryString(
+          "rda.fiss_diagnosis_codes", FISS_CLAIM_ID_FIELD, FISS_DIAGNOSIS_SAMHSA_COLUMNS);
+
+  /** fiss_proc_codes query. */
+  private static String FISS_PROC_QUERY =
+      buildQueryString("rda.fiss_proc_codes", FISS_CLAIM_ID_FIELD, FISS_PROC_SAMHSA_COLUMNS);
+
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {
     /** Fiss Claims. */
     FISS_CLAIMS(
         new TableEntry(
-            FISS_SAMHSA_QUERY,
+            FISS_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -34,7 +83,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** Fiss proc codes. */
     FISS_PROC_CODES(
         new TableEntry(
-            FISS_PROC_SAMHSA_QUERY,
+            FISS_PROC_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -44,7 +93,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** Fiss diagnosis codes. */
     FISS_DIAGNOSIS_CODES(
         new TableEntry(
-            FISS_DIAGNOSIS_SAMHSA_QUERY,
+            FISS_DIAGNOSIS_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -54,7 +103,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** Fiss revenue lines. */
     FISS_REVENUE_LINES(
         new TableEntry(
-            FISS_REVENUE_SAMHSA_QUERY,
+            FISS_REVENUE_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -65,7 +114,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** MCS diagnosis codes. */
     MCS_DIAGNOSIS_CODES(
         new TableEntry(
-            MCS_DIAG_SAMHSA_QUERY,
+            MCS_DIAGNOSIS_QUERY,
             GET_CLAIM_DATES_MCS,
             "rda.mcs_tags",
             MCS_CLAIM_ID_FIELD,
@@ -75,7 +124,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** MCS details. */
     MCS_DETAILS(
         new TableEntry(
-            MCS_DETAILS_SAMHSA_QUERY,
+            MCS_DETAILS_QUERY,
             GET_CLAIM_DATES_MCS,
             "rda.mcs_tags",
             MCS_CLAIM_ID_FIELD,
