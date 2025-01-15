@@ -104,7 +104,7 @@ public final class SecurityTagManager {
             coding
                 .setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode")
                 .setCode("42CFRPart2")
-                .setDisplay("Substance Use Disorder (SAMHSA)");
+                .setDisplay("42 CFR Part 2");
             break;
 
           default:
