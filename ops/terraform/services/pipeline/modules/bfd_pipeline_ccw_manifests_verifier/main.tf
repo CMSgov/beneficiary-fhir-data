@@ -29,7 +29,7 @@ resource "aws_scheduler_schedule_group" "this" {
 }
 
 resource "aws_scheduler_schedule" "this" {
-  name       = "${local.lambda_full_name}-every-monday-9am-et"
+  name       = "${local.lambda_full_name}-mon-9am-et"
   group_name = aws_scheduler_schedule_group.this.name
 
   flexible_time_window {
