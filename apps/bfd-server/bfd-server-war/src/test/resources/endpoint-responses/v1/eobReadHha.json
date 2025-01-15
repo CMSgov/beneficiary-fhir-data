@@ -2,7 +2,12 @@
   "resourceType" : "ExplanationOfBenefit",
   "id" : "hha-2925555555",
   "meta" : {
-    "lastUpdated" : "IGNORED_FIELD"
+    "lastUpdated" : "IGNORED_FIELD",
+    "security" : [ {
+      "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+      "code" : "N",
+      "display" : "Normal"
+    } ]
   },
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
