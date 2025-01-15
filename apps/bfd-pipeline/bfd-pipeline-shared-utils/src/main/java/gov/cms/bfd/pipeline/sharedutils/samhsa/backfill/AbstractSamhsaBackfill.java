@@ -203,9 +203,12 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     builder.append(concatColumns);
     builder.append(" FROM ");
     builder.append(table);
-    builder.append(" ${gtClaimLine} ORDER BY ");
+    builder.append(
+        " ${gtClaimLine} ORDER BY "); // ${gtClaimLine} is used to insert the last processed claim
+                                      // id into the query. If there is no last processed claim id,
+                                      // ${gtClaimLine} will be evaluated to an empty string.
     builder.append(claimField);
-    builder.append(" limit :limit");
+    builder.append(" limit :limit"); // limit will be the batch size set in the configuration.
     return builder.toString();
   }
 
