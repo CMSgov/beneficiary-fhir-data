@@ -172,7 +172,6 @@ public class S3ManifestDbDaoIT extends AbstractLocalStackS3Test {
     entries.add(new DataSetManifest.DataSetManifestEntry("pde.csv", RifFileType.PDE));
     final var manifest = new DataSetManifest(MANIFEST_TIMESTAMP, 0, false, entries);
     manifest.setManifestKeyIncomingLocation(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
-    manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
     return manifest;
   }
 

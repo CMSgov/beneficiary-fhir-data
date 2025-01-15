@@ -362,7 +362,6 @@ public final class DataSetManifestTest {
             0,
             true,
             CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-            CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
             new DataSetManifestEntry("foo.xml", RifFileType.BENEFICIARY),
             new DataSetManifestEntry("bar.xml", RifFileType.PDE));
 
