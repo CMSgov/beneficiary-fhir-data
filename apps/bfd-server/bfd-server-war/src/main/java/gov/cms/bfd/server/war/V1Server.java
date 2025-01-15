@@ -45,6 +45,8 @@ public class V1Server extends RestfulServer {
   public V1Server() {
     super(FhirContext.forDstu3());
     setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+    // See comments in V2Server's constructor for rational for setting this flag
+    setIgnoreServerParsedRequestParameters(false);
     configureServerInfoMetadata();
   }
 

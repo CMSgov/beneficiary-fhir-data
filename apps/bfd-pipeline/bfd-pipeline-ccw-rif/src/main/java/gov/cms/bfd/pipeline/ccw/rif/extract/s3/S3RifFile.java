@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public final class S3RifFile implements RifFile {
   private final MetricRegistry appMetrics;
 
   /** The manifest data. */
-  private final DataSetManifestEntry manifestEntry;
+  @Getter private final DataSetManifestEntry manifestEntry;
 
   /** The manifest download result. */
   private final Future<DataSetQueue.ManifestEntry> manifestEntryDownload;

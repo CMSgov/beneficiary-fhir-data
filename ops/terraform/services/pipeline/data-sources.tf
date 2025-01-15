@@ -114,6 +114,10 @@ data "aws_ssm_parameters_by_path" "nonsensitive_rda" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive/rda"
 }
 
+data "aws_ssm_parameter" "verifier_enabled" {
+  name = "/bfd/${local.env}/${local.service}/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled"
+}
+
 # TODO: this needs to be defined in common
 data "aws_sns_topic" "alarm" {
   count = local.is_prod ? 1 : 0

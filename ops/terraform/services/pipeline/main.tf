@@ -152,6 +152,8 @@ locals {
     for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
     if local.pipeline_variant_configs[k].enabled && k == "ccw"
   }
+
+  ccw_manifests_verifier_enabled = tobool(nonsensitive(data.aws_ssm_parameter.verifier_enabled.value))
 }
 
 # TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
@@ -446,4 +448,17 @@ module "bfd_pipeline_scheduler" {
     arn  = aws_autoscaling_group.this["ccw"].arn
     name = aws_autoscaling_group.this["ccw"].name
   }
+}
+
+module "bfd_pipeline_ccw_manifests_verifier" {
+  count = local.pipeline_variant_configs.ccw.enabled && local.ccw_manifests_verifier_enabled ? 1 : 0
+
+  source = "./modules/bfd_pipeline_ccw_manifests_verifier"
+
+  db_cluster_identifier = local.db_cluster_identifier
+  etl_bucket_id         = aws_s3_bucket.this.id
+  vpc_name              = local.vpc_name
+  bfd_version           = local.latest_bfd_release
+  kms_config_key_alias  = local.nonsensitive_common_config["kms_config_key_alias"]
+  kms_key_alias         = local.kms_key_id
 }
