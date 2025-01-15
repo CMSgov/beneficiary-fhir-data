@@ -446,6 +446,8 @@ public final class PipelineApplication {
       HikariDataSource pooledDataSource,
       Clock clock) {
     List<PipelineApplicationState> ccwAppStates = new ArrayList<>();
+
+    // We want each table's thread to have its own entity manager
     for (int i = 0; i < SamhsaBackfillService.ccwTables.size(); i++) {
       ccwAppStates.add(
           new PipelineApplicationState(
