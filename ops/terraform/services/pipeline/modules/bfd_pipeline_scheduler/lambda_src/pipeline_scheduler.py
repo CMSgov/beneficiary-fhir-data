@@ -16,6 +16,7 @@ from botocore.config import Config
 SCALE_OUT_IMMEDIATELY_ACTION_NAME = "scale_out_immediately"
 SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX = "scale_out_at_"
 INCOMING = "Incoming"
+MANIFEST_LIST = "ManifestList.done"
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
@@ -114,7 +115,10 @@ def _is_incoming_folder_empty(data_load: TimestampedDataLoad) -> bool:
     # files. If any match, that means there is a valid RIF still within Incoming/. We negate the
     # result of any() as we're returning if Incoming/ is empty, not if it's non-empty
     return not any(
-        re.search(pattern=rf".*({RifFileType.match_str()}).*(txt|csv)", string=str(object.key))
+        re.search(
+            pattern=rf".*({RifFileType.match_str()}).*(txt|csv)|{MANIFEST_LIST}",
+            string=str(object.key),
+        )
         is not None
         for object in etl_bucket.objects.filter(Prefix=incoming_key_prefix)
     )
@@ -204,7 +208,7 @@ def handler(event: Any, context: Any):
             rf"^({PipelineLoadType.SYNTHETIC}){{0,1}}/{{0,1}}"
             rf"({INCOMING})/"
             rf"({TimestampedDataLoad.match_str()})/"
-            rf".*({RifFileType.match_str()}).*(txt|csv)$"
+            rf".*({RifFileType.match_str()}).*(txt|csv)|{MANIFEST_LIST}$"
         ),
         string=decoded_file_key,
         flags=re.IGNORECASE,
