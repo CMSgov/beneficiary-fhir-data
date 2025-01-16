@@ -43,29 +43,31 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** mcs_diagnosis_codes query. */
   private static String MCS_DIAGNOSIS_QUERY =
-      buildQueryString("rda.mcs_diagnosis_codes", MCS_CLAIM_ID_FIELD, MCS_DIAGNOSIS_SAMHSA_COLUMNS);
+      buildQueryStringTemplate(
+          "rda.mcs_diagnosis_codes", MCS_CLAIM_ID_FIELD, MCS_DIAGNOSIS_SAMHSA_COLUMNS);
 
   /** mcs_details query. */
   private static String MCS_DETAILS_QUERY =
-      buildQueryString("rda.mcs_details", MCS_CLAIM_ID_FIELD, MCS_DETAILS_SAMHSA_COLUMNS);
+      buildQueryStringTemplate("rda.mcs_details", MCS_CLAIM_ID_FIELD, MCS_DETAILS_SAMHSA_COLUMNS);
 
   /** fiss_claims query. */
   private static String FISS_QUERY =
-      buildQueryString("rda.fiss_claims", FISS_CLAIM_ID_FIELD, FISS_SAMHSA_COLUMNS);
+      buildQueryStringTemplate("rda.fiss_claims", FISS_CLAIM_ID_FIELD, FISS_SAMHSA_COLUMNS);
 
   /** fiss_revenue_lines query. */
   private static String FISS_REVENUE_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "rda.fiss_revenue_lines", FISS_CLAIM_ID_FIELD, FISS_REVENUE_LINES_SAMHSA_COLUMNS);
 
   /** fiss_diagnosis_codes query. */
   private static String FISS_DIAGNOSIS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "rda.fiss_diagnosis_codes", FISS_CLAIM_ID_FIELD, FISS_DIAGNOSIS_SAMHSA_COLUMNS);
 
   /** fiss_proc_codes query. */
   private static String FISS_PROC_QUERY =
-      buildQueryString("rda.fiss_proc_codes", FISS_CLAIM_ID_FIELD, FISS_PROC_SAMHSA_COLUMNS);
+      buildQueryStringTemplate(
+          "rda.fiss_proc_codes", FISS_CLAIM_ID_FIELD, FISS_PROC_SAMHSA_COLUMNS);
 
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {

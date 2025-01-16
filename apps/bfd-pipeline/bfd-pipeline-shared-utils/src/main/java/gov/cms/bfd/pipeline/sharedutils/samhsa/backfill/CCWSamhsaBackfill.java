@@ -53,7 +53,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** carrier_claims query. */
   private static final String CARRIER_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.carrier_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -63,7 +63,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** carrier_claim_lines query. */
   private static final String CARRIER_CLAIM_LINES_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.carrier_claim_lines",
           CLAIM_FIELD,
           LINE_ICD_DIAGNOSIS_CODE_COLUMN,
@@ -71,7 +71,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** dme_claims query. */
   private static final String DME_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.dme_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -81,12 +81,12 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** dme_claim_lines query. */
   private static final String DME_CLAIM_LINES_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.dme_claim_lines", CLAIM_FIELD, LINE_ICD_DIAGNOSIS_CODE_COLUMN, HCPCS_CODE_COLUMN);
 
   /** hospice_claims query. */
   private static final String HOSPICE_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.hospice_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -98,11 +98,11 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** hospice_claim_lines query. */
   private static final String HOSPICE_CLAIM_LINES_QUERY =
-      buildQueryString("ccw.hospice_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
+      buildQueryStringTemplate("ccw.hospice_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
 
   /** hha_claims query. */
   private static final String HHA_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.hha_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -114,12 +114,12 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** hha_claim_lines query. */
   private static final String HHA_CLAIM_LINES_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.hha_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN, REV_CENTER_APC_HIPPS_CODE_COLUMN);
 
   /** snf_claims query. */
   private static final String SNF_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.snf_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -134,11 +134,11 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** snf_claim_lines query. */
   private static final String SNF_CLAIM_LINES_QUERY =
-      buildQueryString("ccw.snf_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
+      buildQueryStringTemplate("ccw.snf_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
 
   /** inpatient_claims query. */
   private static final String INPATIENT_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.inpatient_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -153,11 +153,11 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** inpatient_claim_lines query. */
   private static final String INPATIENT_CLAIM_LINES_QUERY =
-      buildQueryString("ccw.inpatient_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
+      buildQueryStringTemplate("ccw.inpatient_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
 
   /** outpatient_claims query. */
   private static final String OUTPATIENT_CLAIMS_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.outpatient_claims",
           CLAIM_FIELD,
           CLAIM_FROM_DATE,
@@ -171,7 +171,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** outpatient_claim_lines query. */
   private static final String OUTPATIENT_CLAIM_LINES_QUERY =
-      buildQueryString(
+      buildQueryStringTemplate(
           "ccw.outpatient_claim_lines",
           CLAIM_FIELD,
           HCPCS_CODE_COLUMN,

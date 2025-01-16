@@ -148,7 +148,10 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Processes a claim with SamhsaUtil to check for SAMHSA codes.
+   * Processes a claim with SamhsaUtil to check for SAMHSA codes. Does not use Entities, instead
+   * using the positions in the array to determine the column type. This obviously relies on the
+   * queries being constructed in a particular way, so it's not ideal -- but, since it does not have
+   * to construct an entity, it is the fastest way to query.
    *
    * @param claim the claim to process
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
@@ -187,14 +190,15 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Builds the SAMHSA query strings.
+   * Builds the SAMHSA query string template.
    *
    * @param table The table.
    * @param claimField The claim id field.
    * @param columns The columns to check.
    * @return The query string for a particular table.
    */
-  protected static String buildQueryString(String table, String claimField, String... columns) {
+  protected static String buildQueryStringTemplate(
+      String table, String claimField, String... columns) {
     String concatColumns = String.join(", ", columns);
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
@@ -205,8 +209,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     builder.append(table);
     builder.append(
         " ${gtClaimLine} ORDER BY "); // ${gtClaimLine} is used to insert the last processed claim
-                                      // id into the query. If there is no last processed claim id,
-                                      // ${gtClaimLine} will be evaluated to an empty string.
+    // id into the query. If there is no last processed claim id,
+    // ${gtClaimLine} will be evaluated to an empty string.
     builder.append(claimField);
     builder.append(" limit :limit"); // limit will be the batch size set in the configuration.
     return builder.toString();
