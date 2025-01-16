@@ -16,7 +16,6 @@ from botocore.config import Config
 SCALE_OUT_IMMEDIATELY_ACTION_NAME = "scale_out_immediately"
 SCALE_OUT_FUTURE_LOAD_ACTION_NAME_PREFIX = "scale_out_at_"
 INCOMING = "Incoming"
-MANIFEST_LIST = "ManifestList.done"
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
@@ -77,6 +76,7 @@ class RifFileType(StrEnum):
     OUTPATIENT = "outpatient"
     PDE = "pde"
     SNF = "snf"
+    MANIFEST_LIST = "ManifestList"
 
     @classmethod
     def match_str(cls) -> str:
@@ -116,7 +116,7 @@ def _is_incoming_folder_empty(data_load: TimestampedDataLoad) -> bool:
     # result of any() as we're returning if Incoming/ is empty, not if it's non-empty
     return not any(
         re.search(
-            pattern=rf".*({RifFileType.match_str()}).*(txt|csv)|{MANIFEST_LIST}",
+            pattern=rf".*({RifFileType.match_str()}).*(txt|csv|done)",
             string=str(object.key),
         )
         is not None
@@ -208,7 +208,7 @@ def handler(event: Any, context: Any):
             rf"^({PipelineLoadType.SYNTHETIC}){{0,1}}/{{0,1}}"
             rf"({INCOMING})/"
             rf"({TimestampedDataLoad.match_str()})/"
-            rf".*({RifFileType.match_str()}).*(txt|csv)|{MANIFEST_LIST}$"
+            rf".*({RifFileType.match_str()}).*(txt|csv|done)$"
         ),
         string=decoded_file_key,
         flags=re.IGNORECASE,
