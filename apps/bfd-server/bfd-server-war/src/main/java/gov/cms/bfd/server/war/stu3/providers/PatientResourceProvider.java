@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.parseIntOrBadRequest;
+import static gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest;
 import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
@@ -253,9 +255,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
        * TODO Once AB2D has switched to always specifying the year, the implicit `else` on this
        * needs to become an invalid request.
        */
-      year =
-          gov.cms.bfd.server.war.commons.StringUtils.parseIntOrBadRequest(
-              referenceYear.getValueNotNull(), "Contract Year");
+      year = parseIntOrBadRequest(referenceYear.getValueNotNull(), "Contract Year");
     }
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
 
@@ -321,7 +321,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
       if (RequestTypeEnum.POST != requestDetails.getRequestType()) {
         throw new InvalidRequestException(
             String.format(
-                "Search query by '%s' is onlu supported in POST request",
+                "Search query by '%s' is only supported in POST request",
                 TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
       }
     } else if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty()) {
@@ -343,16 +343,10 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
             patient.getIdentifier().stream()
                 .filter(i -> TransformerConstants.CODING_BBAPI_BENE_ID.equals(i.getSystem()))
                 .findFirst();
-        beneId =
-            id.isPresent()
-                ? gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest(
-                    id.get().getValue(), "Patient ID")
-                : 0;
+        beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
       }
     } else {
-      beneId =
-          gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest(
-              logicalId.getValue(), "Patient ID");
+      beneId = parseLongOrBadRequest(logicalId.getValue(), "Patient ID");
       if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
         // Add bene_id to MDC logs when _lastUpdated filter is in effect
         LoggingUtils.logBeneIdToMdc(beneId);
