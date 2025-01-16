@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.parseIntOrBadRequest;
+import static gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest;
 import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
@@ -272,7 +274,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
       if (RequestTypeEnum.POST != requestDetails.getRequestType()) {
         throw new InvalidRequestException(
             String.format(
-                "Search query by '%s' is onlu supported in POST request",
+                "Search query by '%s' is only supported in POST request",
                 TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
       }
     } else if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty()) {
@@ -298,7 +300,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
           beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
         }
       } else {
-        beneId = Long.parseLong(logicalId.getValue());
+        beneId = parseLongOrBadRequest(logicalId.getValue(), "Patient ID");
         if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
           // Add bene_id to MDC logs when _lastUpdated filter is in effect
           LoggingUtils.logBeneIdToMdc(beneId);
@@ -389,11 +391,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
        * `else` on this
        * needs to become an invalid request.
        */
-      try {
-        year = Integer.parseInt(referenceYear.getValueNotNull());
-      } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Contract year must be a number.", e);
-      }
+      year = parseIntOrBadRequest(referenceYear.getValueNotNull(), "Contract Year");
     }
 
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
