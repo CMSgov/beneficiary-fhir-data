@@ -602,7 +602,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .headers(headers)
         .expect()
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("Contract year must be a number."))
+        .body("issue.diagnostics", hasItem("Failed to parse value for Contract Year as a number."))
         .statusCode(400)
         .when()
         .get(requestString);

@@ -253,11 +253,9 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
        * TODO Once AB2D has switched to always specifying the year, the implicit `else` on this
        * needs to become an invalid request.
        */
-      try {
-        year = Integer.parseInt(referenceYear.getValueNotNull());
-      } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Contract year must be a number.", e);
-      }
+      year =
+          gov.cms.bfd.server.war.commons.StringUtils.parseIntOrBadRequest(
+              referenceYear.getValueNotNull(), "Contract Year");
     }
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
 
@@ -345,10 +343,16 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
             patient.getIdentifier().stream()
                 .filter(i -> TransformerConstants.CODING_BBAPI_BENE_ID.equals(i.getSystem()))
                 .findFirst();
-        beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
+        beneId =
+            id.isPresent()
+                ? gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest(
+                    id.get().getValue(), "Patient ID")
+                : 0;
       }
     } else {
-      beneId = Long.parseLong(logicalId.getValue());
+      beneId =
+          gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest(
+              logicalId.getValue(), "Patient ID");
       if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
         // Add bene_id to MDC logs when _lastUpdated filter is in effect
         LoggingUtils.logBeneIdToMdc(beneId);
