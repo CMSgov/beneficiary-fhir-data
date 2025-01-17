@@ -555,7 +555,8 @@ public final class PipelineApplication {
      * each data set that is found.
      */
     DataSetMonitorListener dataSetMonitorListener =
-        new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
+        new DefaultDataSetMonitorListener(
+            appState.getMetrics(), appState.getMeters(), rifProcessor, rifLoader);
     var s3Factory = new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
     // Tell SQ it's ok not to use try-finally here since this will be closed by the CcwRifLoadJob.
     @SuppressWarnings("java:S2095")

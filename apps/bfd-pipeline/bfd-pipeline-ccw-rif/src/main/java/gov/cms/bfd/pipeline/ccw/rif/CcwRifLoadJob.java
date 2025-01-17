@@ -19,6 +19,10 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -33,6 +37,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +170,9 @@ public final class CcwRifLoadJob implements PipelineJob {
   /** The application metrics. */
   private final MetricRegistry appMetrics;
 
+  /** Metrics for operations within this job. */
+  private final Metrics loadJobMetrics;
+
   /** The extraction options. */
   private final ExtractionOptions options;
 
@@ -218,6 +226,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     this.runInterval = runInterval;
     this.statusReporter = statusReporter;
     downloadService = Executors.newSingleThreadScheduledExecutor();
+    loadJobMetrics = new Metrics(appState.getMeters());
   }
 
   @Override
@@ -377,11 +386,16 @@ public final class CcwRifLoadJob implements PipelineJob {
        * processing multiple data sets in parallel (which would lead to data
        * consistency problems).
        */
+      final var activeTimer =
+          loadJobMetrics.createActiveTimerForManifest(manifestToProcess).start();
+      final var totalTimer = Timer.start();
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsStarted(manifestRecord);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsProcessed(manifestRecord);
+      activeTimer.stop();
+      totalTimer.stop(loadJobMetrics.createTotalTimerForManifest(manifestToProcess));
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -576,5 +590,93 @@ public final class CcwRifLoadJob implements PipelineJob {
         dataFileRecord.getFileType(),
         dataFileRecord.getFileName());
     return false;
+  }
+
+  /** Micrometer metrics and helpers for measuring {@link CcwRifLoadJob} operations. */
+  @RequiredArgsConstructor
+  public static final class Metrics {
+
+    /**
+     * Name of the per-{@link DataSetManifest} {@link LongTaskTimer}s that actively, at each
+     * Micrometer reporting interval, records and reports the duration of processing of a given
+     * {@link DataSetManifest}.
+     */
+    public static final String MANIFEST_PROCESSING_ACTIVE_TIMER_NAME =
+        String.format("%s.manifest_processing.active", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Name of the per-{@link DataSetManifest} {@link Timer}s that report the final duration of
+     * processing once the {@link DataSetManifest} is processed.
+     */
+    public static final String MANIFEST_PROCESSING_TOTAL_TIMER_NAME =
+        String.format("%s.manifest_processing.total", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
+     */
+    private static final String TAG_DATA_SET_TIMESTAMP = "data_set_timestamp";
+
+    /**
+     * Tag indicating whether the data load associated with the measured metric was synthetic or
+     * not.
+     */
+    private static final String TAG_IS_SYNTHETIC = "is_synthetic";
+
+    /** Tag indicating which {@link DataSetManifest} was associated with the measured metric. */
+    private static final String TAG_MANIFEST = "manifest";
+
+    /** Micrometer {@link MeterRegistry} for the Pipeline application. */
+    private final MeterRegistry appMetrics;
+
+    /**
+     * Creates a {@link LongTaskTimer} for a given {@link DataSetManifest} so that the time it takes
+     * to process the manifest can be measured and recorded while processing is ongoing. Should be
+     * called prior to processing a {@link DataSetManifest}.
+     *
+     * @param manifest the {@link DataSetManifest} to time
+     * @return the {@link LongTaskTimer} that will be used to actively measure and record the time
+     *     taken to load the {@link DataSetManifest}
+     */
+    LongTaskTimer createActiveTimerForManifest(DataSetManifest manifest) {
+      return LongTaskTimer.builder(MANIFEST_PROCESSING_ACTIVE_TIMER_NAME)
+          .tags(getTags(manifest))
+          .register(appMetrics);
+    }
+
+    /**
+     * Creates a {@link Timer} for a given {@link DataSetManifest} so that the total time it takes
+     * to process the manifest can be recorded. Should be used with {@link Timer.Sample#stop(Timer)}
+     * after processing a {@link DataSetManifest} to record the total duration.
+     *
+     * @param manifest the {@link DataSetManifest} to time
+     * @return the {@link LongTaskTimer} that will be used to record the total time taken to load
+     *     the {@link DataSetManifest}
+     */
+    Timer createTotalTimerForManifest(DataSetManifest manifest) {
+      return Timer.builder(MANIFEST_PROCESSING_TOTAL_TIMER_NAME)
+          .tags(getTags(manifest))
+          .register(appMetrics);
+    }
+
+    /**
+     * Returns a {@link List} of default {@link Tag}s that is used to disambiguate a given metric
+     * based on its corresponding {@link DataSetManifest}.
+     *
+     * @param manifest {@link DataSetManifest} from which the values of {@link
+     *     DataSetManifest#getTimestampText()}, {@link DataSetManifest#isSyntheticData()} and {@link
+     *     DataSetManifest#getIncomingS3Key()} will be used to set the {@link
+     *     #TAG_DATA_SET_TIMESTAMP}, {@link #TAG_IS_SYNTHETIC} and {@link #TAG_MANIFEST} {@link
+     *     Tag}s, respectively
+     * @return a {@link List} of {@link Tag}s including relevant information from {@code manifest}
+     */
+    private List<Tag> getTags(DataSetManifest manifest) {
+      final var manifestFullpath = manifest.getIncomingS3Key();
+      final var manifestFilename =
+          manifestFullpath.substring(manifestFullpath.lastIndexOf("/") + 1);
+      return List.of(
+          Tag.of(TAG_DATA_SET_TIMESTAMP, manifest.getTimestampText()),
+          Tag.of(TAG_IS_SYNTHETIC, Boolean.toString(manifest.isSyntheticData())),
+          Tag.of(TAG_MANIFEST, manifestFilename));
+    }
   }
 }
