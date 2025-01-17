@@ -18,20 +18,20 @@ aws ssm get-parameters-by-path \
     --path "/bfd/${env}/pipeline/nonsensitive/${pipeline_instance}" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")[6:]|join("_")): .Value})|add' > pipeline_vars.json
 
 # shared pipeline variables
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/pipeline/nonsensitive/" \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > shared_pipeline_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5:]|join("_")): .Value})|add' > shared_pipeline_vars.json
 
 # common service variables
 aws ssm get-parameters-by-path \
     --path "/bfd/${env}/common/nonsensitive/" \
     --recursive \
     --region us-east-1 \
-    --query 'Parameters' | jq 'map({(.Name|split("/")|last): .Value})|add' > common_vars.json
+    --query 'Parameters' | jq 'map({(.Name|split("/")[5:]|join("_")): .Value})|add' > common_vars.json
 
 new_relic_sensitive="$(aws ssm get-parameters-by-path \
     --with-decryption \
