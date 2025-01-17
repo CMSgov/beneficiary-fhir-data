@@ -84,12 +84,6 @@ public final class CcwRifLoadJob implements PipelineJob {
   public static final Duration MAX_MANIFEST_AGE = Duration.ofDays(60);
 
   /**
-   * The date when the final manifest list was implemented. Pipeline runs before this date won't
-   * have a manifest list.
-   */
-  private static final Instant FINAL_MANIFEST_CUTOFF = Instant.parse("2024-12-12T00:00:00Z");
-
-  /**
    * Minimum amount of free disk space (in bytes) to allow pre-fetch of second data set while
    * current one is being processed.
    */
@@ -224,7 +218,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     // If no manifest was found, we're done (until next time).
     if (eligibleManifests.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
-      final List<FinalManifestList> finalManifestLists = readFinalManifestLists();
+      final List<FinalManifestList> finalManifestLists = dataSetQueue.readFinalManifestLists();
       final Set<String> allManifests =
           finalManifestLists.stream()
               .flatMap(l -> l.getManifests().stream())
@@ -240,9 +234,14 @@ public final class CcwRifLoadJob implements PipelineJob {
         LOGGER.info("Incomplete manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
-
       // Synthetic loads don't have manifest lists
-      if (additionalNonSyntheticManifestsExist(finalManifestTimestamps)) {
+      Set<Instant> incomingTimestamps =
+          dataSetQueue
+              .readAllIncomingManifests(S3_PREFIX_PENDING_DATA_SETS)
+              .filter(id -> !id.manifestId().isFutureManifest())
+              .map(id -> id.manifestId().getTimestamp())
+              .collect(Collectors.toSet());
+      if (!incomingTimestamps.equals(finalManifestTimestamps)) {
         LOGGER.info("Missing manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
@@ -481,27 +480,6 @@ public final class CcwRifLoadJob implements PipelineJob {
   private List<DataSetQueue.Manifest> readEligibleManifests(Instant now) throws IOException {
     final Instant minEligibleTime = now.minus(MAX_MANIFEST_AGE);
     return dataSetQueue.readEligibleManifests(now, minEligibleTime, this::isEligibleManifest, 500);
-  }
-
-  /**
-   * Searches S3 for all manifest lists.
-   *
-   * @return the manifest lists
-   */
-  private List<FinalManifestList> readFinalManifestLists() {
-    return dataSetQueue.readFinalManifestLists(FINAL_MANIFEST_CUTOFF);
-  }
-
-  /**
-   * Checks if there are any manifest entries in the database that were created after the given
-   * cutoff and are not contained in the given list of timestamps.
-   *
-   * @param finalManifestTimestamps list of timestamps to compare
-   * @return boolean
-   */
-  private boolean additionalNonSyntheticManifestsExist(Set<Instant> finalManifestTimestamps) {
-    return dataSetQueue.additionalNonSyntheticManifestsExist(
-        finalManifestTimestamps, FINAL_MANIFEST_CUTOFF);
   }
 
   /**

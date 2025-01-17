@@ -144,35 +144,6 @@ public class S3ManifestDbDao {
   }
 
   /**
-   * Checks if there are any manifest entries in the database that were created after the given
-   * cutoff and are not contained in the given list of timestamps.
-   *
-   * @param manifestTimestamps list of timestamps to compare
-   * @param cutoff cutoff for checking the database entries
-   * @return boolean
-   */
-  public boolean additionalNonSyntheticManifestsExist(
-      Set<Instant> manifestTimestamps, Instant cutoff) {
-    final String query =
-        """
-        SELECT EXISTS(
-          SELECT 1
-          FROM S3ManifestFile m
-          WHERE m.manifestTimestamp > :cutoff
-          AND m.s3Key NOT LIKE 'Synthetic/%'
-          AND m.manifestTimestamp NOT IN :manifestTimestamps
-        )
-        """;
-    return transactionManager.executeFunction(
-        entityManager ->
-            entityManager
-                .createQuery(query, boolean.class)
-                .setParameter("manifestTimestamps", manifestTimestamps)
-                .setParameter("cutoff", cutoff)
-                .getSingleResult());
-  }
-
-  /**
    * Finds a record matching the given S3 key and returns an entity representing it. Returns null if
    * no record exists.
    *

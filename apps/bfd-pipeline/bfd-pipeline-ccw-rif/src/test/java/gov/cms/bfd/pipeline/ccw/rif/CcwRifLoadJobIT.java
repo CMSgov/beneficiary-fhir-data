@@ -91,7 +91,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       statusOrder.verify(statusReporter).reportNothingToDo();
       statusOrder.verifyNoMoreInteractions();
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
@@ -218,7 +218,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verifyManifestFileStatus(s3FilesDao, manifest1Key, S3ManifestFile.ManifestStatus.COMPLETED);
       verifyManifestFileStatus(s3FilesDao, manifest2Key, S3ManifestFile.ManifestStatus.COMPLETED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3FileCache).close();
 
     } finally {
@@ -325,7 +325,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       verifyManifestFileStatus(s3FilesDao, manifestAKey, S3ManifestFile.ManifestStatus.COMPLETED);
       verifyManifestFileStatus(s3FilesDao, manifestBKey, S3ManifestFile.ManifestStatus.DISCOVERED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3FileCache).close();
 
     } finally {
@@ -406,7 +406,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       verifyManifestFileStatus(s3FilesDao, manifestKey, S3ManifestFile.ManifestStatus.DISCOVERED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3FileCache).close();
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
@@ -486,7 +486,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
       // Verify that the data set was not processed.
       verifyManifestFileStatus(s3FilesDao, manifestKey, null);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3FileCache).close();
 
     } finally {
@@ -831,7 +831,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
       verifyManifestFileStatus(s3FilesDao, manifestS3Key, S3ManifestFile.ManifestStatus.COMPLETED);
 
-      // verifies that close called close on AutoCloseable dependencies
+      // verifies that close was called on AutoCloseable dependencies
       verify(s3FileCache).close();
 
     } finally {
