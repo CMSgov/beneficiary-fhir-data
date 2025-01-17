@@ -391,7 +391,7 @@ public final class CcwRifLoadJob implements PipelineJob {
         // will not be stopped as the dataset has not completed loading. Note that there is an edge
         // case if the current manifest was the last to be loaded for a dataset but the final
         // manifest list has not yet arrived. There is a failsafe above for this possibility
-        readFinalManifestLists().stream()
+        dataSetQueue.readFinalManifestLists().stream()
             .filter(l -> l.getTimestampText().equals(manifestToProcess.getTimestampText()))
             .filter(l -> !dataSetQueue.hasIncompleteManifests(l.getManifests()))
             .map(FinalManifestList::getTimestampText)
