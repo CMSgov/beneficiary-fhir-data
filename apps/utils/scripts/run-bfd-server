@@ -186,9 +186,9 @@ function setvar() {
     eval "export ${env_name}=\"${value}\""
   else
     full_ssm_name="${SSM_PARAMETER_PATH}/${ssm_name}"
-    # some values may need to be escaped to be used as an env var
+    # quotes need to be escaped to be used in an env var,
     # but should be unescaped in SSM
-    value=$(echo "${value}" | tr -d '\')
+    value=$(echo "${value}" | sed 's/\\"/"/g')
     echo put-parameter "$full_ssm_name"
     aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${full_ssm_name}" --value "${value}" --no-cli-pager # > /dev/null
   fi
