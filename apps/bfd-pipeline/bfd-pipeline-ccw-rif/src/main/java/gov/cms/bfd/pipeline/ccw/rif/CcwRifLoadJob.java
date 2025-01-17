@@ -12,7 +12,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.FinalManifestList;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -106,21 +105,6 @@ public final class CcwRifLoadJob implements PipelineJob {
    */
   public static final String S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS = "Synthetic/Incoming";
 
-  /** The directory name that completed/done RIF data sets will be moved to in S3. */
-  public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
-
-  /**
-   * The directory name that completed/done RIF data sets loaded from {@link
-   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
-   */
-  public static final String S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS = "Synthetic/Done";
-
-  /**
-   * The directory name that failed RIF data sets loaded from {@link
-   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
-   */
-  public static final String S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS = "Synthetic/Failed";
-
   /**
    * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} goes and
    * looks, but doesn't find any data sets waiting to be processed.
@@ -155,18 +139,6 @@ public final class CcwRifLoadJob implements PipelineJob {
               + S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
               + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
-  /**
-   * A regex that can be used for checking for a manifest in the {@link
-   * #S3_PREFIX_COMPLETED_DATA_SETS} location.
-   */
-  public static final Pattern REGEX_COMPLETED_MANIFEST =
-      Pattern.compile(
-          "^("
-              + S3_PREFIX_COMPLETED_DATA_SETS
-              + "|"
-              + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-              + ")/(.*)/([0-9]+)_manifest\\.xml$");
-
   /** The application metrics. */
   private final MetricRegistry appMetrics;
 
@@ -198,8 +170,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final ExecutorService downloadService;
 
   /**
-   * Constructs a new instance. The {@link S3TaskManager} will be automatically shut down when this
-   * job's {@link #close} method is called.
+   * Constructs a new instance.
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
@@ -237,12 +208,7 @@ public final class CcwRifLoadJob implements PipelineJob {
 
   @Override
   public boolean isInterruptible() {
-    /*
-     * TODO While the RIF pipeline itself is interruptable now, the S3 transfers are not.
-     *  For now we will leave interrupts disabled and revisit the need for moving files
-     *  between S3 buckets in a later PR. Expected to be changed as part of BFD-3129.
-     */
-    return false;
+    return true;
   }
 
   @Override
@@ -408,33 +374,18 @@ public final class CcwRifLoadJob implements PipelineJob {
        */
       rifFiles.forEach(S3RifFile::cleanupTempFile);
     } else {
-      // TODO BEGIN remove once S3 file moves are no longer necessary.
-      // Expected to be changed as part of BFD-3129.
-      /*
-       * If here, Synthea pre-validation has failed; we want to move the S3 incoming
-       * files to a failed folder; so instead of moving files to a done folder we'll just
-       * replace the manifest's notion of its Done folder to a Failed folder.
-       */
-      manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
-      // TODO END remove once S3 file moves are no longer necessary.
-
       /*
        * If here, Synthea pre-validation has failed; we want to mark the data set as rejected in the database.
        */
       dataSetQueue.markAsRejected(manifestRecord);
     }
 
-    // TODO BEGIN remove once S3 file moves are no longer necessary.
-    // Expected to be changed as part of BFD-3129.
-    dataSetQueue.moveManifestFilesInS3(manifestToProcess);
-    // TODO END remove once S3 file moves are no longer necessary.
-
     return PipelineJobOutcome.WORK_DONE;
   }
 
   /**
-   * Shuts down our {@link S3TaskManager} and clears our S3 files cache. If any download or move
-   * tasks are still running this method will wait for them to complete before returning.
+   * Clears our S3 files cache. If any download or move tasks are still running this method will
+   * wait for them to complete before returning.
    *
    * <p>{@inheritDoc}
    */
