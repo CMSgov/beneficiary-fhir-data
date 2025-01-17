@@ -144,21 +144,30 @@ public class DataSetQueue implements AutoCloseable {
   }
 
   /**
-   * Searches S3 for all manifest lists created after the minimum allowed timestamp.
+   * Reads all manifests from the given prefix.
    *
-   * @param minimumAllowedManifestTimestamp minimum allowed creation timestamp
+   * @param s3Prefix prefix
+   * @return valid manifest IDs
+   */
+  public Stream<ParsedManifestId> readAllIncomingManifests(String s3Prefix) {
+    return s3Files
+        .scanS3ForFiles(s3Prefix)
+        .map(S3Dao.S3ObjectSummary::getKey)
+        .flatMap(s3Key -> parseManifestIdFromS3Key(s3Key).stream());
+  }
+
+  /**
+   * Searches S3 for all manifest lists.
+   *
    * @return the manifest lists
    */
-  public List<FinalManifestList> readFinalManifestLists(Instant minimumAllowedManifestTimestamp) {
+  public List<FinalManifestList> readFinalManifestLists() {
     final String manifestListName = "manifestlist.done";
     return s3Files
         // Purposefully excluding synthetic prefix here because synthetic loads don't have a final
         // manifest
         .scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)
-        .filter(
-            s ->
-                s.getKey().toLowerCase().endsWith(manifestListName)
-                    && s.getLastModified().isAfter(minimumAllowedManifestTimestamp))
+        .filter(s -> s.getKey().toLowerCase().endsWith(manifestListName))
         .map(
             s -> {
               String key = s.getKey();
@@ -181,19 +190,6 @@ public class DataSetQueue implements AutoCloseable {
    */
   public boolean hasIncompleteManifests(Set<String> manifestKeys) {
     return s3Records.hasIncompleteManifests(manifestKeys);
-  }
-
-  /**
-   * Checks if there are any manifest entries in the database that were created after the given
-   * cutoff and are not contained in the given list of timestamps.
-   *
-   * @param manifestTimestamps list of timestamps to compare
-   * @param cutoff cutoff for checking the database entries
-   * @return boolean
-   */
-  public boolean additionalNonSyntheticManifestsExist(
-      Set<Instant> manifestTimestamps, Instant cutoff) {
-    return s3Records.additionalNonSyntheticManifestsExist(manifestTimestamps, cutoff);
   }
 
   /**

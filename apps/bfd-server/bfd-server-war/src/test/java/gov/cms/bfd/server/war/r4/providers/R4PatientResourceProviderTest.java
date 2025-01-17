@@ -463,7 +463,8 @@ public class R4PatientResourceProviderTest {
             () ->
                 patientProvider.searchByCoverageContract(
                     contractId, refYear, null, requestDetails));
-    assertEquals("Contract year must be a number.", exception.getLocalizedMessage());
+    assertEquals(
+        "Failed to parse value for Contract Year as a number.", exception.getLocalizedMessage());
   }
 
   /**

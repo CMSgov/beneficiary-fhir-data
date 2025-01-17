@@ -440,7 +440,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(patientParam.getIdPart()).thenReturn("-1?234");
 
     assertThrows(
-        NumberFormatException.class,
+        InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
                 patientParam, null, null, null, null, null, null, null, requestDetails));

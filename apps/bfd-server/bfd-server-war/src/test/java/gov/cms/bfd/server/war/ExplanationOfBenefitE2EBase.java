@@ -348,6 +348,21 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
+  /** Verify that EOB returns a 400 when searching with an invalid bene ID. */
+  @Test
+  public void testEobByPatientIdWithInvalidIdReturns400() {
+
+    String requestString = eobEndpoint + "?patient=abc";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .when()
+        .get(requestString);
+  }
+
   /**
    * Tests that when searching for EOB by patient id and an unrecognized request param results in a
    * 400 http code.

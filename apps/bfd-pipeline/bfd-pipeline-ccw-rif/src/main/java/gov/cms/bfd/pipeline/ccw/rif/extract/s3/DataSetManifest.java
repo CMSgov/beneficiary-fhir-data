@@ -296,6 +296,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * Also implements {@link Comparable} such that the processing order of {@link DataSetManifest}s
    * can be determined.
    */
+  @Getter
   public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
     /** a {@link String} derived {@link DataSetManifest#getTimestamp()} value. */
     private final String timestampText;

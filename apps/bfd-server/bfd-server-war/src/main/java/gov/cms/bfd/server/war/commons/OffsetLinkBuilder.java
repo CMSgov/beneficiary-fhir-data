@@ -89,16 +89,10 @@ public final class OffsetLinkBuilder implements LinkBuilder {
       RequestDetails requestDetails, String parameterToParse) {
 
     if (requestDetails.getParameters().containsKey(parameterToParse)) {
-      try {
-        return Optional.of(
-            Integer.parseInt(requestDetails.getParameters().get(parameterToParse)[0]));
-      } catch (NumberFormatException e) {
-        LOGGER.warn(
-            "Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.",
-            e);
-        throw new InvalidRequestException(
-            "Invalid argument in request URL: " + parameterToParse + " must be a number.");
-      }
+
+      return Optional.of(
+          StringUtils.parseIntOrBadRequest(
+              requestDetails.getParameters().get(parameterToParse)[0], parameterToParse));
     }
     return Optional.empty();
   }

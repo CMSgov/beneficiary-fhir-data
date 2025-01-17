@@ -181,12 +181,15 @@ function setvar() {
   value="$2"
   if [[ -z "$AWS_REGION" ]] ; then
     # env var names are ssm paths converted upper case and with / replaced by _.
-    env_name=`echo "BFD_${ssm_name}" | tr '/' '_' | tr '[a-z]' '[A-Z]'`
-    echo export $env_name
+    env_name=$(echo "BFD_${ssm_name}" | tr '/' '_' | tr '[a-z]' '[A-Z]')
+    # quotes need to be escaped to be used in an env var,
+    # but should be unescaped in SSM
+    value=$(echo "${value}" | sed 's/"/\\"/g')
+    echo export "$env_name"
     eval "export ${env_name}=\"${value}\""
   else
     full_ssm_name="${SSM_PARAMETER_PATH}/${ssm_name}"
-    echo put-parameter $full_ssm_name
+    echo put-parameter "$full_ssm_name"
     aws ssm put-parameter --overwrite --endpoint-url http://localhost:4566 --name "${full_ssm_name}" --value "${value}" --no-cli-pager # > /dev/null
   fi
 }
