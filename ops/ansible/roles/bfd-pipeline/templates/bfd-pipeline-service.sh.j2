@@ -5,8 +5,8 @@
 # Force UTC time
 export TZ=UTC
 
-export BFD_CCW_JOB_ENABLED={{ enabled if pipeline_instance_type == 'ccw' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
-export BFD_RDA_JOB_ENABLED={{ enabled if pipeline_instance_type == 'rda' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
+export BFD_CCW_JOB_ENABLED={{ job_enabled if pipeline_instance_type == 'ccw' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
+export BFD_RDA_JOB_ENABLED={{ job_enabled if pipeline_instance_type == 'rda' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
 
 export BFD_DB_URL='{{ db_url }}'
 
