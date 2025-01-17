@@ -29,6 +29,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -158,7 +159,8 @@ public class CoverageResourceProvider implements IResourceProvider {
     if (!coverageIdSegment.isPresent()) throw new ResourceNotFoundException(coverageId);
     String coverageIdBeneficiaryIdText = coverageIdMatcher.group(2);
 
-    Long beneficiaryId = Long.parseLong(coverageIdBeneficiaryIdText);
+    Long beneficiaryId =
+        StringUtils.parseLongOrBadRequest(coverageIdBeneficiaryIdText, "Beneficiary ID");
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
@@ -219,7 +221,8 @@ public class CoverageResourceProvider implements IResourceProvider {
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
-    Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
+    Long beneficiaryId =
+        StringUtils.parseLongOrBadRequest(beneficiary.getIdPart(), "Beneficiary ID");
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = coverageTransformer.transform(beneficiaryEntity);
