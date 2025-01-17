@@ -110,7 +110,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
     if (hasAnotherPage) {
       Patient lastPatient = (Patient) entries.get(entries.size() - 1).getResource();
-      Long lastPatientId = Long.parseLong(lastPatient.getId());
+      Long lastPatientId = StringUtils.parseLongOrBadRequest(lastPatient.getId(), PARAM_CURSOR);
       to.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_NEXT)
@@ -165,13 +165,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
   private Integer extractCountParam(UriComponents components) {
     String countText = components.getQueryParams().getFirst(Constants.PARAM_COUNT);
     if (countText != null) {
-      try {
-        return Integer.parseInt(countText);
-      } catch (NumberFormatException ex) {
-        throw new InvalidRequestException(
-            String.format(
-                "Invalid argument in request URL: %s must be a number.", Constants.PARAM_COUNT));
-      }
+      return StringUtils.parseIntOrBadRequest(countText, Constants.PARAM_COUNT);
     }
     return null;
   }
@@ -184,7 +178,9 @@ public final class PatientLinkBuilder implements LinkBuilder {
    */
   private Long extractCursorParam(UriComponents components) {
     String cursorText = components.getQueryParams().getFirst(PARAM_CURSOR);
-    return cursorText != null && cursorText.length() > 0 ? Long.parseLong(cursorText) : null;
+    return cursorText != null && cursorText.length() > 0
+        ? StringUtils.parseLongOrBadRequest(cursorText, PARAM_CURSOR)
+        : null;
   }
 
   /**

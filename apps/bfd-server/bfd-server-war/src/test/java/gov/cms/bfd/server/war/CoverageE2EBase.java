@@ -163,6 +163,19 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
+  /** Verify that Coverage returns a 400 when searching with an invalid bene ID. */
+  @Test
+  public void testSearchByBeneInvalidBeneIdExpect400() {
+    String requestString = coverageEndpoint + "?beneficiary=abc";
+    given()
+        .spec(requestAuth)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .when()
+        .get(requestString);
+  }
+
   /**
    * Verify that Coverage with paging requested returns the paging links and navigating to those
    * links returns valid paged results.
