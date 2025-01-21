@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -34,7 +35,7 @@ public final class SecurityTagManager {
    * @param tagClass the name of the tag class
    * @return queryTagsForClaim
    */
-  private Set<String> queryTagsForClaim(String claimId, Class<?> tagClass) {
+  public Set<String> queryTagsForClaim(String claimId, Class<?> tagClass) {
 
     String sql = "SELECT t.code FROM " + tagClass.getSimpleName() + " t WHERE t.claim = :claim";
 
@@ -45,24 +46,6 @@ public final class SecurityTagManager {
     List<String> resultList = query.getResultList();
 
     return new HashSet<>(resultList);
-  }
-
-  /**
-   * Determines the security level based on the collected tags.
-   *
-   * @param securityTags value of securityTags
-   * @return SecurityLevel
-   */
-  private String determineSecurityLevel(Set<String> securityTags) {
-    // Define the rules for security levels based on tag codes
-    for (String tag : securityTags) {
-      if ("R".equals(tag) || "42CFRPart2".equals(tag)) {
-        return "Restricted"; // Sensitive data
-      }
-    }
-
-    // Default to 'Normal' if no sensitive tags are found
-    return "Normal";
   }
 
   /**
@@ -91,29 +74,31 @@ public final class SecurityTagManager {
       // Check for each tag and set corresponding code and display
       for (String securityTag : securityTags) {
         Coding coding = new Coding();
-
+        // Convert the securityTag string to the TagCode enum
+        TagCode tagCode = TagCode.fromString(securityTag);
         // Check each security tag and apply corresponding values
-        switch (securityTag) {
-          case "R":
-            coding
-                .setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality")
-                .setCode("R")
-                .setDisplay("Restricted");
-            break;
-          case "42CFRPart2":
-            coding
-                .setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode")
-                .setCode("42CFRPart2")
-                .setDisplay("42 CFR Part 2");
-            break;
+        if (tagCode != null) {
+          switch (tagCode) {
+            case R:
+              coding
+                  .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+                  .setCode(TagCode.R.toString())
+                  .setDisplay("Restricted");
+              break;
+            case _42CFRPart2:
+              coding
+                  .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
+                  .setCode(TagCode._42CFRPart2.toString())
+                  .setDisplay("42 CFR Part 2");
+              break;
 
-          default:
-            coding
-                .setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality")
-                .setCode("N") // Default to 'Normal' if unrecognized
-                .setDisplay("Normal");
+            default:
+              coding
+                  .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+                  .setCode("N") // Default to 'Normal' if unrecognized
+                  .setDisplay("Normal");
+          }
         }
-
         securityTagCoding.add(coding);
       }
     }
@@ -137,7 +122,7 @@ public final class SecurityTagManager {
       org.hl7.fhir.dstu3.model.Coding securityTag = new org.hl7.fhir.dstu3.model.Coding();
       securityTag
           .setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality")
-          .setCode(code.getCode()) // Default to 'Normal' if unrecognized
+          .setCode(code.getCode())
           .setDisplay(code.getDisplay());
 
       securityTagCoding.add(securityTag);

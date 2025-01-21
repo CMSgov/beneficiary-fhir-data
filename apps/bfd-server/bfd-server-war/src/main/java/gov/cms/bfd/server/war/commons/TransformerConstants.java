@@ -703,4 +703,18 @@ public final class TransformerConstants {
    */
   public static final String C4DIC_LOGO_URL =
       "https://www.hhs.gov/sites/default/files/logo-white-lg.png";
+
+  /**
+   * URL for C4DIC Logo <a href="https://www.hhs.gov/sites/default/files/logo-white-lg.png">C4DIC
+   * Logo </a>.
+   */
+  public static final String SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL =
+      "http://terminology.hl7.org/CodeSystem/v3-Confidentiality";
+
+  /**
+   * URL for C4DIC Logo <a href="https://www.hhs.gov/sites/default/files/logo-white-lg.png">C4DIC
+   * Logo </a>.
+   */
+  public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
+      "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 }
