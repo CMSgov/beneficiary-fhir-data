@@ -219,28 +219,22 @@ public final class CcwRifLoadJob implements PipelineJob {
     if (eligibleManifests.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       final List<FinalManifestList> finalManifestLists = dataSetQueue.readFinalManifestLists();
-      final Set<String> allManifests =
-          finalManifestLists.stream()
-              .flatMap(l -> l.getManifests().stream())
-              .collect(Collectors.toSet());
+      final Set<String> allManifests = getManifestsFromManifestLists(finalManifestLists);
       final Set<Instant> finalManifestTimestamps =
-          finalManifestLists.stream()
-              .map(FinalManifestList::getTimestamp)
-              .collect(Collectors.toSet());
+          getTimestampsFromManifestLists(finalManifestLists);
 
       listener.noDataAvailable();
       statusReporter.reportNothingToDo();
+      // Ensure all manifests from the manifest lists are accounted for and completed.
       if (dataSetQueue.hasIncompleteManifests(allManifests)) {
         LOGGER.info("Incomplete manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
       // Synthetic loads don't have manifest lists
-      Set<Instant> incomingTimestamps =
-          dataSetQueue
-              .readAllIncomingManifests(S3_PREFIX_PENDING_DATA_SETS)
-              .filter(id -> !id.manifestId().isFutureManifest())
-              .map(id -> id.manifestId().getTimestamp())
-              .collect(Collectors.toSet());
+      final Set<Instant> incomingTimestamps = getAllNonSyntheticManifestTimestamp();
+      // If the distinct set of all non-synthetic loads (identified by their timestamps) from the
+      // available manifests is equal to the set of timestamps from loads that do have a manifest
+      // list, all manifests are accounted for and we're done.
       if (!incomingTimestamps.equals(finalManifestTimestamps)) {
         LOGGER.info("Missing manifests found");
         return PipelineJobOutcome.NOTHING_TO_DO;
@@ -398,6 +392,41 @@ public final class CcwRifLoadJob implements PipelineJob {
         });
     closer.close(dataSetQueue::close);
     closer.finish();
+  }
+
+  /**
+   * Retrieves the distinct set of all timestamps from each non-synthetic load in the 'Incoming'
+   * folder.
+   *
+   * @return set of timestamps
+   */
+  private Set<Instant> getAllNonSyntheticManifestTimestamp() {
+    return dataSetQueue
+        .readAllIncomingManifests(S3_PREFIX_PENDING_DATA_SETS)
+        .filter(id -> !id.manifestId().isFutureManifest())
+        .map(id -> id.manifestId().getTimestamp())
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns the flattened list of manifests from the manifest lists.
+   *
+   * @param finalManifestLists final manifest lists from the 'Incoming' folder
+   */
+  private Set<String> getManifestsFromManifestLists(List<FinalManifestList> finalManifestLists) {
+    return finalManifestLists.stream()
+        .flatMap(l -> l.getManifests().stream())
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns the set of load timestamps from the manifest lists.
+   *
+   * @param finalManifestLists final manifest lists from the 'Incoming' folder
+   * @return timestamps
+   */
+  private Set<Instant> getTimestampsFromManifestLists(List<FinalManifestList> finalManifestLists) {
+    finalManifestLists.stream().map(FinalManifestList::getTimestamp).collect(Collectors.toSet());
   }
 
   /**
