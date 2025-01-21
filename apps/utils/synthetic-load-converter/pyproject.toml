@@ -1,12 +1,9 @@
-[tool.poetry]
+[project]
+version = "0.1.0"
+requires-python = "<4.0,>=3.12"
+dependencies = [
+    "boto3<2.0.0,>=1.35.93",
+    "types-boto3[essential]<2.0.0,>=1.35.93",
+]
 package-mode = false
 name = "synthetic-load-converter"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-boto3 = "^1.35.93"
-types-boto3 = { extras = ["essential"], version = "^1.35.93" }
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

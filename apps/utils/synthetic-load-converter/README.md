@@ -7,9 +7,9 @@ Data will be uploaded to `Incoming/{timestamp}` in the destination bucket using 
 
 ## Example Usage
 ```sh
-poetry install
+uv sync
 
-poetry run ./convert-load.py --source-bucket bft-test-etl0000 --destination-bucket bfd-1000-test-etl0000 --source-prefix Synthetic/Done/2025-01-01T12:00:00Z/
+uv run ./convert-load.py --source-bucket bft-test-etl0000 --destination-bucket bfd-1000-test-etl0000 --source-prefix Synthetic/Done/2025-01-01T12:00:00Z/
 ```
 
 ## Parameters:
