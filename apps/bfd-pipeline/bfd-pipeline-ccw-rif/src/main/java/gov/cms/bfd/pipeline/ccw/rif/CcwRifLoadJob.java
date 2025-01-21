@@ -412,6 +412,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    * Returns the flattened list of manifests from the manifest lists.
    *
    * @param finalManifestLists final manifest lists from the 'Incoming' folder
+   * @return set of manifests
    */
   private Set<String> getManifestsFromManifestLists(List<FinalManifestList> finalManifestLists) {
     return finalManifestLists.stream()
