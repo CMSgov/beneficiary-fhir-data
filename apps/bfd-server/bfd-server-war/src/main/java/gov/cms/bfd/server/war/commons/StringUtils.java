@@ -1,7 +1,10 @@
 package gov.cms.bfd.server.war.commons;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableList;
+import java.util.Map;
+import java.util.Optional;
 
 /** Helper Utils class for Functions shared across. multiple classes. */
 public class StringUtils {
@@ -67,5 +70,53 @@ public class StringUtils {
       throw new InvalidRequestException(
           String.format("Failed to parse value for %s as a number.", fieldName));
     }
+  }
+
+  /**
+   * Returns the parsed parameter as an Integer.
+   *
+   * @param requestDetails the {@link RequestDetails} containing additional parameters for the
+   *     request
+   * @param parameterToParse the parameter to parse from requestDetails
+   * @return the parsed parameter as an Integer, empty {@link Optional} if the parameter is not
+   *     found
+   */
+  public static Optional<Integer> parseIntegerFromRequest(
+      RequestDetails requestDetails, String parameterToParse) {
+    Optional<String> requestParam = getParameterFromRequest(requestDetails, parameterToParse);
+    return requestParam.map(s -> parseIntOrBadRequest(s, parameterToParse));
+  }
+
+  /**
+   * Returns the parsed parameter as a Long.
+   *
+   * @param requestDetails the {@link RequestDetails} containing additional parameters for the
+   *     request
+   * @param parameterToParse the parameter to parse from requestDetails
+   * @return the parsed parameter as a Long, empty {@link Optional} if the parameter is not found
+   */
+  public static Optional<Long> parseLongFromRequest(
+      RequestDetails requestDetails, String parameterToParse) {
+    Optional<String> requestParam = getParameterFromRequest(requestDetails, parameterToParse);
+    return requestParam.map(s -> parseLongOrBadRequest(s, parameterToParse));
+  }
+
+  /**
+   * Extracts the first parameter from the request if it's present and non-empty.
+   *
+   * @param requestDetails request details
+   * @param parameterToParse name of parameter to retrieve
+   * @return extracted value
+   */
+  private static Optional<String> getParameterFromRequest(
+      RequestDetails requestDetails, String parameterToParse) {
+    Map<String, String[]> parameters = requestDetails.getParameters();
+    if (parameters.containsKey(parameterToParse)) {
+      String paramValue = parameters.get(parameterToParse)[0];
+      if (paramValue != null && !paramValue.isBlank()) {
+        return Optional.of(paramValue);
+      }
+    }
+    return Optional.empty();
   }
 }

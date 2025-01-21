@@ -6,25 +6,37 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import java.util.Collections;
+import java.util.HashMap;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** Unit test for the {@link PatientLinkBuilder}. */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class PatientLinkBuilderTest {
   /** Contract url for use in pagination testing. */
-  public static String TEST_CONTRACT_URL =
+  public static final String TEST_CONTRACT_URL =
       "https://localhost:443/v1/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct02|S0000";
+
+  @Mock private RequestDetails requestDetails;
 
   /**
    * Validate that for the base testing contract url no paging was requested, no paging was
@@ -33,7 +45,7 @@ public class PatientLinkBuilderTest {
    */
   @Test
   public void noCountTest() {
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL);
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL);
 
     assertFalse(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -54,7 +66,7 @@ public class PatientLinkBuilderTest {
   @Test
   public void missingCountTest() {
     // Missing _count
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&cursor=999");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&cursor=999");
 
     assertFalse(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -72,7 +84,7 @@ public class PatientLinkBuilderTest {
    */
   @Test
   public void emptyPageTest() {
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&_count=10");
 
     assertTrue(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -91,7 +103,7 @@ public class PatientLinkBuilderTest {
    */
   @Test
   public void emptyCursorTest() {
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10&cursor=");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&_count=10&cursor=");
 
     assertTrue(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -105,7 +117,7 @@ public class PatientLinkBuilderTest {
    */
   @Test
   public void onePageTest() {
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&_count=10");
 
     assertTrue(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -129,7 +141,7 @@ public class PatientLinkBuilderTest {
    */
   @Test
   public void testMdcLogsInAddResourcesToBundle() {
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&_count=10");
 
     assertTrue(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -183,7 +195,7 @@ public class PatientLinkBuilderTest {
   @Test
   public void fullPageTest() {
     // test a page with a page size of 1 and 1 patient in the result
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=1");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&_count=1");
 
     assertTrue(paging.isPagingRequested());
     assertTrue(paging.isFirstPage());
@@ -209,7 +221,7 @@ public class PatientLinkBuilderTest {
   @Test
   public void fullPageTestWithPaging() {
     // test a page with a page size of 1 and 1 patient in the result
-    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=1");
+    PatientLinkBuilder paging = configureRequestDetails(TEST_CONTRACT_URL + "&_count=1");
     paging = new PatientLinkBuilder(paging, true);
 
     assertTrue(paging.isPagingRequested());
@@ -240,7 +252,7 @@ public class PatientLinkBuilderTest {
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=abc");
+          configureRequestDetails(TEST_CONTRACT_URL + "&_count=abc");
         },
         "Invalid argument in request URL: _count must be a number.");
   }
@@ -251,7 +263,7 @@ public class PatientLinkBuilderTest {
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=-1");
+          configureRequestDetails(TEST_CONTRACT_URL + "&_count=-1");
         },
         "Value for pageSize cannot be zero or negative: -1");
   }
@@ -262,7 +274,7 @@ public class PatientLinkBuilderTest {
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=0");
+          configureRequestDetails(TEST_CONTRACT_URL + "&_count=0");
         },
         "Value for pageSize cannot be zero or negative: 0");
   }
@@ -273,9 +285,26 @@ public class PatientLinkBuilderTest {
     assertThrows(
         InvalidRequestException.class,
         () -> {
-          new PatientLinkBuilder(
+          configureRequestDetails(
               TEST_CONTRACT_URL + "&_count=" + (PatientLinkBuilder.MAX_PAGE_SIZE + 1));
         },
         "Page size must be less than " + PatientLinkBuilder.MAX_PAGE_SIZE);
+  }
+
+  /**
+   * Returns a new {@link PatientLinkBuilder} configured from the supplied URI.
+   *
+   * @param uri URI
+   * @return link builder
+   */
+  private PatientLinkBuilder configureRequestDetails(String uri) {
+    UriComponents components = UriComponentsBuilder.fromUriString(uri).build();
+    when(requestDetails.getCompleteUrl()).thenReturn(components.toUriString());
+    HashMap<String, String[]> params = new HashMap<>();
+    for (var param : components.getQueryParams().keySet()) {
+      params.put(param, components.getQueryParams().get(param).toArray(new String[0]));
+    }
+    when(requestDetails.getParameters()).thenReturn(params);
+    return new PatientLinkBuilder(requestDetails);
   }
 }

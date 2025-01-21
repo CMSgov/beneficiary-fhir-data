@@ -418,7 +418,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails);
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContract");
@@ -998,7 +998,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails);
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContractForYearMonth");

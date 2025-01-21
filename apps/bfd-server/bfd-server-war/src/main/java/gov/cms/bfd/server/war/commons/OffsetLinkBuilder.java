@@ -52,9 +52,9 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    * @param resource the resource
    */
   public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
-    this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
-    this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
-    this.serverBase = requestDetails.getServerBaseForRequest();
+    this.pageSize = StringUtils.parseIntegerFromRequest(requestDetails, Constants.PARAM_COUNT);
+    this.startIndex = StringUtils.parseIntegerFromRequest(requestDetails, "startIndex");
+    this.serverBase = requestDetails.getFhirServerBase();
     this.resource = resource;
     this.requestDetails = requestDetails;
     validate();
@@ -74,27 +74,6 @@ public final class OffsetLinkBuilder implements LinkBuilder {
       throw new InvalidRequestException(
           String.format("Value for startIndex cannot be negative: %d", startIndex.get()));
     }
-  }
-
-  /**
-   * Returns the parsed parameter as an Integer.
-   *
-   * @param requestDetails the {@link RequestDetails} containing additional parameters for the URL
-   *     in need of parsing out
-   * @param parameterToParse the parameter to parse from requestDetails
-   * @return the parsed parameter as an Integer, empty {@link Optional} if the parameter is not
-   *     found
-   */
-  private Optional<Integer> parseIntegerParameters(
-      RequestDetails requestDetails, String parameterToParse) {
-
-    if (requestDetails.getParameters().containsKey(parameterToParse)) {
-
-      return Optional.of(
-          StringUtils.parseIntOrBadRequest(
-              requestDetails.getParameters().get(parameterToParse)[0], parameterToParse));
-    }
-    return Optional.empty();
   }
 
   /** {@inheritDoc} */

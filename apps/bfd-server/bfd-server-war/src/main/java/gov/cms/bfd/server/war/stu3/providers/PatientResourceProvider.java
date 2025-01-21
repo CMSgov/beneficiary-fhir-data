@@ -417,7 +417,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
               CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS));
     }
 
-    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails);
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V1_PATIENT);
     operation.setOption("by", "coverageContractForYearMonth");
