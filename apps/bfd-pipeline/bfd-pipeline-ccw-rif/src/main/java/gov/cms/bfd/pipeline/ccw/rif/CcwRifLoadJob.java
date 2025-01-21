@@ -231,7 +231,7 @@ public final class CcwRifLoadJob implements PipelineJob {
         return PipelineJobOutcome.NOTHING_TO_DO;
       }
       // Synthetic loads don't have manifest lists
-      final Set<Instant> incomingTimestamps = getAllNonSyntheticManifestTimestamp();
+      final Set<Instant> incomingTimestamps = getAllNonSyntheticManifestTimestamps();
       // If the distinct set of all non-synthetic loads (identified by their timestamps) from the
       // available manifests is equal to the set of timestamps from loads that do have a manifest
       // list, all manifests are accounted for and we're done.
@@ -400,7 +400,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    *
    * @return set of timestamps
    */
-  private Set<Instant> getAllNonSyntheticManifestTimestamp() {
+  private Set<Instant> getAllNonSyntheticManifestTimestamps() {
     return dataSetQueue
         .readAllIncomingManifests(S3_PREFIX_PENDING_DATA_SETS)
         .filter(id -> !id.manifestId().isFutureManifest())
