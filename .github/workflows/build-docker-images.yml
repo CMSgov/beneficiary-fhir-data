@@ -63,11 +63,13 @@ jobs:
               name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
               dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
               contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
+              platform: "linux/amd64",
             },
             {
               name: "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
               dockerfile: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
               contextDir: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
+              platform: "linux/arm64",
             },
           ]
     runs-on: ubuntu-latest
@@ -133,9 +135,9 @@ jobs:
           tags: ${{ steps.setup_tags.outputs.image_tags }}
           # AWS Lambda does not support multi-platform images, something that is enabled by default
           # by this Action via the "provenance" flag. Until AWS Lambda supports this feature
-          # properly, we must explicitly disable provenance and specify the amd64 platform.
+          # properly, we must explicitly disable provenance and specify the platform directly.
           # See https://github.com/docker/buildx/issues/1533
           provenance: false
-          platforms: "linux/amd64"
+          platforms: ${{ matrix.image.platform }}
         env:
           DOCKER_BUILDKIT: 1
