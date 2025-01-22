@@ -9,7 +9,7 @@ to avoid caching affecting the response times of repeat runs.
 
 These tests are intended to be run from a server instance which has access permissions to reach out to the BFD endpoints. How to
 do this is outside the scope of this document, but instructions for this can be found in this more detailed run guide on confluence:
-https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests. 
+https://confluence.cms.gov/display/BFD/2022+Run+the+BFD+Load+Tests. 
 
 The following test suites ([Locustfiles](https://docs.locust.io/en/stable/writing-a-locustfile.html)) are available to run:
 
@@ -22,7 +22,7 @@ The following test suites ([Locustfiles](https://docs.locust.io/en/stable/writin
 | Load Testing Suite | `high_volume_suite.py` | Used to exhibit distributed load on a target BFD Server to produce performance metrics under stress. Invoked by the `bfd-run-server-load` Jenkins pipeline job |
 ## Dependencies
 
-> **Important:** This project is targeting Python 3.8. Ensure that your local Python is version 3.8 **before** attempting to work in this project!
+> **Important:** This project is targeting Python 3.11. Ensure that your local Python is version 3.11 **before** attempting to work in this project!
 > A good utility for managing multiple Python versions along with [virtualenv](https://virtualenv.pypa.io/en/latest/)s is [`pew`](https://github.com/berdario/pew).
 
 The tests use a few python libraries that will need to be installed on the run box prior to starting the tests. 
