@@ -15,31 +15,11 @@ It is assumed you are using `pyright`/`pylance` for type-checking, `uv` for virt
 2. Setup Python 3.13 virtual environment:
 
    ```bash
-   uv venv --python 3.13
-   source .venv/bin/activate
+   uv sync
    ```
 
-3. Install all dependencies:
-
-   ```bash
-   uv pip sync requirements.txt dev-requirements.txt
-   ```
-
-4. Your virtual environment is now setup!
+3. Your virtual environment is now setup! By default, it is available under `.venv`; using VS Code, this Virtual Environment can be chosen using the `Python: Select Interpreter` command
 
 ## Updating/managing dependencies
 
-1. Add the dependency (with version constraint, if necessary) to `dev-requirements.in` if it is a development-only tool/library (like for testing, linting, etc.) or `requirements.in` if it is a runtime dependency
-2. Source the virtual environment (`source .venv/bin/activate`)
-3. Run:
-
-   ```bash
-   uv pip compile --upgrade --output-file requirements.txt --generate-hashes requirements.in
-   uv pip compile --upgrade --constraint requirements.txt --output-file dev-requirements.txt --generate-hashes dev-requirements.in
-   ```
-
-4. Install requirements:
-
-   ```bash
-   uv pip sync requirements.txt dev-requirements.txt
-   ```
+See [`Managing dependencies`](https://docs.astral.sh/uv/concepts/projects/dependencies/) and [`Locking and syncing`](https://docs.astral.sh/uv/concepts/projects/sync/) in the `uv` docs for more information.

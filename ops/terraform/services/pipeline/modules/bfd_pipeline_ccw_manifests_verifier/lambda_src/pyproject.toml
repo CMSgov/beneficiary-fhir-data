@@ -3,6 +3,19 @@
 requires-python = ">=3.13"
 name = "ccw-manifests-verifier"
 version = "1.0.0"
+dependencies = [
+    "aws-lambda-powertools[all]>=3.4.1",
+    "boto3>=1.36.3",
+    "psycopg[binary]>=3.2.4",
+    "pydantic>=2.10.5",
+]
+
+[dependency-groups]
+dev = [
+    "boto3-stubs[rds,s3,sns]>=1.36.3",
+    "ruff>=0.9.2",
+    "uv>=0.5.22",
+]
 
 [tool.ruff]
 # Set the maximum line length to 100.
@@ -10,35 +23,35 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-  "D",    # pydocstyle
-  "E501",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # pyupgrade
-  "UP",
-  # flake8-bugbear
-  "B",
-  # flake8-simplify
-  "SIM",
-  # isort
-  "I",
-  "ANN",
-  "LOG",
-  "G",
-  "PT",
-  "RSE",
-  "PIE",
-  "RET",
-  "SLF",
-  "ARG",
-  "PTH",
-  "PLE",
-  "PLW",
-  "PERF",
-  "FURB",
-  "RUF",
+    "D",    # pydocstyle
+    "E501",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    "ANN",
+    "LOG",
+    "G",
+    "PT",
+    "RSE",
+    "PIE",
+    "RET",
+    "SLF",
+    "ARG",
+    "PTH",
+    "PLE",
+    "PLW",
+    "PERF",
+    "FURB",
+    "RUF",
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -62,3 +75,4 @@ reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
 reportUnknownParameterType = false
+
