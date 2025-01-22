@@ -67,7 +67,7 @@ mappings:
       dbName: prscrbr_id
       name: prescriberId
       nullable: false
-      sqlType: varchar(15)
+      sqlType: varchar(35)
     - comment: RX Service Reference Number (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_srvc_rfrnc_num.txt)
       dbName: rx_srvc_rfrnc_num
       name: prescriptionReferenceNumber
@@ -77,7 +77,7 @@ mappings:
       dbName: prod_srvc_id
       name: nationalDrugCode
       nullable: false
-      sqlType: varchar(19)
+      sqlType: varchar(40)
     - comment: Plan Contract Record ID (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt)
       dbName: plan_cntrct_rec_id
       name: planContractId
@@ -219,7 +219,7 @@ mappings:
     - comment: Submission Clarification Code (https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt)
       dbName: submsn_clr_cd
       name: submissionClarificationCode
-      sqlType: varchar(2)
+      sqlType: varchar(3)
     - comment: LAST_UPDATED (https://bluebutton.cms.gov/resources/variables/lastUpdated)
       dbName: last_updated
       name: lastUpdated
