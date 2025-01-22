@@ -28,7 +28,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,8 +46,8 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(InpatientClaimTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.

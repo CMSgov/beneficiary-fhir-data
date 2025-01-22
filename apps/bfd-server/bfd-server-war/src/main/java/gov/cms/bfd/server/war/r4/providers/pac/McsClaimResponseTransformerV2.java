@@ -24,7 +24,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
@@ -39,8 +38,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -89,9 +88,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * Instantiates a new Mcs claim response transformer v2. @param metricRegistry the metric registry
    *
    * @param metricRegistry the metric registry
+   * @param securityTagManager the security tag manager
    */
-  public McsClaimResponseTransformerV2(MetricRegistry metricRegistry) {
+  public McsClaimResponseTransformerV2(
+      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
     this.metricRegistry = metricRegistry;
+    this.securityTagManager = securityTagManager;
   }
 
   /**

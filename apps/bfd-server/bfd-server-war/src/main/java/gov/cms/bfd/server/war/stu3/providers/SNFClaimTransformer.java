@@ -27,7 +27,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -44,8 +43,8 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.

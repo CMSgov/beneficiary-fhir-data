@@ -40,7 +40,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -49,8 +48,8 @@ import org.springframework.stereotype.Component;
 public class McsClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /** The metric name. */
   private static final String METRIC_NAME =

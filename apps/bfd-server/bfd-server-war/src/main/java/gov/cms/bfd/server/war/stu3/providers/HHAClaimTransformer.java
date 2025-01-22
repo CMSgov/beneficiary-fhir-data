@@ -26,7 +26,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -42,8 +41,8 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.

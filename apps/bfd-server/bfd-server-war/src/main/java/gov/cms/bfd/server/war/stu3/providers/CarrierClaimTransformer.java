@@ -27,7 +27,6 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms {@link CarrierClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -47,8 +46,8 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.

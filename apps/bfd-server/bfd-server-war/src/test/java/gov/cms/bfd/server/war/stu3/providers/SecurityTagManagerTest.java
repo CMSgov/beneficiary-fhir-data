@@ -39,7 +39,7 @@ class SecurityTagManagerTest {
 
   /** testGetClaimSecurityLevel_Inpatient. */
   @Test
-  void testGetClaimSecurityLevel_Inpatient() {
+  void testGetClaimSecurityLevelInpatient() {
     CodeableConcept type = new CodeableConcept();
     type.addCoding().setCode("INP");
 
@@ -58,7 +58,7 @@ class SecurityTagManagerTest {
 
   /** testGetClaimSecurityLevel_Outpatient. */
   @Test
-  void testGetClaimSecurityLevel_Outpatient() {
+  void testGetClaimSecurityLevelOutpatient() {
     CodeableConcept type = new CodeableConcept();
     type.addCoding().setCode("OUT");
 

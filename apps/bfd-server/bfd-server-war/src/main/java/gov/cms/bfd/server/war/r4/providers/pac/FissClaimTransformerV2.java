@@ -47,7 +47,6 @@ import org.hl7.fhir.r4.model.codesystems.ClaimInformationcategory;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -65,8 +64,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /** The METRIC_NAME constant. */
   private static final String METRIC_NAME =

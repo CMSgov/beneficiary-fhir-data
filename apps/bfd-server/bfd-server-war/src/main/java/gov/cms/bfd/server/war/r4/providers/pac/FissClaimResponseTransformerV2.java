@@ -29,7 +29,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
@@ -44,8 +43,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
@@ -73,10 +72,13 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param securityTagManager the security tag manager
    */
-  public FissClaimResponseTransformerV2(MetricRegistry metricRegistry) {
+  public FissClaimResponseTransformerV2(
+      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
     requireNonNull(metricRegistry);
     this.metricRegistry = metricRegistry;
+    this.securityTagManager = securityTagManager;
   }
 
   /**

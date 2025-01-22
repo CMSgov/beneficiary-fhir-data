@@ -26,7 +26,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Transforms {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -43,8 +42,8 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform");
 
-  /** Injecting securityTagManager. */
-  @Autowired private SecurityTagManager securityTagManager;
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * Instantiates a new transformer.
