@@ -728,6 +728,8 @@ public final class CcwRifLoadJob implements PipelineJob {
      *
      * @param datasetTimestamp the timestamp text of the dataset to time
      * @param isSynthetic whether the dataset is synthetic
+     * @return the {@link LongTaskTimer} that will be used to actively record the time it is taking
+     *     to processing the dataset
      */
     private LongTaskTimer createActiveTimerForDataset(
         String datasetTimestamp, boolean isSynthetic) {
