@@ -60,6 +60,7 @@ resource "aws_lambda_function" "this" {
   kms_key_arn      = local.kms_key_id
   image_uri        = local.lambda_image_uri
   source_code_hash = trimprefix(data.aws_ecr_image.this.id, "sha256:")
+  architectures    = ["arm64"]
   package_type     = "Image"
   memory_size      = 128
   timeout          = 60
