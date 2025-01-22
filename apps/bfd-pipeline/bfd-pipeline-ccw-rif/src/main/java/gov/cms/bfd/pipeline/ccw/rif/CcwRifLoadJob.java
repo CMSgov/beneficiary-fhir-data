@@ -696,8 +696,7 @@ public final class CcwRifLoadJob implements PipelineJob {
 
     /**
      * Creates a {@link LongTaskTimer} for a given {@link DataSetManifest} so that the time it takes
-     * to process the manifest can be measured and recorded while processing is ongoing. Should be
-     * called prior to processing a {@link DataSetManifest}.
+     * to process the manifest can be measured and recorded while processing is ongoing.
      *
      * @param manifest the {@link DataSetManifest} to time
      * @return the {@link LongTaskTimer} that will be used to actively measure and record the time
@@ -711,8 +710,7 @@ public final class CcwRifLoadJob implements PipelineJob {
 
     /**
      * Creates a {@link Timer} for a given {@link DataSetManifest} so that the total time it takes
-     * to process the manifest can be recorded. Should be used with {@link Timer.Sample#stop(Timer)}
-     * after processing a {@link DataSetManifest} to record the total duration.
+     * to process the manifest can be recorded.
      *
      * @param manifest the {@link DataSetManifest} to time
      * @return the {@link LongTaskTimer} that will be used to record the total time taken to load
@@ -725,8 +723,8 @@ public final class CcwRifLoadJob implements PipelineJob {
     }
 
     /**
-     * Starts an active {@link LongTaskTimer.Sample} for the provided dataset given its timestamp
-     * text and whether it is synthetic or not.
+     * Creates an "active" {@link LongTaskTimer} for the provided dataset so that the running time
+     * it takes to process the dataset can be recorded.
      *
      * @param datasetTimestamp the timestamp text of the dataset to time
      * @param isSynthetic whether the dataset is synthetic
@@ -739,12 +737,13 @@ public final class CcwRifLoadJob implements PipelineJob {
     }
 
     /**
-     * Stops an already existing, total {@link Timer.Sample} for the given dataset provided its
-     * timestamp text and whether it is a synthetic dataset.
+     * Creates a {@link Timer} for a given dataset so that the total time it takes to process the
+     * dataset can be recorded.
      *
-     * @param datasetTimestamp the timestamp text of a dataset for which an existing, active {@link
-     *     LongTaskTimer.Sample} will be stopped
+     * @param datasetTimestamp the dataset to record the total processing time for
      * @param isSynthetic whether the dataset is synthetic
+     * @return the {@link Timer} that will be used to record the total time taken to load the
+     *     dataset
      */
     private Timer createTotalTimerForDataset(String datasetTimestamp, boolean isSynthetic) {
       return Timer.builder(DATASET_PROCESSING_TOTAL_TIMER_NAME)
