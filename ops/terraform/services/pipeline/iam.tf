@@ -94,6 +94,8 @@ resource "aws_iam_policy" "aws_cli" {
 EOF
 }
 
+# Ideally, we would only add the SetDesiredCapacity permission for the pipeline's ASG directly,
+# but adding a reference to the ASG here creates a cyclic dependency, so we restrict the permission based on the environment instead
 resource "aws_iam_policy" "bfd_pipeline_rif" {
   description = "Allow the BFD Pipeline application to read-write the S3 bucket with the RIF in it."
   name        = "bfd-${local.env}-${local.service}-rw-s3-rif"
@@ -138,6 +140,25 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
         "${aws_s3_bucket.this.arn}/*"
       ],
       "Sid": "BFDPipelineRWS3RIFReadWriteObjects"
+    },
+    {
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Effect": "Allow",
+      "Resource": "*",
+      "Sid": "BFDPipelineRWS3RIFDescribeAutoScalingGroups"
+    },
+    {
+      "Action": [
+        "autoscaling:SetDesiredCapacity"
+      ],
+      "Effect": "Allow",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {"aws:ResourceTag/Environment": "${local.seed_env}"}
+      },
+      "Sid": "BFDPipelineRWS3RIFUpdateAutoscalingGroup"
     }
   ],
   "Version": "2012-10-17"
@@ -202,7 +223,7 @@ resource "aws_iam_role" "this" {
   "Version": "2012-10-17"
 }
 EOF
-  force_detach_policies = false # TODO unsure of how this works with ephmeral environments just yet...
+  force_detach_policies = false # TODO unsure of how this works with ephemeral environments just yet...
   managed_policy_arns = [
     aws_iam_policy.aws_cli.arn,
     aws_iam_policy.bfd_pipeline_rif.arn,
