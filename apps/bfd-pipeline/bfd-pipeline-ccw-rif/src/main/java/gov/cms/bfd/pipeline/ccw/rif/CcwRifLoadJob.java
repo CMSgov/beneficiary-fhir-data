@@ -645,9 +645,9 @@ public final class CcwRifLoadJob implements PipelineJob {
      * @param manifest the {@link DataSetManifest} to measure processing time for
      */
     void startTimersForManifest(DataSetManifest manifest) {
-      activeManifestTimersMap.putIfAbsent(
+      activeManifestTimersMap.computeIfAbsent(
           manifest,
-          new ManifestTimerSet(createActiveTimerForManifest(manifest).start(), Timer.start()));
+          key -> new ManifestTimerSet(createActiveTimerForManifest(key).start(), Timer.start()));
     }
 
     /**
@@ -672,11 +672,11 @@ public final class CcwRifLoadJob implements PipelineJob {
      * @param isSynthetic whether the dataset is synthetic
      */
     void startTimersForDataset(String datasetTimestampText, boolean isSynthetic) {
-      activeDatasetTimersMap.putIfAbsent(
+      activeDatasetTimersMap.computeIfAbsent(
           datasetTimestampText,
-          new DatasetTimerSet(
-              createActiveTimerForDataset(datasetTimestampText, isSynthetic).start(),
-              Timer.start()));
+          key ->
+              new DatasetTimerSet(
+                  createActiveTimerForDataset(key, isSynthetic).start(), Timer.start()));
     }
 
     /**
