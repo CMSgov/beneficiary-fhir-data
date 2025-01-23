@@ -705,15 +705,16 @@ public final class TransformerConstants {
       "https://www.hhs.gov/sites/default/files/logo-white-lg.png";
 
   /**
-   * HL7 CodeSystem v3-Confidentiality <a
-   * href="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"">CodeSystem: </a>.
+   * URL for v3 Confidentiality Code System <a
+   * href="http://terminology.hl7.org/CodeSystem/v3-Confidentiality">HL7 v3 Confidentiality Code
+   * System</a>.
    */
   public static final String SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL =
       "http://terminology.hl7.org/CodeSystem/v3-Confidentiality";
 
   /**
-   * HL7 CodeSystem v3-Confidentiality<a
-   * href="http://terminology.hl7.org/CodeSystem/v3-ActCode">CodeSystem: </a>.
+   * URL for v3 Act Code System <a href="http://terminology.hl7.org/CodeSystem/v3-ActCode">v3 Act
+   * Code System</a>.
    */
   public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
       "http://terminology.hl7.org/CodeSystem/v3-ActCode";
