@@ -113,6 +113,37 @@ public class S3ManifestDbDao {
   }
 
   /**
+   * Returns whether any of the given manifest keys are not marked as completed in the database.
+   *
+   * @param manifestKeys list of manifest keys
+   * @return boolean
+   */
+  public boolean hasIncompleteManifests(Set<String> manifestKeys) {
+    // Need to use createNativeQuery because createQuery doesn't seem to support the unnest()
+    // syntax
+    final String query =
+        """
+        SELECT EXISTS(
+           SELECT 1
+           FROM UNNEST(:manifestKeys\\:\\:VARCHAR[]) a(id)
+           WHERE NOT EXISTS(
+             SELECT 1
+             FROM ccw.s3_manifest_files m
+             WHERE m.s3_key = a.id
+             AND m.status = 'COMPLETED'
+           )
+         )
+        """;
+    return (boolean)
+        transactionManager.executeFunction(
+            entityManager ->
+                entityManager
+                    .createNativeQuery(query, boolean.class)
+                    .setParameter("manifestKeys", "{" + String.join(",", manifestKeys) + "}")
+                    .getSingleResult());
+  }
+
+  /**
    * Finds a record matching the given S3 key and returns an entity representing it. Returns null if
    * no record exists.
    *
