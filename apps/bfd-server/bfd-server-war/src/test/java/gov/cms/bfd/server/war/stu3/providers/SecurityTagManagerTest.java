@@ -63,7 +63,6 @@ class SecurityTagManagerTest {
     type.addCoding().setCode("OUT");
 
     Set<String> mockTags = new HashSet<>();
-    mockTags.add("NormalTag");
     when(entityManager.createQuery(anyString())).thenReturn(query);
     when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
 

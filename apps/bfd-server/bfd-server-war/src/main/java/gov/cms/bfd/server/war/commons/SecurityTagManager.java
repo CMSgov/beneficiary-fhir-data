@@ -66,7 +66,7 @@ public final class SecurityTagManager {
     if (securityTags.isEmpty()) {
       Coding coding = new Coding();
       coding
-          .setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality")
+          .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
           .setCode("N")
           .setDisplay("Normal");
       securityTagCoding.add(coding);
@@ -83,20 +83,14 @@ public final class SecurityTagManager {
               coding
                   .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
                   .setCode(TagCode.R.toString())
-                  .setDisplay("Restricted");
+                  .setDisplay(TagCode.R.getDisplayName());
               break;
             case _42CFRPart2:
               coding
                   .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
                   .setCode(TagCode._42CFRPart2.toString())
-                  .setDisplay("42 CFR Part 2");
+                  .setDisplay(TagCode._42CFRPart2.getDisplayName());
               break;
-
-            default:
-              coding
-                  .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-                  .setCode("N") // Default to 'Normal' if unrecognized
-                  .setDisplay("Normal");
           }
         }
         securityTagCoding.add(coding);

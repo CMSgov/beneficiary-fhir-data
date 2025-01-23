@@ -1,22 +1,30 @@
 package gov.cms.bfd.sharedutils;
 
+import lombok.Getter;
+
 /** ENUM of TAG codes. */
+@Getter
 public enum TagCode {
   /** Tag Code R. */
-  R("R"),
+  R("R", "Restricted"),
   /** Tag Code 42CFRPart2. */
-  _42CFRPart2("42CFRPart2");
+  _42CFRPart2("42CFRPart2", "42 CFR Part 2");
 
   /** Name of the enum in the DB. */
-  private String dbName;
+  private final String dbName;
+
+  /** Display name. */
+  private final String displayName;
 
   /**
    * Constructor.
    *
    * @param dbName Sets the DB name of the enum.
+   * @param displayName Sets display name of the enum.
    */
-  TagCode(String dbName) {
+  TagCode(String dbName, String displayName) {
     this.dbName = dbName;
+    this.displayName = displayName;
   }
 
   @Override
