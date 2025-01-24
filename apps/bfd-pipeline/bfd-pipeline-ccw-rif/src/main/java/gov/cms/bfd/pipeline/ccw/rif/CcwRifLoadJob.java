@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
@@ -617,16 +618,16 @@ public final class CcwRifLoadJob implements PipelineJob {
     /**
      * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
      */
-    private static final String TAG_DATA_SET_TIMESTAMP = "data_set_timestamp";
+    @VisibleForTesting static final String TAG_DATA_SET_TIMESTAMP = "data_set_timestamp";
 
     /**
      * Tag indicating whether the data load associated with the measured metric was synthetic or
      * not.
      */
-    private static final String TAG_IS_SYNTHETIC = "is_synthetic";
+    @VisibleForTesting static final String TAG_IS_SYNTHETIC = "is_synthetic";
 
     /** Tag indicating which {@link DataSetManifest} was associated with the measured metric. */
-    private static final String TAG_MANIFEST = "manifest";
+    @VisibleForTesting static final String TAG_MANIFEST = "manifest";
 
     /** Micrometer {@link MeterRegistry} for the Pipeline application. */
     private final MeterRegistry appMetrics;

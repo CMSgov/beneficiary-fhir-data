@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.ccw.rif;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -758,6 +760,216 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
        */
 
       // TODO END remove once S3 file moves are no longer necessary.
+    } finally {
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
+    }
+  }
+
+  /**
+   * Tests that {@link CcwRifLoadJob#call()} submits/creates Micrometer expected timer metrics for
+   * non-synthetic datasets
+   *
+   * @throws Exception exception
+   */
+  @Test
+  void submitsMetricsForNonSyntheticDataset() throws Exception {
+    String bucket = null;
+    try {
+      bucket = s3Dao.createTestBucket();
+      final var datasetTimestamp = Instant.now().minus(1, ChronoUnit.HOURS);
+      final var options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
+      final var manifestA =
+          new DataSetManifest(
+              datasetTimestamp,
+              0,
+              false,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestA);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestA,
+          manifestA.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      final var manifestB =
+          new DataSetManifest(
+              datasetTimestamp,
+              1,
+              false,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifestB);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifestB,
+          manifestB.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
+      final var manifests = List.of(manifestA, manifestB);
+      putFinalManifestListInTestBucket(bucket, manifests);
+
+      final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+      final var dataSetQueue =
+          new DataSetQueue(
+              pipelineAppState.getClock(), pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+      try (CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              pipelineAppState,
+              options,
+              dataSetQueue,
+              listener,
+              false,
+              Optional.empty(),
+              statusReporter)) {
+        for (final var ignored : manifests) {
+          assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+        }
+      }
+
+      final var allManifestMeters =
+          pipelineAppState.getMeters().getMeters().stream()
+              .filter(
+                  meter ->
+                      Set.of(
+                              CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_ACTIVE_TIMER_NAME,
+                              CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_TOTAL_TIMER_NAME)
+                          .contains(meter.getId().getName()))
+              .toList();
+      // There are 2 timer metrics per-manifest and 2 manifests, so 4 total manifest meters
+      assertEquals(4, allManifestMeters.size());
+      // Assert all meters have the expected tags
+      for (final var manifestMeter : allManifestMeters) {
+        assertEquals(
+            manifestA.getTimestampText(),
+            manifestMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_DATA_SET_TIMESTAMP));
+        assertEquals("false", manifestMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_IS_SYNTHETIC));
+        assertTrue(
+            Set.of("0_manifest.xml", "1_manifest.xml")
+                .contains(manifestMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_MANIFEST)));
+      }
+
+      final var allDatasetMeters =
+          pipelineAppState.getMeters().getMeters().stream()
+              .filter(
+                  meter ->
+                      Set.of(
+                              CcwRifLoadJob.Metrics.DATASET_PROCESSING_ACTIVE_TIMER_NAME,
+                              CcwRifLoadJob.Metrics.DATASET_PROCESSING_TOTAL_TIMER_NAME)
+                          .contains(meter.getId().getName()))
+              .toList();
+      // There are 2 timer metrics per-dataset, so only 2 timers should be expected
+      assertEquals(2, allDatasetMeters.size());
+      // Assert all meters have the expected tags
+      for (final var datasetMeter : allDatasetMeters) {
+        assertEquals(
+            manifestA.getTimestampText(),
+            datasetMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_DATA_SET_TIMESTAMP));
+        assertEquals("false", datasetMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_IS_SYNTHETIC));
+      }
+    } finally {
+      if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
+    }
+  }
+
+  /**
+   * Tests that {@link CcwRifLoadJob#call()} submits/creates Micrometer expected timer metrics for
+   * synthetic datasets
+   *
+   * @throws Exception exception
+   */
+  @Test
+  void submitsMetricsForSyntheticDataset() throws Exception {
+    String bucket = null;
+    try {
+      bucket = s3Dao.createTestBucket();
+      final var datasetTimestamp = Instant.now().minus(1, ChronoUnit.HOURS);
+      final var options =
+          new ExtractionOptions(bucket, Optional.empty(), Optional.of(1), s3ClientConfig);
+      final var manifest =
+          new DataSetManifest(
+              datasetTimestamp,
+              0,
+              true,
+              CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifest,
+          manifest.getEntries().getFirst(),
+          StaticRifResource.SAMPLE_A_BENES.getResourceUrl());
+      DataSetTestUtilities.putObject(
+          s3Dao,
+          bucket,
+          manifest,
+          manifest.getEntries().getLast(),
+          StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl());
+
+      final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+      final var listener = new MockDataSetMonitorListener();
+      final var s3FilesDao = new S3ManifestDbDao(pipelineAppState.getEntityManagerFactory());
+      final var s3FileCache = spy(new S3FileManager(pipelineAppState.getMetrics(), s3Dao, bucket));
+      final var dataSetQueue =
+          new DataSetQueue(
+              pipelineAppState.getClock(), pipelineAppState.getMetrics(), s3FilesDao, s3FileCache);
+      try (CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(
+              pipelineAppState,
+              options,
+              dataSetQueue,
+              listener,
+              false,
+              Optional.empty(),
+              statusReporter)) {
+        assertEquals(PipelineJobOutcome.WORK_DONE, ccwJob.call());
+      }
+
+      final var allManifestMeters =
+          pipelineAppState.getMeters().getMeters().stream()
+              .filter(
+                  meter ->
+                      Set.of(
+                              CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_ACTIVE_TIMER_NAME,
+                              CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_TOTAL_TIMER_NAME)
+                          .contains(meter.getId().getName()))
+              .toList();
+      // There are 2 timer metrics per-manifest and only 1 manifest, so 2 total manifest meters
+      assertEquals(2, allManifestMeters.size());
+      // Assert all meters have the expected tags
+      for (final var manifestMeter : allManifestMeters) {
+        assertEquals(
+            manifest.getTimestampText(),
+            manifestMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_DATA_SET_TIMESTAMP));
+        assertEquals("true", manifestMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_IS_SYNTHETIC));
+        assertEquals(
+            "0_manifest.xml", manifestMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_MANIFEST));
+      }
+
+      final var allDatasetMeters =
+          pipelineAppState.getMeters().getMeters().stream()
+              .filter(
+                  meter ->
+                      Set.of(
+                              CcwRifLoadJob.Metrics.DATASET_PROCESSING_ACTIVE_TIMER_NAME,
+                              CcwRifLoadJob.Metrics.DATASET_PROCESSING_TOTAL_TIMER_NAME)
+                          .contains(meter.getId().getName()))
+              .toList();
+      // There are 2 timer metrics per-dataset, so only 2 timers should be expected
+      assertEquals(2, allDatasetMeters.size());
+      // Assert all meters have the expected tags
+      for (final var datasetMeter : allDatasetMeters) {
+        assertEquals(
+            manifest.getTimestampText(),
+            datasetMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_DATA_SET_TIMESTAMP));
+        assertEquals("true", datasetMeter.getId().getTag(CcwRifLoadJob.Metrics.TAG_IS_SYNTHETIC));
+      }
     } finally {
       if (StringUtils.isNotBlank(bucket)) s3Dao.deleteTestBucket(bucket);
     }
