@@ -11,6 +11,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -141,6 +142,24 @@ public class ClaimResponseE2E extends ServerRequiredTest {
             + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
 
     verifyResponseMatchesFor(requestString, "claimResponseSearch", MBI_IGNORE_PATTERNS);
+  }
+
+  /** Tests the search endpoint using a POST request. */
+  @Test
+  void shouldGetCorrectClaimResponseResourcesByMbiPost() {
+    String requestString = claimResponseEndpoint + "_search";
+
+    verifyPostResponseMatchesFor(
+        requestString,
+        Map.of(
+            "mbi",
+            List.of(RDATestUtils.MBI),
+            "isHashed",
+            "false",
+            "service-date",
+            List.of("gt1970-07-18", "lt1970-07-25")),
+        "claimResponseSearch",
+        MBI_IGNORE_PATTERNS);
   }
 
   /**
@@ -371,6 +390,38 @@ public class ClaimResponseE2E extends ServerRequiredTest {
             .statusCode(200)
             .when()
             .get(requestString)
+            .then()
+            .extract()
+            .response()
+            .asString();
+
+    String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
+
+    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+  }
+
+  /**
+   * Verifies the ClaimResponse response for the given requestString returns a 200 and the json
+   * response matches the expected response file.
+   *
+   * @param requestString the request string to search with
+   * @param expectedResponseFileName the name of the response file to compare against
+   * @param ignorePatterns the ignore patterns to use when comparing the result file to the response
+   */
+  private void verifyPostResponseMatchesFor(
+      String requestString,
+      Map<String, ?> formParams,
+      String expectedResponseFileName,
+      Set<String> ignorePatterns) {
+
+    String response =
+        given()
+            .spec(requestAuth)
+            .formParams(formParams)
+            .expect()
+            .statusCode(200)
+            .when()
+            .post(requestString)
             .then()
             .extract()
             .response()

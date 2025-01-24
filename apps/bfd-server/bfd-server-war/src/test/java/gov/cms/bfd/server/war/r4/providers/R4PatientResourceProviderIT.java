@@ -231,7 +231,7 @@ public final class R4PatientResourceProviderIT {
     testBene.getBeneficiaryHistories().add(beneHistoryEntry);
 
     Bundle searchResults =
-        patientProvider.searchByIdentifier(identifier, null, null, requestDetails);
+        patientProvider.searchByIdentifier(identifier, null, null, null, requestDetails);
 
     assertNotNull(searchResults);
     assertEquals(1, searchResults.getTotal());

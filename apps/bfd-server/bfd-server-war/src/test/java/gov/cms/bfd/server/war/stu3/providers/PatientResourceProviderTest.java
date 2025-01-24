@@ -261,7 +261,7 @@ public class PatientResourceProviderTest {
             InvalidRequestException.class,
             () ->
                 patientProvider.searchByCoverageContract(
-                    contractId, refYear, null, requestDetails));
+                    contractId, refYear, null, null, requestDetails));
     assertEquals(
         "Failed to parse value for Contract Year as a number.", exception.getLocalizedMessage());
   }
@@ -281,7 +281,7 @@ public class PatientResourceProviderTest {
             InvalidRequestException.class,
             () ->
                 patientProvider.searchByCoverageContract(
-                    contractId, refYear, null, requestDetails));
+                    contractId, refYear, null, null, requestDetails));
     assertEquals(
         "Coverage id is not expected length; value 123 is not expected length 5",
         exception.getLocalizedMessage());
@@ -299,7 +299,7 @@ public class PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByLogicalId(logicalId, null, null, requestDetails));
+            () -> patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails));
     assertEquals("Missing required id value", exception.getLocalizedMessage());
   }
 
@@ -315,7 +315,7 @@ public class PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByLogicalId(logicalId, null, null, requestDetails));
+            () -> patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails));
     assertEquals(
         "System is unsupported here and should not be set (system)",
         exception.getLocalizedMessage());
@@ -334,7 +334,7 @@ public class PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
+            () -> patientProvider.searchByIdentifier(identifier, null, null, null, requestDetails));
     assertEquals("lookup value cannot be null/empty", exception.getLocalizedMessage());
   }
 
@@ -350,7 +350,7 @@ public class PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
+            () -> patientProvider.searchByIdentifier(identifier, null, null, null, requestDetails));
     assertEquals("Unsupported identifier system: bad-system", exception.getLocalizedMessage());
   }
 }
