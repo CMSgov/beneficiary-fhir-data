@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils.adapters;
 
-import static java.util.Map.*;
 import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.entities.SNFClaim;
@@ -8,8 +7,8 @@ import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaFields;
-import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
