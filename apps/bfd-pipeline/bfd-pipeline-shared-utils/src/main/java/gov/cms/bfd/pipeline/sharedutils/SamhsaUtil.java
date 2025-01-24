@@ -30,6 +30,7 @@ import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.io.IOException;
