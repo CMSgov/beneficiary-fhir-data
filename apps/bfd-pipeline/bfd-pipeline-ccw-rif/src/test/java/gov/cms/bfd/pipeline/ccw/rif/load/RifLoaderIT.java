@@ -42,10 +42,13 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.PreValidationProperties;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillService;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -124,6 +127,45 @@ public final class RifLoaderIT {
         sampleResources.get(0).getResourceUrl().toString(),
         CcwRifLoadTestUtils.getLoadOptions(),
         rifFilesEvent);
+
+    validateSamhsaTagsInDatabase(124, CarrierTag.class);
+    validateSamhsaTagsInDatabase(124, DmeTag.class);
+    validateSamhsaTagsInDatabase(124, HhaTag.class);
+    validateSamhsaTagsInDatabase(124, HospiceTag.class);
+    validateSamhsaTagsInDatabase(244, InpatientTag.class);
+    validateSamhsaTagsInDatabase(238, OutpatientTag.class);
+    validateSamhsaTagsInDatabase(244, SnfTag.class);
+  }
+
+  /** Tests that SAMHSA tags are properly created by the backfill service for SAMHSA test claims. */
+  @Test
+  public void testSamhsaBackfill() {
+
+    List<StaticRifResource> sampleResources =
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources());
+    final var rifFiles =
+        sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList());
+    RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), false, rifFiles);
+    loadSample(
+        sampleResources.get(0).getResourceUrl().toString(),
+        CcwRifLoadTestUtils.getLoadOptions(),
+        rifFilesEvent);
+
+    // Since the SAMHSA tags would have been created by the pipeline, we want to delete them
+    // so we can test that the backfill properly recreates them.
+
+    deleteSamhsaTags();
+    validateSamhsaTagsInDatabase(0, CarrierTag.class);
+    validateSamhsaTagsInDatabase(0, DmeTag.class);
+    validateSamhsaTagsInDatabase(0, HhaTag.class);
+    validateSamhsaTagsInDatabase(0, HospiceTag.class);
+    validateSamhsaTagsInDatabase(0, InpatientTag.class);
+    validateSamhsaTagsInDatabase(0, OutpatientTag.class);
+    validateSamhsaTagsInDatabase(0, SnfTag.class);
+    SamhsaBackfillService backfill =
+        SamhsaBackfillService.createBackfillService(
+            PipelineTestUtils.get().getPipelineApplicationState(), null, 100, 60L);
+    backfill.startBackFill(true, false);
 
     validateSamhsaTagsInDatabase(124, CarrierTag.class);
     validateSamhsaTagsInDatabase(124, DmeTag.class);
@@ -1096,6 +1138,30 @@ public final class RifLoaderIT {
         };
     Function<RifFile, RifFile> fileEditor = sample -> editSampleRecords(sample, recordEditor);
     return editSamples(samplesStream, fileEditor);
+  }
+
+  /** Deletes SAMHSA tags from the test database. */
+  private void deleteSamhsaTags() {
+    TransactionManager transactionManager =
+        new TransactionManager(
+            PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory());
+    final String DELETE_QUERY = "DELETE FROM %s";
+    final List<String> TAG_TABLES =
+        List.of(
+            "ccw.carrier_tags",
+            "ccw.dme_tags",
+            "ccw.hha_tags",
+            "ccw.hospice_tags",
+            "ccw.inpatient_tags",
+            "ccw.outpatient_tags",
+            "ccw.snf_tags");
+    transactionManager.executeProcedure(
+        entityManager -> {
+          for (String table : TAG_TABLES) {
+            Query query = entityManager.createNativeQuery(String.format(DELETE_QUERY, table));
+            query.executeUpdate();
+          }
+        });
   }
 
   /**

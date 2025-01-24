@@ -101,7 +101,9 @@ claim_batch_size=
 claim_queue_multiple=
 kubernetes=false
 temp_dir=
-
+max_claims=2500
+db_password=InsecureLocalDev
+db_user=bfd
 usage() {
   cat 1>&2 <<EOF
 Runs a BFD pipeline.  Use command line options to change behaviors.
@@ -120,9 +122,11 @@ $(basename $0) [options] run_mode
 -t threads                Number of threads for RIF/RDA jobs.
 -x                        Do not install latest version before running.
 -z                        Enable debugger support but start immediately.
+-m max_claims             The maximum RDA claims to send in random run mode.
 -Z                        Enable debugger support and wait for debugger to connect.
 -h                        Prints this help message.
-
+-p password               DB password
+-u username               DB Username
 Supported long options:
 
 --bene-load-options threads:batch_size:queue_multiple
@@ -134,11 +138,12 @@ Supported long options:
 --temp directory
   Sets the java.io.tmpdir property.
 
-Run mode options: 
-  rif     RIF pipeline only.
-  random  RDA pipeline only.  Using in-process random API server.
-  s3      RDA pipeline only.  Using in-process S3 API server.
-  rda     RDA pipeline only.  Using remote RDA API server with host/port/token from command line.
+Run mode options:
+  backfill SAMHSA backfill only.
+  rif      RIF pipeline only.
+  random   RDA pipeline only.  Using in-process random API server.
+  s3       RDA pipeline only.  Using in-process S3 API server.
+  rda      RDA pipeline only.  Using remote RDA API server with host/port/token from command line.
 
 Option defaults:
   -b $batch_size
@@ -152,7 +157,7 @@ Option defaults:
 EOF
 }
 
-while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
+while getopts "p:u:m:b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   case $option in
   b) batch_size=$OPTARG ;;
   c) cache_size=$OPTARG ;;
@@ -165,6 +170,7 @@ while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
   I) idempotency_mode=true ;;
   k) kubernetes=true ; install=false ; db_host=dev-postgres ;;
   l) localstack_ip=$OPTARG ;;
+  m) max_claims=$OPTARG ;;
   r) interval_seconds=$OPTARG ;;
   R) IFS=':' read h p t <<<"$OPTARG"
      rda_host=${h:=$rda_host}
@@ -179,6 +185,8 @@ while getopts "b:c:d:i:Ikl:r:R:s:t:xzZh-:" option ; do
      unset m b d
      ;;
   t) threads=$OPTARG ;;
+  u) db_user=$OPTARG ;;
+  p) db_password=$OPTARG ;;
   x) install=false ;;
   z) debug_enabled=true ;;
   Z) debug_enabled=true ; debug_suspend=y ;;
@@ -359,8 +367,8 @@ setvar ccw/s3_bucket_name "$s3_bucket"
 setvar hicn_hash/iterations "1000"  # The minimum number of iterations recommended by NIST is 1000.
 setvar hicn_hash/pepper "6f6e7474656865726c61657070707265" # nottherealpepper
 setvar db/url "jdbc:postgresql://${db_host}:${db_port}/fhirdb?logServerErrorDetail=false"
-setvar db/username "bfd"
-setvar db/password "InsecureLocalDev"
+setvar db/username "$db_user"
+setvar db/password "$db_password"
 
 # For testing RIF performance.
 if [[ x$bene_threads = x ]] ; then
@@ -397,8 +405,13 @@ setvar micrometer_cw/jmx_enabled "true"
 # Command line option below determines which jobs to run.
 setvar ccw/job/enabled "false"
 setvar rda/job/enabled "false"
-
+setvar rda/samhsa/backfill/enabled "false"
 case $run_mode in
+  backfill)
+    setvar rda/samhsa/backfill/enabled "true"
+    setvar rda/samhsa/backfill/batch_size "100000"
+    setvar rda/samhsa/backfill/log_interval "15" #in seconds
+    ;;
   rif)
     setvar ccw/job/enabled "true"
     ;;
@@ -407,7 +420,7 @@ case $run_mode in
     setvar rda/grpc/server_type "InProcess"
     setvar rda/grpc/inprocess_server/mode "Random"
     setvar rda/grpc/inprocess_server/random/seed "42"
-    setvar rda/grpc/inprocess_server/random/max_claims "2500"
+    setvar rda/grpc/inprocess_server/random/max_claims "$max_claims"
     ;;
   rda)
     setvar rda/job/enabled "true"

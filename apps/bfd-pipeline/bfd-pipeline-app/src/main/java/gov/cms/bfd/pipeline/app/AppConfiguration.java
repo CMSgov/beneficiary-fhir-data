@@ -19,6 +19,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
@@ -375,11 +376,24 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
 
+  /** Config value for SAMHSA backfill enabled. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_ENABLED = "rda/samhsa/backfill/enabled";
+
+  /** Config value for SAMHSA backfill batch size. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
+
+  /** Config value for SAMHSA backfill log reporting interval. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL =
+      "rda/samhsa/backfill/log_interval";
+
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
    */
   @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
+
+  /** Configuration for Backfill Config. */
+  @Nullable private final BackfillConfigOptions backfillConfigOptions;
 
   /**
    * The RDA rif load options. This can be null if the RDA job is not configured, Optional is not
@@ -405,6 +419,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
+          .put(SSM_PATH_SAMHSA_BACKFILL_ENABLED, "false")
+          .put(SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE, String.valueOf(10000))
+          .put(SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL, String.valueOf(3600))
           .build();
 
   /**
@@ -415,16 +432,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @param awsClientConfig used to configure AWS services
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
+   * @param backFillConfigOptions the value to use fo {@link #getBackfillConfigOptions()}
    */
   private AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
       AwsClientConfig awsClientConfig,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
-      @Nullable RdaLoadOptions rdaLoadOptions) {
+      @Nullable RdaLoadOptions rdaLoadOptions,
+      @Nullable BackfillConfigOptions backFillConfigOptions) {
     super(metricOptions, databaseOptions, awsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
+    this.backfillConfigOptions = backFillConfigOptions;
   }
 
   /**
@@ -443,6 +463,15 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
     return Optional.ofNullable(rdaLoadOptions);
+  }
+
+  /**
+   * returns the {@link #backfillConfigOptions}.
+   *
+   * @return the {@link BackfillConfigOptions}
+   */
+  public Optional<BackfillConfigOptions> getBackfillConfigOptions() {
+    return Optional.ofNullable(backfillConfigOptions);
   }
 
   @Override
@@ -485,6 +514,31 @@ public final class AppConfiguration extends BaseAppConfiguration {
   }
 
   /**
+   * Loads Backfill Configuration.
+   *
+   * @param config Config loader
+   * @param ccwPipelineEnabled True if the CCW pipeline is enabled in this instance.
+   * @return {@link BackfillConfigOptions}
+   */
+  public static BackfillConfigOptions loadBackfillConfigOptions(
+      ConfigLoader config, boolean ccwPipelineEnabled) {
+    boolean enabled = config.booleanOption(SSM_PATH_SAMHSA_BACKFILL_ENABLED).orElse(false);
+    // We don't want to run if we're on a CCW Pipeline instance
+    if (!enabled || ccwPipelineEnabled) {
+      return null;
+    }
+    int batchSize = config.intValue(SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE, 10000);
+    Long logInterval = config.longValue(SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL, 3600);
+    BackfillConfigOptions backfillConfigOptions =
+        BackfillConfigOptions.builder()
+            .enabled(enabled)
+            .batchSize(batchSize)
+            .logInterval(logInterval)
+            .build();
+    return backfillConfigOptions;
+  }
+
+  /**
    * Load configuration variables using the provided {@link ConfigLoader} instance and build an
    * {@link AppConfiguration} instance from them.
    *
@@ -501,7 +555,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
     int hicnHashIterations = config.positiveIntValue(SSM_PATH_HICN_HASH_ITERATIONS);
     byte[] hicnHashPepper = config.hexBytes(SSM_PATH_HICN_HASH_PEPPER);
     int hicnHashCacheSize = config.intValue(SSM_PATH_HICN_HASH_CACHE_SIZE);
-
     final boolean idempotencyRequired = config.booleanValue(SSM_PATH_IDEMPOTENCY_REQUIRED);
 
     final var benePerformanceSettings = loadBeneficiaryPerformanceSettings(config);
@@ -511,7 +564,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
         Math.max(
             benePerformanceSettings.getLoaderThreads(),
             claimPerformanceSettings.getLoaderThreads());
-
     MetricOptions metricOptions = loadMetricOptions(config);
     DatabaseOptions databaseOptions = loadDatabaseOptions(config, maxLoaderThreads);
 
@@ -527,11 +579,17 @@ public final class AppConfiguration extends BaseAppConfiguration {
             claimPerformanceSettings);
 
     CcwRifLoadOptions ccwRifLoadOptions = loadCcwRifLoadOptions(config, loadOptions);
-
     RdaLoadOptions rdaLoadOptions = loadRdaLoadOptions(config, loadOptions.getIdHasherConfig());
+    BackfillConfigOptions backfillConfigOptions =
+        loadBackfillConfigOptions(config, ccwRifLoadOptions != null);
     AwsClientConfig awsClientConfig = BaseAppConfiguration.loadAwsClientConfig(config);
     return new AppConfiguration(
-        metricOptions, databaseOptions, awsClientConfig, ccwRifLoadOptions, rdaLoadOptions);
+        metricOptions,
+        databaseOptions,
+        awsClientConfig,
+        ccwRifLoadOptions,
+        rdaLoadOptions,
+        backfillConfigOptions);
   }
 
   /**
