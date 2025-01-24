@@ -3,7 +3,12 @@
   "id" : "hospice-9992223422",
   "meta" : {
     "lastUpdated" : "IGNORED_FIELD",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ],
+    "security" : [ {
+      "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+      "code" : "N",
+      "display" : "Normal"
+    } ]
   },
   "contained" : [ {
     "resourceType" : "Organization",

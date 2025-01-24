@@ -19,6 +19,7 @@ import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IcdCode;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -52,6 +54,10 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class Stu3EobSamhsaMatcherTest {
+
+  /** The securityTagManager. */
+  @Mock private SecurityTagManager securityTagManager;
+
   /** The SAMHSA CPT code. */
   public static final String SAMPLE_SAMHSA_CPT_CODE = "G0137";
 
@@ -184,7 +190,12 @@ public final class Stu3EobSamhsaMatcherTest {
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
                     return TransformerTestUtils.transformRifRecordToEob(
-                        r, new MetricRegistry(), false, fdaDrugCodeDisplayLookup, localNpiLookup);
+                        r,
+                        new MetricRegistry(),
+                        false,
+                        fdaDrugCodeDisplayLookup,
+                        localNpiLookup,
+                        securityTagManager);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -865,7 +876,8 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               false,
               RDATestUtils.fdaDrugCodeDisplayLookup(),
-              NPIOrgLookup.createTestNpiOrgLookup());
+              NPIOrgLookup.createTestNpiOrgLookup(),
+              securityTagManager);
 
       return sampleEobForClaimType;
     }
