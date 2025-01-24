@@ -6,7 +6,7 @@ import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.BackfillProgress;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
-import gov.cms.bfd.pipeline.sharedutils.model.TagCode;
+import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
