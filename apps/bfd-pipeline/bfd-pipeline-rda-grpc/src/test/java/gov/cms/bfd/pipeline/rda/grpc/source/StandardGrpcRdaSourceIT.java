@@ -357,7 +357,8 @@ public class StandardGrpcRdaSourceIT {
               assertEquals(2, sink.getValues().size());
               assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
               assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
-              assertEquals(2, sink.updateSequenceNumberCallCount);
+              // Should only be called once per 5 seconds
+              assertEquals(1, sink.updateSequenceNumberCallCount);
             });
   }
 

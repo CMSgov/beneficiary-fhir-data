@@ -55,9 +55,8 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
       com.google.protobuf.Empty request,
       StreamObserver<gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange> responseObserver) {
     LOGGER.info("start getFissClaimsSequenceNumberRange");
-    try {
-      responseObserver.onNext(
-          messageSourceFactory.createFissMessageSource(0).getSequenceNumberRange());
+    try (MessageSource<FissClaimChange> source = messageSourceFactory.createFissMessageSource(0)) {
+      responseObserver.onNext(source.getSequenceNumberRange());
       responseObserver.onCompleted();
       LOGGER.info("end getFissClaimsSequenceNumberRange");
     } catch (Exception ex) {
@@ -74,9 +73,8 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
       com.google.protobuf.Empty request,
       StreamObserver<gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange> responseObserver) {
     LOGGER.info("start getMcsClaimsSequenceNumberRange");
-    try {
-      responseObserver.onNext(
-          messageSourceFactory.createFissMessageSource(0).getSequenceNumberRange());
+    try (MessageSource<McsClaimChange> source = messageSourceFactory.createMcsMessageSource(0)) {
+      responseObserver.onNext(source.getSequenceNumberRange());
       responseObserver.onCompleted();
       LOGGER.info("end getMcsClaimsSequenceNumberRange");
     } catch (Exception ex) {
