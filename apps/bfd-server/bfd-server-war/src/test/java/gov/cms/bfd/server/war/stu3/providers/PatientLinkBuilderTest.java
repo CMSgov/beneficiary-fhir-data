@@ -36,6 +36,7 @@ public class PatientLinkBuilderTest {
   public static final String TEST_CONTRACT_URL =
       "https://localhost:443/v1/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct02|S0000";
 
+  /** Request details. */
   @Mock private RequestDetails requestDetails;
 
   /**

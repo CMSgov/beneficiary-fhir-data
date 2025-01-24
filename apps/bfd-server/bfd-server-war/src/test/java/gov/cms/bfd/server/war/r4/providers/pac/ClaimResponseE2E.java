@@ -405,6 +405,7 @@ public class ClaimResponseE2E extends ServerRequiredTest {
    * response matches the expected response file.
    *
    * @param requestString the request string to search with
+   * @param formParams form parameters
    * @param expectedResponseFileName the name of the response file to compare against
    * @param ignorePatterns the ignore patterns to use when comparing the result file to the response
    */
