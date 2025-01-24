@@ -767,7 +767,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
   /**
    * Tests that {@link CcwRifLoadJob#call()} submits/creates Micrometer expected timer metrics for
-   * non-synthetic datasets
+   * non-synthetic datasets.
    *
    * @throws Exception exception
    */
@@ -878,7 +878,7 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
   /**
    * Tests that {@link CcwRifLoadJob#call()} submits/creates Micrometer expected timer metrics for
-   * synthetic datasets
+   * synthetic datasets.
    *
    * @throws Exception exception
    */
