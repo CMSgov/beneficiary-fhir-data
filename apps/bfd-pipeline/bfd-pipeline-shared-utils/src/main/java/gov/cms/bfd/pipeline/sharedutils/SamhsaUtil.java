@@ -27,11 +27,14 @@ import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaInpatientAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaOutpatientAdapter;
 import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaSnfAdapter;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
+import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.util.Strings;
 
 /**
@@ -111,22 +115,101 @@ public class SamhsaUtil {
   }
 
   /**
+   * Gets the date ranges for a line item table from its parent table.
+   *
+   * @param claimId The claim Id.
+   * @param tableEntry The table entry.
+   * @param entityManager The entity manager.
+   * @return the date ranges.
+   */
+  private Object[] getClaimDates(
+      Object claimId, TableEntry tableEntry, EntityManager entityManager) {
+    Map<String, String> params =
+        Map.of("claimTable", tableEntry.getParentTable(), "claimField", tableEntry.getClaimField());
+    StringSubstitutor strSub = new StringSubstitutor(params);
+    String queryStr = strSub.replace(tableEntry.getDatesQuery());
+    Query query = entityManager.createNativeQuery(queryStr);
+    query.setParameter("claimId", claimId);
+    Object[] dates = (Object[]) query.getSingleResult();
+    return dates;
+  }
+
+  /**
+   * Process a list of codes. Does not use Entities.
+   *
+   * @param codes The list of codes.
+   * @param tableEntry The tableEntry object for this table.
+   * @param claimId The claim id for this claim.
+   * @param dates If present, contains the active dates for this claim.
+   * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
+   *     claim has more than one lineitem.
+   * @param entityManager The entity manager.
+   * @return true if a SAMHSA tag should be created.
+   */
+  public boolean processCodeList(
+      List<String> codes,
+      TableEntry tableEntry,
+      Object claimId,
+      Optional<Object[]> dates,
+      HashMap<String, Object[]> datesMap,
+      EntityManager entityManager) {
+    for (String code : codes) {
+      // Found a samhsa code
+      if (samhsaMap.containsKey(code)) {
+        Object[] datesObject;
+        if (dates.isPresent()) {
+          datesObject = dates.get();
+        } else {
+          datesObject = getClaimDates(claimId, tableEntry, entityManager);
+          // Put the dates in a map, in case any other line items with the same id have samhsa
+          // codes.
+          datesMap.put(claimId.toString(), datesObject);
+        }
+        LocalDate coverageStartDate =
+            datesObject[0] == null
+                ? LocalDate.parse("1970-01-01")
+                : ((Date) datesObject[0]).toLocalDate();
+        LocalDate coverageEndDate =
+            datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
+        SamhsaEntry entry = samhsaMap.get(code);
+        LocalDate startDate = LocalDate.parse(entry.getStartDate());
+        LocalDate endDate =
+            entry.getEndDate().equalsIgnoreCase("Active")
+                ? LocalDate.MAX
+                : LocalDate.parse(entry.getEndDate());
+
+        // if the throughDate is not between the start and end date,
+        // and the serviceDate is not between the start and end date,
+        // then the claim falls outside the date range of the SAMHSA code.
+        if (isDateOutsideOfRange(startDate, endDate, coverageEndDate)
+            && isDateOutsideOfRange(startDate, endDate, coverageStartDate)) {
+          continue;
+        }
+        // This is a valid code, we can stop here.
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Process am RDA claim to check for SAMHSA codes. This will be the external entry point for other
    * parts of the application.
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
+   * @return true if a claim was persisted.
    * @param <TClaim> Generic type of the claim.
    */
-  public <TClaim> void processRdaClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> boolean processRdaClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
         Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-        persistTags(tags, entityManager);
+        return persistTags(tags, entityManager);
       }
       case RdaMcsClaim mcsClaim -> {
         Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-        persistTags(tags, entityManager);
+        return persistTags(tags, entityManager);
       }
       default -> throw new RuntimeException("Unknown claim type.");
     }
@@ -161,7 +244,6 @@ public class SamhsaUtil {
    * @return true if a tag was persisted.
    */
   public <TClaim> boolean processCcwClaim(TClaim claim, EntityManager entityManager) {
-    boolean persisted = false;
     try {
       SamhsaAdapterBase adapter =
           switch (claim) {
