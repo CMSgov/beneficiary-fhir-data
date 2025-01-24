@@ -10,19 +10,23 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
+import gov.cms.bfd.model.rif.samhsa.CarrierTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
@@ -48,6 +52,9 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform");
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /**
    * Instantiates a new transformer.
    *
@@ -58,14 +65,17 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
   public CarrierClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -83,7 +93,11 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((CarrierClaim) claim, includeTaxNumber);
+      CarrierClaim carrierClaim = (CarrierClaim) claim;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(
+              String.valueOf(carrierClaim.getClaimId()), CarrierTag.class);
+      eob = transformClaim(carrierClaim, includeTaxNumber, securityTags);
     }
     return eob;
   }
@@ -93,14 +107,18 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, boolean includeTaxNumbers) {
+  private ExplanationOfBenefit transformClaim(
+      CarrierClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobNonclinicianUrl());
+
+    eob.getMeta().setSecurity(securityTags);
 
     // TODO: ExplanationOfBenefit.outcome is a required field. Needs to be mapped.
     // eob.setOutcome(?)

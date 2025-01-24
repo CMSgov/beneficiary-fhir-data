@@ -19,6 +19,7 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -50,6 +51,9 @@ public final class SNFClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The securityTagManager. */
+  @Mock SecurityTagManager securityTagManager;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -67,7 +71,8 @@ public final class SNFClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     snfClaimTransformer =
-        new SNFClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new SNFClaimTransformer(
+            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */

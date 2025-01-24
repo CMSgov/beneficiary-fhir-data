@@ -22,7 +22,12 @@
       "id" : "outpatient-1234567890",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Organization",
@@ -904,7 +909,12 @@
       "id" : "dme-2188888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Observation",
@@ -1627,7 +1637,12 @@
       "id" : "hha-2925555555",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Organization",
@@ -2253,7 +2268,12 @@
       "id" : "inpatient-333333222222",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Organization",
@@ -3382,7 +3402,12 @@
       "id" : "snf-777777777",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Organization",
@@ -4877,7 +4902,12 @@
       "id" : "carrier-9991831999",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Observation",
@@ -5630,7 +5660,12 @@
       "id" : "hospice-9992223422",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ],
+        "security" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code" : "N",
+          "display" : "Normal"
+        } ]
       },
       "contained" : [ {
         "resourceType" : "Organization",

@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
@@ -61,6 +62,9 @@ public final class CarrierClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   @Mock NPIOrgLookup npiOrgLookup;
 
+  /** The securityTagManager. */
+  @Mock SecurityTagManager securityTagManager;
+
   /** The mock metric timer. */
   @Mock Timer metricsTimer;
 
@@ -78,7 +82,8 @@ public final class CarrierClaimTransformerTest {
         .thenReturn("UNKNOWN");
 
     carrierClaimTransformer =
-        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, npiOrgLookup);
+        new CarrierClaimTransformer(
+            metricRegistry, drugDisplayLookup, npiOrgLookup, securityTagManager);
   }
 
   /**
