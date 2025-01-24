@@ -31,6 +31,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -47,6 +48,14 @@ final class CcwRifLoadJobIT extends AbstractLocalStackS3Test {
 
   /** Used to capture status updates from the job. */
   @Mock private CcwRifLoadJobStatusReporter statusReporter;
+
+  /** Clear Micrometer meters after each test to ensure each test can verify its own metrics. */
+  @AfterEach
+  void clearMeters() {
+    final var pipelineAppState = PipelineTestUtils.get().getPipelineApplicationState();
+    final var meterRegistry = pipelineAppState.getMeters();
+    meterRegistry.getMeters().forEach(meterRegistry::remove);
+  }
 
   /**
    * Tests {@link CcwRifLoadJob} when run against an empty bucket.
