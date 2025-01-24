@@ -406,6 +406,16 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL =
       "rda/samhsa/backfill/log_interval";
 
+  /** Config value for SAMHSA backfill enabled. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_ENABLED = "rda/samhsa/backfill/enabled";
+
+  /** Config value for SAMHSA backfill batch size. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_BATCH_SIZE = "rda/samhsa/backfill/batch_size";
+
+  /** Config value for SAMHSA backfill log reporting interval. */
+  public static final String SSM_PATH_SAMHSA_BACKFILL_LOG_INTERVAL =
+      "rda/samhsa/backfill/log_interval";
+
   /**
    * The CCW rif load options. This can be null if the CCW job is not configured, Optional is not
    * Serializable.
