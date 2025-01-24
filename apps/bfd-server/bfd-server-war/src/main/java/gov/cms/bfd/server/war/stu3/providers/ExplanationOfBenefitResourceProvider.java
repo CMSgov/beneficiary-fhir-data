@@ -31,6 +31,7 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -321,7 +322,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
      * later.
      */
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
-    Long beneficiaryId = Long.parseLong(patient.getIdPart());
+    Long beneficiaryId = StringUtils.parseLongOrBadRequest(patient.getIdPart(), "Patient ID");
     Set<ClaimType> claimTypesRequested = CommonTransformerUtils.parseTypeParam(type);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     boolean filterSamhsa = CommonTransformerUtils.shouldFilterSamhsa(excludeSamhsa, requestDetails);

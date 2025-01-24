@@ -10,14 +10,18 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEn
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.FinalManifestList;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,21 +99,6 @@ public final class CcwRifLoadJob implements PipelineJob {
    */
   public static final String S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS = "Synthetic/Incoming";
 
-  /** The directory name that completed/done RIF data sets will be moved to in S3. */
-  public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
-
-  /**
-   * The directory name that completed/done RIF data sets loaded from {@link
-   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
-   */
-  public static final String S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS = "Synthetic/Done";
-
-  /**
-   * The directory name that failed RIF data sets loaded from {@link
-   * #S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS} will be moved to in S3.
-   */
-  public static final String S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS = "Synthetic/Failed";
-
   /**
    * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} goes and
    * looks, but doesn't find any data sets waiting to be processed.
@@ -142,20 +133,11 @@ public final class CcwRifLoadJob implements PipelineJob {
               + S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS
               + ")/(.*)/([0-9]+)_manifest\\.xml$");
 
-  /**
-   * A regex that can be used for checking for a manifest in the {@link
-   * #S3_PREFIX_COMPLETED_DATA_SETS} location.
-   */
-  public static final Pattern REGEX_COMPLETED_MANIFEST =
-      Pattern.compile(
-          "^("
-              + S3_PREFIX_COMPLETED_DATA_SETS
-              + "|"
-              + S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS
-              + ")/(.*)/([0-9]+)_manifest\\.xml$");
-
   /** The application metrics. */
   private final MetricRegistry appMetrics;
+
+  /** Metrics for operations within this job. */
+  private final Metrics loadJobMetrics;
 
   /** The extraction options. */
   private final ExtractionOptions options;
@@ -182,8 +164,7 @@ public final class CcwRifLoadJob implements PipelineJob {
   private final ExecutorService downloadService;
 
   /**
-   * Constructs a new instance. The {@link S3TaskManager} will be automatically shut down when this
-   * job's {@link #close} method is called.
+   * Constructs a new instance.
    *
    * @param appState the {@link PipelineApplicationState} for the overall application
    * @param options the {@link ExtractionOptions} to use
@@ -210,6 +191,7 @@ public final class CcwRifLoadJob implements PipelineJob {
     this.runInterval = runInterval;
     this.statusReporter = statusReporter;
     downloadService = Executors.newSingleThreadScheduledExecutor();
+    loadJobMetrics = new Metrics(appState.getMeters());
   }
 
   @Override
@@ -220,12 +202,7 @@ public final class CcwRifLoadJob implements PipelineJob {
 
   @Override
   public boolean isInterruptible() {
-    /*
-     * TODO While the RIF pipeline itself is interruptable now, the S3 transfers are not.
-     *  For now we will leave interrupts disabled and revisit the need for moving files
-     *  between S3 buckets in a later PR. Expected to be changed as part of BFD-3129.
-     */
-    return false;
+    return true;
   }
 
   @Override
@@ -241,9 +218,29 @@ public final class CcwRifLoadJob implements PipelineJob {
     // If no manifest was found, we're done (until next time).
     if (eligibleManifests.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
+      final List<FinalManifestList> finalManifestLists = dataSetQueue.readFinalManifestLists();
+      final Set<String> allManifests = getManifestsFromManifestLists(finalManifestLists);
+      final Set<Instant> finalManifestTimestamps =
+          getTimestampsFromManifestLists(finalManifestLists);
+
       listener.noDataAvailable();
       statusReporter.reportNothingToDo();
-      return PipelineJobOutcome.NOTHING_TO_DO;
+      // Ensure all manifests from the manifest lists are accounted for and completed.
+      if (dataSetQueue.hasIncompleteManifests(allManifests)) {
+        LOGGER.info("Incomplete manifests found");
+        return PipelineJobOutcome.NOTHING_TO_DO;
+      }
+      // Synthetic loads don't have manifest lists
+      final Set<Instant> incomingTimestamps = getAllNonSyntheticManifestTimestamps();
+      // If the distinct set of all non-synthetic loads (identified by their timestamps) from the
+      // available manifests is equal to the set of timestamps from loads that do have a manifest
+      // list, all manifests are accounted for and we're done.
+      if (!incomingTimestamps.equals(finalManifestTimestamps)) {
+        LOGGER.info("Missing manifests found");
+        return PipelineJobOutcome.NOTHING_TO_DO;
+      }
+
+      return PipelineJobOutcome.SHOULD_TERMINATE;
     }
 
     // We've found the oldest manifest.
@@ -348,11 +345,16 @@ public final class CcwRifLoadJob implements PipelineJob {
        * processing multiple data sets in parallel (which would lead to data
        * consistency problems).
        */
+      final var activeTimer =
+          loadJobMetrics.createActiveTimerForManifest(manifestToProcess).start();
+      final var totalTimer = Timer.start();
       statusReporter.reportProcessingManifestData(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsStarted(manifestRecord);
       listener.dataAvailable(rifFilesEvent);
       statusReporter.reportCompletedManifest(manifestToProcess.getIncomingS3Key());
       dataSetQueue.markAsProcessed(manifestRecord);
+      activeTimer.stop();
+      totalTimer.stop(loadJobMetrics.createTotalTimerForManifest(manifestToProcess));
       LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
       /*
@@ -365,33 +367,18 @@ public final class CcwRifLoadJob implements PipelineJob {
        */
       rifFiles.forEach(S3RifFile::cleanupTempFile);
     } else {
-      // TODO BEGIN remove once S3 file moves are no longer necessary.
-      // Expected to be changed as part of BFD-3129.
-      /*
-       * If here, Synthea pre-validation has failed; we want to move the S3 incoming
-       * files to a failed folder; so instead of moving files to a done folder we'll just
-       * replace the manifest's notion of its Done folder to a Failed folder.
-       */
-      manifestToProcess.setManifestKeyDoneLocation(S3_PREFIX_FAILED_SYNTHETIC_DATA_SETS);
-      // TODO END remove once S3 file moves are no longer necessary.
-
       /*
        * If here, Synthea pre-validation has failed; we want to mark the data set as rejected in the database.
        */
       dataSetQueue.markAsRejected(manifestRecord);
     }
 
-    // TODO BEGIN remove once S3 file moves are no longer necessary.
-    // Expected to be changed as part of BFD-3129.
-    dataSetQueue.moveManifestFilesInS3(manifestToProcess);
-    // TODO END remove once S3 file moves are no longer necessary.
-
     return PipelineJobOutcome.WORK_DONE;
   }
 
   /**
-   * Shuts down our {@link S3TaskManager} and clears our S3 files cache. If any download or move
-   * tasks are still running this method will wait for them to complete before returning.
+   * Clears our S3 files cache. If any download or move tasks are still running this method will
+   * wait for them to complete before returning.
    *
    * <p>{@inheritDoc}
    */
@@ -405,6 +392,44 @@ public final class CcwRifLoadJob implements PipelineJob {
         });
     closer.close(dataSetQueue::close);
     closer.finish();
+  }
+
+  /**
+   * Retrieves the distinct set of all timestamps from each non-synthetic load in the 'Incoming'
+   * folder.
+   *
+   * @return set of timestamps
+   */
+  private Set<Instant> getAllNonSyntheticManifestTimestamps() {
+    return dataSetQueue
+        .readAllIncomingManifests(S3_PREFIX_PENDING_DATA_SETS)
+        .filter(id -> !id.manifestId().isFutureManifest())
+        .map(id -> id.manifestId().getTimestamp())
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns the flattened list of manifests from the manifest lists.
+   *
+   * @param finalManifestLists final manifest lists from the 'Incoming' folder
+   * @return set of manifests
+   */
+  private Set<String> getManifestsFromManifestLists(List<FinalManifestList> finalManifestLists) {
+    return finalManifestLists.stream()
+        .flatMap(l -> l.getManifests().stream())
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns the set of load timestamps from the manifest lists.
+   *
+   * @param finalManifestLists final manifest lists from the 'Incoming' folder
+   * @return timestamps
+   */
+  private Set<Instant> getTimestampsFromManifestLists(List<FinalManifestList> finalManifestLists) {
+    return finalManifestLists.stream()
+        .map(FinalManifestList::getTimestamp)
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -526,5 +551,93 @@ public final class CcwRifLoadJob implements PipelineJob {
         dataFileRecord.getFileType(),
         dataFileRecord.getFileName());
     return false;
+  }
+
+  /** Micrometer metrics and helpers for measuring {@link CcwRifLoadJob} operations. */
+  @RequiredArgsConstructor
+  public static final class Metrics {
+
+    /**
+     * Name of the per-{@link DataSetManifest} {@link LongTaskTimer}s that actively, at each
+     * Micrometer reporting interval, records and reports the duration of processing of a given
+     * {@link DataSetManifest}.
+     */
+    public static final String MANIFEST_PROCESSING_ACTIVE_TIMER_NAME =
+        String.format("%s.manifest_processing.active", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Name of the per-{@link DataSetManifest} {@link Timer}s that report the final duration of
+     * processing once the {@link DataSetManifest} is processed.
+     */
+    public static final String MANIFEST_PROCESSING_TOTAL_TIMER_NAME =
+        String.format("%s.manifest_processing.total", CcwRifLoadJob.class.getSimpleName());
+
+    /**
+     * Tag indicating which data set (identified by its timestamp in S3) a given metric measured.
+     */
+    private static final String TAG_DATA_SET_TIMESTAMP = "data_set_timestamp";
+
+    /**
+     * Tag indicating whether the data load associated with the measured metric was synthetic or
+     * not.
+     */
+    private static final String TAG_IS_SYNTHETIC = "is_synthetic";
+
+    /** Tag indicating which {@link DataSetManifest} was associated with the measured metric. */
+    private static final String TAG_MANIFEST = "manifest";
+
+    /** Micrometer {@link MeterRegistry} for the Pipeline application. */
+    private final MeterRegistry appMetrics;
+
+    /**
+     * Creates a {@link LongTaskTimer} for a given {@link DataSetManifest} so that the time it takes
+     * to process the manifest can be measured and recorded while processing is ongoing. Should be
+     * called prior to processing a {@link DataSetManifest}.
+     *
+     * @param manifest the {@link DataSetManifest} to time
+     * @return the {@link LongTaskTimer} that will be used to actively measure and record the time
+     *     taken to load the {@link DataSetManifest}
+     */
+    LongTaskTimer createActiveTimerForManifest(DataSetManifest manifest) {
+      return LongTaskTimer.builder(MANIFEST_PROCESSING_ACTIVE_TIMER_NAME)
+          .tags(getTags(manifest))
+          .register(appMetrics);
+    }
+
+    /**
+     * Creates a {@link Timer} for a given {@link DataSetManifest} so that the total time it takes
+     * to process the manifest can be recorded. Should be used with {@link Timer.Sample#stop(Timer)}
+     * after processing a {@link DataSetManifest} to record the total duration.
+     *
+     * @param manifest the {@link DataSetManifest} to time
+     * @return the {@link LongTaskTimer} that will be used to record the total time taken to load
+     *     the {@link DataSetManifest}
+     */
+    Timer createTotalTimerForManifest(DataSetManifest manifest) {
+      return Timer.builder(MANIFEST_PROCESSING_TOTAL_TIMER_NAME)
+          .tags(getTags(manifest))
+          .register(appMetrics);
+    }
+
+    /**
+     * Returns a {@link List} of default {@link Tag}s that is used to disambiguate a given metric
+     * based on its corresponding {@link DataSetManifest}.
+     *
+     * @param manifest {@link DataSetManifest} from which the values of {@link
+     *     DataSetManifest#getTimestampText()}, {@link DataSetManifest#isSyntheticData()} and {@link
+     *     DataSetManifest#getIncomingS3Key()} will be used to set the {@link
+     *     #TAG_DATA_SET_TIMESTAMP}, {@link #TAG_IS_SYNTHETIC} and {@link #TAG_MANIFEST} {@link
+     *     Tag}s, respectively
+     * @return a {@link List} of {@link Tag}s including relevant information from {@code manifest}
+     */
+    private List<Tag> getTags(DataSetManifest manifest) {
+      final var manifestFullpath = manifest.getIncomingS3Key();
+      final var manifestFilename =
+          manifestFullpath.substring(manifestFullpath.lastIndexOf("/") + 1);
+      return List.of(
+          Tag.of(TAG_DATA_SET_TIMESTAMP, manifest.getTimestampText()),
+          Tag.of(TAG_IS_SYNTHETIC, Boolean.toString(manifest.isSyntheticData())),
+          Tag.of(TAG_MANIFEST, manifestFilename));
+    }
   }
 }

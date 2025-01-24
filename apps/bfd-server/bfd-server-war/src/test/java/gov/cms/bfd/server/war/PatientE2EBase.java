@@ -230,6 +230,70 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
+  /** Verify that Patient returns a 400 when searching with an invalid bene ID. */
+  @Test
+  public void testPatientUsingGetByIdentifierInvalidId() {
+    String requestString = patientEndpoint + "?_id=abc";
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .when()
+        .get(requestString);
+  }
+
+  /** Verify that Patient returns a 400 when searching with an invalid count. */
+  @Test
+  public void testPatientUsingGetByIdentifierInvalidCount() {
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2023";
+    String requestString =
+        patientEndpoint
+            + "?_has:Coverage.extension="
+            + contractId
+            + "&_has:Coverage.rfrncyr="
+            + refYear
+            + "&_count=abc";
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .when()
+        .get(requestString);
+  }
+
+  /** Verify that Patient returns a 400 when searching with an invalid bene cursor. */
+  @Test
+  public void testPatientUsingGetByIdInvalidCursor() {
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2023";
+    String requestString =
+        patientEndpoint
+            + "?_has:Coverage.extension="
+            + contractId
+            + "&_has:Coverage.rfrncyr="
+            + refYear
+            + "&_count=1"
+            + "&cursor=abc";
+
+    given()
+        .spec(requestAuth)
+        .headers(headers)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .when()
+        .get(requestString);
+  }
+
   /**
    * Verifies that Patient searchByIdentifier returns a 200 when using HTTP POST with an unhashed
    * MBI in the Request body.
@@ -602,7 +666,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .headers(headers)
         .expect()
         .body("issue.severity", hasItem("error"))
-        .body("issue.diagnostics", hasItem("Contract year must be a number."))
+        .body("issue.diagnostics", hasItem("Failed to parse value for Contract Year as a number."))
         .statusCode(400)
         .when()
         .get(requestString);

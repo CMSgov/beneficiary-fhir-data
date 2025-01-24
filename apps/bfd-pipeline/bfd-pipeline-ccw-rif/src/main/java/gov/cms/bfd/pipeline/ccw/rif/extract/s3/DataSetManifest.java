@@ -70,12 +70,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * Denotes the s3 key where the manifest and its files should be placed when it's processing is
    * complete.
    */
-  @Getter @Setter @XmlTransient private String manifestKeyDoneLocation;
-
-  /**
-   * Denotes the s3 key where the manifest and its files should be placed when it's processing is
-   * complete.
-   */
   @XmlTransient private String manifestKeyFailLocation;
 
   /**
@@ -85,7 +79,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * @param sequenceId the value to use for {@link #sequenceId}
    * @param syntheticData the value to use for {@link #syntheticData}
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
-   * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
    * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
@@ -93,7 +86,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       int sequenceId,
       boolean syntheticData,
       String manifestKeyIncomingLocation,
-      String manifestKeyDoneLocation,
       List<DataSetManifestEntry> entries) {
     this.timestampText = timestampText;
     this.sequenceId = sequenceId;
@@ -101,7 +93,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     this.entries = entries;
     this.entries.forEach(entry -> entry.parentManifest = this);
     this.manifestKeyIncomingLocation = manifestKeyIncomingLocation;
-    this.manifestKeyDoneLocation = manifestKeyDoneLocation;
   }
 
   /**
@@ -124,7 +115,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
         sequenceId,
         syntheticData,
         CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-        CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
         entries);
   }
 
@@ -135,7 +125,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * @param sequenceId the value to use for {@link #sequenceId}
    * @param syntheticData the value to use for {@link #syntheticData}
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
-   * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
    * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
@@ -143,14 +132,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       int sequenceId,
       boolean syntheticData,
       String manifestKeyIncomingLocation,
-      String manifestKeyDoneLocation,
       DataSetManifestEntry... entries) {
     this(
         timestampText,
         sequenceId,
         syntheticData,
         manifestKeyIncomingLocation,
-        manifestKeyDoneLocation,
         Arrays.asList(entries));
   }
 
@@ -161,7 +148,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * @param sequenceId the value to use for {@link #sequenceId}
    * @param syntheticData the value to use for {@link #syntheticData}
    * @param manifestKeyIncomingLocation the value to use for {@link #manifestKeyIncomingLocation}
-   * @param manifestKeyDoneLocation the value to use for {@link #manifestKeyDoneLocation}
    * @param entries the value to use for {@link #entries}
    */
   public DataSetManifest(
@@ -169,14 +155,12 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
       int sequenceId,
       boolean syntheticData,
       String manifestKeyIncomingLocation,
-      String manifestKeyDoneLocation,
       DataSetManifestEntry... entries) {
     this(
         DateTimeFormatter.ISO_INSTANT.format(timestamp),
         sequenceId,
         syntheticData,
         manifestKeyIncomingLocation,
-        manifestKeyDoneLocation,
         Arrays.asList(entries));
   }
 
@@ -312,6 +296,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
    * Also implements {@link Comparable} such that the processing order of {@link DataSetManifest}s
    * can be determined.
    */
+  @Getter
   public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
     /** a {@link String} derived {@link DataSetManifest#getTimestamp()} value. */
     private final String timestampText;
