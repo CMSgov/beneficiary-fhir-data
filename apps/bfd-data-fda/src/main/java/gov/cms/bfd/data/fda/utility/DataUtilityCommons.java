@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
@@ -18,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -78,11 +78,11 @@ public class DataUtilityCommons {
     // download FDA NDC file
     Path downloadedNdcZipFile =
         Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
+    URL ndctextZipUrl = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
     if (!Files.isReadable(downloadedNdcZipFile)) {
-      ClassLoader classLoader = DataUtilityCommons.class.getClassLoader();
-      File ndcFile =
-          new File(Objects.requireNonNull(classLoader.getResource("ndctext.zip")).getFile());
-      FileUtils.copyFile(ndcFile, new File(downloadedNdcZipFile.toFile().getAbsolutePath()));
+      // connectionTimeout, readTimeout = 10 seconds
+      FileUtils.copyURLToFile(
+          ndctextZipUrl, new File(downloadedNdcZipFile.toFile().getAbsolutePath()), 10000, 10000);
     }
 
     // unzip FDA NDC file
@@ -91,7 +91,7 @@ public class DataUtilityCommons {
     if (!Files.isReadable(originalNdcDataFile))
       originalNdcDataFile = workingDir.resolve("Product.txt");
     if (!Files.isReadable(originalNdcDataFile))
-      throw new IllegalStateException("Unable to locate product.txt in ndctext.zip");
+      throw new IllegalStateException("Unable to locate product.txt in " + ndctextZipUrl);
 
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
