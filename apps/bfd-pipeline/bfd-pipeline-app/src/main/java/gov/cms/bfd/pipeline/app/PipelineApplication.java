@@ -347,6 +347,9 @@ public final class PipelineApplication {
 
     PipelineOutcome pipelineOutcome = pipelineManager.awaitCompletion();
 
+    // Ensures that any CloudWatch metrics are published prior to the stop of the Pipeline
+    appMeters.close();
+
     if (pipelineManager.getError() != null) {
       throw new FatalAppException(
           "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
