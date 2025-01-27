@@ -1,5 +1,6 @@
 locals {
-  env = terraform.workspace
+  env    = terraform.workspace
+  region = data.aws_region.current.name
 
   tz_to_duration_offset = {
     "EDT" = "-4h"
@@ -46,6 +47,7 @@ resource "aws_cloudwatch_dashboard" "this" {
     "${path.module}/templates/pipeline_dashboard.json.tftpl",
     {
       env                         = local.env
+      region                      = local.region
       current_week_monday_9am_est = local.current_week_monday_9am_est
       next_monday_9am_est         = local.next_monday_9am_est
       next_next_monday_9am_est    = local.next_next_monday_9am_est
