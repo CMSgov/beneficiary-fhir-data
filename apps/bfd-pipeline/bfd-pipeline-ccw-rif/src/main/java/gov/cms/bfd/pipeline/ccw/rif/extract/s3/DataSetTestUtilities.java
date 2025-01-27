@@ -12,9 +12,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Contains utilities that are useful when running tests that involve working with data sets in S3.
@@ -27,9 +30,8 @@ public class DataSetTestUtilities {
    * Computes the key prefix for a given manifest's contents within an S3 bucket.
    *
    * @param location the location to find the object, should be {@link
-   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS}, {@link
-   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}, or {@link
-   *     CcwRifLoadJob#S3_PREFIX_COMPLETED_DATA_SETS}
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
    * @param manifest the {@link DataSetManifest} to push as an object
    * @return the computed key prefix
    */
@@ -65,6 +67,29 @@ public class DataSetTestUtilities {
       S3Dao s3Dao, String bucket, DataSetManifest manifest, String location) {
     String keyPrefix = keyPrefixForManifest(location, manifest);
     return putObject(s3Dao, bucket, keyPrefix, manifest);
+  }
+
+  /**
+   * Uploads the manifest list to S3.
+   *
+   * @param s3Dao s3dao
+   * @param bucket s3 bucket
+   * @param manifests list of manifests
+   * @param location the location to store the manifest, should be {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_DATA_SETS} or {@link
+   *     CcwRifLoadJob#S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS}
+   */
+  public static void putManifestList(
+      S3Dao s3Dao, String bucket, List<DataSetManifest> manifests, String location) {
+    String keyPrefix = keyPrefixForManifest(location, manifests.get(0));
+    String manifestListContent =
+        manifests.stream()
+            .map(m -> String.format("%d_%s", m.getSequenceId(), "manifest.xml"))
+            .collect(Collectors.joining("\n"));
+
+    String objectKey = String.format("%s/ManifestList.done", keyPrefix);
+    s3Dao.putObject(
+        bucket, objectKey, manifestListContent.getBytes(StandardCharsets.UTF_8), Map.of());
   }
 
   /**

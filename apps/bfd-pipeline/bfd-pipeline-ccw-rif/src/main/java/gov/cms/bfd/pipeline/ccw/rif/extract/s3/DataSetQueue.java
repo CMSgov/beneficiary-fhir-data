@@ -10,7 +10,6 @@ import gov.cms.bfd.model.rif.entities.S3DataFile;
 import gov.cms.bfd.model.rif.entities.S3ManifestFile;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.DataSetManifestFactory;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao.DownloadedFile;
@@ -27,6 +26,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a queue of data sets (manifest file plus entry files) by combining the current
@@ -34,8 +35,11 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class DataSetQueue implements AutoCloseable {
+  /** Logger. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetQueue.class);
+
   /**
-   * Name of S3 meta data field used by CCW to communicate an expected MD5 checksum value for every
+   * Name of S3 metadata field used by CCW to communicate an expected MD5 checksum value for every
    * file they upload to the S3 bucket for processing.
    */
   public static final String MD5_CHECKSUM_META_DATA_FIELD = "md5chksum";
@@ -76,19 +80,10 @@ public class DataSetQueue implements AutoCloseable {
   /** Used to download files from S3 to a local cache for processing. */
   private final S3FileManager s3Files;
 
-  /**
-   * Used only for the soon to be obsolete S3 file move task.
-   *
-   * <p>TODO Remove this when file moves are no longer necessary. Expected to be changed as part of
-   * BFD-3129.
-   */
-  private final S3TaskManager s3TaskManager;
-
   @Override
   public void close() throws Exception {
     final var closer = new MultiCloser();
     closer.close(s3Files::close);
-    closer.close(s3TaskManager::close);
     closer.finish();
   }
 
@@ -146,6 +141,55 @@ public class DataSetQueue implements AutoCloseable {
       }
       return manifests;
     }
+  }
+
+  /**
+   * Reads all manifests from the given prefix.
+   *
+   * @param s3Prefix prefix
+   * @return valid manifest IDs
+   */
+  public Stream<ParsedManifestId> readAllIncomingManifests(String s3Prefix) {
+    return s3Files
+        .scanS3ForFiles(s3Prefix)
+        .map(S3Dao.S3ObjectSummary::getKey)
+        .flatMap(s3Key -> parseManifestIdFromS3Key(s3Key).stream());
+  }
+
+  /**
+   * Searches S3 for all manifest lists.
+   *
+   * @return the manifest lists
+   */
+  public List<FinalManifestList> readFinalManifestLists() {
+    final String manifestListName = "manifestlist.done";
+    return s3Files
+        // Purposefully excluding synthetic prefix here because synthetic loads don't have a final
+        // manifest
+        .scanS3ForFiles(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS)
+        .filter(s -> s.getKey().toLowerCase().endsWith(manifestListName))
+        .map(
+            s -> {
+              String key = s.getKey();
+
+              try {
+                DownloadedFile downloadedFile = downloadFileAndCheckMD5(key);
+                return new FinalManifestList(downloadedFile.getBytes().read(), key);
+              } catch (IOException e) {
+                throw new RuntimeException("Error downloading key from S3: " + key, e);
+              }
+            })
+        .toList();
+  }
+
+  /**
+   * Returns whether any of the given manifest keys are not marked as completed in the database.
+   *
+   * @param manifestKeys list of manifest keys
+   * @return boolean
+   */
+  public boolean hasIncompleteManifests(Set<String> manifestKeys) {
+    return s3Records.hasIncompleteManifests(manifestKeys);
   }
 
   /**
@@ -260,21 +304,8 @@ public class DataSetQueue implements AutoCloseable {
   }
 
   /**
-   * Starts a background thread that moves all of the files associated with the specified manifest
-   * from the Incoming tree to the Done tree.
-   *
-   * <p>TODO Remove this method (and {@link #s3TaskManager} once S3 file movement is no longer
-   * necessary. Expected to be changed as part of BFD-3129.
-   *
-   * @param manifest the manifest to move
-   */
-  public void moveManifestFilesInS3(DataSetManifest manifest) {
-    s3TaskManager.moveManifestFilesInS3(manifest);
-  }
-
-  /**
-   * Download a file from S3 and confirm that its MD5 checksum matches that in the S3 file's meta
-   * data.
+   * Download a file from S3 and confirm that its MD5 checksum matches that in the S3 file's
+   * metadata.
    *
    * @param s3Key identifies file to download in S3 bucket
    * @return object containing information about downloaded file
@@ -356,10 +387,8 @@ public class DataSetQueue implements AutoCloseable {
       if (manifestS3Key.contains(CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS)) {
         manifest.setManifestKeyIncomingLocation(
             CcwRifLoadJob.S3_PREFIX_PENDING_SYNTHETIC_DATA_SETS);
-        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_SYNTHETIC_DATA_SETS);
       } else {
         manifest.setManifestKeyIncomingLocation(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS);
-        manifest.setManifestKeyDoneLocation(CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS);
       }
 
       return manifest;
