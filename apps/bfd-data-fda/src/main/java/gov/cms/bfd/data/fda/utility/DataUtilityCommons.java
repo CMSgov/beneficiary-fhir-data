@@ -3,12 +3,13 @@ package gov.cms.bfd.data.fda.utility;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -18,11 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,11 +81,14 @@ public class DataUtilityCommons {
         Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
     URL ndctextZipUrl = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
     if (!Files.isReadable(downloadedNdcZipFile)) {
-      // connectionTimeout, readTimeout = 10 seconds
-      FileUtils.copyURLToFile(
-          ndctextZipUrl, new File(downloadedNdcZipFile.toFile().getAbsolutePath()), 10000, 10000);
+      HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
+      connection.setRequestProperty(
+          "User-Agent",
+          "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+      try (InputStream in = connection.getInputStream()) {
+        Files.copy(in, downloadedNdcZipFile, StandardCopyOption.REPLACE_EXISTING);
+      }
     }
-
     // unzip FDA NDC file
     unzip(downloadedNdcZipFile, workingDir);
     Path originalNdcDataFile = workingDir.resolve("product.txt");
