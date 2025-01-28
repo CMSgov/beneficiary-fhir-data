@@ -88,7 +88,7 @@ paths:
                        - `startIndex=100`
                   format: int32
                   example: 100
-                "_count":
+                '_count':
                   description: |-
                     Provides the number of records to be used for pagination.
 
@@ -191,7 +191,7 @@ paths:
                        - `startIndex=100`
                   format: int32
                   example: 100
-                "_count":
+                '_count':
                   description: |-
                     Provides the number of records to be used for pagination.
 
@@ -314,7 +314,7 @@ paths:
                        - `startIndex=100`
                   format: int32
                   example: 100
-                "_count":
+                '_count':
                   description: |-
                     Provides the number of records to be used for pagination.
 
@@ -474,7 +474,7 @@ paths:
                       Example:
                       - `startIndex=100`
                     example: 100
-                  "_count":
+                  '_count':
                   description: |-
                     Provides the number of records to be used for pagination.
 
@@ -599,7 +599,7 @@ paths:
                     Example:
                     - `startIndex=100`
                   example: 100
-                "_count":
+                '_count':
                   description: |-
                     Provides the number of records to be used for pagination.
 
