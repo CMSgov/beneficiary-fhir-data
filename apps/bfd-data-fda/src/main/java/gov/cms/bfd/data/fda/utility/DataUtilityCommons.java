@@ -86,7 +86,7 @@ public class DataUtilityCommons {
     if (!Files.isReadable(downloadedNdcZipFile)) {
       HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
       connection.setRequestProperty(
-          "User-Agent", String.format("BFD / %s (Beneficiary FHIR Data Server)", version));
+          "User-Agent", String.format("BFD/%s (Beneficiary FHIR Data Server)", version));
       try (InputStream in = connection.getInputStream()) {
         Files.copy(in, downloadedNdcZipFile, StandardCopyOption.REPLACE_EXISTING);
       }
