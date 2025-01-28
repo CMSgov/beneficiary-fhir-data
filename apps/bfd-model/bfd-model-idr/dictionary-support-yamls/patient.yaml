@@ -1,0 +1,66 @@
+- inputPath: IdrBeneficiary.BENE_1ST_NAME
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LAST_NAME
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_MIDL_NAME
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_DOB
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_DEATH_DT
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.mbi
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_SK
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_GENDER
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.lastUpdated
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.GEO_USPS_STATE_CD
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_ZIP_CD
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LINE_1_ADR
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LINE_2_ADR
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LINE_3_ADR
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LINE_4_ADR
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LINE_5_ADR
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_LINE_6_ADR
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.GEO_ZIP_PLC_NAME
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.CNTCT_LANG_CD
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_PHNE_NUM
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_SEX_CD
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.BENE_RACE_CD
+  appliesTo:
+    - Patient

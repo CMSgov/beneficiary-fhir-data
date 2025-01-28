@@ -1,0 +1,1 @@
+Placeholder directories + structures for mapping between IDR and FHIR.
