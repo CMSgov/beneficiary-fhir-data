@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
@@ -125,6 +126,7 @@ public class V2Server extends RestfulServer {
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
     registerInterceptor(new TimerInterceptor());
+    registerInterceptor(new ConsentInterceptor(new SamhsaConsentInterceptor()));
 
     // OpenAPI
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
