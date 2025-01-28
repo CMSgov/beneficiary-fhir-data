@@ -85,7 +85,6 @@ public class DataUtilityCommons {
     URL ndctextZipUrl = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
     if (!Files.isReadable(downloadedNdcZipFile)) {
       HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
-      LOGGER.info(String.format("Using version %s in User-Agent String", version));
       connection.setRequestProperty(
           "User-Agent", String.format("BFD / %s (Beneficiary FHIR Data Server)", version));
       try (InputStream in = connection.getInputStream()) {
