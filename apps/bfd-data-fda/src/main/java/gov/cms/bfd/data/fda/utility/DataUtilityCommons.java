@@ -38,10 +38,11 @@ public class DataUtilityCommons {
    * Gets the fda drug codes from the fda file.
    *
    * @param outputDir the output directory.
+   * @param version The BFD version.
    * @param fdaFile the fda file.
    */
   @SuppressWarnings("java:S5443")
-  public static void getFDADrugCodes(String outputDir, String fdaFile)
+  public static void getFDADrugCodes(String outputDir, String version, String fdaFile)
       throws IllegalStateException {
     Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {
@@ -56,7 +57,7 @@ public class DataUtilityCommons {
       Path convertedNdcDataFile = outputPath.resolve(fdaFile);
 
       try {
-        buildProductsResource(convertedNdcDataFile, workingDir);
+        buildProductsResource(convertedNdcDataFile, workingDir, version);
       } finally {
         // Recursively delete the working dir.
         recursivelyDelete(workingDir);
@@ -72,9 +73,11 @@ public class DataUtilityCommons {
    *
    * @param convertedNdcDataFile the output file/resource to produce.
    * @param workingDir a directory that temporary/working files can be written to.
+   * @param version The BFD version.
    * @throws IOException (any errors encountered will be bubbled up).
    */
-  public static void buildProductsResource(Path convertedNdcDataFile, Path workingDir)
+  public static void buildProductsResource(
+      Path convertedNdcDataFile, Path workingDir, String version)
       throws IOException, IllegalStateException {
     // download FDA NDC file
     Path downloadedNdcZipFile =
@@ -82,9 +85,9 @@ public class DataUtilityCommons {
     URL ndctextZipUrl = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
     if (!Files.isReadable(downloadedNdcZipFile)) {
       HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
+      LOGGER.info(String.format("Using version %s in User-Agent String", version));
       connection.setRequestProperty(
-          "User-Agent",
-          "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+          "User-Agent", String.format("BFD / %s (Beneficiary FHIR Data Server)", version));
       try (InputStream in = connection.getInputStream()) {
         Files.copy(in, downloadedNdcZipFile, StandardCopyOption.REPLACE_EXISTING);
       }
