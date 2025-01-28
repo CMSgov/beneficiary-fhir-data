@@ -22,10 +22,11 @@ locals {
 
   # Targeted PIPELINE hierarchy paths to be "copied" from the seed environment into requested ephemeral environment
   pipeline_seed_paths = local.is_ephemeral_env ? {
-    "/bfd/${local.env}/pipeline/sensitive/db/password"          = "/bfd/${local.seed_env}/pipeline/sensitive/db/password"
-    "/bfd/${local.env}/pipeline/sensitive/db/username"          = "/bfd/${local.seed_env}/pipeline/sensitive/db/username"
-    "/bfd/${local.env}/pipeline/sensitive/hicn_hash/iterations" = "/bfd/${local.seed_env}/pipeline/sensitive/hicn_hash/iterations"
-    "/bfd/${local.env}/pipeline/sensitive/hicn_hash/pepper"     = "/bfd/${local.seed_env}/pipeline/sensitive/hicn_hash/pepper"
+    "/bfd/${local.env}/pipeline/sensitive/db/password"               = "/bfd/${local.seed_env}/pipeline/sensitive/db/password"
+    "/bfd/${local.env}/pipeline/sensitive/db/username"               = "/bfd/${local.seed_env}/pipeline/sensitive/db/username"
+    "/bfd/${local.env}/pipeline/sensitive/hicn_hash/iterations"      = "/bfd/${local.seed_env}/pipeline/sensitive/hicn_hash/iterations"
+    "/bfd/${local.env}/pipeline/sensitive/hicn_hash/pepper"          = "/bfd/${local.seed_env}/pipeline/sensitive/hicn_hash/pepper"
+    "/bfd/${local.env}/pipeline/nonsensitive/micrometer_cw/interval" = "/bfd/${local.seed_env}/pipeline/nonsensitive/micrometer_cw/interval"
     # The prod-sbx environment includes an in-process server instead of a communicating with an external, gRPC host
     "/bfd/${local.env}/pipeline/sensitive/rda/grpc/auth_token" = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/auth_token"
     "/bfd/${local.env}/pipeline/sensitive/rda/grpc/port"       = local.seed_env == "prod-sbx" ? "" : "/bfd/${local.seed_env}/pipeline/sensitive/rda/grpc/port"
