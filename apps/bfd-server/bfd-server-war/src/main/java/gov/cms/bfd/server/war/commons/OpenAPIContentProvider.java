@@ -135,12 +135,12 @@ Examples:
    - `cursor=1000` the first record is the 1001st record""";
 
   /***
-   * test.
+   * Open API content for the _count parameter.
    */
   public static final String COUNT_SHORT = "The number of records to return";
 
   /***
-   * test.
+   * Open API content for the _count parameter.
    */
   public static final String COUNT_VALUE =
       """
