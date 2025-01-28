@@ -384,7 +384,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
               shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_SHORT,
               value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
-      @OptionalParam(name = "_count")
+      @OptionalParam(name = Constants.PARAM_COUNT)
           @Description(
               shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
               value = OpenAPIContentProvider.COUNT_VALUE)

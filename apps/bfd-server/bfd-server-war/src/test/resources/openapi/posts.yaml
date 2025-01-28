@@ -88,6 +88,13 @@ paths:
                        - `startIndex=100`
                   format: int32
                   example: 100
+                "_count":
+                  description: |-
+                    Provides the number of records to be used for pagination.
+
+                    Examples:
+                      - `_count=10`: return 10 values.
+                  format: int32
                 type:
                   type: string
                   description: |-
@@ -184,6 +191,13 @@ paths:
                        - `startIndex=100`
                   format: int32
                   example: 100
+                "_count":
+                  description: |-
+                    Provides the number of records to be used for pagination.
+
+                    Examples:
+                      - `_count=10`: return 10 values.
+                  format: int32
                 identifier:
                   type: string
                   description: |-
@@ -300,6 +314,13 @@ paths:
                        - `startIndex=100`
                   format: int32
                   example: 100
+                "_count":
+                  description: |-
+                    Provides the number of records to be used for pagination.
+
+                    Examples:
+                      - `_count=10`: return 10 values.
+                  format: int32
                 identifier:
                   type: string
                   description: |-
@@ -453,6 +474,13 @@ paths:
                       Example:
                       - `startIndex=100`
                     example: 100
+                  "_count":
+                  description: |-
+                    Provides the number of records to be used for pagination.
+
+                    Examples:
+                      - `_count=10`: return 10 values.
+                  format: int32
                   type:
                     type: string
                     description: |-
@@ -571,6 +599,13 @@ paths:
                     Example:
                     - `startIndex=100`
                   example: 100
+                "_count":
+                  description: |-
+                    Provides the number of records to be used for pagination.
+
+                    Examples:
+                      - `_count=10`: return 10 values.
+                  format: int32
                 type:
                   type: string
                   description: |-
