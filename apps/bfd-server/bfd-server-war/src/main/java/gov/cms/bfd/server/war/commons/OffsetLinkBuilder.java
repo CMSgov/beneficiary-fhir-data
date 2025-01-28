@@ -52,8 +52,11 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    * @param resource the resource
    */
   public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
-    this.pageSize = StringUtils.parseIntegerFromRequest(requestDetails, Constants.PARAM_COUNT);
-    this.startIndex = StringUtils.parseIntegerFromRequest(requestDetails, "startIndex");
+    this.pageSize =
+        StringUtils.parseIntegersFromRequest(requestDetails, Constants.PARAM_COUNT).stream()
+            .findFirst();
+    this.startIndex =
+        StringUtils.parseIntegersFromRequest(requestDetails, "startIndex").stream().findFirst();
     this.serverBase = requestDetails.getServerBaseForRequest();
     this.resource = resource;
     this.requestDetails = requestDetails;

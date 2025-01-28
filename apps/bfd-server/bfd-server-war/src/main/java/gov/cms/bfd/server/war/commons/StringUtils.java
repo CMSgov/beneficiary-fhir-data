@@ -3,8 +3,11 @@ package gov.cms.bfd.server.war.commons;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /** Helper Utils class for Functions shared across. multiple classes. */
 public class StringUtils {
@@ -81,10 +84,11 @@ public class StringUtils {
    * @return the parsed parameter as an Integer, empty {@link Optional} if the parameter is not
    *     found
    */
-  public static Optional<Integer> parseIntegerFromRequest(
+  public static List<Integer> parseIntegersFromRequest(
       RequestDetails requestDetails, String parameterToParse) {
-    Optional<String> requestParam = getParameterFromRequest(requestDetails, parameterToParse);
-    return requestParam.map(s -> parseIntOrBadRequest(s, parameterToParse));
+    return getParametersFromRequest(requestDetails, parameterToParse)
+        .map(p -> parseIntOrBadRequest(p, parameterToParse))
+        .toList();
   }
 
   /**
@@ -95,10 +99,11 @@ public class StringUtils {
    * @param parameterToParse the parameter to parse from requestDetails
    * @return the parsed parameter as a Long, empty {@link Optional} if the parameter is not found
    */
-  public static Optional<Long> parseLongFromRequest(
+  public static List<Long> parseLongsFromRequest(
       RequestDetails requestDetails, String parameterToParse) {
-    Optional<String> requestParam = getParameterFromRequest(requestDetails, parameterToParse);
-    return requestParam.map(s -> parseLongOrBadRequest(s, parameterToParse));
+    return getParametersFromRequest(requestDetails, parameterToParse)
+        .map(p -> parseLongOrBadRequest(p, parameterToParse))
+        .toList();
   }
 
   /**
@@ -108,15 +113,13 @@ public class StringUtils {
    * @param parameterToParse name of parameter to retrieve
    * @return extracted value
    */
-  private static Optional<String> getParameterFromRequest(
+  private static Stream<String> getParametersFromRequest(
       RequestDetails requestDetails, String parameterToParse) {
     Map<String, String[]> parameters = requestDetails.getParameters();
     if (parameters.containsKey(parameterToParse)) {
-      String paramValue = parameters.get(parameterToParse)[0];
-      if (paramValue != null && !paramValue.isBlank()) {
-        return Optional.of(paramValue);
-      }
+      String[] paramValues = parameters.get(parameterToParse);
+      return Arrays.stream(paramValues).filter(p -> p != null && !p.isBlank());
     }
-    return Optional.empty();
+    return Stream.of();
   }
 }

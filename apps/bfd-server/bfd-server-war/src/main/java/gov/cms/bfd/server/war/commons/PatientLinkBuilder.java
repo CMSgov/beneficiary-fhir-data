@@ -44,8 +44,10 @@ public final class PatientLinkBuilder implements LinkBuilder {
    */
   public PatientLinkBuilder(RequestDetails requestDetails) {
     this.requestDetails = requestDetails;
-    count = StringUtils.parseIntegerFromRequest(requestDetails, Constants.PARAM_COUNT);
-    cursor = StringUtils.parseLongFromRequest(requestDetails, PARAM_CURSOR);
+    count =
+        StringUtils.parseIntegersFromRequest(requestDetails, Constants.PARAM_COUNT).stream()
+            .findFirst();
+    cursor = StringUtils.parseLongsFromRequest(requestDetails, PARAM_CURSOR).stream().findFirst();
     hasAnotherPage = false; // Don't really know, so default to false
     validate();
   }
