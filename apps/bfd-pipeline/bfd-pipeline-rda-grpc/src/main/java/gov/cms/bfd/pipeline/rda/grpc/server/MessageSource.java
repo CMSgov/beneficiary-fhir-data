@@ -40,9 +40,9 @@ public interface MessageSource<T> extends AutoCloseable {
   MessageSource<T> skipTo(long startingSequenceNumber) throws Exception;
 
   /**
-   * test.
+   * Returns the current range of sequence numbers.
    *
-   * @return test
+   * @return sequence number range
    */
   ClaimSequenceNumberRange getSequenceNumberRange();
 }

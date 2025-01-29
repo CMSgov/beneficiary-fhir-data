@@ -193,9 +193,9 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   int writeClaims(Collection<TClaim> objects) throws ProcessingException;
 
   /**
-   * test.
+   * Updates the available range of sequence numbers.
    *
-   * @param sequenceNumberRange test
+   * @param sequenceNumberRange Current range of sequence numbers.
    */
   void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange);
 

@@ -540,10 +540,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     /** The number of insert statements executed. */
     private final DistributionSummary insertCount;
 
-    /** test. */
+    /** Maximum available sequence number. */
     private final AtomicLong maxSequenceNumber;
 
-    /** test. */
+    /** The value returned by the maxSequenceNumber gauge. */
     private final AtomicLong maxSequenceNumberValue;
 
     /**
@@ -588,9 +588,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
 
     /**
-     * test.
+     * Sets the {@link #maxSequenceNumber}.
      *
-     * @param value test
+     * @param value value to set
      */
     void setMaxSequenceNumber(long value) {
       maxSequenceNumberValue.set(value);

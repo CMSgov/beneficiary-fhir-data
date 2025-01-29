@@ -64,11 +64,11 @@ public abstract class GrpcStreamCaller<TResponse> {
       throws Exception;
 
   /**
-   * test.
+   * Calls the service to get the sequence number range.
    *
-   * @param channel test
-   * @param callOptions test
-   * @return test
+   * @param channel an already open channel to the service being called
+   * @param callOptions the CallOptions object to use for the API call
+   * @return sequence number range
    */
   public abstract ClaimSequenceNumberRange callSequenceNumberRangeService(
       ManagedChannel channel, CallOptions callOptions);
