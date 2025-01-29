@@ -36,6 +36,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -175,6 +176,8 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+
+    when(requestDetails.getAttribute(CommonTransformerUtils.SHOULD_FILTER_SAMHSA)).thenReturn(true);
 
     // the EOB provider
     eobProvider =
@@ -436,7 +439,7 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(patientParam.getIdPart()).thenReturn("-1?234");
 
     assertThrows(
-        NumberFormatException.class,
+        InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
                 patientParam, null, null, null, null, null, null, requestDetails));

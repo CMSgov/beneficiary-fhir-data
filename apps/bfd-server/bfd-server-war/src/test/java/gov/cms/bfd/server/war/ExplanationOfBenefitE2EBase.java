@@ -348,6 +348,21 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
+  /** Verify that EOB returns a 400 when searching with an invalid bene ID. */
+  @Test
+  public void testEobByPatientIdWithInvalidIdReturns400() {
+
+    String requestString = eobEndpoint + "?patient=abc";
+
+    given()
+        .spec(requestAuth)
+        .expect()
+        .statusCode(400)
+        .body("issue.severity", hasItem("error"))
+        .when()
+        .get(requestString);
+  }
+
   /**
    * Tests that when searching for EOB by patient id and an unrecognized request param results in a
    * 400 http code.
@@ -618,6 +633,29 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
+  /** Expect SAMHSA to be filtered when SAMHSA is allowed but excludeSAMHSA is true. */
+  @Test
+  public void
+      testEobByPatientIdForNonSamhsaEobsWithExcludeSamhsaTrueWithSamhsaAllowedExpectNoError() {
+
+    // don't load samhsa data
+    String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
+    // call samhsa filter, but it shouldn't do anything since there is nothing to filter
+    String requestString = eobEndpoint + "?patient=" + patientId + "&excludeSAMHSA=true";
+
+    // make sure all 8 entries come back as expected and no 400/500/other errors
+    given()
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
+        .expect()
+        .body("resourceType", equalTo("Bundle"))
+        // we should have 8 claim type entries
+        .body("entry.size()", equalTo(8))
+        .body("total", equalTo(8))
+        .statusCode(200)
+        .when()
+        .get(requestString);
+  }
+
   /**
    * Verifies that EOB search by patient id does not filter SAMHSA results when excludeSAMHSA is not
    * set, as we default to false. The server call takes a long time with the amount of exhaustive
@@ -635,7 +673,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     int numSamhsaClaims = samhsaFiles.size() - 6;
 
     given()
-        .spec(requestAuth)
+        .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA

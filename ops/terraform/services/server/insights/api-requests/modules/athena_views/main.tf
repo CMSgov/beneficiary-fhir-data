@@ -25,6 +25,9 @@ EOF
       view = view
       md5  = md5(local.view_to_templated_sql[view])
 
+      # We want this to trigger if the source table's schema changes so that the view is updated
+      src_table_version = data.external.src_table_version.result.version
+
       # External references from destroy provisioners are not allowed - they may only reference
       # attributes of the related resource. This means that in order for destroy local-exec
       # provisioners to reference external data that data needs to be encoded within its resource's

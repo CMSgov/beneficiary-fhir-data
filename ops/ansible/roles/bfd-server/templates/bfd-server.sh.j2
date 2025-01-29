@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Force UTC time
+export TZ=UTC
+
 # The launcher picks up its config from environment variables, so set those.
 export BFD_PORT='{{ service_port }}'
 export BFD_PATHS_FILES_KEYSTORE='{{ ref_dir }}/bluebutton-appserver-keystore.pfx'
@@ -171,7 +174,7 @@ export CONFIG_SETTINGS_JSON
 "$SERVICE_SCRIPT" \
   -javaagent:{{ ref_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
-  "-DbfdServer.logs.dir={{ logs }}" \
+  "-DbfdServer.logs.dir={{ logs | regex_replace('\\/$', '') }}/" \
   "-Djava.io.tmpdir={{ tmp }}" \
   "-Dorg.jboss.logging.provider=slf4j" \
   >>"{{ ref_dir }}/bluebutton-server-app-log.json" 2>&1

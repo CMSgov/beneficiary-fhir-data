@@ -20,6 +20,9 @@ public class NPIOrgLookupE2E {
   /** Global variable for npiOrgDisplay. */
   Optional<NPIData> npiOrgDisplay;
 
+  /** Global variable for NPI taxonomy. */
+  Optional<String> npiTaxonomyDisplay;
+
   /** Global variable for valid npiOrgNumber. */
   private final String npiOrgNumber = "1992903249";
 
@@ -73,6 +76,7 @@ public class NPIOrgLookupE2E {
     InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
     npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
     npiOrgDisplay = Optional.empty();
+    npiTaxonomyDisplay = Optional.empty();
   }
 
   /** End to End test for Npi Org Data with npi number. */
@@ -88,6 +92,13 @@ public class NPIOrgLookupE2E {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(practitionerNPI));
     assertEquals(taxononomyCode, npiOrgDisplay.get().getTaxonomyCode());
     assertEquals(taxonomyDisplay, npiOrgDisplay.get().getTaxonomyDisplay());
+  }
+
+  /** End to End test for NPI Taxononomy Dislplay. */
+  @Test
+  public void shouldCorrectlyReturnTaxonomyForNPI() throws IOException {
+    npiTaxonomyDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(practitionerNPI));
+    assertEquals(taxononomyCode + "\t" + taxonomyDisplay, npiTaxonomyDisplay.get());
   }
 
   /** End to End test for Npi Org Data with wrong npi number. */

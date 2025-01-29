@@ -31,7 +31,8 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -141,7 +142,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Read(version = false)
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
       throw new InvalidRequestException("Missing required coverage ID");
@@ -183,11 +184,13 @@ public class R4CoverageResourceProvider implements IResourceProvider {
     if (coverageIdMatcher.matches()) {
       profileUsed = Profile.C4BB;
       coverageIdSegmentText = coverageIdMatcher.group(1);
-      beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+      beneficiaryId =
+          StringUtils.parseLongOrBadRequest(coverageIdMatcher.group(2), "Beneficiary ID");
     } else {
       profileUsed = Profile.C4DIC;
       coverageIdSegmentText = c4dicCoverageIdMatcher.group(1);
-      beneficiaryId = Long.parseLong(c4dicCoverageIdMatcher.group(2));
+      beneficiaryId =
+          StringUtils.parseLongOrBadRequest(c4dicCoverageIdMatcher.group(2), "Beneficiary ID");
     }
 
     coverageIdSegment = MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, profileUsed);
@@ -243,7 +246,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(
@@ -267,7 +270,8 @@ public class R4CoverageResourceProvider implements IResourceProvider {
           String profile,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
-    Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
+    Long beneficiaryId =
+        StringUtils.parseLongOrBadRequest(beneficiary.getIdPart(), "Beneficiary ID");
 
     Profile chosenProfile =
         (this.enabledProfiles.contains(Profile.C4DIC) && profile != null)

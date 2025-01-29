@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.parseIntOrBadRequest;
+import static gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest;
 import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
@@ -40,7 +42,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -156,7 +158,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Read(version = false)
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
       throw new InvalidRequestException("Missing required patient ID");
@@ -220,7 +222,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -253,11 +255,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
        * TODO Once AB2D has switched to always specifying the year, the implicit `else` on this
        * needs to become an invalid request.
        */
-      try {
-        year = Integer.parseInt(referenceYear.getValueNotNull());
-      } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Contract year must be a number.", e);
-      }
+      year = parseIntOrBadRequest(referenceYear.getValueNotNull(), "Contract Year");
     }
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
 
@@ -285,7 +283,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(
@@ -323,7 +321,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
       if (RequestTypeEnum.POST != requestDetails.getRequestType()) {
         throw new InvalidRequestException(
             String.format(
-                "Search query by '%s' is onlu supported in POST request",
+                "Search query by '%s' is only supported in POST request",
                 TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
       }
     } else if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty()) {
@@ -348,7 +346,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
         beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
       }
     } else {
-      beneId = Long.parseLong(logicalId.getValue());
+      beneId = parseLongOrBadRequest(logicalId.getValue(), "Patient ID");
       if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
         // Add bene_id to MDC logs when _lastUpdated filter is in effect
         LoggingUtils.logBeneIdToMdc(beneId);
@@ -741,7 +739,7 @@ public class PatientResourceProvider implements IResourceProvider, CommonHeaders
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(shortDefinition = "The patient identifier to search for")

@@ -37,10 +37,10 @@ spec:
       mountPath: /var/run
     resources:
       requests:
-        memory: '8192Mi'
+        memory: '16384Mi'
         cpu: '4000m'
       limits:
-        memory: '8192Mi'
+        memory: '16384Mi'
         cpu: '4000m'
   - name: bfd-cbc-build
     image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk21-mvn3-tfenv3-kt1.9-latest'
@@ -53,10 +53,10 @@ spec:
     imagePullPolicy: Always
     resources:
       requests:
-        memory: '8192Mi'
+        memory: '16384Mi'
         cpu: '4000m'
       limits:
-        memory: '8192Mi'
+        memory: '16384Mi'
         cpu: '4000m'
 """
         }
@@ -65,9 +65,13 @@ spec:
         buildDiscarder(logRotator(numToKeepStr: '15', daysToKeepStr: '30'))
     }
 
-    // Run Every day at 22:00 PM Eastern / 03:00 AM UTC
+
     triggers {
-        cron(env.BRANCH_NAME == 'master' ? '00 03 * * 1-5' : '')
+        // UTC-time dictates that we look at Tue-Sat morning instead of Mon-Fri evening
+        // https://www.worldtimebuddy.com/?qm=1&lid=100,5128581&h=100&date=2024-12-17&sln=3-4&hf=1
+        // https://crontab.guru/#00_03_*_*_2-6
+        // At 03:00 on every day-of-week from Tuesday through Saturday.
+        cron(env.BRANCH_NAME == 'master' ? '00 03 * * 2-6' : '')
     }
 
     environment {

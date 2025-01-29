@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # shellcheck disable=SC1054,SC1064,SC1065,SC1072,SC1073,SC1083
-export BFD_CCW_JOB_ENABLED={{ enabled if pipeline_instance_type == 'ccw' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
-export BFD_RDA_JOB_ENABLED={{ enabled if pipeline_instance_type == 'rda' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
+
+# Force UTC time
+export TZ=UTC
+
+export BFD_CCW_JOB_ENABLED={{ job_enabled if pipeline_instance_type == 'ccw' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
+export BFD_RDA_JOB_ENABLED={{ job_enabled if pipeline_instance_type == 'rda' else 'false' }} {# derived from terraform control plane #}{{ '\n' }}
 
 export BFD_DB_URL='{{ db_url }}'
 

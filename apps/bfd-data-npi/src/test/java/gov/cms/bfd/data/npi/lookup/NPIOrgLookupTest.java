@@ -25,6 +25,9 @@ public class NPIOrgLookupTest {
   /** A fake npi number. */
   public static final String FAKE_NPI_NUMBER = "0000000000";
 
+  /** A fake Practitioner NPI. */
+  public static final String FAKE_PRACTITIONER_NPI = "1111111111";
+
   /** A fake org name display that is associated with the FAKE_NPI_ORG_NAME. */
   public static final String FAKE_NPI_ORG_NAME = "Fake ORG Name";
 

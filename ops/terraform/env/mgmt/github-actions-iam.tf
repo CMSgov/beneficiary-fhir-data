@@ -82,6 +82,7 @@ resource "aws_iam_policy" "github_actions_ecr" {
             "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-server",
             "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-pipeline-app",
             "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-eft-sftp-outbound-transfer-lambda",
+            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
           ]
           Sid = "AllowPushPull"
         },
@@ -362,9 +363,15 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Sid    = "AllowSsmAccess"
           Effect = "Allow"
           Action = [
-            "ssm:Describe*",
-            "ssm:GetParam*",
-            "ssm:List*"
+            "ssm:ListTagsForResource",
+            "ssm:DescribeParameters",
+            "ssm:PutParameter",
+            "ssm:DeleteParameter",
+            "ssm:GetParameterHistory",
+            "ssm:GetParametersByPath",
+            "ssm:GetParameters",
+            "ssm:GetParameter",
+            "ssm:DeleteParameters"
           ]
           Resource = "*"
         },
@@ -398,6 +405,14 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Resource = "*"
         },
         {
+          Sid    = "AllowPolicyManagementOfAllKeys"
+          Effect = "Allow"
+          Action = [
+            "kms:PutKeyPolicy",
+          ]
+          Resource = "*"
+        },
+        {
           Sid    = "AllowSNS"
           Effect = "Allow"
           Action = [
@@ -421,7 +436,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Action = [
             "iam:Get*",
             "iam:List*",
-            "iam:DeletePolicyVersion"
+            "iam:DeletePolicyVersion",
+            "iam:CreatePolicyVersion"
           ]
           Resource = "*"
         },
@@ -450,7 +466,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Action = [
             "quicksight:Get*",
             "quicksight:Describe*",
-            "quicksight:List*"
+            "quicksight:List*",
+            "quicksight:Create*"
           ]
           Resource = "*"
         },

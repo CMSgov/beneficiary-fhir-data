@@ -823,10 +823,13 @@ public final class TransformerUtilsV2 {
     }
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
-    CodeableConcept concept = new CodeableConcept();
-    concept.addCoding(coding);
-
-    careTeam.setQualification(concept);
+    // Only add the qualification if it doesn't already exist
+    if (careTeam.getQualification().getCoding().stream()
+        .noneMatch(
+            c ->
+                c.getSystem().equals(coding.getSystem()) && c.getCode().equals(coding.getCode()))) {
+      careTeam.getQualification().addCoding(coding);
+    }
   }
 
   /**

@@ -37,10 +37,12 @@ paths:
                     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
                     This parameter can be included in a request one or more times.
                     
+                    Inexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.
+
                     Examples:
-                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
-                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
-                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date
                   example: "gt2023-01-02"
                 excludeSAMHSA:
                   type: string
@@ -163,10 +165,12 @@ paths:
                     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
                     This parameter can be included in a request one or more times.
                     
+                    Inexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.
+
                     Examples:
-                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
-                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
-                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date
                   example: "gt2023-01-02"
                 startIndex:
                   type: integer
@@ -277,10 +281,12 @@ paths:
                     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
                     This parameter can be included in a request one or more times.
 
+                    Inexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.
+
                     Examples:
-                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
-                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
-                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date
                   example: "gt2023-01-02"
                 startIndex:
                   type: integer
@@ -389,10 +395,12 @@ paths:
                       A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
                       This parameter can be included in a request one or more times.
 
+                      Inexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.
+
                       Examples:
-                        - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
-                        - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
-                        - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                        - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates
+                        - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today
+                        - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date
                     example: "gt2023-01-02"
                   excludeSAMHSA:
                     type: string
@@ -505,10 +513,12 @@ paths:
                     A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
                     This parameter can be included in a request one or more times.
                     
+                    Inexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.
+
                     Examples:
-                      - `_lastUpdated=gt2023-01-02&_lastUpdated=lt2023-05-01` defines a range between two provided dates
-                      - `_lastUpdated=gt2023-01-02` defines a range between the provided date and today
-                      - `_lastUpdated=lt2023-05-01` defines a range from the earliest available records until the provided date
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates
+                      - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today
+                      - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date
                   example: "gt2023-01-02"
                 excludeSAMHSA:
                   type: string

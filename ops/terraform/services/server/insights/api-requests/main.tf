@@ -31,14 +31,15 @@ module "trigger_glue_crawler" {
   glue_crawler_arn    = aws_glue_crawler.glue-crawler-api-requests.arn
 }
 
-# Do _not_ remove without first following the instructions for safely removing 
+# Do _not_ remove without first following the instructions for safely removing
 # "destroy-time provisioners": https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax#destroy-time-provisioners
 # Otherwise, the null_resources that encode the various Athena Views will not run their destroy
 # provisioners and therefore those Views will remain indefinitely
 module "athena_views" {
   source = "./modules/athena_views"
 
-  region        = local.region
-  env           = local.environment
-  database_name = module.database.name
+  region            = local.region
+  env               = local.environment
+  database_name     = module.database.name
+  source_table_name = module.glue-table-api-requests.name
 }

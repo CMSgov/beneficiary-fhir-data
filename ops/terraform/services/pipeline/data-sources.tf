@@ -114,6 +114,10 @@ data "aws_ssm_parameters_by_path" "nonsensitive_rda" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive/rda"
 }
 
+data "aws_ssm_parameter" "verifier_enabled" {
+  name = "/bfd/${local.env}/${local.service}/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled"
+}
+
 # TODO: this needs to be defined in common
 data "aws_sns_topic" "alarm" {
   count = local.is_prod ? 1 : 0
@@ -136,4 +140,8 @@ data "aws_sns_topic" "bfd_test_slack_alarm" {
 data "aws_sns_topic" "bfd_notices_slack_alarm" {
   count = local.is_ephemeral_env ? 0 : 1
   name  = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-notices"
+}
+
+data "aws_iam_policy" "ec2_instance_tags_ro" {
+  name = "bfd-mgmt-ec2-instance-tags-ro"
 }

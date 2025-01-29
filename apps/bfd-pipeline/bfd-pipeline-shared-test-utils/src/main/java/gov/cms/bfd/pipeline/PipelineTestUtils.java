@@ -38,6 +38,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Table;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -229,6 +230,37 @@ public final class PipelineTestUtils {
     }
   }
 
+  /** Marks a random manifest as not completed. */
+  public void markRandomManifestAsNotCompleted() {
+    try (EntityManager entityManager =
+        pipelineApplicationState.getEntityManagerFactory().createEntityManager()) {
+      EntityTransaction transaction = entityManager.getTransaction();
+      transaction.begin();
+      entityManager
+          .createNativeQuery(
+              """
+              UPDATE ccw.s3_manifest_files
+              SET status = 'DISCOVERED'
+              WHERE manifest_id = (SELECT manifest_id FROM ccw.s3_manifest_files LIMIT 1)
+              """)
+          .executeUpdate();
+      transaction.commit();
+    }
+  }
+
+  /**
+   * Inserts a new manifest entry into the database.
+   *
+   * @param manifest manifest
+   */
+  public void insertManifest(S3ManifestFile manifest) {
+    try (EntityManager entityManager =
+        pipelineApplicationState.getEntityManagerFactory().createEntityManager()) {
+
+      entityManager.persist(manifest);
+    }
+  }
+
   /**
    * Normalize the schema names by removing any quotes.
    *
@@ -320,9 +352,9 @@ public final class PipelineTestUtils {
   }
 
   /**
-   * Pause of a number milliseconds.
+   * Pause for a number of milliseconds.
    *
-   * @param millis to sleap
+   * @param millis to sleep
    */
   public void pauseMillis(long millis) {
     try {

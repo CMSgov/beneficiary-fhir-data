@@ -59,12 +59,17 @@ runShellCheckForCommitFiles() {
     for file in $commits; do
       filename=$(basename -- "$file")
       extension="${filename##*.}"
-      if [ "$extension" == "zip" ]; then
-        continue
-      fi
+
+      # Skip binary formats
+      case "$extension" in
+        "zip" | "p12" | "pfx" | "cer" | "pem")
+          continue ;;
+        *) ;;
+      esac
+
       firstTwo=$( sed 's/^\(..\).*/\1/;q' "$file" )
       # check for a hashbang or a .sh extension to determine if this is a shell script.
-      if [ "$firstTwo" == "#!" ] || [ "$extension" == "sh" ]; then
+      if [ "$firstTwo" == "#!" ] && [ "$filename" != "Jenkinsfile" ] || [ "$extension" == "sh" ]; then
         # run shellcheck with severity level warning, and suppress warnings about invalid hashbangs (allows it to ignore other types of scripts, e.g. python)
         if ! shellcheck -e SC1071,SC2239 -S warning "$file"; then
           echo "Please fix errors before continuing."

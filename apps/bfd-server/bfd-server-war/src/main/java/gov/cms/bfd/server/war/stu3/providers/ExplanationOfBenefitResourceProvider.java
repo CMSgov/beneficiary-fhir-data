@@ -30,7 +30,8 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
-import gov.cms.bfd.server.war.commons.RetryOnRDSFailover;
+import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -187,7 +188,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
     if (eobId == null) {
@@ -276,7 +277,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    */
   @Search
   @Trace
-  @RetryOnRDSFailover
+  @RetryOnFailoverOrConnectionException
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(
@@ -321,10 +322,10 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
      * later.
      */
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
-    Long beneficiaryId = Long.parseLong(patient.getIdPart());
+    Long beneficiaryId = StringUtils.parseLongOrBadRequest(patient.getIdPart(), "Patient ID");
     Set<ClaimType> claimTypesRequested = CommonTransformerUtils.parseTypeParam(type);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
-    boolean filterSamhsa = Boolean.parseBoolean(excludeSamhsa);
+    boolean filterSamhsa = CommonTransformerUtils.shouldFilterSamhsa(excludeSamhsa, requestDetails);
     Map<String, String> operationOptions = new HashMap<>();
     operationOptions.put("by", "patient");
     operationOptions.put(
