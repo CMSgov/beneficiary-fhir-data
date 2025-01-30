@@ -13,10 +13,16 @@
 - inputPath: IdrBeneficiary.BENE_DEATH_DT
   appliesTo:
     - Patient
+- inputPath: IdrBeneficiary.BENE_VRFY_DEATH_DAY_SW
+  appliesTo:
+    - Patient
 - inputPath: IdrBeneficiary.mbi
   appliesTo:
     - Patient
-- inputPath: IdrBeneficiary.BENE_SK
+- inputPath: IdrBeneficiary.EFCTV_BENE_SK
+  appliesTo:
+    - Patient
+- inputPath: IdrBeneficiary.ALL_BENE_SKs
   appliesTo:
     - Patient
 - inputPath: IdrBeneficiary.BENE_GENDER
