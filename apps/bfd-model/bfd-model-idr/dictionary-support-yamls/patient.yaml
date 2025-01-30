@@ -64,3 +64,12 @@
 - inputPath: IdrBeneficiary.BENE_RACE_CD
   appliesTo:
     - Patient
+- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_ID
+  appliesTo:
+    - Patient
+- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_EFCTV_DT
+  appliesTo:
+    - Patient
+- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_OBSLT_DT
+  appliesTo:
+    - Patient

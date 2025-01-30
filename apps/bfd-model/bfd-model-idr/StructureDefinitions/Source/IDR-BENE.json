@@ -94,7 +94,7 @@
                 "max": "*",
                 "type": [
                     {
-                        "code": "Identifier"
+                        "code": "BeneficiaryMBIIdentifier"
                     }
                 ]
             },
