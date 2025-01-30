@@ -128,11 +128,27 @@ Example:
    */
   public static final String PATIENT_PARTD_CURSOR_VALUE =
       """
-Provide a pagination cursor or numeric _offset_ for processing Patient's Part D events information.
+Provides a pagination cursor or numeric _offset_ for processing Patient's Part D events information.
 
 Examples:
    - `cursor=200` the first record is the 201st record
    - `cursor=1000` the first record is the 1001st record""";
+
+  /***
+   * Open API content for the _count parameter.
+   */
+  public static final String COUNT_SHORT = "The number of records to return";
+
+  /***
+   * Open API content for the _count parameter.
+   */
+  public static final String COUNT_VALUE =
+      """
+Provides the number of records to be used for pagination.
+
+Examples:
+  - `_count=10`: return 10 values.
+""";
 
   /** Open API content short description for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_SHORT =

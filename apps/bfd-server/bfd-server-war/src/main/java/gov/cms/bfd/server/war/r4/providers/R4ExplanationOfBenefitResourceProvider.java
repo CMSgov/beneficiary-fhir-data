@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -268,6 +269,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    * @param type a list of {@link ClaimType} to include in the result. Defaults to all types.
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param count an {@link OptionalParam} for the count used in pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
    *     R4EobSamhsaMatcher} to filter out all SAMHSA-related claims from the results
    * @param lastUpdated an {@link OptionalParam} that specifies a date range for the lastUpdated
@@ -300,6 +302,11 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "excludeSAMHSA")
           @Description(
               shortDefinition = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_SHORT,

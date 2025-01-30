@@ -3,26 +3,19 @@ package gov.cms.bfd.server.war.commons;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.http.client.utils.URIBuilder;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * PagingArguments encapsulates the arguments related to paging for the ExplanationOfBenefit,
  * Patient, and Coverage requests.
  */
 public final class OffsetLinkBuilder implements LinkBuilder {
-
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 
   /** The page size for paging. */
   private final Optional<Integer> pageSize;
@@ -45,6 +38,9 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    */
   private int numTotalResults = -1;
 
+  /** Start index request parameter. */
+  private static final String PARAM_START_INDEX = "startIndex";
+
   /**
    * Instantiates a new Offset link builder.
    *
@@ -52,8 +48,12 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    * @param resource the resource
    */
   public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
-    this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
-    this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
+    this.pageSize =
+        StringUtils.parseIntegersFromRequest(requestDetails, Constants.PARAM_COUNT).stream()
+            .findFirst();
+    this.startIndex =
+        StringUtils.parseIntegersFromRequest(requestDetails, PARAM_START_INDEX).stream()
+            .findFirst();
     this.serverBase = requestDetails.getServerBaseForRequest();
     this.resource = resource;
     this.requestDetails = requestDetails;
@@ -74,27 +74,6 @@ public final class OffsetLinkBuilder implements LinkBuilder {
       throw new InvalidRequestException(
           String.format("Value for startIndex cannot be negative: %d", startIndex.get()));
     }
-  }
-
-  /**
-   * Returns the parsed parameter as an Integer.
-   *
-   * @param requestDetails the {@link RequestDetails} containing additional parameters for the URL
-   *     in need of parsing out
-   * @param parameterToParse the parameter to parse from requestDetails
-   * @return the parsed parameter as an Integer, empty {@link Optional} if the parameter is not
-   *     found
-   */
-  private Optional<Integer> parseIntegerParameters(
-      RequestDetails requestDetails, String parameterToParse) {
-
-    if (requestDetails.getParameters().containsKey(parameterToParse)) {
-
-      return Optional.of(
-          StringUtils.parseIntOrBadRequest(
-              requestDetails.getParameters().get(parameterToParse)[0], parameterToParse));
-    }
-    return Optional.empty();
   }
 
   /** {@inheritDoc} */
@@ -238,16 +217,15 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     Map<String, String[]> params = new HashMap<>(requestDetails.getParameters());
 
     // Add in paging related changes.
-    params.put("startIndex", new String[] {String.valueOf(startIndex)});
-    params.put("_count", new String[] {String.valueOf(getPageSize())});
+    params.put(PARAM_START_INDEX, new String[] {String.valueOf(startIndex)});
+    params.put(Constants.PARAM_COUNT, new String[] {String.valueOf(getPageSize())});
 
     try {
       // Setup URL base and resource.
       URIBuilder uri = new URIBuilder(serverBase + resource);
 
-      // Create query parameters by iterating thru all params entry sets. Handle multi values for
+      // Create query parameters by iterating through all params entry sets. Handle multi values for
       // the same parameter key.
-      ArrayList<String> queryParams = new ArrayList<String>();
       for (Map.Entry<String, String[]> paramSet : params.entrySet()) {
         for (String param : paramSet.getValue()) {
           uri.addParameter(paramSet.getKey(), param);
