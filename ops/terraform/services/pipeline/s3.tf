@@ -38,7 +38,7 @@ resource "aws_s3_bucket_logging" "this" {
 }
 
 resource "aws_s3_bucket_notification" "etl_bucket_notifications" {
-  count  = local.create_slis || local.pipeline_variant_configs.ccw.enabled ? 1 : 0
+  count  = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
   bucket = aws_s3_bucket.this.id
 
   dynamic "topic" {

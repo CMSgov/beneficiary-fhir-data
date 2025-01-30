@@ -15,9 +15,8 @@ locals {
 
   account_id        = data.aws_caller_identity.current.account_id
   layer             = "data"
-  create_slis       = !local.is_ephemeral_env || var.force_sli_creation
   create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation
-  create_slo_alarms = (!local.is_ephemeral_env || var.force_slo_alarms_creation) && local.create_slis
+  create_slo_alarms = !local.is_ephemeral_env || var.force_slo_alarms_creation
   jdbc_suffix       = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
@@ -142,12 +141,10 @@ locals {
       }
     }
   }
-  # TODO: Consider replacing with merged map with all variants if RDA variant is updated to be on-demand
   rda_pipeline_config = {
     for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
     if local.pipeline_variant_configs[k].enabled && k == "rda"
   }
-  # TODO: Consider replacing with merged map with all variants if RDA variant is updated to be on-demand
   ccw_pipeline_config = {
     for k, v in local.pipeline_variant_configs : k => local.pipeline_variant_configs[k]
     if local.pipeline_variant_configs[k].enabled && k == "ccw"
@@ -156,7 +153,6 @@ locals {
   ccw_manifests_verifier_enabled = tobool(nonsensitive(data.aws_ssm_parameter.verifier_enabled.value))
 }
 
-# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
 resource "aws_launch_template" "this" {
   for_each = local.ccw_pipeline_config
 
@@ -244,7 +240,6 @@ resource "aws_launch_template" "this" {
   }
 }
 
-# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
 resource "aws_autoscaling_group" "this" {
   for_each = local.ccw_pipeline_config
 
@@ -292,7 +287,6 @@ resource "aws_autoscaling_group" "this" {
   }
 }
 
-# TODO: Determine if resource could be consolidated with RDA variant if RDA becomes on-demand
 resource "aws_sns_topic" "s3_events" {
   for_each = local.ccw_pipeline_config
 
@@ -323,7 +317,6 @@ resource "aws_sns_topic_policy" "s3_events" {
   })
 }
 
-# TODO: Determine if this can be consolidated with the CCW Pipeline's infrastructure
 resource "aws_instance" "pipeline" {
   for_each = { for server in local.rda_pipeline_config : server.instance_name => server }
 
@@ -402,18 +395,6 @@ resource "aws_instance" "pipeline" {
   }
 }
 
-module "bfd_pipeline_slis" {
-  depends_on = [aws_sns_topic.s3_events]
-  count      = local.create_slis ? 1 : 0
-
-  source                   = "./modules/bfd_pipeline_slis"
-  account_id               = local.account_id
-  aws_kms_key_arn          = local.kms_key_id
-  aws_kms_key_id           = local.kms_key_id
-  etl_bucket_id            = aws_s3_bucket.this.id
-  s3_events_sns_topic_name = aws_sns_topic.s3_events["ccw"].name
-}
-
 module "bfd_pipeline_dashboard" {
   count = local.create_dashboard ? 1 : 0
 
@@ -435,8 +416,7 @@ module "bfd_pipeline_scheduler" {
   # For now, this module only supports the CCW-variant of the pipeline and so should not be included
   # if the CCW pipeline is disabled
   depends_on = [aws_sns_topic.s3_events]
-  # TODO: Consider removing when RDA pipeline supports on-demand mechanisms
-  count = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
+  count      = local.pipeline_variant_configs.ccw.enabled ? 1 : 0
 
   source = "./modules/bfd_pipeline_scheduler"
 
