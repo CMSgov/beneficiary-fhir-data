@@ -3,12 +3,14 @@ package gov.cms.bfd.data.fda.utility;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
@@ -17,12 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,11 @@ public class DataUtilityCommons {
    * Gets the fda drug codes from the fda file.
    *
    * @param outputDir the output directory.
+   * @param version The BFD version.
    * @param fdaFile the fda file.
    */
   @SuppressWarnings("java:S5443")
-  public static void getFDADrugCodes(String outputDir, String fdaFile)
+  public static void getFDADrugCodes(String outputDir, String version, String fdaFile)
       throws IllegalStateException {
     Path outputPath = Paths.get(outputDir);
     if (!Files.isDirectory(outputPath)) {
@@ -55,7 +57,7 @@ public class DataUtilityCommons {
       Path convertedNdcDataFile = outputPath.resolve(fdaFile);
 
       try {
-        buildProductsResource(convertedNdcDataFile, workingDir);
+        buildProductsResource(convertedNdcDataFile, workingDir, version);
       } finally {
         // Recursively delete the working dir.
         recursivelyDelete(workingDir);
@@ -71,27 +73,31 @@ public class DataUtilityCommons {
    *
    * @param convertedNdcDataFile the output file/resource to produce.
    * @param workingDir a directory that temporary/working files can be written to.
+   * @param version The BFD version.
    * @throws IOException (any errors encountered will be bubbled up).
    */
-  public static void buildProductsResource(Path convertedNdcDataFile, Path workingDir)
+  public static void buildProductsResource(
+      Path convertedNdcDataFile, Path workingDir, String version)
       throws IOException, IllegalStateException {
     // download FDA NDC file
     Path downloadedNdcZipFile =
         Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
+    URL ndctextZipUrl = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
     if (!Files.isReadable(downloadedNdcZipFile)) {
-      ClassLoader classLoader = DataUtilityCommons.class.getClassLoader();
-      File ndcFile =
-          new File(Objects.requireNonNull(classLoader.getResource("ndctext.zip")).getFile());
-      FileUtils.copyFile(ndcFile, new File(downloadedNdcZipFile.toFile().getAbsolutePath()));
+      HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
+      connection.setRequestProperty(
+          "User-Agent", String.format("BFD/%s (Beneficiary FHIR Data Server)", version));
+      try (InputStream in = connection.getInputStream()) {
+        Files.copy(in, downloadedNdcZipFile, StandardCopyOption.REPLACE_EXISTING);
+      }
     }
-
     // unzip FDA NDC file
     unzip(downloadedNdcZipFile, workingDir);
     Path originalNdcDataFile = workingDir.resolve("product.txt");
     if (!Files.isReadable(originalNdcDataFile))
       originalNdcDataFile = workingDir.resolve("Product.txt");
     if (!Files.isReadable(originalNdcDataFile))
-      throw new IllegalStateException("Unable to locate product.txt in ndctext.zip");
+      throw new IllegalStateException("Unable to locate product.txt in " + ndctextZipUrl);
 
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
