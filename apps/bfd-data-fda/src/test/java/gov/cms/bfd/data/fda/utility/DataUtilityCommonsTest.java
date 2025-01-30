@@ -31,7 +31,7 @@ public final class DataUtilityCommonsTest {
               assertThrows(
                   IllegalStateException.class,
                   () -> {
-                    DataUtilityCommons.getFDADrugCodes(outputDir, any());
+                    DataUtilityCommons.getFDADrugCodes(outputDir, "1.0.0", any());
                   });
           assertEquals("OUTPUT_DIR does not exist for FDA NDC download.", exception.getMessage());
         }

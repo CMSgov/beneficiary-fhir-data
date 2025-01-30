@@ -1,207 +1,680 @@
 {
-    "start": "-PT336H",
-    "widgets": [
-        {
-            "height": 8,
-            "width": 12,
-            "y": 10,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "bfd-${env}/bfd-pipeline", "time-delta/data-full-load-time", { "label": "Full Data Load Time in Seconds", "region": "us-east-1" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 60,
-                "title": "Full Data Load Times in Seconds"
+  "start": "-PT336H",
+  "widgets": [
+    {
+      "height": 8,
+      "width": 12,
+      "y": 10,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"beneficiary\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
             }
-        },
-        {
-            "height": 8,
-            "width": 12,
-            "y": 10,
-            "x": 12,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "bfd-${env}/bfd-pipeline", "time-delta/data-load-time", "data_type", "beneficiary" ],
-                    [ "...", "carrier" ],
-                    [ "...", "dme" ],
-                    [ "...", "hha" ],
-                    [ "...", "hospice" ],
-                    [ "...", "inpatient" ],
-                    [ "...", "outpatient" ],
-                    [ "...", "pde" ],
-                    [ "...", "snf" ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 60,
-                "title": "Load Times in Seconds per-RIF"
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"carrier\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e2",
+              "period": 60,
+              "region": "${region}"
             }
-        },
-        {
-            "height": 8,
-            "width": 8,
-            "y": 18,
-            "x": 8,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                  [ { "expression": "e2 > e3", "label": "Ongoing Data Load?", "id": "e1", "stat": "Maximum", "period": 60, "region": "us-east-1" } ],
-                  [ { "expression": "FILL(m1, REPEAT)", "label": "Expression2", "id": "e2", "visible": false } ],
-                  [ { "expression": "FILL(m2, REPEAT)", "label": "Expression3", "id": "e3", "visible": false } ],
-                  [ "bfd-${env}/bfd-pipeline", "time/data-first-available", { "id": "m1", "visible": false, "region": "us-east-1" } ],
-                  [ ".", "time/data-fully-loaded", { "id": "m2", "visible": false, "region": "us-east-1" } ]
-                ],
-                "view": "gauge",
-                "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 60,
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "max": 1
-                    }
-                },
-                "title": "Ongoing Data Load Status (1 for yes, 0 for no)"
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"dme\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e3",
+              "period": 60,
+              "region": "${region}"
             }
-        },
-        {
-            "height": 8,
-            "width": 12,
-            "y": 1,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ { "expression": "EPOCH(TIME_SERIES(1))", "label": "Expression1", "id": "e1", "stat": "Maximum", "period": 60, "region": "us-east-1", "visible": false } ],
-                    [ { "expression": "FILL(m1, REPEAT)", "label": "Expression2", "id": "e2", "region": "us-east-1", "period": 60, "visible": false } ],
-                    [ { "expression": "FILL(m2, REPEAT)", "label": "Expression3", "id": "e3", "region": "us-east-1", "period": 60, "visible": false } ],
-                    [ "bfd-${env}/bfd-pipeline", "time/data-first-available", { "id": "m1", "region": "us-east-1", "visible": false } ],
-                    [ "bfd-${env}/bfd-pipeline", "time/data-fully-loaded", { "id": "m2", "region": "us-east-1", "visible": false } ],
-                    [ { "expression": "IF(e2>e3, e1-e2, 0)", "label": "Ongoing Data Load Time", "id": "e4", "period": 60, "region": "us-east-1" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 60,
-                "yAxis": {
-                    "left": {
-                        "label": "Seconds",
-                        "showUnits": false
-                    }
-                },
-                "annotations": {
-                    "horizontal": [
-                        {
-                            "label": "Alert Threshold (36 hours)",
-                            "value": 129600
-                        },
-                        {
-                            "label": "Warning Threshold (24 hours)",
-                            "value": 86400
-                        }
-                    ]
-                },
-                "title": "Time to Ingest Weekly Batch Load, in Seconds"
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"hha\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e4",
+              "period": 60,
+              "region": "${region}"
             }
-        },
-        {
-            "height": 1,
-            "width": 24,
-            "y": 0,
-            "x": 0,
-            "type": "text",
-            "properties": {
-                "markdown": "# PIpeline SLO Visuals",
-                "background": "transparent"
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"hospice\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e5",
+              "period": 60,
+              "region": "${region}"
             }
-        },
-        {
-            "height": 1,
-            "width": 24,
-            "y": 9,
-            "x": 0,
-            "type": "text",
-            "properties": {
-                "markdown": "# Other Pipeline Metrics",
-                "background": "transparent"
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"inpatient\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e6",
+              "period": 60,
+              "region": "${region}"
             }
-        },
-        {
-            "height": 8,
-            "width": 12,
-            "y": 1,
-            "x": 12,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ { "expression": "FILL(m1, REPEAT)", "label": "Expression7", "id": "e7", "region": "us-east-1", "visible": false } ],
-                    [ { "expression": "FILL(m2, REPEAT)", "label": "Expression9", "id": "e9", "region": "us-east-1", "visible": false } ],
-                    [ { "expression": "IF(e9 > e7, 1, 0)", "label": "Ongoing Data Load?", "id": "e5", "region": "us-east-1" } ],
-                    [ "bfd-${env}/bfd-pipeline", "time/data-fully-loaded", { "id": "m1", "region": "us-east-1", "visible": false } ],
-                    [ ".", "time/data-first-available", { "id": "m2", "region": "us-east-1", "visible": false } ]
-                ],
-                "view": "timeSeries",
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 60,
-                "title": "Weekly Data Load Status",
-                "yAxis": {
-                    "left": {
-                        "min": -1,
-                        "max": 2,
-                        "showUnits": false
-                    },
-                    "right": {
-                        "showUnits": false
-                    }
-                },
-                "annotations": {
-                    "horizontal": [
-                        {
-                            "color": "#dfb52c",
-                            "label": "Data Load is Running",
-                            "value": 1
-                        },
-                        {
-                            "color": "#00819c",
-                            "label": "Data Load is Finished",
-                            "value": 0
-                        }
-                    ],
-                    "vertical": [
-                        {
-                            "label": "Alert Threshold (9 AM EST/EDT)",
-                            "value": "${next_monday_9am_est}"
-                        },
-                        {
-                            "label": "Alert Threshold (9 AM EST/EDT)",
-                            "value": "${next_next_monday_9am_est}"
-                        },
-                        {
-                            "label": "Alert Threshold (9 AM EST/EDT)",
-                            "value": "${current_week_monday_9am_est}"
-                        },
-                        {
-                            "label": "Alert Threshold (9 AM EST/EDT)",
-                            "value": "${prev_monday_9am_est}"
-                        },
-                        {
-                            "label": "Alert Threshold (9 AM EST/EDT)",
-                            "value": "${prev_prev_monday_9am_est}"
-                        }
-                    ]
-                }
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"outpatient\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e7",
+              "period": 60,
+              "region": "${region}"
             }
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"pde\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e8",
+              "period": 60,
+              "region": "${region}"
+            }
+          ],
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.active.duration\" rif_file=\"snf\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.rif_file')} in $${PROP('Dim.data_set_timestamp')}",
+              "id": "e9",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Active Non-Synthetic RIF Processing Times, in Milliseconds",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
         }
-    ]
+      }
+    },
+    {
+      "height": 8,
+      "width": 12,
+      "y": 18,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic} MetricName=\"CcwRifLoadJob.dataset_processing.active.duration\"', 'Average', 60)",
+              "label": "Expression1",
+              "id": "e1",
+              "visible": false,
+              "region": "${region}"
+            }
+          ],
+          [
+            {
+              "expression": "FILL(e1, 0)",
+              "label": "Expression2",
+              "id": "e2",
+              "visible": false,
+              "region": "${region}"
+            }
+          ],
+          [
+            {
+              "expression": "IF(LAST(e2) > 0, 1, 0)",
+              "label": "Ongoing load?",
+              "id": "e3",
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "gauge",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "yAxis": {
+          "left": {
+            "min": 0,
+            "max": 1
+          }
+        },
+        "title": "Ongoing Data Load Status (1 for yes, 0 for no)",
+        "legend": {
+          "position": "hidden"
+        }
+      }
+    },
+    {
+      "height": 8,
+      "width": 8,
+      "y": 1,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic} MetricName=\"CcwRifLoadJob.dataset_processing.active.duration\" is_synthetic=\"false\"', 'Average', 60)",
+              "id": "e2",
+              "period": 60,
+              "visible": false,
+              "region": "${region}"
+            }
+          ],
+          [
+            {
+              "expression": "e2 / 60",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "yAxis": {
+          "left": {
+            "label": "Seconds",
+            "showUnits": false
+          }
+        },
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Alert Threshold (36 hours)",
+              "value": 129600
+            },
+            {
+              "label": "Warning Threshold (24 hours)",
+              "value": 86400
+            }
+          ]
+        },
+        "title": "Active Non-Synthetic Dataset Processing Times, in Seconds"
+      }
+    },
+    {
+      "height": 1,
+      "width": 24,
+      "y": 0,
+      "x": 0,
+      "type": "text",
+      "properties": {
+        "markdown": "# CCW PIpeline SLO Visuals",
+        "background": "transparent"
+      }
+    },
+    {
+      "height": 1,
+      "width": 24,
+      "y": 9,
+      "x": 0,
+      "type": "text",
+      "properties": {
+        "markdown": "# Other CCW Pipeline Visuals",
+        "background": "transparent"
+      }
+    },
+    {
+      "height": 8,
+      "width": 8,
+      "y": 1,
+      "x": 8,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic} MetricName=\"CcwRifLoadJob.dataset_processing.total.max\" is_synthetic=\"false\"', 'Average', 60)",
+              "id": "e2",
+              "period": 60,
+              "visible": false,
+              "region": "${region}"
+            }
+          ],
+          [
+            {
+              "expression": "e2 / 60",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "yAxis": {
+          "left": {
+            "label": "Seconds",
+            "showUnits": false
+          }
+        },
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Alert Threshold (36 hours)",
+              "value": 129600
+            },
+            {
+              "label": "Warning Threshold (24 hours)",
+              "value": 86400
+            }
+          ]
+        },
+        "title": "Finished Non-Synthetic Dataset Processing Times, in Seconds",
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 8,
+      "width": 8,
+      "y": 1,
+      "x": 16,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic} MetricName=\"CcwRifLoadJob.dataset_processing.active.duration\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "Expression1",
+              "id": "e1",
+              "visible": false,
+              "region": "${region}",
+              "period": 60
+            }
+          ],
+          [
+            {
+              "expression": "FILL(e1, 0)",
+              "label": "Expression2",
+              "id": "e2",
+              "period": 60,
+              "region": "${region}",
+              "visible": false
+            }
+          ],
+          [
+            {
+              "expression": "IF(LAST(e2) > 0, 1, 0)",
+              "label": "Expression3",
+              "id": "e3",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "timeSeries",
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Weekly Data Load Processed by Monday?",
+        "yAxis": {
+          "left": {
+            "min": -1,
+            "max": 2,
+            "showUnits": false
+          },
+          "right": {
+            "showUnits": false
+          }
+        },
+        "annotations": {
+          "horizontal": [
+            {
+              "color": "#dfb52c",
+              "label": "Data Load is Running",
+              "value": 1
+            },
+            {
+              "color": "#00819c",
+              "label": "Data Load is Finished",
+              "value": 0
+            }
+          ],
+          "vertical": [
+            {
+              "label": "Alert Threshold (9 AM EST/EDT)",
+              "value": "${next_monday_9am_est}"
+            },
+            {
+              "label": "Alert Threshold (9 AM EST/EDT)",
+              "value": "${next_next_monday_9am_est}"
+            },
+            {
+              "label": "Alert Threshold (9 AM EST/EDT)",
+              "value": "${current_week_monday_9am_est}"
+            },
+            {
+              "label": "Alert Threshold (9 AM EST/EDT)",
+              "value": "${prev_monday_9am_est}"
+            },
+            {
+              "label": "Alert Threshold (9 AM EST/EDT)",
+              "value": "${prev_prev_monday_9am_est}"
+            }
+          ]
+        },
+        "legend": {
+          "position": "hidden"
+        }
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 10,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"beneficiary\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic beneficiary Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 10,
+      "x": 15,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"carrier\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic carrier Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 10,
+      "x": 18,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"dme\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic dme Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 10,
+      "x": 21,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"hha\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic hha Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 20,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"snf\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic snf Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 15,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"hospice\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic hospice Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 15,
+      "x": 15,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"inpatient\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic inpatient Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 15,
+      "x": 18,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"outpatient\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic outpatient Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    },
+    {
+      "height": 5,
+      "width": 3,
+      "y": 15,
+      "x": 21,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{bfd-${env}/bfd-pipeline,data_set_timestamp,is_synthetic,manifest,rif_file} MetricName=\"CcwRifLoadJob.rif_file_processing.total.max\" rif_file=\"pde\" is_synthetic=\"false\"', 'Average', 60)",
+              "label": "$${PROP('Dim.data_set_timestamp')}",
+              "id": "e1",
+              "period": 60,
+              "region": "${region}"
+            }
+          ]
+        ],
+        "view": "bar",
+        "stacked": false,
+        "region": "${region}",
+        "stat": "Maximum",
+        "period": 60,
+        "title": "Non-Synthetic pde Load Time",
+        "yAxis": {
+          "left": {
+            "label": "Milliseconds",
+            "showUnits": false
+          }
+        },
+        "setPeriodToTimeRange": true
+      }
+    }
+  ]
 }
+
