@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -86,9 +84,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** The class under test. */
   R4ExplanationOfBenefitResourceProvider eobProvider;
-
-  /** ExecutorService for threading. */
-  ExecutorService mockExecutorService = spy(Executors.newFixedThreadPool(2));
 
   /** The mocked request details. */
   @Mock ServletRequestDetails requestDetails;
@@ -443,7 +438,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
         InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
-                patientParam, null, null, null, null, null, null, null, requestDetails));
+                patientParam, null, null, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -456,7 +451,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
     Bundle response =
         eobProvider.findByPatient(
-            patientParam, null, null, null, null, null, null, null, requestDetails);
+            patientParam, null, null, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertNull(response.getLink(Constants.LINK_NEXT));
@@ -481,7 +476,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
         InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
-                patientParam, null, null, null, null, null, null, null, requestDetails));
+                patientParam, null, null, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -496,7 +491,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
     Bundle response =
         eobProvider.findByPatient(
-            patientParam, null, null, null, null, null, null, null, requestDetails);
+            patientParam, null, null, null, null, null, null, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
   }
@@ -512,7 +507,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
     Bundle response =
         eobProvider.findByPatient(
-            patientParam, listParam, null, null, null, null, null, null, requestDetails);
+            patientParam, listParam, null, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertEquals(0, response.getTotal());
@@ -526,7 +521,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   void testFindByPatientSupportsNullClaimTypeV2() {
     Bundle response =
         eobProvider.findByPatient(
-            patientParam, null, null, null, null, null, null, null, requestDetails);
+            patientParam, null, null, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertEquals(0, response.getTotal());
