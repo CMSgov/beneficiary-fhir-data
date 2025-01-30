@@ -58,14 +58,6 @@ locals {
   alert_ok_arn   = data.aws_sns_topic.alert_ok_sns[*].arn
   warning_ok_arn = data.aws_sns_topic.warning_ok_sns[*].arn
 
-  tz_to_utc_hour_offset = {
-    "EDT" = 4
-    "EST" = 5
-  }
-
-  current_eastern_tz         = data.external.edt_or_est.result.timezone
-  eastern_seconds_utc_offset = local.tz_to_utc_hour_offset[local.current_eastern_tz] * 60 * 60
-
   dashboard_url              = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=bfd-${local.env}-pipeline"
   dashboard_message_fragment = <<-EOF
 View the relevant CloudWatch dashboard below for more information:
@@ -76,99 +68,17 @@ View the relevant CloudWatch dashboard below for more information:
 
   data_load_ingestion_time_slo_configs = {
     slo_ingestion_time_warning = {
-      type      = "warning"
-      period    = 60
-      threshold = 24 * 60 * 60 # 24 hours
+      metric_name = "CcwRifLoadJob.dataset_processing.active.duration"
+      type        = "warning"
+      period      = 60
+      threshold   = 24 * 60 * 60 * 1000 # 24 hours in ms
     }
     slo_ingestion_time_alert = {
-      type      = "alert"
-      period    = 60
-      threshold = 36 * 60 * 60 # 36 hours
-    }
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "slo_load_exceeds_9am_est" {
-  alarm_name          = "${local.app}-${local.env}-load-exceeds-9am-est"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = 1
-  datapoints_to_alarm = 1
-  threshold           = 1
-  treat_missing_data  = "ignore"
-
-  alarm_actions = local.alert_arn
-  ok_actions    = local.alert_ok_arn
-
-  alarm_description = join("", [
-    "BFD Pipeline in ${local.env} environment failed to load data prior to this Monday 9 AM ",
-    "EST/EDT",
-    "\n\n${local.dashboard_message_fragment}"
-  ])
-
-  metric_query {
-    id          = "m1"
-    return_data = false
-
-    metric {
-      metric_name = "time/data-fully-loaded-repeating"
-      namespace   = local.metric_namespace
+      metric_name = "CcwRifLoadJob.dataset_processing.active.duration"
+      type        = "alert"
       period      = 60
-      stat        = "Maximum"
+      threshold   = 36 * 60 * 60 * 1000 # 36 hours in ms
     }
-  }
-
-  metric_query {
-    id          = "m2"
-    return_data = false
-
-    metric {
-      metric_name = "time/data-first-available-repeating"
-      namespace   = local.metric_namespace
-      period      = 60
-      stat        = "Maximum"
-    }
-  }
-
-  metric_query {
-    expression  = "(e1 - (DAY(e1) + 5) * 86400 - (HOUR(e1) + 7) * 3600 - (${local.eastern_seconds_utc_offset} + (MINUTE(e1) * 60)) + 604800)"
-    id          = "e4"
-    label       = "Unix Timestamp of Week's Current Monday 9 AM ET"
-    return_data = false
-  }
-
-  metric_query {
-    expression  = "EPOCH(m1)"
-    id          = "e1"
-    label       = "Unix Time"
-    return_data = false
-  }
-
-  metric_query {
-    expression  = "FILL(m1, REPEAT)"
-    id          = "e7"
-    label       = "Filled Fully Loaded"
-    return_data = false
-  }
-
-  metric_query {
-    expression  = "FILL(m2, REPEAT)"
-    id          = "e9"
-    label       = "Filled Time Available"
-    return_data = false
-  }
-
-  metric_query {
-    # Breaking this down:
-    # 1. e9 > e7 - If the Pipeline is currently loading something
-    # 2. e4 > e9 - If the Pipeline was started prior to the upcoming Monday
-    # 3. e1 > e4 - If the current time (when the Alarm evaluates) exceeds Monday at 9 AM; basically,
-    #    is current time after current Monday 9 AM ET?
-    # If all are true, this means that an ongoing load did not finish prior to the current Monday at
-    # 9 AM ET, and so the SLO has been broken
-    expression  = "IF(e9 > e7 && e4 > e9 && e1 > e4, 1, 0)"
-    id          = "e3"
-    label       = "Has ongoing load exceeded Monday 9 AM EST/EDT?"
-    return_data = true
   }
 }
 
@@ -187,59 +97,21 @@ resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {
 
   alarm_description = join("", [
     "BFD Pipeline in ${local.env} environment failed to load data within a ",
-    "${each.value.threshold / 60 / 60} hour period",
+    "${each.value.threshold / 60 / 60 / 1000} hour period",
     "\n\n${local.dashboard_message_fragment}"
   ])
 
   metric_query {
-    id          = "m1"
-    return_data = false
-
-    metric {
-      metric_name = "time/data-first-available-repeating"
-      namespace   = local.metric_namespace
-      period      = 60
-      stat        = "Maximum"
-    }
-  }
-
-  metric_query {
-    id          = "m2"
-    return_data = false
-
-    metric {
-      metric_name = "time/data-fully-loaded-repeating"
-      namespace   = local.metric_namespace
-      period      = 60
-      stat        = "Maximum"
-    }
-  }
-
-  metric_query {
-    expression  = "EPOCH(m1)"
-    id          = "e1"
-    label       = "Expression1"
-    return_data = false
-  }
-
-  metric_query {
-    expression  = "FILL(m1, REPEAT)"
-    id          = "e2"
-    label       = "Expression2"
-    return_data = false
-  }
-
-  metric_query {
-    expression  = "FILL(m2, REPEAT)"
-    id          = "e3"
-    label       = "Expression3"
-    return_data = false
-  }
-
-  metric_query {
-    expression  = "IF(e2>e3, e1-e2, 0)"
-    id          = "e4"
-    label       = "Ongoing Data Load Time"
+    expression = join("", [
+      "SELECT MAX(\"${each.value.metric_name}\")",
+      " FROM SCHEMA(\"${local.metric_namespace}\", data_set_timestamp,is_synthetic)",
+      " WHERE is_synthetic = 'false'",
+    ])
+    id          = "active_dataset_duration"
+    label       = "Active Dataset Processing Duration"
+    period      = 60
     return_data = true
   }
 }
+
+# Weekend data load availability is implemented by the 'ccw_manifests_verifier' Lambda

@@ -92,7 +92,6 @@
 /bfd/${env}/pipeline/nonsensitive/ccw/instance_type: c6a.4xlarge
 /bfd/${env}/pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
 /bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: "25"
-/bfd/${env}/pipeline/nonsensitive/ccw/slis_repeater_lambda_invoke_rate: 1 minutes
 /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
 /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-prod-sbx-cloudwatch-alarms-slack-bfd-warnings
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/max_idle_seconds: "600"

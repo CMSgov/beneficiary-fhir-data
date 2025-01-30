@@ -47,9 +47,9 @@ run when there is data to load.
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | 2.2.0 |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Resources
@@ -65,8 +65,10 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_iam_role_policy_attachment.s3_attach_lambda_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_lambda_function.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_permission.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
+| [aws_sns_topic_subscription.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
 | [archive_file.lambda_src](https://registry.terraform.io/providers/hashicorp/archive/2.2.0/docs/data-sources/file) | data source |
 | [aws_kms_key.env_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_s3_bucket.etl](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
+| [aws_sns_topic.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
 <!-- END_TF_DOCS -->
