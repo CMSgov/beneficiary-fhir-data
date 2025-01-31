@@ -7,10 +7,11 @@ package gov.cms.bfd.pipeline.sharedutils;
 public enum PipelineJobOutcome {
   /**
    * Indicates that the {@link PipelineJob} completed successfully, but didn't have any data to
-   * process or work to do (as opposed to {@link #WORK_DONE}.
+   * process or work to do (as opposed to {@link #WORK_DONE}).
    */
   NOTHING_TO_DO,
-
+  /** Indicates that the {@link PipelineJob} completed and there is no further work to do. */
+  SHOULD_TERMINATE,
   /**
    * Indicates that the {@link PipelineJob} completed successfully, having processed some data or
    * done whatever work needed doing (as opposed to {@link #NOTHING_TO_DO}.

@@ -8,8 +8,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.DataSourceComponents;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.FileBasedAssertionHelper;
@@ -29,7 +31,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomClaimGeneratorConfig;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaMessageSourceFactory;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.pipeline.sharedutils.s3.S3Dao;
+import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.json.JsonConverter;
 import gov.cms.bfd.sharedutils.sqs.SqsDao;
@@ -39,13 +41,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import software.amazon.awssdk.utils.StringUtils;
 
 /**
@@ -56,6 +62,8 @@ import software.amazon.awssdk.utils.StringUtils;
  * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
   /**
    * Name of log file that will contain log output from the app. This has to match the value in our
@@ -75,6 +83,9 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
 
   /** Used to communicate with the localstack SQS service. */
   private SqsDao sqsDao;
+
+  /** ec2 client. */
+  @Mock private AwsEc2Client ec2Client;
 
   /**
    * Locks and truncates the log file so that each test case can read only its own messages from the
@@ -134,6 +145,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
     // Verify the results match expectations
     assertEquals(PipelineApplication.EXIT_CODE_JOB_FAILED, exitCode);
     assertCcwRifLoadJobFailed(logLines);
+    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -165,6 +177,8 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               CcwRifLoadJobStatusEvent.JobStage.CheckingBucketForManifest,
               CcwRifLoadJobStatusEvent.JobStage.NothingToDo),
           readStatusEventsFromSQSQueue());
+      verify(ec2Client).scaleInNow();
+      verifyNoMoreInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -193,7 +207,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               0,
               false,
               CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-              CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
               new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
       DataSetTestUtilities.putObject(s3Dao, bucket, manifest);
@@ -223,19 +236,6 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       assertCcwRifLoadJobCompleted(logLines);
       assertADataSetBeenProcessed(logLines);
 
-      // Verify all files were moved into the done "folder".
-      final String keyPrefix =
-          DataSetTestUtilities.keyPrefixForManifest(
-                  CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS, manifest)
-              + "/";
-      final Set<String> completedFiles =
-          s3Dao
-              .listObjects(bucket, keyPrefix)
-              .map(S3Dao.S3ObjectSummary::getKey)
-              .map(key -> key.substring(keyPrefix.length()))
-              .collect(ImmutableSet.toImmutableSet());
-      assertEquals(Set.of("0_manifest.xml", "beneficiaries.rif", "carrier.rif"), completedFiles);
-
       // Verify we successfully posted the expected events to the SQS queue.
       assertEquals(
           List.of(
@@ -244,6 +244,8 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
               CcwRifLoadJobStatusEvent.JobStage.ProcessingManifestDataFiles,
               CcwRifLoadJobStatusEvent.JobStage.CompletedManifest),
           readStatusEventsFromSQSQueue());
+
+      verifyNoInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -290,6 +292,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
                   RdaMcsClaimLoadJob.class,
                   "MCS job processed all claims");
             });
+    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -335,6 +338,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
                   RdaMcsClaimLoadJob.class,
                   "MCS job terminated by grpc exception");
             });
+    verifyNoInteractions(ec2Client);
   }
 
   /**
@@ -371,6 +375,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
       // Verify the results match expectations
       assertEquals(PipelineApplication.EXIT_CODE_SMOKE_TEST_FAILURE, exitCode);
       assertASmokeTestFailureWasLogged(logLines);
+      verifyNoInteractions(ec2Client);
     } finally {
       if (StringUtils.isNotBlank(bucket)) {
         s3Dao.deleteTestBucket(bucket);
@@ -556,7 +561,7 @@ public final class PipelineApplicationIT extends AbstractLocalStackS3Test {
    */
   private PipelineApplication createApplicationForTest(ConfigLoader configLoader) {
     // using a spy lets us override and verify method calls
-    PipelineApplication app = spy(new PipelineApplication());
+    PipelineApplication app = spy(new PipelineApplication(ec2Client));
 
     // override the default app logic with our own config
     doReturn(configLoader).when(app).createConfigLoader();

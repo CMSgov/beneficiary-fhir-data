@@ -8,6 +8,7 @@
 !.github
 !.sensitive-files
 !.terraform-docs.yml
+!.python-version
 
 # Ignore everything within top-level dist directory
 /dist/**/*

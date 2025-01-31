@@ -10,12 +10,6 @@ variable "force_dashboard_creation" {
   type        = bool
 }
 
-variable "force_sli_creation" {
-  default     = false
-  description = "Forces the creation of BFD Pipeline SLI CloudWatch Metrics; required for SLO Alarms"
-  type        = bool
-}
-
 variable "force_slo_alarms_creation" {
   default     = false
   description = "Forces the creation of BFD Pipeline SLO CloudWatch Alarms; note alarms are created by-default for established environments; requires SLIs"

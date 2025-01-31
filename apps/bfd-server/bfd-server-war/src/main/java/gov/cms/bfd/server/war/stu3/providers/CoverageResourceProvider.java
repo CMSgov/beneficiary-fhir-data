@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -193,6 +194,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    *     and find matches for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param count an {@link OptionalParam} for the count used in pagination
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
@@ -214,6 +216,11 @@ public class CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "_lastUpdated")
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,

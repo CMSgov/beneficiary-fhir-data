@@ -32,6 +32,10 @@
         "type" : "reference",
         "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
       }, {
+        "name" : "_count",
+        "type" : "string",
+        "documentation" : "Provides the number of records to be used for pagination.\n\nExamples:\n  - `_count=10`: return 10 values.\n"
+      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.\nA _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nInexact timestamps are accepted, but not recommended, since the input will implicitly be converted to use the server's timezone.\n\nExamples:\n  - `_lastUpdated=gt2023-01-02T00:00+00:00&_lastUpdated=lt2023-05-01T00:00+00:00` defines a range between two provided dates\n  - `_lastUpdated=gt2023-01-02T00:00+00:00` defines a range between the provided date and today\n  - `_lastUpdated=lt2023-05-01T00:00+00:00` defines a range from the earliest available records until the provided date"
@@ -54,6 +58,10 @@
         "name" : "patient",
         "type" : "reference",
         "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nFetch _Patient_ data using a FHIR _IdType_ identifier; an IdType\nrepresents the logical identity for a resource, or as much of that\nidentity that is known. In FHIR, every resource must have a _logical ID_ which is\ndefined by the [FHIR specification](https://www.hl7.org/fhir/r4/datatypes.html#id) as:\n\n`Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'),\n'-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID\nor any other identifier pattern that meets these constraints.)`\n\nThis class contains that logical ID, and can optionally also contain a relative or absolute URL\nrepresenting the resource identity; the following are all valid values for IdType, and all might\nrepresent the same resource:\n  - `_id=567834`\n  - `_id=1234`"
+      }, {
+        "name" : "_count",
+        "type" : "string",
+        "documentation" : "Provides the number of records to be used for pagination.\n\nExamples:\n  - `_count=10`: return 10 values.\n"
       }, {
         "name" : "_lastUpdated",
         "type" : "date",
@@ -98,6 +106,18 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
+        "name" : "_count",
+        "type" : "string",
+        "documentation" : "Provides the number of records to be used for pagination.\n\nExamples:\n  - `_count=10`: return 10 values.\n"
+      }, {
+        "name" : "_count",
+        "type" : "string",
+        "documentation" : "Provides the number of records to be used for pagination.\n\nExamples:\n  - `_count=10`: return 10 values.\n"
+      }, {
+        "name" : "_count",
+        "type" : "string",
+        "documentation" : "Provides the number of records to be used for pagination.\n\nExamples:\n  - `_count=10`: return 10 values.\n"
+      }, {
         "name" : "_has:Coverage",
         "type" : "token",
         "documentation" : "**NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**\n\nWhen searching for a Patient's Part D events information, this resource identifies\nthe Part D contract value that will be used when determining eligibility.\n\nExample:\n   - `_has:Coverage.extension=<Part D Contract ID Here>`\n   - `_has:Coverage.extension=ABCD`"
@@ -120,7 +140,7 @@
       }, {
         "name" : "cursor",
         "type" : "string",
-        "documentation" : "Provide a pagination cursor or numeric _offset_ for processing Patient's Part D events information.\n\nExamples:\n   - `cursor=200` the first record is the 201st record\n   - `cursor=1000` the first record is the 1001st record"
+        "documentation" : "Provides a pagination cursor or numeric _offset_ for processing Patient's Part D events information.\n\nExamples:\n   - `cursor=200` the first record is the 201st record\n   - `cursor=1000` the first record is the 1001st record"
       }, {
         "name" : "identifier",
         "type" : "token",
