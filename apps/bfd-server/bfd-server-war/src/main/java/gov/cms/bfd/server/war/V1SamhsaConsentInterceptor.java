@@ -47,12 +47,12 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
       IConsentContextServices theContextServices) {
 
     logger.info("V1SamhsaConsentInterceptor - willSeeResource.");
-    // Check if SAMHSA 2.0 filtering is enabled
-    //    if (!samhsa2_0Enabled) {
-    //      // If the feature flag is false, skip filtering and proceed with the resource
-    //      logger.info("SAMHSA 2.0 filtering is disabled, proceeding without filtering.");
-    //      return ConsentOutcome.PROCEED;
-    //    }
+    //     Check if SAMHSA 2.0 filtering is enabled
+    if (!samhsaV2Enabled) {
+      // If the feature flag is false, skip filtering and proceed with the resource
+      logger.info("SAMHSA 2.0 filtering is disabled, proceeding without filtering.");
+      return ConsentOutcome.PROCEED;
+    }
 
     // Extract 'excludeSAMHSA' parameter from the request URL
     boolean excludeSamhsa =

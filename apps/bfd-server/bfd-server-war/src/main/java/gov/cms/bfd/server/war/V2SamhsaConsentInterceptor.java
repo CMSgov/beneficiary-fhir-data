@@ -29,15 +29,14 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
   /** Flag to control whether SAMHSA filtering should be applied. */
   private boolean samhsaV2Enabled;
 
-  //  /**
-  //   * SamhsaConsentInterceptor Constructor.
-  //   *
-  //   * @param samhsaV2Enabled samhsaV2Enabled
-  //   */
-  //  public SamhsaConsentInterceptor(
-  //      @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean samhsaV2Enabled) {
-  //    this.samhsaV2Enabled = samhsaV2Enabled;
-  //  }
+  /**
+   * SamhsaConsentInterceptor Constructor.
+   *
+   * @param samhsaV2Enabled samhsaV2Enabled
+   */
+  public V2SamhsaConsentInterceptor(Boolean samhsaV2Enabled) {
+    this.samhsaV2Enabled = samhsaV2Enabled;
+  }
 
   /**
    * Invoked once at the start of every request.
@@ -67,11 +66,11 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
     logger.info("SAMHSAConsentInterceptor - willSeeResource.");
 
     // Check if SAMHSA 2.0 filtering is enabled
-    //    if (!samhsa2_0Enabled) {
-    //      // If the feature flag is false, skip filtering and proceed with the resource
-    //      logger.info("SAMHSA 2.0 filtering is disabled, proceeding without filtering.");
-    //      return ConsentOutcome.PROCEED;
-    //    }
+    if (!samhsaV2Enabled) {
+      // If the feature flag is false, skip filtering and proceed with the resource
+      logger.info("SAMHSA 2.0 filtering is disabled, proceeding without filtering.");
+      return ConsentOutcome.PROCEED;
+    }
 
     // Extract 'excludeSAMHSA' parameter from the request URL
     boolean excludeSamhsa =

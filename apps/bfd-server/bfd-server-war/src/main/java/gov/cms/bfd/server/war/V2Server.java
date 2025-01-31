@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -97,6 +98,10 @@ public class V2Server extends RestfulServer {
         springContext.getBean(SpringConfiguration.BLUEBUTTON_R4_RESOURCE_PROVIDERS, List.class);
     setResourceProviders(resourceProviders);
 
+    ConfigLoader configLoader = springContext.getBean(ConfigLoader.class);
+    boolean samhsaV2Enabled =
+        configLoader.booleanValue(SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED);
+
     /*
      * Each "plain" provider has one or more annotated methods that provides
      * support for non-resource-type methods, such as transaction, and
@@ -126,7 +131,7 @@ public class V2Server extends RestfulServer {
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
     registerInterceptor(new TimerInterceptor());
-    registerInterceptor(new ConsentInterceptor(new V2SamhsaConsentInterceptor()));
+    registerInterceptor(new ConsentInterceptor(new V2SamhsaConsentInterceptor(samhsaV2Enabled)));
 
     // OpenAPI
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();

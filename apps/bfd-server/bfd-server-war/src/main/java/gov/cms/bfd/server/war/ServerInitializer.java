@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
-
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -17,7 +15,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
@@ -39,27 +36,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 @Component
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
-
-  /** Flag to control whether SAMHSA filtering should be applied. */
-  private boolean samhsaV2Enabled;
-
-  /**
-   * Constructs a new {@link V1Server} instance. '
-   *
-   * @param samhsaV2Enabled samhsaV2Enabled
-   */
-  //  @Autowired
-  //  public void setsamhsaV2Enabled(
-  //      @Value("${SSM_PATH_SAMHSA_V2_ENABLED:false}") Boolean samhsaV2Enabled) {
-  //    this.samhsaV2Enabled = samhsaV2Enabled;
-  //  }
-
-  //
-  //  /** Constructs a new {@link V1Server} instance. */
-  public ServerInitializer(
-      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
-    this.samhsaV2Enabled = samhsaV2Enabled;
-  }
 
   /** Constructs a new {@link V1Server} instance. ' */
   public ServerInitializer() {}
@@ -87,7 +63,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
     servletContext.addListener(RequestContextListener.class);
 
     // Register the Blue Button STU3 Server/Servlet.
-    V1Server stu3Servlet = new V1Server(samhsaV2Enabled);
+    V1Server stu3Servlet = new V1Server();
     ServletRegistration.Dynamic cxfServletReg =
         servletContext.addServlet("fhirStu3Servlet", stu3Servlet);
     cxfServletReg.setLoadOnStartup(1);
