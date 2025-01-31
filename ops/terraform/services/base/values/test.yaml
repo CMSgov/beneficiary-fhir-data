@@ -184,6 +184,7 @@
 /bfd/${env}/server/nonsensitive/pac/enabled: "true"
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "true"
+/bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"
 /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"

@@ -42,7 +42,22 @@ public class V1Server extends RestfulServer {
   /** Represents the capabilities server name. */
   static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
-  /** Constructs a new {@link V1Server} instance. */
+  /** Flag to control whether SAMHSA filtering should be applied. */
+  private boolean samhsaV2Enabled;
+
+  /**
+   * Constructs a new {@link V1Server} instance. '
+   *
+   * @param samhsaV2Enabled samhsaV2Enabled
+   */
+  public V1Server(Boolean samhsaV2Enabled) {
+    super(FhirContext.forDstu3());
+    setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+    configureServerInfoMetadata();
+    this.samhsaV2Enabled = samhsaV2Enabled;
+  }
+
+  /** Constructs a new {@link V1Server} instance. ' */
   public V1Server() {
     super(FhirContext.forDstu3());
     setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
@@ -126,7 +141,7 @@ public class V1Server extends RestfulServer {
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
     registerInterceptor(new TimerInterceptor());
-    registerInterceptor(new ConsentInterceptor(new SamhsaConsentInterceptor()));
+    registerInterceptor(new ConsentInterceptor(new V1SamhsaConsentInterceptor(samhsaV2Enabled)));
 
     // OpenAPI
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();

@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.Coding;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,6 +33,21 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
 
   /** Valid system url for productOrService coding. */
   private static final Set<String> HCPCS_SYSTEM = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
+
+  /** Flag to control whether SAMHSA filtering should be applied. */
+  private final boolean samhsaV2Enabled;
+
+  /**
+   * Instantiates a R4EobSamhsaMatcher.
+   *
+   * <p>Resources should be instantiated by Spring, so this should only be directly called by tests.
+   *
+   * @param samhsaV2Enabled the samhsa2.0 flag
+   */
+  public R4EobSamhsaMatcher(
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
+    this.samhsaV2Enabled = samhsaV2Enabled;
+  }
 
   /**
    * Additional valid coding system URL for backwards-compatibility. See:
@@ -49,6 +67,15 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
   @SuppressWarnings("squid:S128")
   @Override
   public boolean test(ExplanationOfBenefit eob) {
+
+    // check here for the future flag samhsaV2Enabled and return false to skip the Samhsa matcher
+    // check
+    // and redact the data with Samhsa 2.0 Interceptors V1SamhsaConsentInterceptor and
+    // V2SamhsaConsentInterceptor
+    if (samhsaV2Enabled) {
+      return false;
+    }
+
     ExplanationOfBenefitAdapter adapter = new ExplanationOfBenefitAdapter(eob);
 
     ClaimType claimType = TransformerUtilsV2.getClaimType(eob);

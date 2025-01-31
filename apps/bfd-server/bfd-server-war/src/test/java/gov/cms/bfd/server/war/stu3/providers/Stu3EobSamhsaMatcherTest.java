@@ -145,7 +145,7 @@ public final class Stu3EobSamhsaMatcherTest {
   @MethodSource("data")
   public void containsOnlyKnownSystemsTest(
       String name, List<String> systems, boolean expectedResult, String errorMessage) {
-    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
     CodeableConcept mockConcept = mock(CodeableConcept.class);
 
@@ -176,7 +176,7 @@ public final class Stu3EobSamhsaMatcherTest {
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
       NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           RDATestUtils.fdaFakeDrugCodeDisplayLookup();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
@@ -216,7 +216,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchCarrierClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
       Coding sampleEobDiagnosis =
@@ -239,7 +239,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchCarrierClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
       Coding sampleEobDiagnosis =
@@ -262,7 +262,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchCarrierClaimsByCptProcedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
       Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -282,7 +282,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
       String SAMPLE_SAMHSA_CPT_NEW_CODE = "G2067";
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
@@ -303,7 +303,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchDmeClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
       Coding sampleEobDiagnosis =
@@ -326,7 +326,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchDmeClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
       Coding sampleEobDiagnosis =
@@ -349,7 +349,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchDmeClaimsByCptProcedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
       Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -369,7 +369,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchInpatientClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
       Coding sampleEobDiagnosis =
@@ -392,7 +392,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchInpatientClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
       Coding sampleEobDiagnosis =
@@ -415,7 +415,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchInpatientClaimsByIcd9Procedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
       Coding sampleEobDiagnosis =
@@ -438,7 +438,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchInpatientClaimsByIcd10Procedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
       Coding sampleEobDiagnosis =
@@ -461,7 +461,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchInpatientClaimsByDrg() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
       sampleEob
@@ -485,7 +485,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchOutpatientClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
       Coding sampleEobDiagnosis =
@@ -508,7 +508,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchOutpatientClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
       Coding sampleEobDiagnosis =
@@ -531,7 +531,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchOutpatientClaimsByCptProcedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
       Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -551,7 +551,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchOutpatientClaimsByIcd9Procedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
       Coding sampleEobDiagnosis =
@@ -574,7 +574,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchOutpatientClaimsByIcd10Procedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
       Coding sampleEobDiagnosis =
@@ -597,7 +597,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchHhaClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
       Coding sampleEobDiagnosis =
@@ -620,7 +620,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchHhaClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
       Coding sampleEobDiagnosis =
@@ -643,7 +643,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchHhaClaimsByCptProcedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
       Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -663,7 +663,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchHospiceClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
       Coding sampleEobDiagnosis =
@@ -686,7 +686,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchHospiceClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
       Coding sampleEobDiagnosis =
@@ -709,7 +709,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchHospiceClaimsByCptProcedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
       Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -729,7 +729,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchSnfClaimsByIcd9Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
       Coding sampleEobDiagnosis =
@@ -752,7 +752,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchSnfClaimsByIcd10Diagnosis() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
       Coding sampleEobDiagnosis =
@@ -775,7 +775,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchSnfClaimsByCptProcedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
       Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -795,7 +795,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchSnfClaimsByIcd9Procedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
       Coding sampleEobDiagnosis =
@@ -818,7 +818,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchSnfClaimsByIcd10Procedure() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
       Coding sampleEobDiagnosis =
@@ -841,7 +841,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void matchSnfClaimsByDrg() throws FHIRException, IOException {
-      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
+      Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
 
       ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
       sampleEob

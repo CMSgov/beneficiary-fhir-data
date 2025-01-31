@@ -269,6 +269,7 @@ setvar db/password $password
 setvar pac/enabled true
 setvar pac/claim_source_types "fiss,mcs"
 setvar c4dic/enabled false
+setvar samhsa_v2/enabled false
 setvar samhsa_allowed_certificate_aliases_json '["client-local-dev-samhsa"]'
 
 classpath="${launcher_jar}:${bin_dir}/lib/*:${exec_dir}/lib/*"

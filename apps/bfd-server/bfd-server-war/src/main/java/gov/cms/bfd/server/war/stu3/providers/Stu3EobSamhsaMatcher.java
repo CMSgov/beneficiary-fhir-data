@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.stu3.ExplanationOfBenefitAdapter;
@@ -11,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,11 +36,35 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
   private static final Set<String> DATA_ABSENT_SYSTEM =
       Set.of(TransformerConstants.CODING_DATA_ABSENT);
 
+  /** Flag to control whether SAMHSA filtering should be applied. */
+  private final boolean samhsaV2Enabled;
+
+  /**
+   * Instantiates a R4EobSamhsaMatcher.
+   *
+   * <p>Resources should be instantiated by Spring, so this should only be directly called by tests.
+   *
+   * @param samhsaV2Enabled the samhsa2.0 flag
+   */
+  public Stu3EobSamhsaMatcher(
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
+    this.samhsaV2Enabled = samhsaV2Enabled;
+  }
+
   /** {@inheritDoc} */
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
   @Override
   public boolean test(ExplanationOfBenefit eob) {
+
+    // check here for the future flag samhsaV2Enabled and return false to skip the Samhsa matcher
+    // check
+    // and redact the data with Samhsa 2.0 Interceptors V1SamhsaConsentInterceptor and
+    // V2SamhsaConsentInterceptor
+    if (samhsaV2Enabled) {
+      return false;
+    }
+
     ExplanationOfBenefitAdapter adapter = new ExplanationOfBenefitAdapter(eob);
 
     ClaimType claimType = TransformerUtils.getClaimType(eob);

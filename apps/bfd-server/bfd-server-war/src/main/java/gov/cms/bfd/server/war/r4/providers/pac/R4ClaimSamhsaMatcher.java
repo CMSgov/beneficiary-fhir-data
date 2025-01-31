@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Claim;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,6 +37,9 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
   /** The mcs claim transformer, used for converting resources to check for samhsa data. */
   private final McsClaimTransformerV2 mcsTransformer;
 
+  /** Flag to control whether SAMHSA filtering should be applied. */
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new samhsa matcher.
    *
@@ -41,11 +47,15 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
    *
    * @param fissClaimTransformer the fiss claim transformer
    * @param mcsClaimTransformer the mcs claim transformer
+   * @param samhsaV2Enabled the samhsa2.0 flag
    */
   public R4ClaimSamhsaMatcher(
-      FissClaimTransformerV2 fissClaimTransformer, McsClaimTransformerV2 mcsClaimTransformer) {
+      FissClaimTransformerV2 fissClaimTransformer,
+      McsClaimTransformerV2 mcsClaimTransformer,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.mcsTransformer = mcsClaimTransformer;
     this.fissTransformer = fissClaimTransformer;
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -72,6 +82,15 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
   /** {@inheritDoc} */
   @Override
   public boolean test(Claim claim) {
+
+    // check here for the future flag samhsaV2Enabled and return false to skip the Samhsa matcher
+    // check
+    // and redact the data with Samhsa 2.0 Interceptors V1SamhsaConsentInterceptor and
+    // V2SamhsaConsentInterceptor
+    if (samhsaV2Enabled) {
+      return false;
+    }
+
     ClaimAdapter adapter = new ClaimAdapter(claim);
 
     return containsSamhsaIcdProcedureCode(adapter.getProcedure())

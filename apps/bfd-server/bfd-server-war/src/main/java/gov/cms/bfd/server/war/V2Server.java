@@ -126,7 +126,7 @@ public class V2Server extends RestfulServer {
     // Registers HAPI interceptors to capture request/response time metrics when BFD handlers are
     // executed
     registerInterceptor(new TimerInterceptor());
-    registerInterceptor(new ConsentInterceptor(new SamhsaConsentInterceptor()));
+    registerInterceptor(new ConsentInterceptor(new V2SamhsaConsentInterceptor()));
 
     // OpenAPI
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
