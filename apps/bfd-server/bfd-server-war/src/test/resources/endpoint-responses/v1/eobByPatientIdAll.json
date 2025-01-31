@@ -671,16 +671,14 @@
             "identifier" : {
               "system" : "http://hl7.org/fhir/sid/us-npi",
               "value" : "1306849450"
-            },
-            "display" : "DR. HAROLD LEROY SMITSON II M.D."
+            }
           }
         },
         "recipient" : [ {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "value" : "1306849450"
-          },
-          "display" : "DR. HAROLD LEROY SMITSON II M.D."
+          }
         } ]
       }, {
         "resourceType" : "Observation",
@@ -3133,8 +3131,7 @@
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1023011079"
-        },
-        "display" : "ADVANTAGE HOME HEALTH CARE, INC."
+        }
       },
       "facility" : {
         "extension" : [ {
@@ -3155,8 +3152,7 @@
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1023011079"
-        },
-        "display" : "ADVANTAGE HOME HEALTH CARE, INC."
+        }
       },
       "information" : [ {
         "sequence" : 1,

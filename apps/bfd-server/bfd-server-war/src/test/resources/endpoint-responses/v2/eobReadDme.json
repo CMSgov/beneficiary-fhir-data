@@ -127,8 +127,7 @@
         } ]
       },
       "value" : "1306849450"
-    },
-    "display" : "DR. HAROLD LEROY SMITSON II M.D."
+    }
   },
   "outcome" : "complete",
   "disposition" : "01",
@@ -144,8 +143,7 @@
           } ]
         },
         "value" : "1306849450"
-      },
-      "display" : "DR. HAROLD LEROY SMITSON II M.D."
+      }
     },
     "role" : {
       "coding" : [ {

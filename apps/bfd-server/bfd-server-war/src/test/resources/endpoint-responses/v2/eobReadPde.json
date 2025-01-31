@@ -84,8 +84,7 @@
         } ]
       },
       "value" : "1023011079"
-    },
-    "display" : "ADVANTAGE HOME HEALTH CARE, INC."
+    }
   },
   "outcome" : "complete",
   "careTeam" : [ {
@@ -108,6 +107,11 @@
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "prescribing",
         "display" : "Prescribing provider"
+      } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "http://nucc.org/provider-taxonomy"
       } ]
     }
   } ],

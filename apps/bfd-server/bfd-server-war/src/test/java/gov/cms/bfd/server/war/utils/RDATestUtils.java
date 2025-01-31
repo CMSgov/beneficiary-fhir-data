@@ -973,7 +973,6 @@ public class RDATestUtils {
               NPIOrgLookup mockInstance = new NPIOrgLookup(npiOrgHashMap);
               return mockInstance;
             });
-
     return npiOrgLookup;
   }
 }

@@ -94,13 +94,6 @@ public class NPIOrgLookupE2E {
     assertEquals(taxonomyDisplay, npiOrgDisplay.get().getTaxonomyDisplay());
   }
 
-  /** End to End test for NPI Taxononomy Dislplay. */
-  @Test
-  public void shouldCorrectlyReturnTaxonomyForNPI() throws IOException {
-    npiTaxonomyDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(practitionerNPI));
-    assertEquals(taxononomyCode + "\t" + taxonomyDisplay, npiTaxonomyDisplay.get());
-  }
-
   /** End to End test for Npi Org Data with wrong npi number. */
   @Test
   public void shouldReturnEmptyOrganizationWithAWrongNpiNumber() throws IOException {

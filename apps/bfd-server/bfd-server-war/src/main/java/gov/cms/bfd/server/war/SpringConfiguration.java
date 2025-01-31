@@ -16,6 +16,7 @@ import com.newrelic.telemetry.metrics.MetricBatchSender;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -473,9 +474,16 @@ public class SpringConfiguration extends BaseConfiguration {
   public NPIOrgLookup npiOrgLookup(
       @Value("${" + PROP_ORG_FILE_NAME + ":" + NPI_RESOURCE + "}") String orgFileName)
       throws IOException {
-    InputStream npiDataStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
-    return new NPIOrgLookup(npiDataStream);
+    NPIOrgLookup npiOrgLookup;
+    if (orgFileName != null) {
+      InputStream npiDataStream =
+          Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
+      npiOrgLookup = new NPIOrgLookup(npiDataStream);
+    } else {
+      npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
+    }
+    CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
+    return npiOrgLookup;
   }
 
   /**

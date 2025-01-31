@@ -351,7 +351,7 @@ public class DataUtilityCommons {
         FileOutputStream fw =
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
         DeflaterOutputStream dos = new DeflaterOutputStream(fw); ) {
-        CSVParser csvParser =
+      CSVParser csvParser =
           new CSVParser(
               reader,
               CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());

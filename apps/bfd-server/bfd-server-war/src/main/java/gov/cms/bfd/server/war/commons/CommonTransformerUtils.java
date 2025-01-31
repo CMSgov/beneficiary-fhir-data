@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.data.npi.dto.NPIData;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,6 +118,18 @@ public final class CommonTransformerUtils {
 
   /** Tracks the NPI codes that have already had code lookup failures. */
   private static final Set<String> npiCodeLookupMissingFailures = ConcurrentHashMap.newKeySet();
+
+  /** Instance of NPIOrgLookup. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Sets NPIOrgLookup to lookup NPI information.
+   *
+   * @param orgLookup The instance of NPIOrgLookup.
+   */
+  public static void setNpiOrgLookup(NPIOrgLookup orgLookup) {
+    npiOrgLookup = orgLookup;
+  }
 
   /**
    * Builds an id for an FHIR STU3/R4 ExplanationOfBenefit.
@@ -321,31 +336,26 @@ public final class CommonTransformerUtils {
   }
 
   /**
-   * Retrieves the NPI display value from an NPI code look up file.
+   * Retrieves the NPI display value using the NPIOrgLookup class.
    *
    * @param npiCode NPI code
    * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
-    if (npiCode.isEmpty()) {
-      return null;
-    }
-    // read the entire NPI file the first time and put in a Map
-    if (npiMap == null) {
-      // There's a race condition here: we may initialize this static field more than
-      // once if multiple concurrent requests come in. However, the assignment is
-      // atomic, so the
-      // race and reinitialization is harmless other than maybe wasting a bit of time.
-      npiMap = readNpiCodeFile();
-    }
-    if (npiMap.containsKey(npiCode.toUpperCase())) {
-      return npiMap.get(npiCode);
-    }
-
-    // log which NPI codes we couldn't find a match for in our downloaded NPI file
-    if (!npiCodeLookupMissingFailures.contains(npiCode)) {
-      // LOGGER.info("NPI code: {} not found in NPI code file: {}", npiCode, NPI_CODE_FILE);
-      npiCodeLookupMissingFailures.add(npiCode);
+    if (npiOrgLookup != null) {
+      Optional<NPIData> npiData = npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
+      if (npiData.isPresent()) {
+        String[] name =
+            new String[] {
+              npiData.get().getProviderNamePrefix(),
+              npiData.get().getProviderFirstName(),
+              npiData.get().getProviderMiddleName(),
+              npiData.get().getProviderLastName(),
+              npiData.get().getProviderNameSuffix(),
+              npiData.get().getProviderCredential()
+            };
+        return Arrays.stream(name).filter(Objects::nonNull).collect(Collectors.joining(" "));
+      }
     }
     return null;
   }

@@ -385,27 +385,6 @@ final class CoverageTransformerV2 {
           Optional.empty());
     }
 
-    int month = Calendar.getInstance().get(Calendar.MONTH);
-    String contractAndPbpID =
-        concatenateContractAndPbp(
-            getPartCContractNumber(beneficiary, month), getPartCPbpNumber(beneficiary, month));
-
-    if (profile.equals(Profile.C4DIC)) {
-      // Hide resource Part C when Contract ID or PBP ID is null
-      if (contractAndPbpID == null) {
-        return null;
-      }
-      createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
-    } else {
-      createCoverageClass(
-          coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_C,
-          Optional.empty());
-    }
-
     // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
@@ -520,28 +499,6 @@ final class CoverageTransformerV2 {
       createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
       addCoverageCodeExtension(
           coverage, CcwCodebookVariable.CREC, beneficiary.getEntitlementCodeCurrent());
-    } else {
-      createCoverageClass(
-          coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
-      createCoverageClass(
-          coverage,
-          CoverageClass.PLAN,
-          TransformerConstants.COVERAGE_PLAN_PART_D,
-          Optional.empty());
-    }
-
-    int month = Calendar.getInstance().get(Calendar.MONTH);
-
-    String contractAndPbpID =
-        concatenateContractAndPbp(
-            getPartDContractNumber(beneficiary, month), getPartDPbpNumber(beneficiary, month));
-
-    if (profile.equals(Profile.C4DIC)) {
-      // Hide resource Part D when Contract ID or PBP ID is null
-      if (contractAndPbpID == null) {
-        return null;
-      }
-      createCoverageClass(coverage, CoverageClass.PLAN, contractAndPbpID, Optional.empty());
     } else {
       createCoverageClass(
           coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());

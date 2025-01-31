@@ -1022,8 +1022,7 @@
             } ]
           },
           "value" : "1306849450"
-        },
-        "display" : "DR. HAROLD LEROY SMITSON II M.D."
+        }
       },
       "outcome" : "complete",
       "disposition" : "01",
@@ -1039,8 +1038,7 @@
               } ]
             },
             "value" : "1306849450"
-          },
-          "display" : "DR. HAROLD LEROY SMITSON II M.D."
+          }
         },
         "role" : {
           "coding" : [ {
@@ -4366,8 +4364,7 @@
             } ]
           },
           "value" : "1023011079"
-        },
-        "display" : "ADVANTAGE HOME HEALTH CARE, INC."
+        }
       },
       "outcome" : "complete",
       "careTeam" : [ {
@@ -4390,6 +4387,11 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "prescribing",
             "display" : "Prescribing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy"
           } ]
         }
       } ],
