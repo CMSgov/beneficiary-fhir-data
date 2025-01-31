@@ -15,8 +15,8 @@ checkSecretFilesForPlainText() {
   IFS=$'\n' read -d '' -r -a commits <"$tmpfile"
 
   # for all files to be committed which are a secret file, grep for
-  #   1. "<<SECURE>> or <</SECURE>>" 
-  #   2. "CIPHER ENCRYPTED FILE HEADER; SHOULD BE ENCRYPTED" 
+  #   1. "<<SECURE>> or <</SECURE>>"
+  #   2. "CIPHER ENCRYPTED FILE HEADER; SHOULD BE ENCRYPTED"
   # if either is found, this indicates that secrets are possibly unencrypted and the file should not
   # be committed. additionally, the file header preamble is grepped for to ensure that the header
   # was not removed unintentionally
@@ -62,7 +62,7 @@ runShellCheckForCommitFiles() {
 
       # Skip binary formats
       case "$extension" in
-        "zip" | "p12" | "pfx" | "cer" | "pem")
+        "zip" | "p12" | "pfx" | "cer" | "pem" | "png" | "jpg")
           continue ;;
         *) ;;
       esac
@@ -73,7 +73,7 @@ runShellCheckForCommitFiles() {
         # run shellcheck with severity level warning, and suppress warnings about invalid hashbangs (allows it to ignore other types of scripts, e.g. python)
         if ! shellcheck -e SC1071,SC2239 -S warning "$file"; then
           echo "Please fix errors before continuing."
-          exit 1 
+          exit 1
         fi
       fi
     done
