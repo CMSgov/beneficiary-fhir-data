@@ -48,7 +48,11 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
     return eob.getItem().stream().map(ItemComponentAdapter::new).collect(Collectors.toList());
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Returns the {@link SupportingInfoComponent} for the resource.
+   *
+   * @return supporting info
+   */
   public List<SupportingInfoComponent> getSupportingInfo() {
     return eob.getSupportingInfo().stream()
         .map(SupportingInfoAdapter::new)
