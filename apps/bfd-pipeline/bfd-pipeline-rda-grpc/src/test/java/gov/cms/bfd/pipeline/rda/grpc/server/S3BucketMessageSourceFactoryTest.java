@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import gov.cms.bfd.pipeline.sharedutils.s3.S3DirectoryDao;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -212,6 +213,11 @@ public class S3BucketMessageSourceFactoryTest {
     @Override
     public Long next() throws Exception {
       return currentValue++;
+    }
+
+    @Override
+    public ClaimSequenceNumberRange getSequenceNumberRange() {
+      return ClaimSequenceNumberRange.newBuilder().setLower(0).setUpper(maxValue).build();
     }
 
     @Override

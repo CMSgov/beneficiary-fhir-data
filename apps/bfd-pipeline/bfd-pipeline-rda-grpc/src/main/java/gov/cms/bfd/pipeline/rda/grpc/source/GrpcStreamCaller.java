@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.protobuf.Empty;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.mpsm.rda.v1.ApiVersion;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
@@ -61,6 +62,16 @@ public abstract class GrpcStreamCaller<TResponse> {
   public abstract GrpcResponseStream<TResponse> callService(
       ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
       throws Exception;
+
+  /**
+   * Calls the service to get the sequence number range.
+   *
+   * @param channel an already open channel to the service being called
+   * @param callOptions the CallOptions object to use for the API call
+   * @return sequence number range
+   */
+  public abstract ClaimSequenceNumberRange callSequenceNumberRangeService(
+      ManagedChannel channel, CallOptions callOptions);
 
   /**
    * Make a call to the server's {@code getVersion()} service and return the version component. Will
