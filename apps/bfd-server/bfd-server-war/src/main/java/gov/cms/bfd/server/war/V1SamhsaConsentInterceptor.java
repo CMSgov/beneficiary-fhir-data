@@ -7,8 +7,6 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Claim;
-import org.hl7.fhir.dstu3.model.ClaimResponse;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Meta;
@@ -23,7 +21,7 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
   private static final Logger logger = LoggerFactory.getLogger(V1SamhsaConsentInterceptor.class);
 
   /** Flag to control whether SAMHSA filtering should be applied. */
-  private boolean samhsaV2Enabled;
+  private final boolean samhsaV2Enabled;
 
   /**
    * SamhsaConsentInterceptor Constructor.
@@ -69,18 +67,9 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
       for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
         IBaseResource entryResource = entry.getResource();
 
-        // Use helper method to check and redact based on security tags
+        // Check the type of resource and redact it if necessary
         if (shouldRedactResource(entryResource, excludeSamhsa)) {
-          // Depending on the type of resource, call the appropriate redaction method
-          if (entryResource instanceof ExplanationOfBenefit) {
-            redactEobSensitiveData((ExplanationOfBenefit) entryResource);
-          } else if (entryResource instanceof Claim) {
-            redactClaimSensitiveData((Claim) entryResource);
-          } else if (entryResource instanceof ClaimResponse) {
-            redactClaimResponseSensitiveData((ClaimResponse) entryResource);
-          }
-
-          return ConsentOutcome.AUTHORIZED;
+          redactSensitiveData(entry);
         }
       }
     }
@@ -101,10 +90,6 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
     // Extract the meta information depending on the resource type
     if (resource instanceof ExplanationOfBenefit) {
       meta = ((ExplanationOfBenefit) resource).getMeta();
-    } else if (resource instanceof Claim) {
-      meta = ((Claim) resource).getMeta();
-    } else if (resource instanceof ClaimResponse) {
-      meta = ((ClaimResponse) resource).getMeta();
     }
 
     // If meta or security tags are not present, no need to redact
@@ -126,36 +111,14 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
   }
 
   /**
-   * Can redact sensitive data in ExplanationOfBenefit resource.
+   * Redacts sensitive data in the Claim resource.
    *
-   * @param eob the resource
+   * @param entry the claimResource
    */
-  private void redactEobSensitiveData(ExplanationOfBenefit eob) {
-    logger.info("V1SamhsaConsentInterceptor - redactEobSensitiveData.");
-    // Implement redaction logic for ExplanationOfBenefit
-    // Example: eob.setContained(null); // Redact contained resources as an example
-  }
-
-  /**
-   * Can redact sensitive data in Claim resource.
-   *
-   * @param claim the resource
-   */
-  private void redactClaimSensitiveData(Claim claim) {
-    logger.info("V1SamhsaConsentInterceptor - redactClaimSensitiveData.");
+  private void redactSensitiveData(Bundle.BundleEntryComponent entry) {
     // Implement redaction logic for Claim
-    // Example: claim.setContained(null); // Redact contained resources as an example
-  }
-
-  /**
-   * Can redact sensitive data in ClaimResponse resource.
-   *
-   * @param claimResponse the resource
-   */
-  private void redactClaimResponseSensitiveData(ClaimResponse claimResponse) {
-    logger.info("V1SamhsaConsentInterceptor - redactClaimResponseSensitiveData.");
-    // Implement redaction logic for ClaimResponse
-    // Example: claimResponse.setContained(null); // Redact contained resources as an example
+    logger.info("V1SamhsaConsentInterceptor - redactSensitiveData.");
+    entry.setResource(null);
   }
 
   @Override

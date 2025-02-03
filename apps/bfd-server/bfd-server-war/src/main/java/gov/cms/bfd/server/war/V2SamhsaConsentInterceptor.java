@@ -27,7 +27,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
   private static final Logger logger = LoggerFactory.getLogger(V2SamhsaConsentInterceptor.class);
 
   /** Flag to control whether SAMHSA filtering should be applied. */
-  private boolean samhsaV2Enabled;
+  private final boolean samhsaV2Enabled;
 
   /**
    * SamhsaConsentInterceptor Constructor.
@@ -87,20 +87,9 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
       for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
         IBaseResource entryResource = entry.getResource();
 
-        // Use helper method to check and redact based on security tags
+        // Check the type of resource and redact it if necessary
         if (shouldRedactResource(entryResource, excludeSamhsa)) {
-          // If the resource is any of the target types (Claim, ClaimResponse, or
-          // ExplanationOfBenefit), redact sensitive data
-          if (entryResource instanceof Claim) {
-            redactClaimSensitiveData((Claim) entryResource);
-          } else if (entryResource instanceof ClaimResponse) {
-            redactClaimResponseSensitiveData((ClaimResponse) entryResource);
-          } else if (entryResource instanceof ExplanationOfBenefit) {
-            redactEobSensitiveData((ExplanationOfBenefit) entryResource);
-          }
-
-          // Return AUTHORIZED to indicate this resource is redacted or excluded
-          return ConsentOutcome.AUTHORIZED;
+          redactSensitiveData(entry);
         }
       }
     }
@@ -147,34 +136,12 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
   /**
    * Redacts sensitive data in the Claim resource.
    *
-   * @param claimResource the claimResource
+   * @param entry the claimResource
    */
-  private void redactClaimSensitiveData(Claim claimResource) {
+  private void redactSensitiveData(Bundle.BundleEntryComponent entry) {
     // Implement redaction logic for Claim
-    logger.info("V2SamhsaConsentInterceptor - redactClaimSensitiveData.");
-    //    claimResource.setContained(null); // Example: Redact contained resources
-  }
-
-  /**
-   * Redacts sensitive data in the ClaimResponse resource.
-   *
-   * @param claimResponse the claimResponse
-   */
-  private void redactClaimResponseSensitiveData(ClaimResponse claimResponse) {
-    // Implement redaction logic for ClaimResponse
-    logger.info("V2SamhsaConsentInterceptor - redactClaimResponseSensitiveData.");
-    //    claimResponse.setContained(null); // Example: Redact contained resources
-  }
-
-  /**
-   * Redacts sensitive data in the ExplanationOfBenefit resource.
-   *
-   * @param eobResource the ExplanationOfBenefit resource
-   */
-  private void redactEobSensitiveData(ExplanationOfBenefit eobResource) {
-    // Implement redaction logic for ExplanationOfBenefit
-    logger.info("V2SamhsaConsentInterceptor - redactEobSensitiveData.");
-    //    eobResource.setContained(null); // Example: Redact contained resources
+    logger.info("V2SamhsaConsentInterceptor - redactSensitiveData.");
+    entry.setResource(null);
   }
 
   /** completeOperationSuccess. */
