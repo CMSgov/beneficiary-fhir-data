@@ -20,6 +20,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -333,6 +334,34 @@ public class StandardGrpcRdaSourceIT {
             });
   }
 
+  /**
+   * Verifies that a GRPC call updates the current sequence number range.
+   *
+   * @throws Exception indicates test failure
+   */
+  @Test
+  public void grpcCallUpdatesSequenceNumber() throws Exception {
+    createServerConfig()
+        .authorizedToken("secret")
+        .build()
+        .runWithPortParam(
+            port -> {
+              int count;
+              RdaSourceConfig config =
+                  createSourceConfig(port).authenticationToken("secret").build();
+              try (StandardGrpcRdaSource<FissClaimChange, RdaChange<RdaFissClaim>> source =
+                  createSource(config)) {
+                count = source.retrieveAndProcessObjects(1, sink);
+              }
+              assertEquals(2, count);
+              assertEquals(2, sink.getValues().size());
+              assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+              assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+              // Should only be called once per 5 seconds
+              assertEquals(1, sink.updateSequenceNumberCallCount);
+            });
+  }
+
   /** Verifies that a GRPC call with an incompatible RDA version will throw an exception. */
   @Test
   public void grpcCallWithIncompatibleRdaVersion() {
@@ -477,6 +506,9 @@ public class StandardGrpcRdaSourceIT {
     /** The mapper for the json mapping config. */
     private final ObjectMapper mapper;
 
+    /** Number of times that the sequence number was updated. */
+    private int updateSequenceNumberCallCount = 0;
+
     /** Creates a json capture sink with a set configuration. */
     public JsonCaptureSink() {
       mapper =
@@ -513,6 +545,11 @@ public class StandardGrpcRdaSourceIT {
 
     @Override
     public void updateLastSequenceNumber(long lastSequenceNumber) {}
+
+    @Override
+    public void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange) {
+      updateSequenceNumberCallCount++;
+    }
 
     @Override
     public long getSequenceNumberForObject(FissClaimChange object) {

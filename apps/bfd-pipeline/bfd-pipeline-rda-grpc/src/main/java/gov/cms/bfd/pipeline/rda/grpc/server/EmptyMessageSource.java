@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import java.util.NoSuchElementException;
 
 /**
@@ -43,6 +44,11 @@ public class EmptyMessageSource<T> implements MessageSource<T> {
   @Override
   public T next() throws Exception {
     throw new NoSuchElementException();
+  }
+
+  @Override
+  public ClaimSequenceNumberRange getSequenceNumberRange() {
+    return ClaimSequenceNumberRange.newBuilder().setLower(0).setUpper(0).build();
   }
 
   @Override
