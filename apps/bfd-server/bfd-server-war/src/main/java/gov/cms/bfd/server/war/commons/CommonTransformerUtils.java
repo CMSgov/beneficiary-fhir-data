@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -354,7 +355,10 @@ public final class CommonTransformerUtils {
               npiData.get().getProviderNameSuffix(),
               npiData.get().getProviderCredential()
             };
-        return Arrays.stream(name).filter(Objects::nonNull).collect(Collectors.joining(" "));
+        return Arrays.stream(name)
+            .map(Strings::trimToNull)
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(" "));
       }
     }
     return null;
