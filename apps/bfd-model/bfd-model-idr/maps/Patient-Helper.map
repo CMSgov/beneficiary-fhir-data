@@ -1,0 +1,34 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper" = "patient-support-map"
+
+//Eventually these should be sourced automagically from IDR on startup. But until then!
+
+conceptmap "AdministrativeGender" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/4.0/administrative-gender"
+
+  s:0 = t:unknown
+  s:1 = t:male
+  s:2 = t:female
+}
+
+conceptmap "USCDIRaceCode" {
+    prefix s = "https://hl7.org/fhir/string"
+    prefix t = "https://hl7.org/fhir/string"
+
+    s:1 = t:"2106-3"
+    s:2 = t:"2054-5"
+    s:3 = t:"2131-1"
+    s:4 = t:"2028-9"
+    s:6 = t:"1002-5"
+}
+
+conceptmap "USCDIRaceDisplay" {
+    prefix s = "https://hl7.org/fhir/string"
+    prefix t = "https://hl7.org/fhir/string"
+
+    s:1 = t:"White"
+    s:2 = t:"Black or African American"
+    s:3 = t:"Other Race"
+    s:4 = t:"Asian"
+    s:6 = t:"American Indian or Alaska Native"
+}

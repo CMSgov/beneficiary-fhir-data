@@ -1,3 +1,4 @@
+#of note, BENE_SSN_NUM will be consumed by BFD and should be in here, but not as part of the mapping to FHIR. It should only be used for matching, eventually.
 - inputPath: IdrBeneficiary.BENE_1ST_NAME
   appliesTo:
     - Patient
@@ -19,13 +20,13 @@
 - inputPath: IdrBeneficiary.mbi
   appliesTo:
     - Patient
-- inputPath: IdrBeneficiary.EFCTV_BENE_SK
+- inputPath: IdrBeneficiary.XREF_EFCTV_BENE_SK
   appliesTo:
     - Patient
 - inputPath: IdrBeneficiary.ALL_BENE_SKs
   appliesTo:
     - Patient
-- inputPath: IdrBeneficiary.BENE_GENDER
+- inputPath: IdrBeneficiary.BENE_SK
   appliesTo:
     - Patient
 - inputPath: IdrBeneficiary.lastUpdated
