@@ -125,6 +125,7 @@ public class McsClaimRdaSinkTest {
             "McsClaimRdaSink.failures",
             "McsClaimRdaSink.insertCount",
             "McsClaimRdaSink.lastSeq",
+            "McsClaimRdaSink.maxSeq",
             "McsClaimRdaSink.successes",
             "McsClaimRdaSink.transform.failures",
             "McsClaimRdaSink.transform.successes",

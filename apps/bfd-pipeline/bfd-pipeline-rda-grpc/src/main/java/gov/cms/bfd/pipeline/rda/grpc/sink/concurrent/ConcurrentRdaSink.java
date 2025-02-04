@@ -5,6 +5,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
 import gov.cms.bfd.pipeline.sharedutils.SequenceNumberTracker;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import jakarta.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
@@ -270,6 +271,11 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return sink.readMaxExistingSequenceNumber();
+  }
+
+  @Override
+  public void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange) {
+    sink.updateSequenceNumberRange(sequenceNumberRange);
   }
 
   /**

@@ -385,6 +385,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param mbi the patient identifier to search for
    * @param types a list of claim types to include
    * @param startIndex the offset used for result pagination
+   * @param count the count used for result pagination
    * @param hashed a boolean indicating whether the MBI is hashed
    * @param samhsa if {@code true}, exclude all SAMHSA-related resources
    * @param lastUpdated range which to include resources last updated within
@@ -412,6 +413,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "isHashed")
           @Description(
               shortDefinition = OpenAPIContentProvider.PAC_IS_HASHED,

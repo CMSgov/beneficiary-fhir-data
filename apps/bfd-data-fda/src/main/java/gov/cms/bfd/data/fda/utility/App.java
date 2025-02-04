@@ -23,13 +23,14 @@ public class App {
    *     files
    */
   public static void main(String[] args) {
-    if (args.length < 1) {
-      throw new IllegalArgumentException("OUTPUT_DIR argument not specified for FDA NDC download.");
+    if (args.length < 2) {
+      throw new IllegalArgumentException(
+          "Invalid number of arguments supplied for FDA NDC download.");
     }
-    if (args.length > 1) {
+    if (args.length > 2) {
       throw new IllegalArgumentException("Invalid arguments supplied for FDA NDC download.");
     }
 
-    DataUtilityCommons.getFDADrugCodes(args[0], FDA_PRODUCTS_RESOURCE);
+    DataUtilityCommons.getFDADrugCodes(args[0], args[1], FDA_PRODUCTS_RESOURCE);
   }
 }
