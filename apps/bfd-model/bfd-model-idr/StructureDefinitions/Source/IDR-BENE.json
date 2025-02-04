@@ -1,7 +1,7 @@
 {
     "resourceType": "StructureDefinition",
     "id": "IDR_BENE",
-    "url": "http://hl7.org/fhir/StructureDefinition/IDR_BENE",
+    "url": "https://bfd.cms.gov/fhir/StructureDefinition/IDR_BENE",
     "name": "IDR_BENE",
     "status": "draft",
     "fhirVersion": "4.0.1",
@@ -81,7 +81,7 @@
                 "max": "1",
                 "type": [
                     {
-                        "code": "date"
+                        "code": "dateTime"
                     }
                 ]
             },
@@ -107,15 +107,29 @@
                 "max": "*",
                 "type": [
                     {
-                        "code": "BeneficiaryMBIIdentifier"
+                        "code": "BeneficiaryMBIIdentifier",
+                        "targetProfile" : ["https://bfd.cms.gov/fhir/StructureDefinition/IDR_BENE_MBI"]
                     }
                 ]
             },
             {
-                "id": "IdrBeneficiary.EFCTV_BENE_SK",
-                "path": "IdrBeneficiary.EFCTV_BENE_SK",
+                "id": "IdrBeneficiary.XREF_EFCTV_BENE_SK",
+                "path": "IdrBeneficiary.XREF_EFCTV_BENE_SK",
                 "label": "Effective Beneficiary SK ",
                 "definition": "Effective BENE_SK for the individual, representing the XREF_EFCTV_SK",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "IdrBeneficiary.BENE_SK",
+                "path": "IdrBeneficiary.BENE_SK",
+                "label": "Effective Beneficiary SK ",
+                "definition": "BENE_SK for the individual.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -130,20 +144,7 @@
                 "label": "Beneficiary SK List.",
                 "definition": "A list of all BENE_SKs for the beneficiary. This list is to be used when querying the claims table.",
                 "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "IdrBeneficiary.BENE_GENDER",
-                "path": "IdrBeneficiary.BENE_GENDER",
-                "label": "Gender",
-                "definition": "Gender of the beneficiary",
-                "min": 1,
-                "max": "1",
+                "max": "*",
                 "type": [
                     {
                         "code": "string"

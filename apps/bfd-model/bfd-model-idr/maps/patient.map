@@ -81,7 +81,8 @@ group createPatient(source src: IDRBene, target patient: BFDPatient){
     src.ALL_BENE_SKs as bene_sks where (bene_sks != src.XREF_EFCTV_BENE_SK) -> patient.link = create('BackboneElement') as patientLink then{
         src -> patientLink.type = "replaces" "replaces type";
         src -> patientLink.other = create('Reference') as tgtReference,
-        tgtReference.reference = append("Patient/",bene_sks) "Set member number assigner";
+        tgtReference.reference = append("Patient/",bene_sks),
+        tgtReference.display = bene_sks "Set BENE_SK";
     } "Create Patient links";
 
 
