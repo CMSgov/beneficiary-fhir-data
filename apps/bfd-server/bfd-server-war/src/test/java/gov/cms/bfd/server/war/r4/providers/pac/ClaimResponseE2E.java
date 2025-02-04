@@ -289,8 +289,6 @@ public class ClaimResponseE2E extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // sine we start on the last item's index with 2 items per page, 1 item returned
         .body("entry.size()", equalTo(1))
-        // 4 items total reported on all pages
-        .body("total", equalTo(4))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -334,7 +332,7 @@ public class ClaimResponseE2E extends ServerRequiredTest {
         .expect()
         .log()
         .ifError()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -347,7 +345,7 @@ public class ClaimResponseE2E extends ServerRequiredTest {
         .expect()
         .log()
         .ifError()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);

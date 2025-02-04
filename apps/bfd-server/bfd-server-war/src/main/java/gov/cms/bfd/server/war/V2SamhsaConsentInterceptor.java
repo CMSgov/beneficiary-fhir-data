@@ -87,7 +87,6 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
       for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
         IBaseResource entryResource = entry.getResource();
 
-        // Check the type of resource and redact it if necessary
         if (shouldRedactResource(entryResource, excludeSamhsa)) {
           redactSensitiveData(entry);
         }
@@ -134,9 +133,9 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
   }
 
   /**
-   * Redacts sensitive data in the Claim resource.
+   * Redacts sensitive data in the resource.
    *
-   * @param entry the claimResource
+   * @param entry the entry
    */
   private void redactSensitiveData(Bundle.BundleEntryComponent entry) {
     // Implement redaction logic for Claim
@@ -149,7 +148,6 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
   public void completeOperationSuccess(
       RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
     logger.info("V2SamhsaConsentInterceptor - completeOperationSuccess.");
-    // We could write an audit trail entry in here
   }
 
   /** completeOperationFailure. */
@@ -159,6 +157,5 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
       BaseServerResponseException theException,
       IConsentContextServices theContextServices) {
     logger.info("V2SamhsaConsentInterceptor - completeOperationFailure.");
-    // We could write an audit trail entry in here
   }
 }

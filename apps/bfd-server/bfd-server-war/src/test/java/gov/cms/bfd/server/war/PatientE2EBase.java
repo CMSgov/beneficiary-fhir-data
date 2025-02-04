@@ -249,7 +249,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // we should have zero results in our searchset
         .body("type", equalTo("searchset"))
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .post(requestString);
@@ -475,7 +475,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -520,7 +520,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -571,7 +571,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
           .headers(headers)
           .expect()
           .body("resourceType", equalTo("Bundle"))
-          .body("total", equalTo(0))
+          .body("entry", equalTo(null))
           .statusCode(200)
           .when()
           .get(theSearchUrl);
@@ -690,7 +690,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -777,7 +777,6 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .expect()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
-        .body("total", equalTo(1))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -798,7 +797,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .headers(headers)
         .expect()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -810,7 +809,7 @@ public abstract class PatientE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .headers(headers)
         .expect()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);

@@ -58,7 +58,6 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
   public boolean test(ExplanationOfBenefit eob) {
 
     // check here for the future flag samhsaV2Enabled and return false to skip the Samhsa matcher
-    // check
     // and redact the data with Samhsa 2.0 Interceptors V1SamhsaConsentInterceptor and
     // V2SamhsaConsentInterceptor
     if (samhsaV2Enabled) {

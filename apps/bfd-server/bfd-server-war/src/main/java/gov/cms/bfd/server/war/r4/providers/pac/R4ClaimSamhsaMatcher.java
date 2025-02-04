@@ -84,7 +84,6 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
   public boolean test(Claim claim) {
 
     // check here for the future flag samhsaV2Enabled and return false to skip the Samhsa matcher
-    // check
     // and redact the data with Samhsa 2.0 Interceptors V1SamhsaConsentInterceptor and
     // V2SamhsaConsentInterceptor
     if (samhsaV2Enabled) {

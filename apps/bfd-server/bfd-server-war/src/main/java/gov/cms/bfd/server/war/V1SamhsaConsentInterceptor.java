@@ -67,7 +67,6 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
       for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
         IBaseResource entryResource = entry.getResource();
 
-        // Check the type of resource and redact it if necessary
         if (shouldRedactResource(entryResource, excludeSamhsa)) {
           redactSensitiveData(entry);
         }
@@ -111,9 +110,9 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
   }
 
   /**
-   * Redacts sensitive data in the Claim resource.
+   * Redacts sensitive data in the resource.
    *
-   * @param entry the claimResource
+   * @param entry the entry
    */
   private void redactSensitiveData(Bundle.BundleEntryComponent entry) {
     // Implement redaction logic for Claim

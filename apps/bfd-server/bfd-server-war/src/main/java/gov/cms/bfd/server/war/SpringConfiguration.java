@@ -115,10 +115,10 @@ public class SpringConfiguration extends BaseConfiguration {
   /** SSM Path for the server trust store. */
   private static final String SSM_PATH_TRUSTSTORE = "paths/files/truststore";
 
-  /** The {@link String } Boolean property that is used to enable the samhsa 2.0 profile. */
+  /** The {@link String } Boolean property that is used to enable the C4DIC profile. */
   public static final String SSM_PATH_C4DIC_ENABLED = "c4dic/enabled";
 
-  /** The {@link String } Boolean property that is used to enable the C4DIC profile. */
+  /** The {@link String } Boolean property that is used to enable the samhsa 2.0 profile. */
   public static final String SSM_PATH_SAMHSA_V2_ENABLED = "samhsa_v2/enabled";
 
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */

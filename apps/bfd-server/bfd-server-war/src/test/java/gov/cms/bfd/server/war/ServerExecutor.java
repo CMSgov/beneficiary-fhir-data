@@ -142,12 +142,14 @@ public class ServerExecutor {
       Map<String, String> appSettings, String dbUrl, String dbUsername, String dbPassword) {
     // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
     final String pacEnabled = "true";
+    final String samhsaEnabled = "false";
     final String pacOldMbiHashEnabled = "true";
     final String pacClaimSourceTypes = "fiss,mcs";
     final String drugCodeFileName = "fakeDrugOrg.tsv";
     final String orgFileName = "fakeOrgData.tsv";
 
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);
+    appSettings.put(SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED, samhsaEnabled);
     appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);
