@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
-import org.springframework.stereotype.Component;
 import org.springframework.web.SpringServletContainerInitializer;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -33,12 +32,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  * dependencies. That class is a registered {@link ServletContainerInitializer} SPI and will in turn
  * search for and enable any {@link WebApplicationInitializer} implementations (such as this class).
  */
-@Component
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
-
-  /** Constructs a new {@link V1Server} instance. ' */
-  public ServerInitializer() {}
 
   @Override
   public void onStartup(@Nonnull ServletContext servletContext) throws ServletException {
