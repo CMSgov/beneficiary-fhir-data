@@ -181,6 +181,13 @@
         "code" : "performing",
         "display" : "Performing provider"
       } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+        "code" : "A5",
+        "display" : "Pharmacy (DMERC)"
+      } ]
     }
   } ],
   "supportingInfo" : [ {
