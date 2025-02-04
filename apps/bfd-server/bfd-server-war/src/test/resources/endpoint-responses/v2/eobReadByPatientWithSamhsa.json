@@ -5,7 +5,6 @@
     "lastUpdated" : "IGNORED_FIELD"
   },
   "type" : "searchset",
-  "total" : 4462,
   "link" : [ {
     "relation" : "first",
     "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_page=6567834&startIndex=0&_count=2&patient=567834"

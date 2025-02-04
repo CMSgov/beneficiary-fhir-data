@@ -23,7 +23,6 @@
       "url": "https://localhost:6500/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
-  "total": 2,
   "entry": [
     {
       "resource": {

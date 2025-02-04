@@ -5,7 +5,6 @@
     "lastUpdated" : "IGNORED_FIELD"
   },
   "type" : "searchset",
-  "total" : 1,
   "link" : [ {
     "relation" : "self",
     "url" : "https://localhost:IGNORED_FIELD/v1/fhir/Patient?_id=567834"

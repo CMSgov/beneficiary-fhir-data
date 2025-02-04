@@ -5,7 +5,6 @@
     "lastUpdated" : "IGNORED_FIELD"
   },
   "type" : "searchset",
-  "total" : 4,
   "link" : [ {
     "relation" : "self",
     "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Coverage/?beneficiary=567834"

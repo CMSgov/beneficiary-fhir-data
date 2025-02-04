@@ -5,7 +5,6 @@
     "lastUpdated" : "IGNORED_FIELD"
   },
   "type" : "searchset",
-  "total" : 8,
   "link" : [ {
     "relation" : "self",
     "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit/?patient=567834"

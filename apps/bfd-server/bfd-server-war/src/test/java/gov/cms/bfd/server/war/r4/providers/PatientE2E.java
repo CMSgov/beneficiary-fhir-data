@@ -293,7 +293,7 @@ public class PatientE2E extends PatientE2EBase {
     Response response = httpRequest.post(requestString);
     assertThat(response.statusCode(), equalTo(200));
     JsonPath jsonPathEvaluator = response.jsonPath();
-    assertThat(jsonPathEvaluator.get("total"), equalTo(1));
+    assertThat(jsonPathEvaluator.get("entry.size()"), equalTo(1));
     // fetch all MBIs as a list
     List<String> mbis = jsonPathEvaluator.getList("entry.resource.identifier.value.flatten()");
     assertThat(mbis.size(), equalTo(7));
