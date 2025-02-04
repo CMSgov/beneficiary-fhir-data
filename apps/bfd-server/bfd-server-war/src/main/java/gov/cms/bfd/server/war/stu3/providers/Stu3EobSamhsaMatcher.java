@@ -49,6 +49,7 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
       case OUTPATIENT:
       case SNF:
         containsSamhsa = containsSamhsaIcdProcedureCode(adapter.getProcedure());
+        // fall-through intentional here
       case CARRIER:
       case DME:
       case HHA:
@@ -57,6 +58,7 @@ public final class Stu3EobSamhsaMatcher extends AbstractSamhsaMatcher<Explanatio
             containsSamhsa
                 || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
                 || containsSamhsaLineItem(adapter.getItem());
+        // fall-through intentional here
       case PDE:
         // There are no SAMHSA fields in PDE claims
         break;
