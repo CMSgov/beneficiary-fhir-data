@@ -316,8 +316,8 @@ resource "aws_lambda_function_event_invoke_config" "sftp_outbound_transfer" {
   function_name          = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
   maximum_retry_attempts = 2
 
-  # On failure we want failing events to land into a DLQ such that responding engineers can analyze
-  # the event and retry, if necessary
+  # If the Lambda exhausts all of its retry attempts, we want failing events to land into a DLQ such
+  # that responding engineers can analyze the event and retry, if necessary
   destination_config {
     on_failure {
       destination = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn)
