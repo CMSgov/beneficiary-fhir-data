@@ -8,7 +8,7 @@ To compile the StructureMap:
 java -jar validator_cli.jar -ig maps/patient.map -compile https://bfd.cms.gov/MappingLanguage/Resources/Patient -version 4.0.1 -output StructureMaps/bfd_patient_structuremap.json 
 
 To execute:
-java -jar validator_cli.jar sample-data/IdrBeneficiarySample.json -output outputs/Patient.json -transform https://bfd.cms.gov/MappingLanguage/Resources/Patient -version 4.0.1 -ig StructureMaps/bfd_patient_structuremap.json -ig StructureDefinitions/Source/IDR-Bene-MBI.json -ig StructureDefinitions/Source/IDR-Bene.json -ig hl7.fhir.us.carin-bb#2.0.0 -ig maps/Patient-Helper.map
+java -jar validator_cli.jar sample-data/BeneficiarySample.json -output outputs/Patient.json -transform https://bfd.cms.gov/MappingLanguage/Resources/Patient -version 4.0.1 -ig StructureMaps/bfd_patient_structuremap.json -ig StructureDefinitions/Source/Bene-MBI.json -ig StructureDefinitions/Source/Bene.json -ig hl7.fhir.us.carin-bb#2.0.0 -ig maps/Patient-Helper.map
 
 
 Validating sample resources against self-defined StructureDefinitions:

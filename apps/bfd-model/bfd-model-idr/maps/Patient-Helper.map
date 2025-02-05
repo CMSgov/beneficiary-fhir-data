@@ -11,6 +11,15 @@ conceptmap "AdministrativeGender" {
   s:2 = t:female
 }
 
+conceptmap "PreferredContactLanguage" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "urn:ietf:bcp:47"
+
+  s:"~" = t:unknown
+  s:ENG = t:en
+  s:SPA = t:es
+}
+
 conceptmap "USCDIRaceCode" {
     prefix s = "https://hl7.org/fhir/string"
     prefix t = "https://hl7.org/fhir/string"

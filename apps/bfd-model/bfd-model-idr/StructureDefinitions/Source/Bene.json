@@ -1,0 +1,338 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "BENE",
+    "url": "https://bfd.cms.gov/fhir/StructureDefinition/BENE",
+    "name": "BENE",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "Beneficiary",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "Beneficiary",
+                "path": "Beneficiary",
+                "label": "IDR Beneficiary Base. Ignore in DD Generation",
+                "definition": "Beneficiary definition",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "Beneficiary.BENE_1ST_NAME",
+                "path": "Beneficiary.BENE_1ST_NAME",
+                "label": "First Name",
+                "definition": "First name from IDR",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LAST_NAME",
+                "path": "Beneficiary.BENE_LAST_NAME",
+                "label": "Last Name",
+                "definition": "Last name from IDR",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_MIDL_NAME",
+                "path": "Beneficiary.BENE_MIDL_NAME",
+                "label": "Last Name",
+                "definition": "Last name from IDR",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_DOB",
+                "path": "Beneficiary.BENE_DOB",
+                "label": "Date of Birth",
+                "definition": "Date of birth for beneficiary",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_DEATH_DT",
+                "path": "Beneficiary.BENE_DEATH_DT",
+                "label": "Date of Death",
+                "definition": "Date of death for beneficiary. Only populated if BENE_VRFY_DEATH_DAY_SW is true",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "dateTime"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_VRFY_DEATH_DAY_SW",
+                "path": "Beneficiary.BENE_VRFY_DEATH_DAY_SW",
+                "label": "Date of Death Verification Switch",
+                "definition": "Don't trust the date of death unless this is 'true'.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "boolean"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.mbi",
+                "path": "Beneficiary.mbi",
+                "label": "Medicare Beneficiary Identifier (MBI)",
+                "definition": "Medicare Beneficiary Identifier (MBI) for beneficiary",
+                "min": 1,
+                "max": "*",
+                "type": [
+                    {
+                        "code": "BeneficiaryMBIIdentifier",
+                        "targetProfile" : ["https://bfd.cms.gov/fhir/StructureDefinition/BENE_MBI"]
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.XREF_EFCTV_BENE_SK",
+                "path": "Beneficiary.XREF_EFCTV_BENE_SK",
+                "label": "Effective Beneficiary SK ",
+                "definition": "Effective BENE_SK for the individual, representing the XREF_EFCTV_SK",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_SK",
+                "path": "Beneficiary.BENE_SK",
+                "label": "Effective Beneficiary SK ",
+                "definition": "BENE_SK for the individual.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.ALL_BENE_SKs",
+                "path": "Beneficiary.ALL_BENE_SKs",
+                "label": "Beneficiary SK List.",
+                "definition": "A list of all BENE_SKs for the beneficiary. This list is to be used when querying the claims table.",
+                "min": 1,
+                "max": "*",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.lastUpdated",
+                "path": "Beneficiary.lastUpdated",
+                "label": "Last Updated time",
+                "definition": "The time the data utilized from IDR was inserted/updated",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.GEO_USPS_STATE_CD",
+                "path": "Beneficiary.GEO_USPS_STATE_CD",
+                "label": "USPS State Code",
+                "definition": "USPS State Code",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_ZIP_CD",
+                "path": "Beneficiary.BENE_ZIP_CD",
+                "label": "Beneficiary Zip Code",
+                "definition": "Beneficiary Zip Code",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LINE_1_ADR",
+                "path": "Beneficiary.BENE_LINE_1_ADR",
+                "label": "Line 1 of address",
+                "definition": "Line 1 of address",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LINE_2_ADR",
+                "path": "Beneficiary.BENE_LINE_2_ADR",
+                "label": "Line 2 of address",
+                "definition": "Line 2 of address",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LINE_3_ADR",
+                "path": "Beneficiary.BENE_LINE_3_ADR",
+                "label": "Line 3 of address",
+                "definition": "Line 3 of address",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LINE_4_ADR",
+                "path": "Beneficiary.BENE_LINE_4_ADR",
+                "label": "Line 4 of address",
+                "definition": "Line 4 of address",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LINE_5_ADR",
+                "path": "Beneficiary.BENE_LINE_5_ADR",
+                "label": "Line 5 of address",
+                "definition": "Line 5 of address",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_LINE_6_ADR",
+                "path": "Beneficiary.BENE_LINE_6_ADR",
+                "label": "Line 6 of Address",
+                "definition": "Line 6 of address",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.GEO_ZIP_PLC_NAME",
+                "path": "Beneficiary.GEO_ZIP_PLC_NAME",
+                "label": "City Name",
+                "definition": "City Name of Beneficiary.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.CNTCT_LANG_CD",
+                "path": "Beneficiary.CNTCT_LANG_CD",
+                "label": "Contact Language Code",
+                "definition": "Contact Language Code for beneficiary. Either English or Spanish. Used for Medicare Handbook today.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_PHNE_NUM",
+                "path": "Beneficiary.BENE_PHNE_NUM",
+                "label": "Beneficiary Phone Number",
+                "definition": "Beneficiary Phone Number from BENE_HISTRY.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_SEX_CD",
+                "path": "Beneficiary.BENE_SEX_CD",
+                "label": "Beneficiary Sex Code",
+                "definition": "Beneficiary Sex Code, as recorded by CMS in IDR.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.BENE_RACE_CD",
+                "path": "Beneficiary.BENE_RACE_CD",
+                "label": "Beneficiary Race Code",
+                "definition": "Beneficiary Race Code, as recorded by CMS in IDR.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
+        ]
+    }
+}

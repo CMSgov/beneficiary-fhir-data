@@ -1,9 +1,9 @@
 //See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
 //Must appear in order map -> conceptmap -> uses -> imports -> groups
-map "https://bfd.cms.gov/MappingLanguage/Resources/Patient" = "BFD-IDR-Patient-Map"
+map "https://bfd.cms.gov/MappingLanguage/Resources/Patient" = "BFD-Patient-Map"
 
 
-uses "https://bfd.cms.gov/fhir/StructureDefinition/IDR_BENE" alias IDRBene as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/BENE" alias Bene as source
 uses "http://hl7.org/fhir/StructureDefinition/BeneficiaryMBIIdentifier" alias BeneMBI as source
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as target
@@ -13,7 +13,7 @@ imports "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper"
 
 //This refers to a patient where XREF_BENE_EFCTV_SK == BENE_SK. See notes for the other identity use case.
 
-group createPatient(source src: IDRBene, target patient: BFDPatient){
+group createPatient(source src: Bene, target patient: BFDPatient){
     
     src -> patient.name = create('HumanName') as tgtName then{
         src.BENE_1ST_NAME as firstName -> tgtName.given = firstName "Populate first name";
@@ -112,6 +112,14 @@ group createPatient(source src: IDRBene, target patient: BFDPatient){
         src -> ptTele.use = "home" "Set phone number use";
         src -> ptTele.system = "phone" "Set phone as system";
     } "Set beneficary contact info";
+
+    src -> patient.communication = create('BackboneElement') as commsBackbone then{
+        src -> commsBackbone.language = create('CodeableConcept') as langCC then{
+            src.CNTCT_LANG_CD as langCode -> langCC.coding = translate(langCode,'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#PreferredContactLanguage','coding') "set coding";
+
+        }"Create CodeableConcept for Language.";
+        src -> commsBackbone.preferred=true "set preference as true";
+    } "Create backbone element for communication";
 }
 
 group SetMBI(source src : BeneMBI, target tgt : Identifier) {
