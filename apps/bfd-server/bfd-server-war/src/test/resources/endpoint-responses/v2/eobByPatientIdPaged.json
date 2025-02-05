@@ -1057,7 +1057,9 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "http://nucc.org/provider-taxonomy"
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "204D00000X",
+            "display" : "Neuromusculoskeletal Medicine & OMM Physician"
           } ]
         }
       }, {
@@ -4416,7 +4418,9 @@
         },
         "qualification" : {
           "coding" : [ {
-            "system" : "http://nucc.org/provider-taxonomy"
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207T00000X",
+            "display" : "Neurological Surgery Physician"
           } ]
         }
       } ],

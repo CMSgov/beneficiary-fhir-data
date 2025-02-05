@@ -105,7 +105,7 @@ final class TransformerTestUtils {
     }
   }
 
-  /** Empty method to load the static block. */
+  /** Empty method used to trigger execution of the static initializer. */
   public static void touch() {
     // NOOP
   }
