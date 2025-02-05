@@ -38,13 +38,6 @@ resource "aws_elb" "main" {
     interval            = 10 # (seconds) Match HealthApt
     timeout             = 5  # (seconds) Match HealthApt
   }
-
-  access_logs {
-    enabled       = false
-    bucket        = var.log_bucket
-    bucket_prefix = local.log_prefix
-    interval      = 5 # (minutes) Match HealthApt      
-  }
 }
 
 # security group
@@ -81,41 +74,4 @@ resource "aws_security_group" "lb" {
     cidr_blocks = var.egress.cidr_blocks
     description = var.egress.description
   }
-}
-
-# policy for S3 log access
-resource "aws_s3_bucket_policy" "logs" {
-  bucket = data.aws_s3_bucket.logs.id
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Id": "LBAccessLogs",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-          "AWS": "${data.aws_elb_service_account.main.arn}"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::${var.log_bucket}/*"
-    },
-    {
-      "Sid": "AllowSSLRequestsOnly",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": [
-          "arn:aws:s3:::${var.log_bucket}",
-          "arn:aws:s3:::${var.log_bucket}/*"
-      ],
-      "Condition": {
-          "Bool": {
-              "aws:SecureTransport": "false"
-          }
-      }
-    }
-  ]
-}
-POLICY
 }

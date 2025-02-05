@@ -98,7 +98,7 @@ module "fhir_lb" {
   env_config = local.env_config
   role       = local.legacy_service
   layer      = "dmz"
-  log_bucket = data.aws_s3_bucket.logs.id
+  log_bucket = null
   is_public  = local.lb_is_public
 
   ingress = local.lb_is_public ? {
