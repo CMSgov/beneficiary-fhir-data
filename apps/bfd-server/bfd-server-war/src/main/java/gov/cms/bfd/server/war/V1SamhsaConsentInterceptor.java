@@ -1,11 +1,14 @@
 package gov.cms.bfd.server.war;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.parseBoolean;
+
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
-import java.util.Optional;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
+import gov.cms.bfd.sharedutils.TagCode;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -20,18 +23,6 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
   /** The logger. */
   private static final Logger logger = LoggerFactory.getLogger(V1SamhsaConsentInterceptor.class);
 
-  /** Flag to control whether SAMHSA filtering should be applied. */
-  private final boolean samhsaV2Enabled;
-
-  /**
-   * SamhsaConsentInterceptor Constructor.
-   *
-   * @param samhsaV2Enabled samhsaV2Enabled
-   */
-  public V1SamhsaConsentInterceptor(Boolean samhsaV2Enabled) {
-    this.samhsaV2Enabled = samhsaV2Enabled;
-  }
-
   @Override
   public ConsentOutcome startOperation(
       RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
@@ -45,29 +36,19 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
       IConsentContextServices theContextServices) {
 
     logger.info("V1SamhsaConsentInterceptor - willSeeResource.");
-    //     Check if SAMHSA 2.0 filtering is enabled
-    if (!samhsaV2Enabled) {
-      // If the feature flag is false, skip filtering and proceed with the resource
-      logger.info("SAMHSA 2.0 filtering is disabled, proceeding without filtering.");
-      return ConsentOutcome.PROCEED;
-    }
 
     // Extract 'excludeSAMHSA' parameter from the request URL
-    boolean excludeSamhsa =
-        Optional.ofNullable(theRequestDetails.getParameters().get("excludeSAMHSA"))
-            .flatMap(params -> params.length > 0 ? Optional.of(params[0]) : Optional.empty())
-            .map(Boolean::parseBoolean)
-            .orElse(false);
+    boolean excludeSAMHSA = parseBoolean(theRequestDetails.getParameters().get("excludeSAMHSA"));
+    boolean filterSamhsa =
+        CommonTransformerUtils.shouldFilterSamhsa(String.valueOf(excludeSAMHSA), theRequestDetails);
 
     // Handle Bundle
-    if (theResource instanceof Bundle) {
-      Bundle bundle = (Bundle) theResource;
-
+    if (theResource instanceof Bundle bundle) {
       // Iterate through each entry in the Bundle
       for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
         IBaseResource entryResource = entry.getResource();
 
-        if (shouldRedactResource(entryResource, excludeSamhsa)) {
+        if (shouldRedactResource(entryResource, filterSamhsa)) {
           redactSensitiveData(entry);
         }
       }
@@ -80,15 +61,15 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
    * Helper method to determine if a resource should be redacted based on security tags.
    *
    * @param resource The resource to check.
-   * @param excludeSamhsa Flag to determine whether to exclude SAMHSA.
+   * @param filterSamhsa Flag to determine whether to filter SAMHSA.
    * @return true if the resource should be redacted, false otherwise.
    */
-  private boolean shouldRedactResource(IBaseResource resource, boolean excludeSamhsa) {
+  private boolean shouldRedactResource(IBaseResource resource, boolean filterSamhsa) {
     Meta meta = null;
 
     // Extract the meta information depending on the resource type
-    if (resource instanceof ExplanationOfBenefit) {
-      meta = ((ExplanationOfBenefit) resource).getMeta();
+    if (resource instanceof ExplanationOfBenefit eob) {
+      meta = eob.getMeta();
     }
 
     // If meta or security tags are not present, no need to redact
@@ -99,8 +80,9 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
     // Iterate through the security tags in the meta
     for (Coding securityTag : meta.getSecurity()) {
       // Check if the security tag matches the "R" or "42CFRPart2" code
-      if (excludeSamhsa
-          && ("R".equals(securityTag.getCode()) || "42CFRPart2".equals(securityTag.getCode()))) {
+      if (filterSamhsa
+          && (TagCode.R.name().equals(securityTag.getCode())
+              || TagCode._42CFRPart2.name().equals(securityTag.getCode()))) {
         logger.info("Matched SAMHSA security tag, redacting resource.");
         return true;
       }

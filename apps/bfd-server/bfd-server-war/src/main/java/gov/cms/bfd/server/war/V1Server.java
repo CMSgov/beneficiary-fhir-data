@@ -132,7 +132,7 @@ public class V1Server extends RestfulServer {
     // executed
     registerInterceptor(new TimerInterceptor());
     if (samhsaV2Enabled) {
-      registerInterceptor(new ConsentInterceptor(new V1SamhsaConsentInterceptor(samhsaV2Enabled)));
+      registerInterceptor(new ConsentInterceptor(new V1SamhsaConsentInterceptor()));
     }
     // OpenAPI
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();

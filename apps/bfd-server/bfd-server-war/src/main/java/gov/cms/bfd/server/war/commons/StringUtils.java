@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Optional;
 
 /** Helper Utils class for Functions shared across. multiple classes. */
 public class StringUtils {
@@ -30,5 +31,19 @@ public class StringUtils {
       builder.add(curr.toString().trim());
     }
     return builder.build().toArray(new String[0]);
+  }
+
+  /**
+   * Custom function to retrieve the boolean value from a string input.
+   *
+   * @param input a String that needs to remove whitespace and commas.
+   * @return Split Array.
+   */
+  public static Boolean parseBoolean(String[] input) {
+
+    return Optional.ofNullable(input)
+        .flatMap(params -> params.length > 0 ? Optional.of(params[0]) : Optional.empty())
+        .map(Boolean::parseBoolean)
+        .orElse(false);
   }
 }
