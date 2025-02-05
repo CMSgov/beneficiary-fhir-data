@@ -63,6 +63,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
 
   /** {@inheritDoc} */
   @VisibleForTesting
+  @Override
   Set<ResourceTypeV2<Claim, ?>> getDefinedResourceTypes() {
     return Sets.newHashSet(ClaimTypeV2.values());
   }

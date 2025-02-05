@@ -103,7 +103,6 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
           || TransformerConstants.CODING_SYSTEM_CARIN_HCPCS.equals(system))) {
         return false;
       }
-      ;
     }
     return true;
   }

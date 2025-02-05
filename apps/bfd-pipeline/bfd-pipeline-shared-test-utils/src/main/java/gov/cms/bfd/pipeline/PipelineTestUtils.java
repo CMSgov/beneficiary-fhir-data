@@ -360,6 +360,7 @@ public final class PipelineTestUtils {
     try {
       Thread.sleep(millis);
     } catch (InterruptedException ex) {
+      // Stop on interrupt
     }
   }
 }

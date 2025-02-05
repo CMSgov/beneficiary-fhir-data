@@ -377,6 +377,10 @@ public final class AppConfiguration extends BaseAppConfiguration {
       Set.of(
           "FissClaimRdaSink.change.latency.millis",
           "McsClaimRdaSink.change.latency.millis",
+          "FissClaimRdaSink.lastSeq",
+          "McsClaimRdaSink.lastSeq",
+          "FissClaimRdaSink.maxSeq",
+          "McsClaimRdaSink.maxSeq",
           CcwRifLoadJob.Metrics.DATASET_PROCESSING_ACTIVE_TIMER_NAME,
           CcwRifLoadJob.Metrics.DATASET_PROCESSING_TOTAL_TIMER_NAME,
           CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_ACTIVE_TIMER_NAME,

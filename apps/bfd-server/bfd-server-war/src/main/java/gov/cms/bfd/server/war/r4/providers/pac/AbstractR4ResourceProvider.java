@@ -164,6 +164,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /** {@inheritDoc} */
+  @Override
   public Class<T> getResourceType() {
     return resourceType;
   }
