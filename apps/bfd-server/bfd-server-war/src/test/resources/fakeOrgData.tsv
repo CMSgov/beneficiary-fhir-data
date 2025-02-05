@@ -4,3 +4,6 @@
 4444	{ "npi": "444", "taxonomyCode": "204D00000X", "taxonomyDisplay": "Neuromusculoskeletal Medicine & OMM Physician" }
 345345345	{ "npi": "345345345", "taxonomyCode": "207ZH0000X", "taxonomyDisplay": "Hematology (Pathology) Physician" }
 1750384806	{ "npi": "1750384806", "providerNamePrefix": "DR.", "providerFirstName": "ROBERT", "providerLastName": "BISBEE", "providerCredential": "MD" }
+1244444444	{ "npi": "1244444444", "taxonomyCode": "207ZH0000X", "taxonomyDisplay": "Hematology (Pathology) Physician", "providerNamePrefix": "DR.", "providerFirstName": "DAVID", "providerLastName": "SMITH", "providerCredential": "MD" }
+1306849450	{ "npi": "1306849450", "providerNamePrefix": "DR.", "providerFirstName": "HAROLD", "providerMiddleName": "LEROY", "providerLastName": "SMITSON", "providerNameSuffix": "II", "providerCredential": "M.D." }
+

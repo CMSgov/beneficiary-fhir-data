@@ -91,9 +91,6 @@ final class TransformerTestUtils {
   /** The fhir context for parsing the test file. Do this very slow operation once. */
   private static final FhirContext fhirContext = FhirContext.forDstu3();
 
-  /** NPIOrgLookup. */
-  private static final NPIOrgLookup npiOrgLookup;
-
   /** fake npi data. */
   private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
 
@@ -101,11 +98,16 @@ final class TransformerTestUtils {
     try {
       InputStream npiDataStream =
           Thread.currentThread().getContextClassLoader().getResourceAsStream(ORG_FILE_NAME);
-      npiOrgLookup = new NPIOrgLookup(npiDataStream);
+      NPIOrgLookup npiOrgLookup = new NPIOrgLookup(npiDataStream);
       CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
     } catch (IOException e) {
       throw new RuntimeException("Error loading test data for NPIOrgLookup.");
     }
+  }
+
+  /** Empty method to load the static block. */
+  public static void touch() {
+    // NOOP
   }
 
   /**

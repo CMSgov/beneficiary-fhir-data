@@ -1028,7 +1028,8 @@
             } ]
           },
           "value" : "1306849450"
-        }
+        },
+        "display" : "DR. HAROLD LEROY SMITSON II M.D."
       },
       "outcome" : "complete",
       "disposition" : "01",
@@ -1044,13 +1045,19 @@
               } ]
             },
             "value" : "1306849450"
-          }
+          },
+          "display" : "DR. HAROLD LEROY SMITSON II M.D."
         },
         "role" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "referring",
             "display" : "Referring"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy"
           } ]
         }
       }, {
@@ -1073,7 +1080,8 @@
               } ]
             },
             "value" : "1244444444"
-          }
+          },
+          "display" : "DR. DAVID SMITH MD"
         },
         "responsible" : true,
         "role" : {
@@ -1085,6 +1093,10 @@
         },
         "qualification" : {
           "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207ZH0000X",
+            "display" : "Hematology (Pathology) Physician"
+          }, {
             "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
             "code" : "A5",
             "display" : "Pharmacy (DMERC)"

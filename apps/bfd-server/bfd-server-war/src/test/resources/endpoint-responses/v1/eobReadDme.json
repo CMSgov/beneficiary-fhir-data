@@ -16,14 +16,16 @@
         "identifier" : {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1306849450"
-        }
+        },
+        "display" : "DR. HAROLD LEROY SMITSON II M.D."
       }
     },
     "recipient" : [ {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1306849450"
-      }
+      },
+      "display" : "DR. HAROLD LEROY SMITSON II M.D."
     } ]
   }, {
     "resourceType" : "Observation",
@@ -173,7 +175,8 @@
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "value" : "1244444444"
-      }
+      },
+      "display" : "DR. DAVID SMITH MD"
     },
     "responsible" : true,
     "role" : {
