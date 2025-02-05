@@ -17,6 +17,9 @@ public class AbstractResourceProvider {
    */
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
+  /** A constant for excludeSAMHSA. */
+  public static final String EXCLUDE_SAMHSA = "excludeSAMHSA";
+
   /**
    * Returns if tax numbers should be included after examining the request details.
    *

@@ -299,7 +299,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
-      @OptionalParam(name = "excludeSAMHSA")
+      @OptionalParam(name = EXCLUDE_SAMHSA)
           @Description(
               shortDefinition = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_SHORT,
               value = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_VALUE)
