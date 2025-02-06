@@ -10,7 +10,7 @@ env:
   # NOTE: The expression below can be extended to multi-line
   # using a '\' as a continuation character.
   # https://stackoverflow.com/questions/6268391/is-there-a-way-to-represent-a-long-string-that-doesnt-have-any-whitespace-on-mul
-  workflow_files_re: "^apps/(?!bfd-pipeline/bfd-pipeline-idr|utils).+$|^.github/workflows/ci-java.yml$"
+  workflow_files_re: "^apps/(?!bfd-pipeline/bfd-pipeline-idr|bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
 
 jobs:
   workflow:
