@@ -13,7 +13,7 @@ env:
   workflow_files_re: "(\
   ^apps/pom.xml|\
   ^apps/Dockerfile|\
-  ^(apps/bfd-(?!pipeline/bfd-pipeline-idr))|\
+  ^(apps/bfd-(?!pipeline/bfd-pipeline-idr/))|\
   ^ops/ansible/roles/bfd-db-migrator/|\
   ^ops/ansible/roles/bfd-pipeline/|\
   ^ops/ansible/roles/bfd-server/|\
