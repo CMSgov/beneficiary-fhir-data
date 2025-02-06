@@ -1,6 +1,0 @@
-*
-!bfd-model/bfd-model-rif/src/main/resources/db/migration
-!bfd-server/bfd-server-launcher/target/bfd-server-launcher-*.zip
-!bfd-server/bfd-server-war/target/bfd-server-war-*.war
-!bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-*.zip
-!bfd-db-migrator/target/bfd-db-migrator-*.zip
