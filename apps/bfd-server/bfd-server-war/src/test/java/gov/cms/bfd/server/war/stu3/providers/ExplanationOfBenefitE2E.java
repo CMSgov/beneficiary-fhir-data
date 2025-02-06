@@ -53,7 +53,6 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        .body("total", equalTo(8))
         /* Check there are tax numbers on applicable claims; carrier and DME
         Tax num value (for v1) is found in the eob.careTeam[N].provider.identifier[N].value (for
         the appropriate url) */

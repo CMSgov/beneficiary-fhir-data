@@ -101,7 +101,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /** Sets up the test. */
   @BeforeEach
   public void setup() {
-    samhsaMatcher = new Stu3EobSamhsaMatcher();
+    samhsaMatcher = new Stu3EobSamhsaMatcher(false);
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
   }
 

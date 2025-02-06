@@ -301,7 +301,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
               shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
               value = OpenAPIContentProvider.COUNT_VALUE)
           String count,
-      @OptionalParam(name = "excludeSAMHSA")
+      @OptionalParam(name = EXCLUDE_SAMHSA)
           @Description(
               shortDefinition = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_SHORT,
               value = OpenAPIContentProvider.EOB_EXCLUDE_SAMSHA_VALUE)
