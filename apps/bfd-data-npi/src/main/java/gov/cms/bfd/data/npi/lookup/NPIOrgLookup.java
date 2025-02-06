@@ -1,6 +1,7 @@
 package gov.cms.bfd.data.npi.lookup;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.utility.App;
@@ -110,12 +111,12 @@ public class NPIOrgLookup {
     try (final InputStream npiStream =
             isCompressedStream ? new InflaterInputStream(inputStream) : inputStream;
         final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
+      ObjectMapper objectMapper = new ObjectMapper();
       while ((line = reader.readLine()) != null) {
         // the first part of the line will be the NPI, and the second part is the json.
-        String[] tsv = line.split("\t");
-        if (tsv.length == 2) {
-          npiProcessedData.put(tsv[0], tsv[1]);
-        }
+        JsonNode rootNode = objectMapper.readTree(line);
+        String npi = rootNode.path("npi").asText();
+        npiProcessedData.put(npi, line);
       }
     }
     return npiProcessedData;

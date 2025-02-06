@@ -30,7 +30,7 @@ public class NPIOrgLookupE2E {
   private final String practitionerNPI = "1679576722";
 
   /** Global variable for valid taxonomy code. */
-  private final String taxononomyCode = "207X00000X";
+  private final String taxonomyCode = "207X00000X";
 
   /** Global variable for valid taxonomy display. */
   private final String taxonomyDisplay = "Allopathic & Osteopathic Physicians";
@@ -47,20 +47,16 @@ public class NPIOrgLookupE2E {
     StringBuilder initialString = new StringBuilder();
     initialString.append(
         String.format(
-            "%s"
-                + "\t"
-                + " {"
+            " {"
                 + " \"npi\": \"%s\","
                 + " \"entityTypeCode\": \"2\","
                 + " \"providerOrganizationName\": \"%s\""
                 + " }",
-            npiOrgNumber, npiOrgNumber, npiOrgName));
+            npiOrgNumber, npiOrgName));
     initialString.append("\n");
     initialString.append(
         String.format(
-            "%s"
-                + "\t"
-                + " {"
+            " {"
                 + " \"npi\": \"%s\","
                 + " \"taxonomyCode\": \"%s\","
                 + " \"taxonomyDisplay\": \"%s\","
@@ -71,7 +67,7 @@ public class NPIOrgLookupE2E {
                 + " \"providerNameSuffix\": \"Sr.\","
                 + " \"providerCredential\": \"MD\""
                 + " }",
-            practitionerNPI, practitionerNPI, taxononomyCode, taxonomyDisplay));
+            practitionerNPI, taxonomyCode, taxonomyDisplay));
 
     InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
     npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
@@ -81,22 +77,22 @@ public class NPIOrgLookupE2E {
 
   /** End to End test for Npi Org Data with npi number. */
   @Test
-  public void shouldCorrectlyReturnNpiNameObtainedFromFileStream() throws IOException {
+  public void shouldCorrectlyReturnNpiNameObtainedFromFileStream() {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(npiOrgNumber));
     assertEquals(npiOrgName, npiOrgDisplay.get().getProviderOrganizationName());
   }
 
   /** End to End test for NPI Taxononomy Dislplay. */
   @Test
-  public void shouldCorrectlyReturnTaxonomyForNPI() throws IOException {
+  public void shouldCorrectlyReturnTaxonomyForNPI() {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(practitionerNPI));
-    assertEquals(taxononomyCode, npiOrgDisplay.get().getTaxonomyCode());
+    assertEquals(taxonomyCode, npiOrgDisplay.get().getTaxonomyCode());
     assertEquals(taxonomyDisplay, npiOrgDisplay.get().getTaxonomyDisplay());
   }
 
   /** End to End test for Npi Org Data with wrong npi number. */
   @Test
-  public void shouldReturnEmptyOrganizationWithAWrongNpiNumber() throws IOException {
+  public void shouldReturnEmptyOrganizationWithAWrongNpiNumber() {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(invalidNpiOrgNumber));
     assertFalse(npiOrgDisplay.isPresent());
   }

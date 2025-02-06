@@ -40,25 +40,19 @@ public class NPIOrgLookupTest {
   /** Test JSON, which will be deserialized. */
   private static final String testJson =
       String.format(
-          "%s"
-              + "\t"
-              + " \"npi\": \"%s\","
+          " { \"npi\": \"%s\","
               + " \"entityTypeCode\": \"2\","
-              + " \"providerOrganizationName\": \"%s,"
+              + " \"providerOrganizationName\": \"%s\","
               + " \"taxonomyCode\": \"%s\","
               + " \"taxonomyDisplay\": \"%s\","
               + " \"providerNamePrefix\": \"Dr\","
               + " \"providerFirstName\": \"Stephen\","
-              + " \"providerMiddleName\", \"J.\","
+              + " \"providerMiddleName\": \"J.\","
               + " \"providerLastName\": \"Smith\","
               + " \"providerNameSuffix\": \"Sr.\","
               + " \"providerCredential\": \"MD\""
               + " }",
-          FAKE_NPI_NUMBER,
-          FAKE_NPI_NUMBER,
-          FAKE_NPI_ORG_NAME,
-          FAKE_TAXONOMY_CODE,
-          FAKE_TAXONOMY_DISPLAY);
+          FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME, FAKE_TAXONOMY_CODE, FAKE_TAXONOMY_DISPLAY);
 
   /** Setup Before Each test method. */
   @BeforeEach
