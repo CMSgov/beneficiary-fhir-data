@@ -408,7 +408,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     Claim claim = fissClaimTransformerV2.transform(entity, true);
 
     R4ClaimSamhsaMatcher matcher =
-        new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2);
+        new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2, false);
 
     assertEquals(expectedResult, matcher.test(claim), testName + " " + errorMessagePostFix);
   }
@@ -547,7 +547,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     Claim claim = mcsClaimTransformerV2.transform(entity, true);
 
     R4ClaimSamhsaMatcher matcher =
-        new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2);
+        new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2, false);
 
     assertEquals(expectedResult, matcher.test(claim), testName + " " + errorMessagePostFix);
   }
