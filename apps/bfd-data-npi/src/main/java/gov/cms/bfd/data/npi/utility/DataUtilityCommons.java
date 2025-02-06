@@ -244,8 +244,6 @@ public class DataUtilityCommons {
           .forEach(File::delete);
     } catch (IOException e) {
       LOGGER.warn("Failed to cleanup the temporary folder", e);
-    } finally {
-
     }
   }
 
