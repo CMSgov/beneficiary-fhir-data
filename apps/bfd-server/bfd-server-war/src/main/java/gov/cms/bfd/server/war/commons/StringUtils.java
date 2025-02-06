@@ -42,15 +42,15 @@ public class StringUtils {
   /**
    * Custom function to retrieve the boolean value from a string input.
    *
-   * @param input a String that needs to remove whitespace and commas.
-   * @return Split Array.
+   * @param requestDetails the request details.
+   * @param parameterToParse the parameter To Parse.
+   * @return true or false.
    */
-  public static Boolean parseBoolean(String[] input) {
-
-    return Optional.ofNullable(input)
-        .flatMap(params -> params.length > 0 ? Optional.of(params[0]) : Optional.empty())
+  public static List<Boolean> parseBooleansFromRequest(
+      RequestDetails requestDetails, String parameterToParse) {
+    return getParametersFromRequest(requestDetails, parameterToParse)
         .map(Boolean::parseBoolean)
-        .orElse(false);
+        .toList();
   }
 
   /**

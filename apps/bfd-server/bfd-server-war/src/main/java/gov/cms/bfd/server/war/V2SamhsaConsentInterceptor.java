@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.server.war.commons.StringUtils.parseBoolean;
+import static gov.cms.bfd.server.war.commons.StringUtils.parseBooleansFromRequest;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -56,8 +56,10 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
 
     // Determine if SAMHSA filtering is required from request parameters
     boolean excludeSamhsaParam =
-        parseBoolean(
-            theRequestDetails.getParameters().get(AbstractResourceProvider.EXCLUDE_SAMHSA));
+        parseBooleansFromRequest(theRequestDetails, AbstractResourceProvider.EXCLUDE_SAMHSA)
+            .stream()
+            .findFirst()
+            .orElse(false);
     boolean shouldFilterSamhsa =
         CommonTransformerUtils.shouldFilterSamhsa(
             String.valueOf(excludeSamhsaParam), theRequestDetails);
@@ -105,7 +107,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
    */
   private boolean isSamhsaSecurityTag(IBaseCoding securityTag) {
     String code = securityTag.getCode();
-    return TagCode._42CFRPart2.toString().equals(code);
+    return TagCode._42CFRPart2.toString().equalsIgnoreCase(code);
   }
 
   /**
