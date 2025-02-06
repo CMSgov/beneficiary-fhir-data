@@ -113,7 +113,6 @@ public class NPIOrgLookup {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
       ObjectMapper objectMapper = new ObjectMapper();
       while ((line = reader.readLine()) != null) {
-        // the first part of the line will be the NPI, and the second part is the json.
         JsonNode rootNode = objectMapper.readTree(line);
         String npi = rootNode.path("npi").asText();
         npiProcessedData.put(npi, line);
