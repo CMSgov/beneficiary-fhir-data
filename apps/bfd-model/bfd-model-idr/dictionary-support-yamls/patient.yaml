@@ -132,3 +132,4 @@
     - Patient
   targetElement: BFDPatient.identifier.period.end
   expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').period.end
+  
