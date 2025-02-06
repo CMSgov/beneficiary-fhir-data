@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -29,6 +30,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -158,7 +160,8 @@ public class CoverageResourceProvider implements IResourceProvider {
     if (!coverageIdSegment.isPresent()) throw new ResourceNotFoundException(coverageId);
     String coverageIdBeneficiaryIdText = coverageIdMatcher.group(2);
 
-    Long beneficiaryId = Long.parseLong(coverageIdBeneficiaryIdText);
+    Long beneficiaryId =
+        StringUtils.parseLongOrBadRequest(coverageIdBeneficiaryIdText, "Beneficiary ID");
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(beneficiaryId, null);
@@ -191,6 +194,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    *     and find matches for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param count an {@link OptionalParam} for the count used in pagination
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
@@ -212,6 +216,11 @@ public class CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "_lastUpdated")
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
@@ -219,7 +228,8 @@ public class CoverageResourceProvider implements IResourceProvider {
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
-    Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
+    Long beneficiaryId =
+        StringUtils.parseLongOrBadRequest(beneficiary.getIdPart(), "Beneficiary ID");
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiaryId, lastUpdated);
       coverages = coverageTransformer.transform(beneficiaryEntity);

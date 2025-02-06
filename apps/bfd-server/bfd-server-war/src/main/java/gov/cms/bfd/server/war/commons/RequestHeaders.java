@@ -208,12 +208,7 @@ public class RequestHeaders {
    * @return the header value, returns false unless the value is "TRUE" (case-insensitive)
    */
   public static Boolean returnIncludeAddressFieldsValue(String headerValue) {
-    return (headerValue == null
-            || headerValue == ""
-            || headerValue.equalsIgnoreCase("FALSE")
-            || !headerValue.equalsIgnoreCase("TRUE"))
-        ? Boolean.FALSE
-        : Boolean.TRUE;
+    return "TRUE".equalsIgnoreCase(headerValue);
   }
 
   /**

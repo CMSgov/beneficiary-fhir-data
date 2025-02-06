@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -32,6 +33,7 @@ import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.StringUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -183,11 +185,13 @@ public class R4CoverageResourceProvider implements IResourceProvider {
     if (coverageIdMatcher.matches()) {
       profileUsed = Profile.C4BB;
       coverageIdSegmentText = coverageIdMatcher.group(1);
-      beneficiaryId = Long.parseLong(coverageIdMatcher.group(2));
+      beneficiaryId =
+          StringUtils.parseLongOrBadRequest(coverageIdMatcher.group(2), "Beneficiary ID");
     } else {
       profileUsed = Profile.C4DIC;
       coverageIdSegmentText = c4dicCoverageIdMatcher.group(1);
-      beneficiaryId = Long.parseLong(c4dicCoverageIdMatcher.group(2));
+      beneficiaryId =
+          StringUtils.parseLongOrBadRequest(c4dicCoverageIdMatcher.group(2), "Beneficiary ID");
     }
 
     coverageIdSegment = MedicareSegment.selectByUrlPrefix(coverageIdSegmentText, profileUsed);
@@ -233,6 +237,7 @@ public class R4CoverageResourceProvider implements IResourceProvider {
    *     and find matches for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param count an {@link OptionalParam} for the count used in pagination
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
@@ -255,6 +260,11 @@ public class R4CoverageResourceProvider implements IResourceProvider {
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "_lastUpdated")
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
@@ -267,7 +277,8 @@ public class R4CoverageResourceProvider implements IResourceProvider {
           String profile,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
-    Long beneficiaryId = Long.parseLong(beneficiary.getIdPart());
+    Long beneficiaryId =
+        StringUtils.parseLongOrBadRequest(beneficiary.getIdPart(), "Beneficiary ID");
 
     Profile chosenProfile =
         (this.enabledProfiles.contains(Profile.C4DIC) && profile != null)

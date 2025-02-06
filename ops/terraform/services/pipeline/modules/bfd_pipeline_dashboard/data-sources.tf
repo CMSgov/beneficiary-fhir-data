@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 data "external" "edt_or_est" {
   program = [
     "bash",

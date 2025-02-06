@@ -122,6 +122,7 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.failures",
             "FissClaimRdaSink.insertCount",
             "FissClaimRdaSink.lastSeq",
+            "FissClaimRdaSink.maxSeq",
             "FissClaimRdaSink.successes",
             "FissClaimRdaSink.transform.failures",
             "FissClaimRdaSink.transform.successes",

@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.protobuf.util.JsonFormat;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.BufferedReader;
@@ -165,6 +166,12 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     final var answer = nextMessage;
     nextMessage = null;
     return answer;
+  }
+
+  @Override
+  public ClaimSequenceNumberRange getSequenceNumberRange() {
+    // Can't easily support this since it would require deserializing the entire contents
+    return ClaimSequenceNumberRange.newBuilder().setLower(0).setUpper(0).build();
   }
 
   @Override

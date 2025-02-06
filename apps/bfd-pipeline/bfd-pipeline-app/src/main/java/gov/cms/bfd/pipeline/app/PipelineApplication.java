@@ -23,12 +23,13 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3FileManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3ManifestDbDao;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.PipelineOutcome;
+import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillJob;
@@ -69,6 +70,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,8 +81,12 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
  * the specified S3 bucket, parse it, and push it to the specified database server. See {@link
  * #main(String[])}.
  */
+@RequiredArgsConstructor
 public final class PipelineApplication {
   static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
+
+  /** EC2 client. */
+  private final AwsEc2Client ec2Client;
 
   /** This {@link System#exit(int)} value should be used when the application exits successfully. */
   static final int EXIT_CODE_SUCCESS = 0;
@@ -117,7 +123,7 @@ public final class PipelineApplication {
    *     variables)
    */
   public static void main(String[] args) {
-    int exitCode = new PipelineApplication().runPipelineAndHandleExceptions();
+    int exitCode = new PipelineApplication(new AwsEc2Client()).runPipelineAndHandleExceptions();
     System.exit(exitCode);
   }
 
@@ -130,7 +136,14 @@ public final class PipelineApplication {
   @VisibleForTesting
   int runPipelineAndHandleExceptions() {
     try {
-      runPipeline();
+      PipelineOutcome outcome = runPipeline();
+      if (outcome == PipelineOutcome.TERMINATE_INSTANCE) {
+        // When we trigger a scale-in, the instance gets terminated very quickly,
+        // so we should call this at the last minute after all log messages have been flushed.
+        // We can't schedule a scale-in in the future without causing a race condition that may
+        // prevent the next scale-out from happening.
+        ec2Client.scaleInNow();
+      }
       return EXIT_CODE_SUCCESS;
     } catch (FatalAppException ex) {
       if (ex.getCause() != null) {
@@ -165,8 +178,9 @@ public final class PipelineApplication {
    * @throws FatalAppException if app shutdown required
    * @throws IOException for I/O errors
    * @throws SQLException for database errors
+   * @return outcome
    */
-  private void runPipeline() throws FatalAppException, SQLException, IOException {
+  private PipelineOutcome runPipeline() throws FatalAppException, SQLException, IOException {
 
     LOGGER.info("Application starting up!");
     logTempDirectory();
@@ -193,7 +207,7 @@ public final class PipelineApplication {
     try (HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dataSourceFactory, appMetrics)) {
       logDatabaseDetails(pooledDataSource);
-      createJobsAndRunPipeline(appConfig, appMeters, appMetrics, pooledDataSource);
+      return createJobsAndRunPipeline(appConfig, appMeters, appMetrics, pooledDataSource);
     }
   }
 
@@ -306,9 +320,10 @@ public final class PipelineApplication {
    * @param appMeters the app meters
    * @param appMetrics the {@link MetricRegistry} to receive metrics
    * @param pooledDataSource our connection pool
+   * @return pipeline outcome
    * @throws FatalAppException if app shutdown required
    */
-  private void createJobsAndRunPipeline(
+  private PipelineOutcome createJobsAndRunPipeline(
       AppConfiguration appConfig,
       CompositeMeterRegistry appMeters,
       MetricRegistry appMetrics,
@@ -331,12 +346,17 @@ public final class PipelineApplication {
     pipelineManager.start();
     LOGGER.info("Job processing started.");
 
-    pipelineManager.awaitCompletion();
+    PipelineOutcome pipelineOutcome = pipelineManager.awaitCompletion();
+
+    // Ensures that any CloudWatch metrics are published prior to the stop of the Pipeline
+    appMeters.close();
 
     if (pipelineManager.getError() != null) {
       throw new FatalAppException(
           "Pipeline job threw exception", pipelineManager.getError(), EXIT_CODE_JOB_FAILED);
     }
+
+    return pipelineOutcome;
   }
 
   /**
@@ -579,17 +599,6 @@ public final class PipelineApplication {
       AwsClientConfig awsClientConfig,
       Clock clock)
       throws IOException {
-    /*
-     * Create the services that will be used to handle each stage in the extract, transform, and
-     * load process.  The task manager will be automatically closed by the job.
-     * TODO The task manager should be removed once s3 file movement is no longer necessary.
-     */
-    // Tell SQ it's ok not to use try-finally here since this will be closed by the DataSetQueue.
-    @SuppressWarnings("java:S2095")
-    final var s3TaskManager =
-        new S3TaskManager(
-            loadOptions.getExtractionOptions(),
-            new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig()));
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
@@ -598,7 +607,8 @@ public final class PipelineApplication {
      * each data set that is found.
      */
     DataSetMonitorListener dataSetMonitorListener =
-        new DefaultDataSetMonitorListener(appState.getMetrics(), rifProcessor, rifLoader);
+        new DefaultDataSetMonitorListener(
+            appState.getMetrics(), appState.getMeters(), rifProcessor, rifLoader);
     var s3Factory = new AwsS3ClientFactory(loadOptions.getExtractionOptions().getS3ClientConfig());
     // Tell SQ it's ok not to use try-finally here since this will be closed by the CcwRifLoadJob.
     @SuppressWarnings("java:S2095")
@@ -610,8 +620,7 @@ public final class PipelineApplication {
             new S3FileManager(
                 appState.getMetrics(),
                 s3Factory.createS3Dao(),
-                loadOptions.getExtractionOptions().getS3BucketName()),
-            s3TaskManager);
+                loadOptions.getExtractionOptions().getS3BucketName()));
     var statusReporter = createCcwRifLoadJobStatusReporter(loadOptions, awsClientConfig, clock);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(

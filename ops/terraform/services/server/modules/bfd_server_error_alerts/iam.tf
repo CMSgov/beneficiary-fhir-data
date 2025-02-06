@@ -1,10 +1,8 @@
 resource "aws_iam_policy" "logs" {
-  for_each = toset(["${local.alert_lambda_scheduler_name}", "${local.alerting_lambda_name}"])
-
-  name = "${each.key}-logs"
+  name = "${local.alerter_lambda_name}-logs"
   description = join("", [
-    "Permissions for the ${each.key} Lambda to write to its corresponding CloudWatch Log Group ",
-    "and Log Stream"
+    "Permissions for the ${local.alerter_lambda_name} Lambda to write to its corresponding ",
+    "CloudWatch Log Group and Log Stream"
   ])
 
   policy = jsonencode(
@@ -20,7 +18,7 @@ resource "aws_iam_policy" "logs" {
           Effect = "Allow"
           Action = ["logs:CreateLogStream", "logs:PutLogEvents"]
           Resource = [
-            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${each.key}:*"
+            "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${local.alerter_lambda_name}:*"
           ]
         }
       ]
@@ -28,44 +26,10 @@ resource "aws_iam_policy" "logs" {
   )
 }
 
-resource "aws_iam_policy" "scheduler" {
-  name = "${local.alert_lambda_scheduler_name}-scheduler"
-  description = join("", [
-    "Permissions for ${local.alert_lambda_scheduler_name} to create and delete schedules within ",
-    "the ${aws_scheduler_schedule_group.this.name} schedule group, list all schedules, and pass ",
-    "the ${aws_iam_role.scheduler_assume_role.name} role to EventBridge Scheduler"
-  ])
-
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Effect   = "Allow"
-          Action   = ["scheduler:CreateSchedule", "scheduler:DeleteSchedule"]
-          Resource = ["arn:aws:scheduler:${local.region}:${local.account_id}:schedule/${aws_scheduler_schedule_group.this.name}/*"]
-        },
-        # Unfortunately, ListSchedules does not support any resource-level restrictions
-        # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazoneventbridgescheduler.html#amazoneventbridgescheduler-schedule
-        {
-          Effect   = "Allow"
-          Action   = ["scheduler:ListSchedules"]
-          Resource = ["*"]
-        },
-        {
-          Effect   = "Allow"
-          Action   = ["iam:PassRole"]
-          Resource = [aws_iam_role.scheduler_assume_role.arn]
-        }
-      ]
-    }
-  )
-}
-
 resource "aws_iam_policy" "read_log" {
-  name = "${local.alerting_lambda_name}-read-logs"
+  name = "${local.alerter_lambda_name}-read-logs"
   description = join("", [
-    "Permissions for ${local.alerting_lambda_name} to start and retrieve the results of a Log ",
+    "Permissions for ${local.alerter_lambda_name} to start and retrieve the results of a Log ",
     "Insights query against the ${local.access_json_log_group_name} CloudWatch Log Group"
   ])
 
@@ -74,8 +38,8 @@ resource "aws_iam_policy" "read_log" {
       Version = "2012-10-17"
       Statement = [
         {
-          Effect   = "Allow"
-          Action   = ["logs:StartQuery"]
+          Effect = "Allow"
+          Action = ["logs:StartQuery"]
           Resource = [
             "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.access_json_log_group_name}",
             "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.access_json_log_group_name}:log-stream:*",
@@ -93,12 +57,11 @@ resource "aws_iam_policy" "read_log" {
   )
 }
 
-
 resource "aws_iam_policy" "invoke_alerter" {
   name = "${local.name_prefix}-scheduler-assumee-allow-lambda-invoke"
   description = join("", [
     "Permissions for EventBridge Scheduler assumed role to invoke the ",
-    "${local.alerting_lambda_name} Lambda"
+    "${local.alerter_lambda_name} Lambda"
   ])
 
   policy = jsonencode(
@@ -108,20 +71,17 @@ resource "aws_iam_policy" "invoke_alerter" {
         {
           Effect   = "Allow"
           Action   = "lambda:InvokeFunction"
-          Resource = aws_lambda_function.alerting_lambda.arn
+          Resource = aws_lambda_function.alerter_lambda.arn
         }
       ]
     }
   )
 }
 
-
-resource "aws_iam_role" "lambda_roles" {
-  for_each = toset(["${local.alert_lambda_scheduler_name}", "${local.alerting_lambda_name}"])
-
-  name        = each.key
+resource "aws_iam_role" "alerter_lambda_role" {
+  name        = local.alerter_lambda_name
   path        = "/"
-  description = "Role for ${each.key} Lambda"
+  description = "Role for ${local.alerter_lambda_name} Lambda"
 
   assume_role_policy = jsonencode(
     {
@@ -142,11 +102,11 @@ resource "aws_iam_role" "lambda_roles" {
 }
 
 resource "aws_iam_role" "scheduler_assume_role" {
-  name = "${local.name_prefix}-scheduler-assumee"
+  name = "${local.name_prefix}-scheduler-assume"
   path = "/"
   description = join("", [
     "Role for EventBridge Scheduler to assume allowing permissions to invoke the ",
-    "${local.alerting_lambda_name} Lambda"
+    "${local.alerter_lambda_name} Lambda"
   ])
 
   assume_role_policy = jsonencode(
@@ -167,21 +127,14 @@ resource "aws_iam_role" "scheduler_assume_role" {
   force_detach_policies = true
 }
 
-resource "aws_iam_role_policy_attachment" "logs_to_lambda_roles" {
-  for_each = toset(["${local.alert_lambda_scheduler_name}", "${local.alerting_lambda_name}"])
-
-  role       = aws_iam_role.lambda_roles[each.key].name
-  policy_arn = aws_iam_policy.logs[each.key].arn
+resource "aws_iam_role_policy_attachment" "logs_to_alerter_lambda_role" {
+  role       = aws_iam_role.alerter_lambda_role.name
+  policy_arn = aws_iam_policy.logs.arn
 }
 
-resource "aws_iam_role_policy_attachment" "read_log_to_alerter_role" {
-  role       = aws_iam_role.lambda_roles[local.alerting_lambda_name].name
+resource "aws_iam_role_policy_attachment" "read_log_to_alerter_lambda_role" {
+  role       = aws_iam_role.alerter_lambda_role.name
   policy_arn = aws_iam_policy.read_log.arn
-}
-
-resource "aws_iam_role_policy_attachment" "scheduler_to_alert_scheduler_role" {
-  role       = aws_iam_role.lambda_roles[local.alert_lambda_scheduler_name].name
-  policy_arn = aws_iam_policy.scheduler.arn
 }
 
 resource "aws_iam_role_policy_attachment" "invoke_alerter_to_scheduler_assume_role" {

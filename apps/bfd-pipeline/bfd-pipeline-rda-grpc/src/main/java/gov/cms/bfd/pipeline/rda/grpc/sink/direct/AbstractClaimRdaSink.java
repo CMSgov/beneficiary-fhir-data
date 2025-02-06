@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -237,6 +238,11 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     metrics.successes.increment();
     metrics.objectsWritten.increment(claims.size());
     return claims.size();
+  }
+
+  @Override
+  public void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange) {
+    metrics.setMaxSequenceNumber(sequenceNumberRange.getUpper());
   }
 
   /**
@@ -528,7 +534,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     /** Tracks the number of updates per database transaction. */
     private final DistributionSummary dbBatchSize;
 
-    /** Latest sequnce number from writing a batch. * */
+    /** Latest sequence number from writing a batch. * */
     private final AtomicLong latestSequenceNumber;
 
     /** The value returned by the latestSequenceNumber gauge. * */
@@ -536,6 +542,12 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
 
     /** The number of insert statements executed. */
     private final DistributionSummary insertCount;
+
+    /** Maximum available sequence number. */
+    private final AtomicLong maxSequenceNumber;
+
+    /** The value returned by the maxSequenceNumber gauge. */
+    private final AtomicLong maxSequenceNumberValue;
 
     /**
      * Initializes all the metrics.
@@ -563,6 +575,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       latestSequenceNumber = GAUGES.getGaugeForName(appMetrics, latestSequenceNumberGaugeName);
       latestSequenceNumberValue = GAUGES.getValueForName(latestSequenceNumberGaugeName);
       insertCount = appMetrics.summary(MetricRegistry.name(base, "insertCount"));
+      String maxSequenceNumberGaugeName = MetricRegistry.name(base, "maxSeq");
+      maxSequenceNumber = GAUGES.getGaugeForName(appMetrics, maxSequenceNumberGaugeName);
+      maxSequenceNumberValue = GAUGES.getValueForName(maxSequenceNumberGaugeName);
     }
 
     /**
@@ -573,6 +588,15 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     @VisibleForTesting
     void setLatestSequenceNumber(long value) {
       latestSequenceNumberValue.set(value);
+    }
+
+    /**
+     * Sets the {@link #maxSequenceNumber}.
+     *
+     * @param value value to set
+     */
+    void setMaxSequenceNumber(long value) {
+      maxSequenceNumberValue.set(value);
     }
   }
 }

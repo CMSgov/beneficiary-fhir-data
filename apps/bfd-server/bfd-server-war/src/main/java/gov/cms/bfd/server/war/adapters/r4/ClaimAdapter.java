@@ -26,7 +26,11 @@ public class ClaimAdapter implements FhirResource {
     this.claim = claim;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Returns the {@link SupportingInfoComponent} for the claim.
+   *
+   * @return supporting info
+   */
   public List<SupportingInfoComponent> getSupportingInfo() {
     return claim.getSupportingInfo().stream()
         .map(ClaimAdapter.SupportingInfoAdapter::new)

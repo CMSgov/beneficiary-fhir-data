@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rda.MessageError;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -374,7 +375,19 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * auto-generated aggregate metric names with suffixes like {@code .avg}.
    */
   public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
-      Set.of("FissClaimRdaSink.change.latency.millis", "McsClaimRdaSink.change.latency.millis");
+      Set.of(
+          "FissClaimRdaSink.change.latency.millis",
+          "McsClaimRdaSink.change.latency.millis",
+          "FissClaimRdaSink.lastSeq",
+          "McsClaimRdaSink.lastSeq",
+          "FissClaimRdaSink.maxSeq",
+          "McsClaimRdaSink.maxSeq",
+          CcwRifLoadJob.Metrics.DATASET_PROCESSING_ACTIVE_TIMER_NAME,
+          CcwRifLoadJob.Metrics.DATASET_PROCESSING_TOTAL_TIMER_NAME,
+          CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_ACTIVE_TIMER_NAME,
+          CcwRifLoadJob.Metrics.MANIFEST_PROCESSING_TOTAL_TIMER_NAME,
+          DefaultDataSetMonitorListener.Metrics.RIF_FILE_PROCESSING_ACTIVE_TIMER_NAME,
+          DefaultDataSetMonitorListener.Metrics.RIF_FILE_PROCESSING_TOTAL_TIMER_NAME);
 
   /** Config value for SAMHSA backfill enabled. */
   public static final String SSM_PATH_SAMHSA_BACKFILL_ENABLED = "rda/samhsa/backfill/enabled";

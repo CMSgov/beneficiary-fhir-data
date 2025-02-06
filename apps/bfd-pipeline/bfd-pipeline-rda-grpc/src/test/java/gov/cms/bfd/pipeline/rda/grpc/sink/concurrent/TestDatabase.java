@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.model.dsl.codegen.library.DataTransformer;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
@@ -192,6 +193,9 @@ public class TestDatabase {
     public void updateLastSequenceNumber(long lastSequenceNumber) {
       setLastSequenceNumber(lastSequenceNumber);
     }
+
+    @Override
+    public void updateSequenceNumberRange(ClaimSequenceNumberRange sequenceNumberRange) {}
 
     /** {@inheritDoc} */
     @Override

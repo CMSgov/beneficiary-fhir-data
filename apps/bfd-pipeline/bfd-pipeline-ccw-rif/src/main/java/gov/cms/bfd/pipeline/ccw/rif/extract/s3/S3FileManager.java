@@ -61,7 +61,7 @@ public class S3FileManager implements AutoCloseable {
   /**
    * Deletes all cached files.
    *
-   * @throws Exception pass through in case of errrors
+   * @throws Exception pass through in case of errors
    */
   @Override
   public void close() throws Exception {

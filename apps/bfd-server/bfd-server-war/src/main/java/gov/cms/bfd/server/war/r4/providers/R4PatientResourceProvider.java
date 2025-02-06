@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.commons.StringUtils.parseIntOrBadRequest;
+import static gov.cms.bfd.server.war.commons.StringUtils.parseLongOrBadRequest;
 import static gov.cms.bfd.server.war.commons.StringUtils.splitOnCommas;
 import static java.util.Objects.requireNonNull;
 
@@ -10,6 +12,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -226,6 +229,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    *     Patient#getId()} to try and find a matching {@link Patient} for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param count an {@link OptionalParam} used for paging
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
@@ -247,6 +251,11 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "_lastUpdated")
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_VALUE,
@@ -272,7 +281,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
       if (RequestTypeEnum.POST != requestDetails.getRequestType()) {
         throw new InvalidRequestException(
             String.format(
-                "Search query by '%s' is onlu supported in POST request",
+                "Search query by '%s' is only supported in POST request",
                 TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED));
       }
     } else if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty()) {
@@ -298,7 +307,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
           beneId = id.isPresent() ? Long.parseLong(id.get().getValue()) : 0;
         }
       } else {
-        beneId = Long.parseLong(logicalId.getValue());
+        beneId = parseLongOrBadRequest(logicalId.getValue(), "Patient ID");
         if (loadedFilterManager.isResultSetEmpty(beneId, lastUpdated)) {
           // Add bene_id to MDC logs when _lastUpdated filter is in effect
           LoggingUtils.logBeneIdToMdc(beneId);
@@ -350,6 +359,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @param coverageId the coverage id
    * @param referenceYear the reference year
    * @param cursor the cursor for paging
+   * @param count the count for paging
    * @param requestDetails the request details
    * @return the bundle representing the results
    */
@@ -357,7 +367,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
   @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle searchByCoverageContract(
-      // This is very explicit as a place holder until this kind
+      // This is very explicit as a placeholder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
           @Description(
@@ -374,6 +384,11 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
               shortDefinition = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_SHORT,
               value = OpenAPIContentProvider.PATIENT_PARTD_CURSOR_VALUE)
           String cursor,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       RequestDetails requestDetails) {
 
     String contractMonth =
@@ -389,11 +404,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
        * `else` on this
        * needs to become an invalid request.
        */
-      try {
-        year = Integer.parseInt(referenceYear.getValueNotNull());
-      } catch (NumberFormatException e) {
-        throw new InvalidRequestException("Contract year must be a number.", e);
-      }
+      year = parseIntOrBadRequest(referenceYear.getValueNotNull(), "Contract Year");
     }
 
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
@@ -409,7 +420,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @return the bundle representing the results
    */
   public Bundle searchByCoverageContractByFieldName(
-      // This is very explicit as a place holder until this kind
+      // This is very explicit as a placeholder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
           @Description(
@@ -420,7 +431,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
-    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails);
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContract");
@@ -676,6 +687,7 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    *     Patient#getIdentifier()} to try and find a matching {@link Patient} for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param count an {@link OptionalParam} for the record count used for pagination
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
    *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
@@ -697,6 +709,11 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
               shortDefinition = OpenAPIContentProvider.PATIENT_START_INDEX_SHORT,
               value = OpenAPIContentProvider.PATIENT_START_INDEX_VALUE)
           String startIndex,
+      @OptionalParam(name = Constants.PARAM_COUNT)
+          @Description(
+              shortDefinition = OpenAPIContentProvider.COUNT_SHORT,
+              value = OpenAPIContentProvider.COUNT_VALUE)
+          String count,
       @OptionalParam(name = "_lastUpdated")
           @Description(
               shortDefinition = OpenAPIContentProvider.PATIENT_LAST_UPDATED_SHORT,
@@ -994,13 +1011,13 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    */
   @Trace
   private Bundle searchByCoverageContractAndYearMonth(
-      // This is very explicit as a place holder until this kind
+      // This is very explicit as a placeholder until this kind
       // of relational search is more common.
       TokenParam coverageId, LocalDate yearMonth, RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails);
 
     CanonicalOperation operation = new CanonicalOperation(CanonicalOperation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContractForYearMonth");

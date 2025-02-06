@@ -18,6 +18,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,6 +215,7 @@ class S3DaoIT extends AbstractLocalStackTest {
     // Create a bunch of random files at random paths
     // Random seed is arbitrary but fixed so test runs consistently.
     final var random = new Random(1000);
+    final var now = Instant.now();
     final var directories = List.of("/a/", "/a/c/", "/d/e/f/");
     final var files = new HashMap<String, S3Dao.S3ObjectSummary>();
     for (int i = 1; i <= 50; ++i) {
@@ -225,6 +227,7 @@ class S3DaoIT extends AbstractLocalStackTest {
 
       // upload the file and stash its summary for use below
       var summary = s3Dao.putObject(bucket, key, new byte[size], Map.of());
+      summary.setLastModified(now);
       files.put(key, summary);
     }
 
@@ -239,6 +242,9 @@ class S3DaoIT extends AbstractLocalStackTest {
 
       // download a list using default (large) page size
       final var actual = s3Dao.listObjects(bucket, directory).collect(Collectors.toSet());
+      for (var object : actual) {
+        object.setLastModified(now);
+      }
       assertEquals(expected, actual);
     }
 
@@ -247,11 +253,18 @@ class S3DaoIT extends AbstractLocalStackTest {
 
     // download a list with no prefix using default (large) page size
     final var actual = s3Dao.listObjects(bucket).collect(Collectors.toSet());
+    for (var object : actual) {
+      object.setLastModified(now);
+    }
+
     assertEquals(expected, actual);
 
     // download a list with no prefix using tiny page size, should still be the same
     final var paged =
         s3Dao.listObjects(bucket, Optional.empty(), Optional.of(2)).collect(Collectors.toSet());
+    for (var object : paged) {
+      object.setLastModified(now);
+    }
     assertEquals(expected, paged);
   }
 
