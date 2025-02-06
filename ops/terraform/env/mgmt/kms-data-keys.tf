@@ -128,6 +128,52 @@ data "aws_iam_policy_document" "data_keys" {
     resources = ["*"]
   }
 
+  # Allow RDS app autoscaling to use the key to encrypt/decrypt data, specifically for Performance
+  # Insights
+  statement {
+    sid    = "AllowRdsKeyUsage"
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${local.account_id}:role/aws-service-role/rds.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_RDSCluster"
+      ]
+    }
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey",
+      "kms:GenerateDataKeyWithoutPlaintext",
+      "kms:DescribeKey",
+    ]
+    resources = ["*"]
+  }
+
+  # Allow RDS app autoscaling to create and revoke grants for the key, specifically for Performance
+  # Insights
+  statement {
+    sid    = "AllowRdsGrantUsage"
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${local.account_id}:role/aws-service-role/rds.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_RDSCluster"
+      ]
+    }
+    actions = [
+      "kms:CreateGrant",
+      "kms:ListGrants",
+      "kms:RevokeGrant",
+    ]
+    condition {
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values   = ["true"]
+    }
+    resources = ["*"]
+  }
+
   # Allow cloudwatch to use the key to decrypt data
   statement {
     sid    = "AllowCloudWatchKeyUsage"

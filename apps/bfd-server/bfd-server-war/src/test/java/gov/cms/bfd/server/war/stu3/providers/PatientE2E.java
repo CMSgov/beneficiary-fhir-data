@@ -772,6 +772,43 @@ public class PatientE2E extends PatientE2EBase {
         .get(requestString);
   }
 
+  /** Tests the pagination links using a POST request with the pagination info in the POST body. */
+  @Test
+  public void testPatientByPartDContractWhenPaginationExpectPagingLinksPost() {
+    ServerTestUtils.get()
+        .loadData(
+            Arrays.asList(
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
+    Map<String, String> formParams =
+        Map.of("_has:Coverage.extension", contractId, "_has:Coverage.rfrncyr", refYear);
+    String requestString = patientEndpoint + "_search?_count=1";
+
+    given()
+        .spec(requestAuth)
+        .header(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "mbi")
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .formParams(formParams)
+        .expect()
+        .log()
+        .body()
+        .body("resourceType", equalTo("Bundle"))
+        // Should match the paging size
+        .body("entry.size()", equalTo(1))
+        // Check pagination has the right number of links
+        .body("link.size()", equalTo(2))
+        /* Patient (specifically search by contract) uses different paging
+        than all other resources, due to using bene id cursors.
+        There is no "last" page or "previous", only first/next/self
+        */
+        .body("link.relation", hasItems("first", "self"))
+        .statusCode(200)
+        .when()
+        .post(requestString);
+  }
+
   /**
    * Gets the hashed HICN based on the passed unhashed HICN value using the loaded data to look for
    * the corresponding mbi hash. Will pull from the bene history data instead of beneficiary if

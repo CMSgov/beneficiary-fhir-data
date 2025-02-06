@@ -19,7 +19,8 @@ public final class AppTest {
             () -> {
               App.main(new String[] {});
             });
-    assertEquals("OUTPUT_DIR argument not specified for FDA NDC download.", exception.getMessage());
+    assertEquals(
+        "Invalid number of arguments supplied for FDA NDC download.", exception.getMessage());
   }
 
   /** Return illegal argument exception when more than one arguments are passed. */
@@ -29,7 +30,7 @@ public final class AppTest {
         assertThrows(
             IllegalArgumentException.class,
             () -> {
-              App.main(new String[] {"Argument 1", "Argument 2"});
+              App.main(new String[] {"Argument 1", "Argument 2", "Argument 3"});
             });
     assertEquals("Invalid arguments supplied for FDA NDC download.", exception.getMessage());
   }
@@ -41,7 +42,7 @@ public final class AppTest {
         assertThrows(
             IllegalStateException.class,
             () -> {
-              App.main(new String[] {"Argument 1"});
+              App.main(new String[] {"Argument 1", "1.0.0"});
             });
     assertEquals("OUTPUT_DIR does not exist for FDA NDC download.", exception.getMessage());
   }
@@ -55,13 +56,13 @@ public final class AppTest {
       String expectedFdaFile = App.FDA_PRODUCTS_RESOURCE;
 
       dataUtilityCommons
-          .when(() -> DataUtilityCommons.getFDADrugCodes(any(), any()))
+          .when(() -> DataUtilityCommons.getFDADrugCodes(any(), any(), any()))
           .thenAnswer((Answer<Void>) invocation -> null);
-      App.main(new String[] {outputDir});
+      App.main(new String[] {outputDir, "1.0.0"});
 
       // Verify that DataUtilityCommons.getFDADrugCodes was called with specific arguments
       dataUtilityCommons.verify(
-          () -> DataUtilityCommons.getFDADrugCodes(outputDir, expectedFdaFile));
+          () -> DataUtilityCommons.getFDADrugCodes(outputDir, "1.0.0", expectedFdaFile));
     }
   }
 }

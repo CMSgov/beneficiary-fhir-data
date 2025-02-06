@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.protobuf.Timestamp;
 import gov.cms.mpsm.rda.v1.ChangeType;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.RecordSource;
 import java.time.Clock;
@@ -87,6 +88,11 @@ public class RandomFissClaimSource implements MessageSource<FissClaimChange> {
             .setSource(source)
             .build();
     return change;
+  }
+
+  @Override
+  public ClaimSequenceNumberRange getSequenceNumberRange() {
+    return ClaimSequenceNumberRange.newBuilder().setLower(0).setUpper(maxToSend).build();
   }
 
   @Override

@@ -220,6 +220,28 @@ public class ClaimE2E extends ServerRequiredTest {
     verifyResponseMatchesFor(requestString, false, "claimSearch", MBI_IGNORE_PATTERNS);
   }
 
+  /** Tests the search response when using a POST request. */
+  @Test
+  public void shouldGetCorrectClaimResourcesByMbiPost() {
+    // Sending multiple entries with the same key doesn't appear to work in the POST body
+    String requestString = claimEndpoint + "_search";
+
+    // NOTE: Sending multiple values only works with List<String> as the map value, not String[]
+    // because Rest Assured specifically looks for types that extend Collection
+    verifyPostResponseMatchesFor(
+        requestString,
+        Map.of(
+            "mbi",
+            List.of(RDATestUtils.MBI),
+            "isHashed",
+            List.of("false"),
+            "service-date",
+            List.of("gt1970-07-18", "lt1970-07-25")),
+        false,
+        "claimSearch",
+        MBI_IGNORE_PATTERNS);
+  }
+
   /**
    * Tests to see if the correct response is given when a search is done for {@link Claim}s using
    * given mbi and service-date range with tax numbers included. In this test case the query finds
@@ -452,6 +474,42 @@ public class ClaimE2E extends ServerRequiredTest {
             .statusCode(200)
             .when()
             .get(requestString)
+            .then()
+            .extract()
+            .response()
+            .asString();
+
+    String expected = rdaTestUtils.expectedResponseFor(expectedResponseFileName);
+
+    AssertUtils.assertJsonEquals(expected, response, ignorePatterns);
+  }
+
+  /**
+   * Verifies the Claim response for the given requestString returns a 200 and the json response
+   * matches the expected response file.
+   *
+   * @param requestString the request string to search with
+   * @param formParams form POST params
+   * @param includeTaxNumbers the value to use for IncludeTaxNumbers header
+   * @param expectedResponseFileName the name of the response file to compare against
+   * @param ignorePatterns the ignore patterns to use when comparing the result file to the response
+   */
+  private void verifyPostResponseMatchesFor(
+      String requestString,
+      Map<String, ?> formParams,
+      boolean includeTaxNumbers,
+      String expectedResponseFileName,
+      Set<String> ignorePatterns) {
+
+    String response =
+        given()
+            .spec(requestAuth)
+            .formParams(formParams)
+            .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, includeTaxNumbers)
+            .expect()
+            .statusCode(200)
+            .when()
+            .post(requestString)
             .then()
             .extract()
             .response()

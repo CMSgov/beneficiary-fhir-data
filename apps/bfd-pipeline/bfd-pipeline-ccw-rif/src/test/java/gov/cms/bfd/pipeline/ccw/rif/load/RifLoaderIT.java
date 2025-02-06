@@ -916,7 +916,6 @@ public final class RifLoaderIT {
             0,
             true,
             "DummyIn",
-            "DummyOut",
             new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 
     // setup the preValidationProperties; use values data that we know don't already

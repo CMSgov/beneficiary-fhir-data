@@ -3,6 +3,8 @@ package gov.cms.bfd.pipeline.app;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.PipelineOutcome;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingConsumer;
 import jakarta.annotation.Nullable;
 import java.time.Clock;
@@ -50,6 +52,9 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
 
   /** Recent job results for use by tests. */
   private final LinkedList<PipelineJobRunner.JobRunSummary> completedJobs;
+
+  /** Termination requested. */
+  private boolean terminationRequested = false;
 
   /**
    * True if all jobs are interruptable. When false we can't interrupt the pool for faster
@@ -144,8 +149,10 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * <p>External causes like jobs completing on their own or calls to {@link #stop} from the
    * shutdown handler will cause the pool to shut down gracefully while we wait and thus allow us to
    * return.
+   *
+   * @return outcome.
    */
-  public void awaitCompletion() {
+  public PipelineOutcome awaitCompletion() {
     // Calls to the latch are automatically synchronized on the latch.
     while (latch.getCount() > 0) {
       try {
@@ -170,6 +177,12 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
       }
     }
     log.info("pool has terminated");
+
+    if (this.terminationRequested) {
+      return PipelineOutcome.TERMINATE_INSTANCE;
+    } else {
+      return PipelineOutcome.STOP_SERVICE;
+    }
   }
 
   /**
@@ -287,8 +300,11 @@ public class PipelineManager implements PipelineJobRunner.Tracker {
    * @param job the job that has stopped
    */
   @Override
-  public void stopped(PipelineJob job) {
+  public void stopped(PipelineJob job, PipelineJobOutcome outcome) {
     log.info("Job stopped: " + job.getType());
+    if (outcome == PipelineJobOutcome.SHOULD_TERMINATE) {
+      this.terminationRequested = true;
+    }
     latch.countDown();
   }
 

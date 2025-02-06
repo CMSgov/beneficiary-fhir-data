@@ -350,7 +350,7 @@ public class R4PatientResourceProviderTest {
    */
   @Test
   public void testSearchByCoverageContractWhenValidContractExpectMetrics() {
-    patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+    patientProvider.searchByCoverageContract(contractId, refYear, null, null, requestDetails);
 
     // Three queries are made with metrics here
     String expectedTimerName =
@@ -377,7 +377,7 @@ public class R4PatientResourceProviderTest {
   @Test
   public void testSearchByCoverageContractWhenContractExistsExpectTransformerCalled() {
     Bundle response =
-        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+        patientProvider.searchByCoverageContract(contractId, refYear, null, null, requestDetails);
 
     assertEquals(1, response.getTotal());
     verify(beneficiaryTransformerV2, times(1)).transform(eq(testBene), any());
@@ -398,7 +398,7 @@ public class R4PatientResourceProviderTest {
   @Test
   public void testSearchByCoverageContractWhenNoPagingRequestedExpectNoPageData() {
     Bundle response =
-        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+        patientProvider.searchByCoverageContract(contractId, refYear, null, null, requestDetails);
 
     /*
      * Check that no paging was added
@@ -419,9 +419,11 @@ public class R4PatientResourceProviderTest {
     // Apparently the contract endpoint gets the count from the request url instead of how the other
     // endpoints do
     when(requestDetails.getCompleteUrl()).thenReturn("https://test?_count=1");
+    when(requestDetails.getParameters()).thenReturn(Map.of("_count", new String[] {"1"}));
     // Note: cursor in the param is not used, must be passed from requestDetails
+
     Bundle response =
-        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+        patientProvider.searchByCoverageContract(contractId, refYear, null, null, requestDetails);
 
     /*
      * Check paging; Paging on contract also apparently returns differently
@@ -444,7 +446,7 @@ public class R4PatientResourceProviderTest {
     when(mockQuery.getResultList()).thenReturn(new ArrayList());
 
     Bundle response =
-        patientProvider.searchByCoverageContract(contractId, refYear, null, requestDetails);
+        patientProvider.searchByCoverageContract(contractId, refYear, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
   }
@@ -462,8 +464,9 @@ public class R4PatientResourceProviderTest {
             InvalidRequestException.class,
             () ->
                 patientProvider.searchByCoverageContract(
-                    contractId, refYear, null, requestDetails));
-    assertEquals("Contract year must be a number.", exception.getLocalizedMessage());
+                    contractId, refYear, null, null, requestDetails));
+    assertEquals(
+        "Failed to parse value for Contract Year as a number.", exception.getLocalizedMessage());
   }
 
   /**
@@ -479,7 +482,7 @@ public class R4PatientResourceProviderTest {
             InvalidRequestException.class,
             () ->
                 patientProvider.searchByCoverageContract(
-                    contractId, refYear, null, requestDetails));
+                    contractId, refYear, null, null, requestDetails));
     assertEquals(
         "Coverage id is not expected length; value 123 is not expected length 5",
         exception.getLocalizedMessage());
@@ -497,7 +500,8 @@ public class R4PatientResourceProviderTest {
     when(testPatient.getMeta()).thenReturn(mockMeta);
     when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
 
-    Bundle response = patientProvider.searchByLogicalId(logicalId, null, null, requestDetails);
+    Bundle response =
+        patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails);
 
     assertEquals(testPatient, response.getEntry().get(0).getResource());
     verify(beneficiaryTransformerV2, times(1)).transform(eq(testBene), any(), eq(true));
@@ -512,7 +516,8 @@ public class R4PatientResourceProviderTest {
     when(loadedFilterManager.getTransactionTime()).thenReturn(Instant.now());
     when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
 
-    Bundle response = patientProvider.searchByLogicalId(logicalId, null, null, requestDetails);
+    Bundle response =
+        patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
   }
@@ -535,7 +540,8 @@ public class R4PatientResourceProviderTest {
     params.put(Constants.PARAM_COUNT, new String[] {"1"});
     when(requestDetails.getParameters()).thenReturn(params);
     // Note: startIndex in the param is not used, must be passed from requestDetails
-    Bundle response = patientProvider.searchByLogicalId(logicalId, null, null, requestDetails);
+    Bundle response =
+        patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails);
 
     /*
      * Check paging; Verify that only the first and last paging links exist, since there should
@@ -557,7 +563,8 @@ public class R4PatientResourceProviderTest {
     // Set no paging params
     Map<String, String[]> params = new HashMap<>();
     when(requestDetails.getParameters()).thenReturn(params);
-    Bundle response = patientProvider.searchByLogicalId(logicalId, null, null, requestDetails);
+    Bundle response =
+        patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails);
 
     /*
      * Check that no paging was added
@@ -580,7 +587,7 @@ public class R4PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByLogicalId(logicalId, null, null, requestDetails));
+            () -> patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails));
     assertEquals("Missing required id value", exception.getLocalizedMessage());
   }
 
@@ -596,7 +603,7 @@ public class R4PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByLogicalId(logicalId, null, null, requestDetails));
+            () -> patientProvider.searchByLogicalId(logicalId, null, null, null, requestDetails));
     assertEquals(
         "System is unsupported here and should not be set (system)",
         exception.getLocalizedMessage());
@@ -621,7 +628,7 @@ public class R4PatientResourceProviderTest {
     when(mockQueryFunction.getResultList()).thenReturn(rawValues);
 
     Bundle bundle =
-        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, null, requestDetails);
 
     assertEquals(1, bundle.getTotal());
 
@@ -646,7 +653,7 @@ public class R4PatientResourceProviderTest {
     when(requestDetails.getHeader(any())).thenReturn("");
 
     Bundle bundle =
-        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, null, requestDetails);
 
     /*
      * Check that no paging was added when not requested
@@ -671,7 +678,7 @@ public class R4PatientResourceProviderTest {
     when(requestDetails.getParameters()).thenReturn(params);
     // Note: startIndex in the param is not used, must be passed from requestDetails
     Bundle bundle =
-        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, null, requestDetails);
 
     /*
      * Check paging; Verify that only the first and last paging links exist, since there should
@@ -693,7 +700,7 @@ public class R4PatientResourceProviderTest {
     when(mockQueryFunction.getSingleResult()).thenThrow(NoResultException.class);
 
     Bundle bundle =
-        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, requestDetails);
+        patientProvider.searchByIdentifier(mbiHashIdentifier, null, null, null, requestDetails);
 
     assertEquals(0, bundle.getTotal());
   }
@@ -711,7 +718,7 @@ public class R4PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
+            () -> patientProvider.searchByIdentifier(identifier, null, null, null, requestDetails));
     assertEquals("lookup value cannot be null/empty", exception.getLocalizedMessage());
   }
 
@@ -727,7 +734,7 @@ public class R4PatientResourceProviderTest {
     InvalidRequestException exception =
         assertThrows(
             InvalidRequestException.class,
-            () -> patientProvider.searchByIdentifier(identifier, null, null, requestDetails));
+            () -> patientProvider.searchByIdentifier(identifier, null, null, null, requestDetails));
     assertEquals("Unsupported identifier system: bad-system", exception.getLocalizedMessage());
   }
 }

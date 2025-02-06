@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -20,14 +22,14 @@ public final class PatientLinkBuilder implements LinkBuilder {
    */
   public static final int MAX_PAGE_SIZE = Integer.MAX_VALUE - 1;
 
-  /** The uri components. */
-  private final UriComponents components;
+  /** The request details. */
+  private final RequestDetails requestDetails;
 
   /** The count. */
-  private final Integer count;
+  private final Optional<Integer> count;
 
   /** The cursor value. */
-  private final Long cursor;
+  private final Optional<Long> cursor;
 
   /** If there is another page for this link. */
   private final boolean hasAnotherPage;
@@ -38,12 +40,14 @@ public final class PatientLinkBuilder implements LinkBuilder {
   /**
    * Instantiates a new Patient link builder.
    *
-   * @param requestString the request string
+   * @param requestDetails the request details
    */
-  public PatientLinkBuilder(String requestString) {
-    components = UriComponentsBuilder.fromUriString(requestString).build();
-    count = extractCountParam(components);
-    cursor = extractCursorParam(components);
+  public PatientLinkBuilder(RequestDetails requestDetails) {
+    this.requestDetails = requestDetails;
+    count =
+        StringUtils.parseIntegersFromRequest(requestDetails, Constants.PARAM_COUNT).stream()
+            .findFirst();
+    cursor = StringUtils.parseLongsFromRequest(requestDetails, PARAM_CURSOR).stream().findFirst();
     hasAnotherPage = false; // Don't really know, so default to false
     validate();
   }
@@ -55,7 +59,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
    * @param hasAnotherPage if there is another page
    */
   public PatientLinkBuilder(PatientLinkBuilder prev, boolean hasAnotherPage) {
-    components = prev.components;
+    requestDetails = prev.requestDetails;
     count = prev.count;
     cursor = prev.cursor;
     this.hasAnotherPage = hasAnotherPage;
@@ -71,7 +75,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
     if (getPageSize() <= 0) {
       throw new InvalidRequestException("Value for pageSize cannot be zero or negative: %s");
     }
-    if (!(getPageSize() <= MAX_PAGE_SIZE)) {
+    if (getPageSize() > MAX_PAGE_SIZE) {
       throw new InvalidRequestException("Page size must be less than " + MAX_PAGE_SIZE);
     }
   }
@@ -79,19 +83,19 @@ public final class PatientLinkBuilder implements LinkBuilder {
   /** {@inheritDoc} */
   @Override
   public boolean isPagingRequested() {
-    return count != null;
+    return count.isPresent();
   }
 
   /** {@inheritDoc} */
   @Override
   public int getPageSize() {
-    return isPagingRequested() ? count : MAX_PAGE_SIZE;
+    return isPagingRequested() ? count.get() : MAX_PAGE_SIZE;
   }
 
   /** {@inheritDoc} */
   @Override
   public boolean isFirstPage() {
-    return cursor == null || !isPagingRequested();
+    return cursor.isEmpty() || !isPagingRequested();
   }
 
   /** {@inheritDoc} */
@@ -104,13 +108,13 @@ public final class PatientLinkBuilder implements LinkBuilder {
     to.addLink(
         new Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_SELF)
-            .setUrl(components.toUriString()));
+            .setUrl(requestDetails.getCompleteUrl()));
     to.addLink(
         new Bundle.BundleLinkComponent().setRelation(Constants.LINK_FIRST).setUrl(buildUrl(null)));
 
     if (hasAnotherPage) {
-      Patient lastPatient = (Patient) entries.get(entries.size() - 1).getResource();
-      Long lastPatientId = Long.parseLong(lastPatient.getId());
+      Patient lastPatient = (Patient) entries.getLast().getResource();
+      Long lastPatientId = StringUtils.parseLongOrBadRequest(lastPatient.getId(), PARAM_CURSOR);
       to.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_NEXT)
@@ -128,15 +132,15 @@ public final class PatientLinkBuilder implements LinkBuilder {
     to.addLink(
         new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_SELF)
-            .setUrl(components.toUriString()));
+            .setUrl(requestDetails.getCompleteUrl()));
     to.addLink(
         new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_FIRST)
             .setUrl(buildUrl(null)));
 
-    if (entries.size() == getPageSize() && entries.size() > 0) {
+    if (entries.size() == getPageSize() && !entries.isEmpty()) {
       org.hl7.fhir.r4.model.Patient lastPatient =
-          (org.hl7.fhir.r4.model.Patient) entries.get(entries.size() - 1).getResource();
+          (org.hl7.fhir.r4.model.Patient) entries.getLast().getResource();
       Long lastPatientId = Long.parseLong(lastPatient.getId());
       to.addLink(
           new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
@@ -151,40 +155,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
    * @return the cursor
    */
   public Long getCursor() {
-    return cursor;
-  }
-
-  /**
-   * Extracts the count from the component object.
-   *
-   * @param components the components
-   * @return the count, or {@code null} if the count text was {@code null} in the compntent object
-   * @throws InvalidRequestException (http 400 error) if the count could not be parsed into an
-   *     integer
-   */
-  private Integer extractCountParam(UriComponents components) {
-    String countText = components.getQueryParams().getFirst(Constants.PARAM_COUNT);
-    if (countText != null) {
-      try {
-        return Integer.parseInt(countText);
-      } catch (NumberFormatException ex) {
-        throw new InvalidRequestException(
-            String.format(
-                "Invalid argument in request URL: %s must be a number.", Constants.PARAM_COUNT));
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Extracts the cursor from the component object.
-   *
-   * @param components the components
-   * @return the cursor, or {@code null} if the cursor text was {@code null} in the component object
-   */
-  private Long extractCursorParam(UriComponents components) {
-    String cursorText = components.getQueryParams().getFirst(PARAM_CURSOR);
-    return cursorText != null && cursorText.length() > 0 ? Long.parseLong(cursorText) : null;
+    return cursor.orElse(null);
   }
 
   /**
@@ -194,6 +165,8 @@ public final class PatientLinkBuilder implements LinkBuilder {
    * @return the url string
    */
   private String buildUrl(Long cursor) {
+    UriComponents components =
+        UriComponentsBuilder.fromUriString(requestDetails.getCompleteUrl()).build();
     MultiValueMap<String, String> params = components.getQueryParams();
     if (cursor != null) {
       params = new LinkedMultiValueMap<>(params);

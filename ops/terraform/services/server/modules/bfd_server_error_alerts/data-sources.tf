@@ -19,22 +19,12 @@ data "aws_ssm_parameter" "alerter_slack_webhook" {
   with_decryption = true
 }
 
-data "archive_file" "alert_lambda_scheduler_src" {
+data "archive_file" "alerter_lambda_src" {
   type        = "zip"
-  output_path = "${path.module}/lambda_src/${local.alert_lambda_scheduler_src}.zip"
+  output_path = "${path.module}/lambda_src/${local.alerter_lambda_src}.zip"
 
   source {
-    content  = file("${path.module}/lambda_src/${local.alert_lambda_scheduler_src}.py")
-    filename = "${local.alert_lambda_scheduler_src}.py"
-  }
-}
-
-data "archive_file" "alerting_lambda_src" {
-  type        = "zip"
-  output_path = "${path.module}/lambda_src/${local.alerting_lambda_src}.zip"
-
-  source {
-    content  = file("${path.module}/lambda_src/${local.alerting_lambda_src}.py")
-    filename = "${local.alerting_lambda_src}.py"
+    content  = file("${path.module}/lambda_src/${local.alerter_lambda_src}.py")
+    filename = "${local.alerter_lambda_src}.py"
   }
 }

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -266,13 +267,134 @@ public class PatientE2E extends PatientE2EBase {
         .get(requestString);
   }
 
+  /** Tests the pagination response using a POST request. */
+  @Test
+  public void testPatientByPartDContractWhenPaginationExpectPagingLinksPost() {
+    ServerTestUtils.get()
+        .loadData(
+            Arrays.asList(
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
+    Map<String, String> formParams =
+        Map.of("_has:Coverage.extension", contractId, "_has:Coverage.rfrncyr", refYear);
+    String requestString = patientEndpoint + "_search?_count=1";
+
+    Response response =
+        given()
+            .spec(requestAuth)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .formParams(formParams)
+            .expect()
+            .log()
+            .body()
+            .body("resourceType", equalTo("Bundle"))
+            // Should match the paging size
+            .body("entry.size()", equalTo(1))
+            // Check pagination has the right number of links
+            .body("link.size()", equalTo(3))
+            /* Patient (specifically search by contract) uses different paging
+            than all other resources, due to using bene id cursors.
+            There is no "last" page or "previous", only first/next/self
+            */
+            .body("link.relation", hasItems("first", "next", "self"))
+            .statusCode(200)
+            .when()
+            .post(requestString);
+
+    // Try to get the next page
+    String nextLink = testUtils.getPaginationLink(response, "next");
+
+    // However, there is no next page. V2 Patient contract pagination doesnt check this until its
+    // called
+    given()
+        .spec(requestAuth)
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .formParams(formParams)
+        .urlEncodingEnabled(false)
+        .expect()
+        .log()
+        .body()
+        .body("resourceType", equalTo("Bundle"))
+        // Check there were no additional results
+        .body("$", not(hasKey("entry")))
+        // We should only have first and self link now
+        .body("link.size()", equalTo(2))
+        .body("link.relation", hasItems("first", "self"))
+        .statusCode(200)
+        .when()
+        .post(nextLink);
+  }
+
+  /** Tests the pagination links using a POST request with the pagination info in the POST body. */
+  @Test
+  public void testPatientByPartDContractWhenPaginationExpectPagingLinksPostBody() {
+    ServerTestUtils.get()
+        .loadData(
+            Arrays.asList(
+                StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
+    String contractId =
+        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01) + "|S4607";
+    String refYear = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR) + "|2018";
+    Map<String, String> formParams =
+        Map.of(
+            "_has:Coverage.extension", contractId, "_has:Coverage.rfrncyr", refYear, "_count", "1");
+    String requestString = patientEndpoint + "_search";
+
+    Response response =
+        given()
+            .spec(requestAuth)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .formParams(formParams)
+            .expect()
+            .log()
+            .body()
+            .body("resourceType", equalTo("Bundle"))
+            // Should match the paging size
+            .body("entry.size()", equalTo(1))
+            // Check pagination has the right number of links
+            .body("link.size()", equalTo(3))
+            /* Patient (specifically search by contract) uses different paging
+            than all other resources, due to using bene id cursors.
+            There is no "last" page or "previous", only first/next/self
+            */
+            .body("link.relation", hasItems("first", "next", "self"))
+            .statusCode(200)
+            .when()
+            .post(requestString);
+
+    // Try to get the next page
+    String nextLink = testUtils.getPaginationLink(response, "next");
+
+    // However, there is no next page. V2 Patient contract pagination doesnt check this until its
+    // called
+    given()
+        .spec(requestAuth)
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .formParams(formParams)
+        .urlEncodingEnabled(false)
+        .expect()
+        .log()
+        .body()
+        .body("resourceType", equalTo("Bundle"))
+        // Check there were no additional results
+        .body("$", not(hasKey("entry")))
+        // We should only have first and self link now
+        .body("link.size()", equalTo(2))
+        .body("link.relation", hasItems("first", "self"))
+        .statusCode(200)
+        .when()
+        .post(nextLink);
+  }
+
   /**
    * Verifies that Patient searchByIdentifier returns a 200 when using HTTP POST with an unhashed
    * MBI.
    */
   @Test
   public void testPatientUsingPostByIdentifierUsingUnhashedMbi() {
-    List<Object> loadedRecords = loadDataWithAdditionalBeneHistory();
+    loadDataWithAdditionalBeneHistory();
 
     // _search needed to distinguish the POST version of the endpoint (HAPI-FHIR)
     String requestString = patientEndpoint + "_search";

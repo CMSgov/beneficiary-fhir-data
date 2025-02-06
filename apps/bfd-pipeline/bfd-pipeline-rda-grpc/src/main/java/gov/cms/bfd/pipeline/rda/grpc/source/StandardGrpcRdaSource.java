@@ -8,11 +8,13 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.DroppedConnectionException;
 import gov.cms.bfd.pipeline.sharedutils.MultiCloser;
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
 import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +51,12 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
 
   /** The type of RDA API server to connect to. */
   private final RdaSourceConfig.ServerType serverType;
+
+  /** The last sequence number range update timestamp. */
+  private Instant lastSequenceNumberRangeUpdate = Instant.MIN;
+
+  /** The interval to update the sequence number range. */
+  private static final Long SEQUENCE_NUMBER_RANGE_UPDATE_MILLIS = 5000L;
 
   /**
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
@@ -224,6 +232,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
                 } else if (sink.isValidMessage(result)) {
                   batch.put(sink.getClaimIdForMessage(result), result);
                   if (batch.size() >= maxPerBatch) {
+                    updateSequenceNumberRange(sink);
                     processResult.addCount(submitBatchToSink(apiVersion, sink, batch));
                   }
                   lastProcessedTime = clock.millis();
@@ -281,6 +290,22 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
             return processResult;
           }
         });
+  }
+
+  /**
+   * Updates the available sequence number range.
+   *
+   * @param sink RDA sink
+   */
+  private void updateSequenceNumberRange(RdaSink<TMessage, TClaim> sink) {
+    Instant now = Instant.now();
+    if (now.minusMillis(SEQUENCE_NUMBER_RANGE_UPDATE_MILLIS)
+        .isAfter(lastSequenceNumberRangeUpdate)) {
+      ClaimSequenceNumberRange sequenceNumberRange =
+          caller.callSequenceNumberRangeService(channel, callOptionsFactory.get());
+      sink.updateSequenceNumberRange(sequenceNumberRange);
+      this.lastSequenceNumberRangeUpdate = now;
+    }
   }
 
   /**

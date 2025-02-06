@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.mpsm.rda.v1.ClaimSequenceNumberRange;
+
 /**
  * Interface for objects that produce message objects from some source (e.g. a file, an array, a
  * database, etc). Mirrors the Iterator protocol but allows for unwrapped exceptions to be passed
@@ -36,4 +38,11 @@ public interface MessageSource<T> extends AutoCloseable {
    * @throws Exception if there is an issue getting the next claim
    */
   MessageSource<T> skipTo(long startingSequenceNumber) throws Exception;
+
+  /**
+   * Returns the current range of sequence numbers.
+   *
+   * @return sequence number range
+   */
+  ClaimSequenceNumberRange getSequenceNumberRange();
 }
