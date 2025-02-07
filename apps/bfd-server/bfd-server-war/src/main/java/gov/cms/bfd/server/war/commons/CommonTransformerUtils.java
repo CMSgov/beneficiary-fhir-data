@@ -346,19 +346,23 @@ public final class CommonTransformerUtils {
     if (npiOrgLookup != null) {
       Optional<NPIData> npiData = npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
       if (npiData.isPresent()) {
-        String[] name =
-            new String[] {
-              npiData.get().getProviderNamePrefix(),
-              npiData.get().getProviderFirstName(),
-              npiData.get().getProviderMiddleName(),
-              npiData.get().getProviderLastName(),
-              npiData.get().getProviderNameSuffix(),
-              npiData.get().getProviderCredential()
-            };
-        return Arrays.stream(name)
-            .map(Strings::trimToNull)
-            .filter(Objects::nonNull)
-            .collect(Collectors.joining(" "));
+        if (npiData.get().getEntityTypeCode().equals("1")) {
+          String[] name =
+              new String[] {
+                npiData.get().getProviderNamePrefix(),
+                npiData.get().getProviderFirstName(),
+                npiData.get().getProviderMiddleName(),
+                npiData.get().getProviderLastName(),
+                npiData.get().getProviderNameSuffix(),
+                npiData.get().getProviderCredential()
+              };
+          return Arrays.stream(name)
+              .map(Strings::trimToNull)
+              .filter(Objects::nonNull)
+              .collect(Collectors.joining(" "));
+        } else {
+          return npiData.get().getProviderOrganizationName();
+        }
       }
     }
     return null;

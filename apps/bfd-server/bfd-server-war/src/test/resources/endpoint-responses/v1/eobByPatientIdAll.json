@@ -3134,7 +3134,8 @@
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1023011079"
-        }
+        },
+        "display" : "ADVANTAGE HOME HEALTH CARE, INC."
       },
       "facility" : {
         "extension" : [ {
@@ -3155,7 +3156,8 @@
           },
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1023011079"
-        }
+        },
+        "display" : "ADVANTAGE HOME HEALTH CARE, INC."
       },
       "information" : [ {
         "sequence" : 1,
