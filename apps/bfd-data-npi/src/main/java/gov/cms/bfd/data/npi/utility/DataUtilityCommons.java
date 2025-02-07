@@ -77,6 +77,12 @@ public class DataUtilityCommons {
   /** Field for Provider Suffix in CSV. */
   private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
 
+  /** Code for Provider entity type. */
+  public static final String ENTITY_TYPE_CODE_PROVIDER = "1";
+
+  /** Code for Organization entity type. */
+  public static final String ENTITY_TYPE_CODE_ORGANIZATION = "2";
+
   /**
    * Gets the org names from the npi file.
    *

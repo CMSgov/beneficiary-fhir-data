@@ -20,7 +20,7 @@ public class NPIData {
   /** Provider or Org npi. */
   String npi;
 
-  /** Entity Type. Will be 1 or 2. */
+  /** Entity Type. Will be 1 for Provider, or 2 for Organization. */
   String entityTypeCode;
 
   /** Organization name. */

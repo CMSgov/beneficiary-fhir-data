@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
+import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_ORGANIZATION;
+import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_PROVIDER;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -346,7 +349,8 @@ public final class CommonTransformerUtils {
     if (npiOrgLookup != null) {
       Optional<NPIData> npiData = npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
       if (npiData.isPresent()) {
-        if (npiData.get().getEntityTypeCode().equals("1")) {
+        String entityTypeCode = npiData.get().getEntityTypeCode();
+        if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
           String[] name =
               new String[] {
                 npiData.get().getProviderNamePrefix(),
@@ -360,7 +364,7 @@ public final class CommonTransformerUtils {
               .map(Strings::trimToNull)
               .filter(Objects::nonNull)
               .collect(Collectors.joining(" "));
-        } else {
+        } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
           return npiData.get().getProviderOrganizationName();
         }
       }
