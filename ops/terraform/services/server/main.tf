@@ -92,6 +92,8 @@ module "fhir_iam" {
 
 ## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
+### Temporarily commented out during card 3701 ####
+/*
 module "fhir_lb" {
   source = "./modules/bfd_server_lb"
 
@@ -101,25 +103,13 @@ module "fhir_lb" {
   log_bucket = null
   is_public  = local.lb_is_public
 
-  ingress = local.lb_is_public ? {
-    description     = "Public Internet access"
-    port            = local.lb_ingress_port
-    cidr_blocks     = ["0.0.0.0/0"]
-    prefix_list_ids = []
-    } : {
-    description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port            = local.lb_ingress_port
-    cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
-  }
 
-  egress = {
-    description = "To VPC instances"
-    port        = local.lb_egress_port
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
-  }
+
 }
+*/
 
+####
+/*
 module "lb_alarms" {
   count = local.create_server_lb_alarms ? 1 : 0
 
@@ -135,7 +125,7 @@ module "lb_alarms" {
     threshold    = 1 # Count
   }
 }
-
+*/
 
 ## Autoscale group for the FHIR server
 #
@@ -146,7 +136,6 @@ module "fhir_asg" {
   env_config    = local.env_config
   role          = local.legacy_service
   layer         = "app"
-  lb_config     = module.fhir_lb.lb_config
   seed_env      = local.seed_env
 
   # Initial size is one server per AZ
@@ -185,6 +174,66 @@ module "fhir_asg" {
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
     ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
+  }
+
+  ingress = local.lb_is_public ? {
+    description     = "Public Internet access"
+    port            = local.lb_ingress_port
+    cidr_blocks     = ["0.0.0.0/0"]
+    prefix_list_ids = []
+    } : {
+    description     = "From VPN, VPC peerings, the MGMT VPC, and self"
+    port            = local.lb_ingress_port
+    cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
+  }
+
+  egress = {
+    description = "To VPC instances"
+    port        = local.lb_egress_port
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
+  }
+  lb_config = {
+    name               = "bfd-3701-test-fhir-nlb"
+    internal           = true
+    load_balancer_type = "network"
+    ip_address_type    = "ipv4"
+    load_balancer_listener_config = [{
+      id                  = "green"
+      port                = "7443"
+      protocol            = "TCP"
+      default_action_type = "forward"
+      },
+      { id       = "blue"
+        port     = "443"
+        protocol = "TCP"
+    default_action_type = "forward" }]
+    target_group_config = [{
+      id                            = "green"
+      name                          = "bfd-3701-test-green-tg"
+      port                          = "7443"
+      deregisteration_delay_seconds = 30
+      protocol                      = "TCP"
+      health_check_config = {
+        healthy_threshold             = 3
+        health_check_interval_seconds = 10
+        health_check_timeout_seconds  = 8
+        unhealthy_threshold           = 2
+      }
+      },
+      {
+        id                            = "blue"
+        name                          = "bfd-3701-test-blue-tg"
+        port                          = "7443"
+        protocol                      = "TCP"
+        deregisteration_delay_seconds = 30
+        health_check_config = {
+          healthy_threshold             = 3
+          health_check_interval_seconds = 10
+          health_check_timeout_seconds  = 8
+          unhealthy_threshold           = 2
+        }
+    }]
   }
 }
 

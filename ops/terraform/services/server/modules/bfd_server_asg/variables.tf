@@ -35,8 +35,44 @@ variable "db_config" {
 
 variable "lb_config" {
   description = "Load balancer information"
-  type        = object({ name = string, port = number, sg = string })
-  default     = null
+  type = object({
+    name                             = string
+    internal                         = optional(bool)
+    load_balancer_type               = string
+    enable_deletion_protection       = optional(bool)
+    client_keep_alive_seconds        = optional(number)
+    idle_timeout_seconds             = optional(number)
+    ip_address_type                  = string
+    enable_http2                     = optional(bool)
+    desync_mitigation_mode           = optional(string)
+    enable_cross_zone_load_balancing = optional(bool)
+    access_logs = optional(object({
+      access_logs_prefix = string
+    }))
+    connection_logs = optional(object({
+      connection_logs_prefix = string
+    }))
+    load_balancer_listener_config = list(object({
+      id                  = string
+      port                = string
+      protocol            = string
+      default_action_type = string
+    }))
+    target_group_config = list(object({
+      id                            = string
+      name                          = string
+      port                          = number
+      protocol                      = string
+      deregisteration_delay_seconds = number
+      health_check_config = object({
+        healthy_threshold             = number
+        health_check_interval_seconds = number
+        health_check_timeout_seconds  = number
+        unhealthy_threshold           = number
+      })
+    }))
+  })
+  default = null
 }
 
 variable "mgmt_config" {
@@ -62,4 +98,14 @@ variable "jdbc_suffix" {
   default     = "?logServerErrorDetail=false"
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
+}
+
+variable "ingress" {
+  description = "Ingress port and cidr blocks"
+  type        = object({ description = string, port = number, cidr_blocks = list(string), prefix_list_ids = list(string) })
+}
+
+variable "egress" {
+  description = "Egress port and cidr blocks"
+  type        = object({ description = string, port = number, cidr_blocks = list(string) })
 }

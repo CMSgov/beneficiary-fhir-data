@@ -40,38 +40,4 @@ resource "aws_elb" "main" {
   }
 }
 
-# security group
-resource "aws_security_group" "lb" {
-  name        = "bfd-${local.env}-${var.role}-lb"
-  description = "Allow access to the ${var.role} load-balancer"
-  vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${local.env}-${var.role}-lb" }, local.additional_tags)
 
-  ingress {
-    from_port   = var.ingress.port
-    to_port     = var.ingress.port
-    protocol    = "tcp"
-    cidr_blocks = var.ingress.cidr_blocks
-    description = var.ingress.description
-  }
-
-  # add ingress rules for each prefix list id
-  dynamic "ingress" {
-    for_each = var.ingress.prefix_list_ids
-    content {
-      from_port       = var.ingress.port
-      protocol        = "tcp"
-      to_port         = var.ingress.port
-      prefix_list_ids = [ingress.value]
-      description     = var.ingress.description
-    }
-  }
-
-  egress {
-    from_port   = var.egress.port
-    to_port     = var.egress.port
-    protocol    = "tcp"
-    cidr_blocks = var.egress.cidr_blocks
-    description = var.egress.description
-  }
-}

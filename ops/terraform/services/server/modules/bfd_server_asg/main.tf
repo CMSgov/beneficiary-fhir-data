@@ -6,6 +6,7 @@ locals {
       max_size         = var.asg_config.max
       min_size         = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
       warmpool_size    = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+      is_green         = local.odd_needs_scale_out
     }
     even = {
       name             = "${aws_launch_template.main.name}-even"
@@ -13,8 +14,10 @@ locals {
       max_size         = var.asg_config.max
       min_size         = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
       warmpool_size    = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+      is_green         = local.even_needs_scale_out
     }
   }
+
 
   env      = terraform.workspace
   seed_env = var.seed_env
@@ -152,11 +155,14 @@ resource "aws_security_group" "app" {
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.additional_tags)
 
-  ingress {
-    from_port       = var.lb_config.port
-    to_port         = var.lb_config.port
-    protocol        = "tcp"
-    security_groups = [var.lb_config.sg]
+  dynamic "ingress" {
+    for_each = var.lb_config.target_group_config != null ? { for config in var.lb_config.target_group_config : config.id => config } : {}
+    content {
+      from_port       = ingress.value.port
+      to_port         = ingress.value.port
+      protocol        = ingress.value.protocol
+      security_groups = [aws_security_group.lb.id]
+    }
   }
 }
 
@@ -218,7 +224,7 @@ resource "aws_launch_template" "main" {
   user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
     env                   = local.env
     seed_env              = local.seed_env
-    port                  = var.lb_config.port
+    port                  = "7443" # Temp hard Coding
     accountId             = var.launch_config.account_id
     reader_endpoint       = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${local.full_jdbc_suffix}"
     launch_lifecycle_hook = local.on_launch_lifecycle_hook_name
@@ -251,19 +257,16 @@ EOF
   }
 
 
-  name             = each.value.name
-  desired_capacity = each.value.desired_capacity
-  max_size         = each.value.max_size
-  min_size         = each.value.min_size
-
-  # If an lb is defined, wait for the ELB
-  min_elb_capacity          = each.value.desired_capacity
+  name                      = each.value.name
+  desired_capacity          = each.value.desired_capacity
+  max_size                  = each.value.max_size
+  min_size                  = each.value.min_size
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
   health_check_grace_period = 600                                   # Temporary, will be lowered when/if lifecycle hooks are implemented
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-  load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
+  target_group_arns         = each.value.is_green ? [aws_lb_target_group.main["green"].arn] : [aws_lb_target_group.main["blue"].arn]
   termination_policies      = ["OldestLaunchTemplate"]
 
   # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
@@ -313,6 +316,8 @@ EOF
       }
     }
   }
+
+  depends_on = [aws_lb_target_group.main]
 
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
@@ -499,5 +504,102 @@ else
   echo "No change to "$asg_name" warm_pool. 'will_delete' is "$will_delete""
 fi
 EOF
+  }
+}
+
+
+### Load Balancer Components ###
+
+resource "aws_lb" "main" {
+  name                             = var.lb_config.name
+  internal                         = coalesce(var.lb_config.internal, true)
+  load_balancer_type               = var.lb_config.load_balancer_type
+  security_groups                  = [aws_security_group.lb.id]
+  subnets                          = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
+  enable_deletion_protection       = coalesce(var.lb_config.enable_deletion_protection, false)
+  client_keep_alive                = coalesce(var.lb_config.client_keep_alive_seconds, 3600)
+  idle_timeout                     = coalesce(var.lb_config.idle_timeout_seconds, 60)
+  ip_address_type                  = coalesce(var.lb_config.ip_address_type, "ipv4")
+  enable_http2                     = coalesce(var.lb_config.enable_http2, "false")
+  desync_mitigation_mode           = coalesce(var.lb_config.desync_mitigation_mode, "strictest")
+  enable_cross_zone_load_balancing = coalesce(var.lb_config.enable_cross_zone_load_balancing, "true")
+
+  access_logs {
+    bucket  = "" # TBD
+    prefix  = var.lb_config.access_logs != null ? var.lb_config.access_logs.access_logs_prefix : null
+    enabled = var.lb_config.access_logs != null ? true : false
+  }
+
+  connection_logs {
+    bucket  = "" # TBD
+    prefix  = var.lb_config.connection_logs != null ? var.lb_config.connection_logs.connection_logs_prefix : null
+    enabled = var.lb_config.connection_logs != null ? true : false
+  }
+  tags = local.additional_tags
+}
+
+resource "aws_lb_listener" "main" {
+  for_each          = var.lb_config.load_balancer_listener_config != null ? { for config in var.lb_config.load_balancer_listener_config : config.id => config } : {}
+  load_balancer_arn = aws_lb.main.arn
+  port              = each.value.port
+  protocol          = each.value.protocol
+
+  default_action {
+    type             = each.value.default_action_type
+    target_group_arn = aws_lb_target_group.main[each.key].arn
+  }
+}
+
+# security group
+resource "aws_security_group" "lb" {
+  name        = "bfd-${local.env}-${var.role}-lb"
+  description = "Allow access to the ${var.role} load-balancer"
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "bfd-${local.env}-${var.role}-lb" }, local.additional_tags)
+
+  ingress {
+    from_port   = var.ingress.port
+    to_port     = var.ingress.port
+    protocol    = "tcp"
+    cidr_blocks = var.ingress.cidr_blocks
+    description = var.ingress.description
+  }
+
+  # add ingress rules for each prefix list id
+  dynamic "ingress" {
+    for_each = var.ingress.prefix_list_ids
+    content {
+      from_port       = var.ingress.port
+      protocol        = "tcp"
+      to_port         = var.ingress.port
+      prefix_list_ids = [ingress.value]
+      description     = var.ingress.description
+    }
+  }
+
+  egress {
+    from_port   = var.egress.port
+    to_port     = var.egress.port
+    protocol    = "tcp"
+    cidr_blocks = var.egress.cidr_blocks
+    description = var.egress.description
+  }
+}
+
+resource "aws_lb_target_group" "main" {
+  for_each             = var.lb_config.target_group_config != null ? { for config in var.lb_config.target_group_config : config.id => config } : {}
+  name                 = each.value.name
+  port                 = each.value.port
+  protocol             = each.value.protocol
+  vpc_id               = var.env_config.vpc_id
+  deregistration_delay = each.value.deregisteration_delay_seconds
+  health_check {
+    healthy_threshold   = each.value.health_check_config.healthy_threshold
+    interval            = each.value.health_check_config.health_check_interval_seconds
+    timeout             = each.value.health_check_config.health_check_timeout_seconds
+    unhealthy_threshold = each.value.health_check_config.unhealthy_threshold
+    port                = 7443
+    protocol            = "TCP"
+
   }
 }
