@@ -11,4 +11,8 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["mypy>=1.15.0"]
+dev = ["mypy>=1.15.0", "pytest>=8.3.4", "testcontainers>=4.9.1"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*"]
+follow_untyped_imports = true

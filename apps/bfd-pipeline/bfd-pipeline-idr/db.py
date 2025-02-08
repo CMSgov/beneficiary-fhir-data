@@ -18,10 +18,10 @@ WHERE
 
 
 def main():
-    run(PostgresFetcher(100_000))
+    run_pipeline(PostgresFetcher(100_000))
 
 
-def run(fetcher: Fetcher):
+def run_pipeline(fetcher: Fetcher):
     conn = psycopg.connect(
         "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
     )
