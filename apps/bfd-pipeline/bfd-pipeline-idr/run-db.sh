@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+image=postgres:16.4
+max_connections=500
+docker pull $image
+
+docker rm -f bfd-idr-db
+docker volume rm -f bfd-idr-db
+
+docker run \
+  -d \
+  --name 'bfd-idr-db' \
+  -e 'POSTGRES_USER=bfd' \
+  -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
+  -p '5432:5432' \
+  -v 'bfd-idr-db:/var/lib/postgresql/data' \
+  $image \
+  postgres -N $max_connections
+
+echo
+echo Waiting for port 5432 to become available.
+sleep 2
+docker exec bfd-idr-db timeout 15 bash -c 'until echo > /dev/tcp/localhost/5432; do sleep 1; done'
+
+echo
+echo Creating database
+docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd idr
+docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd fhirdb
+
+echo
+echo Database created successfully.
