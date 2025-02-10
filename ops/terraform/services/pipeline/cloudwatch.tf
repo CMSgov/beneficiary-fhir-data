@@ -5,15 +5,31 @@ resource "aws_cloudwatch_dashboard" "bfd-pipeline-dashboard" {
   { dashboard_namespace = "bfd-${local.env}/bfd-pipeline" })
 }
 
-resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
+resource "aws_cloudwatch_log_metric_filter" "pipeline-rda-messages-error-count" {
   count          = local.is_ephemeral_env ? 0 : 1
-  name           = "bfd-${local.env}/bfd-pipeline/messages/count/error"
+  name           = "bfd-${local.env}/bfd-pipeline-rda/messages/count/error"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message]"
-  log_group_name = local.log_groups.messages
+  log_group_name = local.log_groups.rda_messages
+
 
   metric_transformation {
     name          = "messages/count/error"
-    namespace     = "bfd-${local.env}/bfd-pipeline"
+    namespace     = "bfd-${local.env}/bfd-pipeline-rda"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "pipeline-ccw-messages-error-count" {
+  count          = local.is_ephemeral_env ? 0 : 1
+  name           = "bfd-${local.env}/bfd-pipeline-ccw/messages/count/error"
+  pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message]"
+  log_group_name = local.log_groups.ccw_messages
+
+
+  metric_transformation {
+    name          = "messages/count/error"
+    namespace     = "bfd-${local.env}/bfd-pipeline-ccw"
     value         = "1"
     default_value = "0"
   }
@@ -23,7 +39,7 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-cou
   count          = local.is_ephemeral_env ? 0 : 1
   name           = "bfd-${local.env}/bfd-pipeline/messages/count/datasetfailed"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message = \"*Data set failed with an unhandled error*\"]"
-  log_group_name = local.log_groups.messages
+  log_group_name = local.log_groups.ccw_messages
 
   metric_transformation {
     name          = "messages/count/datasetfailed"
@@ -34,9 +50,9 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-cou
 }
 
 # CloudWatch metric alarms
-resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
+resource "aws_cloudwatch_metric_alarm" "pipeline-rda-messages-error" {
   count               = local.is_ephemeral_env ? 0 : 1
-  alarm_name          = "bfd-${local.env}-pipeline-messages-error"
+  alarm_name          = "bfd-${local.env}-pipeline-rda-messages-error"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = local.pipeline_messages_error.eval_periods
   period              = local.pipeline_messages_error.period
@@ -45,7 +61,26 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   alarm_description   = "Pipeline errors detected over ${local.pipeline_messages_error.eval_periods} evaluation periods of ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${local.env}"
 
   metric_name = "messages/count/error"
-  namespace   = "bfd-${local.env}/bfd-pipeline"
+  namespace   = "bfd-${local.env}/bfd-pipeline-rda"
+
+  alarm_actions = local.notice_alarm_actions
+
+  datapoints_to_alarm = local.pipeline_messages_error.datapoints
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "pipeline-ccw-messages-error" {
+  count               = local.is_ephemeral_env ? 0 : 1
+  alarm_name          = "bfd-${local.env}-pipeline-ccw-messages-error"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = local.pipeline_messages_error.eval_periods
+  period              = local.pipeline_messages_error.period
+  statistic           = "Sum"
+  threshold           = local.pipeline_messages_error.threshold
+  alarm_description   = "Pipeline errors detected over ${local.pipeline_messages_error.eval_periods} evaluation periods of ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${local.env}"
+
+  metric_name = "messages/count/error"
+  namespace   = "bfd-${local.env}/bfd-pipeline-ccw"
 
   alarm_actions = local.notice_alarm_actions
 
@@ -93,8 +128,8 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-max-claim-latency-exceeded" {
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_metric_alarm" "pipeline-log-availability-1hr" {
-  alarm_name          = "bfd-${local.env}-pipeline-log-availability-1hr"
+resource "aws_cloudwatch_metric_alarm" "pipeline-rda-log-availability-1hr" {
+  alarm_name          = "bfd-${local.env}-pipeline-rda-log-availability-1hr"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = local.pipeline_log_availability.eval_periods
   period              = local.pipeline_log_availability.period
@@ -110,7 +145,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-log-availability-1hr" {
   namespace   = "AWS/Logs"
 
   dimensions = {
-    LogGroupName = "/bfd/${local.env}/bfd-pipeline/messages.txt"
+    LogGroupName = "/bfd/${local.env}/bfd-pipeline-rda/messages.txt"
   }
 
   alarm_actions = local.log_availability_alarm_actions
