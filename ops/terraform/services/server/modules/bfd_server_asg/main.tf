@@ -225,7 +225,6 @@ resource "aws_launch_template" "main" {
   user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
     env                   = local.env
     seed_env              = local.seed_env
-    port                  = "7443" # Temp hard Coding
     accountId             = var.launch_config.account_id
     reader_endpoint       = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${local.full_jdbc_suffix}"
     launch_lifecycle_hook = local.on_launch_lifecycle_hook_name
