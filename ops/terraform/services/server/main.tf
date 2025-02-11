@@ -110,24 +110,6 @@ module "fhir_iam" {
   legacy_service       = local.legacy_service
 }
 
-## NLB for the FHIR server (SSL terminated by the FHIR server)
-#
-### Temporarily commented out during card 3701 ####
-/*
-module "fhir_lb" {
-  source = "./modules/bfd_server_lb"
-
-  env_config = local.env_config
-  role       = local.legacy_service
-  layer      = "dmz"
-  log_bucket = null
-  is_public  = local.lb_is_public
-
-
-
-}
-*/
-
 ####
 /*
 module "lb_alarms" {
