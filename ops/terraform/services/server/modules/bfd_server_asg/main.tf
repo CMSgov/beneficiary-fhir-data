@@ -488,15 +488,16 @@ resource "null_resource" "set_target_groups" {
     }
 
     command = <<-EOF
-attached_tgs="$(
+attached_other_tgs="$(
   aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" |
-    jq -r '.AutoScalingGroups[0].TargetGroupARNs | join(",")'
+    jq -r --arg target_group_arn "$target_group_arn" \
+      '.AutoScalingGroups[0].TargetGroupARNs | map(select(. != "$target_group_arn")) | join(",")'
 )"
-if [[ -n "$attached_tgs" ]]; then
+if [[ -n "$attached_other_tgs" ]]; then
   aws autoscaling detach-load-balancer-target-groups \
     --auto-scaling-group-name "$asg_name" \
-    --target-group-arns "$attached_tgs"
-  echo "Detached $asg_name from all Target Groups"
+    --target-group-arns "$attached_other_tgs"
+  echo "Detached $asg_name from all non-$target_group_name Target Groups"
 fi
 if ((desired_capacity > 0)); then
   aws autoscaling attach-load-balancer-target-groups \
@@ -583,41 +584,56 @@ resource "aws_lb_listener" "main" {
 
 # security group
 resource "aws_security_group" "lb" {
-  name        = "bfd-${local.env}-${var.role}-lb"
-  description = "Allow access to the ${var.role} load-balancer"
-  vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${local.env}-${var.role}-lb" }, local.additional_tags)
-
-  ingress {
-    from_port   = var.ingress.port
-    to_port     = var.ingress.port
-    protocol    = "tcp"
-    cidr_blocks = var.ingress.cidr_blocks
-    description = var.ingress.description
+  lifecycle {
+    create_before_destroy = true
   }
 
-  # add ingress rules for each prefix list id
+  name        = "${var.lb_config.name}-sg"
+  description = "Allow access to the ${var.role} load-balancer"
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "${var.lb_config.name}-sg" }, local.additional_tags)
+
+  # Dynamic, per-listener CIDR Block ingress rules
   dynamic "ingress" {
-    for_each = var.ingress.prefix_list_ids
+    for_each = var.lb_config.load_balancer_listener_config
     content {
-      from_port       = var.ingress.port
-      protocol        = "tcp"
-      to_port         = var.ingress.port
-      prefix_list_ids = [ingress.value]
-      description     = var.ingress.description
+      from_port   = ingress.value.port
+      to_port     = ingress.value.port
+      protocol    = ingress.value.protocol
+      cidr_blocks = var.lb_config.load_balancer_security_group_config.ingress.cidr_blocks
+      description = var.lb_config.load_balancer_security_group_config.ingress.description
     }
   }
 
-  egress {
-    from_port   = var.egress.port
-    to_port     = var.egress.port
-    protocol    = "tcp"
-    cidr_blocks = var.egress.cidr_blocks
-    description = var.egress.description
+  # Dynamic, per-listener prefix list ingress rules if prefix list IDs are specified
+  dynamic "ingress" {
+    for_each = length(var.lb_config.load_balancer_security_group_config.ingress.prefix_list_ids) > 0 ? var.lb_config.load_balancer_listener_config : []
+    content {
+      from_port       = ingress.value.port
+      to_port         = ingress.value.port
+      protocol        = ingress.value.protocol
+      prefix_list_ids = var.lb_config.load_balancer_security_group_config.ingress.prefix_list_ids
+      description     = var.lb_config.load_balancer_security_group_config.ingress.description
+    }
+  }
+
+  dynamic "egress" {
+    for_each = var.lb_config.target_group_config
+    content {
+      from_port   = egress.value.port
+      to_port     = egress.value.port
+      protocol    = egress.value.protocol
+      cidr_blocks = var.lb_config.load_balancer_security_group_config.egress.cidr_blocks
+      description = var.lb_config.load_balancer_security_group_config.egress.description
+    }
   }
 }
 
 resource "aws_lb_target_group" "main" {
+  lifecycle {
+    create_before_destroy = true
+  }
+
   for_each = { for config in var.lb_config.target_group_config : config.id => config }
 
   name                   = each.value.name
@@ -625,6 +641,7 @@ resource "aws_lb_target_group" "main" {
   protocol               = each.value.protocol
   vpc_id                 = var.env_config.vpc_id
   deregistration_delay   = each.value.deregisteration_delay_seconds
+  connection_termination = true
   health_check {
     healthy_threshold   = each.value.health_check_config.healthy_threshold
     interval            = each.value.health_check_config.health_check_interval_seconds
