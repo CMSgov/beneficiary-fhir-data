@@ -554,17 +554,6 @@ resource "aws_lb" "main" {
   desync_mitigation_mode           = coalesce(var.lb_config.desync_mitigation_mode, "strictest")
   enable_cross_zone_load_balancing = coalesce(var.lb_config.enable_cross_zone_load_balancing, "true")
 
-  access_logs {
-    bucket  = "" # TBD
-    prefix  = var.lb_config.access_logs != null ? var.lb_config.access_logs.access_logs_prefix : null
-    enabled = var.lb_config.access_logs != null ? true : false
-  }
-
-  connection_logs {
-    bucket  = "" # TBD
-    prefix  = var.lb_config.connection_logs != null ? var.lb_config.connection_logs.connection_logs_prefix : null
-    enabled = var.lb_config.connection_logs != null ? true : false
-  }
   tags = local.additional_tags
 }
 

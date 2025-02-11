@@ -46,12 +46,6 @@ variable "lb_config" {
     enable_http2                     = optional(bool)
     desync_mitigation_mode           = optional(string)
     enable_cross_zone_load_balancing = optional(bool)
-    access_logs = optional(object({
-      access_logs_prefix = string
-    }))
-    connection_logs = optional(object({
-      connection_logs_prefix = string
-    }))
     load_balancer_security_group_config = object({
       ingress = object({
         description     = string
