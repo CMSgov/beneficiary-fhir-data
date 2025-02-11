@@ -180,10 +180,11 @@ module "fhir_asg" {
   }
 
   lb_config = {
-    name               = "bfd-${local.env}-${local.legacy_service}-nlb"
-    internal           = !local.lb_is_public
-    load_balancer_type = "network"
-    ip_address_type    = "ipv4"
+    name                       = "bfd-${local.env}-${local.legacy_service}-nlb"
+    internal                   = !local.lb_is_public
+    load_balancer_type         = "network"
+    ip_address_type            = "ipv4"
+    enable_deletion_protection = !local.is_ephemeral_env
     load_balancer_security_group_config = {
       egress = {
         description = "To VPC instances"
