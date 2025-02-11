@@ -157,7 +157,7 @@ resource "aws_security_group" "app" {
   tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.additional_tags)
 
   dynamic "ingress" {
-    for_each = var.lb_config.target_group_config != null ? { for config in var.lb_config.target_group_config : config.id => config } : {}
+    for_each = var.lb_config.target_group_config
     content {
       from_port       = ingress.value.port
       to_port         = ingress.value.port
@@ -569,7 +569,8 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_lb_listener" "main" {
-  for_each          = var.lb_config.load_balancer_listener_config != null ? { for config in var.lb_config.load_balancer_listener_config : config.id => config } : {}
+  for_each = { for config in var.lb_config.load_balancer_listener_config : config.id => config }
+
   load_balancer_arn = aws_lb.main.arn
   port              = each.value.port
   protocol          = each.value.protocol
@@ -617,12 +618,13 @@ resource "aws_security_group" "lb" {
 }
 
 resource "aws_lb_target_group" "main" {
-  for_each             = var.lb_config.target_group_config != null ? { for config in var.lb_config.target_group_config : config.id => config } : {}
-  name                 = each.value.name
-  port                 = each.value.port
-  protocol             = each.value.protocol
-  vpc_id               = var.env_config.vpc_id
-  deregistration_delay = each.value.deregisteration_delay_seconds
+  for_each = { for config in var.lb_config.target_group_config : config.id => config }
+
+  name                   = each.value.name
+  port                   = each.value.port
+  protocol               = each.value.protocol
+  vpc_id                 = var.env_config.vpc_id
+  deregistration_delay   = each.value.deregisteration_delay_seconds
   health_check {
     healthy_threshold   = each.value.health_check_config.healthy_threshold
     interval            = each.value.health_check_config.health_check_interval_seconds
