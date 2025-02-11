@@ -1,23 +1,24 @@
 locals {
   asgs = {
     odd = {
-      name             = "${aws_launch_template.main.name}-odd"
-      desired_capacity = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      max_size         = var.asg_config.max
-      min_size         = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      warmpool_size    = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
-      is_green         = local.odd_needs_scale_out
+      name              = "${aws_launch_template.main.name}-odd"
+      lt_version        = local.is_latest_launch_template_odd ? local.latest_ltv : max(local.latest_ltv - 1, 1)
+      desired_capacity  = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      max_size          = var.asg_config.max
+      min_size          = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      warmpool_size     = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+      deployment_status = local.odd_needs_scale_out ? "green" : "blue"
     }
     even = {
-      name             = "${aws_launch_template.main.name}-even"
-      desired_capacity = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      max_size         = var.asg_config.max
-      min_size         = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      warmpool_size    = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
-      is_green         = local.even_needs_scale_out
+      name              = "${aws_launch_template.main.name}-even"
+      lt_version        = local.is_latest_launch_template_even ? local.latest_ltv : max(local.latest_ltv - 1, 1)
+      desired_capacity  = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      max_size          = var.asg_config.max
+      min_size          = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      warmpool_size     = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+      deployment_status = local.even_needs_scale_out ? "green" : "blue"
     }
   }
-
 
   env      = terraform.workspace
   seed_env = var.seed_env
@@ -242,8 +243,15 @@ resource "aws_launch_template" "main" {
 }
 
 resource "aws_autoscaling_group" "main" {
-  # Deployments of this ASG require two executions of `terraform apply`
-  for_each = local.asgs
+  # Deployments of this ASG require two executions of `terraform apply`. This AutoScaling Group
+  # requires 4 external "null_resourece" resources that manage its Target Group ARNs and Warm Pool
+  # due to defective behavior in the AWS provider. Specifically, attempting to modify Target Group
+  # ARNs dynamically (to do blue/green) results in an error during apply with a message indicating a
+  # bug in the provider. Additionally, attempting to manage the Warm Pool via Terraform results in
+  # an erreneous 3 minute delay upon destruction of the Warm Pool, even with
+  # "force_delete_warm_pool" enabled, which is unnaceptable
+  depends_on = [null_resource.detach_target_groups]
+  for_each   = local.asgs
 
   lifecycle {
     precondition {
@@ -254,19 +262,18 @@ situation typically indicates that green, the incoming ASG, failed automated che
 corresponding Runbook for instructions on how to remediate this situation.
 EOF
     }
-  }
 
+    ignore_changes = [target_group_arns]
+  }
 
   name                      = each.value.name
   desired_capacity          = each.value.desired_capacity
   max_size                  = each.value.max_size
   min_size                  = each.value.min_size
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
-
   health_check_grace_period = 600                                   # Temporary, will be lowered when/if lifecycle hooks are implemented
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-  target_group_arns         = each.value.is_green ? [aws_lb_target_group.main["green"].arn] : [aws_lb_target_group.main["blue"].arn]
   termination_policies      = ["OldestLaunchTemplate"]
 
   # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
@@ -276,7 +283,7 @@ EOF
 
   launch_template {
     name    = aws_launch_template.main.name
-    version = aws_launch_template.main.latest_version
+    version = each.value.lt_version
   }
 
   initial_lifecycle_hook {
@@ -316,8 +323,6 @@ EOF
       }
     }
   }
-
-  depends_on = [aws_lb_target_group.main]
 
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
@@ -482,6 +487,66 @@ resource "aws_autoscaling_policy" "avg_cpu_high" {
   }
 }
 
+resource "null_resource" "detach_target_groups" {
+  for_each = local.asgs
+
+  triggers = {
+    should_detach = each.value.deployment_status == "green"
+  }
+
+  provisioner "local-exec" {
+    environment = {
+      should_detach = self.triggers.should_detach
+      asg_name      = each.value.name
+    }
+
+    command = <<-EOF
+asg_details="$(
+  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" \
+    | jq -r '.AutoScalingGroups | length'
+)"
+if [[ "$asg_details" != "0" && "$should_detach" == "true" ]]; then
+  aws autoscaling detach-load-balancer-target-groups \
+      --auto-scaling-group-name "$asg_name" \
+      --target-group-arns "$(
+          aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" \
+            | jq -r '.AutoScalingGroups[0].TargetGroupARNs | join(",")'
+        )"
+fi
+EOF
+  }
+}
+
+resource "null_resource" "set_target_groups" {
+  for_each = local.asgs
+
+  triggers = {
+    target_group_name = each.value.deployment_status
+  }
+
+  provisioner "local-exec" {
+    environment = {
+      asg_name          = aws_autoscaling_group.main[each.key].name
+      target_group_arn  = aws_lb_target_group.main[self.triggers.target_group_name].arn
+      target_group_name = self.triggers.target_group_name
+    }
+
+    command = <<-EOF
+attached_tgs="$(
+  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" \
+    | jq -r '.AutoScalingGroups[0].TargetGroupARNs | join(",")'
+)"
+if [[ -n "$attached_tgs" ]]; then
+  aws autoscaling detach-load-balancer-target-groups \
+    --auto-scaling-group-name "$asg_name" \
+    --target-group-arns "$attached_tgs"
+fi
+aws autoscaling attach-load-balancer-target-groups --auto-scaling-group-name "$asg_name" --target-group-arns "$target_group_arn" \
+  && echo "Attached $asg_name to $target_group_name Target Group"
+EOF
+  }
+}
+
 # NOTE: Required to *actually* delete a warm pool as of terraform 1.5.0 and AWS Provider v5.53.0
 resource "null_resource" "warm_pool_size" {
   for_each = local.asgs
@@ -600,6 +665,5 @@ resource "aws_lb_target_group" "main" {
     unhealthy_threshold = each.value.health_check_config.unhealthy_threshold
     port                = 7443
     protocol            = "TCP"
-
   }
 }
