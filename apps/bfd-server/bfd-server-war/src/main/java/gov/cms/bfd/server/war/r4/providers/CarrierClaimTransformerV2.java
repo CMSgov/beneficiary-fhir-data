@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -275,7 +276,9 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             C4BBPractitionerIdentifierType.NPI,
             C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
             line.getOrganizationNpi().get(),
-            npiOrgLookup.retrieveNPIOrgDisplay(line.getOrganizationNpi()));
+            npiOrgLookup
+                .retrieveNPIOrgDisplay(line.getOrganizationNpi())
+                .map(NPIData::getProviderOrganizationName));
       }
 
       // CARR_LINE_RDCD_PMT_PHYS_ASTN_C => ExplanationOfBenefit.item.adjudication
