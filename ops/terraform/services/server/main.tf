@@ -16,6 +16,15 @@ locals {
   azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service        = "fhir"
   service               = "server"
+  green_id              = "green"
+  blue_id               = "blue"
+  lb_name               = "bfd-${local.env}-${local.legacy_service}-nlb"
+  tg_health_check_config = {
+    healthy_threshold             = 3
+    health_check_interval_seconds = 10
+    health_check_timeout_seconds  = 8
+    unhealthy_threshold           = 2
+  }
 
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map = zipmap(
@@ -34,6 +43,15 @@ locals {
     for key, value in local.nonsensitive_service_map
     : split("/", key)[5] => value
   }
+  sensitive_service_map = zipmap(
+    data.aws_ssm_parameters_by_path.sensitive_service.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.sensitive_service.values)
+  )
+  sensitive_service_config = {
+    for key, value in local.sensitive_service_map
+    : split("/", key)[5] => value
+  }
+
 
   enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
   management_security_group       = local.nonsensitive_common_config["management_security_group"]
@@ -43,10 +61,10 @@ locals {
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
-  lb_is_public    = local.nonsensitive_service_config["lb_is_public"]
-  lb_ingress_port = local.nonsensitive_service_config["lb_ingress_port"]
-  lb_egress_port  = local.nonsensitive_service_config["lb_egress_port"]
-  lb_vpc_peerings = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
+  lb_is_public          = tobool(local.nonsensitive_service_config["lb_is_public"])
+  lb_blue_ingress_port  = local.nonsensitive_service_config["lb_blue_ingress_port"]
+  lb_green_ingress_port = local.nonsensitive_service_config["lb_green_ingress_port"]
+  lb_vpc_peerings       = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
 
   asg_min_instance_count      = local.nonsensitive_service_config["asg_min_instance_count"]
   asg_max_instance_count      = local.nonsensitive_service_config["asg_max_instance_count"]
@@ -59,6 +77,8 @@ locals {
   launch_template_volume_size_gb    = local.nonsensitive_service_config["launch_template_volume_size_gb"]
   launch_template_volume_throughput = local.nonsensitive_service_config["launch_template_volume_throughput"]
   launch_template_volume_type       = local.nonsensitive_service_config["launch_template_volume_type"]
+
+  service_port = local.sensitive_service_config["service_port"]
 
   env_config = {
     default_tags = local.default_tags,
@@ -176,64 +196,58 @@ module "fhir_asg" {
     ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
   }
 
-  ingress = local.lb_is_public ? {
-    description     = "Public Internet access"
-    port            = local.lb_ingress_port
-    cidr_blocks     = ["0.0.0.0/0"]
-    prefix_list_ids = []
-    } : {
-    description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port            = local.lb_ingress_port
-    cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
-  }
-
-  egress = {
-    description = "To VPC instances"
-    port        = local.lb_egress_port
-    cidr_blocks = [data.aws_vpc.main.cidr_block]
-  }
   lb_config = {
-    name               = "bfd-3701-test-fhir-nlb"
-    internal           = true
+    name               = "bfd-${local.env}-${local.legacy_service}-nlb"
+    internal           = !local.lb_is_public
     load_balancer_type = "network"
     ip_address_type    = "ipv4"
-    load_balancer_listener_config = [{
-      id                  = "green"
-      port                = "7443"
-      protocol            = "TCP"
-      default_action_type = "forward"
-      },
-      { id       = "blue"
-        port     = "443"
-        protocol = "TCP"
-    default_action_type = "forward" }]
-    target_group_config = [{
-      id                            = "green"
-      name                          = "bfd-3701-test-green-tg"
-      port                          = "7443"
-      deregisteration_delay_seconds = 30
-      protocol                      = "TCP"
-      health_check_config = {
-        healthy_threshold             = 3
-        health_check_interval_seconds = 10
-        health_check_timeout_seconds  = 8
-        unhealthy_threshold           = 2
+    load_balancer_security_group_config = {
+      egress = {
+        description = "To VPC instances"
+        cidr_blocks = [data.aws_vpc.main.cidr_block]
       }
+      ingress = local.lb_is_public ? {
+        description     = "Public Internet access"
+        cidr_blocks     = ["0.0.0.0/0"]
+        prefix_list_ids = []
+        } : {
+        description     = "From VPN, VPC peerings, the MGMT VPC, and self"
+        cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+        prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
+      }
+    }
+    load_balancer_listener_config = [
+      {
+        id                  = local.green_id
+        port                = local.lb_green_ingress_port
+        protocol            = "TCP"
+        default_action_type = "forward"
       },
       {
-        id                            = "blue"
-        name                          = "bfd-3701-test-blue-tg"
-        port                          = "7443"
+        id                  = local.blue_id
+        port                = local.lb_blue_ingress_port
+        protocol            = "TCP"
+        default_action_type = "forward"
+      }
+    ]
+    target_group_config = [
+      {
+        id                            = local.green_id
+        name                          = "${local.lb_name}-tg-${local.green_id}"
+        port                          = local.service_port
+        deregisteration_delay_seconds = 60
         protocol                      = "TCP"
-        deregisteration_delay_seconds = 30
-        health_check_config = {
-          healthy_threshold             = 3
-          health_check_interval_seconds = 10
-          health_check_timeout_seconds  = 8
-          unhealthy_threshold           = 2
-        }
-    }]
+        health_check_config           = local.tg_health_check_config
+      },
+      {
+        id                            = local.blue_id
+        name                          = "${local.lb_name}-tg-${local.blue_id}"
+        port                          = local.service_port
+        deregisteration_delay_seconds = 60
+        protocol                      = "TCP"
+        health_check_config           = local.tg_health_check_config
+      }
+    ]
   }
 }
 

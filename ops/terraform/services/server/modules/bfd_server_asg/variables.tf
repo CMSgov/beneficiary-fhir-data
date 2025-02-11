@@ -52,6 +52,17 @@ variable "lb_config" {
     connection_logs = optional(object({
       connection_logs_prefix = string
     }))
+    load_balancer_security_group_config = object({
+      ingress = object({
+        description     = string
+        cidr_blocks     = list(string)
+        prefix_list_ids = list(string)
+      })
+      egress = object({
+        description = string
+        cidr_blocks = list(string)
+      })
+    })
     load_balancer_listener_config = list(object({
       id                  = string
       port                = string
@@ -98,14 +109,4 @@ variable "jdbc_suffix" {
   default     = "?logServerErrorDetail=false"
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
-}
-
-variable "ingress" {
-  description = "Ingress port and cidr blocks"
-  type        = object({ description = string, port = number, cidr_blocks = list(string), prefix_list_ids = list(string) })
-}
-
-variable "egress" {
-  description = "Egress port and cidr blocks"
-  type        = object({ description = string, port = number, cidr_blocks = list(string) })
 }
