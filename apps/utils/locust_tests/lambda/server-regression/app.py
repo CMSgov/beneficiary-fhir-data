@@ -153,6 +153,9 @@ def handler(event, context):
         cert = get_ssm_parameter(
             f"/bfd/{environment}/server/sensitive/server_regression_cert", with_decrypt=True
         )
+        green_port = get_ssm_parameter(
+            f"/bfd/{environment}/server/nonsensitive/lb_green_ingress_port"
+        )
     except ValueError as exc:
         send_pipeline_signal(
             signal_queue_url=signal_queue_url,
@@ -191,7 +194,7 @@ def handler(event, context):
             [
                 "locust",
                 f"--locustfile=/var/task/{invoke_event.suite_version}/{locust_file}",
-                f"--host={invoke_event.host}",
+                f"--host={invoke_event.host}:{green_port}",
                 f"--users={invoke_event.users}",
                 f"--spawn-rate={invoke_event.spawn_rate}",
                 f"--spawned-runtime={invoke_event.spawned_runtime}",
