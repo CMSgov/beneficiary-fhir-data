@@ -242,16 +242,15 @@ resource "aws_launch_template" "main" {
   }
 }
 
+# These AutoScaling Groups require 2 external "null_resourece" resources to manage their Target
+# Group ARNs and their Warm Pool due to defective behavior in the AWS provider. Specifically,
+# attempting to modify Target Group ARNs dynamically (to do blue/green) results in an error during
+# apply with a message indicating a bug in the provider. Additionally, attempting to manage the Warm
+# Pool via Terraform results in an erreneous 3 minute delay upon destruction of the Warm Pool, even
+# with "force_delete_warm_pool" enabled, which is unnaceptable
 resource "aws_autoscaling_group" "main" {
-  # Deployments of this ASG require two executions of `terraform apply`. This AutoScaling Group
-  # requires 4 external "null_resourece" resources that manage its Target Group ARNs and Warm Pool
-  # due to defective behavior in the AWS provider. Specifically, attempting to modify Target Group
-  # ARNs dynamically (to do blue/green) results in an error during apply with a message indicating a
-  # bug in the provider. Additionally, attempting to manage the Warm Pool via Terraform results in
-  # an erreneous 3 minute delay upon destruction of the Warm Pool, even with
-  # "force_delete_warm_pool" enabled, which is unnaceptable
-  depends_on = [null_resource.detach_target_groups]
-  for_each   = local.asgs
+  # Deployments of this ASG require two executions of `terraform apply`.
+  for_each = local.asgs
 
   lifecycle {
     precondition {
@@ -263,7 +262,12 @@ corresponding Runbook for instructions on how to remediate this situation.
 EOF
     }
 
-    ignore_changes = [target_group_arns]
+    # For "target_group_arns" look at "null_resource.set_target_groups" as Terraform's AWS Provider
+    # has a bug in it when changing target group ARNs in the terraform. For "warm_pool" look at
+    # "null_resource.manage_warm_pool" as Terraform's AWS Provider does not respect
+    # "force_delete_warm_pool" which would result in non-zero downtime deployments as scaling-in the
+    # previous "blue" blocks incoming "blue" from being attached to the "blue" Target Group
+    ignore_changes = [target_group_arns, warm_pool]
   }
 
   name                      = each.value.name
@@ -293,8 +297,6 @@ EOF
     lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
   }
 
-
-
   enabled_metrics = [
     "GroupMinSize",
     "GroupMaxSize",
@@ -305,24 +307,6 @@ EOF
     "GroupTerminatingInstances",
     "GroupTotalInstances",
   ]
-
-  # NOTE: AWS Provider for Terraform does not fully respect the warm pool blocks
-  # - it reports that the warm pool will be destroyed when it is not called for
-  # - it reports that the warm pool will be destroyed when we want to destroy it
-  # - in either case, terraform 1.5.0 with provider AWS v5.53.0 does not destroy the warm pool
-  # See null resource provider below for deletion logic
-  force_delete_warm_pool = true
-  dynamic "warm_pool" {
-    for_each = each.value.warmpool_size == 0 ? toset([]) : toset([each.value.warmpool_size])
-    content {
-      pool_state                  = "Stopped"
-      min_size                    = warm_pool.value
-      max_group_prepared_capacity = warm_pool.value
-      instance_reuse_policy {
-        reuse_on_scale_in = false
-      }
-    }
-  }
 
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
@@ -487,94 +471,75 @@ resource "aws_autoscaling_policy" "avg_cpu_high" {
   }
 }
 
-resource "null_resource" "detach_target_groups" {
-  for_each = local.asgs
-
-  triggers = {
-    should_detach = each.value.deployment_status == "green"
-  }
-
-  provisioner "local-exec" {
-    environment = {
-      should_detach = self.triggers.should_detach
-      asg_name      = each.value.name
-    }
-
-    command = <<-EOF
-asg_details="$(
-  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" \
-    | jq -r '.AutoScalingGroups | length'
-)"
-if [[ "$asg_details" != "0" && "$should_detach" == "true" ]]; then
-  aws autoscaling detach-load-balancer-target-groups \
-      --auto-scaling-group-name "$asg_name" \
-      --target-group-arns "$(
-          aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" \
-            | jq -r '.AutoScalingGroups[0].TargetGroupARNs | join(",")'
-        )"
-fi
-EOF
-  }
-}
-
 resource "null_resource" "set_target_groups" {
   for_each = local.asgs
 
   triggers = {
     target_group_name = each.value.deployment_status
+    desired_capacity  = each.value.desired_capacity
   }
 
   provisioner "local-exec" {
     environment = {
       asg_name          = aws_autoscaling_group.main[each.key].name
+      desired_capacity  = self.triggers.desired_capacity
       target_group_arn  = aws_lb_target_group.main[self.triggers.target_group_name].arn
       target_group_name = self.triggers.target_group_name
     }
 
     command = <<-EOF
 attached_tgs="$(
-  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" \
-    | jq -r '.AutoScalingGroups[0].TargetGroupARNs | join(",")'
+  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" |
+    jq -r '.AutoScalingGroups[0].TargetGroupARNs | join(",")'
 )"
 if [[ -n "$attached_tgs" ]]; then
   aws autoscaling detach-load-balancer-target-groups \
     --auto-scaling-group-name "$asg_name" \
     --target-group-arns "$attached_tgs"
+  echo "Detached $asg_name from all Target Groups"
 fi
-aws autoscaling attach-load-balancer-target-groups --auto-scaling-group-name "$asg_name" --target-group-arns "$target_group_arn" \
-  && echo "Attached $asg_name to $target_group_name Target Group"
+if ((desired_capacity > 0)); then
+  aws autoscaling attach-load-balancer-target-groups \
+    --auto-scaling-group-name "$asg_name" \
+    --target-group-arns "$target_group_arn" &&
+    echo "Attached $asg_name to $target_group_name Target Group"
+fi
 EOF
   }
 }
 
-# NOTE: Required to *actually* delete a warm pool as of terraform 1.5.0 and AWS Provider v5.53.0
-resource "null_resource" "warm_pool_size" {
+# NOTE: Required to avoid erroneous 3 minute delay when scaling-in an ASG's Warm Pool due to defects
+# in the Terraform AWS Provider as of Terraform 1.5.0 and version 5.53.0 of the AWS Provider
+resource "null_resource" "manage_warm_pool" {
   for_each = local.asgs
 
   triggers = {
-    should_delete_warmpool = each.value.warmpool_size == 0
+    warmpool_size = each.value.warmpool_size
   }
 
   provisioner "local-exec" {
     environment = {
-      will_delete = self.triggers.should_delete_warmpool
-      asg_name    = each.value.name
+      warmpool_size = self.triggers.warmpool_size
+      asg_name      = aws_autoscaling_group.main[each.key].name
     }
 
     command = <<-EOF
-if [[ $will_delete == "true" ]]; then
+if ((warmpool_size == 0)); then
   aws autoscaling delete-warm-pool --auto-scaling-group-name "$asg_name" --force-delete
-  echo "Deleting "$asg_name" warm_pool. 'will_delete' is "$will_delete""
+  echo "Deleting "$asg_name" warm_pool. 'warmpool_size' is 0"
 else
-  echo "No change to "$asg_name" warm_pool. 'will_delete' is "$will_delete""
+  aws autoscaling put-warm-pool --auto-scaling-group-name "$asg_name" \
+    --max-group-prepared-capacity "$warmpool_size" \
+    --min-size "$warmpool_size" \
+    --pool-state "Stopped" \
+    --instance-reuse-policy "ReuseOnScaleIn=false"
+  echo "Creating Warm Pool for "$asg_name" with size of $warmpool_size"
 fi
 EOF
   }
 }
 
-
 ### Load Balancer Components ###
-
 resource "aws_lb" "main" {
   name                             = var.lb_config.name
   internal                         = coalesce(var.lb_config.internal, true)
