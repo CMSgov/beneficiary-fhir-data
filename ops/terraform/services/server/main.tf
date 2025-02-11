@@ -112,6 +112,7 @@ module "fhir_iam" {
 
 ####
 /*
+TODO: Update this module with new NLB metrics in BFD-XXXX
 module "lb_alarms" {
   count = local.create_server_lb_alarms ? 1 : 0
 
