@@ -153,6 +153,13 @@
         "code" : "referring",
         "display" : "Referring"
       } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "http://nucc.org/provider-taxonomy",
+        "code" : "204D00000X",
+        "display" : "Neuromusculoskeletal Medicine & OMM Physician"
+      } ]
     }
   }, {
     "extension" : [ {
@@ -174,7 +181,8 @@
           } ]
         },
         "value" : "1244444444"
-      }
+      },
+      "display" : "DR. DAVID SMITH MD"
     },
     "responsible" : true,
     "role" : {

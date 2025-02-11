@@ -14,6 +14,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -115,11 +116,17 @@ public final class DMEClaimTransformerV2Test {
    */
   @BeforeEach
   public void before() throws IOException {
+    NPIData npiData =
+        NPIData.builder()
+            .npi("0000000000")
+            .taxonomyCode("207X00000X")
+            .taxonomyDisplay("Orthopaedic Surgery")
+            .build();
+
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(any()))
-        .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(any())).thenReturn(Optional.of(npiData));
     dmeClaimTransformer =
         new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
     claim = generateClaim();

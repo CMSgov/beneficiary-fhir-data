@@ -169,7 +169,8 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     // NPI and FDA drug mocking
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
+    //
+    // when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
 
     when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);

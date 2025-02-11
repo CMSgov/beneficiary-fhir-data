@@ -44,6 +44,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -89,6 +90,25 @@ import org.opentest4j.AssertionFailedError;
 final class TransformerTestUtils {
   /** The fhir context for parsing the test file. Do this very slow operation once. */
   private static final FhirContext fhirContext = FhirContext.forDstu3();
+
+  /** fake npi data. */
+  private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
+
+  static {
+    try {
+      InputStream npiDataStream =
+          Thread.currentThread().getContextClassLoader().getResourceAsStream(ORG_FILE_NAME);
+      NPIOrgLookup npiOrgLookup = new NPIOrgLookup(npiDataStream);
+      CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
+    } catch (IOException e) {
+      throw new RuntimeException("Error loading test data for NPIOrgLookup.");
+    }
+  }
+
+  /** Empty method used to trigger execution of the static initializer. */
+  public static void touch() {
+    // NOOP
+  }
 
   /**
    * Asserts that the adjudication total in an EOB matches the expected value.

@@ -1,6 +1,9 @@
-0000000000	Fake ORG Name
-2222222222	207R00000X	Internal Medicine Physician
-3333333333	207T00000X	Neurological Surgery Physician
-4444	204D00000X	Neuromusculoskeletal Medicine & OMM Physician
-345345345	207ZH0000X	Hematology (Pathology) Physician
-1244444444	207ZH0000X	Hematology (Pathology) Physician
+{ "npi": "0000000000", "entityTypeCode": "2", "providerOrganizationName": "Fake ORG Name" }
+{ "npi":  "2222222222", "entityTypeCode": "1", "taxonomyCode": "207R00000X", "taxonomyDisplay": "Internal Medicine Physician" }
+{ "npi": "3333333333", "entityTypeCode": "1", "taxonomyCode": "207T00000X", "taxonomyDisplay": "Neurological Surgery Physician" }
+{ "npi": "4444", "entityTypeCode": "1", "taxonomyCode": "204D00000X", "taxonomyDisplay": "Neuromusculoskeletal Medicine & OMM Physician" }
+{ "npi": "345345345", "entityTypeCode": "1", "taxonomyCode": "207ZH0000X", "taxonomyDisplay": "Hematology (Pathology) Physician" }
+{ "npi": "1750384806", "entityTypeCode": "1", "providerNamePrefix": "DR.", "providerFirstName": "ROBERT", "providerLastName": "BISBEE", "providerCredential": "MD", "taxonomyCode": "207T00000X", "taxonomyDisplay": "Neurological Surgery Physician" }
+{ "npi": "1244444444", "entityTypeCode": "1", "taxonomyCode": "207ZH0000X", "taxonomyDisplay": "Hematology (Pathology) Physician", "providerNamePrefix": "DR.", "providerFirstName": "DAVID", "providerLastName": "SMITH", "providerCredential": "MD" }
+{ "npi": "1306849450", "entityTypeCode": "1", "providerNamePrefix": "DR.", "providerFirstName": "HAROLD", "providerMiddleName": "LEROY", "providerLastName": "SMITSON", "providerNameSuffix": "II", "providerCredential": "M.D.", "taxonomyCode": "204D00000X", "taxonomyDisplay": "Neuromusculoskeletal Medicine & OMM Physician" }
+{ "npi": "1023011079", "entityTypeCode": "2", "providerOrganizationName": "ADVANTAGE HOME HEALTH CARE, INC." }
