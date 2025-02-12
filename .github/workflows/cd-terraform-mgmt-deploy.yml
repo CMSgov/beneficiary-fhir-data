@@ -1,4 +1,4 @@
-name: "CI - Update OPS Infrastructure"
+name: "CD - Update Management Infrastructure"
 on:
   push:
     branches:
