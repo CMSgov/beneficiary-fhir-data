@@ -245,6 +245,13 @@ public final class AppConfiguration extends BaseAppConfiguration {
   public static final String SSM_PATH_RDA_GRPC_AUTH_TOKEN = "rda/grpc/auth_token";
 
   /**
+   * The path of the SSM parameter that should be used to provide the sequence number update
+   * interval.
+   */
+  public static final String SSM_PATH_RDA_JOB_SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS =
+      "rda/job/sequence_range_update_interval_seconds";
+
+  /**
    * The path of the SSM parameter that should be used to indicate how many RDA messages can error
    * without causing the job to stop processing prematurely.
    */
@@ -410,6 +417,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(SSM_PATH_RDA_JOB_INTERVAL_SECONDS, "300")
           .put(SSM_PATH_RDA_JOB_BATCH_SIZE, "1")
           .put(SSM_PATH_RDA_JOB_WRITE_THREADS, "1")
+          .put(SSM_PATH_RDA_JOB_SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS, "300")
           .put(SSM_PATH_RDA_GRPC_SERVER_TYPE, RdaSourceConfig.ServerType.Remote.name())
           .put(SSM_PATH_RDA_GRPC_HOST, "localhost")
           .put(SSM_PATH_RDA_GRPC_PORT, "443")
@@ -732,6 +740,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
         .minIdleTimeBeforeConnectionDrop(
             Duration.ofSeconds(config.intValue(SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP)))
         .authenticationToken(config.stringOptionEmptyOK(SSM_PATH_RDA_GRPC_AUTH_TOKEN).orElse(null))
+        .sequenceRangeUpdateIntervalSeconds(
+            config.longValue(SSM_PATH_RDA_JOB_SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS))
         .messageErrorExpirationDays(
             config.intOption(SSM_PATH_RDA_JOB_ERROR_EXPIRE_DAYS).orElse(null))
         .build();
