@@ -295,6 +295,7 @@ public class LoadRdaJsonApp {
           RdaSourceConfig.builder()
               .serverType(RdaSourceConfig.ServerType.Remote)
               .host("localhost")
+              .sequenceRangeUpdateIntervalSeconds(300)
               .port(port)
               .maxIdle(Duration.ofDays(1))
               .build();

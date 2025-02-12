@@ -69,10 +69,11 @@ public class StandardGrpcRdaSourceTest {
       ZonedDateTime.of(LocalDateTime.of(2022, 4, 19, 1, 2, 3), ZoneId.systemDefault()).toInstant();
 
   /** Configuration setting for {@link StandardGrpcRdaSource#minIdleMillisBeforeConnectionDrop}. */
-  // JavadocReference - Just for documentation
-  @SuppressWarnings("JavadocReference")
   private static final long MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP =
       Duration.ofMinutes(2).toMillis();
+
+  private static final long SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS =
+      Duration.ofMinutes(5).toSeconds();
 
   /** Integer used as a "claim" in the unit tests. */
   private static final Integer CLAIM_1 = 101;
@@ -145,6 +146,7 @@ public class StandardGrpcRdaSourceTest {
                 "ints",
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS,
                 RdaSourceConfig.ServerType.Remote,
                 rdaVersion));
     lenient().doReturn(false).when(rdaVersion).allows(anyString());
@@ -224,6 +226,7 @@ public class StandardGrpcRdaSourceTest {
                 "ints",
                 Optional.empty(),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS,
                 RdaSourceConfig.ServerType.InProcess,
                 rdaVersion));
 
@@ -307,6 +310,7 @@ public class StandardGrpcRdaSourceTest {
                 "ints",
                 Optional.of(CONFIGURED_SEQUENCE_NUMBER),
                 MIN_IDLE_MILLIS_BEFORE_CONNECTION_DROP,
+                SEQUENCE_RANGE_UPDATE_INTERVAL_SECONDS,
                 RdaSourceConfig.ServerType.Remote,
                 rdaVersion));
     doReturn(createResponse(CLAIM_1))

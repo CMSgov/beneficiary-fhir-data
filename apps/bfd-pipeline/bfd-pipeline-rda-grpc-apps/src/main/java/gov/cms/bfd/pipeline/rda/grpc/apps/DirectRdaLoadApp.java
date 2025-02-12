@@ -175,6 +175,8 @@ public class DirectRdaLoadApp {
             .serverType(RdaSourceConfig.ServerType.Remote)
             .host(options.stringValue("api.host", "localhost"))
             .port(options.intValue("api.port", 5003))
+            .sequenceRangeUpdateIntervalSeconds(
+                options.longValue("job.sequence_range_update_interval_seconds"))
             .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
             .build();
     return new RdaLoadOptions(
