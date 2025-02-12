@@ -16,8 +16,8 @@ locals {
   azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service        = "fhir"
   service               = "server"
-  green_id              = "green"
-  blue_id               = "blue"
+  green_state           = "green"
+  blue_state            = "blue"
   lb_name               = "bfd-${local.env}-${local.legacy_service}-nlb"
   tg_health_check_config = {
     healthy_threshold             = 3
@@ -244,13 +244,13 @@ module "fhir_asg" {
     }
     load_balancer_listener_config = [
       {
-        id                  = local.green_id
+        id                  = local.green_state
         port                = local.lb_green_ingress_port
         protocol            = "TCP"
         default_action_type = "forward"
       },
       {
-        id                  = local.blue_id
+        id                  = local.blue_state
         port                = local.lb_blue_ingress_port
         protocol            = "TCP"
         default_action_type = "forward"
@@ -258,16 +258,16 @@ module "fhir_asg" {
     ]
     target_group_config = [
       {
-        id                            = local.green_id
-        name                          = "${local.lb_name}-tg-${local.green_id}"
+        id                            = local.green_state
+        name                          = "${local.lb_name}-tg-${local.green_state}"
         port                          = local.service_port
         deregisteration_delay_seconds = 60
         protocol                      = "TCP"
         health_check_config           = local.tg_health_check_config
       },
       {
-        id                            = local.blue_id
-        name                          = "${local.lb_name}-tg-${local.blue_id}"
+        id                            = local.blue_state
+        name                          = "${local.lb_name}-tg-${local.blue_state}"
         port                          = local.service_port
         deregisteration_delay_seconds = 60
         protocol                      = "TCP"
