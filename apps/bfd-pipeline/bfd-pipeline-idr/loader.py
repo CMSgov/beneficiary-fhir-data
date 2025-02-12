@@ -53,8 +53,12 @@ class PostgresLoader:
                     cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")
 
                 # Use COPY to load the batch into Postgres.
-                # COPY has a number of optimizations that make bulk loading data more efficient than a bunch of INSERTs.
-                # Even though we need to move the data from the temp table in the next step, it should be much faster.
+                # COPY has a number of optimizations that make bulk loading more efficient than a bunch of INSERTs.
+                # The entire operation is performed in a single statement, resulting in fewer network round-trips,
+                # less WAL activity, and less context switching.
+
+                # Even though we need to move the data from the temp table in the next step, it should still be
+                # faster than alternatives.
                 with cur.copy(
                     f"COPY {self.temp_table} ({cols_str}) FROM STDIN"
                 ) as copy:

@@ -31,3 +31,15 @@ docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd fhir
 
 echo
 echo Database created successfully.
+
+docker cp ./mock-idr.sql bfd-idr-db:/docker-entrypoint-initdb.d/mock-idr.sql
+docker cp ./bfd.sql bfd-idr-db:/docker-entrypoint-initdb.d/bfd.sql
+
+echo
+echo Creating schema.
+
+docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/mock-idr.sql
+docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d/bfd.sql
+
+echo
+echo Schema created successfully.

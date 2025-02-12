@@ -1,8 +1,9 @@
-import psycopg
+import logging
 from loader import PostgresLoader
 from model import IdrBeneficiary
 from extractor import Extractor, PostgresExtractor
 
+logger = logging.getLogger(__name__)
 
 fetch_query = """
 SELECT
@@ -18,16 +19,30 @@ WHERE
 """
 
 
+def init_logger():
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+
 def main():
+    init_logger()
+
     run_pipeline(
-        PostgresExtractor(100_000),
+        PostgresExtractor(
+            "host=localhost dbname=idr user=bfd password=InsecureLocalDev", 100_000
+        ),
         "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev",
     )
 
 
 def run_pipeline(extractor: Extractor, connection_string: str):
+    logger.info("fetching IDR data")
     iter = extractor.extract(IdrBeneficiary, fetch_query, {})
 
+    logger.info("loading data")
     PostgresLoader(
         connection_string=connection_string,
         table="idr.beneficiary",
@@ -36,6 +51,7 @@ def run_pipeline(extractor: Extractor, connection_string: str):
         exclude_cols=["bene_id"],
         insert_cols=["bene_sk", "bene_mbi_id", "bene_1st_name", "bene_last_name"],
     ).load(iter)
+    logger.info("done")
 
 
 if __name__ == "__main__":
