@@ -52,6 +52,8 @@ public class RdaSourceConfig {
   /** Authorization token expiration date, in epoch seconds. */
   private final Long expirationDate;
 
+  private final Long sequenceRangeUpdateIntervalSeconds;
+
   /** The token to pass to the RDA API server to authenticate the client. */
   @Nullable private final String authenticationToken;
 
@@ -73,18 +75,6 @@ public class RdaSourceConfig {
     InProcess
   }
 
-  /**
-   * Instantiates a new Rda source config.
-   *
-   * @param serverType the server type
-   * @param host the host
-   * @param port the port
-   * @param inProcessServerName the in process server name
-   * @param maxIdle the max idle
-   * @param minIdleTimeBeforeConnectionDrop the min idle time before connection drop
-   * @param authenticationToken the authentication token
-   * @param messageErrorExpirationDays days until message errors expire
-   */
   @Builder
   private RdaSourceConfig(
       ServerType serverType,
@@ -92,6 +82,7 @@ public class RdaSourceConfig {
       int port,
       String inProcessServerName,
       Duration maxIdle,
+      long sequenceRangeUpdateIntervalSeconds,
       @Nullable Duration minIdleTimeBeforeConnectionDrop,
       @Nullable String authenticationToken,
       @Nullable Integer messageErrorExpirationDays) {
@@ -100,6 +91,7 @@ public class RdaSourceConfig {
     this.port = port;
     this.inProcessServerName = inProcessServerName;
     this.maxIdle = maxIdle;
+    this.sequenceRangeUpdateIntervalSeconds = sequenceRangeUpdateIntervalSeconds;
     this.minIdleTimeBeforeConnectionDrop =
         minIdleTimeBeforeConnectionDrop == null
             ? Duration.ofMillis(Long.MAX_VALUE)
@@ -113,6 +105,8 @@ public class RdaSourceConfig {
     }
 
     Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
+    Preconditions.checkArgument(
+        sequenceRangeUpdateIntervalSeconds >= 1, "sequenceRangeUpdateInterval less than 1 second");
 
     if (!Strings.isNullOrEmpty(authenticationToken)) {
       this.authenticationToken = authenticationToken;

@@ -482,7 +482,8 @@ public class StandardGrpcRdaSourceIT {
         .serverType(RdaSourceConfig.ServerType.Remote)
         .host("localhost")
         .port(port)
-        .maxIdle(Duration.ofSeconds(30));
+        .maxIdle(Duration.ofSeconds(30))
+        .sequenceRangeUpdateIntervalSeconds(300);
   }
 
   /**

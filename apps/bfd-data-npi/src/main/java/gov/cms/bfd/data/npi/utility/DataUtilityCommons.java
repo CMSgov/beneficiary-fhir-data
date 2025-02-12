@@ -1,16 +1,15 @@
 package gov.cms.bfd.data.npi.utility;
 
-import com.google.common.base.Strings;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -58,6 +58,30 @@ public class DataUtilityCommons {
 
   /** Field for Entity Type Code in CSV. */
   public static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
+
+  /** Field for Provider Credential code in CSV. */
+  private static final String PROVIDER_CREDENTIAL_FIELD = "Provider Credential Text";
+
+  /** Field for Provider first name in CSV. */
+  private static final String PROVIDER_FIRST_NAME_FIELD = "Provider First Name";
+
+  /** Field for Provider middle name in CSV. */
+  private static final String PROVIDER_MIDDLE_NAME_FIELD = "Provider Middle Name";
+
+  /** Field for Provider last name in CSV. */
+  private static final String PROVIDER_LAST_NAME_FIELD = "Provider Last Name (Legal Name)";
+
+  /** Field for Provider prefix in CSV. */
+  private static final String PROVIDER_PREFIX_FIELD = "Provider Name Prefix Text";
+
+  /** Field for Provider Suffix in CSV. */
+  private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
+
+  /** Code for Provider entity type. */
+  public static final String ENTITY_TYPE_CODE_PROVIDER = "1";
+
+  /** Code for Organization entity type. */
+  public static final String ENTITY_TYPE_CODE_ORGANIZATION = "2";
 
   /**
    * Gets the org names from the npi file.
@@ -330,27 +354,42 @@ public class DataUtilityCommons {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
         FileOutputStream fw =
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
+        DeflaterOutputStream dos = new DeflaterOutputStream(fw); ) {
       CSVParser csvParser =
           new CSVParser(
               reader,
               CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+      ObjectMapper objectMapper = new ObjectMapper();
       for (CSVRecord csvRecord : csvParser) {
         String orgName = csvRecord.get(PROVIDER_ORGANIZATION_NAME_FIELD);
         String npi = csvRecord.get(NPI_FIELD);
         String entityTypeCode = csvRecord.get(ENTITY_TYPE_CODE_FIELD);
         String taxonomyCode = csvRecord.get(TAXONOMY_CODE_FIELD);
-        // entity type code 2 is organization
-        if (!Strings.isNullOrEmpty(entityTypeCode)) {
-          if (Integer.parseInt(entityTypeCode) == 2) {
-            out.write(npi + "\t" + orgName);
-            out.newLine();
-          } else if (!Strings.isNullOrEmpty(taxonomyCode)) {
-            out.write(npi + "\t" + taxonomyCode + "\t" + taxonomyMap.get(taxonomyCode));
-            out.newLine();
-          }
-        }
+        String providerFirstName = csvRecord.get(PROVIDER_FIRST_NAME_FIELD);
+        String providerMiddleName = csvRecord.get(PROVIDER_MIDDLE_NAME_FIELD);
+        String providerLastName = csvRecord.get(PROVIDER_LAST_NAME_FIELD);
+        String providerPrefix = csvRecord.get(PROVIDER_PREFIX_FIELD);
+        String providerSuffix = csvRecord.get(PROVIDER_SUFFIX_FIELD);
+        String providerCredential = csvRecord.get(PROVIDER_CREDENTIAL_FIELD);
+        NPIData npiData =
+            NPIData.builder()
+                .npi(npi)
+                .providerOrganizationName(orgName)
+                .entityTypeCode(entityTypeCode)
+                .taxonomyCode(taxonomyCode)
+                .taxonomyDisplay(taxonomyMap.get(taxonomyCode))
+                .providerFirstName(providerFirstName)
+                .providerMiddleName(providerMiddleName)
+                .providerLastName(providerLastName)
+                .providerNamePrefix(providerPrefix)
+                .providerNameSuffix(providerSuffix)
+                .providerCredential(providerCredential)
+                .build();
+        String json = objectMapper.writeValueAsString(npiData);
+        dos.write(json.getBytes());
+        dos.write("\n".getBytes());
       }
+      dos.close();
     }
   }
 

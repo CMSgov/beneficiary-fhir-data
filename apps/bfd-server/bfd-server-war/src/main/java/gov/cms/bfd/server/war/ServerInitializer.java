@@ -3,6 +3,8 @@ package gov.cms.bfd.server.war;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import io.dropwizard.metrics.servlet.InstrumentedFilter;
@@ -80,6 +82,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
         MetricsServlet.METRICS_REGISTRY, springContext.getBean(MetricRegistry.class));
     servletContext.setAttribute(
         HealthCheckServlet.HEALTH_CHECK_REGISTRY, springContext.getBean(HealthCheckRegistry.class));
+    CommonTransformerUtils.setNpiOrgLookup(springContext.getBean(NPIOrgLookup.class));
 
     LOGGER.info("Initialized Blue Button API backend server.");
   }

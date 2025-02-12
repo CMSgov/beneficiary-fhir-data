@@ -55,8 +55,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
   /** The last sequence number range update timestamp. */
   private Instant lastSequenceNumberRangeUpdate = Instant.MIN;
 
-  /** The interval to update the sequence number range. */
-  private static final Long SEQUENCE_NUMBER_RANGE_UPDATE_MILLIS = 5000L;
+  private long sequenceRangeUpdateIntervalSeconds;
 
   /**
    * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
@@ -85,27 +84,11 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
         claimType,
         startingSequenceNumber,
         config.getMinIdleMillisBeforeConnectionDrop(),
+        config.getSequenceRangeUpdateIntervalSeconds(),
         config.getServerType(),
         rdaVersion);
   }
 
-  /**
-   * This constructor accepts a fully constructed channel instead of a configuration object. This is
-   * used internally by the primary constructor but is also used by unit tests to allow a mock
-   * channel to be provided.
-   *
-   * @param clock used to access current time
-   * @param channel channel used to make RPC calls
-   * @param caller the GrpcStreamCaller used to invoke a particular RPC
-   * @param callOptionsFactory factory for generating runtime options for the gRPC call
-   * @param appMetrics the MetricRegistry used to track metrics
-   * @param claimType string representation of the claim type
-   * @param startingSequenceNumber optional hard coded sequence number
-   * @param minIdleMillisBeforeConnectionDrop the amount of time before a connection drop is
-   *     expected
-   * @param serverType the server type
-   * @param rdaVersion The required {@link RdaVersion} in order to ingest data
-   */
   @VisibleForTesting
   StandardGrpcRdaSource(
       Clock clock,
@@ -116,6 +99,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
       String claimType,
       Optional<Long> startingSequenceNumber,
       long minIdleMillisBeforeConnectionDrop,
+      long sequenceRangeUpdateIntervalSeconds,
       RdaSourceConfig.ServerType serverType,
       RdaVersion rdaVersion) {
     super(
@@ -128,6 +112,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
     this.clock = clock;
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     this.minIdleMillisBeforeConnectionDrop = minIdleMillisBeforeConnectionDrop;
+    this.sequenceRangeUpdateIntervalSeconds = sequenceRangeUpdateIntervalSeconds;
     this.serverType = serverType;
   }
 
@@ -299,7 +284,7 @@ public class StandardGrpcRdaSource<TMessage, TClaim>
    */
   private void updateSequenceNumberRange(RdaSink<TMessage, TClaim> sink) {
     Instant now = Instant.now();
-    if (now.minusMillis(SEQUENCE_NUMBER_RANGE_UPDATE_MILLIS)
+    if (now.minusSeconds(sequenceRangeUpdateIntervalSeconds)
         .isAfter(lastSequenceNumberRangeUpdate)) {
       ClaimSequenceNumberRange sequenceNumberRange =
           caller.callSequenceNumberRangeService(channel, callOptionsFactory.get());
