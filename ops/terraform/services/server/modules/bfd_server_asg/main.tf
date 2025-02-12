@@ -269,6 +269,10 @@ EOF
     ignore_changes = [target_group_arns, warm_pool]
   }
 
+  # TODO: Remove below code in BFD-3878
+  load_balancers = var.legacy_clb_name != null ? [var.legacy_clb_name] : null
+  # TODO: Remove above code in BFD-3878
+
   name                      = each.value.name
   desired_capacity          = each.value.desired_capacity
   max_size                  = each.value.max_size

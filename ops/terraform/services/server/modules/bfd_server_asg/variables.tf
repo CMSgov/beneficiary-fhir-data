@@ -104,3 +104,11 @@ variable "jdbc_suffix" {
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
 }
+
+# TODO: Remove below code in BFD-3878
+variable "legacy_clb_name" {
+  default     = null
+  type        = string
+  description = "Name of the legacy CLB to associate ASGs to; only necessary for established environments"
+}
+# TODO: Remove above code in BFD-3878

@@ -110,6 +110,44 @@ module "fhir_iam" {
   legacy_service       = local.legacy_service
 }
 
+## NLB for the FHIR server (SSL terminated by the FHIR server)
+#
+# TODO: Remove bfd_server_lb module in BFD-3878
+# TODO: Remove below code in BFD-3878
+module "fhir_lb" {
+  count  = !local.is_ephemeral_env ? 1 : 0
+  source = "./modules/bfd_server_lb"
+
+  env_config = local.env_config
+  role       = local.legacy_service
+  layer      = "dmz"
+  is_public  = local.lb_is_public
+
+  ingress = local.lb_is_public ? {
+    description     = "Public Internet access"
+    port            = local.lb_blue_ingress_port
+    cidr_blocks     = ["0.0.0.0/0"]
+    prefix_list_ids = []
+    } : {
+    description     = "From VPN, VPC peerings, the MGMT VPC, and self"
+    port            = local.lb_blue_ingress_port
+    cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
+  }
+
+  egress = {
+    description = "To VPC instances"
+    port        = local.service_port
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
+  }
+}
+
+moved {
+  from = module.fhir_lb
+  to   = module.fhir_lb[0]
+}
+# TODO: Remove above code in BFD-3878
+
 ####
 /*
 TODO: Update this module with new NLB metrics in BFD-XXXX
@@ -140,6 +178,10 @@ module "fhir_asg" {
   role          = local.legacy_service
   layer         = "app"
   seed_env      = local.seed_env
+
+  # TODO: Remove below code in BFD-3878
+  legacy_clb_name = one(module.fhir_lb[*].name)
+  # TODO: Remove above code in BFD-3878
 
   # Initial size is one server per AZ
   asg_config = {
