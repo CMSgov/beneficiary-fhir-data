@@ -494,7 +494,7 @@ resource "null_resource" "set_target_groups" {
 attached_other_tgs="$(
   aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" |
     jq -r --arg target_group_arn "$target_group_arn" \
-      '.AutoScalingGroups[0].TargetGroupARNs | map(select(. != "$target_group_arn")) | join(",")'
+      '.AutoScalingGroups[0].TargetGroupARNs | map(select(. != $target_group_arn)) | join(",")'
 )"
 if [[ -n "$attached_other_tgs" ]]; then
   aws autoscaling detach-load-balancer-target-groups \
