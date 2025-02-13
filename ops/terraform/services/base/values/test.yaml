@@ -162,7 +162,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
-/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server (${env})
