@@ -183,8 +183,8 @@
 /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
 /bfd/${env}/server/nonsensitive/paths/files/war: UNDEFINED
 /bfd/${env}/server/nonsensitive/lb_is_public: "false"
-/bfd/${env}/server/nonsensitive/lb_ingress_port: "443"
-/bfd/${env}/server/nonsensitive/lb_egress_port: "7443"
+/bfd/${env}/server/nonsensitive/lb_blue_ingress_port: "443"
+/bfd/${env}/server/nonsensitive/lb_green_ingress_port: "7443"
 /bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: '[ "bfd-prod-vpc-to-dpc-prod-vpc", "bfd-prod-vpc-to-bluebutton-prod", "bfd-prod-vpc-to-bcda-prod-vpc", "bfd-prod-to-ab2d-prod" ]'
 /bfd/${env}/server/nonsensitive/asg_min_instance_count: "3"
 /bfd/${env}/server/nonsensitive/asg_max_instance_count: "12"
