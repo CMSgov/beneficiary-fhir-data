@@ -154,6 +154,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/job/sequence_range_update_interval_seconds: 300
 /bfd/${env}/pipeline/nonsensitive/rda/new_relic/app_name: BFD Pipeline (${env})
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: "150000"

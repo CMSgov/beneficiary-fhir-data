@@ -34,6 +34,8 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -73,6 +75,23 @@ import org.opentest4j.AssertionFailedError;
 public final class TransformerTestUtilsV2 {
   /** The fhir context for parsing the test file. Do this very slow operation once. */
   private static final FhirContext fhirContext = FhirContext.forR4();
+
+  /** NPIOrgLookup. */
+  private static final NPIOrgLookup npiOrgLookup;
+
+  /** fake npi data. */
+  private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
+
+  static {
+    try {
+      InputStream npiDataStream =
+          Thread.currentThread().getContextClassLoader().getResourceAsStream(ORG_FILE_NAME);
+      npiOrgLookup = new NPIOrgLookup(npiDataStream);
+      CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
+    } catch (IOException e) {
+      throw new RuntimeException("Error loading test data for NPIOrgLookup.");
+    }
+  }
 
   /**
    * Test the transformation of common group level header fields between all claim types.

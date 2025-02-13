@@ -1064,6 +1064,13 @@
             "code" : "referring",
             "display" : "Referring"
           } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "204D00000X",
+            "display" : "Neuromusculoskeletal Medicine & OMM Physician"
+          } ]
         }
       }, {
         "extension" : [ {
@@ -1085,7 +1092,8 @@
               } ]
             },
             "value" : "1244444444"
-          }
+          },
+          "display" : "DR. DAVID SMITH MD"
         },
         "responsible" : true,
         "role" : {
@@ -4432,6 +4440,13 @@
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "code" : "prescribing",
             "display" : "Prescribing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "http://nucc.org/provider-taxonomy",
+            "code" : "207T00000X",
+            "display" : "Neurological Surgery Physician"
           } ]
         }
       } ],

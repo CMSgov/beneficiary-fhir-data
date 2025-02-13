@@ -68,6 +68,7 @@ public final class DMEClaimTransformerTest {
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
+    TransformerTestUtils.touch();
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 

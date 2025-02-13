@@ -81,7 +81,8 @@ locals {
   }
 
   log_groups = {
-    messages = "/bfd/${local.env}/bfd-pipeline/messages.txt"
+    rda_messages = "/bfd/${local.env}/bfd-pipeline-rda/messages.txt"
+    ccw_messages = "/bfd/${local.env}/bfd-pipeline-ccw/messages.txt"
   }
 
   alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : []

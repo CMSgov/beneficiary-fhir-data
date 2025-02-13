@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -74,10 +75,18 @@ public final class CarrierClaimTransformerTest {
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
+    NPIData npiData =
+        NPIData.builder()
+            .npi("0000000000")
+            .providerOrganizationName(RDATestUtils.FAKE_NPI_ORG_NAME)
+            .taxonomyCode("207X00000X")
+            .taxonomyDisplay("Orthopaedic Surgery")
+            .build();
+
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of(RDATestUtils.FAKE_NPI_ORG_NAME));
+        .thenReturn(Optional.of(npiData));
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 

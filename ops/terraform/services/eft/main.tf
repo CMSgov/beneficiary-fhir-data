@@ -313,22 +313,17 @@ resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
 resource "aws_lambda_function_event_invoke_config" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  function_name = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
-  # This Lambda is invoked by SNS, which invokes the Lambda asynchronously. By default, AWS Lambda
-  # retries failing Functions twice before dropping the event, but because this Lambda has side
-  # effects we don't want to retry if it fails. Instead, we will drop failing events into a DLQ for
-  # the on-call to process it again, if possible
-  maximum_retry_attempts = 0
+  function_name          = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  maximum_retry_attempts = 2
 
-  # On failure we want failing events to land into a DLQ such that responding engineers can analyze
-  # the event and retry, if necessary
+  # If the Lambda exhausts all of its retry attempts, we want failing events to land into a DLQ such
+  # that responding engineers can analyze the event and retry, if necessary
   destination_config {
     on_failure {
       destination = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn)
     }
   }
 }
-
 
 resource "aws_security_group" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0

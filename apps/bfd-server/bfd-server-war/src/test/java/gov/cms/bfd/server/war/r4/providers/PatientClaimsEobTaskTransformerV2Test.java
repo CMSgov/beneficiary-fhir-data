@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -121,15 +122,20 @@ class PatientClaimsEobTaskTransformerV2Test {
   @BeforeEach
   public void setup() {
     setupEntities();
-
+    NPIData npiData =
+        NPIData.builder()
+            .npi("0000000000")
+            .taxonomyCode("207X00000X")
+            .taxonomyDisplay("Orthopaedic Surgery")
+            .build();
     // metrics mocking
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     // NPI and FDA drug mocking
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
+    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.empty());
     when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
     when(mockNpiTaxonomyLookup.retrieveNPIOrgDisplay(Optional.empty()))
-        .thenReturn(Optional.of("207X00000X\tOrthopaedic Surgery"));
+        .thenReturn(Optional.of(npiData));
     // used to get the claim type in transformer utils
     CodeableConcept mockConcept = mock(CodeableConcept.class);
     Coding mockCoding = mock(Coding.class);

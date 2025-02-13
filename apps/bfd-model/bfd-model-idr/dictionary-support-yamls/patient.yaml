@@ -1,0 +1,135 @@
+#of note, BENE_SSN_NUM will be consumed by BFD and should be in here, but not as part of the mapping to FHIR. It should only be used for matching, eventually.
+- inputPath: Beneficiary.BENE_1ST_NAME
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.name.given
+  expectedFHIRPath: Patient.name.given[0]
+- inputPath: Beneficiary.BENE_LAST_NAME
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.name.family
+  expectedFHIRPath: Patient.name.family
+- inputPath: Beneficiary.BENE_MIDL_NAME
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.name.given
+  expectedFHIRPath: Patient.name.given[1]
+- inputPath: Beneficiary.BENE_DOB
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.birthDate
+  expectedFHIRPath: Patient.birthDate
+- inputPath: Beneficiary.BENE_DEATH_DT
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.deceasedDateTime
+  expectedFHIRPath: Patient.deceasedDateTime
+- inputPath: Beneficiary.BENE_VRFY_DEATH_DAY_SW
+  appliesTo:
+    - Patient
+- inputPath: Beneficiary.mbi
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.identifier
+  expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi')
+- inputPath: Beneficiary.XREF_EFCTV_BENE_SK
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.id XOR BFDPatient.link.other.display
+  expectedFHIRPath: iif(Patient.link.where(type = 'replaced-by').other.exists(),Patient.link.where(type = 'replaced-by').other.reference.substring(8),Patient.id)
+- inputPath: Beneficiary.ALL_BENE_SKs
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.link.other.display OR Patient.id
+  expectedFHIRPath: Patient.link.other.display.union(Patient.id)
+- inputPath: Beneficiary.BENE_SK
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.id
+  expectedFHIRPath: Patient.id
+- inputPath: Beneficiary.lastUpdated
+  appliesTo:
+    - Patient
+  targetElement: Patient.meta.lastUpdated
+  expectedFHIRPath: Patient.meta.lastUpdated
+- inputPath: Beneficiary.GEO_USPS_STATE_CD
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.
+  expectedFHIRPath: Patient.address[0].state
+- inputPath: Beneficiary.BENE_ZIP_CD
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.postalCode
+  expectedFHIRPath: Patient.address[0].postalCode
+- inputPath: Beneficiary.BENE_LINE_1_ADR
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.line
+  expectedFHIRPath: Patient.address[0].line[0]
+- inputPath: Beneficiary.BENE_LINE_2_ADR
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.line
+  expectedFHIRPath: Patient.address[0].line[1]
+- inputPath: Beneficiary.BENE_LINE_3_ADR
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.line
+  expectedFHIRPath: Patient.address[0].line[2]
+- inputPath: Beneficiary.BENE_LINE_4_ADR
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.line
+  expectedFHIRPath: Patient.address[0].line[3]
+- inputPath: Beneficiary.BENE_LINE_5_ADR
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.line
+  expectedFHIRPath: Patient.address[0].line[4]
+- inputPath: Beneficiary.BENE_LINE_6_ADR
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.line
+  expectedFHIRPath: Patient.address[0].line[5]
+- inputPath: Beneficiary.GEO_ZIP_PLC_NAME
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.address.city
+  expectedFHIRPath: Patient.address[0].city
+- inputPath: Beneficiary.CNTCT_LANG_CD
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.communication.language.coding.code
+  expectedFHIRPath: Patient.communication.language.coding.where(system='urn:ietf:bcp:47').code
+- inputPath: Beneficiary.BENE_PHNE_NUM
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.telecom.value
+  expectedFHIRPath: Patient.telecom.where(system='phone').value
+- inputPath: Beneficiary.BENE_SEX_CD
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.gender
+  expectedFHIRPath: Patient.gender
+- inputPath: Beneficiary.BENE_RACE_CD
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.extension.extension.valueString
+  expectedFHIRPath: Patient.extension.where(url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity' or url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')
+- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_ID
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.identifier.value
+  expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').value
+- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_EFCTV_DT
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.identifier.period.start
+  expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').period.start
+- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_OBSLT_DT
+  appliesTo:
+    - Patient
+  targetElement: BFDPatient.identifier.period.end
+  expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').period.end
+  
