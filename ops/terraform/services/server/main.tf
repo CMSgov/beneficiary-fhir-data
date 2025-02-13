@@ -148,15 +148,13 @@ moved {
 }
 # TODO: Remove above code in BFD-3878
 
-####
-/*
-TODO: Update this module with new NLB metrics in BFD-XXXX
+# TODO: Update this module with new NLB metrics in BFD-3885
 module "lb_alarms" {
   count = local.create_server_lb_alarms ? 1 : 0
 
   source = "./modules/bfd_server_lb_alarms"
 
-  load_balancer_name = module.fhir_lb.name
+  load_balancer_name = one(module.fhir_lb[*].name)
   app                = "bfd"
 
   # NLBs only have this metric to alarm on
@@ -166,7 +164,6 @@ module "lb_alarms" {
     threshold    = 1 # Count
   }
 }
-*/
 
 ## Autoscale group for the FHIR server
 #
