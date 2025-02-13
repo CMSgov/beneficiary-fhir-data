@@ -4,7 +4,7 @@ locals {
   asgs = {
     odd = {
       name              = "${aws_launch_template.main.name}-odd"
-      lt_version        = local.is_latest_launch_template_odd ? local.latest_ltv : max(local.latest_ltv - 1, 1)
+      lt_version        = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
       desired_capacity  = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
       max_size          = var.asg_config.max
       min_size          = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
@@ -13,7 +13,7 @@ locals {
     }
     even = {
       name              = "${aws_launch_template.main.name}-even"
-      lt_version        = local.is_latest_launch_template_even ? local.latest_ltv : max(local.latest_ltv - 1, 1)
+      lt_version        = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
       desired_capacity  = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
       max_size          = var.asg_config.max
       min_size          = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
@@ -31,6 +31,9 @@ locals {
   latest_ltv                     = tonumber(aws_launch_template.main.latest_version)
   is_latest_launch_template_odd  = local.latest_ltv % 2 == 1
   is_latest_launch_template_even = local.latest_ltv % 2 == 0
+
+  odd_remote_lt_version  = try(tonumber(data.external.current_asg.result["odd_launch_template_version"]), null)
+  even_remote_lt_version = try(tonumber(data.external.current_asg.result["even_launch_template_version"]), null)
 
   odd_remote_desired_capacity  = tonumber(data.external.current_asg.result["odd_desired_capacity"])
   even_remote_desired_capacity = tonumber(data.external.current_asg.result["even_desired_capacity"])
