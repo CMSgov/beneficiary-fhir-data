@@ -149,7 +149,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/job/batch_size: "20"
 /bfd/${env}/pipeline/nonsensitive/rda/job/write_thread_count: "20"
 /bfd/${env}/pipeline/nonsensitive/rda/job/process_dlq: "true"
-/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: UNDEFINED
