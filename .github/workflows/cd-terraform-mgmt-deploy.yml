@@ -1,4 +1,4 @@
-name: "CD - Update Management Infrastructure"
+name: "CD - Update MGMT Infrastructure"
 on:
   push:
     branches:
