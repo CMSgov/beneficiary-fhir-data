@@ -484,13 +484,11 @@ resource "null_resource" "set_target_groups" {
 
   triggers = {
     target_group_name = each.value.deployment_status
-    desired_capacity  = each.value.desired_capacity
   }
 
   provisioner "local-exec" {
     environment = {
       asg_name          = aws_autoscaling_group.main[each.key].name
-      desired_capacity  = self.triggers.desired_capacity
       target_group_arn  = aws_lb_target_group.main[self.triggers.target_group_name].arn
       target_group_name = self.triggers.target_group_name
     }
@@ -507,12 +505,10 @@ if [[ -n "$attached_other_tgs" ]]; then
     --target-group-arns "$attached_other_tgs"
   echo "Detached $asg_name from all non-$target_group_name Target Groups"
 fi
-if ((desired_capacity > 0)); then
-  aws autoscaling attach-load-balancer-target-groups \
-    --auto-scaling-group-name "$asg_name" \
-    --target-group-arns "$target_group_arn" &&
-    echo "Attached $asg_name to $target_group_name Target Group"
-fi
+aws autoscaling attach-load-balancer-target-groups \
+  --auto-scaling-group-name "$asg_name" \
+  --target-group-arns "$target_group_arn" &&
+  echo "Attached $asg_name to $target_group_name Target Group"
 EOF
   }
 }
