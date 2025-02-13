@@ -8,5 +8,5 @@ CREATE SCHEMA idr
         bene_mbi_id VARCHAR(11),
         bene_1st_name VARCHAR(30),
         bene_last_name VARCHAR(40),
-        created_ts TIMESTAMPTZ NOT NULL,
-        updated_ts TIMESTAMPTZ);
+        created_timestamp TIMESTAMPTZ NOT NULL,
+        updated_timestamp TIMESTAMPTZ);

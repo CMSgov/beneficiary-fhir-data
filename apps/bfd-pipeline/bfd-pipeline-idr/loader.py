@@ -48,7 +48,10 @@ class PostgresLoader:
                     f"CREATE TEMPORARY TABLE {self.temp_table} (LIKE {self.table}) ON COMMIT DROP"
                 )
                 # Created/updated columns don't need to be loaded from the source.
-                exclude_cols = ["created_ts", "updated_ts"] + self.exclude_cols
+                exclude_cols = [
+                    "created_timestamp",
+                    "updated_timestamp",
+                ] + self.exclude_cols
                 for col in exclude_cols:
                     cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")
 
@@ -68,9 +71,9 @@ class PostgresLoader:
                 # Upsert into the main table
                 cur.execute(
                     f"""
-                    INSERT INTO {self.table}({cols_str}, created_ts)
+                    INSERT INTO {self.table}({cols_str}, created_timestamp)
                     SELECT {cols_str}, %(ts)s FROM {self.temp_table}
-                    ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, updated_ts=%(ts)s
+                    ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, updated_timestamp=%(ts)s
                     """,
                     {"ts": ts},
                 )
