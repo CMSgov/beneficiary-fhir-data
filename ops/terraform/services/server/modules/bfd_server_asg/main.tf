@@ -22,6 +22,16 @@ locals {
     }
   }
 
+  lb_name = "bfd-${local.env}-${var.role}-nlb"
+  lb_targets = {
+    blue = {
+      ingress_port = var.lb_config.ingress.blue_port
+    }
+    green = {
+      ingress_port = var.lb_config.ingress.green_port
+    }
+  }
+
   env      = terraform.workspace
   seed_env = var.seed_env
 
@@ -155,37 +165,37 @@ resource "aws_security_group" "base" {
 
 # app server
 resource "aws_security_group" "app" {
-  count       = var.lb_config == null ? 0 : 1
+  lifecycle {
+    create_before_destroy = true
+  }
+
   name        = "bfd-${local.env}-${var.role}-app"
   description = "Allow access to app servers"
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.additional_tags)
 
-  dynamic "ingress" {
-    for_each = var.lb_config.target_group_config
-    content {
-      from_port       = ingress.value.port
-      to_port         = ingress.value.port
-      protocol        = ingress.value.protocol
-      security_groups = concat([aws_security_group.lb.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
-      # TODO: Replace above "security_groups" definition with below commented code in BFD-3878
-      # security_groups = [aws_security_group.lb.id]
-      # TODO: Replace above "security_groups" definition with above commented code in BFD-3878
-    }
+  ingress {
+    from_port       = var.lb_config.server_listen_port
+    to_port         = var.lb_config.server_listen_port
+    protocol        = "TCP"
+    security_groups = concat([aws_security_group.lb.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
+    # TODO: Replace above "security_groups" definition with below commented code in BFD-3878
+    # security_groups = [aws_security_group.lb.id]server_listen_port
+    # TODO: Replace above "security_groups" definition with above commented code in BFD-3878
   }
 }
 
 # database
 resource "aws_security_group_rule" "allow_db_access" {
-  for_each    = var.db_config != null ? toset(var.db_config.db_sg) : []
+  for_each    = toset(var.db_config.db_sg)
   type        = "ingress"
   from_port   = 5432
   to_port     = 5432
   protocol    = "tcp"
   description = "Allows access to the ${var.db_config.role} db"
 
-  security_group_id        = each.value                   # The SG associated with each replica
-  source_security_group_id = aws_security_group.app[0].id # Every instance in the ASG
+  security_group_id        = each.value                # The SG associated with each replica
+  source_security_group_id = aws_security_group.app.id # Every instance in the ASG
 }
 
 ## Launch Template
@@ -549,31 +559,30 @@ EOF
 
 ### Load Balancer Components ###
 resource "aws_lb" "main" {
-  name                             = var.lb_config.name
-  internal                         = coalesce(var.lb_config.internal, true)
-  load_balancer_type               = var.lb_config.load_balancer_type
+  name                             = local.lb_name
+  internal                         = !var.lb_config.is_public
+  load_balancer_type               = "network"
   security_groups                  = [aws_security_group.lb.id]
   subnets                          = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
-  enable_deletion_protection       = coalesce(var.lb_config.enable_deletion_protection, false)
-  client_keep_alive                = coalesce(var.lb_config.client_keep_alive_seconds, 3600)
-  idle_timeout                     = coalesce(var.lb_config.idle_timeout_seconds, 60)
-  ip_address_type                  = coalesce(var.lb_config.ip_address_type, "ipv4")
-  enable_http2                     = coalesce(var.lb_config.enable_http2, "false")
-  desync_mitigation_mode           = coalesce(var.lb_config.desync_mitigation_mode, "strictest")
-  enable_cross_zone_load_balancing = coalesce(var.lb_config.enable_cross_zone_load_balancing, "true")
+  enable_deletion_protection       = var.lb_config.enable_deletion_protection
+  idle_timeout                     = 60
+  ip_address_type                  = "ipv4"
+  enable_http2                     = false
+  desync_mitigation_mode           = "strictest"
+  enable_cross_zone_load_balancing = true
 
   tags = local.additional_tags
 }
 
 resource "aws_lb_listener" "main" {
-  for_each = { for config in var.lb_config.load_balancer_listener_config : config.id => config }
+  for_each = local.lb_targets
 
   load_balancer_arn = aws_lb.main.arn
-  port              = each.value.port
-  protocol          = each.value.protocol
+  port              = each.value.ingress_port
+  protocol          = "TCP"
 
   default_action {
-    type             = each.value.default_action_type
+    type             = "forward"
     target_group_arn = aws_lb_target_group.main[each.key].arn
   }
 }
@@ -584,44 +593,38 @@ resource "aws_security_group" "lb" {
     create_before_destroy = true
   }
 
-  name        = "${var.lb_config.name}-sg"
+  name        = "${local.lb_name}-sg"
   description = "Allow access to the ${var.role} load-balancer"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "${var.lb_config.name}-sg" }, local.additional_tags)
+  tags        = merge({ Name = "${local.lb_name}-sg" }, local.additional_tags)
 
   # Dynamic, per-listener CIDR Block ingress rules
   dynamic "ingress" {
-    for_each = var.lb_config.load_balancer_listener_config
+    for_each = local.lb_targets
     content {
-      from_port   = ingress.value.port
-      to_port     = ingress.value.port
-      protocol    = ingress.value.protocol
-      cidr_blocks = var.lb_config.load_balancer_security_group_config.ingress.cidr_blocks
-      description = var.lb_config.load_balancer_security_group_config.ingress.description
+      from_port   = ingress.value.ingress_port
+      to_port     = ingress.value.ingress_port
+      protocol    = "TCP"
+      cidr_blocks = var.lb_config.ingress.cidr_blocks
     }
   }
 
   # Dynamic, per-listener prefix list ingress rules if prefix list IDs are specified
   dynamic "ingress" {
-    for_each = length(var.lb_config.load_balancer_security_group_config.ingress.prefix_list_ids) > 0 ? var.lb_config.load_balancer_listener_config : []
+    for_each = length(var.lb_config.ingress.prefix_list_ids) > 0 ? local.lb_targets : {}
     content {
-      from_port       = ingress.value.port
-      to_port         = ingress.value.port
-      protocol        = ingress.value.protocol
-      prefix_list_ids = var.lb_config.load_balancer_security_group_config.ingress.prefix_list_ids
-      description     = var.lb_config.load_balancer_security_group_config.ingress.description
+      from_port       = ingress.value.ingress_port
+      to_port         = ingress.value.ingress_port
+      protocol        = "TCP"
+      prefix_list_ids = var.lb_config.ingress.prefix_list_ids
     }
   }
 
-  dynamic "egress" {
-    for_each = var.lb_config.target_group_config
-    content {
-      from_port   = egress.value.port
-      to_port     = egress.value.port
-      protocol    = egress.value.protocol
-      cidr_blocks = var.lb_config.load_balancer_security_group_config.egress.cidr_blocks
-      description = var.lb_config.load_balancer_security_group_config.egress.description
-    }
+  egress {
+    from_port   = var.lb_config.server_listen_port
+    to_port     = var.lb_config.server_listen_port
+    protocol    = "TCP"
+    cidr_blocks = var.lb_config.egress.cidr_blocks
   }
 }
 
@@ -630,20 +633,20 @@ resource "aws_lb_target_group" "main" {
     create_before_destroy = true
   }
 
-  for_each = { for config in var.lb_config.target_group_config : config.id => config }
+  for_each = local.lb_targets
 
-  name                   = each.value.name
-  port                   = each.value.port
-  protocol               = each.value.protocol
+  name                   = "${aws_lb.main.name}-tg-${each.key}"
+  port                   = var.lb_config.server_listen_port
+  protocol               = "TCP"
   vpc_id                 = var.env_config.vpc_id
-  deregistration_delay   = each.value.deregisteration_delay_seconds
+  deregistration_delay   = 60
   connection_termination = true
   health_check {
-    healthy_threshold   = each.value.health_check_config.healthy_threshold
-    interval            = each.value.health_check_config.health_check_interval_seconds
-    timeout             = each.value.health_check_config.health_check_timeout_seconds
-    unhealthy_threshold = each.value.health_check_config.unhealthy_threshold
-    port                = 7443
+    healthy_threshold   = 3
+    interval            = 10
+    timeout             = 8
+    unhealthy_threshold = 2
+    port                = var.lb_config.server_listen_port
     protocol            = "TCP"
   }
 }

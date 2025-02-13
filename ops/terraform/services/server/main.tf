@@ -16,15 +16,6 @@ locals {
   azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
   legacy_service        = "fhir"
   service               = "server"
-  green_state           = "green"
-  blue_state            = "blue"
-  lb_name               = "bfd-${local.env}-${local.legacy_service}-nlb"
-  tg_health_check_config = {
-    healthy_threshold             = 3
-    health_check_interval_seconds = 10
-    health_check_timeout_seconds  = 8
-    unhealthy_threshold           = 2
-  }
 
   # NOTE: nonsensitive service-oriented and common config
   nonsensitive_common_map = zipmap(
@@ -220,58 +211,18 @@ module "fhir_asg" {
   }
 
   lb_config = {
-    name                       = "bfd-${local.env}-${local.legacy_service}-nlb"
-    internal                   = !local.lb_is_public
-    load_balancer_type         = "network"
-    ip_address_type            = "ipv4"
+    is_public                  = local.lb_is_public
     enable_deletion_protection = !local.is_ephemeral_env
-    load_balancer_security_group_config = {
-      egress = {
-        description = "To VPC instances"
-        cidr_blocks = [data.aws_vpc.main.cidr_block]
-      }
-      ingress = local.lb_is_public ? {
-        description     = "Public Internet access"
-        cidr_blocks     = ["0.0.0.0/0"]
-        prefix_list_ids = []
-        } : {
-        description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-        cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-        prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
-      }
+    ingress = {
+      blue_port       = local.lb_blue_ingress_port
+      green_port      = local.lb_green_ingress_port
+      cidr_blocks     = !local.lb_is_public ? concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]) : ["0.0.0.0/0"]
+      prefix_list_ids = !local.lb_is_public ? [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id] : []
     }
-    load_balancer_listener_config = [
-      {
-        id                  = local.green_state
-        port                = local.lb_green_ingress_port
-        protocol            = "TCP"
-        default_action_type = "forward"
-      },
-      {
-        id                  = local.blue_state
-        port                = local.lb_blue_ingress_port
-        protocol            = "TCP"
-        default_action_type = "forward"
-      }
-    ]
-    target_group_config = [
-      {
-        id                            = local.green_state
-        name                          = "${local.lb_name}-tg-${local.green_state}"
-        port                          = local.service_port
-        deregisteration_delay_seconds = 60
-        protocol                      = "TCP"
-        health_check_config           = local.tg_health_check_config
-      },
-      {
-        id                            = local.blue_state
-        name                          = "${local.lb_name}-tg-${local.blue_state}"
-        port                          = local.service_port
-        deregisteration_delay_seconds = 60
-        protocol                      = "TCP"
-        health_check_config           = local.tg_health_check_config
-      }
-    ]
+    egress = {
+      cidr_blocks = [data.aws_vpc.main.cidr_block]
+    }
+    server_listen_port = local.service_port
   }
 }
 

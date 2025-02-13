@@ -36,46 +36,18 @@ variable "db_config" {
 variable "lb_config" {
   description = "Load balancer information"
   type = object({
-    name                             = string
-    internal                         = optional(bool)
-    load_balancer_type               = string
-    enable_deletion_protection       = optional(bool)
-    client_keep_alive_seconds        = optional(number)
-    idle_timeout_seconds             = optional(number)
-    ip_address_type                  = string
-    enable_http2                     = optional(bool)
-    desync_mitigation_mode           = optional(string)
-    enable_cross_zone_load_balancing = optional(bool)
-    load_balancer_security_group_config = object({
-      ingress = object({
-        description     = string
-        cidr_blocks     = list(string)
-        prefix_list_ids = list(string)
-      })
-      egress = object({
-        description = string
-        cidr_blocks = list(string)
-      })
+    is_public                  = bool
+    enable_deletion_protection = bool
+    ingress = object({
+      green_port      = number
+      blue_port       = number
+      cidr_blocks     = list(string)
+      prefix_list_ids = list(string)
     })
-    load_balancer_listener_config = list(object({
-      id                  = string
-      port                = string
-      protocol            = string
-      default_action_type = string
-    }))
-    target_group_config = list(object({
-      id                            = string
-      name                          = string
-      port                          = number
-      protocol                      = string
-      deregisteration_delay_seconds = number
-      health_check_config = object({
-        healthy_threshold             = number
-        health_check_interval_seconds = number
-        health_check_timeout_seconds  = number
-        unhealthy_threshold           = number
-      })
-    }))
+    egress = object({
+      cidr_blocks = list(string)
+    })
+    server_listen_port = string
   })
   default = null
 }
