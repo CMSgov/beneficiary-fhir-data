@@ -9,7 +9,7 @@ locals {
       max_size          = var.asg_config.max
       min_size          = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
       warmpool_size     = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
-      deployment_status = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state ? local.blue_state : local.green_state)
+      deployment_status = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
     }
     even = {
       name              = "${aws_launch_template.main.name}-even"
@@ -18,7 +18,7 @@ locals {
       max_size          = var.asg_config.max
       min_size          = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
       warmpool_size     = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
-      deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state ? local.blue_state : local.green_state)
+      deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
     }
   }
 
