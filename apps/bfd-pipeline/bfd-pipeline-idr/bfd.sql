@@ -9,4 +9,4 @@ CREATE SCHEMA idr
         bene_1st_name VARCHAR(30),
         bene_last_name VARCHAR(40),
         created_timestamp TIMESTAMPTZ NOT NULL,
-        updated_timestamp TIMESTAMPTZ);
+        updated_timestamp TIMESTAMPTZ NOT NULL);

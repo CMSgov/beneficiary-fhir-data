@@ -34,7 +34,7 @@ class PostgresLoader:
         update_set = ", ".join(
             [f"{v}=EXCLUDED.{v}" for v in self.insert_cols if v != self.primary_key]
         )
-        ts = datetime.now(timezone.utc)
+        timestamp = datetime.now(timezone.utc)
         with self.conn.cursor() as cur:
             # load each batch in a separate transaction
             for results in fetch_results:
@@ -71,11 +71,11 @@ class PostgresLoader:
                 # Upsert into the main table
                 cur.execute(
                     f"""
-                    INSERT INTO {self.table}({cols_str}, created_timestamp)
-                    SELECT {cols_str}, %(ts)s FROM {self.temp_table}
-                    ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, updated_timestamp=%(ts)s
+                    INSERT INTO {self.table}({cols_str}, created_timestamp, updated_timestamp)
+                    SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {self.temp_table}
+                    ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, updated_timestamp=%(timestamp)s
                     """,
-                    {"ts": ts},
+                    {"timestamp": timestamp},
                 )
                 self.conn.commit()
                 # TODO: probably should track progress here so the data load can be stopped and resumed
