@@ -154,7 +154,7 @@ module "lb_alarms" {
 
   source = "./modules/bfd_server_lb_alarms"
 
-  load_balancer_name = one(module.fhir_lb[*].name)
+  load_balancer_name = one(module.fhir_lb[*].legacy_clb_name)
   app                = "bfd"
 
   # NLBs only have this metric to alarm on
@@ -177,7 +177,8 @@ module "fhir_asg" {
   seed_env      = local.seed_env
 
   # TODO: Remove below code in BFD-3878
-  legacy_clb_name = one(module.fhir_lb[*].name)
+  legacy_clb_name = one(module.fhir_lb[*].legacy_clb_name)
+  legacy_sg_id    = one(module.fhir_lb[*].legacy_sg_id)
   # TODO: Remove above code in BFD-3878
 
   # Initial size is one server per AZ

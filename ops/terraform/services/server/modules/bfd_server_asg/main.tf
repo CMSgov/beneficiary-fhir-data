@@ -167,7 +167,10 @@ resource "aws_security_group" "app" {
       from_port       = ingress.value.port
       to_port         = ingress.value.port
       protocol        = ingress.value.protocol
-      security_groups = [aws_security_group.lb.id]
+      security_groups = concat([aws_security_group.lb.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
+      # TODO: Replace above "security_groups" definition with below commented code in BFD-3878
+      # security_groups = [aws_security_group.lb.id]
+      # TODO: Replace above "security_groups" definition with above commented code in BFD-3878
     }
   }
 }

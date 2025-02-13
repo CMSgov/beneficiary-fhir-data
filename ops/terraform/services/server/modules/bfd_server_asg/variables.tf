@@ -111,4 +111,10 @@ variable "legacy_clb_name" {
   type        = string
   description = "Name of the legacy CLB to associate ASGs to; only necessary for established environments"
 }
+
+variable "legacy_sg_id" {
+  default     = null
+  type        = string
+  description = "Name of the legacy Security Group to allow ingress from in the app SG"
+}
 # TODO: Remove above code in BFD-3878
