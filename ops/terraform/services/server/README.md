@@ -15,6 +15,16 @@ terraform apply
 
 **NOTE** the above double-invocation of terraform is correct. Two executions of `terraform apply` are necessary to achieve the desired state as of BFD-2558.
 
+## Blue/Green Workflow
+
+This Terraservice implements the logic and resources necessary to support a Blue/Green Deployment strategy for the BFD Server.
+
+Blue (`blue`) refers to the "active" or _production_ infrastructure that serves traffic to our consumers. Resources in `blue` are considered to "known-good" resources. Green (`green`) refers to _incoming_, new infrastructure for a _new_ version of the BFD Server that needs to be verified as good before it being promoted to `blue` and made available to serve traffic to our consumers.
+
+This Terraservice achieves a Blue/Green Deployment strategy by utilizing two AutoScaling Groups, two Target Groups and two Load Balancer Listeners on ports `443` and `7443` that route to the aforementioned Target Groups on different ports. The Listener on port `443` (the reserved HTTPS port) is associated with the `blue` Target Group and the Listener on `7443` is associated with `green`. This way, clients using the default HTTPS port will reach the `blue` BFD Server Instances only, while our automation can reach the `green` Instances by using port `7443`.
+
+The Terraservice logic decides which AutoScaling Group is associated with the `blue`/`green` Target Group by looking at the oddness/evenness of the _latest_ Launch Template version number _iff_ the Launch Template is changing upon the `terraform apply`. Correspondingly, the ASGs are suffixed with `-odd` and `-even`. Given latest Launch Template version number, if it is _odd_ the ASG suffixed as `-odd` will be chosen as `green` whereas if it is _even_ `-even` will be chosen as `green`. In this scenario, we expect no changes to the existing `blue` ASG nor its Target Group so that it continues to serve traffic uninterrupted.
+
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
