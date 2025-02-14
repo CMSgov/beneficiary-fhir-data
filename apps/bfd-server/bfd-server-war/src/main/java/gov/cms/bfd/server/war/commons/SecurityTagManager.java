@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -9,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Coding;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /** Find security level. */
@@ -17,6 +20,19 @@ public final class SecurityTagManager {
 
   /** The Entity manager. */
   private EntityManager entityManager;
+
+  /** Flag to control whether SAMHSA filtering should be applied. */
+  private final boolean samhsaV2Enabled;
+
+  /**
+   * Instantiates a new SecurityTagManager.
+   *
+   * @param samhsaV2Enabled samhsaV2Enabled flag
+   */
+  public SecurityTagManager(
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
+    this.samhsaV2Enabled = samhsaV2Enabled;
+  }
 
   /**
    * Sets the {@link #entityManager}.
@@ -57,47 +73,49 @@ public final class SecurityTagManager {
    */
   public List<Coding> getClaimSecurityLevel(String claimId, Class<?> tagClass) {
 
-    // Query tags associated with the claim
-    List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
+    if (samhsaV2Enabled) {
+      // Query tags associated with the claim
+      List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
 
-    List<Coding> securityTagCoding = new ArrayList<>();
+      List<Coding> securityTagCoding = new ArrayList<>();
 
-    // If no security tags are found, directly add the default "Normal" tag
-    if (securityTags.isEmpty()) {
-      Coding coding = new Coding();
-      coding
-          .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-          .setCode("N")
-          .setDisplay("Normal");
-      securityTagCoding.add(coding);
-    } else {
-      // Check for each tag and set corresponding code and display
-      for (String securityTag : securityTags) {
+      // If no security tags are found, directly add the default "Normal" tag
+      if (securityTags.isEmpty()) {
         Coding coding = new Coding();
-        // Convert the securityTag string to the TagCode enum
-        TagCode tagCode = TagCode.fromString(securityTag);
-        // Check each security tag and apply corresponding values
-        if (tagCode != null) {
-          switch (tagCode) {
-            case R:
-              coding
-                  .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-                  .setCode(TagCode.R.toString())
-                  .setDisplay(TagCode.R.getDisplayName());
-              break;
-            case _42CFRPart2:
-              coding
-                  .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
-                  .setCode(TagCode._42CFRPart2.toString())
-                  .setDisplay(TagCode._42CFRPart2.getDisplayName());
-              break;
-          }
-        }
+        coding
+            .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+            .setCode("N")
+            .setDisplay("Normal");
         securityTagCoding.add(coding);
+      } else {
+        // Check for each tag and set corresponding code and display
+        for (String securityTag : securityTags) {
+          Coding coding = new Coding();
+          // Convert the securityTag string to the TagCode enum
+          TagCode tagCode = TagCode.fromString(securityTag);
+          // Check each security tag and apply corresponding values
+          if (tagCode != null) {
+            switch (tagCode) {
+              case R:
+                coding
+                    .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+                    .setCode(TagCode.R.toString())
+                    .setDisplay(TagCode.R.getDisplayName());
+                break;
+              case _42CFRPart2:
+                coding
+                    .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
+                    .setCode(TagCode._42CFRPart2.toString())
+                    .setDisplay(TagCode._42CFRPart2.getDisplayName());
+                break;
+            }
+          }
+          securityTagCoding.add(coding);
+        }
       }
+      return securityTagCoding;
     }
-
-    return securityTagCoding;
+    return new ArrayList<>();
   }
 
   /**

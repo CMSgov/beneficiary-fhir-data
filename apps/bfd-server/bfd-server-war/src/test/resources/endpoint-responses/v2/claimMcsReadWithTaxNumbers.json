@@ -2,12 +2,7 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "lastUpdated": "1970-01-01T00:00:04.000+00:00",
-    "security" : [ {
-      "code" : "N",
-      "display" : "Normal",
-      "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality"
-    } ]
+    "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
     {
