@@ -21,12 +21,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "outpatient-1234567890",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt",
@@ -668,12 +663,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "dme-2188888888",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
@@ -1184,12 +1174,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "hha-2925555555",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -1629,12 +1614,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "inpatient-333333222222",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
@@ -2467,12 +2447,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "snf-777777777",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
@@ -3587,12 +3562,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "carrier-9991831999",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
@@ -4124,12 +4094,7 @@
       "resourceType" : "ExplanationOfBenefit",
       "id" : "hospice-9992223422",
       "meta" : {
-        "lastUpdated" : "IGNORED_FIELD",
-        "security" : [ {
-          "system" : "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
-          "code" : "N",
-          "display" : "Normal"
-        } ]
+        "lastUpdated" : "IGNORED_FIELD"
       },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
