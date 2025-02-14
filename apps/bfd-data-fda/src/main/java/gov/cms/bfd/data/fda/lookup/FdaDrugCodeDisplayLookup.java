@@ -30,13 +30,13 @@ public class FdaDrugCodeDisplayLookup {
   /** Tracks the national drug codes that have already had code lookup failures. */
   private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
-  /** Keeps track of the PRODUCTNDC column index in the fda_products_utf8.tsv file. */
+  /** Product NDC column name in the fda_products_utf8.tsv file. */
   private static final String PRODUCT_NDC_COLUMN = "PRODUCTNDC";
 
-  /** Keeps track of the PROPRIETARYNAME column index in the fda_products_utf8.tsv file. */
+  /** Proprietary Name column name in the fda_products_utf8.tsv file. */
   private static final String PROPRIETARY_NAME_COLUMN = "PROPRIETARYNAME";
 
-  /** Keeps track of the SUBSTANCENAME column index in the fda_products_utf8.tsv file. */
+  /** Substance Name column name in the fda_products_utf8.tsv file. */
   private static final String SUBSTANCE_NAME_COLUMN = "SUBSTANCENAME";
 
   /**
