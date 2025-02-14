@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +31,13 @@ public class FdaDrugCodeDisplayLookup {
   private final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
   /** Keeps track of the PRODUCTNDC column index in the fda_products_utf8.tsv file. */
-  private static int PRODUCT_NDC_COLUMN_INDEX = 1;
+  private static final String PRODUCT_NDC_COLUMN = "PRODUCTNDC";
 
   /** Keeps track of the PROPRIETARYNAME column index in the fda_products_utf8.tsv file. */
-  private static int PROPRIETARY_NAME_COLUMN_INDEX = 3;
+  private static final String PROPRIETARY_NAME_COLUMN = "PROPRIETARYNAME";
 
   /** Keeps track of the SUBSTANCENAME column index in the fda_products_utf8.tsv file. */
-  private static int SUBSTANCE_NAME_COLUMN_INDEX = 13;
+  private static final String SUBSTANCE_NAME_COLUMN = "SUBSTANCENAME";
 
   /**
    * Constructs an {@link FdaDrugCodeDisplayLookup}.
@@ -129,28 +132,28 @@ public class FdaDrugCodeDisplayLookup {
        * retrieval to get the display value which is a combination of PROPRIETARYNAME &
        * SUBSTANCENAME
        */
-      String line = "";
-      ndcProductsIn.readLine();
-      while ((line = ndcProductsIn.readLine()) != null) {
-        String ndcProductColumns[] = line.split("\t");
+      CSVParser csvParser =
+          new CSVParser(
+              ndcProductsIn,
+              CSVFormat.DEFAULT
+                  .builder()
+                  .setDelimiter('\t')
+                  .setHeader()
+                  .setIgnoreHeaderCase(true)
+                  .setTrim(true)
+                  .build());
+      for (CSVRecord csvRecord : csvParser) {
+        String productNdc = csvRecord.get(PRODUCT_NDC_COLUMN);
+        String proprietaryName = csvRecord.get(PROPRIETARY_NAME_COLUMN);
+        String substanceName = csvRecord.get(SUBSTANCE_NAME_COLUMN);
         String nationalDrugCodeManufacturer =
-            StringUtils.leftPad(
-                ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].substring(
-                    0, ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].indexOf("-")),
-                5,
-                '0');
+            StringUtils.leftPad(productNdc.substring(0, productNdc.indexOf("-")), 5, '0');
         String nationalDrugCodeIngredient =
             StringUtils.leftPad(
-                ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].substring(
-                    ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].indexOf("-") + 1,
-                    ndcProductColumns[PRODUCT_NDC_COLUMN_INDEX].length()),
-                4,
-                '0');
+                productNdc.substring(productNdc.indexOf("-") + 1, productNdc.length()), 4, '0');
         ndcProcessedData.put(
             String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-            ndcProductColumns[PROPRIETARY_NAME_COLUMN_INDEX].replace("\"", "")
-                + " - "
-                + ndcProductColumns[SUBSTANCE_NAME_COLUMN_INDEX].replace("\"", ""));
+            String.format("%s - %s", proprietaryName, substanceName));
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
