@@ -371,7 +371,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "ssm:GetParametersByPath",
             "ssm:GetParameters",
             "ssm:GetParameter",
-            "ssm:DeleteParameters"
+            "ssm:DeleteParameters",
+            "ssm:AddTagsToResource"
           ]
           Resource = "*"
         },
