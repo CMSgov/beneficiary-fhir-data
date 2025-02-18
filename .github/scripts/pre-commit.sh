@@ -60,9 +60,9 @@ runShellCheckForCommitFiles() {
       filename=$(basename -- "$file")
       extension="${filename##*.}"
 
-      # Skip binary formats
+      # Skip binary formats and groovy files
       case "$extension" in
-        "zip" | "p12" | "pfx" | "cer" | "pem" | "png" | "jpg")
+        "zip" | "p12" | "pfx" | "cer" | "pem" | "png" | "jpg" | "groovy")
           continue ;;
         *) ;;
       esac

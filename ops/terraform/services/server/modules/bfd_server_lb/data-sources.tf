@@ -13,8 +13,3 @@ data "aws_subnet" "app_subnets" {
     values = [var.layer]
   }
 }
-
-# S3 bucket for logs
-data "aws_s3_bucket" "logs" {
-  bucket = var.log_bucket
-}

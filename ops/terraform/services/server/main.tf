@@ -34,6 +34,15 @@ locals {
     for key, value in local.nonsensitive_service_map
     : split("/", key)[5] => value
   }
+  sensitive_service_map = zipmap(
+    data.aws_ssm_parameters_by_path.sensitive_service.names,
+    nonsensitive(data.aws_ssm_parameters_by_path.sensitive_service.values)
+  )
+  sensitive_service_config = {
+    for key, value in local.sensitive_service_map
+    : split("/", key)[5] => value
+  }
+
 
   enterprise_tools_security_group = local.nonsensitive_common_config["enterprise_tools_security_group"]
   management_security_group       = local.nonsensitive_common_config["management_security_group"]
@@ -43,10 +52,10 @@ locals {
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
-  lb_is_public    = local.nonsensitive_service_config["lb_is_public"]
-  lb_ingress_port = local.nonsensitive_service_config["lb_ingress_port"]
-  lb_egress_port  = local.nonsensitive_service_config["lb_egress_port"]
-  lb_vpc_peerings = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
+  lb_is_public          = tobool(local.nonsensitive_service_config["lb_is_public"])
+  lb_blue_ingress_port  = local.nonsensitive_service_config["lb_blue_ingress_port"]
+  lb_green_ingress_port = local.nonsensitive_service_config["lb_green_ingress_port"]
+  lb_vpc_peerings       = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
 
   asg_min_instance_count      = local.nonsensitive_service_config["asg_min_instance_count"]
   asg_max_instance_count      = local.nonsensitive_service_config["asg_max_instance_count"]
@@ -59,6 +68,8 @@ locals {
   launch_template_volume_size_gb    = local.nonsensitive_service_config["launch_template_volume_size_gb"]
   launch_template_volume_throughput = local.nonsensitive_service_config["launch_template_volume_throughput"]
   launch_template_volume_type       = local.nonsensitive_service_config["launch_template_volume_type"]
+
+  service_port = local.sensitive_service_config["service_port"]
 
   env_config = {
     default_tags = local.default_tags,
@@ -92,40 +103,49 @@ module "fhir_iam" {
 
 ## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
+# TODO: Remove bfd_server_lb module in BFD-3878
+# TODO: Remove below code in BFD-3878
 module "fhir_lb" {
+  count  = !local.is_ephemeral_env ? 1 : 0
   source = "./modules/bfd_server_lb"
 
   env_config = local.env_config
   role       = local.legacy_service
   layer      = "dmz"
-  log_bucket = data.aws_s3_bucket.logs.id
   is_public  = local.lb_is_public
 
   ingress = local.lb_is_public ? {
     description     = "Public Internet access"
-    port            = local.lb_ingress_port
+    port            = local.lb_blue_ingress_port
     cidr_blocks     = ["0.0.0.0/0"]
     prefix_list_ids = []
     } : {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port            = local.lb_ingress_port
+    port            = local.lb_blue_ingress_port
     cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
 
   egress = {
     description = "To VPC instances"
-    port        = local.lb_egress_port
+    port        = local.service_port
     cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
 
+moved {
+  from = module.fhir_lb
+  to   = module.fhir_lb[0]
+}
+# TODO: Remove above code in BFD-3878
+
+# TODO: Update this module with new NLB metrics in BFD-3885
 module "lb_alarms" {
   count = local.create_server_lb_alarms ? 1 : 0
 
   source = "./modules/bfd_server_lb_alarms"
 
-  load_balancer_name = module.fhir_lb.name
+  load_balancer_name = one(module.fhir_lb[*].legacy_clb_name)
   app                = "bfd"
 
   # NLBs only have this metric to alarm on
@@ -136,7 +156,6 @@ module "lb_alarms" {
   }
 }
 
-
 ## Autoscale group for the FHIR server
 #
 module "fhir_asg" {
@@ -146,8 +165,12 @@ module "fhir_asg" {
   env_config    = local.env_config
   role          = local.legacy_service
   layer         = "app"
-  lb_config     = module.fhir_lb.lb_config
   seed_env      = local.seed_env
+
+  # TODO: Remove below code in BFD-3878
+  legacy_clb_name = one(module.fhir_lb[*].legacy_clb_name)
+  legacy_sg_id    = one(module.fhir_lb[*].legacy_sg_id)
+  # TODO: Remove above code in BFD-3878
 
   # Initial size is one server per AZ
   asg_config = {
@@ -185,6 +208,21 @@ module "fhir_asg" {
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
     ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
+  }
+
+  lb_config = {
+    is_public                  = local.lb_is_public
+    enable_deletion_protection = !local.is_ephemeral_env
+    ingress = {
+      blue_port       = local.lb_blue_ingress_port
+      green_port      = local.lb_green_ingress_port
+      cidr_blocks     = !local.lb_is_public ? concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]) : ["0.0.0.0/0"]
+      prefix_list_ids = !local.lb_is_public ? [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id] : []
+    }
+    egress = {
+      cidr_blocks = [data.aws_vpc.main.cidr_block]
+    }
+    server_listen_port = local.service_port
   }
 }
 
