@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
+import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -79,15 +80,33 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
   }
 
   /**
+   * Gets the json response for the specified endpoint request string and default content type json
+   * header.
+   *
+   * @param requestString the request string
+   * @param requestSpec the request Spec
+   * @return the json response for
+   */
+  protected static String getJsonResponseFor(
+      String requestString, RequestSpecification requestSpec) {
+    return getJsonResponseFor(
+        requestString,
+        new Headers(new Header("Content-Type", "application/json+fhir")),
+        requestSpec);
+  }
+
+  /**
    * Gets the json response for the specified endpoint request string and specified headers.
    *
    * @param requestString the request string
    * @param headers the headers for the request
+   * @param requestSpec the request Specification
    * @return the json response for
    */
-  protected static String getJsonResponseFor(String requestString, Headers headers) {
+  protected static String getJsonResponseFor(
+      String requestString, Headers headers, RequestSpecification requestSpec) {
     return given()
-        .spec(requestAuth)
+        .spec(requestSpec)
         .headers(headers)
         .expect()
         .log()
@@ -99,6 +118,17 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
         .extract()
         .response()
         .asString();
+  }
+
+  /**
+   * Gets the json response for the specified endpoint request string and specified headers.
+   *
+   * @param requestString the request string
+   * @param headers the headers for the request
+   * @return the json response for
+   */
+  protected static String getJsonResponseFor(String requestString, Headers headers) {
+    return getJsonResponseFor(requestString, headers, requestAuth);
   }
 
   /**
@@ -204,6 +234,16 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
    */
   protected static Beneficiary getSampleABene() {
     List<Object> loadedRecords = ServerTestUtils.get().loadSampleAData();
+    return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
+  }
+
+  /**
+   * Gets the first sample A beneficiary.
+   *
+   * @return the first sample A beneficiary
+   */
+  protected static Beneficiary getSampleABeneSamhsa() {
+    List<Object> loadedRecords = ServerTestUtils.get().loadSampleASamhsaData();
     return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
   }
 

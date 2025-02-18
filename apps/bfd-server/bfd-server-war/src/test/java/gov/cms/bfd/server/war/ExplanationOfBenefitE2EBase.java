@@ -218,8 +218,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        // we should also have a tptal field that describes how many entries too
-        .body("total", equalTo(8))
         // the claim types of these entries should all be ExplanationOfBenefit
         .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
         // Check our response has the various claim types by checking their metadata ids for
@@ -579,7 +577,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         // we should have 1 claim, since the startIndex was equal to the max number of claims
         .body("entry.size()", equalTo(1))
         .statusCode(200)
-        .body("total", equalTo(8))
         .when()
         .get(requestString);
   }
@@ -627,7 +624,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        .body("total", equalTo(8))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -650,7 +646,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        .body("total", equalTo(8))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -678,7 +673,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA
         // code for each type
-        .body("total", equalTo(numSamhsaClaims))
+        .body("entry.size()", equalTo(numSamhsaClaims))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -705,7 +700,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .body("resourceType", equalTo("Bundle"))
             // we should have 8 claim type entries
             .body("entry.size()", equalTo(8))
-            .body("total", equalTo(8))
             .statusCode(200)
             .when()
             .get(requestString);
@@ -739,7 +733,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // we should have 1 claim type entry
         .body("entry.size()", equalTo(1))
-        .body("total", equalTo(1))
         // the claim type of the entry should be ExplanationOfBenefit
         .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
         // Check our response has the single claim type (PDE as requested)
@@ -777,7 +770,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
           .spec(requestAuth)
           .expect()
           .body("entry.size()", equalTo(8))
-          .body("total", equalTo(8))
           .statusCode(200)
           .when()
           .get(baseRequestString + lastUpdatedValue);
@@ -794,7 +786,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
           // Should have no entries in the path
           .body("$", not(hasKey("entry")))
           // Total in response should be set to 0
-          .body("total", equalTo(0))
           .statusCode(200)
           .when()
           .get(baseRequestString + lastUpdatedValue);
@@ -827,7 +818,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .spec(requestAuth)
             .expect()
             .body("entry.size()", equalTo(expectedCount))
-            .body("total", equalTo(expectedTotal))
             .statusCode(200)
             .when()
             .get(requestString);
@@ -853,7 +843,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .urlEncodingEnabled(false)
         .expect()
         .body("entry.size()", equalTo(3))
-        .body("total", equalTo(expectedTotal))
         .statusCode(200)
         .when()
         .get(nextLink);
@@ -890,7 +879,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // Expect all the claims to return
-        .body("total", equalTo(8))
+        .body("entry.size()", equalTo(8))
         .rootPath("entry.find { it.resource.id.contains('carrier') }")
         .body("resource.meta.lastUpdated", equalTo(expectedFallbackDate))
         .statusCode(200)
@@ -905,7 +894,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // Expect all the claims to return
-        .body("total", equalTo(8))
+        .body("entry.size()", equalTo(8))
         // Check the lastUpdated is set to the fallback
         .rootPath("entry.find { it.resource.id.contains('carrier') }")
         .body("resource.meta.lastUpdated", equalTo(expectedFallbackDate))
@@ -924,7 +913,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // Expect all the claims to return
-        .body("total", equalTo(7))
+        .body("entry.size()", equalTo(7))
         .statusCode(200)
         .when()
         .get(requestString + "&_lastUpdated=gt" + slightyBeforeNow);
@@ -984,11 +973,12 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
               .get(url);
 
       // To preserve the test case message, we'll set this up using assertEquals
-      Integer total = response.path("total");
+      Integer entry = 0;
+      if (response.path("entry") != null) {
+        entry = response.path("entry.size()");
+      }
       assertEquals(
-          String.valueOf(total.intValue()),
-          testData.getRight().toString(),
-          testData.getLeft().toString());
+          String.valueOf(entry), testData.getRight().toString(), testData.getLeft().toString());
     }
   }
 
@@ -1008,7 +998,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .expect()
         .log()
         .ifError()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -1021,7 +1011,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .expect()
         .log()
         .ifError()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);

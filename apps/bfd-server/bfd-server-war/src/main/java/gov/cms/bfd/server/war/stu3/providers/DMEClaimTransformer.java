@@ -9,14 +9,18 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
+import gov.cms.bfd.model.rif.samhsa.DmeTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -38,6 +42,9 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform");
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /**
    * Instantiates a new transformer.
    *
@@ -47,11 +54,15 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
+   * @param securityTagManager SamhsaSecurityTag lookup
    */
   public DMEClaimTransformer(
-      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      MetricRegistry metricRegistry,
+      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -69,7 +80,11 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((DMEClaim) claim, includeTaxNumber);
+      DMEClaim dmeClaim = (DMEClaim) claim;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(
+              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
+      eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
     }
     return eob;
   }
@@ -79,10 +94,12 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    *
    * @param claimGroup the {@link DMEClaim} to use
    * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
+   * @param securityTags securityTags of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, boolean includeTaxNumbers) {
+  private ExplanationOfBenefit transformClaim(
+      DMEClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -303,6 +320,9 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
       }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
+
+    eob.getMeta().setSecurity(securityTags);
+
     return eob;
   }
 }
