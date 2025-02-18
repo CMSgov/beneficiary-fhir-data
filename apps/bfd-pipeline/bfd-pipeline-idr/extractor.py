@@ -12,9 +12,15 @@ T = TypeVar("T", bound=BaseModel)
 
 class Extractor(ABC):
     @abstractmethod
-    def extract(
+    def extract_many(
         self, cls: type[T], sql: str, params: dict[str, Any]
     ) -> Iterator[list[T]]:
+        pass
+
+    @abstractmethod
+    def extract_single(
+        self, cls: type[T], sql: str, params: dict[str, Any]
+    ) -> T | None:
         pass
 
 
@@ -24,7 +30,7 @@ class PostgresExtractor(Extractor):
         self.conn = psycopg.connect(connection_string)
         self.batch_size = batch_size
 
-    def extract(
+    def extract_many(
         self, cls: type[T], sql: str, params: Mapping[str, Any]
     ) -> Iterator[list[T]]:
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
@@ -34,6 +40,13 @@ class PostgresExtractor(Extractor):
                 yield batch
                 batch = cur.fetchmany(self.batch_size)
 
+    def extract_single(
+        self, cls: type[T], sql: str, params: dict[str, Any]
+    ) -> T | None:
+        with self.conn.cursor(row_factory=class_row(cls)) as cur:
+            cur.execute(sql, params)
+            return cur.fetchone()
+
 
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int):
@@ -41,7 +54,7 @@ class SnowflakeExtractor(Extractor):
         self.conn = snowflake.connector.connect(user="", password="", account="")
         self.batch_size = batch_size
 
-    def extract(
+    def extract_many(
         self, cls: type[T], sql: str, params: dict[str, Any]
     ) -> Iterator[list[T]]:
         try:

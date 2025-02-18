@@ -49,8 +49,8 @@ class PostgresLoader:
                 )
                 # Created/updated columns don't need to be loaded from the source.
                 exclude_cols = [
-                    "created_timestamp",
-                    "updated_timestamp",
+                    "bfd_created_ts",
+                    "bfd_updated_ts",
                 ] + self.exclude_cols
                 for col in exclude_cols:
                     cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")
@@ -68,14 +68,30 @@ class PostgresLoader:
                     for row in results:
                         model_dump = row.model_dump()
                         copy.write_row([model_dump[k] for k in self.insert_cols])
-                # Upsert into the main table
-                cur.execute(
-                    f"""
-                    INSERT INTO {self.table}({cols_str}, created_timestamp, updated_timestamp)
-                    SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {self.temp_table}
-                    ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, updated_timestamp=%(timestamp)s
-                    """,
-                    {"timestamp": timestamp},
-                )
+                if len(results) > 0:
+                    # Upsert into the main table
+                    cur.execute(
+                        f"""
+                        INSERT INTO {self.table}({cols_str}, bfd_created_ts, bfd_updated_ts)
+                        SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {self.temp_table}
+                        ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
+                        """,
+                        {"timestamp": timestamp},
+                    )
+
+                    last = results[len(results) - 1].model_dump()
+                    last_id = last[self.primary_key]
+                    last_timestamp = last["idr_trans_efctv_ts"]
+                    cur.execute(
+                        f"""
+                        INSERT INTO idr.load_progress(table_name, last_id, last_timestamp)
+                        VALUES(%(table)s, %(last_id)s, %(last_timestamp)s)
+                        ON CONFLICT (table_name) DO UPDATE SET last_id = EXCLUDED.last_id, last_timestamp = EXCLUDED.last_timestamp
+                        """,
+                        {
+                            "table": self.table,
+                            "last_id": last_id,
+                            "last_timestamp": last_timestamp,
+                        },
+                    )
                 self.conn.commit()
-                # TODO: probably should track progress here so the data load can be stopped and resumed

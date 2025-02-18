@@ -1,4 +1,6 @@
+from datetime import datetime, timezone
 import os
+import time
 import psycopg
 from psycopg.rows import dict_row
 import pytest
@@ -33,13 +35,15 @@ class TestPipeline:
         assert rows[0]["bene_mbi_id"] == "1S000000000"
         assert rows[1]["bene_sk"] == 2
         assert rows[1]["bene_mbi_id"] == "1S000000001"
-
+        # Wait for system time to advance enough to update the timestamp
+        time.sleep(0.05)
         conn.execute(
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene
-            SET bene_mbi_id = '1S000000002'
+            SET bene_mbi_id = '1S000000002', idr_trans_efctv_ts=%(timestamp)s
             WHERE bene_sk = 1
-        """
+        """,
+            {"timestamp": datetime.now(timezone.utc)},
         )
         conn.commit()
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
