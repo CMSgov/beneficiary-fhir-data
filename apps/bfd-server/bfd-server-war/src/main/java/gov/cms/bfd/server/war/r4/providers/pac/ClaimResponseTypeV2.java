@@ -2,6 +2,13 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +30,8 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaFissClaim.class,
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.claimId,
-          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate));
+          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
+          "FissTag");
 
   /** Instance for MCS claims. */
   public static final ClaimResponseTypeV2<RdaMcsClaim> M =
@@ -33,7 +41,85 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaMcsClaim.class,
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
-          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc));
+          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc),
+          "McsTag");
+
+  /** Instance for Carrier claims. */
+  public static final ClaimResponseTypeV2<CarrierClaim> CARRIER =
+      new ClaimResponseTypeV2<>(
+          "CARRIER",
+          "carrier",
+          CarrierClaim.class,
+          CarrierClaim.Fields.beneficiaryId,
+          CarrierClaim.Fields.claimId,
+          List.of(CarrierClaim.Fields.dateFrom, CarrierClaim.Fields.dateThrough),
+          "CarrierTag");
+
+  /** Instance for DME claims. */
+  public static final ClaimResponseTypeV2<DMEClaim> DME =
+      new ClaimResponseTypeV2<>(
+          "DME",
+          "dme",
+          DMEClaim.class,
+          DMEClaim.Fields.beneficiaryId,
+          DMEClaim.Fields.claimId,
+          List.of(DMEClaim.Fields.dateFrom, DMEClaim.Fields.dateThrough),
+          "DmeTag");
+
+  /** Instance for HHA claims. */
+  public static final ClaimResponseTypeV2<HHAClaim> HHA =
+      new ClaimResponseTypeV2<>(
+          "HHA",
+          "hha",
+          HHAClaim.class,
+          HHAClaim.Fields.beneficiaryId,
+          HHAClaim.Fields.claimId,
+          List.of(HHAClaim.Fields.dateFrom, HHAClaim.Fields.dateThrough),
+          "HhaTag");
+
+  /** Instance for Hospice claims. */
+  public static final ClaimResponseTypeV2<HospiceClaim> HOSPICE =
+      new ClaimResponseTypeV2<>(
+          "HOSPICE",
+          "hospice",
+          HospiceClaim.class,
+          HospiceClaim.Fields.beneficiaryId,
+          HospiceClaim.Fields.claimId,
+          List.of(HospiceClaim.Fields.dateFrom, HospiceClaim.Fields.dateThrough),
+          "HospiceTag");
+
+  /** Instance for Inpatient claims. */
+  public static final ClaimResponseTypeV2<InpatientClaim> INPATIENT =
+      new ClaimResponseTypeV2<>(
+          "INPATIENT",
+          "inpatient",
+          InpatientClaim.class,
+          InpatientClaim.Fields.beneficiaryId,
+          InpatientClaim.Fields.claimId,
+          List.of(InpatientClaim.Fields.dateFrom, InpatientClaim.Fields.dateThrough),
+          "InpatientTag");
+
+  /** Instance for Outpatient claims. */
+  public static final ClaimResponseTypeV2<OutpatientClaim> OUTPATIENT =
+      new ClaimResponseTypeV2<>(
+          "OUTPATIENT",
+          "outpatient",
+          OutpatientClaim.class,
+          OutpatientClaim.Fields.beneficiaryId,
+          OutpatientClaim.Fields.claimId,
+          List.of(OutpatientClaim.Fields.dateFrom, OutpatientClaim.Fields.dateThrough),
+          "OutpatientTag");
+
+  /** Instance for snfClaim claims. */
+  public static final ClaimResponseTypeV2<SNFClaim> SNFCLAIM =
+      new ClaimResponseTypeV2<>(
+          "SNFCLAIM",
+          "snfClaim",
+          SNFClaim.class,
+          SNFClaim.Fields.beneficiaryId,
+          SNFClaim.Fields.claimId,
+          List.of(SNFClaim.Fields.dateFrom, SNFClaim.Fields.dateThrough),
+          "SnfTag");
 
   /** Immutable list of all possible instances of this class. */
   private static final List<ClaimResponseTypeV2<?>> VALUES = List.of(F, M);
@@ -47,7 +133,7 @@ public final class ClaimResponseTypeV2<TEntity>
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
    * @param entityServiceDateAttributes the attribute name for the service end date on the entity
-   *     class
+   * @param entityTagType the entity security tag type class
    */
   private ClaimResponseTypeV2(
       String nameForParsing,
@@ -55,14 +141,16 @@ public final class ClaimResponseTypeV2<TEntity>
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      List<String> entityServiceDateAttributes) {
+      List<String> entityServiceDateAttributes,
+      String entityTagType) {
     super(
         nameForParsing,
         typeLabel,
         entityClass,
         entityMbiRecordAttribute,
         entityIdAttribute,
-        entityServiceDateAttributes);
+        entityServiceDateAttributes,
+        entityTagType);
   }
 
   /**

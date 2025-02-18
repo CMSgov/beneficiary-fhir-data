@@ -3,8 +3,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
-import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -43,14 +41,9 @@ class SecurityTagManagerTest {
   void testGetClaimSecurityLevelInpatient() {
     CodeableConcept type = new CodeableConcept();
     type.addCoding().setCode("INP");
-
-    Set<String> mockTags = new HashSet<>();
-    mockTags.add("R");
-    when(entityManager.createQuery(anyString())).thenReturn(query);
-    when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
-
-    List<Coding> securityLevel =
-        securityTagManager.getClaimSecurityLevel("12345", CarrierTag.class);
+    Set<String> securityTags = new HashSet<>();
+    securityTags.add("R");
+    List<Coding> securityLevel = securityTagManager.getClaimSecurityLevel(securityTags);
     assertEquals(
         "Restricted",
         securityLevel.getFirst().getDisplay(),
@@ -63,12 +56,7 @@ class SecurityTagManagerTest {
     CodeableConcept type = new CodeableConcept();
     type.addCoding().setCode("OUT");
 
-    Set<String> mockTags = new HashSet<>();
-    when(entityManager.createQuery(anyString())).thenReturn(query);
-    when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
-
-    List<Coding> securityLevel =
-        securityTagManager.getClaimSecurityLevel("67890", HospiceTag.class);
+    List<Coding> securityLevel = securityTagManager.getClaimSecurityLevel(new HashSet<>());
     assertEquals(
         "Normal",
         securityLevel.getFirst().getDisplay(),

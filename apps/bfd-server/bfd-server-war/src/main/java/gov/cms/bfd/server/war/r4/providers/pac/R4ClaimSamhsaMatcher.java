@@ -11,6 +11,7 @@ import gov.cms.bfd.server.war.adapters.r4.ClaimAdapter;
 import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -67,9 +68,9 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
   public boolean hasNoSamhsaData(Object entity) {
     Claim claim;
 
-    if (entity instanceof RdaFissClaim) {
+    if (((ClaimWithSecurityTags<?>) entity).getClaimEntity() instanceof RdaFissClaim) {
       claim = fissTransformer.transform(entity, false);
-    } else if (entity instanceof RdaMcsClaim) {
+    } else if (((ClaimWithSecurityTags<?>) entity).getClaimEntity() instanceof RdaMcsClaim) {
       claim = mcsTransformer.transform(entity, false);
     } else {
       throw new IllegalArgumentException(

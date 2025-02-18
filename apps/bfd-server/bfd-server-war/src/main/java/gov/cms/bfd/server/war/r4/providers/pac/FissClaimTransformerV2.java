@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -11,7 +12,6 @@ import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissPayer;
 import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
-import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -20,6 +20,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -47,6 +48,7 @@ import org.hl7.fhir.r4.model.codesystems.ClaimInformationcategory;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -67,6 +69,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /** The METRIC_NAME constant. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
@@ -80,11 +84,15 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public FissClaimTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -96,14 +104,21 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    */
   @Trace
   public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
-    if (!(claimEntity instanceof RdaFissClaim)) {
+
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
+    }
+    if (!(claim instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      RdaFissClaim rdaFissClaim = (RdaFissClaim) claimEntity;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
+      RdaFissClaim rdaFissClaim = (RdaFissClaim) claim;
       return transformClaim(rdaFissClaim, includeTaxNumbers, securityTags);
     }
   }
@@ -148,8 +163,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setInsurance(getInsurance(claimGroup));
     claim.setItem(getClaimItems(claimGroup));
 
-    Meta meta =
-        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    Meta meta = new Meta();
+    meta.setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    if (samhsaV2Enabled) {
+      meta.setSecurity(securityTags);
+    }
     claim.setMeta(meta);
     claim.setCreated(new Date());
 

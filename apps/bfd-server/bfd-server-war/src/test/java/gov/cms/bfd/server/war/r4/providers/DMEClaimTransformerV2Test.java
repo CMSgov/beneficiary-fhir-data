@@ -133,7 +133,7 @@ public final class DMEClaimTransformerV2Test {
     when(mockNpiOrgLookup.retrieveNPIOrgDisplay(any())).thenReturn(Optional.of(npiData));
     dmeClaimTransformer =
         new DMEClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup, securityTagManager);
+            metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

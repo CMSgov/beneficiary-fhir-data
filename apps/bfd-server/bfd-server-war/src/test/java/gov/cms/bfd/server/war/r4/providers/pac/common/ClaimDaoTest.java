@@ -36,6 +36,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -371,17 +372,26 @@ class ClaimDaoTest {
    * @return all test parameters
    */
   private static Stream<MbiLookupTestParameter<?, ?>> getMbiLookupParameters() {
+
+    RdaFissClaim fiss = new RdaFissClaim();
+    fiss.setClaimId("123");
+    Supplier<RdaFissClaim> fissSupplier = () -> fiss;
+
+    RdaMcsClaim mcs = new RdaMcsClaim();
+    mcs.setIdrClmHdIcn("456");
+    Supplier<RdaMcsClaim> mcsSupplier = () -> mcs;
+
     return Stream.of(
+        new MbiLookupTestParameter<>("FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, fissSupplier),
         new MbiLookupTestParameter<>(
-            "FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, RdaFissClaim::new),
+            "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, mcsSupplier),
         new MbiLookupTestParameter<>(
-            "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, RdaMcsClaim::new),
-        new MbiLookupTestParameter<>(
-            "MCS - with serviceDate", ClaimTypeV2.M, LastUpdated, ServiceDate, RdaMcsClaim::new));
+            "MCS - with serviceDate", ClaimTypeV2.M, LastUpdated, ServiceDate, mcsSupplier));
   }
 
   /**
-   * Test the {@link ClaimDao#findAllByMbiAttribute} method.
+   * Test the {@link ClaimDao#findAllByMbiAttribute(ResourceTypeV2, String, boolean, DateRangeParam,
+   * DateRangeParam)} method.
    *
    * @param param defines the specific test case
    * @param <TResource> FHIR resource type
@@ -431,11 +441,27 @@ class ClaimDaoTest {
     final List<TEntity> queryResult =
         List.of(
             param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
+
     doReturn(queryResult).when(query).getResultList();
 
-    final List<TEntity> result =
+    TypedQuery<Object[]> mockTypedQuery = mock(TypedQuery.class);
+    // Mock the behavior of createQuery to return the mock TypedQuery
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(anyString(), eq(Object[].class));
+
+    // Mock the behavior of setParameter to return the same mock TypedQuery (for method chaining)
+    doReturn(mockTypedQuery).when(mockTypedQuery).setParameter(anyString(), any());
+
+    // Mock the behavior of getResultList to return the desired result
+    Object[] expectedResult = new Object[] {}; // Example result
+    doReturn(Arrays.asList(expectedResult)).when(mockTypedQuery).getResultList();
+
+    List<ClaimWithSecurityTags<TEntity>> claimsWithTags =
         dao.findAllByMbiAttribute(
             resourceType, mbiSearchValue, isMbiSearchValueHashed, lastUpdated, serviceDate);
+
+    final List<TEntity> result =
+        claimsWithTags.stream().map(ClaimWithSecurityTags::getClaimEntity).toList();
+
     assertEquals(queryResult, result);
 
     ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
@@ -598,7 +624,8 @@ class ClaimDaoTest {
           Long.class,
           "mbiAttribute",
           "somePropertyName",
-          List.of("endDateAttribute"));
+          List.of("endDateAttribute"),
+          "");
     }
   }
 
