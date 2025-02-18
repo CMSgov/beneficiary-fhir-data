@@ -193,7 +193,7 @@ def handler(event, context):
         regression_process = subprocess.run(
             [
                 "locust",
-                f"--locustfile=/var/task/{invoke_event.suite_version}/{locust_file}",
+                f"--locustfile=/var/task/app/{invoke_event.suite_version}/{locust_file}",
                 f"--host={invoke_event.host}:{green_port}",
                 f"--users={invoke_event.users}",
                 f"--spawn-rate={invoke_event.spawn_rate}",
