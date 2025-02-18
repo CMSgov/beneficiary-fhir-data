@@ -1,18 +1,29 @@
-FROM public.ecr.aws/lambda/python:3.11 as base
-RUN  yum install git gcc python3-devel -y
+FROM ghcr.io/astral-sh/uv:0.6.1 AS uv
+# First, bundle the dependencies into the task root.
+FROM public.ecr.aws/lambda/python:3.11 AS builder
+# Enable bytecode compilation, to improve cold-start performance.
+ENV UV_COMPILE_BYTECODE=1
+# Disable installer metadata, to create a deterministic layer.
+ENV UV_NO_INSTALLER_METADATA=1
+# Enable copy mode to support bind mount caching.
+ENV UV_LINK_MODE=copy
+# Bundle the dependencies into the Lambda task root via `uv pip install --target`.
+#
+# Omit any local packages (`--no-emit-workspace`) and development dependencies (`--no-dev`).
+# This ensures that the Docker layer cache is only invalidated when the `pyproject.toml` or `uv.lock`
+# files change, but remains robust to changes in the application code.
+COPY pyproject.toml .
+COPY uv.lock .
+RUN --mount=from=uv,source=/uv,target=/bin/uv \
+  --mount=type=cache,target=/root/.cache/uv \
+  uv export --frozen --no-emit-workspace --no-dev --no-editable -o requirements.txt && \
+  uv pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-FROM base as python
-# Install the function's dependencies using file requirements.txt
-# from your project folder.
-COPY requirements.txt .
-RUN  pip3 install -r requirements.txt
-ENV  PATH="/var/lang/lib/python3.11/site-packages:${PATH}"
-
-FROM python as app
-# Copy function code
-COPY . ${LAMBDA_TASK_ROOT}
-RUN mv "${LAMBDA_TASK_ROOT}/lambda/server-regression/app.py" "${LAMBDA_TASK_ROOT}"
-RUN rm -rf "${LAMBDA_TASK_ROOT}/lambda"
-
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-CMD [ "app.handler" ]
+FROM public.ecr.aws/lambda/python:3.11
+# Copy the runtime dependencies from the builder stage.
+COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
+# Copy the application code.
+COPY . ${LAMBDA_TASK_ROOT}/app
+RUN mv "${LAMBDA_TASK_ROOT}/app/lambda/server-regression/app.py" "${LAMBDA_TASK_ROOT}/app"
+RUN rm -rf "${LAMBDA_TASK_ROOT}/app/lambda"
+CMD [ "app.app.handler" ]

@@ -23,8 +23,9 @@ IMAGE_TAGGED_LATEST="$IMAGE_NAME:$DOCKER_TAG_LATEST"
 aws ecr-public get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "public.ecr.aws"
 aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$PRIVATE_REGISTRY_URI"
 
-docker build "$CONTEXT_DIR" \
+DOCKER_BUILDKIT=1 docker buildx build "$CONTEXT_DIR" \
   --file "$SCRIPT_DIR/Dockerfile" \
+  --ignorefile "$SCRIPT_DIR/Dockerfile.dockerignore" \
   --tag "$IMAGE_TAGGED_HASH" \
   --tag "$IMAGE_TAGGED_LATEST" \
   --platform "linux/amd64"
