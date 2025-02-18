@@ -22,13 +22,8 @@ The following test suites ([Locustfiles](https://docs.locust.io/en/stable/writin
 | Load Testing Suite | `high_volume_suite.py` | Used to exhibit distributed load on a target BFD Server to produce performance metrics under stress. Invoked by the `bfd-run-server-load` Jenkins pipeline job |
 ## Dependencies
 
-> **Important:** This project is targeting Python 3.11. Ensure that your local Python is version 3.11 **before** attempting to work in this project!
-> A good utility for managing multiple Python versions along with [virtualenv](https://virtualenv.pypa.io/en/latest/)s is [`pew`](https://github.com/berdario/pew).
-
 The tests use a few python libraries that will need to be installed on the run box prior to starting the tests.
-Below are the required libraries, what they do, and the command to install them.
-
-To install everything below at the same time you can use the provided requirements file `pip3 install -r requirements.txt`:
+Below are the required libraries along with what they do.
 
 ### "Production" Dependencies
 
@@ -51,6 +46,8 @@ To install everything below at the same time you can use the provided requiremen
 | `ruff` | Extremely fast formatter, import sorter, and linter all-in-one | Used to format, lint, and sort imports | <https://docs.astral.sh/ruff/> |
 
 ### Installing Dependencies
+
+The Locust tests use the `uv` package manager to manage dependencies.
 
 1. Ensure `uv` is installed
 
