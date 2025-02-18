@@ -54,30 +54,35 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
 
     logger.debug("SAMHSAConsentInterceptor - Processing willSeeResource.");
 
-    // Determine if SAMHSA filtering is required from request parameters
+    if (!shouldApplySamhsaFiltering(theRequestDetails)) {
+      return ConsentOutcome.PROCEED; // No filtering needed, proceed
+    }
+
+    // Process the resource if it is a Bundle
+    if (theResource instanceof Bundle bundle) {
+      processBundle(bundle);
+    }
+
+    return ConsentOutcome.PROCEED;
+  }
+
+  // Determine if SAMHSA filtering is required from request parameters
+  boolean shouldApplySamhsaFiltering(RequestDetails theRequestDetails) {
     boolean excludeSamhsaParam =
         parseBooleansFromRequest(theRequestDetails, AbstractResourceProvider.EXCLUDE_SAMHSA)
             .stream()
             .findFirst()
             .orElse(false);
-    boolean shouldFilterSamhsa =
-        CommonTransformerUtils.shouldFilterSamhsa(
-            String.valueOf(excludeSamhsaParam), theRequestDetails);
+    return CommonTransformerUtils.shouldFilterSamhsa(
+        String.valueOf(excludeSamhsaParam), theRequestDetails);
+  }
 
-    if (!shouldFilterSamhsa) {
-      return ConsentOutcome.PROCEED; // No filtering needed, proceed
-    }
-
-    // If the resource is a Bundle, check each entry for SAMHSA security tags
-    if (theResource instanceof Bundle bundle) {
-      for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-        if (shouldRedactResource(entry.getResource())) {
-          redactSensitiveData(entry);
-        }
+  void processBundle(Bundle bundle) {
+    for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+      if (shouldRedactResource(entry.getResource())) {
+        redactSensitiveData(entry);
       }
     }
-
-    return ConsentOutcome.PROCEED;
   }
 
   /**
@@ -86,7 +91,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
    * @param baseResource The resource to check.
    * @return true if the resource should be redacted, false otherwise.
    */
-  private boolean shouldRedactResource(IBaseResource baseResource) {
+  boolean shouldRedactResource(IBaseResource baseResource) {
     if (baseResource instanceof Resource resource && resource.getMeta() != null) {
       for (IBaseCoding securityTag : resource.getMeta().getSecurity()) {
         // Check for SAMHSA-related tags
@@ -115,7 +120,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
    *
    * @param entry the entry
    */
-  private void redactSensitiveData(Bundle.BundleEntryComponent entry) {
+  void redactSensitiveData(Bundle.BundleEntryComponent entry) {
     logger.debug("V2SamhsaConsentInterceptor - redactSensitiveData.");
     entry.setResource(null);
   }

@@ -51,7 +51,8 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
         oldMbiHashEnabled,
         fissClaimTransformerV2,
         mcsClaimTransformerV2,
-        claimSourceTypeNames);
+        claimSourceTypeNames,
+        false);
   }
 
   /** {@inheritDoc} */
