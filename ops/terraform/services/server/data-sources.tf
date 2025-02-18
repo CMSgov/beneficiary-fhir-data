@@ -47,11 +47,6 @@ data "aws_ami" "main" {
   }
 }
 
-# s3 buckets
-data "aws_s3_bucket" "logs" {
-  bucket = "bfd-${local.env}-logs-${data.aws_caller_identity.current.account_id}"
-}
-
 # aurora security group
 data "aws_security_groups" "aurora_cluster" {
   filter {
@@ -113,4 +108,9 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 
 data "aws_ssm_parameters_by_path" "nonsensitive_service" {
   path = "/bfd/${local.env}/${local.service}/nonsensitive"
+}
+
+data "aws_ssm_parameters_by_path" "sensitive_service" {
+  path            = "/bfd/${local.env}/${local.service}/sensitive"
+  with_decryption = true
 }
