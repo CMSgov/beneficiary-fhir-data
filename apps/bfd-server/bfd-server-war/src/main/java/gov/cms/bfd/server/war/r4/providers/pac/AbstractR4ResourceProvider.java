@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -25,6 +26,7 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -60,6 +62,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -111,6 +116,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The mcs transformer. */
   private final ResourceTransformer<T> mcsTransformer;
 
+  /** Flag to control whether SAMHSA shadow filtering should be applied. */
+  private final boolean samhsaV2Shadow;
+
+  private static final Logger logger = LoggerFactory.getLogger(V2SamhsaConsentSimulation.class);
+
   /**
    * Initializes the resource provider beans via spring injection. These should be passed from the
    * child class constructor.
@@ -121,8 +131,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param fissTransformer the fiss transformer
    * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param samhsaV2Shadow the samhsa V2 Shadow flag resources ({@link org.hl7.fhir.r4.model.Claim}
+   *     / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
@@ -130,12 +140,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Boolean oldMbiHashEnabled,
       ResourceTransformer<T> fissTransformer,
       ResourceTransformer<T> mcsTransformer,
-      String claimSourceTypeNames) {
+      String claimSourceTypeNames,
+      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
     this.fissTransformer = requireNonNull(fissTransformer);
     this.mcsTransformer = requireNonNull(mcsTransformer);
+    this.samhsaV2Shadow = samhsaV2Shadow;
 
     requireNonNull(claimSourceTypeNames);
     enabledSourceTypes =
@@ -471,7 +483,15 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                 getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
 
-      return bundleResource;
+      V2SamhsaConsentSimulation v2SamhsaConsentSimulation = new V2SamhsaConsentSimulation();
+      Bundle v2SamhsaScrubbedResource =
+          (Bundle) v2SamhsaConsentSimulation.simulateScrubbing(requestDetails, bundleResource);
+      if (samhsaV2Shadow
+          && (v2SamhsaScrubbedResource.getEntry().size() != bundleResource.getEntry().size())) {
+        // log missing claim ids Samhsa: claim Id missing  error
+        logger.error("Samhsa: claim ids missing");
+      }
+      return (Bundle) v2SamhsaConsentSimulation.simulateScrubbing(requestDetails, bundleResource);
     } else {
       throw new InvalidRequestException("Missing required field mbi");
     }
