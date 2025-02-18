@@ -7,3 +7,4 @@
 !lambda/server-regression/app.py
 !pyproject.toml
 !uv.lock
+!__init__.py
