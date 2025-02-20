@@ -52,10 +52,8 @@ locals {
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
-  lb_is_public          = tobool(local.nonsensitive_service_config["lb_is_public"])
-  lb_blue_ingress_port  = local.nonsensitive_service_config["lb_blue_ingress_port"]
-  lb_green_ingress_port = local.nonsensitive_service_config["lb_green_ingress_port"]
-  lb_vpc_peerings       = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
+  lb_is_public    = tobool(local.nonsensitive_service_config["lb_is_public"])
+  lb_vpc_peerings = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
 
   asg_min_instance_count      = local.nonsensitive_service_config["asg_min_instance_count"]
   asg_max_instance_count      = local.nonsensitive_service_config["asg_max_instance_count"]
@@ -84,8 +82,10 @@ locals {
     data.aws_ec2_managed_prefix_list.vpn.id,
     data.aws_ec2_managed_prefix_list.jenkins.id
   ]
-  cw_period       = 60 # Seconds
-  cw_eval_periods = 3
+  lb_blue_ingress_port  = 443                # Must always be the HTTPS port. Necessary for prod-sbx
+  lb_green_ingress_port = local.service_port # Can be any port other than 443; using the server port keeps it simple
+  cw_period             = 60                 # Seconds
+  cw_eval_periods       = 3
 
   ami_id = data.aws_ami.main.image_id
 

@@ -47,8 +47,6 @@
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/lb_is_public: false
-/bfd/${env}/server/nonsensitive/lb_blue_ingress_port: 443
-/bfd/${env}/server/nonsensitive/lb_green_ingress_port: 7443
 /bfd/${env}/server/nonsensitive/launch_template_volume_iops: 3000
 /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 60
 /bfd/${env}/server/nonsensitive/launch_template_volume_throughput: 250
