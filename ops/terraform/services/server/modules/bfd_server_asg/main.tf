@@ -1,18 +1,34 @@
 locals {
+  green_state = "green"
+  blue_state  = "blue"
   asgs = {
     odd = {
-      name             = "${aws_launch_template.main.name}-odd"
-      desired_capacity = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      max_size         = var.asg_config.max
-      min_size         = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      warmpool_size    = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+      name              = "${aws_launch_template.main.name}-odd"
+      lt_version        = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
+      desired_capacity  = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      max_size          = var.asg_config.max
+      min_size          = local.odd_needs_scale_out ? max(local.even_remote_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_min_size : 0)
+      warmpool_size     = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+      deployment_status = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
     }
     even = {
-      name             = "${aws_launch_template.main.name}-even"
-      desired_capacity = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      max_size         = var.asg_config.max
-      min_size         = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      warmpool_size    = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+      name              = "${aws_launch_template.main.name}-even"
+      lt_version        = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
+      desired_capacity  = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      max_size          = var.asg_config.max
+      min_size          = local.even_needs_scale_out ? max(local.odd_remote_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_min_size : 0)
+      warmpool_size     = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+      deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+    }
+  }
+
+  lb_name = "bfd-${local.env}-${var.role}-nlb"
+  lb_targets = {
+    blue = {
+      ingress_port = var.lb_config.ingress.blue_port
+    }
+    green = {
+      ingress_port = var.lb_config.ingress.green_port
     }
   }
 
@@ -26,8 +42,14 @@ locals {
   is_latest_launch_template_odd  = local.latest_ltv % 2 == 1
   is_latest_launch_template_even = local.latest_ltv % 2 == 0
 
+  odd_remote_lt_version  = try(tonumber(data.external.current_asg.result["odd_launch_template_version"]), null)
+  even_remote_lt_version = try(tonumber(data.external.current_asg.result["even_launch_template_version"]), null)
+
   odd_remote_desired_capacity  = tonumber(data.external.current_asg.result["odd_desired_capacity"])
   even_remote_desired_capacity = tonumber(data.external.current_asg.result["even_desired_capacity"])
+
+  odd_remote_min_size  = tonumber(data.external.current_asg.result["odd_min_size"])
+  even_remote_min_size = tonumber(data.external.current_asg.result["even_min_size"])
 
   odd_remote_warmpool_min_size  = tonumber(data.external.current_asg.result["odd_warmpool_min_size"])
   even_remote_warmpool_min_size = tonumber(data.external.current_asg.result["even_warmpool_min_size"])
@@ -146,31 +168,37 @@ resource "aws_security_group" "base" {
 
 # app server
 resource "aws_security_group" "app" {
-  count       = var.lb_config == null ? 0 : 1
+  lifecycle {
+    create_before_destroy = true
+  }
+
   name        = "bfd-${local.env}-${var.role}-app"
   description = "Allow access to app servers"
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${local.env}-${var.role}-app" }, local.additional_tags)
 
   ingress {
-    from_port       = var.lb_config.port
-    to_port         = var.lb_config.port
-    protocol        = "tcp"
-    security_groups = [var.lb_config.sg]
+    from_port       = var.lb_config.server_listen_port
+    to_port         = var.lb_config.server_listen_port
+    protocol        = "TCP"
+    security_groups = concat([aws_security_group.lb.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
+    # TODO: Replace above "security_groups" definition with below commented code in BFD-3878
+    # security_groups = [aws_security_group.lb.id]server_listen_port
+    # TODO: Replace above "security_groups" definition with above commented code in BFD-3878
   }
 }
 
 # database
 resource "aws_security_group_rule" "allow_db_access" {
-  for_each    = var.db_config != null ? toset(var.db_config.db_sg) : []
+  for_each    = toset(var.db_config.db_sg)
   type        = "ingress"
   from_port   = 5432
   to_port     = 5432
   protocol    = "tcp"
   description = "Allows access to the ${var.db_config.role} db"
 
-  security_group_id        = each.value                   # The SG associated with each replica
-  source_security_group_id = aws_security_group.app[0].id # Every instance in the ASG
+  security_group_id        = each.value                # The SG associated with each replica
+  source_security_group_id = aws_security_group.app.id # Every instance in the ASG
 }
 
 ## Launch Template
@@ -218,7 +246,6 @@ resource "aws_launch_template" "main" {
   user_data = base64encode(templatefile("${path.module}/templates/${var.launch_config.user_data_tpl}", {
     env                   = local.env
     seed_env              = local.seed_env
-    port                  = var.lb_config.port
     accountId             = var.launch_config.account_id
     reader_endpoint       = "jdbc:postgresql://${local.rds_reader_endpoint}:5432/fhirdb${local.full_jdbc_suffix}"
     launch_lifecycle_hook = local.on_launch_lifecycle_hook_name
@@ -235,8 +262,14 @@ resource "aws_launch_template" "main" {
   }
 }
 
+# These AutoScaling Groups require 2 external "null_resourece" resources to manage their Target
+# Group ARNs and their Warm Pool due to defective behavior in the AWS provider. Specifically,
+# attempting to modify Target Group ARNs dynamically (to do blue/green) results in an error during
+# apply with a message indicating a bug in the provider. Additionally, attempting to manage the Warm
+# Pool via Terraform results in an erreneous 3 minute delay upon destruction of the Warm Pool, even
+# with "force_delete_warm_pool" enabled, which is unnaceptable
 resource "aws_autoscaling_group" "main" {
-  # Deployments of this ASG require two executions of `terraform apply`
+  # Deployments of this ASG require two executions of `terraform apply`.
   for_each = local.asgs
 
   lifecycle {
@@ -248,22 +281,27 @@ situation typically indicates that green, the incoming ASG, failed automated che
 corresponding Runbook for instructions on how to remediate this situation.
 EOF
     }
+
+    # For "target_group_arns" look at "null_resource.set_target_groups" as Terraform's AWS Provider
+    # has a bug in it when changing target group ARNs in the terraform. For "warm_pool" look at
+    # "null_resource.manage_warm_pool" as Terraform's AWS Provider does not respect
+    # "force_delete_warm_pool" which would result in non-zero downtime deployments as scaling-in the
+    # previous "blue" blocks incoming "blue" from being attached to the "blue" Target Group
+    ignore_changes = [target_group_arns, warm_pool]
   }
 
+  # TODO: Remove below code in BFD-3878
+  load_balancers = var.legacy_clb_name != null ? [var.legacy_clb_name] : null
+  # TODO: Remove above code in BFD-3878
 
-  name             = each.value.name
-  desired_capacity = each.value.desired_capacity
-  max_size         = each.value.max_size
-  min_size         = each.value.min_size
-
-  # If an lb is defined, wait for the ELB
-  min_elb_capacity          = each.value.desired_capacity
+  name                      = each.value.name
+  desired_capacity          = each.value.desired_capacity
+  max_size                  = each.value.max_size
+  min_size                  = each.value.min_size
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
-
   health_check_grace_period = 600                                   # Temporary, will be lowered when/if lifecycle hooks are implemented
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-  load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
   termination_policies      = ["OldestLaunchTemplate"]
 
   # With Lifecycle Hooks, BFD Server instances will not reach the InService state until the BFD
@@ -273,7 +311,7 @@ EOF
 
   launch_template {
     name    = aws_launch_template.main.name
-    version = aws_launch_template.main.latest_version
+    version = each.value.lt_version
   }
 
   initial_lifecycle_hook {
@@ -282,8 +320,6 @@ EOF
     heartbeat_timeout    = var.asg_config.instance_warmup * 2
     lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
   }
-
-
 
   enabled_metrics = [
     "GroupMinSize",
@@ -295,24 +331,6 @@ EOF
     "GroupTerminatingInstances",
     "GroupTotalInstances",
   ]
-
-  # NOTE: AWS Provider for Terraform does not fully respect the warm pool blocks
-  # - it reports that the warm pool will be destroyed when it is not called for
-  # - it reports that the warm pool will be destroyed when we want to destroy it
-  # - in either case, terraform 1.5.0 with provider AWS v5.53.0 does not destroy the warm pool
-  # See null resource provider below for deletion logic
-  force_delete_warm_pool = true
-  dynamic "warm_pool" {
-    for_each = each.value.warmpool_size == 0 ? toset([]) : toset([each.value.warmpool_size])
-    content {
-      pool_state                  = "Stopped"
-      min_size                    = warm_pool.value
-      max_group_prepared_capacity = warm_pool.value
-      instance_reuse_policy {
-        reuse_on_scale_in = false
-      }
-    }
-  }
 
   dynamic "tag" {
     for_each = merge(local.additional_tags, var.env_config.default_tags)
@@ -477,27 +495,161 @@ resource "aws_autoscaling_policy" "avg_cpu_high" {
   }
 }
 
-# NOTE: Required to *actually* delete a warm pool as of terraform 1.5.0 and AWS Provider v5.53.0
-resource "null_resource" "warm_pool_size" {
+resource "null_resource" "set_target_groups" {
   for_each = local.asgs
 
   triggers = {
-    should_delete_warmpool = each.value.warmpool_size == 0
+    target_group_name = each.value.deployment_status
   }
 
   provisioner "local-exec" {
     environment = {
-      will_delete = self.triggers.should_delete_warmpool
-      asg_name    = each.value.name
+      asg_name          = aws_autoscaling_group.main[each.key].name
+      target_group_arn  = aws_lb_target_group.main[self.triggers.target_group_name].arn
+      target_group_name = self.triggers.target_group_name
     }
 
     command = <<-EOF
-if [[ $will_delete == "true" ]]; then
+attached_other_tgs="$(
+  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$asg_name" |
+    jq -r --arg target_group_arn "$target_group_arn" \
+      '.AutoScalingGroups[0].TargetGroupARNs | map(select(. != $target_group_arn)) | join(",")'
+)"
+if [[ -n "$attached_other_tgs" ]]; then
+  aws autoscaling detach-load-balancer-target-groups \
+    --auto-scaling-group-name "$asg_name" \
+    --target-group-arns "$attached_other_tgs"
+  echo "Detached $asg_name from all non-$target_group_name Target Groups"
+fi
+aws autoscaling attach-load-balancer-target-groups \
+  --auto-scaling-group-name "$asg_name" \
+  --target-group-arns "$target_group_arn" &&
+  echo "Attached $asg_name to $target_group_name Target Group"
+EOF
+  }
+}
+
+# NOTE: Required to avoid erroneous 3 minute delay when scaling-in an ASG's Warm Pool due to defects
+# in the Terraform AWS Provider as of Terraform 1.5.0 and version 5.53.0 of the AWS Provider
+resource "null_resource" "manage_warm_pool" {
+  for_each = local.asgs
+
+  triggers = {
+    warmpool_size = each.value.warmpool_size
+  }
+
+  provisioner "local-exec" {
+    environment = {
+      warmpool_size = self.triggers.warmpool_size
+      asg_name      = aws_autoscaling_group.main[each.key].name
+    }
+
+    command = <<-EOF
+if ((warmpool_size == 0)); then
   aws autoscaling delete-warm-pool --auto-scaling-group-name "$asg_name" --force-delete
-  echo "Deleting "$asg_name" warm_pool. 'will_delete' is "$will_delete""
+  echo "Deleting "$asg_name" warm_pool. 'warmpool_size' is 0"
 else
-  echo "No change to "$asg_name" warm_pool. 'will_delete' is "$will_delete""
+  aws autoscaling put-warm-pool --auto-scaling-group-name "$asg_name" \
+    --max-group-prepared-capacity "$warmpool_size" \
+    --min-size "$warmpool_size" \
+    --pool-state "Stopped" \
+    --instance-reuse-policy "ReuseOnScaleIn=false"
+  echo "Creating Warm Pool for "$asg_name" with size of $warmpool_size"
 fi
 EOF
+  }
+}
+
+### Load Balancer Components ###
+resource "aws_lb" "main" {
+  name                             = local.lb_name
+  internal                         = !var.lb_config.is_public
+  load_balancer_type               = "network"
+  security_groups                  = [aws_security_group.lb.id]
+  subnets                          = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
+  enable_deletion_protection       = var.lb_config.enable_deletion_protection
+  idle_timeout                     = 60
+  ip_address_type                  = "ipv4"
+  enable_http2                     = false
+  desync_mitigation_mode           = "strictest"
+  enable_cross_zone_load_balancing = true
+
+  tags = local.additional_tags
+}
+
+resource "aws_lb_listener" "main" {
+  for_each = local.lb_targets
+
+  load_balancer_arn = aws_lb.main.arn
+  port              = each.value.ingress_port
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main[each.key].arn
+  }
+}
+
+# security group
+resource "aws_security_group" "lb" {
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  name        = "${local.lb_name}-sg"
+  description = "Allow access to the ${var.role} load-balancer"
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "${local.lb_name}-sg" }, local.additional_tags)
+
+  # Dynamic, per-listener CIDR Block ingress rules
+  dynamic "ingress" {
+    for_each = local.lb_targets
+    content {
+      from_port   = ingress.value.ingress_port
+      to_port     = ingress.value.ingress_port
+      protocol    = "TCP"
+      cidr_blocks = var.lb_config.ingress.cidr_blocks
+    }
+  }
+
+  # Dynamic, per-listener prefix list ingress rules if prefix list IDs are specified
+  dynamic "ingress" {
+    for_each = length(var.lb_config.ingress.prefix_list_ids) > 0 ? local.lb_targets : {}
+    content {
+      from_port       = ingress.value.ingress_port
+      to_port         = ingress.value.ingress_port
+      protocol        = "TCP"
+      prefix_list_ids = var.lb_config.ingress.prefix_list_ids
+    }
+  }
+
+  egress {
+    from_port   = var.lb_config.server_listen_port
+    to_port     = var.lb_config.server_listen_port
+    protocol    = "TCP"
+    cidr_blocks = var.lb_config.egress.cidr_blocks
+  }
+}
+
+resource "aws_lb_target_group" "main" {
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  for_each = local.lb_targets
+
+  name                   = "${aws_lb.main.name}-tg-${each.key}"
+  port                   = var.lb_config.server_listen_port
+  protocol               = "TCP"
+  vpc_id                 = var.env_config.vpc_id
+  deregistration_delay   = 60
+  connection_termination = true
+  health_check {
+    healthy_threshold   = 3
+    interval            = 10
+    timeout             = 8
+    unhealthy_threshold = 2
+    port                = var.lb_config.server_listen_port
+    protocol            = "TCP"
   }
 }
