@@ -76,6 +76,14 @@ locals {
     vpc_id       = data.aws_vpc.main.id,
     azs          = local.azs
   }
+  internal_ingress_cidrs = concat(
+    data.aws_vpc_peering_connection.peers[*].peer_cidr_block,
+    [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]
+  )
+  internal_prefix_lists = [
+    data.aws_ec2_managed_prefix_list.vpn.id,
+    data.aws_ec2_managed_prefix_list.jenkins.id
+  ]
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
 
@@ -213,16 +221,23 @@ module "fhir_asg" {
   lb_config = {
     is_public                  = local.lb_is_public
     enable_deletion_protection = !local.is_ephemeral_env
-    ingress = {
-      blue_port       = local.lb_blue_ingress_port
-      green_port      = local.lb_green_ingress_port
-      cidr_blocks     = !local.lb_is_public ? concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]) : ["0.0.0.0/0"]
-      prefix_list_ids = !local.lb_is_public ? [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id] : []
+    server_listen_port         = local.service_port
+    targets = {
+      green = {
+        ingress = {
+          cidrs        = local.internal_ingress_cidrs
+          port         = local.lb_green_ingress_port
+          prefix_lists = local.internal_prefix_lists
+        }
+      }
+      blue = {
+        ingress = {
+          cidrs        = !local.lb_is_public ? local.internal_ingress_cidrs : ["0.0.0.0/0"]
+          port         = local.lb_blue_ingress_port
+          prefix_lists = !local.lb_is_public ? local.internal_prefix_lists : []
+        }
+      }
     }
-    egress = {
-      cidr_blocks = [data.aws_vpc.main.cidr_block]
-    }
-    server_listen_port = local.service_port
   }
 }
 

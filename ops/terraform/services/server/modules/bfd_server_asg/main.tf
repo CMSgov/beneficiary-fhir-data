@@ -23,14 +23,6 @@ locals {
   }
 
   lb_name = "bfd-${local.env}-${var.role}-nlb"
-  lb_targets = {
-    blue = {
-      ingress_port = var.lb_config.ingress.blue_port
-    }
-    green = {
-      ingress_port = var.lb_config.ingress.green_port
-    }
-  }
 
   env      = terraform.workspace
   seed_env = var.seed_env
@@ -578,10 +570,10 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_lb_listener" "main" {
-  for_each = local.lb_targets
+  for_each = var.lb_config.targets
 
   load_balancer_arn = aws_lb.main.arn
-  port              = each.value.ingress_port
+  port              = each.value.ingress.port
   protocol          = "TCP"
 
   default_action {
@@ -603,23 +595,23 @@ resource "aws_security_group" "lb" {
 
   # Dynamic, per-listener CIDR Block ingress rules
   dynamic "ingress" {
-    for_each = local.lb_targets
+    for_each = var.lb_config.targets
     content {
-      from_port   = ingress.value.ingress_port
-      to_port     = ingress.value.ingress_port
+      from_port   = ingress.value.ingress.port
+      to_port     = ingress.value.ingress.port
       protocol    = "TCP"
-      cidr_blocks = var.lb_config.ingress.cidr_blocks
+      cidr_blocks = ingress.value.ingress.cidrs
     }
   }
 
   # Dynamic, per-listener prefix list ingress rules if prefix list IDs are specified
   dynamic "ingress" {
-    for_each = length(var.lb_config.ingress.prefix_list_ids) > 0 ? local.lb_targets : {}
+    for_each = { for k, v in var.lb_config.targets : k => v if length(v.ingress.prefix_lists) > 0 }
     content {
-      from_port       = ingress.value.ingress_port
-      to_port         = ingress.value.ingress_port
+      from_port       = ingress.value.ingress.port
+      to_port         = ingress.value.ingress.port
       protocol        = "TCP"
-      prefix_list_ids = var.lb_config.ingress.prefix_list_ids
+      prefix_list_ids = ingress.value.ingress.prefix_lists
     }
   }
 
@@ -627,7 +619,7 @@ resource "aws_security_group" "lb" {
     from_port   = var.lb_config.server_listen_port
     to_port     = var.lb_config.server_listen_port
     protocol    = "TCP"
-    cidr_blocks = var.lb_config.egress.cidr_blocks
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
 
@@ -636,7 +628,7 @@ resource "aws_lb_target_group" "main" {
     create_before_destroy = true
   }
 
-  for_each = local.lb_targets
+  for_each = var.lb_config.targets
 
   name                   = "${aws_lb.main.name}-tg-${each.key}"
   port                   = var.lb_config.server_listen_port

@@ -1,3 +1,7 @@
+data "aws_vpc" "main" {
+  id = var.env_config.vpc_id
+}
+
 data "aws_subnet" "app_subnets" {
   count             = length(var.env_config.azs)
   vpc_id            = var.env_config.vpc_id
