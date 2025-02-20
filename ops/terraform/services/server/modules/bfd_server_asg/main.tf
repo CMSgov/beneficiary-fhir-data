@@ -7,7 +7,7 @@ locals {
       lt_version        = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
       desired_capacity  = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
       max_size          = var.asg_config.max
-      min_size          = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      min_size          = local.odd_needs_scale_out ? max(local.even_remote_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_min_size : 0)
       warmpool_size     = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
       deployment_status = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
     }
@@ -16,7 +16,7 @@ locals {
       lt_version        = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
       desired_capacity  = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
       max_size          = var.asg_config.max
-      min_size          = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      min_size          = local.even_needs_scale_out ? max(local.odd_remote_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_min_size : 0)
       warmpool_size     = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
       deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
     }
@@ -47,6 +47,9 @@ locals {
 
   odd_remote_desired_capacity  = tonumber(data.external.current_asg.result["odd_desired_capacity"])
   even_remote_desired_capacity = tonumber(data.external.current_asg.result["even_desired_capacity"])
+
+  odd_remote_min_size  = tonumber(data.external.current_asg.result["odd_min_size"])
+  even_remote_min_size = tonumber(data.external.current_asg.result["even_min_size"])
 
   odd_remote_warmpool_min_size  = tonumber(data.external.current_asg.result["odd_warmpool_min_size"])
   even_remote_warmpool_min_size = tonumber(data.external.current_asg.result["even_warmpool_min_size"])
