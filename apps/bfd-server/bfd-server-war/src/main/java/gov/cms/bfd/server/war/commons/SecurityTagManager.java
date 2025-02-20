@@ -72,50 +72,55 @@ public final class SecurityTagManager {
    * @return SecurityLevel
    */
   public List<Coding> getClaimSecurityLevel(String claimId, Class<?> tagClass) {
-
-    if (samhsaV2Enabled) {
-      // Query tags associated with the claim
-      List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
-
-      List<Coding> securityTagCoding = new ArrayList<>();
-
-      // If no security tags are found, directly add the default "Normal" tag
-      if (securityTags.isEmpty()) {
-        Coding coding = new Coding();
-        coding
-            .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-            .setCode("N")
-            .setDisplay("Normal");
-        securityTagCoding.add(coding);
-      } else {
-        // Check for each tag and set corresponding code and display
-        for (String securityTag : securityTags) {
-          Coding coding = new Coding();
-          // Convert the securityTag string to the TagCode enum
-          TagCode tagCode = TagCode.fromString(securityTag);
-          // Check each security tag and apply corresponding values
-          if (tagCode != null) {
-            switch (tagCode) {
-              case R:
-                coding
-                    .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-                    .setCode(TagCode.R.toString())
-                    .setDisplay(TagCode.R.getDisplayName());
-                break;
-              case _42CFRPart2:
-                coding
-                    .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
-                    .setCode(TagCode._42CFRPart2.toString())
-                    .setDisplay(TagCode._42CFRPart2.getDisplayName());
-                break;
-            }
-          }
-          securityTagCoding.add(coding);
-        }
-      }
-      return securityTagCoding;
+    if (!samhsaV2Enabled) {
+      return new ArrayList<>();
     }
-    return new ArrayList<>();
+
+    List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
+    List<Coding> securityTagCoding = new ArrayList<>();
+
+    if (securityTags.isEmpty()) {
+      addDefaultSecurityTag(securityTagCoding);
+    } else {
+      for (String securityTag : securityTags) {
+        addSecurityTagCoding(securityTag, securityTagCoding);
+      }
+    }
+
+    return securityTagCoding;
+  }
+
+  private void addDefaultSecurityTag(List<Coding> securityTagCoding) {
+    Coding coding = new Coding();
+    coding
+        .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+        .setCode("N")
+        .setDisplay("Normal");
+    securityTagCoding.add(coding);
+  }
+
+  private void addSecurityTagCoding(String securityTag, List<Coding> securityTagCoding) {
+    Coding coding = new Coding();
+    TagCode tagCode = TagCode.fromString(securityTag);
+
+    if (tagCode != null) {
+      switch (tagCode) {
+        case R:
+          coding
+              .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+              .setCode(TagCode.R.toString())
+              .setDisplay(TagCode.R.getDisplayName());
+          break;
+        case _42CFRPart2:
+          coding
+              .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
+              .setCode(TagCode._42CFRPart2.toString())
+              .setDisplay(TagCode._42CFRPart2.getDisplayName());
+          break;
+      }
+    }
+
+    securityTagCoding.add(coding);
   }
 
   /**

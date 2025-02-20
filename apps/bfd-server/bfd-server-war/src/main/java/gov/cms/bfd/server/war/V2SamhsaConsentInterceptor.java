@@ -54,7 +54,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
 
     logger.debug("SAMHSAConsentInterceptor - Processing willSeeResource.");
 
-    if (!shouldApplySamhsaFiltering(theRequestDetails)) {
+    if (!applySamhsaFiltering(theRequestDetails)) {
       return ConsentOutcome.PROCEED; // No filtering needed, proceed
     }
 
@@ -66,8 +66,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
     return ConsentOutcome.PROCEED;
   }
 
-  // Determine if SAMHSA filtering is required from request parameters
-  boolean shouldApplySamhsaFiltering(RequestDetails theRequestDetails) {
+  boolean applySamhsaFiltering(RequestDetails theRequestDetails) {
     boolean excludeSamhsaParam =
         parseBooleansFromRequest(theRequestDetails, AbstractResourceProvider.EXCLUDE_SAMHSA)
             .stream()
