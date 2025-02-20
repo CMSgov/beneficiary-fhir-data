@@ -1,11 +1,22 @@
-# subnets
 data "aws_subnet" "app_subnets" {
   count             = length(var.env_config.azs)
   vpc_id            = var.env_config.vpc_id
   availability_zone = var.env_config.azs[count.index]
   filter {
     name   = "tag:Layer"
-    values = [var.layer]
+    values = ["app"]
+  }
+}
+
+# NLBs must exist in the dmz subnets. This is especially important for prod-sbx as those subnets
+# have an IGW in their routing tables
+data "aws_subnet" "dmz_subnets" {
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[count.index]
+  filter {
+    name   = "tag:Layer"
+    values = ["dmz"]
   }
 }
 

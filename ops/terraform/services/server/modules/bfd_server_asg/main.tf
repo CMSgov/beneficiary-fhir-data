@@ -566,7 +566,7 @@ resource "aws_lb" "main" {
   internal                         = !var.lb_config.is_public
   load_balancer_type               = "network"
   security_groups                  = [aws_security_group.lb.id]
-  subnets                          = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
+  subnets                          = data.aws_subnet.dmz_subnets[*].id # Gives AZs and VPC association
   enable_deletion_protection       = var.lb_config.enable_deletion_protection
   idle_timeout                     = 60
   ip_address_type                  = "ipv4"
