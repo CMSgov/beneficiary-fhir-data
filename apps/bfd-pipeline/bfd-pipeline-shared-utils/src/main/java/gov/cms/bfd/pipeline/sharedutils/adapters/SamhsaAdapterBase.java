@@ -37,6 +37,225 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
   /** The claimLines' table. */
   String linesTable;
 
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_1 = "icd_dgns_cd1";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_2 = "icd_dgns_cd2";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_3 = "icd_dgns_cd3";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_4 = "icd_dgns_cd4";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_5 = "icd_dgns_cd5";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_6 = "icd_dgns_cd6";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_7 = "icd_dgns_cd7";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_8 = "icd_dgns_cd8";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_9 = "icd_dgns_cd9";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_10 = "icd_dgns_cd10";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_11 = "icd_dgns_cd11";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_12 = "icd_dgns_cd12";
+
+  /** Claim SAMHSA Column. */
+  public static final String LINE_ICD_DGNS_CD = "line_icd_dgns_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String PRNCPAL_DGNS_CD = "prncpal_dgns_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String HCPCS_CD = "hcpcs_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String REV_CNTR_APC_HIPPS_CD = "rev_cntr_apc_hipps_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_13 = "icd_dgns_cd13";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_14 = "icd_dgns_cd14";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_15 = "icd_dgns_cd15";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_16 = "icd_dgns_cd16";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_17 = "icd_dgns_cd17";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_18 = "icd_dgns_cd18";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_19 = "icd_dgns_cd19";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_20 = "icd_dgns_cd20";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_21 = "icd_dgns_cd21";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_22 = "icd_dgns_cd22";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_23 = "icd_dgns_cd23";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_24 = "icd_dgns_cd24";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_CD_25 = "icd_dgns_cd25";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_1 = "icd_dgns_e_cd1";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_2 = "icd_dgns_e_cd2";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_3 = "icd_dgns_e_cd3";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_4 = "icd_dgns_e_cd4";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_5 = "icd_dgns_e_cd5";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_6 = "icd_dgns_e_cd6";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_7 = "icd_dgns_e_cd7";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_8 = "icd_dgns_e_cd8";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_9 = "icd_dgns_e_cd9";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_10 = "icd_dgns_e_cd10";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_11 = "icd_dgns_e_cd11";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_DGNS_E_CD_12 = "icd_dgns_e_cd12";
+
+  /** Claim SAMHSA Column. */
+  public static final String FST_DGNS_E_CD = "fst_dgns_e_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String CLM_DRG_CD = "clm_drg_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String ADMTG_DGNS_CD = "admtg_dgns_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String PRNCPAL_DGNS_CD1 = "prncpal_dgns_cd";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_1 = "icd_prcdr_cd1";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_2 = "icd_prcdr_cd2";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_3 = "icd_prcdr_cd3";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_4 = "icd_prcdr_cd4";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_5 = "icd_prcdr_cd5";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_6 = "icd_prcdr_cd6";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_7 = "icd_prcdr_cd7";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_8 = "icd_prcdr_cd8";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_9 = "icd_prcdr_cd9";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_10 = "icd_prcdr_cd10";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_11 = "icd_prcdr_cd11";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_12 = "icd_prcdr_cd12";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_13 = "icd_prcdr_cd13";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_14 = "icd_prcdr_cd14";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_15 = "icd_prcdr_cd15";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_16 = "icd_prcdr_cd16";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_17 = "icd_prcdr_cd17";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_18 = "icd_prcdr_cd18";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_19 = "icd_prcdr_cd19";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_20 = "icd_prcdr_cd20";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_21 = "icd_prcdr_cd21";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_22 = "icd_prcdr_cd22";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_23 = "icd_prcdr_cd23";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_24 = "icd_prcdr_cd24";
+
+  /** Claim SAMHSA Column. */
+  public static final String ICD_PRCDR_CD_25 = "icd_prcdr_cd25";
+
+  /** Claim SAMHSA Column. */
+  public static final String RSN_VISIT_CD_1 = "rsn_visit_cd1";
+
+  /** Claim SAMHSA Column. */
+  public static final String RSN_VISIT_CD_2 = "rsn_visit_cd2";
+
+  /** Claim SAMHSA Column. */
+  public static final String RSN_VISIT_CD_3 = "rsn_visit_cd3";
+
   /**
    * Retrieves a list of SAMHSA fields.
    *
@@ -184,7 +403,7 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
             TagDetails.builder()
                 .table(field.getTable())
                 .column(field.getColumn())
-                .clm_line_num(field.getLineNum() != null ? (int) field.getLineNum() : null)
+                .clmLineNum(field.getLineNum() != null ? (int) field.getLineNum() : null)
                 .type(type)
                 .build();
         detailsList.add(detail);
