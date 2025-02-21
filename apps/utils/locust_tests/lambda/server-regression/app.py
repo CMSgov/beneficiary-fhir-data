@@ -154,8 +154,6 @@ def handler(event, context):
         cert = get_ssm_parameter(
             f"/bfd/{environment}/server/sensitive/server_regression_cert", with_decrypt=True
         )
-        # Green Load Balancer Target listens on the same port as the BFD Server service
-        green_port = get_ssm_parameter(f"/bfd/{environment}/server/sensitive/service_port")
     except ValueError as exc:
         send_pipeline_signal(
             signal_queue_url=signal_queue_url,
@@ -194,7 +192,7 @@ def handler(event, context):
             [
                 "locust",
                 f"--locustfile={lambda_task_root}/app/{invoke_event.suite_version}/{locust_file}",
-                f"--host={invoke_event.host}:{green_port}",
+                f"--host={invoke_event.host}",
                 f"--users={invoke_event.users}",
                 f"--spawn-rate={invoke_event.spawn_rate}",
                 f"--spawned-runtime={invoke_event.spawned_runtime}",
