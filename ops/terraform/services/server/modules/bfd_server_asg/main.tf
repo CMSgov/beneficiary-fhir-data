@@ -21,8 +21,27 @@ locals {
       deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
     }
   }
-
-  lb_name = "bfd-${local.env}-${var.role}-nlb"
+  lb_ingress_port = 443
+  lb_protocol     = "TCP"
+  lb_name_prefix  = "bfd-${local.env}-${var.role}-nlb"
+  lbs = {
+    "${local.green_state}" = {
+      name     = "${local.lb_name_prefix}-${local.green_state}"
+      internal = true # green is always internal, regardless of whether blue is public
+      ingress = {
+        cidrs        = var.lb_config.internal_ingress_cidrs
+        prefix_lists = var.lb_config.internal_prefix_lists
+      }
+    }
+    "${local.blue_state}" = {
+      name     = "${local.lb_name_prefix}-${local.blue_state}"
+      internal = !var.lb_config.is_public
+      ingress = {
+        cidrs        = !var.lb_config.is_public ? var.lb_config.internal_ingress_cidrs : ["0.0.0.0/0"]
+        prefix_lists = !var.lb_config.is_public ? var.lb_config.internal_prefix_lists : []
+      }
+    }
+  }
 
   env      = terraform.workspace
   seed_env = var.seed_env
@@ -172,10 +191,10 @@ resource "aws_security_group" "app" {
   ingress {
     from_port       = var.lb_config.server_listen_port
     to_port         = var.lb_config.server_listen_port
-    protocol        = "TCP"
-    security_groups = concat([aws_security_group.lb.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
+    protocol        = local.lb_protocol
+    security_groups = concat([for _, v in aws_security_group.lb : v.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
     # TODO: Replace above "security_groups" definition with below commented code in BFD-3878
-    # security_groups = [aws_security_group.lb.id]server_listen_port
+    # security_groups = [for _, v in aws_security_group.lb : v.id]
     # TODO: Replace above "security_groups" definition with above commented code in BFD-3878
   }
 }
@@ -186,7 +205,7 @@ resource "aws_security_group_rule" "allow_db_access" {
   type        = "ingress"
   from_port   = 5432
   to_port     = 5432
-  protocol    = "tcp"
+  protocol    = local.lb_protocol
   description = "Allows access to the ${var.db_config.role} db"
 
   security_group_id        = each.value                # The SG associated with each replica
@@ -554,10 +573,12 @@ EOF
 
 ### Load Balancer Components ###
 resource "aws_lb" "main" {
-  name                             = local.lb_name
-  internal                         = !var.lb_config.is_public
+  for_each = local.lbs
+
+  name                             = each.value.name
+  internal                         = each.value.internal
   load_balancer_type               = "network"
-  security_groups                  = [aws_security_group.lb.id]
+  security_groups                  = [aws_security_group.lb[each.key].id]
   subnets                          = data.aws_subnet.dmz_subnets[*].id # Gives AZs and VPC association
   enable_deletion_protection       = var.lb_config.enable_deletion_protection
   idle_timeout                     = 60
@@ -570,11 +591,11 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_lb_listener" "main" {
-  for_each = var.lb_config.targets
+  for_each = local.lbs
 
-  load_balancer_arn = aws_lb.main.arn
-  port              = each.value.ingress.port
-  protocol          = "TCP"
+  load_balancer_arn = aws_lb.main[each.key].arn
+  port              = local.lb_ingress_port
+  protocol          = local.lb_protocol
 
   default_action {
     type             = "forward"
@@ -584,55 +605,51 @@ resource "aws_lb_listener" "main" {
 
 # security group
 resource "aws_security_group" "lb" {
+  for_each = local.lbs
   lifecycle {
     create_before_destroy = true
   }
 
-  name        = "${local.lb_name}-sg"
-  description = "Allow access to the ${var.role} load-balancer"
+  name        = "${each.value.name}-sg"
+  description = "Allow ${each.value.internal ? "internal" : "public"} ingress to the ${each.value.name} NLB; egress to ${local.env} VPC"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "${local.lb_name}-sg" }, local.additional_tags)
+  tags        = merge({ Name = "${each.value.name}-sg" }, local.additional_tags)
 
-  # Dynamic, per-listener CIDR Block ingress rules
-  dynamic "ingress" {
-    for_each = var.lb_config.targets
-    content {
-      from_port   = ingress.value.ingress.port
-      to_port     = ingress.value.ingress.port
-      protocol    = "TCP"
-      cidr_blocks = ingress.value.ingress.cidrs
-    }
+  ingress {
+    from_port   = local.lb_ingress_port
+    to_port     = local.lb_ingress_port
+    protocol    = local.lb_protocol
+    cidr_blocks = each.value.ingress.cidrs
   }
 
-  # Dynamic, per-listener prefix list ingress rules if prefix list IDs are specified
+  # Dynamically create ingress rule for Prefix Lists iff they are specified
   dynamic "ingress" {
-    for_each = { for k, v in var.lb_config.targets : k => v if length(v.ingress.prefix_lists) > 0 }
+    for_each = length(each.value.ingress.prefix_lists) > 0 ? [1] : []
     content {
-      from_port       = ingress.value.ingress.port
-      to_port         = ingress.value.ingress.port
-      protocol        = "TCP"
-      prefix_list_ids = ingress.value.ingress.prefix_lists
+      from_port       = local.lb_ingress_port
+      to_port         = local.lb_ingress_port
+      protocol        = local.lb_protocol
+      prefix_list_ids = each.value.ingress.prefix_lists
     }
   }
 
   egress {
     from_port   = var.lb_config.server_listen_port
     to_port     = var.lb_config.server_listen_port
-    protocol    = "TCP"
+    protocol    = local.lb_protocol
     cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
 
 resource "aws_lb_target_group" "main" {
+  for_each = local.lbs
   lifecycle {
     create_before_destroy = true
   }
 
-  for_each = var.lb_config.targets
-
-  name                   = "${aws_lb.main.name}-tg-${each.key}"
+  name                   = "${aws_lb.main[each.key].name}-tg"
   port                   = var.lb_config.server_listen_port
-  protocol               = "TCP"
+  protocol               = local.lb_protocol
   vpc_id                 = var.env_config.vpc_id
   deregistration_delay   = 60
   connection_termination = true
@@ -642,6 +659,6 @@ resource "aws_lb_target_group" "main" {
     timeout             = 8
     unhealthy_threshold = 2
     port                = var.lb_config.server_listen_port
-    protocol            = "TCP"
+    protocol            = local.lb_protocol
   }
 }

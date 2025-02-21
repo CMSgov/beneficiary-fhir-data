@@ -74,18 +74,8 @@ locals {
     vpc_id       = data.aws_vpc.main.id,
     azs          = local.azs
   }
-  internal_ingress_cidrs = concat(
-    data.aws_vpc_peering_connection.peers[*].peer_cidr_block,
-    [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]
-  )
-  internal_prefix_lists = [
-    data.aws_ec2_managed_prefix_list.vpn.id,
-    data.aws_ec2_managed_prefix_list.jenkins.id
-  ]
-  lb_blue_ingress_port  = 443                # Must always be the HTTPS port. Necessary for prod-sbx
-  lb_green_ingress_port = local.service_port # Can be any port other than 443; using the server port keeps it simple
-  cw_period             = 60                 # Seconds
-  cw_eval_periods       = 3
+  cw_period       = 60 # Seconds
+  cw_eval_periods = 3
 
   ami_id = data.aws_ami.main.image_id
 
@@ -124,12 +114,12 @@ module "fhir_lb" {
 
   ingress = local.lb_is_public ? {
     description     = "Public Internet access"
-    port            = local.lb_blue_ingress_port
+    port            = 443
     cidr_blocks     = ["0.0.0.0/0"]
     prefix_list_ids = []
     } : {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port            = local.lb_blue_ingress_port
+    port            = 443
     cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
@@ -222,22 +212,8 @@ module "fhir_asg" {
     is_public                  = local.lb_is_public
     enable_deletion_protection = !local.is_ephemeral_env
     server_listen_port         = local.service_port
-    targets = {
-      green = {
-        ingress = {
-          cidrs        = local.internal_ingress_cidrs
-          port         = local.lb_green_ingress_port
-          prefix_lists = local.internal_prefix_lists
-        }
-      }
-      blue = {
-        ingress = {
-          cidrs        = !local.lb_is_public ? local.internal_ingress_cidrs : ["0.0.0.0/0"]
-          port         = local.lb_blue_ingress_port
-          prefix_lists = !local.lb_is_public ? local.internal_prefix_lists : []
-        }
-      }
-    }
+    internal_ingress_cidrs     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    internal_prefix_lists      = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
 }
 

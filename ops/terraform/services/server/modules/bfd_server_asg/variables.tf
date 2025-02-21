@@ -39,22 +39,8 @@ variable "lb_config" {
     is_public                  = bool
     enable_deletion_protection = bool
     server_listen_port         = string
-    targets = object({
-      green = object({
-        ingress = object({
-          port         = number
-          cidrs        = list(string)
-          prefix_lists = list(string)
-        })
-      })
-      blue = object({
-        ingress = object({
-          port         = number
-          cidrs        = list(string)
-          prefix_lists = list(string)
-        })
-      })
-    })
+    internal_ingress_cidrs     = list(string)
+    internal_prefix_lists      = list(string)
   })
   default = null
 }
