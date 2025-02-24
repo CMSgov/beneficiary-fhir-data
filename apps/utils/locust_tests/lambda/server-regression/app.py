@@ -12,6 +12,7 @@ from botocore.config import Config
 environment = os.environ.get("BFD_ENVIRONMENT", "test").lower()
 s3_bucket = os.environ.get("INSIGHTS_BUCKET_NAME")
 sqs_pipeline_signal = os.environ.get("SQS_PIPELINE_SIGNAL_NAME")
+lambda_task_root = os.environ.get("LAMBDA_TASK_ROOT", "/var/task")
 
 boto_config = Config(region_name="us-east-1")
 ssm_client = boto3.client("ssm", config=boto_config)
@@ -153,9 +154,6 @@ def handler(event, context):
         cert = get_ssm_parameter(
             f"/bfd/{environment}/server/sensitive/server_regression_cert", with_decrypt=True
         )
-        green_port = get_ssm_parameter(
-            f"/bfd/{environment}/server/nonsensitive/lb_green_ingress_port"
-        )
     except ValueError as exc:
         send_pipeline_signal(
             signal_queue_url=signal_queue_url,
@@ -193,8 +191,8 @@ def handler(event, context):
         regression_process = subprocess.run(
             [
                 "locust",
-                f"--locustfile=/var/task/{invoke_event.suite_version}/{locust_file}",
-                f"--host={invoke_event.host}:{green_port}",
+                f"--locustfile={lambda_task_root}/app/{invoke_event.suite_version}/{locust_file}",
+                f"--host={invoke_event.host}",
                 f"--users={invoke_event.users}",
                 f"--spawn-rate={invoke_event.spawn_rate}",
                 f"--spawned-runtime={invoke_event.spawned_runtime}",
@@ -209,6 +207,7 @@ def handler(event, context):
                 ),
                 "--stats-compare-average",
                 f"--stats-compare-tag={invoke_event.compare_tag}",
+                f"--stats-compare-meta-file={lambda_task_root}/app/config/regression_suites_compare_meta.json",
                 "--headless",
                 "--only-summary",
             ]
