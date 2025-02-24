@@ -3,22 +3,24 @@ locals {
   blue_state  = "blue"
   asgs = {
     odd = {
-      name              = "${aws_launch_template.main.name}-odd"
-      lt_version        = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
-      desired_capacity  = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      max_size          = var.asg_config.max
-      min_size          = local.odd_needs_scale_out ? max(local.even_remote_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_min_size : 0)
-      warmpool_size     = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
-      deployment_status = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      name                     = "${aws_launch_template.main.name}-odd"
+      lt_version               = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
+      desired_capacity         = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      max_size                 = var.asg_config.max
+      min_size                 = local.odd_needs_scale_out ? max(local.even_remote_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_min_size : 0)
+      warmpool_size            = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+      deployment_status        = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      remote_target_groups_csv = local.odd_remote_target_groups_csv
     }
     even = {
-      name              = "${aws_launch_template.main.name}-even"
-      lt_version        = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
-      desired_capacity  = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      max_size          = var.asg_config.max
-      min_size          = local.even_needs_scale_out ? max(local.odd_remote_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_min_size : 0)
-      warmpool_size     = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
-      deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      name                     = "${aws_launch_template.main.name}-even"
+      lt_version               = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
+      desired_capacity         = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      max_size                 = var.asg_config.max
+      min_size                 = local.even_needs_scale_out ? max(local.odd_remote_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_min_size : 0)
+      warmpool_size            = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+      deployment_status        = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      remote_target_groups_csv = local.even_remote_target_groups_csv
     }
   }
   lb_ingress_port = 443
@@ -64,6 +66,9 @@ locals {
 
   odd_remote_warmpool_min_size  = tonumber(data.external.current_asg.result["odd_warmpool_min_size"])
   even_remote_warmpool_min_size = tonumber(data.external.current_asg.result["even_warmpool_min_size"])
+
+  odd_remote_target_groups_csv  = data.external.current_asg.result["odd_target_groups_csv"]
+  even_remote_target_groups_csv = data.external.current_asg.result["even_target_groups_csv"]
 
   #ODD scales OUT when launchtemplate is ODD and ODD ASG has 0 desired capacity
   odd_needs_scale_out = alltrue([
@@ -512,6 +517,7 @@ resource "null_resource" "set_target_groups" {
 
   triggers = {
     target_group_name = each.value.deployment_status
+    target_groups     = each.value.remote_target_groups_csv # Here so that this resource runs again if the TGs change. Handles out-of-band changes
   }
 
   provisioner "local-exec" {
