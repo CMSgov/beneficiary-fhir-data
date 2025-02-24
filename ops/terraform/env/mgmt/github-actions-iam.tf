@@ -427,7 +427,8 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
           Effect = "Allow"
           Action = [
             "logs:Describe*",
-            "logs:List*"
+            "logs:List*",
+            "logs:Create*"
           ]
           Resource = "*"
         },
@@ -468,7 +469,10 @@ resource "aws_iam_policy" "github_actions_ci_ops" {
             "quicksight:Get*",
             "quicksight:Describe*",
             "quicksight:List*",
-            "quicksight:Create*"
+            "quicksight:Create*",
+            "quicksight:Search*",
+            "quicksight:Delete*",
+            "quicksight:Register*"
           ]
           Resource = "*"
         },
