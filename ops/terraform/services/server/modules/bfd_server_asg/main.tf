@@ -3,32 +3,45 @@ locals {
   blue_state  = "blue"
   asgs = {
     odd = {
-      name              = "${aws_launch_template.main.name}-odd"
-      lt_version        = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
-      desired_capacity  = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      max_size          = var.asg_config.max
-      min_size          = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
-      warmpool_size     = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
-      deployment_status = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      name                     = "${aws_launch_template.main.name}-odd"
+      lt_version               = local.odd_needs_scale_out ? local.latest_ltv : coalesce(local.odd_remote_lt_version, max(local.latest_ltv - 1, 1))
+      desired_capacity         = local.odd_needs_scale_out ? max(local.even_remote_desired_capacity, var.asg_config.desired) : (local.odd_maintains_state ? local.odd_remote_desired_capacity : 0)
+      max_size                 = var.asg_config.max
+      min_size                 = local.odd_needs_scale_out ? max(local.even_remote_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_min_size : 0)
+      warmpool_size            = local.odd_needs_scale_out ? max(local.even_remote_warmpool_min_size, var.asg_config.min) : (local.odd_maintains_state ? local.odd_remote_warmpool_min_size : 0)
+      deployment_status        = local.odd_needs_scale_out ? local.green_state : (local.odd_maintains_state && local.odd_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      remote_target_groups_csv = local.odd_remote_target_groups_csv
     }
     even = {
-      name              = "${aws_launch_template.main.name}-even"
-      lt_version        = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
-      desired_capacity  = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      max_size          = var.asg_config.max
-      min_size          = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
-      warmpool_size     = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
-      deployment_status = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      name                     = "${aws_launch_template.main.name}-even"
+      lt_version               = local.even_needs_scale_out ? local.latest_ltv : coalesce(local.even_remote_lt_version, max(local.latest_ltv - 1, 1))
+      desired_capacity         = local.even_needs_scale_out ? max(local.odd_remote_desired_capacity, var.asg_config.desired) : (local.even_maintains_state ? local.even_remote_desired_capacity : 0)
+      max_size                 = var.asg_config.max
+      min_size                 = local.even_needs_scale_out ? max(local.odd_remote_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_min_size : 0)
+      warmpool_size            = local.even_needs_scale_out ? max(local.odd_remote_warmpool_min_size, var.asg_config.min) : (local.even_maintains_state ? local.even_remote_warmpool_min_size : 0)
+      deployment_status        = local.even_needs_scale_out ? local.green_state : (local.even_maintains_state && local.even_remote_desired_capacity > 0 ? local.blue_state : local.green_state)
+      remote_target_groups_csv = local.even_remote_target_groups_csv
     }
   }
-
-  lb_name = "bfd-${local.env}-${var.role}-nlb"
-  lb_targets = {
-    blue = {
-      ingress_port = var.lb_config.ingress.blue_port
+  lb_ingress_port = 443
+  lb_protocol     = "TCP"
+  lb_name_prefix  = "bfd-${local.env}-${var.role}-nlb"
+  lbs = {
+    "${local.green_state}" = {
+      name     = "${local.lb_name_prefix}-${local.green_state}"
+      internal = true # green is always internal, regardless of whether blue is public
+      ingress = {
+        cidrs        = var.lb_config.internal_ingress_cidrs
+        prefix_lists = var.lb_config.internal_prefix_lists
+      }
     }
-    green = {
-      ingress_port = var.lb_config.ingress.green_port
+    "${local.blue_state}" = {
+      name     = "${local.lb_name_prefix}-${local.blue_state}"
+      internal = !var.lb_config.is_public
+      ingress = {
+        cidrs        = !var.lb_config.is_public ? var.lb_config.internal_ingress_cidrs : ["0.0.0.0/0"]
+        prefix_lists = !var.lb_config.is_public ? var.lb_config.internal_prefix_lists : []
+      }
     }
   }
 
@@ -48,8 +61,14 @@ locals {
   odd_remote_desired_capacity  = tonumber(data.external.current_asg.result["odd_desired_capacity"])
   even_remote_desired_capacity = tonumber(data.external.current_asg.result["even_desired_capacity"])
 
+  odd_remote_min_size  = tonumber(data.external.current_asg.result["odd_min_size"])
+  even_remote_min_size = tonumber(data.external.current_asg.result["even_min_size"])
+
   odd_remote_warmpool_min_size  = tonumber(data.external.current_asg.result["odd_warmpool_min_size"])
   even_remote_warmpool_min_size = tonumber(data.external.current_asg.result["even_warmpool_min_size"])
+
+  odd_remote_target_groups_csv  = data.external.current_asg.result["odd_target_groups_csv"]
+  even_remote_target_groups_csv = data.external.current_asg.result["even_target_groups_csv"]
 
   #ODD scales OUT when launchtemplate is ODD and ODD ASG has 0 desired capacity
   odd_needs_scale_out = alltrue([
@@ -177,10 +196,10 @@ resource "aws_security_group" "app" {
   ingress {
     from_port       = var.lb_config.server_listen_port
     to_port         = var.lb_config.server_listen_port
-    protocol        = "TCP"
-    security_groups = concat([aws_security_group.lb.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
+    protocol        = local.lb_protocol
+    security_groups = concat([for _, v in aws_security_group.lb : v.id], var.legacy_sg_id != null ? [var.legacy_sg_id] : [])
     # TODO: Replace above "security_groups" definition with below commented code in BFD-3878
-    # security_groups = [aws_security_group.lb.id]server_listen_port
+    # security_groups = [for _, v in aws_security_group.lb : v.id]
     # TODO: Replace above "security_groups" definition with above commented code in BFD-3878
   }
 }
@@ -191,7 +210,7 @@ resource "aws_security_group_rule" "allow_db_access" {
   type        = "ingress"
   from_port   = 5432
   to_port     = 5432
-  protocol    = "tcp"
+  protocol    = local.lb_protocol
   description = "Allows access to the ${var.db_config.role} db"
 
   security_group_id        = each.value                # The SG associated with each replica
@@ -288,7 +307,8 @@ EOF
   }
 
   # TODO: Remove below code in BFD-3878
-  load_balancers = var.legacy_clb_name != null ? [var.legacy_clb_name] : null
+  # Only attach to the CLB if the ASG has been promoted to blue. This effectively gives us Blue/Green with our CLB, as well.
+  load_balancers = var.legacy_clb_name != null && each.value.deployment_status == local.blue_state ? [var.legacy_clb_name] : []
   # TODO: Remove above code in BFD-3878
 
   name                      = each.value.name
@@ -497,6 +517,7 @@ resource "null_resource" "set_target_groups" {
 
   triggers = {
     target_group_name = each.value.deployment_status
+    target_groups     = each.value.remote_target_groups_csv # Here so that this resource runs again if the TGs change. Handles out-of-band changes
   }
 
   provisioner "local-exec" {
@@ -559,11 +580,13 @@ EOF
 
 ### Load Balancer Components ###
 resource "aws_lb" "main" {
-  name                             = local.lb_name
-  internal                         = !var.lb_config.is_public
+  for_each = local.lbs
+
+  name                             = each.value.name
+  internal                         = each.value.internal
   load_balancer_type               = "network"
-  security_groups                  = [aws_security_group.lb.id]
-  subnets                          = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
+  security_groups                  = [aws_security_group.lb[each.key].id]
+  subnets                          = data.aws_subnet.dmz_subnets[*].id # Gives AZs and VPC association
   enable_deletion_protection       = var.lb_config.enable_deletion_protection
   idle_timeout                     = 60
   ip_address_type                  = "ipv4"
@@ -575,11 +598,11 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_lb_listener" "main" {
-  for_each = local.lb_targets
+  for_each = local.lbs
 
-  load_balancer_arn = aws_lb.main.arn
-  port              = each.value.ingress_port
-  protocol          = "TCP"
+  load_balancer_arn = aws_lb.main[each.key].arn
+  port              = local.lb_ingress_port
+  protocol          = local.lb_protocol
 
   default_action {
     type             = "forward"
@@ -587,57 +610,69 @@ resource "aws_lb_listener" "main" {
   }
 }
 
+resource "aws_route53_record" "nlb_alias" {
+  for_each = local.lbs
+
+  # The subdomain should be <env>.fhir.<...> for the blue environment and <env>.fhir-green.<...> for
+  # the green
+  name    = "${local.env}.${var.role}${each.key == local.green_state ? "-${local.green_state}" : ""}.${data.aws_route53_zone.root.name}"
+  type    = "A"
+  zone_id = data.aws_route53_zone.root.zone_id
+
+  alias {
+    name                   = aws_lb.main[each.key].dns_name
+    zone_id                = aws_lb.main[each.key].zone_id
+    evaluate_target_health = true
+  }
+}
+
 # security group
 resource "aws_security_group" "lb" {
+  for_each = local.lbs
   lifecycle {
     create_before_destroy = true
   }
 
-  name        = "${local.lb_name}-sg"
-  description = "Allow access to the ${var.role} load-balancer"
+  name        = "${each.value.name}-sg"
+  description = "Allow ${each.value.internal ? "internal" : "public"} ingress to the ${each.value.name} NLB; egress to ${local.env} VPC"
   vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "${local.lb_name}-sg" }, local.additional_tags)
+  tags        = merge({ Name = "${each.value.name}-sg" }, local.additional_tags)
 
-  # Dynamic, per-listener CIDR Block ingress rules
-  dynamic "ingress" {
-    for_each = local.lb_targets
-    content {
-      from_port   = ingress.value.ingress_port
-      to_port     = ingress.value.ingress_port
-      protocol    = "TCP"
-      cidr_blocks = var.lb_config.ingress.cidr_blocks
-    }
+  ingress {
+    from_port   = local.lb_ingress_port
+    to_port     = local.lb_ingress_port
+    protocol    = local.lb_protocol
+    cidr_blocks = each.value.ingress.cidrs
   }
 
-  # Dynamic, per-listener prefix list ingress rules if prefix list IDs are specified
+  # Dynamically create ingress rule for Prefix Lists iff they are specified
   dynamic "ingress" {
-    for_each = length(var.lb_config.ingress.prefix_list_ids) > 0 ? local.lb_targets : {}
+    for_each = length(each.value.ingress.prefix_lists) > 0 ? [1] : []
     content {
-      from_port       = ingress.value.ingress_port
-      to_port         = ingress.value.ingress_port
-      protocol        = "TCP"
-      prefix_list_ids = var.lb_config.ingress.prefix_list_ids
+      from_port       = local.lb_ingress_port
+      to_port         = local.lb_ingress_port
+      protocol        = local.lb_protocol
+      prefix_list_ids = each.value.ingress.prefix_lists
     }
   }
 
   egress {
     from_port   = var.lb_config.server_listen_port
     to_port     = var.lb_config.server_listen_port
-    protocol    = "TCP"
-    cidr_blocks = var.lb_config.egress.cidr_blocks
+    protocol    = local.lb_protocol
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
 
 resource "aws_lb_target_group" "main" {
+  for_each = local.lbs
   lifecycle {
     create_before_destroy = true
   }
 
-  for_each = local.lb_targets
-
-  name                   = "${aws_lb.main.name}-tg-${each.key}"
+  name                   = "${aws_lb.main[each.key].name}-tg"
   port                   = var.lb_config.server_listen_port
-  protocol               = "TCP"
+  protocol               = local.lb_protocol
   vpc_id                 = var.env_config.vpc_id
   deregistration_delay   = 60
   connection_termination = true
@@ -647,6 +682,6 @@ resource "aws_lb_target_group" "main" {
     timeout             = 8
     unhealthy_threshold = 2
     port                = var.lb_config.server_listen_port
-    protocol            = "TCP"
+    protocol            = local.lb_protocol
   }
 }

@@ -305,17 +305,7 @@ try {
 					milestone(label: 'stage_deploy_test_start')
 
 					container('bfd-cbc-build') {
-						// Initial `server` terraservice deployment (scale-out)
-						awsAuth.assumeRole()
-						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/server",
-							tfVars: [
-								ami_id_override: amiIds.bfdServerAmiId
-							]
-						)
-
-						// Secondary `server` terraservice deployment (scale-in)
+						// Initial `server` terraservice deployment (scale-out scale-out new green)
 						awsAuth.assumeRole()
 						terraform.deployTerraservice(
 							env: bfdEnv,
@@ -334,13 +324,6 @@ try {
 							]
 						)
 
-						// Deploy the API requests Insights Lambda
-						awsAuth.assumeRole()
-						terraform.deployTerraservice(
-							env: bfdEnv,
-							directory: "ops/terraform/services/server/insights/api-requests"
-						)
-
 						awsAuth.assumeRole()
 						hasRegressionRunSucceeded = serverScripts.runServerRegression(
 							bfdEnv: bfdEnv,
@@ -349,15 +332,32 @@ try {
 						)
 
 						if (hasRegressionRunSucceeded) {
-							println 'Regression suite passed, proceeding to next stage...'
+							println 'Regression suite passed, proceeding...'
 						} else {
 							try {
 								input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
-								echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+								echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding..."
 							} catch(err) {
 								error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
 							}
 						}
+
+						// Secondary `server` terraservice deployment (scale-in old-blue, accept new green-to-blue)
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server",
+							tfVars: [
+								ami_id_override: amiIds.bfdServerAmiId
+							]
+						)
+
+						// Deploy the API requests Insights Lambda
+						awsAuth.assumeRole()
+						terraform.deployTerraservice(
+							env: bfdEnv,
+							directory: "ops/terraform/services/server/insights/api-requests"
+						)
 					}
 				}
 			}
@@ -482,17 +482,7 @@ try {
 					lock(resource: 'env_prod_sbx') {
 						milestone(label: 'stage_deploy_prod_sbx_start')
 						container('bfd-cbc-build') {
-							// Initial `server` terraservice deployment (scale-out)
-							awsAuth.assumeRole()
-							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server",
-								tfVars: [
-									ami_id_override: amiIds.bfdServerAmiId
-								]
-							)
-
-							// Secondary `server` terraservice deployment (scale-in)
+							// Initial `server` terraservice deployment (scale-out scale-out new green)
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
@@ -511,13 +501,6 @@ try {
 								]
 							)
 
-							// Deploy the API requests Insights Lambda
-							awsAuth.assumeRole()
-							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server/insights/api-requests"
-							)
-
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
@@ -526,15 +509,32 @@ try {
 							)
 
 							if (hasRegressionRunSucceeded) {
-								println 'Regression suite passed, proceeding to next stage...'
+								println 'Regression suite passed, proceeding...'
 							} else {
 								try {
 									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
-									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding..."
 								} catch(err) {
 									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
 								}
 							}
+
+							// Secondary `server` terraservice deployment (scale-in old-blue, accept new green-to-blue)
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server",
+								tfVars: [
+									ami_id_override: amiIds.bfdServerAmiId
+								]
+							)
+
+							// Deploy the API requests Insights Lambda
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
+							)
 						}
 					}
 				} else {
@@ -657,17 +657,7 @@ try {
 						milestone(label: 'stage_deploy_prod_start')
 
 						container('bfd-cbc-build') {
-							// Initial `server` terraservice deployment (scale-out)
-							awsAuth.assumeRole()
-							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server",
-								tfVars: [
-									ami_id_override: amiIds.bfdServerAmiId
-								]
-							)
-
-							// Secondary `server` terraservice deployment (scale-in)
+							// Initial `server` terraservice deployment (scale-out scale-out new green)
 							awsAuth.assumeRole()
 							terraform.deployTerraservice(
 								env: bfdEnv,
@@ -686,13 +676,6 @@ try {
 								]
 							)
 
-							// Deploy the API requests Insights Lambda
-							awsAuth.assumeRole()
-							terraform.deployTerraservice(
-								env: bfdEnv,
-								directory: "ops/terraform/services/server/insights/api-requests"
-							)
-
 							awsAuth.assumeRole()
 							hasRegressionRunSucceeded = serverScripts.runServerRegression(
 								bfdEnv: bfdEnv,
@@ -701,15 +684,32 @@ try {
 							)
 
 							if (hasRegressionRunSucceeded) {
-								println 'Regression suite passed, proceeding to next stage...'
+								println 'Regression suite passed, proceeding...'
 							} else {
 								try {
 									input 'Regression suite failed, check the CloudWatch logs above for more details. Should deployment proceed?'
-									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding to next stage..."
+									echo "Regression suite failure in '${bfdEnv}' has been accepted by operator. Proceeding..."
 								} catch(err) {
 									error "Operator opted to fail deployment due to regression suite failure in '${bfdEnv}'"
 								}
 							}
+
+							// Secondary `server` terraservice deployment (scale-in old-blue, accept new green-to-blue)
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server",
+								tfVars: [
+									ami_id_override: amiIds.bfdServerAmiId
+								]
+							)
+
+							// Deploy the API requests Insights Lambda
+							awsAuth.assumeRole()
+							terraform.deployTerraservice(
+								env: bfdEnv,
+								directory: "ops/terraform/services/server/insights/api-requests"
+							)
 						}
 					}
 				} else {
