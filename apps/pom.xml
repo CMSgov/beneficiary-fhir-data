@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gov.cms.bfd</groupId>
@@ -56,7 +58,8 @@
     </modules>
 
     <properties>
-        <!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
+        <!-- As specified in
+        http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
             encoding. We're forcing that to UTF-8, because it's the only sane choice. -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -70,62 +73,67 @@
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/coverage-reports/jacoco-ut/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.coverage.jacoco.itReportPath>${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml</sonar.coverage.jacoco.itReportPath>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/coverage-reports/jacoco-ut/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.itReportPath>
+            ${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml
+        </sonar.coverage.jacoco.itReportPath>
         <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
         <sonar.issue.ignore.multicriteria.e1.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
-        <metrics.version>4.2.25</metrics.version>
+        <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
-        <dropwizard-metrics-newrelic.version>0.9.0</dropwizard-metrics-newrelic.version>
+        <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.25.70</aws-java-sdk-bom.version>
-        <aws.crt.version>0.29.25</aws.crt.version>
-        <spring-data-jpa.version>3.2.11</spring-data-jpa.version>
-        <spring-framework.version>6.1.14</spring-framework.version>
+        <aws-java-sdk-bom.version>2.30.26</aws-java-sdk-bom.version>
+        <aws.crt.version>0.35.0</aws.crt.version>
+        <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
+        <spring-data-jpa.version>3.4.3</spring-data-jpa.version>
+        <spring-framework.version>6.2.3</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
 
         <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
         but not all (in particular, entity-manager does not have a 6.0 version available yet).
         Staying on latest 5.x version until all components have 6.0 versions available. -->
         <hibernate.version>6.4.4.Final</hibernate.version>
-        <junit.version>5.10.1</junit.version>
-        <javadoc.version>3.6.3</javadoc.version>
+        <junit.version>5.12.0</junit.version>
+        <javadoc.version>3.11.2</javadoc.version>
         <testcontainers.version>1.19.3</testcontainers.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
-        <jackson-databind.version>2.16.0</jackson-databind.version>
-        <jackson-datatype-jdk8.version>2.16.0</jackson-datatype-jdk8.version>
-        <jackson-dataformat-yaml.version>2.16.0</jackson-dataformat-yaml.version>
-        <jackson-datatype-jsr310.version>2.16.0</jackson-datatype-jsr310.version>
-        <jackson-annotations.version>2.16.0</jackson-annotations.version>
+        <jackson-databind.version>2.18.2</jackson-databind.version>
+        <jackson-datatype-jdk8.version>2.18.2</jackson-datatype-jdk8.version>
+        <jackson-dataformat-yaml.version>2.18.2</jackson-dataformat-yaml.version>
+        <jackson-datatype-jsr310.version>2.18.2</jackson-datatype-jsr310.version>
+        <jackson-annotations.version>2.18.2</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
-        <snakeyaml.version>2.2</snakeyaml.version>
+        <snakeyaml.version>2.4</snakeyaml.version>
 
-        <jakarta.xml.bind.api.version>4.0.1</jakarta.xml.bind.api.version>
-        <org.glassfish.jaxb.runtime.version>4.0.4</org.glassfish.jaxb.runtime.version>
-        <jakarta.annotation.api.version>3.0.0-M1</jakarta.annotation.api.version>
+        <jakarta.xml.bind.api.version>4.0.2</jakarta.xml.bind.api.version>
+        <org.glassfish.jaxb.runtime.version>4.0.5</org.glassfish.jaxb.runtime.version>
+        <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
 
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
-        <mockito.version>5.11.0</mockito.version>
-        <byte-buddy.version>1.14.10</byte-buddy.version>
-        <rest-assured.version>5.4.0</rest-assured.version>
-        <assertj.version>3.24.2</assertj.version>
+        <mockito.version>5.15.2</mockito.version>
+        <byte-buddy.version>1.17.1</byte-buddy.version>
+        <rest-assured.version>5.5.1</rest-assured.version>
+        <assertj.version>3.27.3</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
-        <postgresql.version>42.7.3</postgresql.version>
-        <slf4j.version>2.0.9</slf4j.version>
-        <log4j.version>2.22.0</log4j.version>
-        <hikari.version>5.1.0</hikari.version>
-        <flyway.version>10.2.0</flyway.version>
-        <newrelic.agent.version>8.7.0</newrelic.agent.version>
-        <checkstyle.version>10.12.6</checkstyle.version>
+        <postgresql.version>42.7.5</postgresql.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <log4j.version>2.24.3</log4j.version>
+        <hikari.version>6.2.1</hikari.version>
+        <flyway.version>11.3.3</flyway.version>
+        <newrelic.agent.version>8.18.0</newrelic.agent.version>
+        <checkstyle.version>10.21.3</checkstyle.version>
         <guava.version>32.1.2-jre</guava.version>
-        <logback.classic.version>1.4.14</logback.classic.version>
+        <logback.classic.version>1.5.16</logback.classic.version>
         <zjsonpatch.version>0.4.16</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
         <reflections.version>0.10.2</reflections.version>
@@ -143,18 +151,18 @@
         <hapi-fhir.version>7.6.0</hapi-fhir.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
-        <org.apache.poi.version>5.3.0</org.apache.poi.version>
+        <org.apache.poi.version>5.4.0</org.apache.poi.version>
 
         <!--  Dependencies required for org.apache.commons -->
-        <commons.lang3.version>3.14.0</commons.lang3.version>
-        <commons.csv.version>1.10.0</commons.csv.version>
-        <commons.io.version>2.15.1</commons.io.version>
+        <commons.lang3.version>3.17.0</commons.lang3.version>
+        <commons.csv.version>1.13.0</commons.csv.version>
+        <commons.io.version>2.18.0</commons.io.version>
         <commons.collections4.version>4.4</commons.collections4.version>
-        <commons-codec.version>1.16.0</commons-codec.version>
-        <commons-text.version>1.10.0</commons-text.version>
+        <commons-codec.version>1.18.0</commons-codec.version>
+        <commons-text.version>1.13.0</commons-text.version>
         <hamcrest-library.version>2.2</hamcrest-library.version>
-        <awaitility.version>4.2.0</awaitility.version>
-        <lombok.version>1.18.30</lombok.version>
+        <awaitility.version>4.3.0</awaitility.version>
+        <lombok.version>1.18.36</lombok.version>
         <jaxb.java.time.adapters.version>1.1.3</jaxb.java.time.adapters.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <commons-cli.version>1.6.0</commons-cli.version>
@@ -163,11 +171,11 @@
         <jpa.version>1.0.2.Final</jpa.version>
 
         <!-- Dependencies required for connecting to a gRPC API -->
-        <grpc_java.version>1.60.0</grpc_java.version>
+        <grpc_java.version>1.70.0</grpc_java.version>
         <protoc.version>3.25.1</protoc.version>
-        <protobuf.version>3.25.5</protobuf.version>
-        <jacoco.version>0.8.11</jacoco.version>
-        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <protobuf.version>4.29.3</protobuf.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <!-- The default DB that will be used in integration tests. -->
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
@@ -175,10 +183,12 @@
         <its.db.username />
         <its.db.password />
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
-        <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed when changing this property. -->
+        <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
+        when changing this property. -->
         <its.testcontainer.db.image>postgres:16.4-alpine</its.testcontainer.db.image>
         <!-- Docker image used with testcontainers to simulate AWS services for testing. -->
-        <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be changed when changing this property. -->
+        <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be
+        changed when changing this property. -->
         <its.testcontainer.aws.image>localstack/localstack:3.0.2</its.testcontainer.aws.image>
 
         <!-- Whether the old MBI hash query feature should be enabled -->
@@ -188,14 +198,14 @@
         <local.pac.claimSourceTypes>fiss,mcs</local.pac.claimSourceTypes>
 
         <!-- Functional-reactive programming api for concurrent claim ingestion. -->
-        <reactor.version>3.6.1</reactor.version>
+        <reactor.version>3.7.3</reactor.version>
 
         <!-- Default number of threads that we can overridden as needed in module poms. -->
         <compile.thread.count>4</compile.thread.count>
         <tests.thread.count>4</tests.thread.count>
         <!-- The jib maven plugin produces optimized docker images from maven projects. -->
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
-        <jib.version>3.4.0</jib.version>
+        <jib.version>3.4.4</jib.version>
         <!-- The base image (FROM) used to build images with jib. -->
         <jib.from>amazoncorretto:21.0.1-alpine</jib.from>
         <!--
@@ -220,29 +230,29 @@
         <!-- maven plugin versions -->
         <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
         <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
-        <maven.clean.plugin.version>3.3.2</maven.clean.plugin.version>
-        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+        <maven.clean.plugin.version>3.4.1</maven.clean.plugin.version>
+        <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
         <maven.dependency.plugin.version>3.6.1</maven.dependency.plugin.version>
-        <maven.enforcer.plugin.version>3.4.1</maven.enforcer.plugin.version>
-        <maven.failsafe.plugin.version>3.2.3</maven.failsafe.plugin.version>
+        <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
+        <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-        <maven.release.plugin.version>3.0.1</maven.release.plugin.version>
-        <maven.surefire.plugin.version>3.2.3</maven.surefire.plugin.version>
-        <maven.toolchains.plugin.version>3.1.0</maven.toolchains.plugin.version>
+        <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
+        <maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
+        <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
         <maven-core.version>3.9.6</maven-core.version>
-        <maven.jacoco.plugin.version>0.8.11</maven.jacoco.plugin.version>
+        <maven.jacoco.plugin.version>0.8.12</maven.jacoco.plugin.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
         <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
         <maven.plugin.version>3.10.2</maven.plugin.version>
-        <build.helper.maven.plugin.version>3.5.0</build.helper.maven.plugin.version>
-        <checkstyle.plugin.version>3.3.1</checkstyle.plugin.version>
+        <build.helper.maven.plugin.version>3.6.0</build.helper.maven.plugin.version>
+        <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <exec.maven.plugin.version>3.1.1</exec.maven.plugin.version>
-        <fmt.maven.plugin.version>2.21.1</fmt.maven.plugin.version>
+        <fmt.maven.plugin.version>2.25</fmt.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
-        <versions.maven.plugin.version>2.16.2</versions.maven.plugin.version>
-        <antlr4.version>4.10.1</antlr4.version>
+        <versions.maven.plugin.version>2.18.0</versions.maven.plugin.version>
+        <antlr4.version>4.13.2</antlr4.version>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-        <jakarta.persistence-api.version>3.1.0</jakarta.persistence-api.version>
+        <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <hibernate-commons-annotations.version>6.0.6.Final</hibernate-commons-annotations.version>
     </properties>
 
