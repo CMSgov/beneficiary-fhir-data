@@ -302,7 +302,8 @@ EOF
   }
 
   # TODO: Remove below code in BFD-3878
-  load_balancers = var.legacy_clb_name != null ? [var.legacy_clb_name] : null
+  # Only attach to the CLB if the ASG has been promoted to blue. This effectively gives us Blue/Green with our CLB, as well.
+  load_balancers = var.legacy_clb_name != null && each.value.deployment_status == local.blue_state ? [var.legacy_clb_name] : []
   # TODO: Remove above code in BFD-3878
 
   name                      = each.value.name
