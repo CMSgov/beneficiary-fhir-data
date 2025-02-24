@@ -1,11 +1,26 @@
-# subnets
+data "aws_vpc" "main" {
+  id = var.env_config.vpc_id
+}
+
 data "aws_subnet" "app_subnets" {
   count             = length(var.env_config.azs)
   vpc_id            = var.env_config.vpc_id
   availability_zone = var.env_config.azs[count.index]
   filter {
     name   = "tag:Layer"
-    values = [var.layer]
+    values = ["app"]
+  }
+}
+
+# NLBs must exist in the dmz subnets. This is especially important for prod-sbx as those subnets
+# have an IGW in their routing tables
+data "aws_subnet" "dmz_subnets" {
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[count.index]
+  filter {
+    name   = "tag:Layer"
+    values = ["dmz"]
   }
 }
 
@@ -38,4 +53,22 @@ data "external" "current_lt_version" {
     "${path.module}/scripts/launch-template-data.sh", # helper script
     local.env
   ]
+}
+
+data "aws_ssm_parameter" "zone_name" {
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "zone_is_private" {
+  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_is_private"
+  with_decryption = true
+}
+
+data "aws_route53_zone" "root" {
+  name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
+  private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
+  tags = {
+    "ConfigId" = "root"
+  }
 }

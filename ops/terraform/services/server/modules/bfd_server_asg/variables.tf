@@ -38,16 +38,9 @@ variable "lb_config" {
   type = object({
     is_public                  = bool
     enable_deletion_protection = bool
-    ingress = object({
-      green_port      = number
-      blue_port       = number
-      cidr_blocks     = list(string)
-      prefix_list_ids = list(string)
-    })
-    egress = object({
-      cidr_blocks = list(string)
-    })
-    server_listen_port = string
+    server_listen_port         = string
+    internal_ingress_cidrs     = list(string)
+    internal_prefix_lists      = list(string)
   })
   default = null
 }
