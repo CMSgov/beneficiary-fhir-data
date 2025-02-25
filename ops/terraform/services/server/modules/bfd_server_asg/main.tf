@@ -520,6 +520,7 @@ resource "null_resource" "set_load_balancer" {
   }
 
   provisioner "local-exec" {
+    quiet = true # Suppress unnecessary command echo; output is still logged
     environment = {
       asg_name = aws_autoscaling_group.main[each.key].name
       # Only attach to the CLB if the ASG is Blue, otherwise don't attach to any CLB (rather, detach from _all_ CLBs)
@@ -558,6 +559,7 @@ resource "null_resource" "set_target_groups" {
   }
 
   provisioner "local-exec" {
+    quiet = true # Suppress unnecessary command echo; output is still logged
     environment = {
       asg_name          = aws_autoscaling_group.main[each.key].name
       target_group_arn  = aws_lb_target_group.main[self.triggers.target_group_name].arn
@@ -594,6 +596,7 @@ resource "null_resource" "manage_warm_pool" {
   }
 
   provisioner "local-exec" {
+    quiet = true # Suppress unnecessary command echo; output is still logged
     environment = {
       warmpool_size = self.triggers.warmpool_size
       asg_name      = aws_autoscaling_group.main[each.key].name
