@@ -532,17 +532,17 @@ attached_other_clbs="$(
     jq -r --arg clb_name "$desired_clb_name" \
       '.LoadBalancers | map(select(.State != "Removing" and .LoadBalancerName != $clb_name) | .LoadBalancerName) | join(",")'
 )"
-if [[ -n "$attached_other_clbs" ]]; then
-  aws autoscaling detach-load-balancers \
-    --auto-scaling-group-name "$asg_name" \
-    --load-balancer-names "$attached_other_clbs"
-  echo "Detached $asg_name from all non-$desired_clb_name Load Balancers"
-fi
 if [[ "$desired_clb_name" != "none" ]]; then
   aws autoscaling attach-load-balancers \
     --auto-scaling-group-name "$asg_name" \
     --load-balancer-names "$desired_clb_name" &&
     echo "Attached $asg_name to $desired_clb_name Load Balancer"
+fi
+if [[ -n "$attached_other_clbs" ]]; then
+  aws autoscaling detach-load-balancers \
+    --auto-scaling-group-name "$asg_name" \
+    --load-balancer-names "$attached_other_clbs"
+  echo "Detached $asg_name from all non-$desired_clb_name Load Balancers"
 fi
 EOF
   }
@@ -570,16 +570,16 @@ attached_other_tgs="$(
     jq -r --arg target_group_arn "$target_group_arn" \
       '.AutoScalingGroups[0].TargetGroupARNs | map(select(. != $target_group_arn)) | join(",")'
 )"
+aws autoscaling attach-load-balancer-target-groups \
+  --auto-scaling-group-name "$asg_name" \
+  --target-group-arns "$target_group_arn" &&
+  echo "Attached $asg_name to $target_group_name Target Group"
 if [[ -n "$attached_other_tgs" ]]; then
   aws autoscaling detach-load-balancer-target-groups \
     --auto-scaling-group-name "$asg_name" \
     --target-group-arns "$attached_other_tgs"
   echo "Detached $asg_name from all non-$target_group_name Target Groups"
 fi
-aws autoscaling attach-load-balancer-target-groups \
-  --auto-scaling-group-name "$asg_name" \
-  --target-group-arns "$target_group_arn" &&
-  echo "Attached $asg_name to $target_group_name Target Group"
 EOF
   }
 }
