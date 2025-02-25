@@ -1,4 +1,4 @@
-name: "CI - Update OPS Infrastructure"
+name: "CD - Update MGMT Infrastructure"
 on:
   push:
     branches:
@@ -16,7 +16,7 @@ defaults:
   run:
     shell: bash
 env:
-  DEFAULT_LOG_GROUP: "/bfd/mgmt/gha/ci-ops-infra"
+  DEFAULT_LOG_GROUP: "/bfd/mgmt/gha/cd-terraform-mgmt-deploy"
   DEFAULT_LOG_STREAM: "deploy-terraservice_${{ github.run_number }}"
 
 jobs:

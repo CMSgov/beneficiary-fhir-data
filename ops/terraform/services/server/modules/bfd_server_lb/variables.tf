@@ -13,10 +13,6 @@ variable "layer" {
   type        = string
 }
 
-variable "log_bucket" {
-  type = string
-}
-
 variable "is_public" {
   description = "If true, the LB is created as a public LB"
   type        = bool

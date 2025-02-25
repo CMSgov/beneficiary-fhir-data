@@ -15,6 +15,16 @@ terraform apply
 
 **NOTE** the above double-invocation of terraform is correct. Two executions of `terraform apply` are necessary to achieve the desired state as of BFD-2558.
 
+## Blue/Green Workflow
+
+This Terraservice implements the logic and resources necessary to support a Blue/Green Deployment strategy for the BFD Server.
+
+Blue (`blue`) refers to the "active" or _production_ infrastructure that serves traffic to our consumers. Resources in `blue` are considered to "known-good" resources. Green (`green`) refers to _incoming_, new infrastructure for a _new_ version of the BFD Server that needs to be verified as good before it being promoted to `blue` and made available to serve traffic to our consumers.
+
+This Terraservice achieves a Blue/Green Deployment strategy by utilizing two AutoScaling Groups, two Target Groups, two Load Balancer Listeners, and two Network Load Balancers. Each NLB routes to its respective `green`/`blue` Listener which routes to the respective `green`/`blue` Target Group. If an environment is "public" (internet-facing) only the `blue` NLB will be internet-facing, whereas the `green` will remain internal. This way, external consumers will only be able to reach `blue` BFD Server Instances, while our automation can reach the `green` Instances to verify them.
+
+The Terraservice logic decides which AutoScaling Group is associated with the `blue`/`green` Target Group by looking at the oddness/evenness of the _latest_ Launch Template version number _iff_ the Launch Template is changing upon the `terraform apply`. Correspondingly, the ASGs are suffixed with `-odd` and `-even`. Given latest Launch Template version number, if it is _odd_ the ASG suffixed as `-odd` will be chosen as `green` whereas if it is _even_ `-even` will be chosen as `green`. In this scenario, we expect no changes to the existing `blue` ASG nor its Target Group so that it continues to serve traffic uninterrupted.
+
 <!-- BEGIN_TF_DOCS -->
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
@@ -61,13 +71,13 @@ terraform apply
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_ec2_managed_prefix_list.jenkins](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
 | [aws_ec2_managed_prefix_list.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ec2_managed_prefix_list) | data source |
-| [aws_s3_bucket.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
 | [aws_security_group.remote](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_groups.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_groups) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_ssm_parameters_by_path.sensitive_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 | [aws_vpc.mgmt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 | [aws_vpc_peering_connection.peers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc_peering_connection) | data source |
