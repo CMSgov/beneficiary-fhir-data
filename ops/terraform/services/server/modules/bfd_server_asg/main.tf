@@ -278,12 +278,13 @@ resource "aws_launch_template" "main" {
   }
 }
 
-# These AutoScaling Groups require 2 external "null_resourece" resources to manage their Target
-# Group ARNs and their Warm Pool due to defective behavior in the AWS provider. Specifically,
-# attempting to modify Target Group ARNs dynamically (to do blue/green) results in an error during
-# apply with a message indicating a bug in the provider. Additionally, attempting to manage the Warm
-# Pool via Terraform results in an erreneous 3 minute delay upon destruction of the Warm Pool, even
-# with "force_delete_warm_pool" enabled, which is unnaceptable
+# These AutoScaling Groups require 3 external "null_resourece" resources to manage their Target
+# Group ARNs, Load Balancer attachment, and their Warm Pool due to defective behavior in the AWS
+# provider. Specifically, attempting to modify Target Group ARNs or Load Balancer attachment
+# dynamically (to do blue/green) results in an error during apply with a message indicating a bug in
+# the provider. Additionally, attempting to manage the Warm Pool via Terraform results in an
+# erreneous 3 minute delay upon destruction of the Warm Pool, even with "force_delete_warm_pool"
+# enabled, which is unnaceptable
 resource "aws_autoscaling_group" "main" {
   # Deployments of this ASG require two executions of `terraform apply`.
   for_each = local.asgs
@@ -299,17 +300,14 @@ EOF
     }
 
     # For "target_group_arns" look at "null_resource.set_target_groups" as Terraform's AWS Provider
-    # has a bug in it when changing target group ARNs in the terraform. For "warm_pool" look at
-    # "null_resource.manage_warm_pool" as Terraform's AWS Provider does not respect
-    # "force_delete_warm_pool" which would result in non-zero downtime deployments as scaling-in the
-    # previous "blue" blocks incoming "blue" from being attached to the "blue" Target Group
-    ignore_changes = [target_group_arns, warm_pool]
+    # has a bug in it when changing target group ARNs in the terraform. For "load_balancers" look at
+    # "null_resource.set_load_balancer" for the same reason as the "target_group_arns". For
+    # "warm_pool" look at "null_resource.manage_warm_pool" as Terraform's AWS Provider does not
+    # respect "force_delete_warm_pool" which would result in non-zero downtime deployments as
+    # scaling-in the previous "blue" blocks incoming "blue" from being attached to the "blue" Target
+    # Group.
+    ignore_changes = [target_group_arns, load_balancers, warm_pool]
   }
-
-  # TODO: Remove below code in BFD-3878
-  # Only attach to the CLB if the ASG has been promoted to blue. This effectively gives us Blue/Green with our CLB, as well.
-  load_balancers = var.legacy_clb_name != null && each.value.deployment_status == local.blue_state ? [var.legacy_clb_name] : []
-  # TODO: Remove above code in BFD-3878
 
   name                      = each.value.name
   desired_capacity          = each.value.desired_capacity
@@ -511,6 +509,45 @@ resource "aws_autoscaling_policy" "avg_cpu_high" {
     }
   }
 }
+
+# TODO: Remove below code in BFD-3878
+resource "null_resource" "set_load_balancer" {
+  # Only run this null_resource in established environments with a legacy CLB
+  for_each = { for k, v in local.asgs : k => v if var.legacy_clb_name != null }
+
+  triggers = {
+    always_run = timestamp() # Just always run this null_resource to set the CLB
+  }
+
+  provisioner "local-exec" {
+    environment = {
+      asg_name = aws_autoscaling_group.main[each.key].name
+      # Only attach to the CLB if the ASG is Blue, otherwise don't attach to any CLB (rather, detach from _all_ CLBs)
+      desired_clb_name = each.value.deployment_status == local.blue_state ? var.legacy_clb_name : "none"
+    }
+
+    command = <<-EOF
+attached_other_clbs="$(
+  aws autoscaling describe-load-balancers --auto-scaling-group-name "$asg_name" |
+    jq -r --arg clb_name "$desired_clb_name" \
+      '.LoadBalancers | map(select(.State != "Removing" and .LoadBalancerName != $clb_name) | .LoadBalancerName) | join(",")'
+)"
+if [[ -n "$attached_other_clbs" ]]; then
+  aws autoscaling detach-load-balancers \
+    --auto-scaling-group-name "$asg_name" \
+    --load-balancer-names "$attached_other_clbs"
+  echo "Detached $asg_name from all non-$desired_clb_name Load Balancers"
+fi
+if [[ "$desired_clb_name" != "none" ]]; then
+  aws autoscaling attach-load-balancers \
+    --auto-scaling-group-name "$asg_name" \
+    --load-balancer-names "$desired_clb_name" &&
+    echo "Attached $asg_name to $desired_clb_name Load Balancer"
+fi
+EOF
+  }
+}
+# TODO: Remove above code in BFD-3878
 
 resource "null_resource" "set_target_groups" {
   for_each = local.asgs
