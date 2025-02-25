@@ -33,6 +33,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import jakarta.annotation.Nonnull;
@@ -289,6 +290,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private T transformEntity(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
 
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claimEntity = claimWithSecurityTagsV2.getClaimEntity();
+    }
+
     if (claimIdType.getTypeLabel().equals("fiss")) {
       return fissTransformer.transform(claimEntity, includeTaxNumbers);
     } else if (claimIdType.getTypeLabel().equals("mcs")) {
@@ -313,6 +318,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claimEntity = claimWithSecurityTagsV2.getClaimEntity();
+    }
+
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
       case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
@@ -477,20 +487,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             createBundleFor(
                 getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
-
-      // This is evaluating the new Samhsa2.0 data scrubbing compared to the old one
-      // a difference will be logged as error
-      IBaseResource resourceCopy = bundleResource.copy();
-      Bundle v2SamhsaScrubbedResource =
-          (Bundle) v2SamhsaConsentSimulation.simulateScrubbing(requestDetails, resourceCopy);
-      long scrubbedResourceCount =
-          v2SamhsaScrubbedResource.getEntry().stream()
-              .filter(entry -> entry.getResource() != null) // Filter out entries with null resource
-              .count();
-      if (scrubbedResourceCount != bundleResource.getEntry().size()) {
-        v2SamhsaConsentSimulation.logMissingClaimIds(v2SamhsaScrubbedResource, bundleResource);
-      }
-
       return bundleResource;
     } else {
       throw new InvalidRequestException("Missing required field mbi");
@@ -524,7 +520,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             .flatMap(
                 type ->
                     claimDao
-                        .findAllByMbiAttribute(
+                        .findAllByMbiAttributeWithSecurityTags(
                             type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate)
                         .stream()
                         .map(e -> new ImmutablePair<>(e, type)))
@@ -546,7 +542,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         entitiesWithType.stream()
             .filter(
                 pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
-            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
+            .map(
+                pair -> {
+                  // Log missing claim for samhsa V2 Shadow check
+                  v2SamhsaConsentSimulation.logMissingClaim(
+                      pair.left, samhsaMatcher.hasNoSamhsaData(pair.left));
+
+                  return transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers);
+                })
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());

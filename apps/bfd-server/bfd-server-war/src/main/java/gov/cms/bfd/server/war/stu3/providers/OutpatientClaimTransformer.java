@@ -11,11 +11,11 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
-import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -76,15 +76,16 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    List<Coding> securityTags = new ArrayList<>();
     if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevelDstu3(
+      //              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
       eob = transformClaim(outpatientClaim, securityTags);
     }
     return eob;

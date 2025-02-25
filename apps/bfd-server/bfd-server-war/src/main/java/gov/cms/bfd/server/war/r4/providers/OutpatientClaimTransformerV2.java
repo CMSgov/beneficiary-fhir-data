@@ -12,7 +12,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
-import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -22,7 +21,9 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -81,14 +82,24 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
   /**
    * Transforms a {@link OutpatientClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+    }
+
     if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
@@ -96,9 +107,9 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
 
       OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(
-              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevel(
+      //              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
       eob = transformClaim(outpatientClaim, securityTags);
     }
     return eob;

@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissPayer;
 import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
-import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -20,6 +19,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -96,14 +96,24 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    */
   @Trace
   public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
-    if (!(claimEntity instanceof RdaFissClaim)) {
+
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+    }
+    if (!(claim instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      RdaFissClaim rdaFissClaim = (RdaFissClaim) claimEntity;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
+      RdaFissClaim rdaFissClaim = (RdaFissClaim) claim;
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevel(rdaFissClaim.getClaimId(),
+      // FissTag.class);
       return transformClaim(rdaFissClaim, includeTaxNumbers, securityTags);
     }
   }

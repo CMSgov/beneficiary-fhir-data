@@ -9,13 +9,13 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
-import gov.cms.bfd.model.rif.samhsa.DmeTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -75,15 +75,16 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    List<Coding> securityTags = new ArrayList<>();
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       DMEClaim dmeClaim = (DMEClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevelDstu3(
+      //              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
       eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
     }
     return eob;

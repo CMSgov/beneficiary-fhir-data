@@ -11,13 +11,13 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
-import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,15 +77,16 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    List<Coding> securityTags = new ArrayList<>();
     if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       SNFClaim snfClaim = (SNFClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(snfClaim.getClaimId()), SnfTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevelDstu3(
+      //              String.valueOf(snfClaim.getClaimId()), SnfTag.class);
       eob = transformClaim(snfClaim, securityTags);
     }
     return eob;

@@ -11,11 +11,11 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.model.rif.samhsa.HhaTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -75,15 +75,16 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    List<Coding> securityTags = new ArrayList<>();
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HHAClaim hhaClaim = (HHAClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevelDstu3(
+      //              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
       eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

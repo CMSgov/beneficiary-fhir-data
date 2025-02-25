@@ -12,7 +12,6 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -89,11 +88,10 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       CarrierClaim carrierClaim = (CarrierClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(carrierClaim.getClaimId()), CarrierTag.class);
+      List<Coding> securityTags = securityTagManager.getClaimSecurityLevelDstu3(claim);
       eob = transformClaim(carrierClaim, includeTaxNumber, securityTags);
     }
+
     return eob;
   }
 
