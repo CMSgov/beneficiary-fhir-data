@@ -27,7 +27,19 @@ CREATE TABLE idr.beneficiary(
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL);
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE idr.beneficiary_history(
+    bene_sk BIGINT NOT NULL,
+    bene_xref_efctv_sk BIGINT NOT NULL,
+    bene_mbi_id VARCHAR(11),
+    idr_trans_efctv_ts TIMESTAMPTZ,
+    idr_trans_obslt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
+);
     
 CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,

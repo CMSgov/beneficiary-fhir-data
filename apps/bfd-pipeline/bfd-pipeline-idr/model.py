@@ -27,6 +27,14 @@ class IdrBeneficiary(BaseModel):
     idr_trans_obslt_ts: datetime
 
 
+class IdrBeneficiaryHistory(BaseModel):
+    bene_sk: int
+    bene_xref_efctv_sk: int
+    bene_mbi_id: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+
+
 class LoadProgress(BaseModel):
     table_name: str
     last_id: str

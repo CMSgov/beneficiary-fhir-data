@@ -6,6 +6,8 @@ from psycopg.rows import class_row
 from pydantic import BaseModel
 import snowflake.connector
 
+from model import LoadProgress
+
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -69,3 +71,40 @@ class SnowflakeExtractor(Extractor):
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
         finally:
             cur.close()
+
+
+def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
+    return PostgresExtractor(connection_string, batch_size=1).extract_single(
+        LoadProgress,
+        "SELECT table_name, last_id, last_timestamp FROM idr.load_progress WHERE table_name = %(table_name)s",
+        {"table_name": table_name},
+    )
+
+
+def fetch_bene_data(
+    extractor: Extractor,
+    cls: type[T],
+    connection_string: str,
+    table: str,
+    fetch_query: str,
+) -> Iterator[list[T]]:
+    columns = ",".join(cls.model_fields.keys())
+    fetch_query = fetch_query.replace("{COLUMNS}", columns)
+    progress = get_progress(connection_string, table)
+    if progress is not None:
+        return extractor.extract_many(
+            cls,
+            fetch_query.replace(
+                "{WHERE_CLAUSE}",
+                """
+                WHERE (
+                    idr_trans_efctv_ts = %(timestamp)s AND idr_updt_ts <= %(timestamp)s AND bene_sk > %(bene_sk)s
+                ) OR idr_trans_efctv_ts > %(timestamp)s OR idr_updt_ts > %(timestamp)s""",
+            ),
+            {"timestamp": progress.last_timestamp, "bene_sk": progress.last_id},
+        )
+
+    else:
+        return extractor.extract_many(
+            cls, fetch_query.replace("{WHERE_CLAUSE}", ""), {}
+        )

@@ -12,27 +12,22 @@ class PostgresLoader:
         connection_string: str,
         table: str,
         temp_table: str,
-        primary_key: str,
-        exclude_cols: list[str],
-        insert_cols: list[str],
+        primary_key: list[str],
+        sort_key: str,
     ):
         self.conn = psycopg.connect(connection_string)
         self.table = table
         self.temp_table = temp_table
         self.primary_key = primary_key
-        self.exclude_cols = exclude_cols
-        self.insert_cols = insert_cols
+        self.sort_key = sort_key
 
-        self.insert_cols.sort()
-
-    def load(
-        self,
-        fetch_results: Iterator[list[T]],
-    ):
-        cols_str = ", ".join(self.insert_cols)
+    def load(self, fetch_results: Iterator[list[T]], model: type[T]):
+        insert_cols = list(model.model_fields.keys())
+        insert_cols.sort()
+        cols_str = ", ".join(insert_cols)
 
         update_set = ", ".join(
-            [f"{v}=EXCLUDED.{v}" for v in self.insert_cols if v != self.primary_key]
+            [f"{v}=EXCLUDED.{v}" for v in insert_cols if not v in self.primary_key]
         )
         timestamp = datetime.now(timezone.utc)
         with self.conn.cursor() as cur:
@@ -51,7 +46,7 @@ class PostgresLoader:
                 exclude_cols = [
                     "bfd_created_ts",
                     "bfd_updated_ts",
-                ] + self.exclude_cols
+                ]
                 for col in exclude_cols:
                     cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")
 
@@ -67,20 +62,20 @@ class PostgresLoader:
                 ) as copy:
                     for row in results:
                         model_dump = row.model_dump()
-                        copy.write_row([model_dump[k] for k in self.insert_cols])
+                        copy.write_row([model_dump[k] for k in insert_cols])
                 if len(results) > 0:
                     # Upsert into the main table
                     cur.execute(
                         f"""
                         INSERT INTO {self.table}({cols_str}, bfd_created_ts, bfd_updated_ts)
                         SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {self.temp_table}
-                        ON CONFLICT ({self.primary_key}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
+                        ON CONFLICT ({",".join(self.primary_key)}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
                         """,
                         {"timestamp": timestamp},
                     )
 
                     last = results[len(results) - 1].model_dump()
-                    last_id = last[self.primary_key]
+                    last_id = last[self.sort_key]
                     last_timestamp = last["idr_trans_efctv_ts"]
                     cur.execute(
                         f"""
