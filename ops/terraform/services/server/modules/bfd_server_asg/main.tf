@@ -278,6 +278,7 @@ resource "aws_launch_template" "main" {
   }
 }
 
+# TODO: Amend comment in BFD-3878
 # These AutoScaling Groups require 3 external "null_resourece" resources to manage their Target
 # Group ARNs, Load Balancer attachment, and their Warm Pool due to defective behavior in the AWS
 # provider. Specifically, attempting to modify Target Group ARNs or Load Balancer attachment
@@ -299,6 +300,7 @@ corresponding Runbook for instructions on how to remediate this situation.
 EOF
     }
 
+    # TODO: Amend comment in BFD-3878
     # For "target_group_arns" look at "null_resource.set_target_groups" as Terraform's AWS Provider
     # has a bug in it when changing target group ARNs in the terraform. For "load_balancers" look at
     # "null_resource.set_load_balancer" for the same reason as the "target_group_arns". For
@@ -307,6 +309,9 @@ EOF
     # scaling-in the previous "blue" blocks incoming "blue" from being attached to the "blue" Target
     # Group.
     ignore_changes = [target_group_arns, load_balancers, warm_pool]
+    # TODO: Replace above "ignore_changes" definition with below commented code in BFD-3878
+    # ignore_changes = [target_group_arns, warm_pool]
+    # TODO: Replace above "ignore_changes" definition with above commented code in BFD-3878
   }
 
   name                      = each.value.name
