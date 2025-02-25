@@ -285,7 +285,7 @@ resource "aws_launch_template" "main" {
 # dynamically (to do blue/green) results in an error during apply with a message indicating a bug in
 # the provider. Additionally, attempting to manage the Warm Pool via Terraform results in an
 # erreneous 3 minute delay upon destruction of the Warm Pool, even with "force_delete_warm_pool"
-# enabled, which is unnaceptable
+# enabled, which is unacceptable
 resource "aws_autoscaling_group" "main" {
   # Deployments of this ASG require two executions of `terraform apply`.
   for_each = local.asgs
