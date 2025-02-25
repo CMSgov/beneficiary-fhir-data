@@ -40,6 +40,20 @@ public class StringUtils {
   }
 
   /**
+   * Custom function to retrieve the boolean value from a string input.
+   *
+   * @param requestDetails the request details.
+   * @param parameterToParse the parameter To Parse.
+   * @return true or false.
+   */
+  public static List<Boolean> parseBooleansFromRequest(
+      RequestDetails requestDetails, String parameterToParse) {
+    return getParametersFromRequest(requestDetails, parameterToParse)
+        .map(Boolean::parseBoolean)
+        .toList();
+  }
+
+  /**
    * Attempts to parse the input as a Long, throwing a bad request error if it fails.
    *
    * @param input numeric input

@@ -2,11 +2,13 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -100,6 +102,7 @@ public class McsClaimTransformerV2Test {
       int numberOfRecords) {
 
     RdaMcsClaim entity = new RdaMcsClaim();
+    SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
     entity.setLastUpdated(Instant.ofEpochMilli(1));
 
@@ -141,7 +144,8 @@ public class McsClaimTransformerV2Test {
     entity.setDiagCodes(diagnoses);
     entity.setDetails(new HashSet<>(procedures));
 
-    McsClaimTransformerV2 mcsClaimTransformerV2 = new McsClaimTransformerV2(new MetricRegistry());
+    McsClaimTransformerV2 mcsClaimTransformerV2 =
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager);
 
     Claim claim = mcsClaimTransformerV2.transform(entity, true);
     assertEquals(numberOfRecords, claim.getDiagnosis().size());

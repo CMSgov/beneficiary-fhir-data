@@ -39,7 +39,7 @@ public class R4ClaimSamhsaMatcherTest {
   /** Sets up the class under test and dependencies. */
   @BeforeEach
   public void setup() {
-    samhsaMatcher = new R4ClaimSamhsaMatcher(mockFissTransformer, mockMcsTransformer);
+    samhsaMatcher = new R4ClaimSamhsaMatcher(mockFissTransformer, mockMcsTransformer, false);
     when(mockFissTransformer.transform(any(), anyBoolean())).thenReturn(mockClaim);
     when(mockMcsTransformer.transform(any(), anyBoolean())).thenReturn(mockClaim);
     List<Claim.ProcedureComponent> procedureComponentList = new ArrayList<>();

@@ -131,6 +131,9 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             "eobReadInpatient",
             (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadInpatient),
         arguments(
+            "eobReadByPatientWithSamhsa",
+            (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadByPatientWithSamhsa),
+        arguments(
             "eobReadOutpatient",
             (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadOutpatient),
         arguments("eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadPde),
@@ -767,6 +770,27 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
     String eobId = CommonTransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
+  }
+
+  /**
+   * Executes a search against the EOB endpoint using an inpatient claim id (based on the sample a
+   * data) and returns the sorted results.
+   *
+   * @return the sorted results
+   */
+  public static String eobReadByPatientWithSamhsa() {
+    Beneficiary bene = getSampleABeneSamhsa();
+
+    String url =
+        baseServerUrl
+            + "/v2/fhir/ExplanationOfBenefit/?patient="
+            + bene.getBeneficiaryId()
+            + "&_count="
+            + 2
+            + "&_page="
+            + (6);
+
+    return getJsonResponseFor(url + bene.getBeneficiaryId(), getRequestAuth(SAMHSA_KEYSTORE));
   }
 
   /**
