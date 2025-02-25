@@ -8,12 +8,12 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
-import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -97,15 +97,21 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    */
   @Trace
   public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
-    if (!(claimEntity instanceof RdaMcsClaim)) {
-      throw new BadCodeMonkeyException();
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
     }
 
+    if (!(claim instanceof RdaMcsClaim)) {
+      throw new BadCodeMonkeyException();
+    }
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      RdaMcsClaim claim = (RdaMcsClaim) claimEntity;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(claim.getIdrClmHdIcn(), McsTag.class);
-      return transformClaim(claim, includeTaxNumbers, securityTags);
+      RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claim;
+      return transformClaim(rdaMcsClaim, includeTaxNumbers, securityTags);
     }
   }
 

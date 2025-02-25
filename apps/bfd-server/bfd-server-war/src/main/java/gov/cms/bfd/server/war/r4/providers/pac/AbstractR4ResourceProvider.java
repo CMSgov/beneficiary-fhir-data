@@ -25,6 +25,7 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -32,6 +33,7 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import jakarta.annotation.Nonnull;
@@ -90,6 +92,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The samhsa matcher. */
   private final R4ClaimSamhsaMatcher samhsaMatcher;
 
+  /** v2SamhsaConsentSimulation. */
+  private final V2SamhsaConsentSimulation v2SamhsaConsentSimulation;
+
   /** True if old MBI values should be included in queries. */
   private final Boolean oldMbiHashEnabled;
 
@@ -121,8 +126,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param fissTransformer the fiss transformer
    * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param v2SamhsaConsentSimulation the v2SamhsaConsentSimulation resources ({@link
+   *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
@@ -130,12 +135,15 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Boolean oldMbiHashEnabled,
       ResourceTransformer<T> fissTransformer,
       ResourceTransformer<T> mcsTransformer,
-      String claimSourceTypeNames) {
+      String claimSourceTypeNames,
+      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
     this.fissTransformer = requireNonNull(fissTransformer);
     this.mcsTransformer = requireNonNull(mcsTransformer);
+    this.v2SamhsaConsentSimulation = v2SamhsaConsentSimulation;
+    //    this.samhsaV2Shadow = samhsaV2Shadow;
 
     requireNonNull(claimSourceTypeNames);
     enabledSourceTypes =
@@ -282,6 +290,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private T transformEntity(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
 
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claimEntity = claimWithSecurityTagsV2.getClaimEntity();
+    }
+
     if (claimIdType.getTypeLabel().equals("fiss")) {
       return fissTransformer.transform(claimEntity, includeTaxNumbers);
     } else if (claimIdType.getTypeLabel().equals("mcs")) {
@@ -306,6 +318,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claimEntity = claimWithSecurityTagsV2.getClaimEntity();
+    }
+
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
       case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
@@ -469,7 +486,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             createBundleFor(
                 getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
-
       return bundleResource;
     } else {
       throw new InvalidRequestException("Missing required field mbi");
@@ -503,7 +519,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             .flatMap(
                 type ->
                     claimDao
-                        .findAllByMbiAttribute(
+                        .findAllByMbiAttributeWithSecurityTags(
                             type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate)
                         .stream()
                         .map(e -> new ImmutablePair<>(e, type)))
@@ -525,7 +541,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         entitiesWithType.stream()
             .filter(
                 pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
-            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
+            .map(
+                pair -> {
+                  // Log missing claim for samhsa V2 Shadow check
+                  v2SamhsaConsentSimulation.logMissingClaim(
+                      pair.left, samhsaMatcher.hasNoSamhsaData(pair.left));
+
+                  return transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers);
+                })
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());

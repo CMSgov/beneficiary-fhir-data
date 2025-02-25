@@ -10,11 +10,11 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
-import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -73,15 +73,16 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+    List<Coding> securityTags = new ArrayList<>();
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HospiceClaim hospiceClaim = (HospiceClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(hospiceClaim.getClaimId()), HospiceTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevelDstu3(
+      //              String.valueOf(hospiceClaim.getClaimId()), HospiceTag.class);
       eob = transformClaim(hospiceClaim, securityTags);
     }
     return eob;

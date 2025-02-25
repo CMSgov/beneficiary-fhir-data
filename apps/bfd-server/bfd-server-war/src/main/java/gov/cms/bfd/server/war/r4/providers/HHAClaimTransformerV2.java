@@ -10,7 +10,6 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
-import gov.cms.bfd.model.rif.samhsa.HhaTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -19,7 +18,9 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -70,22 +71,31 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+    }
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HHAClaim hhaClaim = (HHAClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(
-              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevel(
+      //              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
       eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;

@@ -11,7 +11,6 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
-import gov.cms.bfd.model.rif.samhsa.CarrierTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
@@ -21,8 +20,10 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -82,22 +83,31 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a {@link CarrierClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+    }
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       CarrierClaim carrierClaim = (CarrierClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(
-              String.valueOf(carrierClaim.getClaimId()), CarrierTag.class);
+      //      List<Coding> securityTags =
+      //          securityTagManager.getClaimSecurityLevel(
+      //              String.valueOf(carrierClaim.getClaimId()), CarrierTag.class);
       eob = transformClaim(carrierClaim, includeTaxNumber, securityTags);
     }
     return eob;
