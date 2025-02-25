@@ -52,10 +52,8 @@ locals {
   ssh_key_pair                    = local.nonsensitive_common_config["key_pair"]
   vpc_name                        = local.nonsensitive_common_config["vpc_name"]
 
-  lb_is_public          = tobool(local.nonsensitive_service_config["lb_is_public"])
-  lb_blue_ingress_port  = local.nonsensitive_service_config["lb_blue_ingress_port"]
-  lb_green_ingress_port = local.nonsensitive_service_config["lb_green_ingress_port"]
-  lb_vpc_peerings       = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
+  lb_is_public    = tobool(local.nonsensitive_service_config["lb_is_public"])
+  lb_vpc_peerings = jsondecode(local.nonsensitive_service_config["lb_vpc_peerings_json"])
 
   asg_min_instance_count      = local.nonsensitive_service_config["asg_min_instance_count"]
   asg_max_instance_count      = local.nonsensitive_service_config["asg_max_instance_count"]
@@ -116,12 +114,12 @@ module "fhir_lb" {
 
   ingress = local.lb_is_public ? {
     description     = "Public Internet access"
-    port            = local.lb_blue_ingress_port
+    port            = 443
     cidr_blocks     = ["0.0.0.0/0"]
     prefix_list_ids = []
     } : {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port            = local.lb_blue_ingress_port
+    port            = 443
     cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
@@ -213,16 +211,9 @@ module "fhir_asg" {
   lb_config = {
     is_public                  = local.lb_is_public
     enable_deletion_protection = !local.is_ephemeral_env
-    ingress = {
-      blue_port       = local.lb_blue_ingress_port
-      green_port      = local.lb_green_ingress_port
-      cidr_blocks     = !local.lb_is_public ? concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]) : ["0.0.0.0/0"]
-      prefix_list_ids = !local.lb_is_public ? [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id] : []
-    }
-    egress = {
-      cidr_blocks = [data.aws_vpc.main.cidr_block]
-    }
-    server_listen_port = local.service_port
+    server_listen_port         = local.service_port
+    internal_ingress_cidrs     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    internal_prefix_lists      = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   }
 }
 
