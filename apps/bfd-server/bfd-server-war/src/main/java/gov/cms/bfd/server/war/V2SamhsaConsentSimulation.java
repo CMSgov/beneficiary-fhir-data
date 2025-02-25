@@ -2,11 +2,20 @@ package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import java.util.HashSet;
-import java.util.Set;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimSamhsaMatcher;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
+import java.util.List;
+import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,68 +36,104 @@ public class V2SamhsaConsentSimulation {
   /** Flag to control whether SAMHSA shadow filtering should be applied. */
   private boolean samhsaV2Shadow;
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
+  /** The samhsa matcher. */
+  private final R4ClaimSamhsaMatcher samhsaMatcher;
+
   protected V2SamhsaConsentSimulation(
-      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
+      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow,
+      R4ClaimSamhsaMatcher samhsaMatcher,
+      SecurityTagManager securityTagManager) {
     this.samhsaV2Shadow = samhsaV2Shadow;
+    this.samhsaMatcher = samhsaMatcher;
+    this.securityTagManager = securityTagManager;
   }
 
-  /**
-   * Simulates V2SamhsaConsentInterceptor without actually registering V2SamhsaConsentInterceptor.
-   *
-   * @param theRequestDetails the request details
-   * @param theResource the resource being processed
-   * @return IBaseResource
-   */
-  public IBaseResource simulateScrubbing(
-      RequestDetails theRequestDetails, IBaseResource theResource) {
-    logger.debug("Simulating SAMHSA scrubbing.");
-
-    if (!samhsaV2Shadow || !v2SamhsaConsentInterceptor.applySamhsaFiltering(theRequestDetails)) {
-      return theResource;
-    }
-
-    // Process the resource if it is a Bundle
-    if (theResource instanceof Bundle bundle) {
-      v2SamhsaConsentInterceptor.processBundle(bundle);
-      return bundle;
-    }
-
-    return theResource; // Return the unmodified resource if no redaction
-  }
+  //  /**
+  //   * Simulates V2SamhsaConsentInterceptor without actually registering
+  // V2SamhsaConsentInterceptor.
+  //   *
+  //   * @param theRequestDetails the request details
+  //   * @param theResource the resource being processed
+  //   * @return IBaseResource
+  //   */
+  //  public IBaseResource simulateScrubbing(
+  //      RequestDetails theRequestDetails, IBaseResource theResource) {
+  //    logger.debug("Simulating SAMHSA scrubbing.");
+  //
+  //    if (!samhsaV2Shadow || !v2SamhsaConsentInterceptor.applySamhsaFiltering(theRequestDetails))
+  // {
+  //      return theResource;
+  //    }
+  //
+  //    // Process the resource if it is a Bundle
+  //    if (theResource instanceof Bundle bundle) {
+  //      v2SamhsaConsentInterceptor.processBundle(bundle);
+  //      return bundle;
+  //    }
+  //
+  //    return theResource; // Return the unmodified resource if no redaction
+  //  }
 
   /**
    * logs Missing Claim Ids.
    *
-   * @param v2SamhsaScrubbedResource the request details
-   * @param bundleResource the resource being processed
+   * @param entity the resource being processed
+   * @param hasNoSamhsaData the hasNoSamhsaData boolean
    */
-  public void logMissingClaimIds(Bundle v2SamhsaScrubbedResource, Bundle bundleResource) {
-    if (samhsaV2Shadow) {
-      Set<String> scrubbedClaimIds = new HashSet<>();
-      Set<String> originalClaimIds = new HashSet<>();
+  public void logMissingClaim(Object entity, boolean hasNoSamhsaData) {
+    if (samhsaV2Shadow && entity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
 
-      // Populate the scrubbedClaimIds set with IDs from the scrubbed resource
-      for (Bundle.BundleEntryComponent entry : v2SamhsaScrubbedResource.getEntry()) {
-        if (entry.getResource() != null) {
-          originalClaimIds.add(entry.getResource().getIdElement().getIdPart());
-        }
-      }
+      // Get security tags from the claim entity
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
 
-      // Populate the originalClaimIds set with IDs from the original resource
-      for (Bundle.BundleEntryComponent entry : bundleResource.getEntry()) {
-        originalClaimIds.add(entry.getResource().getIdElement().getIdPart());
-      }
+      // Check the redaction status of the interceptor against the SAMHSA exclusion flag
+      boolean notToRedact = !(v2SamhsaConsentInterceptor.shouldRedactResource(securityTags));
 
-      // Find missing claim IDs by checking which entries are in the original but not in the
-      // scrubbed
-      Set<String> missingClaimIds = new HashSet<>(originalClaimIds);
-      missingClaimIds.removeAll(scrubbedClaimIds);
+      // If redaction status doesn't match the SAMHSA exclusion flag, log the claim
+      if (notToRedact == hasNoSamhsaData) {
+        String claimId = getClaimId(claimWithSecurityTagsV2.getClaimEntity());
+        String claim =
+            claimWithSecurityTagsV2
+                .getClaimEntity()
+                .getClass()
+                .getSimpleName(); // Add class type for context
 
-      // Log the missing claim IDs
-      // the goal here is to compare the old SAMHSA 2.0 scrubbed vs the SAMHSA.0 scrubbed
-      if (!missingClaimIds.isEmpty()) {
-        logger.error("Samhsa: claim ids missing - " + String.join(", ", missingClaimIds));
+        // Logging the error with better message formatting and more context
+        logger.error(
+            "Samhsa: claim IDs not matching between old SAMHSA filter and new SAMHSA 2.0 - "
+                + "Claim ID: {} (Class: {})",
+            claimId,
+            claim);
       }
     }
+  }
+
+  /**
+   * Get Claim Ids.
+   *
+   * @param entity the resource being processed
+   * @return String claim Id
+   */
+  public String getClaimId(Object entity) {
+    if (entity == null) {
+      return null; // return null if the entity is null
+    }
+
+    return switch (entity) {
+      case RdaMcsClaim rdaMcsClaim -> rdaMcsClaim.getIdrClmHdIcn();
+      case RdaFissClaim rdaFissClaim -> rdaFissClaim.getClaimId();
+      case CarrierClaim carrierClaim -> String.valueOf(carrierClaim.getClaimId());
+      case DMEClaim dmeClaim -> String.valueOf(dmeClaim.getClaimId());
+      case HHAClaim hhaClaim -> String.valueOf(hhaClaim.getClaimId());
+      case HospiceClaim hospiceClaim -> String.valueOf(hospiceClaim.getClaimId());
+      case InpatientClaim inpatientClaim -> String.valueOf(inpatientClaim.getClaimId());
+      case OutpatientClaim outpatientClaim -> String.valueOf(outpatientClaim.getClaimId());
+      case SNFClaim snfClaim -> String.valueOf(snfClaim.getClaimId());
+      default -> null; // Return null for unsupported claim types
+    };
   }
 }

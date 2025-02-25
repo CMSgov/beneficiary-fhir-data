@@ -6,6 +6,15 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import jakarta.persistence.EntityManager;
@@ -17,7 +26,9 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
@@ -133,6 +144,132 @@ public class ClaimDao {
     }
 
     return claimEntities;
+  }
+
+  /**
+   * Find records by MBI (hashed or unhashed) for a given {@link ResourceTypeV2} using search value
+   * plus optional last updated and service date ranges.
+   *
+   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
+   * @param mbiSearchValue The desired value of the mbi attribute be searched on.
+   * @param isMbiSearchValueHashed True if the mbiSearchValue is a hashed MBI.
+   * @param lastUpdated The range of lastUpdated values to search on.
+   * @param serviceDate The range of the desired service date to search on.
+   * @param <T> The entity type being retrieved.
+   * @return A list of entities of type T retrieved matching the given parameters.
+   */
+  @Trace
+  public <T> List<ClaimWithSecurityTagsV2<T>> findAllByMbiAttributeWithSecurityTags(
+      ResourceTypeV2<?, T> resourceType,
+      String mbiSearchValue,
+      boolean isMbiSearchValueHashed,
+      DateRangeParam lastUpdated,
+      DateRangeParam serviceDate) {
+
+    final Class<T> entityClass = resourceType.getEntityClass();
+    final String idAttributeName = resourceType.getEntityIdAttribute();
+    final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    final CriteriaQuery<T> criteria = builder.createQuery(entityClass);
+    final Root<T> root = criteria.from(entityClass);
+
+    // Standard predicates for the MBI lookup
+    final List<Predicate> predicates =
+        createStandardPredicatesForMbiLookup(
+            builder,
+            root,
+            resourceType,
+            mbiSearchValue,
+            isMbiSearchValueHashed,
+            lastUpdated,
+            serviceDate);
+
+    criteria.where(predicates.toArray(new Predicate[0]));
+
+    // Sorting to ensure predictable responses
+    criteria.orderBy(builder.asc(root.get(idAttributeName)));
+
+    List<T> claimEntities = null;
+
+    Timer.Context timerClaimQuery =
+        getTimerForResourceQuery(resourceType, CLAIM_BY_MBI_QUERY).time();
+    try {
+      claimEntities = entityManager.createQuery(criteria).getResultList();
+    } finally {
+      logQueryMetric(
+          resourceType,
+          CLAIM_BY_MBI_QUERY,
+          timerClaimQuery.stop(),
+          claimEntities == null ? 0 : claimEntities.size());
+    }
+
+    // List to hold claims with their respective security tags
+    List<ClaimWithSecurityTagsV2<T>> claimEntitiesWithTags = new ArrayList<>();
+    Long claimId = null;
+    String mcsFissClaimId = null;
+    String query = null;
+
+    if (claimEntities != null) {
+      // Iterate over each claim and get its security tags
+      for (T claimEntity : claimEntities) {
+        // Identify claim type and get the claimId
+        switch (claimEntity) {
+          case RdaMcsClaim rdaMcsClaim:
+            mcsFissClaimId = rdaMcsClaim.getIdrClmHdIcn();
+            query = "SELECT t.code FROM McsTag t WHERE t.claim = :mcsFissClaimId";
+            break;
+          case RdaFissClaim rdaFissClaim:
+            mcsFissClaimId = rdaFissClaim.getClaimId();
+            query = "SELECT t.code FROM FissTag t WHERE t.claim = :mcsFissClaimId";
+            break;
+          case CarrierClaim carrierClaim:
+            claimId = carrierClaim.getClaimId();
+            query = "SELECT t.code FROM CarrierTag t WHERE t.claim = :claimId";
+            break;
+          case DMEClaim dmeClaim:
+            claimId = dmeClaim.getClaimId();
+            query = "SELECT t.code FROM DmeTag t WHERE t.claim = :claimId";
+            break;
+          case HHAClaim hhaClaim:
+            claimId = hhaClaim.getClaimId();
+            query = "SELECT t.code FROM HhaTag t WHERE t.claim = :claimId";
+            break;
+          case HospiceClaim hospiceClaim:
+            claimId = hospiceClaim.getClaimId();
+            query = "SELECT t.code FROM HospiceTag t WHERE t.claim = :claimId";
+            break;
+          case InpatientClaim inpatientClaim:
+            claimId = inpatientClaim.getClaimId();
+            query = "SELECT t.code FROM InpatientTag t WHERE t.claim = :claimId";
+            break;
+          case OutpatientClaim outpatientClaim:
+            claimId = outpatientClaim.getClaimId();
+            query = "SELECT t.code FROM OutpatientTag t WHERE t.claim = :claimId";
+            break;
+          case SNFClaim snfClaim:
+            claimId = snfClaim.getClaimId();
+            query = "SELECT t.code FROM SnfTag t WHERE t.claim = :claimId";
+            break;
+          default:
+            // Handle other claim types or throw an exception if the type is unsupported
+            throw new IllegalArgumentException(
+                "Unsupported claim type: " + claimEntity.getClass().getName());
+        }
+
+        // Query tags for the identified claimId
+        List<String> securityTagResults =
+            entityManager
+                .createQuery(query, String.class)
+                .setParameter(mcsFissClaimId != null ? "mcsFissClaimId" : "claimId", claimId)
+                .getResultList();
+
+        // Collect the security tags into a Set (avoiding duplicates)
+        Set<String> securityTags = new HashSet<>(securityTagResults);
+
+        // Wrap the claim and its tags in the response object
+        claimEntitiesWithTags.add(new ClaimWithSecurityTagsV2<>(claimEntity, securityTags));
+      }
+    }
+    return claimEntitiesWithTags;
   }
 
   /**

@@ -420,13 +420,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
 
-    // This is evaluating the new Samhsa2.0 data scrubbing compared to the old one
-    // a difference will be logged as error
-    IBaseResource resourceCopy = bundle.copy();
-    Bundle v2SamhsaScrubbedResource =
-        (Bundle) v2SamhsaConsentSimulation.simulateScrubbing(requestDetails, resourceCopy);
-    v2SamhsaConsentSimulation.logMissingClaimIds(v2SamhsaScrubbedResource, bundle);
-
     return bundle;
   }
 

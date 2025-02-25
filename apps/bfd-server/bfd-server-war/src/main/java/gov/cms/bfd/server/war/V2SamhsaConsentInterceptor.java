@@ -10,9 +10,11 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.sharedutils.TagCode;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +104,26 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
     }
     return false; // No matching SAMHSA tags found
   }
+
+  /**
+   * Checks if a resource should be redacted based on SAMHSA security tags.
+   *
+   * @param securityTags The security Tags.
+   * @return true if the resource should be redacted, false otherwise.
+   */
+  boolean shouldRedactResource(List<Coding> securityTags) {
+    for (IBaseCoding securityTag : securityTags) {
+      // Check for SAMHSA-related tags
+      if (isSamhsaSecurityTag(securityTag)) {
+        logger.info("Matched SAMHSA security tag, redacting resource.");
+        return true;
+      }
+    }
+    return false; // No matching SAMHSA tags found
+  }
+
+  // make another shouldRedactResource that takes securityTag or use isSamhsaSecurityTag for the
+  // shadow tag
 
   /**
    * Determines if a security tag is related to SAMHSA (42CFRPart2).

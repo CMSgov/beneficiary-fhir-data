@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -67,16 +68,17 @@ public final class SecurityTagManager {
   /**
    * Determines the security level based on the collected tags.
    *
-   * @param claimId value of claimId
-   * @param tagClass value of tagClass
+   * <p>// * @param claimId value of claimId
+   *
+   * @param securityTags value of tagClass
    * @return SecurityLevel
    */
-  public List<Coding> getClaimSecurityLevel(String claimId, Class<?> tagClass) {
+  public List<Coding> getClaimSecurityLevel(Set<String> securityTags) {
     if (!samhsaV2Enabled) {
       return new ArrayList<>();
     }
 
-    List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
+    //    List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
     List<Coding> securityTagCoding = new ArrayList<>();
 
     if (securityTags.isEmpty()) {
@@ -126,15 +128,20 @@ public final class SecurityTagManager {
   /**
    * Determines the security level based on the collected tags.
    *
-   * @param claimId value of claimId
-   * @param tagClass value of tagClass
+   * @param claimEntity value of claimEntity
    * @return SecurityLevel
    */
-  public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(
-      String claimId, Class<?> tagClass) {
+  public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(Object claimEntity) {
+    Object claim = claimEntity;
+    List<Coding> coding = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      coding = getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+    }
 
     List<org.hl7.fhir.dstu3.model.Coding> securityTagCoding = new ArrayList<>();
-    List<Coding> coding = getClaimSecurityLevel(claimId, tagClass);
+    //    List<Coding> coding = getClaimSecurityLevel(securityTags);
     for (Coding code : coding) {
       org.hl7.fhir.dstu3.model.Coding securityTag = new org.hl7.fhir.dstu3.model.Coding();
       securityTag
