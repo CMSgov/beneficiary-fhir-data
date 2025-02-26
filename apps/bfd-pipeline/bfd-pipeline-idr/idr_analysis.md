@@ -152,6 +152,3 @@ select bene.bene_sk, bene.bene_xref_efctv_sk, bene.bene_xref_sk, ix.bene_xref_sk
 CMS_VDM_VIEW_MDCR_PRD.V2_MDCR_BENE bene
 join invalid_xref ix on ix.bene_sk = bene.bene_xref_efctv_sk and ix.bene_xref_sk = bene.bene_sk
 ```
-
-- for search by contract, do we supply the current bene record or the xref_efctv record?
-  - If current, what do we do about null mbi?
