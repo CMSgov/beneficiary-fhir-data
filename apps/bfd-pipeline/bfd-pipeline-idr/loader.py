@@ -23,6 +23,10 @@ class PostgresLoader:
         self.sort_key = sort_key
         self.exclude_keys = exclude_keys
 
+    def refresh_materialized_view(self, view_name: str):
+        self.conn.execute(f"REFRESH MATERIALIZED VIEW {view_name}")
+        self.conn.commit()
+
     def load(self, fetch_results: Iterator[list[T]], model: type[T]):
         insert_cols = list(model.model_fields.keys())
         insert_cols.sort()

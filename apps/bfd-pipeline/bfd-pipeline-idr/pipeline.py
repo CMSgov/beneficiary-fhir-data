@@ -79,6 +79,8 @@ def run_pipeline(extractor: Extractor, connection_string: str):
         exclude_keys=["bene_xref_efctv_sk_computed"],
     )
     bene_loader.load(bene_iter, IdrBeneficiary)
+    bene_loader.refresh_materialized_view("idr.overshare_mbis")
+
     logger.info("done")
 
 

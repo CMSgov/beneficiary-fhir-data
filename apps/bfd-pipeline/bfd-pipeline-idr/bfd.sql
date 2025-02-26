@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS idr.beneficiary;
+DROP TABLE IF EXISTS idr.beneficiary_history;
 DROP TABLE IF EXISTS idr.load_progress;
 DROP SCHEMA IF EXISTS idr;
 

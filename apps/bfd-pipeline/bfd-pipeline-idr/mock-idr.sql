@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS cms_vdm_view_mdcr_prd.v2_mdcr_bene;
+DROP TABLE IF EXISTS cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry;
 DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd;
 
 CREATE SCHEMA cms_vdm_view_mdcr_prd;
