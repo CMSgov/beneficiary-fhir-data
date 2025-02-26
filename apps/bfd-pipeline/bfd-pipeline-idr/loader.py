@@ -12,14 +12,16 @@ class PostgresLoader:
         connection_string: str,
         table: str,
         temp_table: str,
-        primary_key: list[str],
+        unique_key: list[str],
         sort_key: str,
+        exclude_keys: list[str],
     ):
         self.conn = psycopg.connect(connection_string)
         self.table = table
         self.temp_table = temp_table
-        self.primary_key = primary_key
+        self.unique_key = unique_key
         self.sort_key = sort_key
+        self.exclude_keys = exclude_keys
 
     def load(self, fetch_results: Iterator[list[T]], model: type[T]):
         insert_cols = list(model.model_fields.keys())
@@ -27,7 +29,7 @@ class PostgresLoader:
         cols_str = ", ".join(insert_cols)
 
         update_set = ", ".join(
-            [f"{v}=EXCLUDED.{v}" for v in insert_cols if not v in self.primary_key]
+            [f"{v}=EXCLUDED.{v}" for v in insert_cols if not v in self.unique_key]
         )
         timestamp = datetime.now(timezone.utc)
         with self.conn.cursor() as cur:
@@ -43,7 +45,7 @@ class PostgresLoader:
                     f"CREATE TEMPORARY TABLE {self.temp_table} (LIKE {self.table}) ON COMMIT DROP"
                 )
                 # Created/updated columns don't need to be loaded from the source.
-                exclude_cols = [
+                exclude_cols = self.exclude_keys + [
                     "bfd_created_ts",
                     "bfd_updated_ts",
                 ]
@@ -69,7 +71,7 @@ class PostgresLoader:
                         f"""
                         INSERT INTO {self.table}({cols_str}, bfd_created_ts, bfd_updated_ts)
                         SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {self.temp_table}
-                        ON CONFLICT ({",".join(self.primary_key)}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
+                        ON CONFLICT ({",".join(self.unique_key)}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
                         """,
                         {"timestamp": timestamp},
                     )

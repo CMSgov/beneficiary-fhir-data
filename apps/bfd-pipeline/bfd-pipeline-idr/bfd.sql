@@ -6,7 +6,10 @@ CREATE SCHEMA idr;
 CREATE TABLE idr.beneficiary(
     bene_sk BIGINT NOT NULL PRIMARY KEY, 
     bene_xref_efctv_sk BIGINT NOT NULL, 
+    bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
+        AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11),
+    bene_ssn_num VARCHAR(9),
     bene_1st_name VARCHAR(30),
     bene_midl_name VARCHAR(15),
     bene_last_name VARCHAR(40),
@@ -33,7 +36,10 @@ CREATE TABLE idr.beneficiary(
 CREATE TABLE idr.beneficiary_history(
     bene_sk BIGINT NOT NULL,
     bene_xref_efctv_sk BIGINT NOT NULL,
+    bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS
+        AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11),
+    bene_ssn_num VARCHAR(9),
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
@@ -47,3 +53,8 @@ CREATE TABLE idr.load_progress(
     last_id TEXT NOT NULL,
     last_timestamp TIMESTAMPTZ NOT NULL
 );
+
+CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
+SELECT bene_mbi_id FROM idr.beneficiary
+GROUP BY bene_mbi_id
+HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1

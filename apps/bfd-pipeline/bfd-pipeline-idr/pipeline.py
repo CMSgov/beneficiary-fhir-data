@@ -26,15 +26,7 @@ def main():
 
 
 def run_pipeline(extractor: Extractor, connection_string: str):
-    logger.info("fetching bene_history data")
-
-    history_loader = PostgresLoader(
-        connection_string=connection_string,
-        table="idr.beneficiary_history",
-        temp_table="beneficiary_history_temp",
-        primary_key=["bene_sk", "idr_trans_efctv_ts"],
-        sort_key="bene_sk",
-    )
+    logger.info("load start")
 
     history_fetch_query = """
     SELECT
@@ -51,15 +43,16 @@ def run_pipeline(extractor: Extractor, connection_string: str):
         "idr.beneficiary_history",
         history_fetch_query,
     )
-    history_loader.load(history_iter, IdrBeneficiaryHistory)
 
-    bene_loader = PostgresLoader(
+    history_loader = PostgresLoader(
         connection_string=connection_string,
-        table="idr.beneficiary",
-        temp_table="beneficiary_temp",
-        primary_key=["bene_sk"],
+        table="idr.beneficiary_history",
+        temp_table="beneficiary_history_temp",
+        unique_key=["bene_sk", "idr_trans_efctv_ts"],
         sort_key="bene_sk",
+        exclude_keys=["bene_xref_efctv_sk_computed"],
     )
+    history_loader.load(history_iter, IdrBeneficiaryHistory)
 
     bene_fetch_query = """
     SELECT
@@ -76,7 +69,15 @@ def run_pipeline(extractor: Extractor, connection_string: str):
         "idr.beneficiary",
         bene_fetch_query,
     )
-    logger.info("loading data")
+
+    bene_loader = PostgresLoader(
+        connection_string=connection_string,
+        table="idr.beneficiary",
+        temp_table="beneficiary_temp",
+        unique_key=["bene_sk"],
+        sort_key="bene_sk",
+        exclude_keys=["bene_xref_efctv_sk_computed"],
+    )
     bene_loader.load(bene_iter, IdrBeneficiary)
     logger.info("done")
 

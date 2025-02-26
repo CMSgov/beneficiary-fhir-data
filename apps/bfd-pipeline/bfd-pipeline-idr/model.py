@@ -6,6 +6,7 @@ class IdrBeneficiary(BaseModel):
     bene_sk: int
     bene_xref_efctv_sk: int
     bene_mbi_id: str
+    bene_ssn_num: str
     bene_1st_name: str
     bene_midl_name: str
     bene_last_name: str
