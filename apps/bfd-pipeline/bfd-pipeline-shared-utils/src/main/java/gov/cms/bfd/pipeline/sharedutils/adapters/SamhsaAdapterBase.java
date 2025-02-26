@@ -170,9 +170,6 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
   public static final String ADMTG_DGNS_CD = "admtg_dgns_cd";
 
   /** Claim SAMHSA Column. */
-  public static final String PRNCPAL_DGNS_CD1 = "prncpal_dgns_cd";
-
-  /** Claim SAMHSA Column. */
   public static final String ICD_PRCDR_CD_1 = "icd_prcdr_cd1";
 
   /** Claim SAMHSA Column. */

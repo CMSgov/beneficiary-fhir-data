@@ -95,7 +95,7 @@ public class SamhsaInpatientAdapter extends SamhsaAdapterBase<InpatientClaim, In
         entry(claim::getDiagnosisExternal12Code, ICD_DGNS_E_CD_12),
         entry(claim::getDiagnosisRelatedGroupCd, CLM_DRG_CD),
         entry(claim::getDiagnosisAdmittingCode, ADMTG_DGNS_CD),
-        entry(claim::getDiagnosisPrincipalCode, PRNCPAL_DGNS_CD1),
+        entry(claim::getDiagnosisPrincipalCode, PRNCPAL_DGNS_CD),
         entry(claim::getProcedure1Code, ICD_PRCDR_CD_1),
         entry(claim::getProcedure2Code, ICD_PRCDR_CD_2),
         entry(claim::getProcedure3Code, ICD_PRCDR_CD_3),
