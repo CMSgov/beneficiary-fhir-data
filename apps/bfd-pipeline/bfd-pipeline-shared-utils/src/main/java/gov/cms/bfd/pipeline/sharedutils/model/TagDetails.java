@@ -20,7 +20,7 @@ public class TagDetails {
   String column;
 
   /** The line entry in the table. Will correspond to either rdaPosition, or idrDtlNumber */
-  Integer clm_line_num;
+  Integer clmLineNum;
 
   /** The type. */
   String type;

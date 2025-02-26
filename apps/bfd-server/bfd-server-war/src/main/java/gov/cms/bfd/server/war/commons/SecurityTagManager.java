@@ -133,7 +133,7 @@ public final class SecurityTagManager {
     for (Coding code : coding) {
       org.hl7.fhir.dstu3.model.Coding securityTag = new org.hl7.fhir.dstu3.model.Coding();
       securityTag
-          .setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality")
+          .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
           .setCode(code.getCode())
           .setDisplay(code.getDisplay());
 

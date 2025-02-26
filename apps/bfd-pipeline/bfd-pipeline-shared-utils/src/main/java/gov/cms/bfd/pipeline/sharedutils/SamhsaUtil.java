@@ -418,7 +418,7 @@ public class SamhsaUtil {
               .reduce((first, second) -> second)
               .orElse(Strings.EMPTY);
       TagDetails detail =
-          TagDetails.builder().table(table).column(column).clm_line_num(lineNum).type(type).build();
+          TagDetails.builder().table(table).column(column).clmLineNum(lineNum).type(type).build();
       detailsList.add(detail);
     }
   }

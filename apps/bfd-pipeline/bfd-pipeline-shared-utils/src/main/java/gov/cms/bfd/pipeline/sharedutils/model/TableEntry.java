@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TableEntry {
   /** The query for the table. */
-  String Query;
+  String query;
 
   /** The query to get the dates from the parent table. */
   String datesQuery;
