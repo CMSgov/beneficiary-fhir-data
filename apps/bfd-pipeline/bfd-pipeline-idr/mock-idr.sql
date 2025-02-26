@@ -36,6 +36,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_ssn_num VARCHAR(9),
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
@@ -89,34 +90,8 @@ VALUES(
     NOW(),-- idr_trans_efctv_ts,
     '2099-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
-    );
-
-INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene(
-    bene_sk, 
-    bene_xref_efctv_sk, 
-    bene_mbi_id,
-    bene_ssn_num,
-    bene_1st_name,
-    bene_midl_name,
-    bene_last_name,
-    bene_brth_dt,
-    bene_sex_cd,
-    bene_race_cd,
-    geo_usps_state_cd,
-    geo_zip5_cd,
-    geo_zip4_cd,
-    geo_zip_plc_name,
-    bene_line_1_adr,
-    bene_line_2_adr,
-    bene_line_3_adr,
-    bene_line_4_adr,
-    bene_line_5_adr,
-    bene_line_6_adr,
-    cntct_lang_cd,
-    idr_trans_efctv_ts,
-    idr_trans_obslt_ts,
-    idr_updt_ts)
-VALUES(
+),
+(
     2, -- bene_sk, 
     2, -- bene_xref_efctv_sk, 
     '1S000000001',-- bene_mbi_id,
@@ -141,5 +116,23 @@ VALUES(
     NOW(),-- idr_trans_efctv_ts,
     '2099-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
-    );
+);
 
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
+    bene_sk,
+    bene_xref_efctv_sk,
+    bene_mbi_id,
+    bene_ssn_num,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    1, -- bene_sk, 
+    1, -- bene_xref_efctv_sk, 
+    '1S000000000',-- bene_mbi_id,
+    '000000000',-- bene_ssn_num,
+    NOW(),-- idr_trans_efctv_ts,
+    '2099-12-31',-- idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
