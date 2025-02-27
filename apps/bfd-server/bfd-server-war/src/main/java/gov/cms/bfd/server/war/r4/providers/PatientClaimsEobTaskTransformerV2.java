@@ -12,6 +12,7 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -19,13 +20,19 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -307,7 +314,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
-  private <T> List<T> findClaimTypeByPatient() {
+  private <T> List<ClaimWithSecurityTags<T>> findClaimTypeByPatient() {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
     Root root = criteria.from(claimType.getEntityClass());
@@ -342,6 +349,34 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       }
     }
 
+    List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
+
+    Set<String> claimIds = new HashSet<>();
+
+    collectClaimIds((List<Object>) claimEntities, claimIds);
+
+    if (!claimIds.isEmpty()) {
+      // Make ONE query to get all claim-tag relationships
+      Map<String, Set<String>> claimIdToTagsMap =
+          buildClaimIdToTagsMap(claimType.getEntityTagType(), claimIds);
+
+      // Process all claims using the map from the single query
+      claimEntities.stream()
+          .forEach(
+              claimEntity -> {
+                // Get the claim ID
+                String claimId = extractClaimId(claimEntity);
+
+                // Look up this claim's tags from our pre-fetched map (no additional DB query)
+                Set<String> claimSpecificTags =
+                    claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+
+                // Wrap the claim and its tags in the response object
+                claimEntitiesWithTags.add(
+                    new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags));
+              });
+    }
+
     if (claimEntities != null && !serviceDate.isEmpty()) {
       final Instant lowerBound =
           serviceDate.get().getLowerBoundAsInstant() != null
@@ -368,15 +403,108 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
                       upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.get().getUpperBound().getPrefix());
 
-      return claimEntities.stream()
+      return claimEntitiesWithTags.stream()
           .filter(
               entity ->
-                  lowerBoundCheck.test(claimType.getServiceEndAttributeFunction().apply(entity))
+                  lowerBoundCheck.test(
+                          claimType.getServiceEndAttributeFunction().apply(entity.getClaimEntity()))
                       && upperBoundCheck.test(
-                          claimType.getServiceEndAttributeFunction().apply(entity)))
+                          claimType
+                              .getServiceEndAttributeFunction()
+                              .apply(entity.getClaimEntity())))
           .collect(Collectors.toList());
     }
-    return claimEntities;
+
+    return claimEntitiesWithTags;
+  }
+
+  private String extractClaimId(Object claimEntity) {
+    try {
+      // Dynamically access the field corresponding to the entityIdAttribute using reflection
+      Field entityIdField =
+          claimEntity.getClass().getDeclaredField(claimType.getEntityIdAttribute().getName());
+      entityIdField.setAccessible(true); // Make the field accessible
+
+      Object claimIdValue = entityIdField.get(claimEntity);
+
+      if (claimIdValue != null) {
+        return claimIdValue.toString();
+      }
+    } catch (NoSuchFieldException e) {
+      // Field not found, try the next one
+    } catch (IllegalAccessException e) {
+      // Access error, try the next one
+    }
+    // If no ID found, return empty string or throw an exception
+    return "";
+  }
+
+  /**
+   * Builds a mapping from claim IDs to their security tags.
+   *
+   * @param tagTable The table containing security tags
+   * @param claimIds The list of claim IDs
+   * @return A map from claim ID to a list of security tags
+   */
+  private Map<String, Set<String>> buildClaimIdToTagsMap(String tagTable, Set<String> claimIds) {
+    // If no claim IDs, return an empty map
+    if (claimIds.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    List<Object[]> results = new ArrayList<>();
+
+    if (tagTable != null) {
+      String query =
+          String.format("SELECT t.claim, t.code FROM %s t WHERE t.claim IN :claimIds", tagTable);
+
+      results =
+          entityManager
+              .createQuery(query, Object[].class)
+              .setParameter("claimIds", claimIds)
+              .getResultList();
+    }
+
+    // Build the map from results
+    Map<String, Set<String>> claimIdToTagsMap = new HashMap<>();
+    for (Object[] result : results) {
+      String claimId = result[0].toString();
+      String tag = result[1].toString();
+
+      // Add tag to the list for this claim ID
+      claimIdToTagsMap.computeIfAbsent(claimId, k -> new HashSet<>()).add(tag);
+    }
+
+    return claimIdToTagsMap;
+  }
+
+  // Method to dynamically collect claim IDs for the given claim entity
+  private void collectClaimIds(List<Object> claimEntities, Set<String> claimIds) {
+
+    for (Object claimEntity : claimEntities) {
+
+      try {
+        // Dynamically access the field corresponding to the entityIdAttribute using reflection
+        Field entityIdField =
+            claimEntity.getClass().getDeclaredField(claimType.getEntityIdAttribute().getName());
+        entityIdField.setAccessible(true); // Make the field accessible
+
+        // Get the value of the entityIdField
+        Object claimIdValue = entityIdField.get(claimEntity);
+
+        // If a valid claim ID is found, add it to the claimIds list
+        if (claimIdValue != null) {
+          claimIds.add(claimIdValue.toString());
+        }
+      } catch (NoSuchFieldException e) {
+        LOGGER.debug(
+            "Field '{}' not found for claim entity: {}",
+            claimType.getEntityIdAttribute().getName(),
+            claimEntity);
+      } catch (IllegalAccessException e) {
+        LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
+      }
+    }
   }
 
   /**

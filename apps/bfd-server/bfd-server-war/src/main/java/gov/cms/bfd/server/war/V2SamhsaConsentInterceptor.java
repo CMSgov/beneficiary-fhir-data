@@ -80,29 +80,14 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
 
   void processBundle(Bundle bundle) {
     for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-      if (shouldRedactResource(entry.getResource())) {
+      IBaseResource baseResource = entry.getResource();
+
+      if (baseResource instanceof Resource resource
+          && resource.getMeta() != null
+          && shouldRedactResource(resource.getMeta().getSecurity())) {
         redactSensitiveData(entry);
       }
     }
-  }
-
-  /**
-   * Checks if a resource should be redacted based on SAMHSA security tags.
-   *
-   * @param baseResource The resource to check.
-   * @return true if the resource should be redacted, false otherwise.
-   */
-  boolean shouldRedactResource(IBaseResource baseResource) {
-    if (baseResource instanceof Resource resource && resource.getMeta() != null) {
-      for (IBaseCoding securityTag : resource.getMeta().getSecurity()) {
-        // Check for SAMHSA-related tags
-        if (isSamhsaSecurityTag(securityTag)) {
-          logger.info("Matched SAMHSA security tag, redacting resource.");
-          return true;
-        }
-      }
-    }
-    return false; // No matching SAMHSA tags found
   }
 
   /**
@@ -121,9 +106,6 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
     }
     return false; // No matching SAMHSA tags found
   }
-
-  // make another shouldRedactResource that takes securityTag or use isSamhsaSecurityTag for the
-  // shadow tag
 
   /**
    * Determines if a security tag is related to SAMHSA (42CFRPart2).

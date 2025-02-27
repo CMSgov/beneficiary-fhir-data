@@ -13,7 +13,7 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimSamhsaMatcher;
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.util.List;
 import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
@@ -51,32 +51,6 @@ public class V2SamhsaConsentSimulation {
     this.securityTagManager = securityTagManager;
   }
 
-  //  /**
-  //   * Simulates V2SamhsaConsentInterceptor without actually registering
-  // V2SamhsaConsentInterceptor.
-  //   *
-  //   * @param theRequestDetails the request details
-  //   * @param theResource the resource being processed
-  //   * @return IBaseResource
-  //   */
-  //  public IBaseResource simulateScrubbing(
-  //      RequestDetails theRequestDetails, IBaseResource theResource) {
-  //    logger.debug("Simulating SAMHSA scrubbing.");
-  //
-  //    if (!samhsaV2Shadow || !v2SamhsaConsentInterceptor.applySamhsaFiltering(theRequestDetails))
-  // {
-  //      return theResource;
-  //    }
-  //
-  //    // Process the resource if it is a Bundle
-  //    if (theResource instanceof Bundle bundle) {
-  //      v2SamhsaConsentInterceptor.processBundle(bundle);
-  //      return bundle;
-  //    }
-  //
-  //    return theResource; // Return the unmodified resource if no redaction
-  //  }
-
   /**
    * logs Missing Claim Ids.
    *
@@ -84,7 +58,7 @@ public class V2SamhsaConsentSimulation {
    * @param hasNoSamhsaData the hasNoSamhsaData boolean
    */
   public void logMissingClaim(Object entity, boolean hasNoSamhsaData) {
-    if (samhsaV2Shadow && entity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+    if (samhsaV2Shadow && entity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
 
       // Get security tags from the claim entity
       List<Coding> securityTags =
