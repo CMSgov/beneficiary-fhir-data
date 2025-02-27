@@ -6,15 +6,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.model.rda.entities.RdaFissClaim;
-import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
-import gov.cms.bfd.model.rif.entities.CarrierClaim;
-import gov.cms.bfd.model.rif.entities.DMEClaim;
-import gov.cms.bfd.model.rif.entities.HHAClaim;
-import gov.cms.bfd.model.rif.entities.HospiceClaim;
-import gov.cms.bfd.model.rif.entities.InpatientClaim;
-import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import jakarta.persistence.EntityManager;
@@ -24,24 +15,35 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Provides common logic for performing DB interactions. */
 @EqualsAndHashCode
 @AllArgsConstructor
 public class ClaimDao {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClaimDao.class);
+
   /** Query name for logging MDC. */
   static final String CLAIM_BY_MBI_QUERY = "claim_by_mbi";
 
   /** Query name for logging MDC. */
   static final String CLAIM_BY_ID_QUERY = "claim_by_id";
+
+  /** Query name for logging MDC. */
+  static final String CLAIM_SECURITY_TAG_QUERY = "security_tag_by_claim";
 
   /** {@link EntityManager} used for database access. */
   private final EntityManager entityManager;
@@ -51,6 +53,8 @@ public class ClaimDao {
 
   /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
+
+  private static final Logger logger = LoggerFactory.getLogger(ClaimDao.class);
 
   /**
    * Gets an entity by it's ID for the given claim type.
@@ -87,63 +91,43 @@ public class ClaimDao {
   }
 
   /**
-   * Find records by MBI (hashed or unhashed) for a given {@link ResourceTypeV2} using search value
-   * plus optional last updated and service date ranges.
+   * getSecurityTags By claim Ids.
    *
-   * @param resourceType The {@link ResourceTypeV2} that defines properties required for the query.
-   * @param mbiSearchValue The desired value of the mbi attribute be searched on.
-   * @param isMbiSearchValueHashed True if the mbiSearchValue is a hashed MBI.
-   * @param lastUpdated The range of lastUpdated values to search on.
-   * @param serviceDate The range of the desired service date to search on.
-   * @param <T> The entity type being retrieved.
-   * @return A list of entities of type T retrieved matching the given parameters.
+   * @param tagTable The table containing security tags
+   * @param claimIds The id of the claim to retrieve.
+   * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
   @Trace
-  public <T> List<T> findAllByMbiAttribute(
-      ResourceTypeV2<?, T> resourceType,
-      String mbiSearchValue,
-      boolean isMbiSearchValueHashed,
-      DateRangeParam lastUpdated,
-      DateRangeParam serviceDate) {
-    final Class<T> entityClass = resourceType.getEntityClass();
-    final String idAttributeName = resourceType.getEntityIdAttribute();
-    final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    final CriteriaQuery<T> criteria = builder.createQuery(entityClass);
-    final Root<T> root = criteria.from(entityClass);
-
-    criteria.select(root);
-
-    // Normal case where we do a simple query with all the conditions in its where clause.
-    final List<Predicate> predicates =
-        createStandardPredicatesForMbiLookup(
-            builder,
-            root,
-            resourceType,
-            mbiSearchValue,
-            isMbiSearchValueHashed,
-            lastUpdated,
-            serviceDate);
-
-    criteria.where(predicates.toArray(new Predicate[0]));
-
-    // This sort will ensure predictable responses for any current/future testing needs
-    criteria.orderBy(builder.asc(root.get(idAttributeName)));
-
-    List<T> claimEntities = null;
-
-    Timer.Context timerClaimQuery =
-        getTimerForResourceQuery(resourceType, CLAIM_BY_MBI_QUERY).time();
-    try {
-      claimEntities = entityManager.createQuery(criteria).getResultList();
-    } finally {
-      logQueryMetric(
-          resourceType,
-          CLAIM_BY_MBI_QUERY,
-          timerClaimQuery.stop(),
-          claimEntities == null ? 0 : claimEntities.size());
+  public Map<String, Set<String>> buildClaimIdToTagsMap(String tagTable, List<String> claimIds) {
+    // If no claim IDs, return an empty map
+    if (claimIds.isEmpty()) {
+      return Collections.emptyMap();
     }
 
-    return claimEntities;
+    List<Object[]> results = new ArrayList<>();
+
+    if (tagTable != null) {
+      String query =
+          String.format("SELECT t.claim, t.code FROM %s t WHERE t.claim IN :claimIds", tagTable);
+
+      results =
+          entityManager
+              .createQuery(query, Object[].class)
+              .setParameter("claimIds", claimIds)
+              .getResultList();
+    }
+
+    // Build the map from results
+    Map<String, Set<String>> claimIdToTagsMap = new HashMap<>();
+    for (Object[] result : results) {
+      String claimId = result[0].toString();
+      String tag = result[1].toString();
+
+      // Add tag to the list for this claim ID
+      claimIdToTagsMap.computeIfAbsent(claimId, k -> new HashSet<>()).add(tag);
+    }
+
+    return claimIdToTagsMap;
   }
 
   /**
@@ -159,7 +143,7 @@ public class ClaimDao {
    * @return A list of entities of type T retrieved matching the given parameters.
    */
   @Trace
-  public <T> List<ClaimWithSecurityTagsV2<T>> findAllByMbiAttributeWithSecurityTags(
+  public <T> List<ClaimWithSecurityTags<T>> findAllByMbiAttribute(
       ResourceTypeV2<?, T> resourceType,
       String mbiSearchValue,
       boolean isMbiSearchValueHashed,
@@ -202,74 +186,80 @@ public class ClaimDao {
           claimEntities == null ? 0 : claimEntities.size());
     }
 
-    // List to hold claims with their respective security tags
-    List<ClaimWithSecurityTagsV2<T>> claimEntitiesWithTags = new ArrayList<>();
-    Long claimId = null;
-    String mcsFissClaimId = null;
-    String query = null;
+    List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
+    List<String> claimIds = new ArrayList<>();
 
     if (claimEntities != null) {
-      // Iterate over each claim and get its security tags
-      for (T claimEntity : claimEntities) {
-        // Identify claim type and get the claimId
-        switch (claimEntity) {
-          case RdaMcsClaim rdaMcsClaim:
-            mcsFissClaimId = rdaMcsClaim.getIdrClmHdIcn();
-            query = "SELECT t.code FROM McsTag t WHERE t.claim = :mcsFissClaimId";
-            break;
-          case RdaFissClaim rdaFissClaim:
-            mcsFissClaimId = rdaFissClaim.getClaimId();
-            query = "SELECT t.code FROM FissTag t WHERE t.claim = :mcsFissClaimId";
-            break;
-          case CarrierClaim carrierClaim:
-            claimId = carrierClaim.getClaimId();
-            query = "SELECT t.code FROM CarrierTag t WHERE t.claim = :claimId";
-            break;
-          case DMEClaim dmeClaim:
-            claimId = dmeClaim.getClaimId();
-            query = "SELECT t.code FROM DmeTag t WHERE t.claim = :claimId";
-            break;
-          case HHAClaim hhaClaim:
-            claimId = hhaClaim.getClaimId();
-            query = "SELECT t.code FROM HhaTag t WHERE t.claim = :claimId";
-            break;
-          case HospiceClaim hospiceClaim:
-            claimId = hospiceClaim.getClaimId();
-            query = "SELECT t.code FROM HospiceTag t WHERE t.claim = :claimId";
-            break;
-          case InpatientClaim inpatientClaim:
-            claimId = inpatientClaim.getClaimId();
-            query = "SELECT t.code FROM InpatientTag t WHERE t.claim = :claimId";
-            break;
-          case OutpatientClaim outpatientClaim:
-            claimId = outpatientClaim.getClaimId();
-            query = "SELECT t.code FROM OutpatientTag t WHERE t.claim = :claimId";
-            break;
-          case SNFClaim snfClaim:
-            claimId = snfClaim.getClaimId();
-            query = "SELECT t.code FROM SnfTag t WHERE t.claim = :claimId";
-            break;
-          default:
-            // Handle other claim types or throw an exception if the type is unsupported
-            throw new IllegalArgumentException(
-                "Unsupported claim type: " + claimEntity.getClass().getName());
-        }
+      collectClaimIds((List<Object>) claimEntities, claimIds, resourceType.getEntityIdAttribute());
 
-        // Query tags for the identified claimId
-        List<String> securityTagResults =
-            entityManager
-                .createQuery(query, String.class)
-                .setParameter(mcsFissClaimId != null ? "mcsFissClaimId" : "claimId", claimId)
-                .getResultList();
+      if (!claimIds.isEmpty()) {
+        // Query for security tags by the collected claim IDs
+        Map<String, Set<String>> claimIdToTagsMap =
+            buildClaimIdToTagsMap(resourceType.getEntityTagType(), claimIds);
 
-        // Collect the security tags into a Set (avoiding duplicates)
-        Set<String> securityTags = new HashSet<>(securityTagResults);
+        // Process all claims using the map from the single query
+        claimEntities.stream()
+            .forEach(
+                claimEntity -> {
+                  // Get the claim ID
+                  String claimId = extractClaimId(claimEntity, resourceType.getEntityIdAttribute());
 
-        // Wrap the claim and its tags in the response object
-        claimEntitiesWithTags.add(new ClaimWithSecurityTagsV2<>(claimEntity, securityTags));
+                  // Look up this claim's tags from our pre-fetched map (no additional DB query)
+                  Set<String> claimSpecificTags =
+                      claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+
+                  // Wrap the claim and its tags in the response object
+                  claimEntitiesWithTags.add(
+                      new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags));
+                });
       }
     }
     return claimEntitiesWithTags;
+  }
+
+  // Method to dynamically collect claim IDs for the given claim entity
+  private void collectClaimIds(
+      List<Object> claimEntities, List<String> claimIds, String entityIdAttribute) {
+    for (Object claimEntity : claimEntities) {
+
+      try {
+        // Dynamically access the field corresponding to the entityIdAttribute using reflection
+        Field entityIdField = claimEntity.getClass().getDeclaredField(entityIdAttribute);
+        entityIdField.setAccessible(true); // Make the field accessible
+
+        // Get the value of the entityIdField
+        Object claimIdValue = entityIdField.get(claimEntity);
+
+        // If a valid claim ID is found, add it to the claimIds list
+        if (claimIdValue != null) {
+          claimIds.add(claimIdValue.toString());
+        }
+      } catch (NoSuchFieldException e) {
+        LOGGER.debug("Field '{}' not found for claim entity: {}", entityIdAttribute, claimEntity);
+      } catch (IllegalAccessException e) {
+        LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
+      }
+    }
+  }
+
+  private String extractClaimId(Object claimEntity, String entityIdAttribute) {
+    try {
+      // Dynamically access the field corresponding to the entityIdAttribute using reflection
+      Field entityIdField = claimEntity.getClass().getDeclaredField(entityIdAttribute);
+      entityIdField.setAccessible(true); // Make the field accessible
+
+      Object claimIdValue = entityIdField.get(claimEntity);
+
+      if (claimIdValue != null) {
+        return claimIdValue.toString();
+      }
+    } catch (NoSuchFieldException e) {
+      // Field not found, try the next one
+    } catch (IllegalAccessException e) {
+      // Access error, try the next one
+    }
+    // If no ID found, return empty string or throw an exception
+    return "";
   }
 
   /**

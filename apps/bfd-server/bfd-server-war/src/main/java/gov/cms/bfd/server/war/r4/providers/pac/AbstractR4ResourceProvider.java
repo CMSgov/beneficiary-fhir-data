@@ -33,7 +33,6 @@ import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import jakarta.annotation.Nonnull;
@@ -290,10 +289,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private T transformEntity(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
 
-    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
-      claimEntity = claimWithSecurityTagsV2.getClaimEntity();
-    }
-
     if (claimIdType.getTypeLabel().equals("fiss")) {
       return fissTransformer.transform(claimEntity, includeTaxNumbers);
     } else if (claimIdType.getTypeLabel().equals("mcs")) {
@@ -318,10 +313,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
-
-    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
-      claimEntity = claimWithSecurityTagsV2.getClaimEntity();
-    }
 
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
@@ -520,7 +511,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             .flatMap(
                 type ->
                     claimDao
-                        .findAllByMbiAttributeWithSecurityTags(
+                        .findAllByMbiAttribute(
                             type, mbi, bundleOptions.isHashed, lastUpdated, serviceDate)
                         .stream()
                         .map(e -> new ImmutablePair<>(e, type)))
@@ -529,7 +520,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     // Log nonsensitive MBI identifiers for a given Claim/ClaimResponse request for use in
     // historical analysis
     entitiesWithType.stream()
-        .map(pair -> getClaimEntityMbi(pair.right, pair.left))
+        .map(pair -> getClaimEntityMbi(pair.right, pair.left.getClaimEntity()))
         .filter(Objects::nonNull)
         // We choose the first MBI from the first, valid claim entity (technically, all entities
         // should fit these criteria or something is very wrong) in the Stream as the MBI

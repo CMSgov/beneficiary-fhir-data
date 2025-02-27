@@ -20,7 +20,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +86,7 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
 
-    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
       claim = claimWithSecurityTagsV2.getClaimEntity();
       securityTags =
           securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());

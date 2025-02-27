@@ -2,7 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -128,6 +128,14 @@ public final class SecurityTagManager {
    */
   public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(
       String claimId, Class<?> tagClass) {
+  public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(Object claimEntity) {
+    Object claim = claimEntity;
+    List<Coding> coding = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
+      claim = claimWithSecurityTagsV2.getClaimEntity();
+      coding = getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+    }
 
     List<org.hl7.fhir.dstu3.model.Coding> securityTagCoding = new ArrayList<>();
     List<Coding> coding = getClaimSecurityLevel(claimId, tagClass);

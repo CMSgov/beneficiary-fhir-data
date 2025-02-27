@@ -11,7 +11,7 @@ import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -94,7 +94,7 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
     Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
 
-    if (claimEntity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
       claim = claimWithSecurityTagsV2.getClaimEntity();
       securityTags =
           securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());

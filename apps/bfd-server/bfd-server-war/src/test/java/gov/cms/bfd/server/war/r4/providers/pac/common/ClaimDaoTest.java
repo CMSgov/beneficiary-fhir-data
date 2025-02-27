@@ -381,7 +381,8 @@ class ClaimDaoTest {
   }
 
   /**
-   * Test the {@link ClaimDao#findAllByMbiAttribute} method.
+   * Test the {@link ClaimDao#findAllByMbiAttribute(ResourceTypeV2, String, boolean, DateRangeParam,
+   * DateRangeParam)} method.
    *
    * @param param defines the specific test case
    * @param <TResource> FHIR resource type
@@ -428,14 +429,22 @@ class ClaimDaoTest {
     final TypedQuery<TEntity> query = mock(TypedQuery.class);
     doReturn(query).when(mockEntityManager).createQuery(claimsQuery);
 
-    final List<TEntity> queryResult =
-        List.of(
-            param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
+    RdaFissClaim rda = new RdaFissClaim();
+    rda.setClaimId("123");
+
+    RdaMcsClaim mcs = new RdaMcsClaim();
+    mcs.setIdrClmHdIcn("456");
+
+    final List<TEntity> queryResult = (List<TEntity>) List.of(rda, mcs, mcs);
     doReturn(queryResult).when(query).getResultList();
 
-    final List<TEntity> result =
+    List<ClaimWithSecurityTags<TEntity>> claimsWithTags =
         dao.findAllByMbiAttribute(
             resourceType, mbiSearchValue, isMbiSearchValueHashed, lastUpdated, serviceDate);
+
+    final List<TEntity> result =
+        claimsWithTags.stream().map(ClaimWithSecurityTags::getClaimEntity).toList();
+
     assertEquals(queryResult, result);
 
     ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
@@ -598,7 +607,8 @@ class ClaimDaoTest {
           Long.class,
           "mbiAttribute",
           "somePropertyName",
-          List.of("endDateAttribute"));
+          List.of("endDateAttribute"),
+          "");
     }
   }
 
