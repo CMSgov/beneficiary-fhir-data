@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -217,6 +218,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         // our top level is a bundle
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(8))
         // the claim types of these entries should all be ExplanationOfBenefit
         .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
@@ -259,6 +261,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .spec(requestAuth)
             .expect()
             // we should have 8 claim type entries
+            .body("entry", notNullValue())
             .body("entry.size()", equalTo(8))
             // Check that no paging info exists, since we didn't request it (only self should exist
             // for link)
@@ -279,6 +282,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // we should have 4 claim type entries since we started at item 4/8
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(4))
         // By adding start index we've enabled paging, so check paging was added
         // there should be 4 entries for the paging section; first, previous, last, self (we're on
@@ -396,6 +400,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .ifError()
             .body("resourceType", equalTo("Bundle"))
             // we should have 3 entries, since we set page size to 3
+            .body("entry", notNullValue())
             .body("entry.size()", equalTo(3))
             // Our entries should contain the first three claim types (we return claim types in
             // order)
@@ -427,6 +432,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .ifError()
             .body("resourceType", equalTo("Bundle"))
             // we should have 3 entries, since we set page size to 3
+            .body("entry", notNullValue())
             .body("entry.size()", equalTo(3))
             // Our entries should contain the first two claim types (we return claim types in order)
             .body(
@@ -451,6 +457,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .ifError()
         .body("resourceType", equalTo("Bundle"))
         // we should have 2 entries, since we only have 2 elements left in the list
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(2))
         .body("entry.resource.id", hasItems(containsString("carrier"), containsString("hospice")))
         // expect 4 entries for the paging section; first, last, self, previous; should be no "next"
@@ -477,6 +484,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // we should have 5 entries, since we entered on index 3 with 8 results
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(5))
         // there should be 4 entries for the paging section; first, previous, last, self
         .body("link.size()", equalTo(4))
@@ -501,6 +509,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // we should have all 8 claims, since count > claims returned
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(8))
         // there should be 3 entries for the paging section; first, last, self (since all the items
         // were returned on one page)
@@ -574,6 +583,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .log()
         .ifError()
         .body("resourceType", equalTo("Bundle"))
+        .body("entry", notNullValue())
         // we should have 1 claim, since the startIndex was equal to the max number of claims
         .body("entry.size()", equalTo(1))
         .statusCode(200)
@@ -598,6 +608,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // Make sure we found only the PDE claim that was not modified
         // (claims with samhsa data are entirely filtered out of the result set)
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(1))
         .body("entry.resource.id", hasItem(containsString("pde")))
         .statusCode(200)
@@ -622,6 +633,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         .body("resourceType", equalTo("Bundle"))
+        .body("entry", notNullValue())
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
         .statusCode(200)
@@ -644,6 +656,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(getRequestAuth(SAMHSA_KEYSTORE))
         .expect()
         .body("resourceType", equalTo("Bundle"))
+        .body("entry", notNullValue())
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
         .statusCode(200)
@@ -673,6 +686,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .body("resourceType", equalTo("Bundle"))
         // Check nothing is filtered; we should see tons of claims as we load 1 claim per SAMHSA
         // code for each type
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(numSamhsaClaims))
         .statusCode(200)
         .when()
@@ -699,6 +713,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .expect()
             .body("resourceType", equalTo("Bundle"))
             // we should have 8 claim type entries
+            .body("entry", notNullValue())
             .body("entry.size()", equalTo(8))
             .statusCode(200)
             .when()
@@ -731,6 +746,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .expect()
         // our top level is still a bundle
         .body("resourceType", equalTo("Bundle"))
+        .body("entry", notNullValue())
         // we should have 1 claim type entry
         .body("entry.size()", equalTo(1))
         // the claim type of the entry should be ExplanationOfBenefit
@@ -769,6 +785,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
       given()
           .spec(requestAuth)
           .expect()
+          .body("entry", notNullValue())
           .body("entry.size()", equalTo(8))
           .statusCode(200)
           .when()
@@ -817,6 +834,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         given()
             .spec(requestAuth)
             .expect()
+            .body("entry", notNullValue())
             .body("entry.size()", equalTo(expectedCount))
             .statusCode(200)
             .when()
@@ -842,6 +860,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
          * since it will double-encode the lastUpdated field otherwise. */
         .urlEncodingEnabled(false)
         .expect()
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(3))
         .statusCode(200)
         .when()
@@ -879,6 +898,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // Expect all the claims to return
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(8))
         .rootPath("entry.find { it.resource.id.contains('carrier') }")
         .body("resource.meta.lastUpdated", equalTo(expectedFallbackDate))
@@ -893,6 +913,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     given()
         .spec(requestAuth)
         .expect()
+        .body("entry", notNullValue())
         // Expect all the claims to return
         .body("entry.size()", equalTo(8))
         // Check the lastUpdated is set to the fallback
@@ -913,6 +934,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // Expect all the claims to return
+        .body("entry", notNullValue())
         .body("entry.size()", equalTo(7))
         .statusCode(200)
         .when()
