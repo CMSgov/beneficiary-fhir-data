@@ -47,19 +47,19 @@ public class SamhsaCarrierAdapter extends SamhsaAdapterBase<CarrierClaim, Carrie
   @Override
   public Map<Supplier<Optional<String>>, String> getClaimMethods() {
     return Map.ofEntries(
-        entry(claim::getDiagnosisPrincipalCode, "prncpal_dgns_cd"),
-        entry(claim::getDiagnosis1Code, "icd_dgns_cd1"),
-        entry(claim::getDiagnosis2Code, "icd_dgns_cd2"),
-        entry(claim::getDiagnosis3Code, "icd_dgns_cd3"),
-        entry(claim::getDiagnosis4Code, "icd_dgns_cd4"),
-        entry(claim::getDiagnosis5Code, "icd_dgns_cd5"),
-        entry(claim::getDiagnosis6Code, "icd_dgns_cd6"),
-        entry(claim::getDiagnosis7Code, "icd_dgns_cd7"),
-        entry(claim::getDiagnosis8Code, "icd_dgns_cd8"),
-        entry(claim::getDiagnosis9Code, "icd_dgns_cd9"),
-        entry(claim::getDiagnosis10Code, "icd_dgns_cd10"),
-        entry(claim::getDiagnosis11Code, "icd_dgns_cd11"),
-        entry(claim::getDiagnosis12Code, "icd_dgns_cd12"));
+        entry(claim::getDiagnosisPrincipalCode, PRNCPAL_DGNS_CD),
+        entry(claim::getDiagnosis1Code, ICD_DGNS_CD_1),
+        entry(claim::getDiagnosis2Code, ICD_DGNS_CD_2),
+        entry(claim::getDiagnosis3Code, ICD_DGNS_CD_3),
+        entry(claim::getDiagnosis4Code, ICD_DGNS_CD_4),
+        entry(claim::getDiagnosis5Code, ICD_DGNS_CD_5),
+        entry(claim::getDiagnosis6Code, ICD_DGNS_CD_6),
+        entry(claim::getDiagnosis7Code, ICD_DGNS_CD_7),
+        entry(claim::getDiagnosis8Code, ICD_DGNS_CD_8),
+        entry(claim::getDiagnosis9Code, ICD_DGNS_CD_9),
+        entry(claim::getDiagnosis10Code, ICD_DGNS_CD_10),
+        entry(claim::getDiagnosis11Code, ICD_DGNS_CD_11),
+        entry(claim::getDiagnosis12Code, ICD_DGNS_CD_12));
   }
 
   /** {@inheritDoc} */
@@ -72,7 +72,7 @@ public class SamhsaCarrierAdapter extends SamhsaAdapterBase<CarrierClaim, Carrie
   @Override
   public Map<Supplier<Optional<String>>, String> getClaimLineMethods(CarrierClaimLine line) {
     return Map.ofEntries(
-        entry(line::getDiagnosisCode, "line_icd_dgns_cd"), entry(line::getHcpcsCode, "hcpcs_cd"));
+        entry(line::getDiagnosisCode, LINE_ICD_DGNS_CD), entry(line::getHcpcsCode, "hcpcs_cd"));
   }
 
   /** {@inheritDoc} */
