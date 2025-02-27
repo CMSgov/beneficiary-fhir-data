@@ -139,6 +139,7 @@ resource "aws_iam_role" "partner_bucket_role" {
 
 resource "aws_iam_role" "isp_bcda_bucket_role" {
   name = "${local.full_name}-isp-to-bcda-bucket-role"
+  path = "/delegatedadmin/adodeveloper/"
   description = join("", [
     "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
     "path within the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
@@ -231,6 +232,7 @@ resource "aws_iam_policy" "partner_bucket_access" {
 
 resource "aws_iam_policy" "isp_bcda_bucket_access" {
   name = "${local.full_name}-isp-to-bcda-allow-eft-s3-path"
+  path = "/delegatedadmin/adodeveloper/"
   description = join("", [
     "Allows ISP to access the BCDA inbound path when this policy's corresponding IAM ",
     "role is assumed by ISP"
