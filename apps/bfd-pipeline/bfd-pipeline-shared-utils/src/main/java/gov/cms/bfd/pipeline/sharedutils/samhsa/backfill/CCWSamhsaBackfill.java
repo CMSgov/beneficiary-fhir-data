@@ -196,9 +196,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The Logger. */
   static final Logger LOGGER = LoggerFactory.getLogger(CCWSamhsaBackfill.class);
 
-  /** The table to process in this thread. */
-  private final TableEntry tableEntry;
-
   /**
    * The list of table entries for CCW claims. This is mostly used in building the queries for the
    * tables.
@@ -389,7 +386,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
       Long logInterval,
       CCW_TABLES tableEntry) {
     super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
-    this.tableEntry = tableEntry.getEntry();
   }
 
   /** {@inheritDoc} */
