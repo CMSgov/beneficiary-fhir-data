@@ -11,9 +11,9 @@ Several options are proposed.
 
 ## Status
 
-* Status: Approved <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Implemented <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
-    * n/a
+    * [BFD-3124](https://jira.cms.gov/browse/BFD-3124)
 
 ## Table of Contents
 
