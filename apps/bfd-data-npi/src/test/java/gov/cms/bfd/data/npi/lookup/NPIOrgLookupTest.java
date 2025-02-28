@@ -1,5 +1,6 @@
 package gov.cms.bfd.data.npi.lookup;
 
+import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,20 +40,34 @@ public class NPIOrgLookupTest {
 
   /** Test JSON, which will be deserialized. */
   private static final String testJson =
-      String.format(
-          " { \"npi\": \"%s\","
-              + " \"entityTypeCode\": \"2\","
-              + " \"providerOrganizationName\": \"%s\","
-              + " \"taxonomyCode\": \"%s\","
-              + " \"taxonomyDisplay\": \"%s\","
-              + " \"providerNamePrefix\": \"Dr\","
-              + " \"providerFirstName\": \"Stephen\","
-              + " \"providerMiddleName\": \"J.\","
-              + " \"providerLastName\": \"Smith\","
-              + " \"providerNameSuffix\": \"Sr.\","
-              + " \"providerCredential\": \"MD\""
-              + " }",
-          FAKE_NPI_NUMBER, FAKE_NPI_ORG_NAME, FAKE_TAXONOMY_CODE, FAKE_TAXONOMY_DISPLAY);
+      new StringBuilder()
+          .append(PROVIDER_ORGANIZATION_NAME_FIELD)
+          .append(",")
+          .append(ENTITY_TYPE_CODE_FIELD)
+          .append(",")
+          .append(NPI_FIELD)
+          .append(",")
+          .append(TAXONOMY_CODE_FIELD)
+          .append(",")
+          .append(TAXONOMY_DISPLAY_FIELD)
+          .append(",")
+          .append(PROVIDER_FIRST_NAME_FIELD)
+          .append(",")
+          .append(PROVIDER_MIDDLE_NAME_FIELD)
+          .append(",")
+          .append(PROVIDER_LAST_NAME_FIELD)
+          .append(",")
+          .append(PROVIDER_PREFIX_FIELD)
+          .append(",")
+          .append(PROVIDER_SUFFIX_FIELD)
+          .append(",")
+          .append(PROVIDER_CREDENTIAL_FIELD)
+          .append("\n")
+          .append(
+              String.format(
+                  "%s,1,%s,%s,%s,Stephen,J.,Smith,Dr.,Sr.,MD",
+                  FAKE_NPI_ORG_NAME, FAKE_NPI_NUMBER, FAKE_TAXONOMY_CODE, FAKE_TAXONOMY_DISPLAY))
+          .toString();
 
   /** Setup Before Each test method. */
   @BeforeEach

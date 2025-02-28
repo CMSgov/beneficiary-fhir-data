@@ -1,7 +1,8 @@
 package gov.cms.bfd.data.npi.lookup;
 
+import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.utility.App;
@@ -15,6 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.zip.InflaterInputStream;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,15 +111,30 @@ public class NPIOrgLookup {
     Map<String, String> npiProcessedData = new HashMap<>();
     // if the stream is compressed, we will have to use InflaterInputStream to read it.
     boolean isCompressedStream = isStreamDeflated(inputStream);
-    String line;
+    ObjectMapper mapper = new ObjectMapper();
     try (final InputStream npiStream =
             isCompressedStream ? new InflaterInputStream(inputStream) : inputStream;
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
-      ObjectMapper objectMapper = new ObjectMapper();
-      while ((line = reader.readLine()) != null) {
-        JsonNode rootNode = objectMapper.readTree(line);
-        String npi = rootNode.path("npi").asText();
-        npiProcessedData.put(npi, line);
+        CSVParser csvParser =
+            new CSVParser(
+                new BufferedReader(new InputStreamReader(npiStream)),
+                CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+      for (CSVRecord record : csvParser) {
+        NPIData npiData =
+            NPIData.builder()
+                .providerOrganizationName(record.get(PROVIDER_ORGANIZATION_NAME_FIELD))
+                .entityTypeCode(record.get(ENTITY_TYPE_CODE_FIELD))
+                .npi(record.get(NPI_FIELD))
+                .taxonomyCode(record.get(TAXONOMY_CODE_FIELD))
+                .taxonomyDisplay(record.get(TAXONOMY_DISPLAY_FIELD))
+                .providerFirstName(record.get(PROVIDER_FIRST_NAME_FIELD))
+                .providerMiddleName(record.get(PROVIDER_MIDDLE_NAME_FIELD))
+                .providerLastName(record.get(PROVIDER_LAST_NAME_FIELD))
+                .providerNamePrefix(record.get(PROVIDER_PREFIX_FIELD))
+                .providerNameSuffix(record.get(PROVIDER_SUFFIX_FIELD))
+                .providerCredential(record.get(PROVIDER_CREDENTIAL_FIELD))
+                .build();
+        String line = mapper.writeValueAsString(npiData);
+        npiProcessedData.put(npiData.getNpi(), line);
       }
     }
     return npiProcessedData;
