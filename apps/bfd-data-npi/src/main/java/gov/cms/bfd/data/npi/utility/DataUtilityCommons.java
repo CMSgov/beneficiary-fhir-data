@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -353,8 +352,7 @@ public class DataUtilityCommons {
     try (FileInputStream is = new FileInputStream(originalNpiDataFile.toFile().getAbsolutePath());
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
         FileOutputStream fw =
-            new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
-        DeflaterOutputStream dos = new DeflaterOutputStream(fw); ) {
+            new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath())) {
       CSVParser csvParser =
           new CSVParser(
               reader,
@@ -386,10 +384,9 @@ public class DataUtilityCommons {
                 .providerCredential(providerCredential)
                 .build();
         String json = objectMapper.writeValueAsString(npiData);
-        dos.write(json.getBytes());
-        dos.write("\n".getBytes());
+        fw.write(json.getBytes());
+        fw.write("\n".getBytes());
       }
-      dos.close();
     }
   }
 
