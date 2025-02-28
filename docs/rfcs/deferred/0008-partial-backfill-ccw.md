@@ -14,7 +14,7 @@ The CCW team will, hopefully early in 2021,
 However, that backfill data will all be in new RIF layouts,
   which will only contain the record primary keys and the fields to be backfilled.
 BFD does not support such layouts and will need to.
-Adding that fucntionality will be a moderate-to-major architectural change for BFD.
+Adding that functionality will be a moderate-to-major architectural change for BFD.
 
 ## Status
 [Status]: #status
