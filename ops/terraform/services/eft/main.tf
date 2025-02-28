@@ -540,8 +540,8 @@ resource "aws_s3_bucket_policy" "this" {
   policy = jsonencode(
     {
       Version = "2012-10-17",
-      Statement = [
-        {
+      Statement = concat(
+        [{
           Sid       = "AllowSSLRequestsOnly",
           Effect    = "Deny",
           Principal = "*",
@@ -555,12 +555,12 @@ resource "aws_s3_bucket_policy" "this" {
               "aws:SecureTransport" = "false"
             }
           }
-        },
-        {
+        }],
+        length(aws_iam_role.isp_bcda_bucket_role) > 0 ? [{
           Sid    = "AllowISPFromVPCEOnly",
           Effect = "Deny",
           Principal = {
-            AWS = aws_iam_role.isp_bcda_bucket_role.arn
+            AWS = one(aws_iam_role.isp_bcda_bucket_role[*].arn)
           },
           Action = "s3:*",
           Resource = [
@@ -572,8 +572,8 @@ resource "aws_s3_bucket_policy" "this" {
               "aws:SourceVpce" = local.bcda_isp_vpc_endpoint_id
             }
           }
-        }
-      ]
+        }] : []
+      )
     }
   )
 }

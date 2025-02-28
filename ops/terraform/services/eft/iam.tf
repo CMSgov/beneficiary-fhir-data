@@ -138,6 +138,8 @@ resource "aws_iam_role" "partner_bucket_role" {
 }
 
 resource "aws_iam_role" "isp_bcda_bucket_role" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
   name = "${local.full_name}-isp-to-bcda-bucket-role"
   path = "/delegatedadmin/adodeveloper/"
   description = join("", [
@@ -160,7 +162,7 @@ resource "aws_iam_role" "isp_bcda_bucket_role" {
       Version = "2012-10-17"
     }
   )
-  managed_policy_arns = [aws_iam_policy.isp_bcda_bucket_access.arn]
+  managed_policy_arns = aws_iam_policy.isp_bcda_bucket_access[*].arn
 
   force_detach_policies = true
 }
@@ -231,6 +233,8 @@ resource "aws_iam_policy" "partner_bucket_access" {
 }
 
 resource "aws_iam_policy" "isp_bcda_bucket_access" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
   name = "${local.full_name}-isp-to-bcda-allow-eft-s3-path"
   path = "/delegatedadmin/adodeveloper/"
   description = join("", [
