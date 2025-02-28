@@ -10,7 +10,7 @@ A proposal to rewrite the SAMHSA filter to be more reliable and easier to mainta
 
 ## Status
 
-* Status: Proposed <!-- (Proposed/Approved/Rejected/Implemented) -->
+* Status: Approved <!-- (Proposed/Approved/Rejected/Implemented) -->
 * Implementation JIRA Ticket(s):
 
 ## Table of Contents
