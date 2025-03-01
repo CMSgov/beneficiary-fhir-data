@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -36,10 +37,12 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -371,13 +374,22 @@ class ClaimDaoTest {
    * @return all test parameters
    */
   private static Stream<MbiLookupTestParameter<?, ?>> getMbiLookupParameters() {
+
+    RdaFissClaim fiss = new RdaFissClaim();
+    fiss.setClaimId("123");
+    Supplier<RdaFissClaim> fissSupplier = () -> fiss;
+
+    RdaMcsClaim mcs = new RdaMcsClaim();
+    mcs.setIdrClmHdIcn("456");
+    Supplier<RdaMcsClaim> mcsSupplier = () -> mcs;
+
     return Stream.of(
         new MbiLookupTestParameter<>(
-            "FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, RdaFissClaim::new),
+            "FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, fissSupplier),
         new MbiLookupTestParameter<>(
-            "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, RdaMcsClaim::new),
+            "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, mcsSupplier),
         new MbiLookupTestParameter<>(
-            "MCS - with serviceDate", ClaimTypeV2.M, LastUpdated, ServiceDate, RdaMcsClaim::new));
+            "MCS - with serviceDate", ClaimTypeV2.M, LastUpdated, ServiceDate, mcsSupplier));
   }
 
   /**
@@ -429,14 +441,24 @@ class ClaimDaoTest {
     final TypedQuery<TEntity> query = mock(TypedQuery.class);
     doReturn(query).when(mockEntityManager).createQuery(claimsQuery);
 
-    RdaFissClaim rda = new RdaFissClaim();
-    rda.setClaimId("123");
+    final List<TEntity> queryResult =
+            List.of(
+                    param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
 
-    RdaMcsClaim mcs = new RdaMcsClaim();
-    mcs.setIdrClmHdIcn("456");
-
-    final List<TEntity> queryResult = (List<TEntity>) List.of(rda, mcs, mcs);
     doReturn(queryResult).when(query).getResultList();
+
+    TypedQuery<Object[]> mockTypedQuery = mock(TypedQuery.class);
+    // Mock the behavior of createQuery to return the mock TypedQuery
+    doReturn(mockTypedQuery).when(mockEntityManager)
+            .createQuery(anyString(), eq(Object[].class));
+
+    // Mock the behavior of setParameter to return the same mock TypedQuery (for method chaining)
+    doReturn(mockTypedQuery).when(mockTypedQuery).setParameter(anyString(), any());
+
+
+    // Mock the behavior of getResultList to return the desired result
+    Object[] expectedResult = new Object[] {}; // Example result
+    doReturn(Arrays.asList(expectedResult)).when(mockTypedQuery).getResultList();
 
     List<ClaimWithSecurityTags<TEntity>> claimsWithTags =
         dao.findAllByMbiAttribute(

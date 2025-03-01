@@ -156,6 +156,8 @@ public class ClaimDao {
     final CriteriaQuery<T> criteria = builder.createQuery(entityClass);
     final Root<T> root = criteria.from(entityClass);
 
+    criteria.select(root);
+
     // Standard predicates for the MBI lookup
     final List<Predicate> predicates =
         createStandardPredicatesForMbiLookup(

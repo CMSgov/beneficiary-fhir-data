@@ -110,9 +110,9 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           "OutpatientTag");
 
   /** Instance for snfClaim claims. */
-  public static final ClaimTypeV2<SNFClaim> SNFCLAIM =
+  public static final ClaimTypeV2<SNFClaim> SNF =
       new ClaimTypeV2<>(
-          "SNFCLAIM",
+          "SNF",
           "snfClaim",
           SNFClaim.class,
           SNFClaim.Fields.beneficiaryId,
