@@ -4,7 +4,8 @@ sections:
     - requirements
     - data-sources
     - inputs
-    - outputs
+    - resources
+    - modules
 
 
 # this `content` string is implemented with as a golang template https://pkg.go.dev/text/template
@@ -26,7 +27,7 @@ content: |-
          https://terraform-docs.io/user-guide/configuration/
     -->
 
-    {{ .Outputs }}
+    {{ .Modules }}
 
     <!-- GENERATED WITH `terraform-docs .`
          Manually updating the README.md will be overwritten.
