@@ -41,13 +41,8 @@ class SecurityTagManagerTest {
   void testGetClaimSecurityLevelInpatient() {
     CodeableConcept type = new CodeableConcept();
     type.addCoding().setCode("INP");
-
-    Set<String> mockTags = new HashSet<>();
-    mockTags.add("R");
-    when(entityManager.createQuery(anyString())).thenReturn(query);
-    when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
     Set<String> securityTags = new HashSet<>();
-    securityTags.add("N");
+    securityTags.add("R");
     List<Coding> securityLevel = securityTagManager.getClaimSecurityLevel(securityTags);
     assertEquals(
         "Restricted",
@@ -61,12 +56,7 @@ class SecurityTagManagerTest {
     CodeableConcept type = new CodeableConcept();
     type.addCoding().setCode("OUT");
 
-    Set<String> mockTags = new HashSet<>();
-    when(entityManager.createQuery(anyString())).thenReturn(query);
-    when(query.getResultList()).thenReturn(new java.util.ArrayList<>(mockTags));
-    Set<String> securityTags = new HashSet<>();
-    securityTags.add("N");
-    List<Coding> securityLevel = securityTagManager.getClaimSecurityLevel(securityTags);
+    List<Coding> securityLevel = securityTagManager.getClaimSecurityLevel(new HashSet<>());
     assertEquals(
         "Normal",
         securityLevel.getFirst().getDisplay(),
