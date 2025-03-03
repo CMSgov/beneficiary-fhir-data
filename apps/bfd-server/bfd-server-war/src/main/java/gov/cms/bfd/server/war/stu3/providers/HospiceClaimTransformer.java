@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,23 +67,27 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link HospiceClaim} to use
+   * @param claimEntity the {@link HospiceClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+    Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
+    }
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HospiceClaim hospiceClaim = (HospiceClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevelDstu3(
-      //              String.valueOf(hospiceClaim.getClaimId()), HospiceTag.class);
       eob = transformClaim(hospiceClaim, securityTags);
     }
     return eob;

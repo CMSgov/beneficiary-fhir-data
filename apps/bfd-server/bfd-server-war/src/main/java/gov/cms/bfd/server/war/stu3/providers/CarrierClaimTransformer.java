@@ -17,8 +17,10 @@ import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -75,20 +77,28 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link CarrierClaim} to use
+   * @param claimEntity the {@link CarrierClaim} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+    Object claim = claimEntity;
+    List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
+    }
+
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       CarrierClaim carrierClaim = (CarrierClaim) claim;
-      List<Coding> securityTags = securityTagManager.getClaimSecurityLevelDstu3(claim);
       eob = transformClaim(carrierClaim, includeTaxNumber, securityTags);
     }
 

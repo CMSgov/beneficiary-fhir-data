@@ -126,8 +126,6 @@ public final class SecurityTagManager {
    * @param tagClass value of tagClass
    * @return SecurityLevel
    */
-  public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(
-      String claimId, Class<?> tagClass) {
   public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(Object claimEntity) {
     Object claim = claimEntity;
     List<Coding> coding = new ArrayList<>();
@@ -138,6 +136,7 @@ public final class SecurityTagManager {
     }
 
     List<org.hl7.fhir.dstu3.model.Coding> securityTagCoding = new ArrayList<>();
+
     List<Coding> coding = getClaimSecurityLevel(claimId, tagClass);
     for (Coding code : coding) {
       org.hl7.fhir.dstu3.model.Coding securityTag = new org.hl7.fhir.dstu3.model.Coding();

@@ -100,10 +100,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
 
-    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
-      claim = claimWithSecurityTagsV2.getClaimEntity();
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
       securityTags =
-          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
     }
 
     if (!(claim instanceof RdaMcsClaim)) {

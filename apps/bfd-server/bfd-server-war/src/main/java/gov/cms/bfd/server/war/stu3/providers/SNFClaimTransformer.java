@@ -15,6 +15,7 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -70,23 +71,27 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link SNFClaim} to use
+   * @param claimEntity the {@link SNFClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+    Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
+    }
     if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       SNFClaim snfClaim = (SNFClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevelDstu3(
-      //              String.valueOf(snfClaim.getClaimId()), SnfTag.class);
       eob = transformClaim(snfClaim, securityTags);
     }
     return eob;
