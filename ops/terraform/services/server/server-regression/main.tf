@@ -1,5 +1,5 @@
 module "terraservice" {
-  source = "../../_modules/bfd-terraservice"
+  source = "git::https://github.com/CMSgov/beneficiary-fhir-data.git//ops/terraform/services/_modules/bfd-terraservice?ref=2.181.0"
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/terraform/services/server/server-regression"
