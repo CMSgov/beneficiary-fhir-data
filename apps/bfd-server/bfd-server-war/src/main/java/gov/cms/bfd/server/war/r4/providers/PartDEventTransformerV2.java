@@ -85,8 +85,8 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     Object claim = claimEntity;
 
-    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
-      claim = claimWithSecurityTagsV2.getClaimEntity();
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
     }
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();

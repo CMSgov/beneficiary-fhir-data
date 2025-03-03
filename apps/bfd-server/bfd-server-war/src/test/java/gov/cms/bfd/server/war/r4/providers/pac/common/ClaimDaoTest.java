@@ -16,7 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -42,7 +41,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
-import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -384,8 +382,7 @@ class ClaimDaoTest {
     Supplier<RdaMcsClaim> mcsSupplier = () -> mcs;
 
     return Stream.of(
-        new MbiLookupTestParameter<>(
-            "FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, fissSupplier),
+        new MbiLookupTestParameter<>("FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, fissSupplier),
         new MbiLookupTestParameter<>(
             "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, mcsSupplier),
         new MbiLookupTestParameter<>(
@@ -442,19 +439,17 @@ class ClaimDaoTest {
     doReturn(query).when(mockEntityManager).createQuery(claimsQuery);
 
     final List<TEntity> queryResult =
-            List.of(
-                    param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
+        List.of(
+            param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
 
     doReturn(queryResult).when(query).getResultList();
 
     TypedQuery<Object[]> mockTypedQuery = mock(TypedQuery.class);
     // Mock the behavior of createQuery to return the mock TypedQuery
-    doReturn(mockTypedQuery).when(mockEntityManager)
-            .createQuery(anyString(), eq(Object[].class));
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(anyString(), eq(Object[].class));
 
     // Mock the behavior of setParameter to return the same mock TypedQuery (for method chaining)
     doReturn(mockTypedQuery).when(mockTypedQuery).setParameter(anyString(), any());
-
 
     // Mock the behavior of getResultList to return the desired result
     Object[] expectedResult = new Object[] {}; // Example result

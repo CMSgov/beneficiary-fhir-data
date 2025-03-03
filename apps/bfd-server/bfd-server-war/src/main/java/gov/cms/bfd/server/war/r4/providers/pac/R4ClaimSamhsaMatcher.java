@@ -68,9 +68,6 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
   public boolean hasNoSamhsaData(Object entity) {
     Claim claim;
 
-    //    if (entity instanceof ClaimWithSecurityTagsV2<?> claimWithSecurityTagsV2) {
-    //      entity = claimWithSecurityTagsV2;
-    //    }
     if (((ClaimWithSecurityTags<?>) entity).getClaimEntity() instanceof RdaFissClaim) {
       claim = fissTransformer.transform(entity, false);
     } else if (((ClaimWithSecurityTags<?>) entity).getClaimEntity() instanceof RdaMcsClaim) {

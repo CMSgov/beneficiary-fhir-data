@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.commons;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -128,20 +127,15 @@ public final class SecurityTagManager {
   /**
    * Determines the security level based on the collected tags.
    *
-   * @param claimEntity value of claimEntity
+   * @param securityTags value of claimEntity
    * @return SecurityLevel
    */
-  public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(Object claimEntity) {
-    Object claim = claimEntity;
-    List<Coding> coding = new ArrayList<>();
-
-    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
-      claim = claimWithSecurityTagsV2.getClaimEntity();
-      coding = getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
-    }
+  public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(
+      Set<String> securityTags) {
+    List<Coding> coding = getClaimSecurityLevel(securityTags);
 
     List<org.hl7.fhir.dstu3.model.Coding> securityTagCoding = new ArrayList<>();
-    //    List<Coding> coding = getClaimSecurityLevel(securityTags);
+
     for (Coding code : coding) {
       org.hl7.fhir.dstu3.model.Coding securityTag = new org.hl7.fhir.dstu3.model.Coding();
       securityTag

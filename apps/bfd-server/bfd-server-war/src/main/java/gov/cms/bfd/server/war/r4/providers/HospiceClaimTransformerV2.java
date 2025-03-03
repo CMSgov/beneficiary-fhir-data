@@ -84,10 +84,10 @@ final class HospiceClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
 
-    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
-      claim = claimWithSecurityTagsV2.getClaimEntity();
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
       securityTags =
-          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
     }
     if (!(claim instanceof HospiceClaim)) {
       throw new BadCodeMonkeyException();

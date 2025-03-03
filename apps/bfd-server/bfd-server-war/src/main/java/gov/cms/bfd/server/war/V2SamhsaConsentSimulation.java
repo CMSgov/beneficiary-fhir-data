@@ -15,6 +15,8 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.R4ClaimSamhsaMatcher;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.util.List;
+import java.util.Set;
+import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,20 +60,20 @@ public class V2SamhsaConsentSimulation {
    * @param hasNoSamhsaData the hasNoSamhsaData boolean
    */
   public void logMissingClaim(Object entity, boolean hasNoSamhsaData) {
-    if (samhsaV2Shadow && entity instanceof ClaimWithSecurityTags<?> claimWithSecurityTagsV2) {
+    if (samhsaV2Shadow && entity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
 
       // Get security tags from the claim entity
       List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(claimWithSecurityTagsV2.getSecurityTags());
+          securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
 
       // Check the redaction status of the interceptor against the SAMHSA exclusion flag
       boolean notToRedact = !(v2SamhsaConsentInterceptor.shouldRedactResource(securityTags));
 
       // If redaction status doesn't match the SAMHSA exclusion flag, log the claim
-      if (notToRedact == hasNoSamhsaData) {
-        String claimId = getClaimId(claimWithSecurityTagsV2.getClaimEntity());
+      if (notToRedact != hasNoSamhsaData) {
+        String claimId = getClaimId(claimWithSecurityTags.getClaimEntity());
         String claim =
-            claimWithSecurityTagsV2
+            claimWithSecurityTags
                 .getClaimEntity()
                 .getClass()
                 .getSimpleName(); // Add class type for context
@@ -82,6 +84,43 @@ public class V2SamhsaConsentSimulation {
                 + "Claim ID: {} (Class: {})",
             claimId,
             claim);
+      }
+    }
+  }
+
+  /**
+   * logs Missing Claim Ids.
+   *
+   * @param entities the resource being processed
+   * @param hasNoSamhsaData the hasNoSamhsaData boolean
+   */
+  public void logMissingClaim(List<ClaimWithSecurityTags<T>> entities, boolean hasNoSamhsaData) {
+
+    if (samhsaV2Shadow) {
+      boolean notToRedact = false;
+
+      for (ClaimWithSecurityTags claimWithSecurityTags : entities) {
+        Set<String> securityTagsSet = claimWithSecurityTags.getSecurityTags();
+        List<Coding> securityTags = securityTagManager.getClaimSecurityLevel(securityTagsSet);
+
+        // Check the redaction status of the interceptor against the SAMHSA exclusion flag
+        notToRedact = !(v2SamhsaConsentInterceptor.shouldRedactResource(securityTags));
+
+        if (notToRedact != hasNoSamhsaData) {
+          String claimId = getClaimId(claimWithSecurityTags.getClaimEntity());
+          String claim =
+              claimWithSecurityTags
+                  .getClaimEntity()
+                  .getClass()
+                  .getSimpleName(); // Add class type for context
+
+          // Logging the error with better message formatting and more context
+          logger.error(
+              "Samhsa: claimWithSecurityTags IDs not matching between old SAMHSA filter and new SAMHSA 2.0 - "
+                  + "Claim ID: {} (Class: {})",
+              claimId,
+              claim);
+        }
       }
     }
   }

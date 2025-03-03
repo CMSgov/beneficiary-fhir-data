@@ -14,6 +14,7 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,23 +69,28 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a {@link HHAClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link OutpatientClaim} to use
+   * @param claimEntity the {@link OutpatientClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
+    Object claim = claimEntity;
     List<Coding> securityTags = new ArrayList<>();
+
+    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+      claim = claimWithSecurityTags.getClaimEntity();
+      securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
+    }
+
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HHAClaim hhaClaim = (HHAClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevelDstu3(
-      //              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
       eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;

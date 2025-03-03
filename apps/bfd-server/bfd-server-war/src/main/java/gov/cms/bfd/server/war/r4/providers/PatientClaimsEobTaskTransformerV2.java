@@ -9,10 +9,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsDao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -20,13 +22,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -37,6 +37,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,9 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
 
   /** The samhsa matcher. */
   private final R4EobSamhsaMatcher samhsaMatcher;
+
+  /** v2SamhsaConsentSimulation. */
+  private final V2SamhsaConsentSimulation v2SamhsaConsentSimulation;
 
   /** Database entity manager. */
   private EntityManager entityManager;
@@ -137,17 +141,20 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    *     manager bean
    * @param samhsaMatcher the samhsa matcher bean
    * @param drugCodeDisplayLookup the drug code display lookup bean
+   * @param v2SamhsaConsentSimulation the v2SamhsaConsentSimulation
    * @param npiOrgLookup the npi org lookup bean
    */
   public PatientClaimsEobTaskTransformerV2(
       MetricRegistry metricRegistry,
       R4EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.v2SamhsaConsentSimulation = v2SamhsaConsentSimulation;
   }
 
   /**
@@ -205,7 +212,15 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   public PatientClaimsEobTaskTransformerV2 call() {
     LOGGER.debug("TransformPatientClaimsToEobTaskV2.call() started for {}", id);
     try {
-      eobs.addAll(transformToEobs(findClaimTypeByPatient()));
+      List<ClaimWithSecurityTags<T>> claims = findClaimTypeByPatient();
+      eobs.addAll(transformToEobs(claims));
+
+      for (ExplanationOfBenefit eob : eobs) {
+        boolean samhsaMatcherTest = samhsaMatcher.test(eob);
+        // Log missing claim for samhsa V2 Shadow check
+        v2SamhsaConsentSimulation.logMissingClaim(claims, samhsaMatcherTest);
+      }
+
       if (excludeSamhsa) {
         filterSamhsa(eobs);
       }
@@ -349,23 +364,26 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       }
     }
 
+    ClaimWithSecurityTagsDao claimWithSecurityTagsDao = new ClaimWithSecurityTagsDao();
+
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
 
     Set<String> claimIds = new HashSet<>();
 
-    collectClaimIds((List<Object>) claimEntities, claimIds);
+    claimWithSecurityTagsDao.collectClaimIds((List<Object>) claimEntities, claimIds, claimType);
 
     if (!claimIds.isEmpty()) {
       // Make ONE query to get all claim-tag relationships
       Map<String, Set<String>> claimIdToTagsMap =
-          buildClaimIdToTagsMap(claimType.getEntityTagType(), claimIds);
+          claimWithSecurityTagsDao.buildClaimIdToTagsMap(
+              claimType.getEntityTagType(), claimIds, entityManager);
 
       // Process all claims using the map from the single query
       claimEntities.stream()
           .forEach(
               claimEntity -> {
                 // Get the claim ID
-                String claimId = extractClaimId(claimEntity);
+                String claimId = claimWithSecurityTagsDao.extractClaimId(claimEntity, claimType);
 
                 // Look up this claim's tags from our pre-fetched map (no additional DB query)
                 Set<String> claimSpecificTags =
@@ -418,95 +436,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     return claimEntitiesWithTags;
   }
 
-  private String extractClaimId(Object claimEntity) {
-    try {
-      // Dynamically access the field corresponding to the entityIdAttribute using reflection
-      Field entityIdField =
-          claimEntity.getClass().getDeclaredField(claimType.getEntityIdAttribute().getName());
-      entityIdField.setAccessible(true); // Make the field accessible
-
-      Object claimIdValue = entityIdField.get(claimEntity);
-
-      if (claimIdValue != null) {
-        return claimIdValue.toString();
-      }
-    } catch (NoSuchFieldException e) {
-      // Field not found, try the next one
-    } catch (IllegalAccessException e) {
-      // Access error, try the next one
-    }
-    // If no ID found, return empty string or throw an exception
-    return "";
-  }
-
-  /**
-   * Builds a mapping from claim IDs to their security tags.
-   *
-   * @param tagTable The table containing security tags
-   * @param claimIds The list of claim IDs
-   * @return A map from claim ID to a list of security tags
-   */
-  private Map<String, Set<String>> buildClaimIdToTagsMap(String tagTable, Set<String> claimIds) {
-    // If no claim IDs, return an empty map
-    if (claimIds.isEmpty()) {
-      return Collections.emptyMap();
-    }
-
-    List<Object[]> results = new ArrayList<>();
-
-    if (tagTable != null) {
-      String query =
-          String.format("SELECT t.claim, t.code FROM %s t WHERE t.claim IN :claimIds", tagTable);
-
-      results =
-          entityManager
-              .createQuery(query, Object[].class)
-              .setParameter("claimIds", claimIds)
-              .getResultList();
-    }
-
-    // Build the map from results
-    Map<String, Set<String>> claimIdToTagsMap = new HashMap<>();
-    for (Object[] result : results) {
-      String claimId = result[0].toString();
-      String tag = result[1].toString();
-
-      // Add tag to the list for this claim ID
-      claimIdToTagsMap.computeIfAbsent(claimId, k -> new HashSet<>()).add(tag);
-    }
-
-    return claimIdToTagsMap;
-  }
-
-  // Method to dynamically collect claim IDs for the given claim entity
-  private void collectClaimIds(List<Object> claimEntities, Set<String> claimIds) {
-
-    for (Object claimEntity : claimEntities) {
-
-      try {
-        // Dynamically access the field corresponding to the entityIdAttribute using reflection
-        Field entityIdField =
-            claimEntity.getClass().getDeclaredField(claimType.getEntityIdAttribute().getName());
-        entityIdField.setAccessible(true); // Make the field accessible
-
-        // Get the value of the entityIdField
-        Object claimIdValue = entityIdField.get(claimEntity);
-
-        // If a valid claim ID is found, add it to the claimIds list
-        if (claimIdValue != null) {
-          claimIds.add(claimIdValue.toString());
-        }
-      } catch (NoSuchFieldException e) {
-        LOGGER.debug(
-            "Field '{}' not found for claim entity: {}",
-            claimType.getEntityIdAttribute().getName(),
-            claimEntity);
-      } catch (IllegalAccessException e) {
-        LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
-      }
-    }
-  }
-
   /**
    * Removes all SAMHSA-related claims from the specified {@link List} of {@link
    * ExplanationOfBenefit} resources.
@@ -519,6 +448,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     samhsaIgnoredCount.getAndIncrement();
     while (eobsIter.hasNext()) {
       ExplanationOfBenefit eob = eobsIter.next();
+      // log here
       if (samhsaMatcher.test(eob)) {
         eobsIter.remove();
         samhsaRemovedCount.getAndIncrement();
