@@ -1,6 +1,5 @@
 package gov.cms.bfd.data.npi.lookup;
 
-import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -46,35 +45,29 @@ public class NPIOrgLookupE2E {
   @BeforeEach
   void setup() throws IOException {
     StringBuilder initialString = new StringBuilder();
-    initialString
-        .append(PROVIDER_ORGANIZATION_NAME_FIELD)
-        .append(",")
-        .append(ENTITY_TYPE_CODE_FIELD)
-        .append(",")
-        .append(NPI_FIELD)
-        .append(",")
-        .append(TAXONOMY_CODE_FIELD)
-        .append(",")
-        .append(TAXONOMY_DISPLAY_FIELD)
-        .append(",")
-        .append(PROVIDER_FIRST_NAME_FIELD)
-        .append(",")
-        .append(PROVIDER_MIDDLE_NAME_FIELD)
-        .append(",")
-        .append(PROVIDER_LAST_NAME_FIELD)
-        .append(",")
-        .append(PROVIDER_PREFIX_FIELD)
-        .append(",")
-        .append(PROVIDER_SUFFIX_FIELD)
-        .append(",")
-        .append(PROVIDER_CREDENTIAL_FIELD)
-        .append("\n")
-        .append(String.format("%s,2,%s,,,,,,,,", npiOrgName, npiOrgNumber))
-        .append("\n")
-        .append(
-            String.format(
-                ",1,%s,%s,%s,Stephen,J.,Smith,Dr.,Sr.,MD",
-                practitionerNPI, taxonomyCode, taxonomyDisplay));
+    initialString.append(
+        String.format(
+            " {"
+                + " \"npi\": \"%s\","
+                + " \"entityTypeCode\": \"2\","
+                + " \"providerOrganizationName\": \"%s\""
+                + " }",
+            npiOrgNumber, npiOrgName));
+    initialString.append("\n");
+    initialString.append(
+        String.format(
+            " {"
+                + " \"npi\": \"%s\","
+                + " \"taxonomyCode\": \"%s\","
+                + " \"taxonomyDisplay\": \"%s\","
+                + " \"providerNamePrefix\": \"Dr\","
+                + " \"providerFirstName\": \"Stephen\","
+                + " \"providerMiddleName\": \"J.\","
+                + " \"providerLastName\": \"Smith\","
+                + " \"providerNameSuffix\": \"Sr.\","
+                + " \"providerCredential\": \"MD\""
+                + " }",
+            practitionerNPI, taxonomyCode, taxonomyDisplay));
 
     InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
     npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
