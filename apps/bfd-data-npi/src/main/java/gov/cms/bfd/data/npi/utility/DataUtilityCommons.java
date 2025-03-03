@@ -2,13 +2,11 @@ package gov.cms.bfd.data.npi.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
-import java.io.BufferedOutputStream;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -22,12 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -40,9 +36,6 @@ import org.slf4j.LoggerFactory;
 /** Data Utility Commons class for npi. * */
 public class DataUtilityCommons {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataUtilityCommons.class);
-
-  /** Size of the buffer to read/write data. */
-  private static final int BUFFER_SIZE = 4096;
 
   /** The day of the month we should check to see if the file has posted. */
   private static final int DAYS_IN_EXPIRATION = 10;
@@ -112,57 +105,6 @@ public class DataUtilityCommons {
   }
 
   /**
-   * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
-   * (will be created if does not exists).
-   *
-   * @param zipFilePath the zip file path
-   * @param destDirectory the destination directory
-   * @throws IOException (any errors encountered will be bubbled up)
-   */
-  @SuppressWarnings("java:S5042")
-  public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
-    try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
-      ZipEntry entry = zipIn.getNextEntry();
-      // iterates over entries in the zip file
-      while (entry != null) {
-        Path filePath = destDirectory.resolve(entry.getName()).normalize();
-        if (!filePath.startsWith(destDirectory)) {
-          // Checks if resolved path is trying to escape from the destination directory
-          throw new IOException("ZipSlip: Entry is outside of the target directory");
-        }
-        if (!entry.isDirectory()) {
-          // if the entry is a file, extracts it
-          extractFile(zipIn, filePath);
-        } else {
-          // if the entry is a directory, make the directory
-          Files.createDirectories(filePath);
-        }
-        zipIn.closeEntry();
-        entry = zipIn.getNextEntry();
-      }
-    }
-  }
-
-  /**
-   * Extracts a zip entry (file entry).
-   *
-   * @param zipIn the zip file coming in
-   * @param filePath the file path for the file
-   * @throws IOException (any errors encountered will be bubbled up)
-   */
-  public static void extractFile(ZipInputStream zipIn, Path filePath) throws IOException {
-    Files.createDirectories(filePath.getParent());
-    try (BufferedOutputStream bos =
-        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()))) {
-      byte[] bytesIn = new byte[BUFFER_SIZE];
-      int read;
-      while ((read = zipIn.read(bytesIn)) != -1) {
-        bos.write(bytesIn, 0, read);
-      }
-    }
-  }
-
-  /**
    * Streams the zip file and calls a method to create the NPI csv file.
    *
    * @param convertedNpiDataFile Data file.
@@ -192,24 +134,6 @@ public class DataUtilityCommons {
     }
     if (!foundMatch) {
       throw new IllegalStateException("No NPI file found");
-    }
-  }
-
-  /**
-   * Deletes the directory.
-   *
-   * @param tempDir for the temp directory
-   */
-  private static void recursivelyDelete(Path tempDir) {
-    // Recursively delete the working dir.
-    try (Stream<Path> paths = Files.walk(tempDir)) {
-      paths
-          .sorted(Comparator.reverseOrder())
-          .map(Path::toFile)
-          .peek(f -> LOGGER.info("deleting {}", f))
-          .forEach(File::delete);
-    } catch (IOException e) {
-      LOGGER.warn("Failed to cleanup the temporary folder", e);
     }
   }
 
