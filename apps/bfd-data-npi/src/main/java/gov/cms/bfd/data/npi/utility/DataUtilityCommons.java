@@ -111,6 +111,7 @@ public class DataUtilityCommons {
    * @throws IOException (any errors encountered will be bubbled up)
    * @throws IllegalStateException if there is an issue with NPI File
    */
+  @SuppressWarnings("java:S5042")
   public static void getOriginalNpiDataFile(Path convertedNpiDataFile, String fileName)
       throws IOException, IllegalStateException {
     // download NPI file
