@@ -83,7 +83,7 @@ public class ServerExecutor {
     appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
     appSettings.put(AppConfiguration.SSM_PATH_TRUSTSTORE, trustStore);
     appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
-    appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, "npi_e2e.json");
+    appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, "npi_e2e_it.json");
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
     serverInfo = DataServerLauncherApp.createServer(appConfig);
 

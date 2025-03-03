@@ -2,7 +2,6 @@ package gov.cms.bfd.data.npi.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.data.npi.dto.NPIData;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

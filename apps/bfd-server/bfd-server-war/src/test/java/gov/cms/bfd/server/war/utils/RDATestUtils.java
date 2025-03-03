@@ -967,7 +967,7 @@ public class RDATestUtils {
     } catch (JsonProcessingException ignored) {
     }
     npiOrgLookup
-        .when(NPIOrgLookup::createNpiOrgLookup)
+        .when(NPIOrgLookup::createTestNpiOrgLookup)
         .thenAnswer(
             i -> {
               NPIOrgLookup mockInstance = new NPIOrgLookup(npiOrgHashMap);
