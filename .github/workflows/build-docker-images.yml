@@ -72,7 +72,7 @@ jobs:
               platform: "linux/arm64",
             },
           ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Validate Inputs
         run: |
