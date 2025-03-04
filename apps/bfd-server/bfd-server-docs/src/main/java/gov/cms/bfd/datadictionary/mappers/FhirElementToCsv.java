@@ -202,11 +202,8 @@ public class FhirElementToCsv implements Function<FhirElement, List<String>>, Cl
       case "version" -> element.getFhirMapping().get(0).getVersion();
       case "discriminator" -> String.join(";", element.getFhirMapping().get(0).getDiscriminator());
       case "additional" -> String.join(";", element.getFhirMapping().get(0).getAdditional());
-      case "AB2D", "BB2", "BCDA", "BFD", "DPC", "SyntheticData" -> element
-              .getSuppliedIn()
-              .contains(field)
-          ? "X"
-          : "";
+      case "AB2D", "BB2", "BCDA", "BFD", "DPC", "SyntheticData" ->
+          element.getSuppliedIn().contains(field) ? "X" : "";
       case "bfdTableType" -> element.getBfdTableType();
       case "bfdColumnName" -> element.getBfdColumnName();
       case "bfdJavaFieldName" -> element.getBfdJavaFieldName();

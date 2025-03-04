@@ -44,13 +44,13 @@ public enum C4BBAdjudication {
    */
   public String getSystem() {
     switch (this) {
-        // These are HL7
+      // These are HL7
       case SUBMITTED:
       case DEDUCTIBLE:
       case BENEFIT:
       case ELIGIBLE:
         return "http://terminology.hl7.org/CodeSystem/adjudication";
-        // The rest are Carin
+      // The rest are Carin
       default:
         return "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication";
     }
