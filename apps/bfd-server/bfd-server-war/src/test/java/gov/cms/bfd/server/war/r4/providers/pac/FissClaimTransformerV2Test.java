@@ -3,11 +3,13 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -130,6 +132,7 @@ public class FissClaimTransformerV2Test {
       int numberOfRecords) {
 
     RdaFissClaim entity = new RdaFissClaim();
+    SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
     entity.setLastUpdated(Instant.ofEpochMilli(1));
     entity.setStmtCovToDate(LocalDate.of(2020, 1, 1));
@@ -155,7 +158,7 @@ public class FissClaimTransformerV2Test {
 
     entity.setRevenueLines(Set.of(line));
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry());
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager);
 
     Claim claim = fissClaimTransformerV2.transform(entity, true);
 
