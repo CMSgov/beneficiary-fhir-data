@@ -1,22 +1,9 @@
 import logging
 from loader import PostgresLoader
-from model import IdrBeneficiary
-from extractor import Extractor, PostgresExtractor
+from model import IdrBeneficiary, IdrBeneficiaryHistory, LoadProgress
+from extractor import Extractor, PostgresExtractor, fetch_bene_data
 
 logger = logging.getLogger(__name__)
-
-fetch_query = """
-SELECT
-    bene.bene_sk,
-    bene.bene_mbi_id,
-    bene.bene_1st_name,
-    bene.bene_last_name
-FROM
-    cms_vdm_view_mdcr_prd.v2_mdcr_bene bene
-WHERE
-    bene.idr_trans_obslt_ts > '9999-12-30' 
-    AND bene.bene_xref_efctv_sk = bene.bene_sk
-"""
 
 
 def init_logger():
@@ -39,18 +26,61 @@ def main():
 
 
 def run_pipeline(extractor: Extractor, connection_string: str):
-    logger.info("fetching IDR data")
-    iter = extractor.extract(IdrBeneficiary, fetch_query, {})
+    logger.info("load start")
 
-    logger.info("loading data")
-    PostgresLoader(
+    history_fetch_query = """
+    SELECT
+        {COLUMNS}
+    FROM
+        cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+    {WHERE_CLAUSE}
+    ORDER BY idr_trans_efctv_ts, bene_sk
+    """
+    history_iter = fetch_bene_data(
+        extractor,
+        IdrBeneficiaryHistory,
+        connection_string,
+        "idr.beneficiary_history",
+        history_fetch_query,
+    )
+
+    history_loader = PostgresLoader(
+        connection_string=connection_string,
+        table="idr.beneficiary_history",
+        temp_table="beneficiary_history_temp",
+        unique_key=["bene_sk", "idr_trans_efctv_ts"],
+        sort_key="bene_sk",
+        exclude_keys=["bene_xref_efctv_sk_computed"],
+    )
+    history_loader.load(history_iter, IdrBeneficiaryHistory)
+
+    bene_fetch_query = """
+    SELECT
+        {COLUMNS}
+    FROM
+        cms_vdm_view_mdcr_prd.v2_mdcr_bene
+    {WHERE_CLAUSE}
+    ORDER BY idr_trans_efctv_ts, bene_sk
+    """
+    bene_iter = fetch_bene_data(
+        extractor,
+        IdrBeneficiary,
+        connection_string,
+        "idr.beneficiary",
+        bene_fetch_query,
+    )
+
+    bene_loader = PostgresLoader(
         connection_string=connection_string,
         table="idr.beneficiary",
         temp_table="beneficiary_temp",
-        primary_key="bene_sk",
-        exclude_cols=["bene_id"],
-        insert_cols=["bene_sk", "bene_mbi_id", "bene_1st_name", "bene_last_name"],
-    ).load(iter)
+        unique_key=["bene_sk"],
+        sort_key="bene_sk",
+        exclude_keys=["bene_xref_efctv_sk_computed"],
+    )
+    bene_loader.load(bene_iter, IdrBeneficiary)
+    bene_loader.refresh_materialized_view("idr.overshare_mbis")
+
     logger.info("done")
 
 
