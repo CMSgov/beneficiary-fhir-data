@@ -130,7 +130,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             .getContextClassLoader()
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
     DMEClaimTransformerV2 dmeClaimTransformerV2 =

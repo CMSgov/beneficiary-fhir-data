@@ -111,8 +111,7 @@ public final class HospiceClaimTransformerV2Test {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
+        new HospiceClaimTransformerV2(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 

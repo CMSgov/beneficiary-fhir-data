@@ -175,7 +175,7 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
-      NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+      NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           RDATestUtils.fdaFakeDrugCodeDisplayLookup();
@@ -876,7 +876,7 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               false,
               RDATestUtils.fdaDrugCodeDisplayLookup(),
-              NPIOrgLookup.createNpiOrgLookup(),
+              NPIOrgLookup.createTestNpiOrgLookup(),
               securityTagManager);
 
       return sampleEobForClaimType;

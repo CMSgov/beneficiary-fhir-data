@@ -68,8 +68,7 @@ public final class HHAClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hhaClaimTransformer =
-        new HHAClaimTransformer(
-            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
+        new HHAClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */
@@ -138,7 +137,7 @@ public final class HHAClaimTransformerTest {
     // interesting conumdrum here....we should be using Mock(s) for unit tests, but this static
     // method is invoked from ITs (integration tests) which means that our BeforeEach setup will
     // not create the NPIOrgLookup so we need to explicitly create one here.
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
 
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(

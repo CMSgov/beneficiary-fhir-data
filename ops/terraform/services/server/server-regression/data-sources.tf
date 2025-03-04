@@ -8,6 +8,10 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_master_key_alias
 }
 
+data "aws_kms_key" "mgmt_key" {
+  key_id = "alias/bfd-mgmt-cmk"
+}
+
 data "aws_kms_key" "config_cmk" {
   key_id = local.kms_config_key_alias
 }

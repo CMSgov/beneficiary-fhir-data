@@ -71,8 +71,7 @@ public final class InpatientClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     inpatientClaimTransformer =
-        new InpatientClaimTransformer(
-            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
+        new InpatientClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */
@@ -141,7 +140,7 @@ public final class InpatientClaimTransformerTest {
    */
   static void assertMatches(InpatientClaim claim, ExplanationOfBenefit eob)
       throws FHIRException, IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
 
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(

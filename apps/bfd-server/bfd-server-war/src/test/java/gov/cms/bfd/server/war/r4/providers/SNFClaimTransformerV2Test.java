@@ -130,8 +130,7 @@ public class SNFClaimTransformerV2Test {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     snfClaimTransformer =
-        new SNFClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createNpiOrgLookup(), securityTagManager);
+        new SNFClaimTransformerV2(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
