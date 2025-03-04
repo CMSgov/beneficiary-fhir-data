@@ -114,7 +114,7 @@
                             <mainClass>gov.cms.bfd.data.fda.utility.App</mainClass>
                             <arguments>
                                 <argument>${basedir}/target/fda-drug-csv-output</argument>
-                                <argument>${parent.version}</argument>
+                                <argument>${project.parent.version}</argument>
                             </arguments>
                         </configuration>
                     </execution>

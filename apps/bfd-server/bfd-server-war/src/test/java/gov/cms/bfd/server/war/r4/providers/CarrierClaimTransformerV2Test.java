@@ -130,7 +130,7 @@ public class CarrierClaimTransformerV2Test {
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(
-            metricRegistry, drugCodeDisplayLookup, NPIOrgLookup.createNpiOrgLookup());
+            metricRegistry, drugCodeDisplayLookup, NPIOrgLookup.createTestNpiOrgLookup());
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);

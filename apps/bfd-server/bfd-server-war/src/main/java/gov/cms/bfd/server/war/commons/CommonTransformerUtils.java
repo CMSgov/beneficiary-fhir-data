@@ -57,9 +57,6 @@ public final class CommonTransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(CommonTransformerUtils.class);
 
   /** file containing NPI code entries. */
-  private static final String NPI_CODE_FILE = "NPI_Coded_Display_Values_Tab.txt";
-
-  /** file containing NPI code entries. */
   private static final String PROCEDURE_CODE_FILE = "PRCDR_CD.txt";
 
   /** Stores the diagnosis ICD codes and their display values. */
@@ -370,60 +367,6 @@ public final class CommonTransformerUtils {
       }
     }
     return null;
-  }
-
-  /**
-   * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
-   * Refer to the README file in the src/main/resources directory.
-   *
-   * @return the map of npi codes
-   */
-  private static Map<String, String> readNpiCodeFile() {
-
-    Map<String, String> npiCodeMap = new HashMap<String, String>();
-    try (final InputStream npiCodeDisplayStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(NPI_CODE_FILE);
-        final BufferedReader reader =
-            new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
-      /*
-       * We want to extract the NPI codes and display values and put in a map for easy
-       * retrieval to get the display value:
-       * npiColumns [0] : NPI Code
-       * npiColumns [4] : NPI Organization Code
-       * npiColumns [8] : NPI provider name prefix
-       * npiColumns [6] : NPI provider first name
-       * npiColumns [7] : NPI provider middle name
-       * npiColumns [5] : NPI provider last name
-       * npiColumns [9] : NPI provider suffix name
-       * npiColumns[10] : NPI provider credential
-       */
-      String line = "";
-      reader.readLine();
-
-      while ((line = reader.readLine()) != null) {
-        String[] npiColumns = line.split("\t");
-
-        if (!npiColumns[4].isEmpty()) {
-          npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
-          continue;
-        }
-
-        String displayName =
-            String.join(
-                " ",
-                npiColumns[8].trim(),
-                npiColumns[6].trim(),
-                npiColumns[7].trim(),
-                npiColumns[5].trim(),
-                npiColumns[9].trim(),
-                npiColumns[10].trim());
-
-        npiCodeMap.put(npiColumns[0], displayName.replace("  ", " ").trim());
-      }
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NPI code data.", e);
-    }
-    return npiCodeMap;
   }
 
   /**

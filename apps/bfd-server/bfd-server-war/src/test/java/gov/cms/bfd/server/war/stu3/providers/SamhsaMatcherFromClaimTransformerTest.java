@@ -115,7 +115,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @return the collection
    */
   public static Stream<Arguments> data() throws IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
 
     InputStream npiDataStream =
         Thread.currentThread()

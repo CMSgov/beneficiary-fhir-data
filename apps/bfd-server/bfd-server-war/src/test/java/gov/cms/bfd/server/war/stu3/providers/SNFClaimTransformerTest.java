@@ -68,7 +68,7 @@ public final class SNFClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     snfClaimTransformer =
-        new SNFClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new SNFClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup());
   }
 
   /** Releases the static mock NPIOrgLookup. */
@@ -134,7 +134,7 @@ public final class SNFClaimTransformerTest {
    */
   static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob)
       throws FHIRException, IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,

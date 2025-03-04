@@ -137,6 +137,36 @@ resource "aws_iam_role" "partner_bucket_role" {
   force_detach_policies = true
 }
 
+resource "aws_iam_role" "isp_bcda_bucket_role" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name = "${local.full_name}-isp-to-bcda-bucket-role"
+  path = "/delegatedadmin/adodeveloper/"
+  description = join("", [
+    "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
+    "path within the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
+  ])
+
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Sid    = "AllowAssumeRole"
+          Effect = "Allow"
+          Action = "sts:AssumeRole"
+          Principal = {
+            AWS = local.bcda_isp_bucket_assumer_arns
+          }
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = aws_iam_policy.isp_bcda_bucket_access[*].arn
+
+  force_detach_policies = true
+}
+
 resource "aws_iam_policy" "partner_bucket_access" {
   for_each = local.eft_partners_config
 
@@ -189,6 +219,65 @@ resource "aws_iam_policy" "partner_bucket_access" {
           Action = [
             "kms:Encrypt",
             "kms:Decrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey",
+          ]
+          Resource = [
+            local.kms_key_id
+          ]
+        },
+      ]
+    }
+  )
+}
+
+resource "aws_iam_policy" "isp_bcda_bucket_access" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name = "${local.full_name}-isp-to-bcda-allow-eft-s3-path"
+  path = "/delegatedadmin/adodeveloper/"
+  description = join("", [
+    "Allows ISP to access the BCDA inbound path when this policy's corresponding IAM ",
+    "role is assumed by ISP"
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowListingOfBCDAHomePath"
+          Effect = "Allow"
+          Action = [
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+          ]
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = ["${local.eft_partners_config["bcda"].bucket_home_path}/*"]
+            }
+          }
+        },
+        {
+          Sid    = "AllowRestrictedAccessToBCDAHomePath"
+          Effect = "Allow"
+          Action = [
+            "s3:AbortMultipartUpload",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:PutObjectVersionAcl"
+          ],
+          Resource = [
+            "${aws_s3_bucket.this.arn}/${local.eft_partners_config["bcda"].bucket_home_path}/*"
+          ]
+        },
+        {
+          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
+          Effect = "Allow"
+          Action = [
+            "kms:Encrypt",
             "kms:ReEncrypt*",
             "kms:GenerateDataKey*",
             "kms:DescribeKey",
