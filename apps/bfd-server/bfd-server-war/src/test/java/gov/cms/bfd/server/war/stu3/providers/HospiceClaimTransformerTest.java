@@ -68,7 +68,8 @@ public final class HospiceClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new HospiceClaimTransformer(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */

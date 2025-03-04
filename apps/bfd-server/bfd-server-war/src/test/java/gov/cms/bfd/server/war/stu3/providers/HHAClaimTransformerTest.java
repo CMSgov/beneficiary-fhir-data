@@ -68,7 +68,8 @@ public final class HHAClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hhaClaimTransformer =
-        new HHAClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new HHAClaimTransformer(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */

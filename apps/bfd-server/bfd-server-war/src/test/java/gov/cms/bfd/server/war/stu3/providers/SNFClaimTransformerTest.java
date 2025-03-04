@@ -72,7 +72,8 @@ public final class SNFClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     snfClaimTransformer =
-        new SNFClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new SNFClaimTransformer(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */

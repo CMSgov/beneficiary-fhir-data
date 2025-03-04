@@ -130,7 +130,8 @@ public final class InpatientClaimTransformerV2Test {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     inpatientClaimTransformer =
-        new InpatientClaimTransformerV2(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new InpatientClaimTransformerV2(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

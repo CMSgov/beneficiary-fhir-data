@@ -1103,7 +1103,8 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new HHAClaimTransformerV2(
+            new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);

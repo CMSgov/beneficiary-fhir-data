@@ -73,7 +73,8 @@ public final class OutpatientClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     outpatientClaimTransformer =
-        new OutpatientClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new OutpatientClaimTransformer(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */

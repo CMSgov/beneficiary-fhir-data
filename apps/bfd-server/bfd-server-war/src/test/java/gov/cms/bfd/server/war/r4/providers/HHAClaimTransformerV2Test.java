@@ -131,7 +131,8 @@ public class HHAClaimTransformerV2Test {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hhaClaimTransformer =
-        new HHAClaimTransformerV2(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new HHAClaimTransformerV2(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
