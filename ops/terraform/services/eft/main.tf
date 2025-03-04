@@ -1,5 +1,5 @@
 module "terraservice" {
-  source = "../_modules/bfd-terraservice"
+  source = "git::https://github.com/CMSgov/beneficiary-fhir-data.git//ops/terraform/services/_modules/bfd-terraservice?ref=2.181.0"
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/terraform/services/eft"
@@ -66,6 +66,11 @@ locals {
   inbound_sftp_user_pub_key  = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_public_key"]
   inbound_sftp_user_username = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_username"]
   inbound_sftp_s3_home_dir   = trim(local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_home_dir"], "/")
+  # Special case for BCDA. ISP does not use the typical BFD EFT Inbound process, they instead upload
+  # directly to the BCDA inbound path. These configuration parameters are used to create an IAM Role
+  # that ISP assumes to do the aforementioned upload.
+  bcda_isp_bucket_assumer_arns = jsondecode(lookup(local.ssm_config, "/bcda/${local.service}/inbound/isp_bucket_iam_assumer_arns_json", "[]"))
+  bcda_isp_vpc_endpoint_id     = lookup(local.ssm_config, "/bcda/${local.service}/inbound/isp_vpc_endpoint_id", null)
   # Global Inbound configuration is required, as the SFTP server should always be running and the
   # home directory is global, but this outbound configuration is not required. If any are undefined,
   # outbound is considered to be disabled globally for all partners and corresponding resources will
@@ -535,8 +540,8 @@ resource "aws_s3_bucket_policy" "this" {
   policy = jsonencode(
     {
       Version = "2012-10-17",
-      Statement = [
-        {
+      Statement = concat(
+        [{
           Sid       = "AllowSSLRequestsOnly",
           Effect    = "Deny",
           Principal = "*",
@@ -550,8 +555,25 @@ resource "aws_s3_bucket_policy" "this" {
               "aws:SecureTransport" = "false"
             }
           }
-        }
-      ]
+        }],
+        length(aws_iam_role.isp_bcda_bucket_role) > 0 ? [{
+          Sid    = "AllowISPFromVPCEOnly",
+          Effect = "Deny",
+          Principal = {
+            AWS = one(aws_iam_role.isp_bcda_bucket_role[*].arn)
+          },
+          Action = "s3:*",
+          Resource = [
+            "${aws_s3_bucket.this.arn}",
+            "${aws_s3_bucket.this.arn}/*"
+          ],
+          Condition = {
+            StringNotEquals = {
+              "aws:SourceVpce" = local.bcda_isp_vpc_endpoint_id
+            }
+          }
+        }] : []
+      )
     }
   )
 }

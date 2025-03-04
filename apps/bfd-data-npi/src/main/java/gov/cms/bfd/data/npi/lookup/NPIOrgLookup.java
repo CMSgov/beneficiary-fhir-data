@@ -3,6 +3,7 @@ package gov.cms.bfd.data.npi.lookup;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.utility.App;
 import java.io.BufferedInputStream;
@@ -26,25 +27,26 @@ public class NPIOrgLookup {
   private Map<String, String> npiOrgHashMap = new HashMap<>();
 
   /** A field to return the production org lookup. */
-  private static NPIOrgLookup npiOrgLookupForProduction;
+  private static NPIOrgLookup fakeNpiOrgLookup;
 
   /** Zlib compression header. */
   private static final byte[] COMPRESSED_HEADER = {120, -100};
 
   /**
-   * Factory method for creating a {@link NPIOrgLookup } for production that does not include the
-   * fake org name.
+   * Test-only factory method for creating a {@link NPIOrgLookup } that does not include the fake
+   * org name.
    *
-   * @return the {@link NPIOrgLookup }
+   * @return the fake {@link NPIOrgLookup}
    * @throws IOException if there is an issue reading file
    */
-  public static NPIOrgLookup createNpiOrgLookup() throws IOException {
-    if (npiOrgLookupForProduction == null) {
-      InputStream npiDataStream = getFileInputStream(App.NPI_RESOURCE);
-      npiOrgLookupForProduction = new NPIOrgLookup(npiDataStream);
+  @VisibleForTesting
+  public static NPIOrgLookup createTestNpiOrgLookup() throws IOException {
+    if (fakeNpiOrgLookup == null) {
+      InputStream npiDataStream = getFileInputStream(App.NPI_TESTING_RESOURCE_FILE);
+      fakeNpiOrgLookup = new NPIOrgLookup(npiDataStream);
     }
 
-    return npiOrgLookupForProduction;
+    return fakeNpiOrgLookup;
   }
 
   /**

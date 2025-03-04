@@ -124,7 +124,7 @@ public final class OutpatientClaimTransformerV2Test {
 
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(
-            metricRegistry, drugCodeDisplayLookup, NPIOrgLookup.createNpiOrgLookup());
+            metricRegistry, drugCodeDisplayLookup, NPIOrgLookup.createTestNpiOrgLookup());
     claim = generateClaim();
     ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

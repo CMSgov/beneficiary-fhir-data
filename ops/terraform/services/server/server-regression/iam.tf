@@ -37,6 +37,7 @@ resource "aws_iam_policy" "kms" {
           "Resource" : concat(
             [
               "${local.kms_key_arn}",
+              "${data.aws_kms_key.mgmt_key.arn}",
               "${data.aws_kms_key.insights_s3.arn}"
             ],
             local.kms_config_key_arns

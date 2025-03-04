@@ -44,7 +44,7 @@ def runServerRegression(Map args = [:]) {
         return false
     }
 
-    elbDnsName = awsElb.getElbDnsName(bfdEnv)
+    elbDnsName = awsElb.getGreenElbDnsName(bfdEnv)
     sqsMessage = writeJSON(returnText: true, json: [
         'host': "https://${elbDnsName}",
         'suite_version': 'v2',
@@ -60,7 +60,7 @@ def runServerRegression(Map args = [:]) {
     )
 
     hasRegressionSucceeded = monitorServerRegression(
-        sqsQueueName: signalSqsQueueName, 
+        sqsQueueName: signalSqsQueueName,
         heartbeatInterval: heartbeatInterval
     )
 
