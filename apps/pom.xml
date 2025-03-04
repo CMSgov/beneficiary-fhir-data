@@ -96,9 +96,6 @@
         <spring-framework.version>6.2.3</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
 
-        <!-- Newer (6.0) release versions for hibernate are available for some hibernate components
-        but not all (in particular, entity-manager does not have a 6.0 version available yet).
-        Staying on latest 5.x version until all components have 6.0 versions available. -->
         <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.12.0</junit.version>
         <javadoc.version>3.11.2</javadoc.version>
