@@ -23,5 +23,13 @@
                 <ignoreVersion type="range">[3.2,)</ignoreVersion>
             </ignoreVersions>
         </rule>
+        <!--
+            1.5.15 is the version listed in the slf4j compatibility list: https://www.slf4j.org/manual.html
+        -->
+        <rule groupId="ch.qos.logback" artifactId="logback-classic" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="range">[1.5.16,)</ignoreVersion>
+            </ignoreVersions>
+        </rule>
     </rules>
 </ruleset>
