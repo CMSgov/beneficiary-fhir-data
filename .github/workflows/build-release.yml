@@ -58,7 +58,7 @@ defaults:
 
 jobs:
   run-mvn-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       BFD_RELEASE: ${{ steps.bfd-version-strings.outputs.BFD_RELEASE }}
     steps:
@@ -204,7 +204,7 @@ jobs:
 
   create-gh-release:
     if: ${{ !contains(needs.run-mvn-release.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [run-mvn-release, build-docker-images]
     steps:
       - name: Configure AWS credentials
