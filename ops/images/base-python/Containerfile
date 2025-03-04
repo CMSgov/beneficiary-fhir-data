@@ -8,7 +8,7 @@ FROM base as uv
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-FROM uv AS python
+FROM uv
 
 # Ensure that uv-managed Python installation takes precedence over existing Python installation(s)
 # in the PATH. This is necessary to ensure that the correct Python version is used when running
@@ -17,9 +17,3 @@ ENV PATH="/root/.local/bin:$PATH"
 # As of uv 0.6.3, the "--preview" flag is still necessary to set a specific Python version as the
 # default. This flag will be removed when "--default" is supported as a release feature
 RUN uv python install python3.13 --preview --default
-
-FROM python AS java
-
-RUN yum install -y java-21-amazon-corretto && \
-    yum -y clean all && \
-    rm -rf /var/cache
