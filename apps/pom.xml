@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gov.cms.bfd</groupId>
@@ -89,7 +89,7 @@
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.30.26</aws-java-sdk-bom.version>
+        <aws-java-sdk-bom.version>2.30.32</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.3</spring-data-jpa.version>
@@ -106,11 +106,11 @@
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
-        <jackson-databind.version>2.18.2</jackson-databind.version>
-        <jackson-datatype-jdk8.version>2.18.2</jackson-datatype-jdk8.version>
-        <jackson-dataformat-yaml.version>2.18.2</jackson-dataformat-yaml.version>
-        <jackson-datatype-jsr310.version>2.18.2</jackson-datatype-jsr310.version>
-        <jackson-annotations.version>2.18.2</jackson-annotations.version>
+        <jackson-databind.version>2.18.3</jackson-databind.version>
+        <jackson-datatype-jdk8.version>2.18.3</jackson-datatype-jdk8.version>
+        <jackson-dataformat-yaml.version>2.18.3</jackson-dataformat-yaml.version>
+        <jackson-datatype-jsr310.version>2.18.3</jackson-datatype-jsr310.version>
+        <jackson-annotations.version>2.18.3</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
         <snakeyaml.version>2.4</snakeyaml.version>
 
@@ -120,8 +120,8 @@
 
         <logback.jackson.version>0.1.5</logback.jackson.version>
         <logback.json.classic.version>0.1.5</logback.json.classic.version>
-        <mockito.version>5.15.2</mockito.version>
-        <byte-buddy.version>1.17.1</byte-buddy.version>
+        <mockito.version>5.16.0</mockito.version>
+        <byte-buddy.version>1.17.2</byte-buddy.version>
         <rest-assured.version>5.5.1</rest-assured.version>
         <assertj.version>3.27.3</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
@@ -129,7 +129,7 @@
         <slf4j.version>2.0.16</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
         <hikari.version>6.2.1</hikari.version>
-        <flyway.version>11.3.3</flyway.version>
+        <flyway.version>11.3.4</flyway.version>
         <newrelic.agent.version>8.18.0</newrelic.agent.version>
         <checkstyle.version>10.21.3</checkstyle.version>
         <guava.version>32.1.2-jre</guava.version>
@@ -180,8 +180,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -200,7 +200,7 @@
         <!-- Functional-reactive programming api for concurrent claim ingestion. -->
         <reactor.version>3.7.3</reactor.version>
 
-        <!-- Default number of threads that we can overridden as needed in module poms. -->
+        <!-- Default number of threads that we can override as needed in module poms. -->
         <compile.thread.count>4</compile.thread.count>
         <tests.thread.count>4</tests.thread.count>
         <!-- The jib maven plugin produces optimized docker images from maven projects. -->
@@ -217,7 +217,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>latest</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
@@ -252,7 +252,7 @@
         <versions.maven.plugin.version>2.18.0</versions.maven.plugin.version>
         <antlr4.version>4.13.2</antlr4.version>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-        <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
+        <jakarta.persistence-api.version>3.1.0</jakarta.persistence-api.version>
         <hibernate-commons-annotations.version>6.0.6.Final</hibernate-commons-annotations.version>
     </properties>
 
@@ -536,7 +536,7 @@
             </dependency>
             <dependency>
                 <!-- The Hibernate JPA Model Generator, which will produce MetaModel
-                    classes for JPA entities. This happens happens automagically via javac's
+                    classes for JPA entities. This happens automagically via javac's
                     annotation processor. -->
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-jpamodelgen</artifactId>
@@ -1061,8 +1061,10 @@
                                         builds.
                                     </message>
                                     <banTimestamps>false</banTimestamps>
-                                    <!-- Allow SNAPSHOT version of theses plugins since we build them in our own project rather than pulling from a repository. -->
-                                    <unCheckedPluginList>gov.cms.bfd:bfd-model-dsl-codegen-plugin,gov.cms.bfd:bfd-model-codebook-plugin</unCheckedPluginList>
+                                    <!-- Allow SNAPSHOT version of these plugins since we build them in our own project rather than pulling from a repository. -->
+                                    <unCheckedPluginList>
+                                        gov.cms.bfd:bfd-model-dsl-codegen-plugin,gov.cms.bfd:bfd-model-codebook-plugin
+                                    </unCheckedPluginList>
                                 </requirePluginVersions>
                             </rules>
                         </configuration>
@@ -1225,18 +1227,18 @@
                         unit tests have been run.
                     -->
                     <execution>
-                    <id>post-unit-test</id>
-                    <phase>test</phase>
-                    <goals>
-                        <goal>report</goal>
-                    </goals>
-                    <configuration>
-                        <!-- Sets the path to the file which contains the execution data. -->
-                        <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
-                        <outputDirectory>${project.build.directory}/coverage-reports/jacoco-ut</outputDirectory>
-                        <!-- Only generate the XML version of the report -->
-                        <formats>XML</formats>
-                    </configuration>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
+                            <outputDirectory>${project.build.directory}/coverage-reports/jacoco-ut</outputDirectory>
+                            <!-- Only generate the XML version of the report -->
+                            <formats>XML</formats>
+                        </configuration>
                     </execution>
                     <!--
                         Prepares the property pointing to the JaCoCo runtime agent which
@@ -1306,7 +1308,9 @@
                         </goals>
                         <configuration>
                             <!-- Sets the path to the file which contains the aggregated report. -->
-                            <outputDirectory>${project.build.directory}/coverage-reports/jacoco-aggregate</outputDirectory>
+                            <outputDirectory>
+                                ${project.build.directory}/coverage-reports/jacoco-aggregate
+                            </outputDirectory>
                             <formats>XML</formats>
                         </configuration>
                     </execution>

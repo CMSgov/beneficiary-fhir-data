@@ -261,8 +261,8 @@ public class FissTransformer extends AbstractTransformer {
       case "inpatient" -> FissClaimTypeIndicator.CLAIM_TYPE_INPATIENT;
       case "outpatient" -> FissClaimTypeIndicator.CLAIM_TYPE_OUTPATIENT;
       case "home", "hha" ->
-      // Home and HHA are synonymous in this context
-      FissClaimTypeIndicator.CLAIM_TYPE_HOME_HEALTH;
+          // Home and HHA are synonymous in this context
+          FissClaimTypeIndicator.CLAIM_TYPE_HOME_HEALTH;
       case "hospice" -> FissClaimTypeIndicator.CLAIM_TYPE_HOSPICE;
       case "snf" -> FissClaimTypeIndicator.CLAIM_TYPE_SNF;
       default -> FissClaimTypeIndicator.UNRECOGNIZED;

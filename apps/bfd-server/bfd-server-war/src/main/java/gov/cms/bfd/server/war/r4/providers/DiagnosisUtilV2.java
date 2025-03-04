@@ -444,7 +444,7 @@ public class DiagnosisUtilV2 {
             C4BBClaimProfessionalAndNonClinicianDiagnosisType.PRINCIPAL.toCode(),
             C4BBClaimProfessionalAndNonClinicianDiagnosisType.PRINCIPAL.getDisplay());
 
-        // Only Principal and Secondary are valid for this EOB type
+      // Only Principal and Secondary are valid for this EOB type
       case ADMITTING:
       case FIRSTEXTERNAL:
       case EXTERNAL:
