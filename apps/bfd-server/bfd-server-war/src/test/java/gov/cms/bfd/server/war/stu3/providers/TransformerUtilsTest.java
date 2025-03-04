@@ -439,7 +439,7 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(new MetricRegistry(), NPIOrgLookup.createNpiOrgLookup());
+        new HHAClaimTransformer(new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup());
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -471,7 +471,7 @@ public final class TransformerUtilsTest {
    */
   @Test
   public void createBundleWithPagingWithASizeOf2() throws IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});

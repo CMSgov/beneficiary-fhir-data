@@ -19,6 +19,9 @@ public final class App {
    */
   public static final String NPI_RESOURCE = "npi_org_data_utf8.tsv";
 
+  /** The name of the classpath resource for the fake E2E/IT-only NPI data. */
+  public static final String NPI_TESTING_RESOURCE_FILE = "npi_e2e_it.json";
+
   /**
    * The application entry point, which will receive all non-JVM command line options in the <code>
    * args</code> array.

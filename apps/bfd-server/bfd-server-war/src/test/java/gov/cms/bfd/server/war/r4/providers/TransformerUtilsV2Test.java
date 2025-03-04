@@ -895,7 +895,7 @@ public class TransformerUtilsV2Test {
   @Test
   public void createBundleWithoutPagingWithASizeOf2() throws IOException {
 
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
@@ -1093,7 +1093,7 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(new MetricRegistry(), NPIOrgLookup.createNpiOrgLookup());
+        new HHAClaimTransformerV2(new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup());
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
