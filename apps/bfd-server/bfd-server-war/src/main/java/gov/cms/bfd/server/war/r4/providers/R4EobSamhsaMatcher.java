@@ -88,7 +88,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
         containsSamhsa =
             containsSamhsaIcdProcedureCode(adapter.getProcedure())
                 || containsSamhsaSupportingInfo(adapter.getSupportingInfo());
-        // fall-through intentional here
+      // fall-through intentional here
       case CARRIER:
       case DME:
       case HHA:
@@ -97,7 +97,7 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
             containsSamhsa
                 || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
                 || containsSamhsaLineItem(adapter.getItem());
-        // fall-through intentional here
+      // fall-through intentional here
       case PDE:
         // There are no SAMHSA fields in PDE claims
         break;

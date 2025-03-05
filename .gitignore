@@ -3,6 +3,7 @@
 .*
 !.gitleaks.toml
 !.dockerignore
+!.containerignore
 !.gitignore
 !.gitattributes
 !.github

@@ -309,8 +309,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
       case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
-      default -> throw new IllegalArgumentException(
-          "Invalid claim ID type '" + claimIdType.getTypeLabel() + "', cannot get claim data");
+      default ->
+          throw new IllegalArgumentException(
+              "Invalid claim ID type '" + claimIdType.getTypeLabel() + "', cannot get claim data");
     };
   }
 
