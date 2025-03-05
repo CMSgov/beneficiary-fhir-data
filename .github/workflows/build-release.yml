@@ -69,7 +69,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.releaseBranch || github.ref_name }}
-          token: ${{ steps.generate_token.outputs.token }}
 
       - name: "Install yq"
         run: |
@@ -237,7 +236,13 @@ jobs:
   create-gh-release:
     if: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') || inputs.forceRelease }}
     runs-on: ubuntu-24.04
-    needs: [compute-version-strings, build-base-images, run-mvn-release, build-other-images]
+    needs:
+      [
+        compute-version-strings,
+        build-base-images,
+        run-mvn-release,
+        build-other-images,
+      ]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
