@@ -10,9 +10,11 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.sharedutils.TagCode;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,46 +56,52 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
 
     logger.debug("SAMHSAConsentInterceptor - Processing willSeeResource.");
 
-    // Determine if SAMHSA filtering is required from request parameters
-    boolean excludeSamhsaParam =
-        parseBooleansFromRequest(theRequestDetails, AbstractResourceProvider.EXCLUDE_SAMHSA)
-            .stream()
-            .findFirst()
-            .orElse(false);
-    boolean shouldFilterSamhsa =
-        CommonTransformerUtils.shouldFilterSamhsa(
-            String.valueOf(excludeSamhsaParam), theRequestDetails);
-
-    if (!shouldFilterSamhsa) {
+    if (!applySamhsaFiltering(theRequestDetails)) {
       return ConsentOutcome.PROCEED; // No filtering needed, proceed
     }
 
-    // If the resource is a Bundle, check each entry for SAMHSA security tags
+    // Process the resource if it is a Bundle
     if (theResource instanceof Bundle bundle) {
-      for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-        if (shouldRedactResource(entry.getResource())) {
-          redactSensitiveData(entry);
-        }
-      }
+      processBundle(bundle);
     }
 
     return ConsentOutcome.PROCEED;
   }
 
+  boolean applySamhsaFiltering(RequestDetails theRequestDetails) {
+    boolean excludeSamhsaParam =
+        parseBooleansFromRequest(theRequestDetails, AbstractResourceProvider.EXCLUDE_SAMHSA)
+            .stream()
+            .findFirst()
+            .orElse(false);
+    return CommonTransformerUtils.shouldFilterSamhsa(
+        String.valueOf(excludeSamhsaParam), theRequestDetails);
+  }
+
+  void processBundle(Bundle bundle) {
+    for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+      IBaseResource baseResource = entry.getResource();
+
+      if (baseResource instanceof Resource resource
+          && resource.getMeta() != null
+          && shouldRedactResource(resource.getMeta().getSecurity())) {
+        redactSensitiveData(entry);
+      }
+    }
+  }
+
   /**
    * Checks if a resource should be redacted based on SAMHSA security tags.
    *
-   * @param baseResource The resource to check.
+   * @param securityTags The security Tags.
    * @return true if the resource should be redacted, false otherwise.
    */
-  private boolean shouldRedactResource(IBaseResource baseResource) {
-    if (baseResource instanceof Resource resource && resource.getMeta() != null) {
-      for (IBaseCoding securityTag : resource.getMeta().getSecurity()) {
-        // Check for SAMHSA-related tags
-        if (isSamhsaSecurityTag(securityTag)) {
-          logger.info("Matched SAMHSA security tag, redacting resource.");
-          return true;
-        }
+  boolean shouldRedactResource(List<Coding> securityTags) {
+    for (IBaseCoding securityTag : securityTags) {
+      // Check for SAMHSA-related tags
+      if (isSamhsaSecurityTag(securityTag)) {
+        logger.info("Matched SAMHSA security tag, redacting resource.");
+        return true;
       }
     }
     return false; // No matching SAMHSA tags found
@@ -115,7 +123,7 @@ public class V2SamhsaConsentInterceptor implements IConsentService {
    *
    * @param entry the entry
    */
-  private void redactSensitiveData(Bundle.BundleEntryComponent entry) {
+  void redactSensitiveData(Bundle.BundleEntryComponent entry) {
     logger.debug("V2SamhsaConsentInterceptor - redactSensitiveData.");
     entry.setResource(null);
   }

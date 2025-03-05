@@ -132,7 +132,7 @@ public class HHAClaimTransformerV2Test {
 
     hhaClaimTransformer =
         new HHAClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
