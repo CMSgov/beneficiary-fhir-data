@@ -136,7 +136,8 @@ public class CarrierClaimTransformerV2Test {
             metricRegistry,
             drugCodeDisplayLookup,
             NPIOrgLookup.createTestNpiOrgLookup(),
-            securityTagManager);
+            securityTagManager,
+            false);
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);

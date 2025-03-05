@@ -8,6 +8,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +38,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
    *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
    *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param v2SamhsaConsentSimulation v2SamhsaConsentSimulation
    */
   public R4ClaimResponseResourceProvider(
       MetricRegistry metricRegistry,
@@ -44,14 +46,16 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
       @Qualifier(PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
       FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
       McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
-      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
+      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames,
+      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
     super(
         metricRegistry,
         samhsaMatcher,
         oldMbiHashEnabled,
         fissClaimResponseTransformerV2,
         mcsClaimResponseTransformerV2,
-        claimSourceTypeNames);
+        claimSourceTypeNames,
+        v2SamhsaConsentSimulation);
   }
 
   /** {@inheritDoc} */

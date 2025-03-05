@@ -76,7 +76,7 @@ public final class DMEClaimTransformerTest {
         .thenReturn("UNKNOWN");
 
     dmeClaimTransformer =
-        new DMEClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager);
+        new DMEClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager, false);
   }
 
   /**
