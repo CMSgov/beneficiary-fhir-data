@@ -19,6 +19,11 @@ on:
         default: us-east-1
         type: string
         required: true
+      imagesCsv:
+        description: "Comma-separated list of image names to build. Defaults to all images ('*')"
+        default: "*"
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
       branch:
@@ -41,6 +46,11 @@ on:
           - us-east-1
           - us-west-2
         required: true
+      imagesCsv:
+        description: "Comma-separated list of image names to build. Defaults to all images ('*')"
+        default: "*"
+        type: string
+        required: true
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
@@ -54,24 +64,43 @@ defaults:
     shell: bash
 
 jobs:
+  compute-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Mutate images list for JMESPath
+        if: inputs.imagesCsv != '*'
+        id: mutate-images-csv
+        env:
+          IMAGES_CSV: ${{ inputs.imagesCsv }}
+        run: |
+          images_jmespath_fragments="$(jq -cR $'gsub("\\\\s*"; "") | split(",") | map("contains(\'"+.+"\', name)")' <<< "$IMAGES_CSV")"
+          echo "images_jmespath_fragments=$images_jmespath_fragments" >> $GITHUB_OUTPUT
+
+      - name: Generate JMESPath
+        if: inputs.imagesCsv != '*'
+        id: gen-jmespath
+        run: |
+          jmes_path="[?${{ join(fromJson(steps.mutate-images-csv.outputs.images_jmespath_fragments), ' || ') }}]"
+          echo "jmes_path=$jmes_path" >> $GITHUB_OUTPUT
+
+      - name: Setup CI jobs matrix
+        id: set-matrix
+        uses: JoshuaTheMiller/conditional-build-matrix@main
+        with:
+          filter: "${{ steps.gen-jmespath.outputs.jmes_path || '[]' }}"
+          addInclude: "false"
+          inputFile: ".github/workflows/build_images_matrix.json"
+
   build-images:
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    needs: compute-matrix
     strategy:
       matrix:
-        image:
-          [
-            {
-              name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
-              dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
-              contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
-              platform: "linux/amd64",
-            },
-            {
-              name: "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
-              dockerfile: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
-              contextDir: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
-              platform: "linux/arm64",
-            },
-          ]
+        image: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
     runs-on: ubuntu-24.04
     steps:
       - name: Validate Inputs
