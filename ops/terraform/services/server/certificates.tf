@@ -18,7 +18,7 @@ resource "null_resource" "generate_truststore" {
   provisioner "local-exec" {
     command = <<-EOF
 chmod +x ${path.module}/scripts/generate-truststore.sh
-${path.module}/scripts/generate-truststore.sh
+${path.module}/scripts/generate-truststore.sh "$TRUSTSTORE_PATH" "$CERTS_JSON"
 EOF
 
     environment = {
