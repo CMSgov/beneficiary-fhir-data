@@ -1639,30 +1639,30 @@ public final class TransformerTestUtilsV2 {
     if (rifRecord instanceof CarrierClaim) {
       claimTransformerInterface =
           new CarrierClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof DMEClaim) {
       claimTransformerInterface =
           new DMEClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface =
-          new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+          new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof HospiceClaim) {
       claimTransformerInterface =
-          new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+          new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof InpatientClaim) {
       claimTransformerInterface =
-          new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+          new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof OutpatientClaim) {
       claimTransformerInterface =
           new OutpatientClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof PartDEvent) {
       claimTransformerInterface =
           new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
     } else if (rifRecord instanceof SNFClaim) {
       claimTransformerInterface =
-          new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+          new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }

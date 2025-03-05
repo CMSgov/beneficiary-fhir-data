@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -29,6 +30,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -48,6 +50,8 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -58,14 +62,17 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTag lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public SNFClaimTransformer(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -266,7 +273,9 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
     return eob;
   }
 }

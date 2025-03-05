@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Quantity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -48,6 +50,8 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -58,14 +62,17 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public HHAClaimTransformerV2(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -93,9 +100,7 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HHAClaim hhaClaim = (HHAClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevel(
-      //              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
+
       eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;
@@ -114,7 +119,10 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobNonclinicianUrl());
-    eob.getMeta().setSecurity(securityTags);
+
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

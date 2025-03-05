@@ -72,7 +72,7 @@ public final class InpatientClaimTransformerTest {
 
     inpatientClaimTransformer =
         new InpatientClaimTransformer(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
   }
 
   /** Releases the static mock NPIOrgLookup. */

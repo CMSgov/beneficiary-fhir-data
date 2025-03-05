@@ -69,7 +69,7 @@ public final class HHAClaimTransformerTest {
 
     hhaClaimTransformer =
         new HHAClaimTransformer(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
   }
 
   /** Releases the static mock NPIOrgLookup. */

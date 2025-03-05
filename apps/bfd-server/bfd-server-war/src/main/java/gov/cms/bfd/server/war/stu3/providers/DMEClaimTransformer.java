@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -27,6 +28,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -46,6 +48,8 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -56,14 +60,17 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param securityTagManager SamhsaSecurityTag lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public DMEClaimTransformer(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -326,8 +333,9 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
       }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     return eob;
   }

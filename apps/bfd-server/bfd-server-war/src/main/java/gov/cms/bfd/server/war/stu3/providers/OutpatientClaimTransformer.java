@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -25,6 +26,7 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,6 +49,8 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -57,14 +61,17 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTag lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public OutpatientClaimTransformer(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -345,7 +352,9 @@ final class OutpatientClaimTransformer implements ClaimTransformerInterface {
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
     return eob;
   }
 }

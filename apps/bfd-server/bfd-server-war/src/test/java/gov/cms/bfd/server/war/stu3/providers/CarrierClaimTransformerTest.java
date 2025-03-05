@@ -92,7 +92,7 @@ public final class CarrierClaimTransformerTest {
 
     carrierClaimTransformer =
         new CarrierClaimTransformer(
-            metricRegistry, drugDisplayLookup, npiOrgLookup, securityTagManager);
+            metricRegistry, drugDisplayLookup, npiOrgLookup, securityTagManager, false);
   }
 
   /**
