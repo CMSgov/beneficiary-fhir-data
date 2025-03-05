@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -31,6 +32,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,6 +58,8 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -67,16 +71,19 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public OutpatientClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -107,9 +114,6 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
 
       OutpatientClaim outpatientClaim = (OutpatientClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevel(
-      //              String.valueOf(outpatientClaim.getClaimId()), OutpatientTag.class);
       eob = transformClaim(outpatientClaim, securityTags);
     }
     return eob;
@@ -129,7 +133,10 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobOutpatientUrl());
-    eob.getMeta().setSecurity(securityTags);
+
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

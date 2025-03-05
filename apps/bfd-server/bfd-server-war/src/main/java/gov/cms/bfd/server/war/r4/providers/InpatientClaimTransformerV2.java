@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -51,6 +53,8 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -61,14 +65,17 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTag lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public InpatientClaimTransformerV2(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -97,9 +104,6 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       InpatientClaim inpatientClaim = (InpatientClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevel(
-      //              String.valueOf(inpatientClaim.getClaimId()), InpatientTag.class);
       eob = transformClaim(inpatientClaim, securityTags);
     }
     return eob;
@@ -119,7 +123,10 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
-    eob.getMeta().setSecurity(securityTags);
+
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

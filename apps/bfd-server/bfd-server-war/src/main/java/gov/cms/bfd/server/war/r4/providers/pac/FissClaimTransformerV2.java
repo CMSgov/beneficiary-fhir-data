@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -47,6 +48,7 @@ import org.hl7.fhir.r4.model.codesystems.ClaimInformationcategory;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -67,6 +69,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /** The METRIC_NAME constant. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
@@ -80,11 +84,15 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public FissClaimTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -111,9 +119,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       RdaFissClaim rdaFissClaim = (RdaFissClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevel(rdaFissClaim.getClaimId(),
-      // FissTag.class);
       return transformClaim(rdaFissClaim, includeTaxNumbers, securityTags);
     }
   }
@@ -158,8 +163,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setInsurance(getInsurance(claimGroup));
     claim.setItem(getClaimItems(claimGroup));
 
-    Meta meta =
-        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    Meta meta = new Meta();
+    meta.setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    if (samhsaV2Enabled) {
+      meta.setSecurity(securityTags);
+    }
     claim.setMeta(meta);
     claim.setCreated(new Date());
 

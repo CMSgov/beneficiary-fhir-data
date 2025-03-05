@@ -131,7 +131,7 @@ public final class InpatientClaimTransformerV2Test {
 
     inpatientClaimTransformer =
         new InpatientClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

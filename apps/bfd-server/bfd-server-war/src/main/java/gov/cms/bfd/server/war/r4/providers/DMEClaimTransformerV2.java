@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Quantity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -54,6 +56,8 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -65,16 +69,19 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi display lookup
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   DMEClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = npiOrgLookup;
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -103,9 +110,6 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       DMEClaim dmeClaim = (DMEClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevel(
-      //              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
       eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
     }
     return eob;
@@ -127,7 +131,9 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
 
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
@@ -24,6 +26,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
@@ -40,6 +43,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean samhsaV2Enabled;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -89,11 +94,15 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager the security tag manager
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public McsClaimResponseTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = metricRegistry;
     this.securityTagManager = securityTagManager;
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -121,9 +130,6 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claim;
-      //      List<Coding> securityTags =
-      //          securityTagManager.getClaimSecurityLevel(rdaMcsClaim.getIdrClmHdIcn(),
-      // McsTag.class);
       return transformClaim(rdaMcsClaim, securityTags);
     }
   }
@@ -152,8 +158,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    Meta meta =
-        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    Meta meta = new Meta();
+    meta.setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    if (samhsaV2Enabled) {
+      meta.setSecurity(securityTags);
+    }
     claim.setMeta(meta);
     claim.setCreated(new Date());
 

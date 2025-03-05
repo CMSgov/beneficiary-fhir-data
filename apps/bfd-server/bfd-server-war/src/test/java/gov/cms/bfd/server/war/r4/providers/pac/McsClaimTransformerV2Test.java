@@ -145,7 +145,7 @@ public class McsClaimTransformerV2Test {
     entity.setDetails(new HashSet<>(procedures));
 
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
 
     Claim claim = mcsClaimTransformerV2.transform(entity, true);
     assertEquals(numberOfRecords, claim.getDiagnosis().size());

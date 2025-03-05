@@ -233,7 +233,11 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new CarrierClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup, securityTagManager);
+            new MetricRegistry(),
+            mockDrugDisplayLookup,
+            mockNpiOrgLookup,
+            securityTagManager,
+            false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -275,7 +279,11 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new CarrierClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup, securityTagManager);
+            new MetricRegistry(),
+            mockDrugDisplayLookup,
+            mockNpiOrgLookup,
+            securityTagManager,
+            false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -317,7 +325,11 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new DMEClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup, securityTagManager);
+            new MetricRegistry(),
+            mockDrugDisplayLookup,
+            mockNpiOrgLookup,
+            securityTagManager,
+            false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -359,7 +371,11 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new DMEClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup, securityTagManager);
+            new MetricRegistry(),
+            mockDrugDisplayLookup,
+            mockNpiOrgLookup,
+            securityTagManager,
+            false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -400,7 +416,8 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new HHAClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup, securityTagManager);
+        new HHAClaimTransformerV2(
+            new MetricRegistry(), mockNpiOrgLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -442,7 +459,8 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new HospiceClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup, securityTagManager);
+        new HospiceClaimTransformerV2(
+            new MetricRegistry(), mockNpiOrgLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -484,7 +502,8 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new InpatientClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup, securityTagManager);
+        new InpatientClaimTransformerV2(
+            new MetricRegistry(), mockNpiOrgLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -527,7 +546,11 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new OutpatientClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, mockNpiOrgLookup, securityTagManager);
+            new MetricRegistry(),
+            mockDrugDisplayLookup,
+            mockNpiOrgLookup,
+            securityTagManager,
+            false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -611,7 +634,8 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(new MetricRegistry(), mockNpiOrgLookup, securityTagManager);
+        new SNFClaimTransformerV2(
+            new MetricRegistry(), mockNpiOrgLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,
@@ -655,7 +679,7 @@ class PatientClaimsEobTaskTransformerV2Test {
     when(claimTypeMock.name()).thenReturn("DME");
 
     ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup, securityTagManager);
+        new SNFClaimTransformerV2(metricRegistry, mockNpiOrgLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
             metricRegistry,

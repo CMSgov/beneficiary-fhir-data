@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,7 +71,7 @@ public final class HHAClaimTransformerTest {
 
     hhaClaimTransformer =
         new HHAClaimTransformer(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
   }
 
   /** Releases the static mock NPIOrgLookup. */
