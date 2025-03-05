@@ -978,7 +978,8 @@ public class TransformerUtilsV2Test {
     inpatientClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new InpatientClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager, false);
+        new InpatientClaimTransformerV2(
+            new MetricRegistry(), npiOrgLookup, securityTagManager, false);
     genEob = claimTransformerInterface.transform(inpatientClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);

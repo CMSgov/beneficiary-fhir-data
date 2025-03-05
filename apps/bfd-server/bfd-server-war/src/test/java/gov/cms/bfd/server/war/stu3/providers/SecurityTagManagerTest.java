@@ -32,7 +32,7 @@ class SecurityTagManagerTest {
   /** Set up the mocks and the validator being tested. */
   @BeforeEach
   void setUp() {
-    securityTagManager = new SecurityTagManager(true);
+    securityTagManager = new SecurityTagManager();
     MockitoAnnotations.openMocks(this); // Initialize mocks
   }
 
