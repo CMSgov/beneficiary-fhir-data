@@ -379,7 +379,7 @@ public class PatientE2E extends PatientE2EBase {
         .headers(headers)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);

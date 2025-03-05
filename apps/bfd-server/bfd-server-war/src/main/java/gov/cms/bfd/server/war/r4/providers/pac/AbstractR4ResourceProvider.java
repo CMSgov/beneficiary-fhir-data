@@ -425,7 +425,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               shortDefinition = OpenAPIContentProvider.PAC_IS_HASHED,
               value = OpenAPIContentProvider.PAC_IS_HASHED_VALUE)
           String hashed,
-      @OptionalParam(name = "excludeSAMHSA")
+      @OptionalParam(name = EXCLUDE_SAMHSA)
           @Description(
               shortDefinition = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_SHORT,
               value = OpenAPIContentProvider.PAC_EXCLUDE_SAMSHA_VALUE)
