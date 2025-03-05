@@ -113,7 +113,7 @@ jobs:
 
   run-mvn-release:
     runs-on: ubuntu-24.04
-    needs: compute-version-strings
+    needs: [compute-version-strings, build-base-images]
     env:
       BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
       BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
