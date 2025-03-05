@@ -130,7 +130,7 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
 
     ExplanationOfBenefit.DetailComponent detail = new ExplanationOfBenefit.DetailComponent();
     switch (claimGroup.getCompoundCode()) {
-        // COMPOUNDED
+      // COMPOUNDED
       case 2:
         /* Pharmacy dispense invoice for a compound */
         detail
@@ -141,7 +141,7 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
                     .setCode(V3ActCode.RXCINV.toCode())
                     .setDisplay(V3ActCode.RXCINV.getDisplay()));
         break;
-        // NOT_COMPOUNDED
+      // NOT_COMPOUNDED
       case 1:
         /*
          * Pharmacy dispense invoice not involving a compound
@@ -154,7 +154,7 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
                     .setCode(V3ActCode.RXDINV.toCode())
                     .setDisplay(V3ActCode.RXDINV.getDisplay()));
         break;
-        // NOT_SPECIFIED
+      // NOT_SPECIFIED
       case 0:
         /*
          * Pharmacy dispense invoice not specified - do not set a value

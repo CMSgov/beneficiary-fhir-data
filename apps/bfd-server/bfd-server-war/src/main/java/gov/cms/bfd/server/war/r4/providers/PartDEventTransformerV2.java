@@ -166,7 +166,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
     // CMPND_CD => ExplanationOfBenefit.item.programCode
     switch (claimGroup.getCompoundCode()) {
-        // COMPOUNDED
+      // COMPOUNDED
       case 2:
         /* Pharmacy dispense invoice for a compound */
         TransformerUtilsV2.addInformationSlice(eob, C4BBSupportingInfoType.COMPOUND_CODE)
@@ -180,7 +180,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
         break;
 
-        // NOT_COMPOUNDED
+      // NOT_COMPOUNDED
       case 1:
         /*
          * Pharmacy dispense invoice not involving a compound
@@ -196,7 +196,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
 
         break;
 
-        // NOT_SPECIFIED
+      // NOT_SPECIFIED
       case 0:
         /*
          * Pharmacy dispense invoice not specified - do not set a value

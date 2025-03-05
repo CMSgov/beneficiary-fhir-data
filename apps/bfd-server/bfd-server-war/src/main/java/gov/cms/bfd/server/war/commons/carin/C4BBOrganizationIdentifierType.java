@@ -39,15 +39,15 @@ public enum C4BBOrganizationIdentifierType {
    */
   public String getSystem() {
     switch (this) {
-        // C4BBIdentifierType
+      // C4BBIdentifierType
       case NPI:
       case PAYERID:
       case NAICCODE:
         return "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
-        // Non-standard
+      // Non-standard
       case NCPDP:
         return "https://bluebutton.cms.gov/resources/codesystem/identifier-type";
-        // All others are v2-0203
+      // All others are v2-0203
       default:
         return "http://terminology.hl7.org/CodeSystem/v2-0203";
     }

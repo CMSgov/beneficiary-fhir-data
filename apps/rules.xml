@@ -1,9 +1,9 @@
 <ruleset comparisonMethod="maven"
-         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0"
+         xmlns="https://www.mojohaus.org/VERSIONS/RULE/2.1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 http://mojo.codehaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+         xsi:schemaLocation="https://www.mojohaus.org/VERSIONS/RULE/2.1.0 https://www.mojohaus.org/versions/versions-model/xsd/rule-2.1.0.xsd">
     <ignoreVersions>
-        <ignoreVersion type="regex">.*[bB]eta.</ignoreVersion>
+        <ignoreVersion type="regex">.*[bB]eta.*</ignoreVersion>
         <ignoreVersion type="regex">.*[aA]lpha.*</ignoreVersion>
         <ignoreVersion type="regex">.*[aA]lpha[0-9]{1,}</ignoreVersion>
         <ignoreVersion type="regex">.*[bB]eta[0-9]{1,}</ignoreVersion>
@@ -11,5 +11,25 @@
         <ignoreVersion type="regex">.*CR.</ignoreVersion>
         <ignoreVersion type="regex">.*[rR][cC]*.*</ignoreVersion>
         <ignoreVersion type="regex">.*-M\d+</ignoreVersion>
+        <ignoreVersion type="regex">.*-B\d+</ignoreVersion>
     </ignoreVersions>
+    <rules>
+        <!--
+            jakarta.persistence 3.2 is not compatible with Spring Data JPA v3.
+            This will need to be updated when v4 is released.
+        -->
+        <rule groupId="jakarta.persistence" artifactId="jakarta.persistence-api" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="range">[3.2,)</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+        <!--
+            1.5.15 is the version listed in the slf4j compatibility list: https://www.slf4j.org/manual.html
+        -->
+        <rule groupId="ch.qos.logback" artifactId="logback-classic" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="range">[1.5.16,)</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+    </rules>
 </ruleset>
