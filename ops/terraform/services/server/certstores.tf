@@ -14,6 +14,52 @@ locals {
   s3_keystore_key     = "keystore.pfx"
 }
 
+resource "aws_s3_bucket" "certstores" {
+  bucket        = "bfd-${local.env}-${local.service}-certstores"
+  force_destroy = true
+}
+
+data "aws_iam_policy_document" "certstores_bucket_policy_doc" {
+  statement {
+    sid       = "AllowSSLRequestsOnly"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = "${aws_s3_bucket.certstores.arn}/*"
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = "false"
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "certstores" {
+  bucket = aws_s3_bucket.this.id
+  policy = data.aws_iam_policy_document.certstores_bucket_policy_doc.json
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.certstores.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  bucket = aws_s3_bucket.certstores.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = data.aws_kms_key.env_key.arn
+      sse_algorithm     = "aws:kms"
+    }
+
+    bucket_key_enabled = true
+  }
+}
+
 # Necessary as the certstores may not exist on first run and Terraform's aws_s3_object data resource
 # will fail if they don't exist. Used to trigger the null_resources to run if there are any
 # out-of-band changes to the stores in S3.
@@ -22,14 +68,14 @@ data "external" "certstore_etag" {
 
   program = ["${path.module}/scripts/get-s3-object-etag.sh"]
   query = {
-    bucket = "my-bucket" #TODO: Replace with real bucket name
+    bucket = aws_s3_bucket.certstores.id
     s3_key = each.key
   }
 }
 
 resource "null_resource" "generate_truststore" {
   triggers = {
-    # Ensures that the truststore is regenerated if the certificates it's comprised of changes
+    # Ensures that the truststore is regenerated if the certificates it's comprised of change
     truststore_certs = jsonencode(local.truststore_certs)
     # Ensures that the truststore is regenerated if the store in s3 changes
     truststore_etag = data.external.certstore_etag[local.s3_truststore_key].result.ETag
