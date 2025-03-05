@@ -1,6 +1,6 @@
 #!/bin/bash
 #######################################
-# This script retrieves the ETag of an S3 object.
+# This script retrieves the size of an S3 object, returning null if the object does not exist.
 #
 # This is intended for use in terraform as an external data script.
 #
@@ -27,5 +27,6 @@ readonly s3_key
 
 aws s3api get-object-attributes --bucket "$bucket" \
   --key "$s3_key" \
-  --object-attributes "ETag" 2>/dev/null |
-  jq -r '{ETag}' || jq -n '{ETag: null}'
+  --object-attributes "ObjectSize" 2>/dev/null |
+  jq '{ObjectSize: (.ObjectSize | tostring) }' ||
+  jq -n '{ObjectSize: null}'

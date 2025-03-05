@@ -107,8 +107,7 @@ data "aws_ssm_parameters_by_path" "nonsensitive_common" {
 }
 
 data "aws_ssm_parameters_by_path" "nonsensitive_service" {
-  path      = "/bfd/${local.env}/${local.service}/nonsensitive"
-  recursive = true
+  path = "/bfd/${local.env}/${local.service}/nonsensitive"
 }
 
 data "aws_ssm_parameters_by_path" "sensitive_service" {
