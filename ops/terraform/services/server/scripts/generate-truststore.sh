@@ -18,7 +18,7 @@
 #   Each certificate in the JSON string will be added to the truststore with its corresponding alias.
 #######################################
 
-set -eou pipefail
+set -Eeou pipefail
 
 truststore_path="$1"
 readonly truststore_path
