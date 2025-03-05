@@ -1,5 +1,17 @@
 [
   {
+    "name": "bfd-mgmt-base-jdk",
+    "dockerfile": "ops/images/bfd-mgmt-base-jdk/Containerfile",
+    "contextDir": "ops/images/bfd-mgmt-base-jdk",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-base-python",
+    "dockerfile": "ops/images/bfd-mgmt-base-python/Containerfile",
+    "contextDir": "ops/images/bfd-mgmt-base-python",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
     "dockerfile": "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
     "contextDir": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
