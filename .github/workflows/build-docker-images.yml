@@ -84,8 +84,10 @@ jobs:
       - name: Generate JMESPath
         if: inputs.imagesCsv != '*'
         id: gen-jmespath
+        env:
+          JOINED_JMES_CONTAINS: ${{ join(fromJson(steps.mutate-images-csv.outputs.images_jmespath_fragments), ' || ') }}
         run: |
-          jmes_path="[?${{ join(fromJson(steps.mutate-images-csv.outputs.images_jmespath_fragments), ' || ') }}]"
+          jmes_path="[?$JOINED_JMES_CONTAINS]"
           echo "jmes_path=$jmes_path" >> $GITHUB_OUTPUT
 
       - name: Setup CI jobs matrix
