@@ -101,7 +101,7 @@ jobs:
     strategy:
       matrix:
         image: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
       - name: Validate Inputs
         run: |
@@ -139,29 +139,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Setup tags
-        id: setup_tags
-        run: |
-          # Naively, if version tag does not contain a "-" we assume the version is not a release
-          # and the "latest" tag should not be pushed.
-          image_tags=""
-          if [[ "${{ inputs.versionTag }}" == *"-"* ]]; then
-            image_tags="$IMAGE_VERSIONED_TAG"
-          else
-            image_tags="$IMAGE_VERSIONED_TAG,$IMAGE_LATEST_TAG"
-          fi
-          echo image_tags=$image_tags >> $GITHUB_OUTPUT
-        env:
-          IMAGE_VERSIONED_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
-          IMAGE_LATEST_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
-
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: true
-          tags: ${{ steps.setup_tags.outputs.image_tags }}
+          tags: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
           # AWS Lambda does not support multi-platform images, something that is enabled by default
           # by this Action via the "provenance" flag. Until AWS Lambda supports this feature
           # properly, we must explicitly disable provenance and specify the platform directly.
