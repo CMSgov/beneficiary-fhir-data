@@ -101,7 +101,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param entityManager The entity manager.
    * @return Query to run.
    */
-  private Query buildQuery(
+  Query buildQuery(
       Optional<String> startingClaim,
       TableEntry tableEntry,
       int limit,
@@ -345,7 +345,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param totalTags The total number of tags created so far.
    * @param entityManager The entity manager.
    */
-  private void saveProgress(
+  void saveProgress(
       String table,
       Optional<String> lastClaimId,
       Long totalProcessed,
@@ -369,7 +369,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param table The claim table in question.
    * @return The last claim id processed for the given table.
    */
-  private Optional<BackfillProgress> getLastClaimId(String table) {
+  Optional<BackfillProgress> getLastClaimId(String table) {
     return transactionManager.executeFunction(
         entityManager -> {
           Query query =
