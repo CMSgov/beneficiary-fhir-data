@@ -71,6 +71,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # Generates a JSON string array of JMESPath contains expression "fragments".
+      # Given an input like:
+      #    image1, image2
+      # The following JSON string will be the output:
+      #    ["contains('image1', name)", "contains('image2', name)"]
       - name: Mutate images list for JMESPath
         if: inputs.imagesCsv != '*'
         id: mutate-images-csv
@@ -80,6 +85,12 @@ jobs:
           images_jmespath_fragments="$(jq -cR $'gsub("\\\\s*"; "") | split(",") | map("contains(\'"+.+"\', name)")' <<< "$IMAGES_CSV")"
           echo "images_jmespath_fragments=$images_jmespath_fragments" >> $GITHUB_OUTPUT
 
+      # Consumes the output of the previous step and generates a full JMESPath expression that will
+      # be used to filter the list of images.
+      # Given an input like:
+      #    ["contains('image1', name)", "contains('image2', name)"]
+      # Generates a JMESPath expression like:
+      #    [?contains('image1', name) || contains('image2', name)]
       - name: Generate JMESPath
         if: inputs.imagesCsv != '*'
         id: gen-jmespath
@@ -87,6 +98,8 @@ jobs:
           jmes_path="[?${{ join(fromJson(steps.mutate-images-csv.outputs.images_jmespath_fragments), ' || ') }}]"
           echo "jmes_path=$jmes_path" >> $GITHUB_OUTPUT
 
+      # Uses the above JMESPath expression to filter the list of buildable images based upon their
+      # names.
       - name: Setup CI jobs matrix
         id: set-matrix
         uses: JoshuaTheMiller/conditional-build-matrix@main
