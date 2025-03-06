@@ -96,7 +96,7 @@ jobs:
           echo BFD_DEV_VERSION="${BFD_DEV_VERSION_OVERRIDE:-$BFD_DEV_VERSION_DEFAULT}" >> "$GITHUB_OUTPUT"
 
   build-base-images:
-    uses: ./.github/workflows/build-docker-images.yml
+    uses: ./.github/workflows/build-container-images.yml
     needs: compute-version-strings
     permissions:
       contents: read
@@ -219,7 +219,7 @@ jobs:
         working-directory: ./apps
 
   build-other-images:
-    uses: ./.github/workflows/build-docker-images.yml
+    uses: ./.github/workflows/build-container-images.yml
     needs: [compute-version-strings, run-mvn-release]
     permissions:
       contents: read
