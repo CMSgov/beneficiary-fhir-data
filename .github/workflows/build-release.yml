@@ -106,7 +106,7 @@ jobs:
       versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
       awsRegion: ${{ inputs.awsRegion }}
       # Build the base images prior to building the application images with jib in "run-mvn-release"
-      # See .github/workflows/build_images_matrix.json for list of buildable images
+      # See .github/workflows/build_container_images_matrix.json for list of buildable images
       imagesCsv: "bfd-mgmt-base-jdk, bfd-mgmt-base-python"
     secrets: inherit
 
@@ -229,7 +229,7 @@ jobs:
       versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
       awsRegion: ${{ inputs.awsRegion }}
       # Build other images, like Lambda images, Python applications, etc.
-      # See .github/workflows/build_images_matrix.json for list of buildable images
+      # See .github/workflows/build_container_images_matrix.json for list of buildable images
       imagesCsv: "bfd-mgmt-eft-sftp-outbound-transfer-lambda, bfd-mgmt-pipeline-ccw-manifests-verifier-lambda"
     secrets: inherit
 
