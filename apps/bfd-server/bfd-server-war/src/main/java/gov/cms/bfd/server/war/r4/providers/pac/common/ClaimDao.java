@@ -6,6 +6,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.server.war.commons.ClaimWithSecurityTagsDao;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import jakarta.persistence.EntityManager;
@@ -18,7 +19,6 @@ import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,9 +37,6 @@ public class ClaimDao {
 
   /** Query name for logging MDC. */
   static final String CLAIM_BY_ID_QUERY = "claim_by_id";
-
-  /** Query name for logging MDC. */
-  static final String CLAIM_SECURITY_TAG_QUERY = "security_tag_by_claim";
 
   /** {@link EntityManager} used for database access. */
   private final EntityManager entityManager;
@@ -145,13 +142,14 @@ public class ClaimDao {
     }
 
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
-    Set<String> claimIds = new HashSet<>();
+    Set<String> claimIds;
 
     ClaimWithSecurityTagsDao claimWithSecurityTagsDao = new ClaimWithSecurityTagsDao();
 
     if (claimEntities != null) {
-      claimWithSecurityTagsDao.collectClaimIds(
-          (List<Object>) claimEntities, claimIds, resourceType.getEntityIdAttribute());
+      claimIds =
+          claimWithSecurityTagsDao.collectClaimIds(
+              (List<Object>) claimEntities, resourceType.getEntityIdAttribute());
 
       if (!claimIds.isEmpty()) {
         // Query for security tags by the collected claim IDs

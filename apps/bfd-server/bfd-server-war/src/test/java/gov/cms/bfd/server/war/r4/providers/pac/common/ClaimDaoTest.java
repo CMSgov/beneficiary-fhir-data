@@ -446,7 +446,7 @@ class ClaimDaoTest {
 
     TypedQuery<Object[]> mockTypedQuery = mock(TypedQuery.class);
     // Mock the behavior of createQuery to return the mock TypedQuery
-    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(anyString(), eq(Object[].class));
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(anyString(), eq(String[].class));
 
     // Mock the behavior of setParameter to return the same mock TypedQuery (for method chaining)
     doReturn(mockTypedQuery).when(mockTypedQuery).setParameter(anyString(), any());

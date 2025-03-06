@@ -11,10 +11,10 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.ClaimWithSecurityTagsDao;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
-import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTagsDao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -369,8 +369,11 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
 
     Set<String> claimIds = new HashSet<>();
-
-    claimWithSecurityTagsDao.collectClaimIds((List<Object>) claimEntities, claimIds, claimType);
+    if (claimEntities != null) {
+      claimIds =
+          claimWithSecurityTagsDao.collectClaimIds(
+              (List<Object>) claimEntities, claimType.getEntityIdAttribute().getName());
+    }
 
     if (!claimIds.isEmpty()) {
       // Make ONE query to get all claim-tag relationships
@@ -383,7 +386,9 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
           .forEach(
               claimEntity -> {
                 // Get the claim ID
-                String claimId = claimWithSecurityTagsDao.extractClaimId(claimEntity, claimType);
+                String claimId =
+                    claimWithSecurityTagsDao.extractClaimId(
+                        claimEntity, claimType.getEntityIdAttribute().toString());
 
                 // Look up this claim's tags from our pre-fetched map (no additional DB query)
                 Set<String> claimSpecificTags =

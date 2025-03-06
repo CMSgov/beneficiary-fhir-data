@@ -1,6 +1,5 @@
-package gov.cms.bfd.server.war.r4.providers.pac.common;
+package gov.cms.bfd.server.war.commons;
 
-import gov.cms.bfd.server.war.commons.ClaimType;
 import jakarta.persistence.EntityManager;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -21,42 +20,6 @@ public class ClaimWithSecurityTagsDao {
   /**
    * Builds a mapping from claim IDs to their security tags.
    *
-   * @param claimEntities the claim entity
-   * @param claimIds The list of claim IDs
-   * @param claimType the claim type
-   */
-  public void collectClaimIds(
-      List<Object> claimEntities, Set<String> claimIds, ClaimType claimType) {
-
-    for (Object claimEntity : claimEntities) {
-
-      try {
-        // Dynamically access the field corresponding to the entityIdAttribute using reflection
-        Field entityIdField =
-            claimEntity.getClass().getDeclaredField(claimType.getEntityIdAttribute().getName());
-        entityIdField.setAccessible(true); // Make the field accessible
-
-        // Get the value of the entityIdField
-        Object claimIdValue = entityIdField.get(claimEntity);
-
-        // If a valid claim ID is found, add it to the claimIds list
-        if (claimIdValue != null) {
-          claimIds.add(claimIdValue.toString());
-        }
-      } catch (NoSuchFieldException e) {
-        LOGGER.debug(
-            "Field '{}' not found for claim entity: {}",
-            claimType.getEntityIdAttribute().getName(),
-            claimEntity);
-      } catch (IllegalAccessException e) {
-        LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
-      }
-    }
-  }
-
-  /**
-   * Builds a mapping from claim IDs to their security tags.
-   *
    * @param tagTable The table containing security tags
    * @param claimIds The list of claim IDs
    * @param entityManager the entityManager
@@ -69,7 +32,7 @@ public class ClaimWithSecurityTagsDao {
       return Collections.emptyMap();
     }
 
-    List<Object[]> results = new ArrayList<>();
+    List<String[]> results = new ArrayList<>();
 
     if (tagTable != null) {
       String query =
@@ -77,7 +40,7 @@ public class ClaimWithSecurityTagsDao {
 
       results =
           entityManager
-              .createQuery(query, Object[].class)
+              .createQuery(query, String[].class)
               .setParameter("claimIds", claimIds)
               .getResultList();
     }
@@ -127,11 +90,11 @@ public class ClaimWithSecurityTagsDao {
    * Builds a mapping from claim IDs to their security tags.
    *
    * @param claimEntities the claim entity
-   * @param claimIds The list of claim IDs
    * @param entityIdAttribute the claim type
+   * @return set of ClaimIds
    */
-  public void collectClaimIds(
-      List<Object> claimEntities, Set<String> claimIds, String entityIdAttribute) {
+  public Set<String> collectClaimIds(List<Object> claimEntities, String entityIdAttribute) {
+    Set<String> claimIds = new HashSet<>();
     for (Object claimEntity : claimEntities) {
 
       try {
@@ -152,6 +115,7 @@ public class ClaimWithSecurityTagsDao {
         LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
       }
     }
+    return claimIds;
   }
 
   /**
