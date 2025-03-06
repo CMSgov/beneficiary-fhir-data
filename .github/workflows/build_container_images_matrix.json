@@ -19,7 +19,7 @@
   },
   {
     "name": "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
-    "dockerfile": "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
+    "dockerfile": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/Dockerfile",
     "contextDir": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
     "platform": "linux/amd64"
   },
