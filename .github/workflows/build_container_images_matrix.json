@@ -1,13 +1,13 @@
 [
   {
     "name": "bfd-mgmt-base-jdk",
-    "dockerfile": "ops/images/bfd-mgmt-base-jdk/Containerfile",
+    "dockerfile": "ops/images/bfd-mgmt-base-jdk/Dockerfile",
     "contextDir": "ops/images/bfd-mgmt-base-jdk",
     "platform": "linux/arm64"
   },
   {
     "name": "bfd-mgmt-base-python",
-    "dockerfile": "ops/images/bfd-mgmt-base-python/Containerfile",
+    "dockerfile": "ops/images/bfd-mgmt-base-python/Dockerfile",
     "contextDir": "ops/images/bfd-mgmt-base-python",
     "platform": "linux/arm64"
   },
