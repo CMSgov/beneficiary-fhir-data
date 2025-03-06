@@ -29,8 +29,8 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -90,7 +90,7 @@ class PatientClaimsEobTaskTransformerV2Test {
   @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
 
   /** v2SamhsaConsentSimulation. */
-  @Mock V2SamhsaConsentSimulation v2SamhsaConsentSimulation;
+  @Mock SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
 
   /** The carrier claim returned in tests. */
   CarrierClaim testCarrierClaim;
@@ -244,7 +244,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -290,7 +290,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -336,7 +336,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -382,7 +382,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -424,7 +424,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -467,7 +467,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -510,7 +510,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -557,7 +557,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -599,7 +599,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -642,7 +642,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -686,7 +686,7 @@ class PatientClaimsEobTaskTransformerV2Test {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            v2SamhsaConsentSimulation);
+            samhsaV2InterceptorShadow);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);

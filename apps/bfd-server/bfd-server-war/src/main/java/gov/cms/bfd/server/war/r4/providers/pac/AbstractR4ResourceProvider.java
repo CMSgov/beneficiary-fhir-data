@@ -25,7 +25,7 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
-import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -92,7 +92,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   private final R4ClaimSamhsaMatcher samhsaMatcher;
 
   /** v2SamhsaConsentSimulation. */
-  private final V2SamhsaConsentSimulation v2SamhsaConsentSimulation;
+  private final SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
 
   /** True if old MBI values should be included in queries. */
   private final Boolean oldMbiHashEnabled;
@@ -125,7 +125,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param fissTransformer the fiss transformer
    * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   * @param v2SamhsaConsentSimulation the v2SamhsaConsentSimulation resources ({@link
+   * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation resources ({@link
    *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
@@ -135,14 +135,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       ResourceTransformer<T> fissTransformer,
       ResourceTransformer<T> mcsTransformer,
       String claimSourceTypeNames,
-      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
     this.fissTransformer = requireNonNull(fissTransformer);
     this.mcsTransformer = requireNonNull(mcsTransformer);
-    this.v2SamhsaConsentSimulation = v2SamhsaConsentSimulation;
-    //    this.samhsaV2Shadow = samhsaV2Shadow;
+    this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
 
     requireNonNull(claimSourceTypeNames);
     enabledSourceTypes =
@@ -531,16 +530,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     List<T> resources =
         entitiesWithType.stream()
-            .filter(
-                pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
             .map(
                 pair -> {
-                  // Log missing claim for samhsa V2 Shadow check
-                  v2SamhsaConsentSimulation.logMissingClaim(
-                      pair.left, samhsaMatcher.hasNoSamhsaData(pair.left));
-
-                  return transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers);
+                  // Log if missing claim for samhsa V2 Shadow check before filtering
+                  samhsaV2InterceptorShadow.logMissingClaim(
+                      pair.left, !samhsaMatcher.hasNoSamhsaData(pair.left));
+                  return pair;
                 })
+            .filter(
+                pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
+            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());

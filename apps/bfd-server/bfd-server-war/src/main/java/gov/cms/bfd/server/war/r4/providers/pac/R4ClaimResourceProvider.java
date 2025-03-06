@@ -8,7 +8,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    * @param fissClaimTransformerV2 is the fiss claim transformer
    * @param mcsClaimTransformerV2 is the mcs claim transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   * @param v2SamhsaConsentSimulation v2SamhsaConsentSimulation resources ({@link
+   * @param samhsaV2InterceptorShadow v2SamhsaConsentSimulation resources ({@link
    *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   public R4ClaimResourceProvider(
@@ -46,7 +46,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
       @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames,
-      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow) {
     super(
         metricRegistry,
         samhsaMatcher,
@@ -54,7 +54,7 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
         fissClaimTransformerV2,
         mcsClaimTransformerV2,
         claimSourceTypeNames,
-        v2SamhsaConsentSimulation);
+        samhsaV2InterceptorShadow);
   }
 
   /** {@inheritDoc} */

@@ -33,7 +33,6 @@ import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -188,8 +187,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             Mockito.mock(InpatientClaimTransformerV2.class),
             Mockito.mock(OutpatientClaimTransformerV2.class),
             mockPdeTransformer,
-            Mockito.mock(SNFClaimTransformerV2.class),
-            Mockito.mock(V2SamhsaConsentSimulation.class));
+            Mockito.mock(SNFClaimTransformerV2.class));
 
     // entity manager mocking
     mockEntityManager();

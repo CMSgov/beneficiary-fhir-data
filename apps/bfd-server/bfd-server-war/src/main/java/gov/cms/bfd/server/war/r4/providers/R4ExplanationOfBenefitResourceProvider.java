@@ -26,7 +26,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
-import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonQueries;
@@ -117,9 +116,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   /** The transformer for snf claims. */
   private final SNFClaimTransformerV2 snfClaimTransformer;
 
-  /** v2SamhsaConsentSimulation. */
-  private final V2SamhsaConsentSimulation v2SamhsaConsentSimulation;
-
   /**
    * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
    *
@@ -138,7 +134,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
-   * @param v2SamhsaConsentSimulation the v2SamhsaConsentSimulation
    */
   public R4ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -152,8 +147,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
       InpatientClaimTransformerV2 inpatientClaimTransformer,
       OutpatientClaimTransformerV2 outpatientClaimTransformer,
       PartDEventTransformerV2 partDEventTransformer,
-      SNFClaimTransformerV2 snfClaimTransformer,
-      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
+      SNFClaimTransformerV2 snfClaimTransformer) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -166,7 +160,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
-    this.v2SamhsaConsentSimulation = v2SamhsaConsentSimulation;
   }
 
   /**

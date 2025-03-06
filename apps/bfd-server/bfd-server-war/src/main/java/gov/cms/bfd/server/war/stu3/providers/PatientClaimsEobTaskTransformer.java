@@ -9,7 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
-import gov.cms.bfd.server.war.V2SamhsaConsentSimulation;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.ClaimWithSecurityTagsDao;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -86,7 +86,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   private final Stu3EobSamhsaMatcher samhsaMatcher;
 
   /** v2SamhsaConsentSimulation. */
-  private final V2SamhsaConsentSimulation v2SamhsaConsentSimulation;
+  private final SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
 
   /** Database entity manager. */
   private EntityManager entityManager;
@@ -143,19 +143,19 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param samhsaMatcher the samhsa matcher bean
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param npiOrgLookup the npi org lookup bean
-   * @param v2SamhsaConsentSimulation the v2SamhsaConsentSimulation
+   * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation
    */
   public PatientClaimsEobTaskTransformer(
       MetricRegistry metricRegistry,
       Stu3EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
-      V2SamhsaConsentSimulation v2SamhsaConsentSimulation) {
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
-    this.v2SamhsaConsentSimulation = v2SamhsaConsentSimulation;
+    this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
   }
 
   /**
@@ -211,17 +211,9 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   @Override
   public PatientClaimsEobTaskTransformer call() {
-    LOGGER.debug("TransformPatientClaimsToEobTaskpwd.call() started for {}", id);
+    LOGGER.debug("TransformPatientClaimsToEobTask.call() started for {}", id);
     try {
-      List<ClaimWithSecurityTags<T>> claims = findClaimTypeByPatient();
-      eobs.addAll(transformToEobs(claims));
-
-      for (ExplanationOfBenefit eob : eobs) {
-        boolean samhsaMatcherTest = samhsaMatcher.test(eob);
-        // Log missing claim for samhsa V2 Shadow check
-        v2SamhsaConsentSimulation.logMissingClaim(claims, samhsaMatcherTest);
-      }
-
+      eobs.addAll(transformToEobs(findClaimTypeByPatient()));
       if (excludeSamhsa) {
         filterSamhsa(eobs);
       }
@@ -242,9 +234,17 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param claims the claims/events to transform
    * @return the {@link ExplanationOfBenefit} instances, one per claim/event
    */
-  @Trace
   private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
-    return claims.stream().map(c -> transformEobClaim(c)).collect(Collectors.toList());
+    return claims.stream()
+        .map(
+            c -> {
+              ExplanationOfBenefit eob = transformEobClaim(c);
+              // Log the missing claim along with the EOB
+              samhsaV2InterceptorShadow.logMissingClaim(c, samhsaMatcher.test(eob));
+
+              return eob;
+            })
+        .collect(Collectors.toList());
   }
 
   /**
@@ -383,7 +383,9 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           .forEach(
               claimEntity -> {
                 // Get the claim ID
-                String claimId = claimWithSecurityTagsDao.extractClaimId(claimEntity, claimType);
+                String claimId =
+                    claimWithSecurityTagsDao.extractClaimId(
+                        claimEntity, claimType.getEntityIdAttribute().getName());
 
                 // Look up this claim's tags from our pre-fetched map (no additional DB query)
                 Set<String> claimSpecificTags =

@@ -51,39 +51,10 @@ public class ClaimWithSecurityTagsDao {
       String claimId = result[0].toString();
       String tag = result[1].toString();
 
-      // Add tag to the list for this claim ID
       claimIdToTagsMap.computeIfAbsent(claimId, k -> new HashSet<>()).add(tag);
     }
 
     return claimIdToTagsMap;
-  }
-
-  /**
-   * Builds a mapping from claim IDs to their security tags.
-   *
-   * @param claimEntity the Claim
-   * @param claimType the claim type
-   * @return A map from claim ID to a list of security tags
-   */
-  public String extractClaimId(Object claimEntity, ClaimType claimType) {
-    try {
-      // Dynamically access the field corresponding to the entityIdAttribute using reflection
-      Field entityIdField =
-          claimEntity.getClass().getDeclaredField(claimType.getEntityIdAttribute().getName());
-      entityIdField.setAccessible(true); // Make the field accessible
-
-      Object claimIdValue = entityIdField.get(claimEntity);
-
-      if (claimIdValue != null) {
-        return claimIdValue.toString();
-      }
-    } catch (NoSuchFieldException e) {
-      // Field not found, try the next one
-    } catch (IllegalAccessException e) {
-      // Access error, try the next one
-    }
-    // If no ID found, return empty string or throw an exception
-    return "";
   }
 
   /**
@@ -98,11 +69,9 @@ public class ClaimWithSecurityTagsDao {
     for (Object claimEntity : claimEntities) {
 
       try {
-        // Dynamically access the field corresponding to the entityIdAttribute using reflection
         Field entityIdField = claimEntity.getClass().getDeclaredField(entityIdAttribute);
-        entityIdField.setAccessible(true); // Make the field accessible
+        entityIdField.setAccessible(true);
 
-        // Get the value of the entityIdField
         Object claimIdValue = entityIdField.get(claimEntity);
 
         // If a valid claim ID is found, add it to the claimIds list
@@ -127,9 +96,8 @@ public class ClaimWithSecurityTagsDao {
    */
   public String extractClaimId(Object claimEntity, String entityIdAttribute) {
     try {
-      // Dynamically access the field corresponding to the entityIdAttribute using reflection
       Field entityIdField = claimEntity.getClass().getDeclaredField(entityIdAttribute);
-      entityIdField.setAccessible(true); // Make the field accessible
+      entityIdField.setAccessible(true);
 
       Object claimIdValue = entityIdField.get(claimEntity);
 
@@ -137,11 +105,10 @@ public class ClaimWithSecurityTagsDao {
         return claimIdValue.toString();
       }
     } catch (NoSuchFieldException e) {
-      // Field not found, try the next one
+      LOGGER.debug("Field entityIdAttribute not found for claim entity: {}", claimEntity, e);
     } catch (IllegalAccessException e) {
-      // Access error, try the next one
+      LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
     }
-    // If no ID found, return empty string or throw an exception
     return "";
   }
 }
