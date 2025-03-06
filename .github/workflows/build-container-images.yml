@@ -93,7 +93,7 @@ jobs:
         with:
           filter: "${{ steps.gen-jmespath.outputs.jmes_path || '[]' }}"
           addInclude: "false"
-          inputFile: ".github/workflows/build_images_matrix.json"
+          inputFile: ".github/workflows/build_container_images_matrix.json"
 
   build-images:
     if: needs.compute-matrix.outputs.matrix != '[]'
