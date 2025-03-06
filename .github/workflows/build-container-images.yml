@@ -1,5 +1,5 @@
 ---
-name: "Build Docker Images"
+name: "Build Container Images"
 on:
   # GHA does not support "shared_inputs" or some other form of workflow_call and workflow_dispatch
   # input consolidation; instead, we must duplicate the input definitions for each event
