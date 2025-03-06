@@ -12,6 +12,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-mgmt-server-regression",
+    "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
+    "contextDir": "apps/utils/locust_tests",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
     "dockerfile": "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
     "contextDir": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
