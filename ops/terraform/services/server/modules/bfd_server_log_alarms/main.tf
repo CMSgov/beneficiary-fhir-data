@@ -1,6 +1,6 @@
 locals {
   env = terraform.workspace
-  
+
   victor_ops_sns         = "bfd-${local.env}-cloudwatch-alarms"
   bfd_test_slack_sns     = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
   bfd_warnings_slack_sns = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-warnings"
@@ -41,8 +41,8 @@ locals {
   # Use Terraform's "splat" operator to automatically return either an empty list, if no
   # SNS topic was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that
   # is the ARN of the SNS topic. Functionally equivalent to [for o in data.aws_sns_topic.sns : o.arn]
-  alert_arn       = data.aws_sns_topic.alert_sns[*].arn
-  notify_arn      = data.aws_sns_topic.notify_sns[*].arn
+  alert_arn  = data.aws_sns_topic.alert_sns[*].arn
+  notify_arn = data.aws_sns_topic.notify_sns[*].arn
 
   server_log_availability = {
     period       = 1 * 60 * 60 # 1 hour 

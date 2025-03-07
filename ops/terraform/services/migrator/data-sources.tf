@@ -6,7 +6,7 @@ data "external" "rds" {
 }
 
 data "aws_iam_policy" "permission_boundary" {
-  name     = "ct-ado-poweruser-permissions-boundary-policy"
+  name = "ct-ado-poweruser-permissions-boundary-policy"
 }
 
 data "aws_caller_identity" "current" {}

@@ -11,8 +11,7 @@ locals {
   env              = module.terraservice.env
   seed_env         = module.terraservice.seed_env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
-
-  kms_key_alias = "alias/bfd-${local.seed_env}-config-cmk"
+  kms_key_alias    = "alias/bfd-${local.seed_env}-config-cmk"
   key_policy_template = jsonencode(
     {
       Version = "2012-10-17",

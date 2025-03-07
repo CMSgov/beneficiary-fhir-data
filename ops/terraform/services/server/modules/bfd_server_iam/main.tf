@@ -25,8 +25,8 @@ resource "aws_iam_instance_profile" "instance" {
 
 # EC2 instance role
 resource "aws_iam_role" "instance" {
-  name = "bfd-${local.env}-${var.legacy_service}-role"
-  path = "/delegatedadmin/developer/"
+  name                 = "bfd-${local.env}-${var.legacy_service}-role"
+  path                 = "/delegatedadmin/developer/"
   permissions_boundary = data.aws_iam_policy.permission_boundary.arn
 
   assume_role_policy = <<-EOF
@@ -61,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${var.service}-kms"
   description = "Permissions to use the default environment KMS key"
-  path = "/delegatedadmin/developer/"
+  path        = "/delegatedadmin/developer/"
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -94,7 +94,7 @@ resource "aws_iam_role_policy_attachment" "kms" {
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${var.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${var.service} SSM hierarchies"
-  path = "/delegatedadmin/developer/"
+  path        = "/delegatedadmin/developer/"
   policy = jsonencode(
     {
       "Version" : "2012-10-17",

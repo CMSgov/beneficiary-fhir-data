@@ -16,9 +16,9 @@ locals {
   latest_bfd_release = module.terraservice.latest_bfd_release
   seed_env           = module.terraservice.seed_env
 
-  service = "migrator"
-  layer   = "data"
-
+  service                    = "migrator"
+  layer                      = "data"
+  cloudtamer_iam_path        = "/delegatedadmin/developer/"
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : basename(key) => value }
   nonsensitive_map           = zipmap(data.aws_ssm_parameters_by_path.nonsensitive.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive.values))

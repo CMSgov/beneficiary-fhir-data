@@ -83,7 +83,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
     data.aws_security_group.vpn.id,
   ]
 
-# Autoscaled reader nodes, by default, are not configured with Performance Insights. Until
+  # Autoscaled reader nodes, by default, are not configured with Performance Insights. Until
   # recently, the only option for enabling Performance Insights for those nodes would be to enable
   # it after they scale-out and reach the "available" state. However, it seems that it is now
   # possible to enable both Performance Insights and Enhanced Monitoring at the Cluster level for

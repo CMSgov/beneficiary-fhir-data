@@ -22,3 +22,9 @@ variable "disable_rds_scheduling_override" {
   EOF
   type        = bool
 }
+
+variable "enable_cloudtamer_deployment" {
+  type        = bool
+  default     = false
+  description = "Feature Flag to toggle off resource creation for restricted actions related to cloudtamer administrative roles"
+}

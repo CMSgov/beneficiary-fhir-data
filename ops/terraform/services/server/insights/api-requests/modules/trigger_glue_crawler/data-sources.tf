@@ -7,3 +7,7 @@ data "archive_file" "lambda_src" {
   source_file = "${path.module}/lambda_src/trigger_glue_crawler.py"
   output_path = "${path.module}/lambda_src/trigger_glue_crawler.zip"
 }
+
+data "aws_iam_policy" "permission_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

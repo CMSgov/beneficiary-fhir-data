@@ -95,7 +95,7 @@ data "aws_iam_policy_document" "db_users_group_policy_combined" {
 
 # IAM group to manage database users
 resource "aws_iam_group" "db_users" {
-  count = local.is_ephemeral_env ? 0 : 1
+  count = local.is_ephemeral_env && var.enable_cloudtamer_deployment != false ? 0 : 1
   name  = "bfd-fhirdb-${local.env}-users"
 }
 
@@ -103,6 +103,7 @@ resource "aws_iam_group" "db_users" {
 resource "aws_iam_policy" "db_users" {
   count       = local.is_ephemeral_env ? 0 : 1
   name        = "bfd-fhirdb-${local.env}-users-gp"
+  path        = local.cloudtamer_iam_path
   description = "Group policy for bfd-fhirdb-${local.env}-users"
   policy      = data.aws_iam_policy_document.db_users_group_policy_combined[0].json
 }
@@ -117,10 +118,10 @@ resource "aws_iam_group_policy_attachment" "db_users" {
 # The fhirdb auth role users will assume when connecting to this environments clusters (includes ephemeral seeds).
 # Note: the role session name must be set to the callers IAM username (case sensitive) when assuming this role.
 resource "aws_iam_role" "db_auth" {
-  count              = local.is_ephemeral_env ? 0 : 1
-  name               = "bfd-fhirdb-${local.env}-auth"
-  assume_role_policy = data.aws_iam_policy_document.db_auth_role_trust_policy[0].json
-  path               = "/delegatedadmin/developer/"
+  count                = local.is_ephemeral_env ? 0 : 1
+  name                 = "bfd-fhirdb-${local.env}-auth"
+  assume_role_policy   = data.aws_iam_policy_document.db_auth_role_trust_policy[0].json
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permission_boundary.arn
 }
 
@@ -138,7 +139,7 @@ resource "aws_iam_policy" "db_auth_ephemeral" {
   name        = "bfd-fhirdb-${local.env}-auth"
   description = "Role policy allowing db connect action for ${local.env} ephemeral cluster"
   policy      = data.aws_iam_policy_document.db_rds_connect.json
-  path               = "/delegatedadmin/developer/"
+  path        = local.cloudtamer_iam_path
 }
 
 # attach the ephemeral policy to the auth role
@@ -167,9 +168,9 @@ data "aws_iam_policy_document" "rds_monitoring" {
 }
 
 resource "aws_iam_role" "rds_monitoring" {
-  name               = "bfd-fhirdb-${local.seed_env}-monitoring"
-  path               = "/delegatedadmin/developer/"
-  assume_role_policy = data.aws_iam_policy_document.rds_monitoring.json
+  name                 = "bfd-fhirdb-${local.seed_env}-monitoring"
+  path                 = local.cloudtamer_iam_path
+  assume_role_policy   = data.aws_iam_policy_document.rds_monitoring.json
   permissions_boundary = data.aws_iam_policy.permission_boundary.arn
 }
 

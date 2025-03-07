@@ -12,7 +12,7 @@ data "aws_iam_policy" "cloudwatch_agent_xray_policy" {
 resource "aws_iam_policy" "sqs" {
   name        = "bfd-${local.env}-${local.service}-sqs"
   description = "Permissions to specific SQS queue for ${local.service} in ${local.env}"
-  path = "/delegatedadmin/developer/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-EOF
   {
       "Version": "2012-10-17",
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "sqs" {
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service}, /bfd/mgmt/common/sensitive/user SSM hierarchies"
-  path = "/delegatedadmin/developer/"
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -77,10 +77,10 @@ resource "aws_iam_policy" "ssm" {
 }
 
 resource "aws_iam_role" "this" {
-  name        = "bfd-${local.env}-${local.service}"
-  path = "/delegatedadmin/developer/"
+  name                 = "bfd-${local.env}-${local.service}"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permission_boundary.arn
-  description = "Role for instance profile use for ${local.service} in ${local.env}"
+  description          = "Role for instance profile use for ${local.service} in ${local.env}"
 
   assume_role_policy = <<-EOF
   {
@@ -108,5 +108,5 @@ resource "aws_iam_role" "this" {
 resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-${local.service}"
   role = aws_iam_role.this.name
-  path = "/delegatedadmin/developer/"
+  path = local.cloudtamer_iam_path
 }

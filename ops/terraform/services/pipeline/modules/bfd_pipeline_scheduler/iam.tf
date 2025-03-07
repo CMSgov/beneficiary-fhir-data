@@ -94,8 +94,8 @@ EOF
 }
 
 resource "aws_iam_role" "this" {
-  name        = local.lambda_full_name
-  path = "/delegatedadmin/developer/"
+  name                 = local.lambda_full_name
+  path                 = "/delegatedadmin/developer/"
   permissions_boundary = data.aws_iam_policy.permission_boundary.arn
 
   description = "Role for ${local.lambda_full_name} Lambda"
