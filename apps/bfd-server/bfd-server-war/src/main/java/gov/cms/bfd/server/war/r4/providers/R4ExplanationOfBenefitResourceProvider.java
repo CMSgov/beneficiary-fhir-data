@@ -412,6 +412,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
           TransformerUtilsV2.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
+
     return bundle;
   }
 

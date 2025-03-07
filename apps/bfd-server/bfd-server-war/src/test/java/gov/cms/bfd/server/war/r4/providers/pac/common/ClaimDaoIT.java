@@ -236,7 +236,7 @@ public class ClaimDaoIT {
             testParam.serviceDateParam);
     assertEquals(
         testParam.expectedClaimIds,
-        claims.stream().map(RdaFissClaim::getClaimId).collect(Collectors.toList()));
+        claims.stream().map(r -> r.getClaimEntity().getClaimId()).collect(Collectors.toList()));
   }
 
   /**
@@ -360,7 +360,14 @@ public class ClaimDaoIT {
    * @return The claims that were found from the lookup on the {@link ClaimDao} with the given MBI.
    */
   private List<RdaFissClaim> runFissMbiQuery(ClaimDao claimDao, String mbi) {
-    return claimDao.findAllByMbiAttribute(ClaimResponseTypeV2.F, mbi, false, null, null);
+    // Fetch claims with security tags
+    List<ClaimWithSecurityTags<RdaFissClaim>> claimsWithTags =
+        claimDao.findAllByMbiAttribute(ClaimResponseTypeV2.F, mbi, false, null, null);
+
+    // Map the result to extract the RdaFissClaim entities
+    return claimsWithTags.stream()
+        .map(ClaimWithSecurityTags::getClaimEntity)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -372,7 +379,11 @@ public class ClaimDaoIT {
    *     hash.
    */
   private List<RdaMcsClaim> runMcsMbiHashQuery(ClaimDao claimDao, String mbiHash) {
-    return claimDao.findAllByMbiAttribute(ClaimTypeV2.M, mbiHash, true, null, null);
+    List<ClaimWithSecurityTags<RdaMcsClaim>> claimsWithTags =
+        claimDao.findAllByMbiAttribute(ClaimTypeV2.M, mbiHash, true, null, null);
+    return claimsWithTags.stream()
+        .map(ClaimWithSecurityTags::getClaimEntity)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -391,7 +402,12 @@ public class ClaimDaoIT {
       String mbiHash,
       @Nullable DateRangeParam lastUpdated,
       @Nullable DateRangeParam serviceDate) {
-    return claimDao.findAllByMbiAttribute(ClaimTypeV2.M, mbiHash, true, lastUpdated, serviceDate);
+    List<ClaimWithSecurityTags<RdaMcsClaim>> claimsWithTags =
+        claimDao.findAllByMbiAttribute(ClaimTypeV2.M, mbiHash, true, lastUpdated, serviceDate);
+
+    return claimsWithTags.stream()
+        .map(ClaimWithSecurityTags::getClaimEntity)
+        .collect(Collectors.toList());
   }
 
   /**

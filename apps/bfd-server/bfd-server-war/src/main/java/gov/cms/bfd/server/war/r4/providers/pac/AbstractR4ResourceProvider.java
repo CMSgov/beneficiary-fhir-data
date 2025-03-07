@@ -25,6 +25,7 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -90,6 +91,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The samhsa matcher. */
   private final R4ClaimSamhsaMatcher samhsaMatcher;
 
+  /** v2SamhsaConsentSimulation. */
+  private final SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
+
   /** True if old MBI values should be included in queries. */
   private final Boolean oldMbiHashEnabled;
 
@@ -121,8 +125,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param fissTransformer the fiss transformer
    * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation resources ({@link
+   *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
@@ -130,12 +134,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Boolean oldMbiHashEnabled,
       ResourceTransformer<T> fissTransformer,
       ResourceTransformer<T> mcsTransformer,
-      String claimSourceTypeNames) {
+      String claimSourceTypeNames,
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
     this.fissTransformer = requireNonNull(fissTransformer);
     this.mcsTransformer = requireNonNull(mcsTransformer);
+    this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
 
     requireNonNull(claimSourceTypeNames);
     enabledSourceTypes =
@@ -306,6 +312,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
+
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
       case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
@@ -470,7 +477,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             createBundleFor(
                 getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
-
       return bundleResource;
     } else {
       throw new InvalidRequestException("Missing required field mbi");
@@ -513,7 +519,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     // Log nonsensitive MBI identifiers for a given Claim/ClaimResponse request for use in
     // historical analysis
     entitiesWithType.stream()
-        .map(pair -> getClaimEntityMbi(pair.right, pair.left))
+        .map(pair -> getClaimEntityMbi(pair.right, pair.left.getClaimEntity()))
         .filter(Objects::nonNull)
         // We choose the first MBI from the first, valid claim entity (technically, all entities
         // should fit these criteria or something is very wrong) in the Stream as the MBI
@@ -524,6 +530,13 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     List<T> resources =
         entitiesWithType.stream()
+            .map(
+                pair -> {
+                  // Log if missing claim for samhsa V2 Shadow check before filtering
+                  samhsaV2InterceptorShadow.logMissingClaim(
+                      pair.left, !samhsaMatcher.hasNoSamhsaData(pair.left));
+                  return pair;
+                })
             .filter(
                 pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
             .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))

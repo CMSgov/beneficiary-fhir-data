@@ -131,7 +131,7 @@ public class SNFClaimTransformerV2Test {
 
     snfClaimTransformer =
         new SNFClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
