@@ -165,5 +165,7 @@ jobs:
           # See https://github.com/docker/buildx/issues/1533
           provenance: false
           platforms: ${{ matrix.image.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
         env:
           DOCKER_BUILDKIT: 1
