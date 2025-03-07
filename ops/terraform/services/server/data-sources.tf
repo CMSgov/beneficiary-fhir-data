@@ -114,3 +114,7 @@ data "aws_ssm_parameters_by_path" "sensitive_service" {
   path            = "/bfd/${local.env}/${local.service}/sensitive"
   with_decryption = true
 }
+
+data "aws_kms_key" "env_key" {
+  key_id = local.kms_key_alias
+}
