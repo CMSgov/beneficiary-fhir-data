@@ -43,11 +43,6 @@ data "aws_ecr_image" "image" {
   image_tag       = local.docker_image_tag
 }
 
-data "aws_ssm_parameter" "docker_image_tag" {
-  # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
-  name = "/bfd/mgmt/server/nonsensitive/server_regression_latest_image_tag"
-}
-
 data "aws_security_group" "rds" {
   vpc_id = data.aws_vpc.main.id
   filter {

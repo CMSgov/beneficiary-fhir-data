@@ -1,0 +1,32 @@
+[
+  {
+    "name": "bfd-mgmt-base-jdk",
+    "dockerfile": "ops/images/bfd-mgmt-base-jdk/Dockerfile",
+    "contextDir": "ops/images/bfd-mgmt-base-jdk",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-base-python",
+    "dockerfile": "ops/images/bfd-mgmt-base-python/Dockerfile",
+    "contextDir": "ops/images/bfd-mgmt-base-python",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-server-regression",
+    "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
+    "contextDir": "apps/utils/locust_tests",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
+    "dockerfile": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/Dockerfile",
+    "contextDir": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
+    "platform": "linux/amd64"
+  },
+  {
+    "name": "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
+    "dockerfile": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
+    "contextDir": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
+    "platform": "linux/arm64"
+  }
+]
