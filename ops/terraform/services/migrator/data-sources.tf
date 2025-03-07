@@ -5,6 +5,10 @@ data "external" "rds" {
   ]
 }
 
+data "aws_iam_policy" "permission_boundary" {
+  name     = "ct-ado-poweruser-permissions-boundary-policy"
+}
+
 data "aws_caller_identity" "current" {}
 
 # the following logic produces a map of ami filters to their filter values:

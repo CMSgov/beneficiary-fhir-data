@@ -71,6 +71,14 @@ resource "aws_s3_bucket_ownership_controls" "cloudfront_logging" {
   }
 }
 
+# Required as of April,2023 for legacy standard logging - Will evaluate the need for standard logging v2 in a future iteration
+resource "aws_s3_bucket_acl" "cloudfront_logging" {
+  depends_on = [aws_s3_bucket_ownership_controls.cloudfront_logging]
+
+  bucket = aws_s3_bucket.cloudfront_logging.id
+  acl    = "private"
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "cloudfront_logging" {
   bucket = aws_s3_bucket.cloudfront_logging.bucket
   rule {

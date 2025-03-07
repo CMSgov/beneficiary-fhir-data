@@ -66,6 +66,6 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
-data "aws_iam_role" "monitoring" {
-  name = "rds-monitoring-role"
+data "aws_iam_policy" "permission_boundary" {
+  name     = "ct-ado-poweruser-permissions-boundary-policy"
 }

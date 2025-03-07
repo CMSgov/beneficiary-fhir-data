@@ -120,6 +120,8 @@ resource "aws_iam_role" "db_auth" {
   count              = local.is_ephemeral_env ? 0 : 1
   name               = "bfd-fhirdb-${local.env}-auth"
   assume_role_policy = data.aws_iam_policy_document.db_auth_role_trust_policy[0].json
+  path               = "/delegatedadmin/developer/"
+  permissions_boundary = data.aws_iam_policy.permission_boundary.arn
 }
 
 # Policy allowing the rds-db:connect action, as well as allowing assumed role users to describe clusters and endpoints.
@@ -136,6 +138,7 @@ resource "aws_iam_policy" "db_auth_ephemeral" {
   name        = "bfd-fhirdb-${local.env}-auth"
   description = "Role policy allowing db connect action for ${local.env} ephemeral cluster"
   policy      = data.aws_iam_policy_document.db_rds_connect.json
+  path               = "/delegatedadmin/developer/"
 }
 
 # attach the ephemeral policy to the auth role
@@ -147,4 +150,30 @@ resource "aws_iam_role_policy_attachment" "db_auth" {
   count      = local.is_ephemeral_env ? 1 : 0
   role       = data.aws_iam_role.db_auth[0].name
   policy_arn = aws_iam_policy.db_auth_ephemeral[0].arn
+}
+
+
+# RDS Monitoring Role - Special Naming convention required for KION Deployments
+
+data "aws_iam_policy_document" "rds_monitoring" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["monitoring.rds.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "rds_monitoring" {
+  name               = "bfd-fhirdb-${local.seed_env}-monitoring"
+  path               = "/delegatedadmin/developer/"
+  assume_role_policy = data.aws_iam_policy_document.rds_monitoring.json
+  permissions_boundary = data.aws_iam_policy.permission_boundary.arn
+}
+
+resource "aws_iam_role_policy_attachment" "rds_monitoring" {
+  role       = aws_iam_role.rds_monitoring.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
