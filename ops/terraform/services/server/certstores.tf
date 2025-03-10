@@ -24,7 +24,7 @@ data "aws_ssm_parameters_by_path" "client_certificates" {
 }
 
 resource "aws_s3_bucket" "certstores" {
-  bucket        = "bfd-${local.env}-${local.service}-certstores"
+  bucket_prefix = "bfd-${local.env}-${local.service}-certstores"
   force_destroy = true
 }
 
