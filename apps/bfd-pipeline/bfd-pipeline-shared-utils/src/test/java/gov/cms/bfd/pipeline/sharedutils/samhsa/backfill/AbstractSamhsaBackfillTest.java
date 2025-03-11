@@ -4,9 +4,15 @@ import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.UP
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +24,7 @@ public class AbstractSamhsaBackfillTest {
   EntityManager manager;
   TransactionManager transactionManagerMock;
   Query mockQuery;
+  SamhsaUtil mockSamhsaUtil;
   private static final String CARRIER_TEST_QUERY =
       "SELECT clm_id, clm_from_dt, clm_thru_dt, prncpal_dgns_cd, icd_dgns_cd1, icd_dgns_cd2, icd_dgns_cd3, icd_dgns_cd4, icd_dgns_cd5, icd_dgns_cd6, icd_dgns_cd7, icd_dgns_cd8, icd_dgns_cd9, icd_dgns_cd10, icd_dgns_cd11, icd_dgns_cd12 FROM ccw.carrier_claims WHERE clm_id >= :startingClaim ORDER BY clm_id limit :limit";
   private static final String FISS_TEST_QUERY =
@@ -34,8 +41,13 @@ public class AbstractSamhsaBackfillTest {
     manager = Mockito.mock(EntityManager.class);
     transactionManagerMock = Mockito.mock(TransactionManager.class);
     mockQuery = Mockito.mock(Query.class);
+    mockSamhsaUtil = Mockito.mock(SamhsaUtil.class);
     Mockito.when(manager.createNativeQuery(anyString())).thenReturn(mockQuery);
     Mockito.when(mockQuery.setParameter(anyString(), anyInt())).thenReturn(mockQuery);
+    Object[] objects = new Object[] {"12345", LocalDate.of(1970, 1, 1), LocalDate.of(1970, 1, 1)};
+    List<Object[]> objectList = new ArrayList<>();
+    objectList.add(objects);
+    Mockito.when(mockQuery.getResultList()).thenReturn(objectList);
   }
 
   @Test
@@ -81,5 +93,19 @@ public class AbstractSamhsaBackfillTest {
 
     Assertions.assertEquals(
         FISS_TEST_QUERY, RDASamhsaBackfill.RDA_TABLES.FISS_CLAIMS.getEntry().getQuery());
+  }
+
+  @Test
+  public void testQueryLoop() throws Exception {
+    AbstractSamhsaBackfill backfill =
+        new RDASamhsaBackfill(
+            transactionManagerMock, 100000, 900l, RDASamhsaBackfill.RDA_TABLES.FISS_CLAIMS);
+    backfill.setLastClaimId(Optional.empty());
+    backfill.setTotalProcessedInInterval(0L);
+    backfill.setStartTime(Instant.now().minus(1000, ChronoUnit.SECONDS));
+    backfill.setSamhsaUtil(mockSamhsaUtil);
+    backfill.queryLoop(manager);
+    verify(mockQuery, times(1)).getResultList();
+    verify(mockSamhsaUtil, times(1)).processCodeList(any(), any(), any(), any(), any(), any());
   }
 }

@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 
@@ -36,10 +36,10 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractSamhsaBackfill implements Callable {
   /** The Logger. */
-  private final Logger logger;
+  @Getter private final Logger logger;
 
   /** The table to use for this thread. */
-  protected final TableEntry tableEntry;
+  @Getter protected final TableEntry tableEntry;
 
   /** The transaction manager. */
   TransactionManager transactionManager;
@@ -48,13 +48,31 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * SamhsaUtil class. This will be used to check the claims for SAMHSA data, and create the tags if
    * necessary.
    */
-  SamhsaUtil samhsaUtil;
+  @Getter @Setter SamhsaUtil samhsaUtil;
 
   /** query batch size. */
-  int batchSize;
+  @Getter @Setter int batchSize;
 
   /** The log interval. */
-  Long logInterval;
+  @Getter Long logInterval;
+
+  /** The size of the list of claims pulled in a particular iteration. */
+  @Getter @Setter int claimSize = 0;
+
+  /** total claims saved to the database. */
+  @Getter @Setter long totalSaved;
+
+  /** Total number of claims processed, overall. */
+  @Getter @Setter long totalProcessed;
+
+  /** Last claim id processed in a particular iteration. */
+  @Getter @Setter Optional<String> lastClaimId;
+
+  /** The start time of a logging interval. */
+  @Getter @Setter Instant startTime;
+
+  /** Total claims processed in a particular logging interval. */
+  @Getter @Setter Long totalProcessedInInterval;
 
   /**
    * Constructor.
@@ -87,7 +105,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return a list of claims.
    */
   private List<Object[]> executeQuery(Query query) {
-    return (List<Object[]>) query.getResultList();
+    return query.getResultList();
   }
 
   /**
@@ -139,10 +157,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   @Override
   public Long call() {
     long total = 0L;
-    Long tableTotal = executeForTable(tableEntry);
-    logger.info(
-        String.format(
-            "Created tags for %d claims in table %s", tableTotal, tableEntry.getClaimTable()));
+    Long tableTotal = executeForTable();
+    logger.info("Created tags for {} claims in table {}", tableTotal, tableEntry.getClaimTable());
     total += tableTotal;
     return total;
   }
@@ -217,100 +233,137 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
+   * Contents of the main loop to process the table.
+   *
+   * @param entityManager The entityManager
+   */
+  void queryLoop(EntityManager entityManager) {
+    Query query = buildQuery(getLastClaimId(), getTableEntry(), getBatchSize(), entityManager);
+    List<Object[]> claims = executeQuery(query);
+    int savedInBatch = 0;
+    // This Map will allow us to save the active dates for a claim to be used in multiple
+    // records with the same claim id.
+    HashMap<String, Object[]> datesMap = new HashMap<>();
+    // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
+    // codes. */
+    for (Object[] claim : claims) {
+      savedInBatch += processClaim(claim, datesMap, entityManager);
+    }
+    incrementTotalSaved(savedInBatch);
+    incrementTotalProcessedInInterval(claims.size());
+    incrementTotalProcessed(claims.size());
+    // Checks if a progress message should be logged.
+    checkTimeIntervalForLogging();
+    setLastClaimId(
+        !claims.isEmpty() ? Optional.of(String.valueOf(claims.getLast()[0])) : Optional.empty());
+    // Write progress to the progress table, so that we can restart at the last processed
+    // claim id if interrupted.
+    saveProgress(
+        getTableEntry().getClaimTable(),
+        getLastClaimId(),
+        getTotalProcessed(),
+        getTotalSaved(),
+        entityManager);
+
+    setClaimSize(claims.size());
+  }
+
+  /** Logs a progress message if enough time has passed. */
+  private void checkTimeIntervalForLogging() {
+    // Only write progress to the log at a given interval.
+    if (getStartTime().plus(getLogInterval(), ChronoUnit.SECONDS).isBefore(Instant.now())) {
+      getLogger()
+          .info(
+              "Processed {} claims from table {}, {} in the last {} seconds. {} SAMHSA tags saved total.",
+              getTotalProcessed(),
+              getTableEntry().getClaimTable(),
+              getTotalProcessedInInterval(),
+              Duration.between(getStartTime(), Instant.now()).getSeconds(),
+              getTotalSaved());
+      setStartTime(Instant.now());
+      setTotalProcessedInInterval(0L);
+    }
+  }
+
+  /**
+   * increments the totalProcessed value.
+   *
+   * @param amount The amount to increment by.
+   */
+  private void incrementTotalProcessed(int amount) {
+    totalProcessed += amount;
+  }
+
+  /**
+   * Increments the totalProcessedInInterval value.
+   *
+   * @param amount The amount to increment by.
+   */
+  private void incrementTotalProcessedInInterval(int amount) {
+    totalProcessedInInterval += amount;
+  }
+
+  /**
+   * Increments the totalSaved value.
+   *
+   * @param amount The amount to increment by.
+   */
+  private void incrementTotalSaved(int amount) {
+    totalSaved += amount;
+  }
+
+  /**
    * Iterates over all of the claims in a table, and checks for SAMHSA data.
    *
-   * @param tableEntry Contains information about the tables and entities for this claim type.
    * @return The number of claims for which tags were created.
-   * @param <TClaim> The type of the claim.
    */
-  private <TClaim> Long executeForTable(TableEntry tableEntry) {
-    // making these final Atomic objects allow us to use them inside of executeProcedure lambda.
-    final AtomicLong claimsSize = new AtomicLong(0L);
-    Optional<BackfillProgress> progress = getLastClaimId(tableEntry.getClaimTable());
-    final AtomicLong totalSaved =
-        new AtomicLong(
-            progress.isPresent() && progress.get().getTotalTags() != null
-                ? progress.get().getTotalTags()
-                : 0L);
-    final AtomicLong totalProcessed =
-        new AtomicLong(
-            progress.isPresent() && progress.get().getTotalProcessed() != null
-                ? progress.get().getTotalProcessed()
-                : 0L);
-    Optional<String> id = progress.map(BackfillProgress::getLastClaimId);
-    final AtomicReference<Optional<String>> lastClaimId = new AtomicReference<>(id);
-    // lastClaimId will only be present if this is the second or later run of the job. */
-    if (lastClaimId.get().isPresent()) {
-      logger.info(
-          String.format(
-              "Starting processing of table %s at claim %s",
-              tableEntry.getClaimTable(), lastClaimId.get().get()));
-    } else {
-      logger.info(
-          String.format(
-              "Starting processing of table %s from the beginning.", tableEntry.getClaimTable()));
-    }
-    AtomicReference<Instant> startTime = new AtomicReference<>(Instant.now());
-    AtomicLong totalProcessedInInterval = new AtomicLong(0L);
+  private Long executeForTable() {
+    setupExecution();
     do {
       try {
-        transactionManager.executeProcedure(
-            entityManager -> {
-              Query query = buildQuery(lastClaimId.get(), tableEntry, batchSize, entityManager);
-              List<Object[]> claims = executeQuery(query);
-              int savedInBatch = 0;
-              // This Map will allow us to save the active dates for a claim to be used in multiple
-              // records with the same claim id.
-              HashMap<String, Object[]> datesMap = new HashMap<>();
-              // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
-              // codes. */
-              for (Object[] claim : claims) {
-                savedInBatch += processClaim(claim, datesMap, entityManager);
-              }
-              totalSaved.accumulateAndGet(savedInBatch, Long::sum);
-              totalProcessedInInterval.accumulateAndGet(claims.size(), Long::sum);
-              totalProcessed.accumulateAndGet(claims.size(), Long::sum);
-              // Only write progress to the log at a given interval.
-              if (startTime.get().plus(logInterval, ChronoUnit.SECONDS).isBefore(Instant.now())) {
-                logger.info(
-                    String.format(
-                        "Processed %d claims from table %s, %d in the last %d seconds. %d SAMHSA tags saved total.",
-                        totalProcessed.get(),
-                        tableEntry.getClaimTable(),
-                        totalProcessedInInterval.get(),
-                        Duration.between(startTime.get(), Instant.now()).getSeconds(),
-                        totalSaved.get()));
-                startTime.set(Instant.now());
-                totalProcessedInInterval.set(0L);
-              }
-              lastClaimId.set(
-                  !claims.isEmpty()
-                      ? Optional.of(String.valueOf(claims.getLast()[0]))
-                      : Optional.empty());
-              // Write progress to the progress table, so that we can restart at the last processed
-              // claim id if interrupted.
-              saveProgress(
-                  tableEntry.getClaimTable(),
-                  lastClaimId.get(),
-                  totalProcessed.get(),
-                  totalSaved.get(),
-                  entityManager);
+        transactionManager.executeProcedure(this::queryLoop);
 
-              claimsSize.set(claims.size());
-            });
       } catch (Exception ex) {
         throw new RuntimeException(ex);
       }
       // If the number of returned claims is not equal to the requested batch size, then the
       // table
       // is done being processed.
-    } while (claimsSize.get() == batchSize);
+    } while (getClaimSize() == getBatchSize());
 
     logger.info(
-        String.format(
-            "Finished processing table %s. Processed %d claims, and %d of them had SAMHSA codes.",
-            tableEntry.getClaimTable(), totalProcessed.get(), totalSaved.get()));
-    return totalSaved.get();
+        "Finished processing table {}. Processed {} claims, and {} of them had SAMHSA codes.",
+        tableEntry.getClaimTable(),
+        getTotalProcessed(),
+        getTotalSaved());
+    return getTotalSaved();
+  }
+
+  private void setupExecution() {
+    // making these final Atomic objects allow us to use them inside of executeProcedure lambda.
+    Optional<BackfillProgress> progress = getLastClaimId(getTableEntry().getClaimTable());
+    setTotalSaved(
+        progress.isPresent() && progress.get().getTotalTags() != null
+            ? progress.get().getTotalTags()
+            : 0L);
+    setTotalProcessed(
+        progress.isPresent() && progress.get().getTotalProcessed() != null
+            ? progress.get().getTotalProcessed()
+            : 0L);
+    setLastClaimId(progress.map(BackfillProgress::getLastClaimId));
+
+    // lastClaimId will only be present if this is the second or later run of the job. */
+    if (getLastClaimId().isPresent()) {
+      logger.info(
+          "Starting processing of table {} at claim {}",
+          getTableEntry().getClaimTable(),
+          getLastClaimId().get());
+    } else {
+      logger.info(
+          "Starting processing of table {} from the beginning.", getTableEntry().getClaimTable());
+    }
+    setStartTime(Instant.now());
+    setTotalProcessedInInterval(0L);
   }
 
   /**
