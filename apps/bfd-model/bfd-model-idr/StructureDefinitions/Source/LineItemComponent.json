@@ -1,0 +1,481 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "LineItemComponent",
+    "url": "http://hl7.org/fhir/StructureDefinition/LineItemComponent",
+    "name": "Line Item info",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "LineItemComponent",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "LineItemComponent",
+                "path": "LineItemComponent",
+                "label": "LineItemComponent for IDR. Ignore in DD Generation",
+                "definition": "LineItemComponent definition.",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NUM",
+                "path": "LineItemComponent.CLM_LINE_NUM",
+                "label": "Line Item Sequence Number",
+                "definition": "This field represents the item's sequence number.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_HCPCS_CD",
+                "path": "LineItemComponent.CLM_LINE_HCPCS_CD",
+                "label": "Line Item Sequence Number",
+                "definition": "This field represents the item's HCPCS code, if available.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_REV_APC_HIPPS_CD",
+                "path": "LineItemComponent.CLM_REV_APC_HIPPS_CD",
+                "label": "Line Item Sequence Number",
+                "definition": "This field represents the HCPCS Level 3 / HIPPS code, if available.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NDC_CD",
+                "path": "LineItemComponent.CLM_LINE_NDC_CD",
+                "label": "Line Item NDC Code",
+                "definition": "This field represents the NDC of the drug provided, if any.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NDC_QTY",
+                "path": "LineItemComponent.CLM_LINE_NDC_QTY",
+                "label": "Line Item NDC quantity",
+                "definition": "This field represents the NDC quantity of the drug provided.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD",
+                "path": "LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD",
+                "label": "Line Item NDC quantity qualifier code",
+                "definition": "This field represents the NDC quantity qualifier code of the drug provided.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_SRVC_UNIT_QTY",
+                "path": "LineItemComponent.CLM_LINE_SRVC_UNIT_QTY",
+                "label": "Line Item service unit quantity",
+                "definition": "This field represents the quantity of the service provided on the line item.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_REV_CTR_CD",
+                "path": "LineItemComponent.CLM_LINE_REV_CTR_CD",
+                "label": "Line Item Revenue Center Code",
+                "definition": "The provider-assigned revenue code for each cost center for which a separate charge is billed (type of accommodation or ancillary).",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_DDCTBL_COINSRNC_CD",
+                "path": "LineItemComponent.CLM_DDCTBL_COINSRNC_CD",
+                "label": "Line Item Revenue Center Code",
+                "definition": "Code indicating whether the revenue center charges are subject to deductible and/or coinsurance.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.HCPCS_1_MDFR_CD",
+                "path": "LineItemComponent.HCPCS_1_MDFR_CD",
+                "label": "HCPCS Modifier code 1",
+                "definition": "HCPCS Modifier code 1. Update definition.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.HCPCS_2_MDFR_CD",
+                "path": "LineItemComponent.HCPCS_2_MDFR_CD",
+                "label": "HCPCS Modifier code 2",
+                "definition": "HCPCS Modifier code 2. Update definition.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.HCPCS_3_MDFR_CD",
+                "path": "LineItemComponent.HCPCS_3_MDFR_CD",
+                "label": "HCPCS Modifier code 3",
+                "definition": "HCPCS Modifier code 3. Update definition.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.HCPCS_4_MDFR_CD",
+                "path": "LineItemComponent.HCPCS_4_MDFR_CD",
+                "label": "HCPCS Modifier code 4",
+                "definition": "HCPCS Modifier code 4. Update definition.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.HCPCS_5_MDFR_CD",
+                "path": "LineItemComponent.HCPCS_5_MDFR_CD",
+                "label": "HCPCS Modifier code 5",
+                "definition": "HCPCS Modifier code 5. Update definition.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_INSTNL_RATE_AMT",
+                "path": "LineItemComponent.CLM_LINE_INSTNL_RATE_AMT",
+                "label": "Claim Line Institutional Rate Amount",
+                "definition": "Charges relating to unit cost associated with the revenue center code.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD",
+                "path": "LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD",
+                "label": "Claim Line Adjustment reason code 1",
+                "definition": "The first code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD",
+                "path": "LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD",
+                "label": "Claim Line Adjustment reason code 1",
+                "definition": "The second code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD",
+                "path": "LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD",
+                "label": "Claim Line Adjustment reason code 1",
+                "definition": "The third code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD",
+                "path": "LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD",
+                "label": "Claim Line Adjustment reason code 1",
+                "definition": "The fourth code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD",
+                "path": "LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD",
+                "label": "Claim Line Adjustment reason code 1",
+                "definition": "The fifth code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT",
+                "path": "LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT",
+                "label": "Claim Line Noncovered Charge Amount",
+                "definition": "The non-covered charge amount.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT",
+                "path": "LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT",
+                "label": "Claim Line Allowed Charge Amount",
+                "definition": "The allowed charge amount.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_SBMT_CHRG_AMT",
+                "path": "LineItemComponent.CLM_LINE_SBMT_CHRG_AMT",
+                "label": "Claim Line Submitted Charge Amount",
+                "definition": "The amount charged for the line item.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_PRVDR_PMT_AMT",
+                "path": "LineItemComponent.CLM_LINE_PRVDR_PMT_AMT",
+                "label": "Claim Line Provider Paid Amount",
+                "definition": "The amount paid to the provider.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_BENE_PMT_AMT",
+                "path": "LineItemComponent.CLM_LINE_BENE_PMT_AMT",
+                "label": "Claim Line Beneficiary Payment Amount",
+                "definition": "The amount paid by the beneficiary for the line item.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_BENE_PD_AMT",
+                "path": "LineItemComponent.CLM_LINE_BENE_PD_AMT",
+                "label": "Claim Line Beneficiary Paid Amount",
+                "definition": "The amount paid to the beneficiary.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_CVRD_PD_AMT",
+                "path": "LineItemComponent.CLM_LINE_CVRD_PD_AMT",
+                "label": "Claim Line Covered Paid Amount",
+                "definition": "The amount covered and paid by medicare for the line item.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT",
+                "path": "LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT",
+                "label": "Claim Line Blood Deductible Amount",
+                "definition": "The blood deductible amount.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT",
+                "path": "LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT",
+                "label": "Part B Deductible Amount",
+                "definition": "Part B deductible applied.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT",
+                "path": "LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT",
+                "label": "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
+                "definition": "Revenue Center Reduced Coinsurance Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT",
+                "path": "LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT",
+                "label": "",
+                "definition": "CLM_LINE_INSTL",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT",
+                "path": "LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT",
+                "label": "Revenue Center 1st Medicare Secondary Payer Paid Amount",
+                "definition": "CLM_LINE_INSTL",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT",
+                "path": "LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT",
+                "label": "Revenue Center 2nd Medicare Secondary Payer Paid Amount",
+                "definition": "CLM_LINE_INSTL",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.GEO_FAC_SSA_STATE_CD",
+                "path": "LineItemComponent.GEO_FAC_SSA_STATE_CD",
+                "label": "Provider State Code",
+                "definition": "Specifically, the facility.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.REV_CNTR_DT",
+                "path": "LineItemComponent.REV_CNTR_DT",
+                "label": "Revenue Center Date",
+                "definition": "This is the date of service for the revenue center record.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            }
+            
+        ]
+    }
+}
