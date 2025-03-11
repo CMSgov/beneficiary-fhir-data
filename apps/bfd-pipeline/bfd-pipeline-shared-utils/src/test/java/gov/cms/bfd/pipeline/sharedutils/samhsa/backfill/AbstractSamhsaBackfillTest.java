@@ -104,7 +104,7 @@ public class AbstractSamhsaBackfillTest {
     backfill.setTotalProcessedInInterval(0L);
     backfill.setStartTime(Instant.now().minus(1000, ChronoUnit.SECONDS));
     backfill.setSamhsaUtil(mockSamhsaUtil);
-    backfill.queryLoop(manager);
+    backfill.executeQueryLoop(manager);
     verify(mockQuery, times(1)).getResultList();
     verify(mockSamhsaUtil, times(1)).processCodeList(any(), any(), any(), any(), any(), any());
   }

@@ -237,7 +237,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    *
    * @param entityManager The entityManager
    */
-  void queryLoop(EntityManager entityManager) {
+  void executeQueryLoop(EntityManager entityManager) {
     Query query = buildQuery(getLastClaimId(), getTableEntry(), getBatchSize(), entityManager);
     List<Object[]> claims = executeQuery(query);
     int savedInBatch = 0;
@@ -264,7 +264,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         getTotalProcessed(),
         getTotalSaved(),
         entityManager);
-
     setClaimSize(claims.size());
   }
 
@@ -321,7 +320,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     setupExecution();
     do {
       try {
-        transactionManager.executeProcedure(this::queryLoop);
+        transactionManager.executeProcedure(this::executeQueryLoop);
 
       } catch (Exception ex) {
         throw new RuntimeException(ex);
@@ -339,8 +338,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return getTotalSaved();
   }
 
+  /** Sets up the fields needed to begin processing the table. */
   private void setupExecution() {
-    // making these final Atomic objects allow us to use them inside of executeProcedure lambda.
     Optional<BackfillProgress> progress = getLastClaimId(getTableEntry().getClaimTable());
     setTotalSaved(
         progress.isPresent() && progress.get().getTotalTags() != null
