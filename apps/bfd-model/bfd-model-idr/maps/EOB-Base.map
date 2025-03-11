@@ -184,7 +184,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.CLM_TYPE_CD as claim_type where claim_type = 60 -> tgt.insurance = create('BackboneElement') as tgtBBElement then{
       src -> tgtBBElement.focal=true "Add focal";
-      src -> tgtBBElement.coveage = create('Reference') as tgtReference then{
+      src -> tgtBBElement.coverage = create('Reference') as tgtReference then{
         src -> tgtReference.display = "Part A" "Add temp coverage placeholder";
       }"Add reference for coverage";
     }"Add insurance coverage";
