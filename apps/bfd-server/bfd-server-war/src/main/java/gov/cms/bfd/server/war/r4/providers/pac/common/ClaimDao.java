@@ -6,9 +6,10 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
-import gov.cms.bfd.server.war.commons.ClaimWithSecurityTagsDao;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -24,8 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Provides common logic for performing DB interactions. */
 @EqualsAndHashCode
@@ -47,8 +46,6 @@ public class ClaimDao {
   /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
 
-  private static final Logger logger = LoggerFactory.getLogger(ClaimDao.class);
-
   /**
    * Gets an entity by it's ID for the given claim type.
    *
@@ -58,7 +55,7 @@ public class ClaimDao {
    * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
   @Trace
-  public <T> T getEntityById(ResourceTypeV2<?, T> resourceType, String id) {
+  public <T> ClaimWithSecurityTags<T> getEntityById(ResourceTypeV2<?, T> resourceType, String id) {
     final Class<T> entityClass = resourceType.getEntityClass();
     final String entityIdAttribute = resourceType.getEntityIdAttribute();
 
@@ -80,7 +77,27 @@ public class ClaimDao {
           resourceType, CLAIM_BY_ID_QUERY, timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
     }
 
-    return claimEntity;
+    ClaimWithSecurityTags<T> claimEntitiesWithTags = null;
+    String claimId;
+
+    SecurityTagsDao securityTagsDao = new SecurityTagsDao();
+    SecurityTagManager securityTagManager = new SecurityTagManager();
+
+    if (claimEntity != null) {
+      claimId = securityTagManager.extractClaimId(claimEntity, resourceType.getEntityIdAttribute());
+
+      if (!claimId.isEmpty()) {
+        Map<String, Set<String>> claimIdToTagsMap =
+            securityTagsDao.buildClaimIdToTagsMap(
+                resourceType.getEntityTagType(), Collections.singleton(claimId), entityManager);
+
+        Set<String> claimSpecificTags =
+            claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+
+        claimEntitiesWithTags = new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags);
+      }
+    }
+    return claimEntitiesWithTags;
   }
 
   /**
@@ -144,17 +161,18 @@ public class ClaimDao {
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
     Set<String> claimIds;
 
-    ClaimWithSecurityTagsDao claimWithSecurityTagsDao = new ClaimWithSecurityTagsDao();
+    SecurityTagsDao securityTagsDao = new SecurityTagsDao();
+    SecurityTagManager securityTagManager = new SecurityTagManager();
 
     if (claimEntities != null) {
       claimIds =
-          claimWithSecurityTagsDao.collectClaimIds(
+          securityTagManager.collectClaimIds(
               (List<Object>) claimEntities, resourceType.getEntityIdAttribute());
 
       if (!claimIds.isEmpty()) {
         // Query for security tags by the collected claim IDs
         Map<String, Set<String>> claimIdToTagsMap =
-            claimWithSecurityTagsDao.buildClaimIdToTagsMap(
+            securityTagsDao.buildClaimIdToTagsMap(
                 resourceType.getEntityTagType(), claimIds, entityManager);
 
         // Process all claims using the map from the single query
@@ -163,7 +181,7 @@ public class ClaimDao {
                 claimEntity -> {
                   // Get the claim ID
                   String claimId =
-                      claimWithSecurityTagsDao.extractClaimId(
+                      securityTagManager.extractClaimId(
                           claimEntity, resourceType.getEntityIdAttribute());
 
                   // Look up this claim's tags from our pre-fetched map (no additional DB query)

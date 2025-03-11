@@ -233,7 +233,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -280,7 +281,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -322,7 +324,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -364,7 +367,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -405,7 +409,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -448,7 +453,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -491,7 +497,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -534,7 +541,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -575,7 +583,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -617,7 +626,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -661,7 +671,8 @@ class PatientClaimsEobTaskTransformerTest {
             mockSamhsaMatcher,
             mockDrugDisplayLookup,
             mockNpiOrgLookup,
-            samhsaV2InterceptorShadow);
+            samhsaV2InterceptorShadow,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);

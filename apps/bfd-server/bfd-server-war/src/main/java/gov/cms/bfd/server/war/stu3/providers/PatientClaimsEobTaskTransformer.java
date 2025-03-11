@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -11,9 +12,10 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.ClaimWithSecurityTagsDao;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.PatientClaimsEobTaskTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import jakarta.persistence.EntityManager;
@@ -38,10 +40,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -132,6 +134,9 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /** the list of EOBs that we'll return. */
   private final List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
 
+  /** Flag to control whether SAMHSA shadow filtering should be applied. */
+  private final boolean samhsaV2Shadow;
+
   /**
    * Constructor for TransformPatientClaimsToEobTask.
    *
@@ -144,18 +149,21 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param npiOrgLookup the npi org lookup bean
    * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation
+   * @param samhsaV2Shadow the samhsa V2 Shadow flag
    */
   public PatientClaimsEobTaskTransformer(
       MetricRegistry metricRegistry,
       Stu3EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
-      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow) {
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
+    this.samhsaV2Shadow = samhsaV2Shadow;
   }
 
   /**
@@ -239,8 +247,12 @@ public class PatientClaimsEobTaskTransformer implements Callable {
         .map(
             c -> {
               ExplanationOfBenefit eob = transformEobClaim(c);
-              // Log the missing claim along with the EOB
-              samhsaV2InterceptorShadow.logMissingClaim(c, samhsaMatcher.test(eob));
+
+              if (samhsaV2Shadow) {
+                // Log the missing claim along with the EOB
+                samhsaV2InterceptorShadow.logMissingClaim(
+                    (ClaimWithSecurityTags) c, samhsaMatcher.test(eob));
+              }
 
               return eob;
             })
@@ -361,21 +373,22 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       timerEobQuery.close();
     }
 
-    ClaimWithSecurityTagsDao claimWithSecurityTagsDao = new ClaimWithSecurityTagsDao();
+    SecurityTagsDao securityTagsDao = new SecurityTagsDao();
+    SecurityTagManager securityTagManager = new SecurityTagManager();
 
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
 
     Set<String> claimIds = new HashSet<>();
     if (claimEntities != null) {
       claimIds =
-          claimWithSecurityTagsDao.collectClaimIds(
+          securityTagManager.collectClaimIds(
               (List<Object>) claimEntities, claimType.getEntityIdAttribute().getName());
     }
 
     if (!claimIds.isEmpty()) {
       // Make ONE query to get all claim-tag relationships
       Map<String, Set<String>> claimIdToTagsMap =
-          claimWithSecurityTagsDao.buildClaimIdToTagsMap(
+          securityTagsDao.buildClaimIdToTagsMap(
               claimType.getEntityTagType(), claimIds, entityManager);
 
       // Process all claims using the map from the single query
@@ -384,7 +397,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
               claimEntity -> {
                 // Get the claim ID
                 String claimId =
-                    claimWithSecurityTagsDao.extractClaimId(
+                    securityTagManager.extractClaimId(
                         claimEntity, claimType.getEntityIdAttribute().getName());
 
                 // Look up this claim's tags from our pre-fetched map (no additional DB query)

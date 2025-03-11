@@ -55,7 +55,8 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
         fissClaimResponseTransformerV2,
         mcsClaimResponseTransformerV2,
         claimSourceTypeNames,
-        samhsaV2InterceptorShadow);
+        samhsaV2InterceptorShadow,
+        false);
   }
 
   /** {@inheritDoc} */

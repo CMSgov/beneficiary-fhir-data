@@ -1,15 +1,21 @@
 package gov.cms.bfd.server.war.commons;
 
 import gov.cms.bfd.sharedutils.TagCode;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Coding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /** Find security level. */
 @Service
 public final class SecurityTagManager {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecurityTagManager.class);
 
   /**
    * Determines the security level based on the collected tags.
@@ -88,5 +94,49 @@ public final class SecurityTagManager {
       securityTagCoding.add(securityTag);
     }
     return securityTagCoding;
+  }
+
+  /**
+   * Builds a mapping from claim IDs to their security tags.
+   *
+   * @param claimEntities the claim entity
+   * @param entityIdAttribute the claim type
+   * @return set of ClaimIds
+   */
+  public Set<String> collectClaimIds(List<Object> claimEntities, String entityIdAttribute) {
+    Set<String> claimIds = new HashSet<>();
+    for (Object claimEntity : claimEntities) {
+      String claimId = extractClaimId(claimEntity, entityIdAttribute);
+      if (!claimId.isEmpty()) {
+        claimIds.add(claimId);
+      }
+    }
+    return claimIds;
+  }
+
+  /**
+   * extracts ClaimId.
+   *
+   * @param claimEntity the claim entity
+   * @param entityIdAttribute the entityIdAttribute
+   * @return claim Id
+   */
+  public String extractClaimId(Object claimEntity, String entityIdAttribute) {
+    try {
+      Field entityIdField = claimEntity.getClass().getDeclaredField(entityIdAttribute);
+      entityIdField.setAccessible(true);
+
+      Object claimIdValue = entityIdField.get(claimEntity);
+
+      if (claimIdValue != null) {
+        return claimIdValue.toString();
+      }
+    } catch (NoSuchFieldException e) {
+      LOGGER.error("Field entityIdAttribute not found for claim entity: {}", claimEntity, e);
+      throw new RuntimeException("Field not found for claim entity: " + entityIdAttribute, e);
+    } catch (IllegalAccessException e) {
+      LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
+    }
+    return "";
   }
 }
