@@ -6,6 +6,7 @@ sections:
     - resources
     - outputs
     - data-sources
+    - modules
 
 # this `content` string is implemented as a golang template https://pkg.go.dev/text/template
 # updates here correspond to `{{ .Content }}` in `output.template` setting below
@@ -19,6 +20,14 @@ content: |-
     -->
 
     {{ .Inputs }}
+
+    <!-- GENERATED WITH `terraform-docs .`
+         Manually updating the README.md will be overwritten.
+         For more details, see the file '.terraform-docs.yml' or
+         https://terraform-docs.io/user-guide/configuration/
+    -->
+
+    {{ .Modules }}
 
     <!-- GENERATED WITH `terraform-docs .`
          Manually updating the README.md will be overwritten.
