@@ -159,6 +159,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_ATNDG_PRVDR_NPI_NUM as prvdr_npi -> tgt then addAttendingCareTeamMember(src,tgt) "Add attending";
 
     //Add header level adjudication.
+    //NOTE: removed to comply with C4BB Profile.
+    /*
     src -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then{
       src -> tgtAdjudication.reason = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding then{
@@ -175,6 +177,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       }"Set category";
 
     } "Add header-level adjudication";
+
+    */
 
     src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalItems(src, instlTgt) "add institutional components";
 
@@ -562,7 +566,7 @@ group addAttendingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then{
     src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then{
       src -> tgtCC.coding = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system=" http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         tgtCoding.code="attending" "Add role";
       }"Add coding";
     }"Add codeableConcept for role";
@@ -594,7 +598,7 @@ group addOperatingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then{
     src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then{
       src -> tgtCC.coding = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system=" http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         tgtCoding.code="operating" "Add role";
       }"Add coding";
     }"Add codeableConcept for role";
@@ -626,7 +630,7 @@ group addOtherCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: B
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then{
     src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then{
       src -> tgtCC.coding = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system=" http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         tgtCoding.code="otheroperating" "Add role";
       }"Add coding";
     }"Add codeableConcept for role";
@@ -658,7 +662,7 @@ group addRenderingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then{
     src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then{
       src -> tgtCC.coding = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system=" http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         tgtCoding.code="rendering" "Add role";
       }"Add coding";
     }"Add codeableConcept for role";

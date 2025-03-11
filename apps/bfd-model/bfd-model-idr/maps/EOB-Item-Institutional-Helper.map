@@ -7,7 +7,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.productOrService = create('CodeableConcept') as prodCC then addProductOrService(src,prodCC) "Add productOrService";
     //We know we CAN get HCPCS + HIPPS code, and potentially NDC, we'll want to add it.
     src.CLM_LINE_NDC_CD as ndc_cd where(ndc_cd.length()=11) -> tgt.detail = create('BackboneElement') as tgtDetail then addNDCToInstitutional(src, tgtDetail) "Add ndc info";
-    src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then{
+        src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then{
         src.CLM_LINE_SRVC_UNIT_QTY as unit_qty -> tgtQuantity.value=cast(unit_qty,"decimal") "set quantity";
     } "Set quantity of service provided";
     src -> tgt.revenue = create('CodeableConcept') as tgtRevenue then addRevenue(src,tgtRevenue) "add revenue";
@@ -420,6 +420,7 @@ group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneE
             src -> tgtCoding.code=ndc_cd "set code";
         }"Add codings";
     }"Add product or service";
+    src -> tgt.sequence = 1 "Add sequence";
     src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then{
         src.CLM_LINE_NDC_QTY as ndc_qty -> tgtQuantity.value=cast(ndc_qty,"decimal") "set quantity";
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndc_unit where ndc_unit.length()>0 -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";

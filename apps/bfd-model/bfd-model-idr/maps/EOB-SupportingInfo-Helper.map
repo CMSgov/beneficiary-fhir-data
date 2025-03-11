@@ -170,9 +170,9 @@ group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt:
 group addProcessingDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        tgtCoding.code="clmrecvddate",
-        tgtCoding.display="Claim Received Date" "Set target coding";
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        tgtCoding.code="info",
+        tgtCoding.display="Information" "Set target coding";
     } "set category";
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding,

@@ -97,12 +97,12 @@ conceptmap "CLM_SRC_ID" {
   prefix t = "https://hl7.org/fhir/string"
 
   s:"N/A" = t:"Medicaid"
-  s:"20000" = t:"National Claims History"
+  s:"20000" = t:"NationalClaimsHistory"
   s:"21000" = t:"FISS"
   s:"22000" = t:"MCS"
   s:"23000" = t:"VIPS"
   s:"24000" = t:"EDPS"
-  s:"25000" = t:"Encounter Medicaid Duals"
+  s:"25000" = t:"EncounterMedicaidDuals"
 }
 
 conceptmap "CLM_DGNS_PRCDR_ICD_IND_PROCEDURE" {
