@@ -13,30 +13,20 @@ As it is possible that _many_ errors occur in a short period, these alerts summa
 Along with the summary, the alert includes various links to Log Insights queries that allow an operator to view the log messages related to the errors with more detailed information such as exception stack traces, request URLs, etc.
 
 <!-- BEGIN_TF_DOCS -->
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
--->
 ## Requirements
 
 No requirements.
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
--->
+## Providers
 
-## Inputs
+| Name | Version |
+|------|---------|
+| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
 
-No inputs.
+## Modules
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
--->
+No modules.
 
 ## Resources
 
@@ -55,17 +45,18 @@ No inputs.
 | [aws_scheduler_schedule_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/scheduler_schedule_group) | resource |
 | [archive_file.alerter_lambda_src](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_ssm_parameter.alerter_slack_webhook](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_common](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_ssm_parameters_by_path.nonsensitive_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
--->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 
 ## Outputs
 

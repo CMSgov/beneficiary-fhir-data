@@ -32,6 +32,7 @@ In addition to the [Requirements (below)](#requirements) below, an included [ext
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Migrator override ami-id. Defaults to latest migrator AMI from `master`. | `string` | `null` | no |
+| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 | <a name="input_create_migrator_instance"></a> [create\_migrator\_instance](#input\_create\_migrator\_instance) | When true, create the migrator instance, security group, and RDS security group rules | `bool` | `false` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
@@ -77,6 +78,7 @@ In addition to the [Requirements (below)](#requirements) below, an included [ext
 | [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_xray_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.ec2_instance_tags_ro](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
+| [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_key_pair.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/key_pair) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_kms_key.config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |

@@ -23,6 +23,7 @@
 | <a name="input_alert_ok_sns_override"></a> [alert\_ok\_sns\_override](#input\_alert\_ok\_sns\_override) | Overrides the default, per-environment SNS topic used for Alert Alarms that transition from ALARM to OK | `string` | `null` | no |
 | <a name="input_alert_sns_override"></a> [alert\_sns\_override](#input\_alert\_sns\_override) | Overrides the default, per-environment SNS topic used for Alert SLO alarms | `string` | `null` | no |
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Pipeline override ami-id. Defaults to latest pipeline/etl AMI from `master`. | `string` | `null` | no |
+| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 | <a name="input_create_ccw_pipeline"></a> [create\_ccw\_pipeline](#input\_create\_ccw\_pipeline) | Creates a BFD Pipeline to run CCW Rif jobs; RDA jobs on the pipeline are disabled by default. | `bool` | `true` | no |
 | <a name="input_create_rda_pipeline"></a> [create\_rda\_pipeline](#input\_create\_rda\_pipeline) | Creates a BFD Pipeline to run RDA jobs; CCW Rif jobs on the pipeline are disabled by default. | `bool` | `true` | no |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts only. | `string` | `null` | no |
@@ -44,12 +45,14 @@
 |------|------|
 | [aws_autoscaling_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
 | [aws_cloudwatch_dashboard.bfd-pipeline-dashboard](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
+| [aws_cloudwatch_log_metric_filter.pipeline-ccw-messages-error-count](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_metric_filter) | resource |
 | [aws_cloudwatch_log_metric_filter.pipeline-messages-datasetfailed-count](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_metric_filter) | resource |
-| [aws_cloudwatch_log_metric_filter.pipeline-messages-error-count](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_metric_filter) | resource |
-| [aws_cloudwatch_metric_alarm.pipeline-log-availability-1hr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_cloudwatch_log_metric_filter.pipeline-rda-messages-error-count](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_metric_filter) | resource |
+| [aws_cloudwatch_metric_alarm.pipeline-ccw-messages-error](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.pipeline-max-claim-latency-exceeded](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.pipeline-messages-datasetfailed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
-| [aws_cloudwatch_metric_alarm.pipeline-messages-error](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_cloudwatch_metric_alarm.pipeline-rda-log-availability-1hr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
+| [aws_cloudwatch_metric_alarm.pipeline-rda-messages-error](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.aws_cli](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.bfd_pipeline_rif](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -77,6 +80,7 @@
 | [aws_ami.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy.ec2_instance_tags_ro](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
+| [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_kms_key.config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_kms_key.mgmt_config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |

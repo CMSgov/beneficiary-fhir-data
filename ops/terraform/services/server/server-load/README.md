@@ -10,12 +10,12 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.12 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.53.0 |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Inputs
@@ -23,6 +23,7 @@ https://terraform-docs.io/user-guide/configuration/
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id_override"></a> [ami\_id\_override](#input\_ami\_id\_override) | BFD Server Load override ami-id. Defaults to latest server-load AMI from `master`. | `string` | `null` | no |
+| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 | <a name="input_coasting_time"></a> [coasting\_time](#input\_coasting\_time) | The amount of time, in seconds, the load test should continue for after receiving a scaling notification. Ignored if stop\_on\_scaling is false. Ends immediately on operator stop signal | `number` | `0` | no |
 | <a name="input_container_image_tag_node_override"></a> [container\_image\_tag\_node\_override](#input\_container\_image\_tag\_node\_override) | Overrides the Container image URI used by the built load suite worker node lambda | `string` | `null` | no |
 | <a name="input_create_locust_instance"></a> [create\_locust\_instance](#input\_create\_locust\_instance) | When true, create the locust instance | `bool` | `false` | no |
@@ -45,9 +46,9 @@ https://terraform-docs.io/user-guide/configuration/
 | <a name="input_warm_instance_target"></a> [warm\_instance\_target](#input\_warm\_instance\_target) | The number of BFD Server instances to target before scaling causes the load test to stop | `number` | `0` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 
 ## Resources
@@ -83,6 +84,7 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_ecr_repository.ecr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
 | [aws_iam_policy.cloudwatch_agent_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy.cloudwatch_agent_xray_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
+| [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_kms_key.config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_kms_key.mgmt_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
@@ -99,9 +101,9 @@ https://terraform-docs.io/user-guide/configuration/
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 
 <!-- GENERATED WITH `terraform-docs .`
-Manually updating the README.md will be overwritten.
-For more details, see the file '.terraform-docs.yml' or
-https://terraform-docs.io/user-guide/configuration/
+     Manually updating the README.md will be overwritten.
+     For more details, see the file '.terraform-docs.yml' or
+     https://terraform-docs.io/user-guide/configuration/
 -->
 ## Outputs
 
