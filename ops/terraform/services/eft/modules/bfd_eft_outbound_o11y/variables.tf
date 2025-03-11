@@ -32,3 +32,9 @@ variable "outbound_partner_sns_topic_names" {
   type        = list(string)
   description = "List of names of the partner-specific BFD EFT Outbound SNS Topics"
 }
+
+variable "cloudtamer_iam_path" {
+  type = string
+  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
+  default = "/delegatedadmin/developer/"
+}

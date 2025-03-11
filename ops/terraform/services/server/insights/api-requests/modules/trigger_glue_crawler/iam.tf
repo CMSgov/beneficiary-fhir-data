@@ -1,5 +1,6 @@
 resource "aws_iam_policy" "glue" {
   name = "${local.lambda_full_name}-glue"
+  path = var.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to start the ${var.glue_crawler_name} ",
     "Glue crawler and to query specific partitions on the ${var.glue_table} Glue Table"
@@ -29,6 +30,7 @@ EOF
 
 resource "aws_iam_policy" "logs" {
   name = "${local.lambda_full_name}-logs"
+  path = var.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to write to its corresponding CloudWatch ",
     "Log Group and Log Stream"
@@ -56,7 +58,8 @@ EOF
 
 resource "aws_iam_role" "this" {
   name        = local.lambda_full_name
-  path        = "/"
+  path        = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for ${local.lambda_full_name} Lambda"
 
   assume_role_policy = <<-EOF

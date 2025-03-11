@@ -83,3 +83,7 @@ data "archive_file" "spice_trigger" {
   source_file = "${path.module}/lambda-src/spice-trigger/spice-trigger.py"
   output_path = "${path.module}/lambda-src/spice-trigger/out/spice-trigger.zip"
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

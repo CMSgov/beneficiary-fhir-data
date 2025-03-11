@@ -21,3 +21,7 @@ data "archive_file" "lambda_src" {
     filename = "pipeline_scheduler.py"
   }
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

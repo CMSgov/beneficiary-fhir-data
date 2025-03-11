@@ -32,3 +32,9 @@ variable "glue_crawler_arn" {
   description = "The ARN of the BFD Server API requests Glue Crawler"
   type        = string
 }
+
+variable "cloudtamer_iam_path" {
+  type = string
+  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
+  default = "/delegatedadmin/developer/"
+}

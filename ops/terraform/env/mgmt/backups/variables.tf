@@ -1,9 +1,3 @@
-variable "env" {
-  description = "The BFD Server SDLC environment to deploy the CloudWatch Alarms to"
-  type        = string
-  default     = "test"
-}
-
 variable "cloudtamer_iam_path" {
   type = string
   description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"

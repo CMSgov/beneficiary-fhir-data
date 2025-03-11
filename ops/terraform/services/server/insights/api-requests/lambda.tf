@@ -62,6 +62,7 @@ data "archive_file" "bfd_insights_error_slack" {
 resource "aws_iam_policy" "logs_bfd_insights_error_slack" {
   name        = "bfd-${local.environment}-${local.lambda_name}-logs"
   description = "Permissions to create and write to bfd-${local.environment}-${local.lambda_name} logs"
+  path = var.cloudtamer_iam_path
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -89,6 +90,7 @@ EOF
 resource "aws_iam_policy" "kms_bfd_insights_error_slack" {
   name        = "bfd-${local.environment}-${local.lambda_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
+  path = var.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -108,6 +110,7 @@ resource "aws_iam_policy" "kms_bfd_insights_error_slack" {
 resource "aws_iam_policy" "ssm_bfd_insights_error_slack" {
   name        = "bfd-${local.environment}-${local.lambda_name}-ssm-parameters"
   description = "Permissions to /bfd/mgmt/common/sensitive/* SSM hierarchies"
+  path = var.cloudtamer_iam_path
   policy      = <<-EOF
 {
     "Version": "2012-10-17",
@@ -130,7 +133,8 @@ EOF
 
 resource "aws_iam_role" "bfd_insights_error_slack" {
   name        = "bfd-${local.environment}-${local.lambda_name}"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for bfd-${local.environment}-${local.lambda_name} Lambda"
 
   assume_role_policy = <<-EOF

@@ -1,5 +1,6 @@
 resource "aws_iam_policy" "logs" {
   name = "${local.alerter_lambda_name}-logs"
+  path = var.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.alerter_lambda_name} Lambda to write to its corresponding ",
     "CloudWatch Log Group and Log Stream"
@@ -28,6 +29,7 @@ resource "aws_iam_policy" "logs" {
 
 resource "aws_iam_policy" "read_log" {
   name = "${local.alerter_lambda_name}-read-logs"
+  path = var.cloudtamer_iam_path
   description = join("", [
     "Permissions for ${local.alerter_lambda_name} to start and retrieve the results of a Log ",
     "Insights query against the ${local.access_json_log_group_name} CloudWatch Log Group"
@@ -59,6 +61,7 @@ resource "aws_iam_policy" "read_log" {
 
 resource "aws_iam_policy" "invoke_alerter" {
   name = "${local.name_prefix}-scheduler-assumee-allow-lambda-invoke"
+  path = var.cloudtamer_iam_path
   description = join("", [
     "Permissions for EventBridge Scheduler assumed role to invoke the ",
     "${local.alerter_lambda_name} Lambda"
@@ -80,7 +83,8 @@ resource "aws_iam_policy" "invoke_alerter" {
 
 resource "aws_iam_role" "alerter_lambda_role" {
   name        = local.alerter_lambda_name
-  path        = "/"
+  path        = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for ${local.alerter_lambda_name} Lambda"
 
   assume_role_policy = jsonencode(
@@ -103,7 +107,8 @@ resource "aws_iam_role" "alerter_lambda_role" {
 
 resource "aws_iam_role" "scheduler_assume_role" {
   name = "${local.name_prefix}-scheduler-assume"
-  path = "/"
+  path = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = join("", [
     "Role for EventBridge Scheduler to assume allowing permissions to invoke the ",
     "${local.alerter_lambda_name} Lambda"

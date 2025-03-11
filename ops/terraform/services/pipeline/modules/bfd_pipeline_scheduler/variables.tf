@@ -22,3 +22,9 @@ variable "ccw_pipeline_asg_details" {
   description = "Details about the BFD CCW Pipeline ASG"
   type        = object({ arn = string, name = string })
 }
+
+variable "cloudtamer_iam_path" {
+  type = string
+  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
+  default = "/delegatedadmin/developer/"
+}

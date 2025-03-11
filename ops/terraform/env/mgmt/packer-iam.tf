@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "packer_ssm" {
   description = "Policy granting permission for bfd-packer profiled instances to access some common SSM hierarchies"
   name        = "bfd-${local.env}-packer-ssm"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -29,7 +29,7 @@ POLICY
 resource "aws_iam_policy" "packer_kms" {
   description = "Policy granting permission for bfd-packer profiled instances to decrypt using mgmt and established environment KMS keys"
   name        = "bfd-${local.env}-packer-kms"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [
@@ -78,11 +78,12 @@ resource "aws_iam_role" "packer" {
   ]
   max_session_duration = 3600
   name                 = "bfd-packer"
-  path                 = "/"
+  path                 = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
 }
 
 resource "aws_iam_instance_profile" "packer" {
   name = aws_iam_role.packer.name
   role = aws_iam_role.packer.name
-  path = "/"
+  path = var.cloudtamer_iam_path
 }

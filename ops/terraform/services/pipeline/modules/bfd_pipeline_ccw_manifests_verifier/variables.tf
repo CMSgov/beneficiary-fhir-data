@@ -27,3 +27,9 @@ variable "etl_bucket_id" {
   type        = string
   description = "Bucket ID of the Pipeline ETL S3 Bucket"
 }
+
+variable "cloudtamer_iam_path" {
+  type = string
+  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
+  default = "/delegatedadmin/developer/"
+}

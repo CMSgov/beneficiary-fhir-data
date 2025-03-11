@@ -123,3 +123,9 @@ variable "locust_master_port" {
   description = "The port to connect to that is used by the locust master for distributed load testing."
   type        = number
 }
+
+variable "cloudtamer_iam_path" {
+  type = string
+  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
+  default = "/delegatedadmin/developer/"
+}

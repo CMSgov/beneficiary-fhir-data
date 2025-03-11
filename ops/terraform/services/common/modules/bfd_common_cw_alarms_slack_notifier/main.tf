@@ -37,7 +37,7 @@ locals {
 
 resource "aws_iam_policy" "logs" {
   for_each = local.lambdas
-
+  path = var.cloudtamer_iam_path
   name        = "bfd-${var.env}-${each.value.full_name}-logs"
   description = "Permissions to create and write to bfd-${var.env}-${each.value.full_name} logs"
   policy      = <<-EOF
@@ -66,7 +66,7 @@ EOF
 
 resource "aws_iam_policy" "kms" {
   for_each = local.lambdas
-
+  path = var.cloudtamer_iam_path
   name        = "bfd-${var.env}-${each.value.full_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
   policy = jsonencode(
@@ -87,7 +87,7 @@ resource "aws_iam_policy" "kms" {
 
 resource "aws_iam_policy" "ssm" {
   for_each = local.lambdas
-
+  path = var.cloudtamer_iam_path
   name        = "bfd-${var.env}-${each.value.full_name}-ssm-parameters"
   description = "Permissions to /bfd/mgmt/common/sensitive/* SSM hierarchies"
   policy      = <<-EOF
@@ -114,7 +114,8 @@ resource "aws_iam_role" "this" {
   for_each = local.lambdas
 
   name        = "bfd-${var.env}-${each.value.full_name}"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for bfd-${var.env}-${each.value.full_name} Lambda"
 
   assume_role_policy = <<-EOF

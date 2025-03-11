@@ -64,3 +64,9 @@ variable "db_environment_override" {
   sensitive   = false
   type        = string
 }
+
+variable "cloudtamer_iam_path" {
+  type = string
+  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
+  default = "/delegatedadmin/developer/"
+}

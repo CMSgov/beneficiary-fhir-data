@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "ec2_instance_tags_ro" {
   description = "Global EC2 Instances and Tags RO Policy"
   name        = "bfd-${local.env}-ec2-instance-tags-ro"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Version": "2012-10-17",
@@ -23,7 +23,7 @@ POLICY
 resource "aws_iam_policy" "code_artifact_rw" {
   description = "CodeArtifact read/write permissions"
   name        = "bfd-${local.env}-codeartifact-rw"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -71,7 +71,7 @@ POLICY
 resource "aws_iam_policy" "code_artifact_ro" {
   description = "Allows Access to env:mgmt AWS Code Artifact Resources"
   name        = "bfd-${local.env}-code-artifact-ro"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy      = <<-POLICY
 {
     "Version": "2012-10-17",
@@ -109,7 +109,7 @@ POLICY
 resource "aws_iam_policy" "jenkins_volume" {
   description = "Jenkins Data Volume Policy"
   name        = "bfd-${local.env}-jenkins-volume"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -151,6 +151,7 @@ resource "aws_iam_role" "cloudbees" {
 POLICY
   description           = "Assume role for our cloudbees jenkins"
   force_detach_policies = false
+#  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn # Temporarily commented out due to incompatabilities
   managed_policy_arns = [
     aws_iam_policy.jenkins_permission_boundary.arn,
     aws_iam_policy.jenkins_volume.arn,
@@ -158,7 +159,7 @@ POLICY
   ]
   max_session_duration = 3600
   name                 = "cloudbees-jenkins"
-  path                 = "/"
+  path                 = var.cloudtamer_iam_path
 
 }
 
@@ -195,7 +196,7 @@ POLICY
 
 resource "aws_iam_policy" "s3_integration_tests" {
   name   = "bfd-s3-for-integration-tests"
-  path   = "/"
+  path   = var.cloudtamer_iam_path
   policy = <<-POLICY
 {
   "Statement": [
@@ -273,7 +274,7 @@ resource "aws_iam_group_policy_attachment" "app_engineers_vpc_ro" {
 resource "aws_iam_policy" "bfd_ssm_ro" {
   description = "Permissions to /bfd SSM hierarchies"
   name        = "bfd-ssm-parameters-ro"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [
@@ -321,7 +322,7 @@ resource "aws_iam_group_policy_attachment" "app_engineers_bfd_ssm_ro" {
 resource "aws_iam_policy" "rda_ec2_instance_manager" {
   name        = "bfd-rda-pipeline-ec2-instance-manager"
   description = "Allow management of RDA pipeline instances"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy      = <<-POLICY
 {
     "Version": "2012-10-17",
@@ -347,7 +348,7 @@ POLICY
 resource "aws_iam_policy" "rda_ssm_ro" {
   description = "Allow reading RDA pipeline SSM hierarchies"
   name        = "bfd-rda-pipeline-ssm-parameters-ro"
-  path        = "/"
+  path        = var.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
