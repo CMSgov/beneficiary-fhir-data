@@ -10,8 +10,8 @@
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | 1.5.0 |
 | <a name="requirement_aws"></a> [aws](#requirement_aws) | ~>5 |
-| <a name="requirement_external"></a> [external](#requirement_external) | 2.3.4 |
-| <a name="requirement_http"></a> [http](#requirement_http) | 3.4.5 |
+| <a name="requirement_external"></a> [external](#requirement_external) | ~>2 |
+| <a name="requirement_http"></a> [http](#requirement_http) | ~>3 |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.
@@ -57,6 +57,6 @@
 | Name | Type |
 |------|------|
 | [aws_ssm_parameters_by_path.params](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
-| [external_external.github_token](https://registry.terraform.io/providers/hashicorp/external/2.3.4/docs/data-sources/external) | data source |
-| [http_http.latest_bfd_release](https://registry.terraform.io/providers/hashicorp/http/3.4.5/docs/data-sources/http) | data source |
+| [external_external.github_token](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
+| [http_http.latest_bfd_release](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
 <!-- END_TF_DOCS -->
