@@ -164,19 +164,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefitBase.OPRTG_PRVDR_NPI_NUM",
-                "path": "ExplanationOfBenefitBase.OPRTG_PRVDR_NPI_NUM",
-                "label": "Operating Provider NPI Number",
-                "definition": "The NPI number of the operating provider.",
-                "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefitBase.procedures",
                 "path": "ExplanationOfBenefitBase.procedures",
                 "label": "Procedure List",
