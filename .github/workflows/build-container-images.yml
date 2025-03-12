@@ -1,5 +1,5 @@
 ---
-name: "Build Docker Images"
+name: "Build Container Images"
 on:
   # GHA does not support "shared_inputs" or some other form of workflow_call and workflow_dispatch
   # input consolidation; instead, we must duplicate the input definitions for each event
@@ -17,6 +17,11 @@ on:
       awsRegion:
         description: "Override the AWS Region destination for uploaded artifacts. Default to `us-east-1`."
         default: us-east-1
+        type: string
+        required: true
+      imagesCsv:
+        description: "Comma-separated list of image names to build. Defaults to all images ('*')"
+        default: "*"
         type: string
         required: true
   workflow_dispatch:
@@ -41,6 +46,11 @@ on:
           - us-east-1
           - us-west-2
         required: true
+      imagesCsv:
+        description: "Comma-separated list of image names to build. Defaults to all images ('*')"
+        default: "*"
+        type: string
+        required: true
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
@@ -54,25 +64,57 @@ defaults:
     shell: bash
 
 jobs:
+  compute-matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+
+      # Generates a JSON string array of JMESPath contains expression "fragments".
+      # Given an input like:
+      #    image1, image2
+      # The following JSON string will be the output:
+      #    ["contains('image1', name)", "contains('image2', name)"]
+      - name: Mutate images list for JMESPath
+        if: inputs.imagesCsv != '*'
+        id: mutate-images-csv
+        env:
+          IMAGES_CSV: ${{ inputs.imagesCsv }}
+        run: |
+          images_jmespath_fragments="$(jq -cR $'gsub("\\\\s*"; "") | split(",") | map("contains(\'"+.+"\', name)")' <<< "$IMAGES_CSV")"
+          echo "images_jmespath_fragments=$images_jmespath_fragments" >> $GITHUB_OUTPUT
+
+      # Consumes the output of the previous step and generates a full JMESPath expression that will
+      # be used to filter the list of images.
+      # Given an input like:
+      #    ["contains('image1', name)", "contains('image2', name)"]
+      # Generates a JMESPath expression like:
+      #    [?contains('image1', name) || contains('image2', name)]
+      - name: Generate JMESPath
+        if: inputs.imagesCsv != '*'
+        id: gen-jmespath
+        run: |
+          jmes_path="[?${{ join(fromJson(steps.mutate-images-csv.outputs.images_jmespath_fragments), ' || ') }}]"
+          echo "jmes_path=$jmes_path" >> $GITHUB_OUTPUT
+
+      # Uses the above JMESPath expression to filter the list of buildable images based upon their
+      # names.
+      - name: Setup CI jobs matrix
+        id: set-matrix
+        uses: JoshuaTheMiller/conditional-build-matrix@main
+        with:
+          filter: "${{ steps.gen-jmespath.outputs.jmes_path || '[]' }}"
+          addInclude: "false"
+          inputFile: ".github/workflows/build_container_images_matrix.json"
+
   build-images:
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    needs: compute-matrix
     strategy:
       matrix:
-        image:
-          [
-            {
-              name: "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
-              dockerfile: "ops/jenkins/bfd-build-eft-sftp-outbound-transfer-lambda/Dockerfile",
-              contextDir: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
-              platform: "linux/amd64",
-            },
-            {
-              name: "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
-              dockerfile: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
-              contextDir: "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
-              platform: "linux/arm64",
-            },
-          ]
-    runs-on: ubuntu-24.04
+        image: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+    runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
       - name: Validate Inputs
         run: |
@@ -110,34 +152,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Setup tags
-        id: setup_tags
-        run: |
-          # Naively, if version tag does not contain a "-" we assume the version is not a release
-          # and the "latest" tag should not be pushed.
-          image_tags=""
-          if [[ "${{ inputs.versionTag }}" == *"-"* ]]; then
-            image_tags="$IMAGE_VERSIONED_TAG"
-          else
-            image_tags="$IMAGE_VERSIONED_TAG,$IMAGE_LATEST_TAG"
-          fi
-          echo image_tags=$image_tags >> $GITHUB_OUTPUT
-        env:
-          IMAGE_VERSIONED_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
-          IMAGE_LATEST_TAG: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:latest
-
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: true
-          tags: ${{ steps.setup_tags.outputs.image_tags }}
+          tags: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
           # AWS Lambda does not support multi-platform images, something that is enabled by default
           # by this Action via the "provenance" flag. Until AWS Lambda supports this feature
           # properly, we must explicitly disable provenance and specify the platform directly.
           # See https://github.com/docker/buildx/issues/1533
           provenance: false
           platforms: ${{ matrix.image.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
         env:
           DOCKER_BUILDKIT: 1
