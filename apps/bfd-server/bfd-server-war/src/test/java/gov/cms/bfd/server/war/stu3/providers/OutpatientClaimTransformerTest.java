@@ -21,12 +21,15 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -65,6 +68,8 @@ public final class OutpatientClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   public void setup() throws IOException {
@@ -99,7 +104,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    outpatientClaimTransformer.transform(claim, false);
+    outpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
 
     String expectedTimerName = outpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -125,7 +130,8 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = outpatientClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit eob =
+        outpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

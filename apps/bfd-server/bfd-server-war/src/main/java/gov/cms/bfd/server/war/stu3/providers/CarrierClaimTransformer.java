@@ -21,7 +21,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -91,14 +90,10 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   @Trace
   @Override
   public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
-    Object claim = claimEntity;
-    List<Coding> securityTags = new ArrayList<>();
-
-    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
-      claim = claimWithSecurityTags.getClaimEntity();
-      securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
-    }
+    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
+    Object claim = claimWithSecurityTags.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
 
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();

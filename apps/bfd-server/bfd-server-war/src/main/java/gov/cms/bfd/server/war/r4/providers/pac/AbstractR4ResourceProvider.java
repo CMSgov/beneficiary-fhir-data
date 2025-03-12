@@ -32,8 +32,10 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import jakarta.annotation.Nonnull;
@@ -120,6 +122,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** Flag to control whether SAMHSA shadow filtering should be applied. */
   private final boolean samhsaV2Shadow;
 
+  private final SecurityTagsDao securityTagsDao;
+
   /**
    * Initializes the resource provider beans via spring injection. These should be passed from the
    * child class constructor.
@@ -131,6 +135,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
    * @param samhsaV2Shadow the samhsa V2 Shadow flag
+   * @param securityTagsDao security Tags Dao
    * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation resources ({@link
    *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
@@ -142,6 +147,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       ResourceTransformer<T> mcsTransformer,
       String claimSourceTypeNames,
       SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      SecurityTagsDao securityTagsDao,
       @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
@@ -149,6 +155,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     this.fissTransformer = requireNonNull(fissTransformer);
     this.mcsTransformer = requireNonNull(mcsTransformer);
     this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
+    this.securityTagsDao = securityTagsDao;
     this.samhsaV2Shadow = samhsaV2Shadow;
 
     requireNonNull(claimSourceTypeNames);
@@ -172,7 +179,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** Initiates the provider's dependencies. */
   @PostConstruct
   public void init() {
-    claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled);
+    claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled, securityTagsDao);
 
     setResourceType();
   }
@@ -252,7 +259,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity);
+    Mbi claimEntityMbi =
+        getClaimEntityMbi(
+            claimIdObj.getRight(), ((ClaimWithSecurityTags<?>) claimEntity).getClaimEntity());
     if (claimEntityMbi != null) logMbiIdentifiersToMdc(claimEntityMbi);
 
     return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);

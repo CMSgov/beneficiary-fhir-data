@@ -49,11 +49,12 @@ public class SamhsaV2InterceptorShadow {
   /**
    * logs Missing Claim Ids.
    *
-   * @param entity the resource being processed
+   * @param claimWithSecurityTags the resource being processed
    * @param hasSamhsaData the hasNoSamhsaData boolean
    */
-  public void logMissingClaim(Object entity, boolean hasSamhsaData) {
-    if (samhsaV2Shadow && entity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
+  public void logMissingClaim(
+      ClaimWithSecurityTags<?> claimWithSecurityTags, boolean hasSamhsaData) {
+    if (samhsaV2Shadow) {
 
       // Get security tags from the claim entity
       List<Coding> securityTags =

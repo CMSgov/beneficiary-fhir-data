@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +32,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -835,7 +838,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @param type the type
    * @return the claim to be used for the test, should match the input type
    */
-  public static RifRecordBase getClaim(Class<? extends RifRecordBase> type) {
+  public static ClaimWithSecurityTags getClaim(Class<? extends RifRecordBase> type) {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -848,7 +851,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       throw new IllegalStateException(
           "Test setup issue, did not find expected InpatientClaim in sample record.");
     }
-
-    return claim;
+    Set<String> securityTags = new HashSet<>();
+    return new ClaimWithSecurityTags(claim, securityTags);
   }
 }

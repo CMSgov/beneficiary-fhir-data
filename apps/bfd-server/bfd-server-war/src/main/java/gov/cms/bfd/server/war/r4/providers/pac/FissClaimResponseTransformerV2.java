@@ -99,14 +99,11 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
   @Trace
   public ClaimResponse transform(Object claimEntity, boolean includeTaxNumbers) {
 
-    Object claim = claimEntity;
-    List<Coding> securityTags = new ArrayList<>();
+    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
+    Object claim = claimWithSecurityTags.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
 
-    if (claimEntity instanceof ClaimWithSecurityTags<?> claimWithSecurityTags) {
-      claim = claimWithSecurityTags.getClaimEntity();
-      securityTags =
-          securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
-    }
     if (!(claim instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }

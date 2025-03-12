@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -40,6 +39,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,6 +137,8 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /** Flag to control whether SAMHSA shadow filtering should be applied. */
   private final boolean samhsaV2Shadow;
 
+  private final SecurityTagsDao securityTagsDao;
+
   /**
    * Constructor for TransformPatientClaimsToEobTask.
    *
@@ -149,6 +151,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param npiOrgLookup the npi org lookup bean
    * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation
+   * @param securityTagsDao the security Tags Dao
    * @param samhsaV2Shadow the samhsa V2 Shadow flag
    */
   public PatientClaimsEobTaskTransformer(
@@ -157,12 +160,14 @@ public class PatientClaimsEobTaskTransformer implements Callable {
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       NPIOrgLookup npiOrgLookup,
       SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      SecurityTagsDao securityTagsDao,
       @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
+    this.securityTagsDao = securityTagsDao;
     this.samhsaV2Shadow = samhsaV2Shadow;
   }
 
@@ -242,7 +247,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param claims the claims/events to transform
    * @return the {@link ExplanationOfBenefit} instances, one per claim/event
    */
-  private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
+  private List<ExplanationOfBenefit> transformToEobs(List<ClaimWithSecurityTags<T>> claims) {
     return claims.stream()
         .map(
             c -> {
@@ -250,8 +255,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
 
               if (samhsaV2Shadow) {
                 // Log the missing claim along with the EOB
-                samhsaV2InterceptorShadow.logMissingClaim(
-                    (ClaimWithSecurityTags) c, samhsaMatcher.test(eob));
+                samhsaV2InterceptorShadow.logMissingClaim(c, samhsaMatcher.test(eob));
               }
 
               return eob;
@@ -372,42 +376,33 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           claimEntities == null ? 0 : claimEntities.size());
       timerEobQuery.close();
     }
-
-    SecurityTagsDao securityTagsDao = new SecurityTagsDao();
     SecurityTagManager securityTagManager = new SecurityTagManager();
 
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
 
-    Set<String> claimIds = new HashSet<>();
-    if (claimEntities != null) {
-      claimIds =
-          securityTagManager.collectClaimIds(
-              (List<Object>) claimEntities, claimType.getEntityIdAttribute().getName());
-    }
+    if (claimEntities != null && !claimEntities.isEmpty()) {
+      Set<String> claimIds =
+          securityTagManager.collectClaimIds((List<Object>) claimEntities, claimType, null);
 
-    if (!claimIds.isEmpty()) {
-      // Make ONE query to get all claim-tag relationships
-      Map<String, Set<String>> claimIdToTagsMap =
-          securityTagsDao.buildClaimIdToTagsMap(
-              claimType.getEntityTagType(), claimIds, entityManager);
+      if (!claimIds.isEmpty()) {
+        // Query the claim-tag relationships in one batch
+        Map<String, Set<String>> claimIdToTagsMap =
+            securityTagsDao.buildClaimIdToTagsMap(claimType.getEntityTagType(), claimIds);
 
-      // Process all claims using the map from the single query
-      claimEntities.stream()
-          .forEach(
-              claimEntity -> {
-                // Get the claim ID
-                String claimId =
-                    securityTagManager.extractClaimId(
-                        claimEntity, claimType.getEntityIdAttribute().getName());
-
-                // Look up this claim's tags from our pre-fetched map (no additional DB query)
-                Set<String> claimSpecificTags =
-                    claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
-
-                // Wrap the claim and its tags in the response object
-                claimEntitiesWithTags.add(
-                    new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags));
-              });
+        // Process each claim entity, associating it with its tags
+        claimEntitiesWithTags =
+            claimEntities.stream()
+                .map(
+                    claimEntity -> {
+                      String claimId =
+                          securityTagManager.extractClaimId(claimEntity, claimType, null);
+                      // Ensure claimId is valid (not null or empty) before attempting to fetch tags
+                      Set<String> claimSpecificTags =
+                          claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+                      return new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags);
+                    })
+                .collect(Collectors.toList());
+      }
     }
 
     if (claimEntities != null && !serviceDate.isEmpty()) {

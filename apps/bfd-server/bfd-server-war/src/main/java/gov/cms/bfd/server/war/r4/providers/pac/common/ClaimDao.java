@@ -46,6 +46,8 @@ public class ClaimDao {
   /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
 
+  private final SecurityTagsDao securityTagsDao;
+
   /**
    * Gets an entity by it's ID for the given claim type.
    *
@@ -80,16 +82,15 @@ public class ClaimDao {
     ClaimWithSecurityTags<T> claimEntitiesWithTags = null;
     String claimId;
 
-    SecurityTagsDao securityTagsDao = new SecurityTagsDao();
     SecurityTagManager securityTagManager = new SecurityTagManager();
 
     if (claimEntity != null) {
-      claimId = securityTagManager.extractClaimId(claimEntity, resourceType.getEntityIdAttribute());
+      claimId = securityTagManager.extractClaimId(claimEntity, null, resourceType);
 
       if (!claimId.isEmpty()) {
         Map<String, Set<String>> claimIdToTagsMap =
             securityTagsDao.buildClaimIdToTagsMap(
-                resourceType.getEntityTagType(), Collections.singleton(claimId), entityManager);
+                resourceType.getEntityTagType(), Collections.singleton(claimId));
 
         Set<String> claimSpecificTags =
             claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
@@ -160,20 +161,16 @@ public class ClaimDao {
 
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
     Set<String> claimIds;
-
-    SecurityTagsDao securityTagsDao = new SecurityTagsDao();
     SecurityTagManager securityTagManager = new SecurityTagManager();
 
     if (claimEntities != null) {
       claimIds =
-          securityTagManager.collectClaimIds(
-              (List<Object>) claimEntities, resourceType.getEntityIdAttribute());
+          securityTagManager.collectClaimIds((List<Object>) claimEntities, null, resourceType);
 
       if (!claimIds.isEmpty()) {
         // Query for security tags by the collected claim IDs
         Map<String, Set<String>> claimIdToTagsMap =
-            securityTagsDao.buildClaimIdToTagsMap(
-                resourceType.getEntityTagType(), claimIds, entityManager);
+            securityTagsDao.buildClaimIdToTagsMap(resourceType.getEntityTagType(), claimIds);
 
         // Process all claims using the map from the single query
         claimEntities.stream()
@@ -181,8 +178,7 @@ public class ClaimDao {
                 claimEntity -> {
                   // Get the claim ID
                   String claimId =
-                      securityTagManager.extractClaimId(
-                          claimEntity, resourceType.getEntityIdAttribute());
+                      securityTagManager.extractClaimId(claimEntity, null, resourceType);
 
                   // Look up this claim's tags from our pre-fetched map (no additional DB query)
                   Set<String> claimSpecificTags =

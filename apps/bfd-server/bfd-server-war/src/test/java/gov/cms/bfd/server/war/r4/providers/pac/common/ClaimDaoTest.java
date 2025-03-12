@@ -24,6 +24,8 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.pac.AbstractResourceTypeV2;
 import gov.cms.bfd.server.war.r4.providers.pac.ClaimTypeV2;
 import jakarta.persistence.EntityManager;
@@ -36,7 +38,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -74,6 +75,8 @@ class ClaimDaoTest {
   /** Used when mocking query construction. */
   @Mock private CriteriaBuilder mockBuilder;
 
+  @Mock private SecurityTagsDao securityTagsDao;
+
   /** Initializes non-mock fields for each test. */
   @BeforeEach
   void setUp() {
@@ -84,10 +87,10 @@ class ClaimDaoTest {
   @Test
   void testCreateMetricNameForResourceQuery() {
     assertEquals(
-        "ClaimDao.query.claim_by_id.mockType",
+        "ClaimDao.query.claim_by_id.carrier",
         ClaimDao.createMetricNameForResourceQuery(claimType, ClaimDao.CLAIM_BY_ID_QUERY));
     assertEquals(
-        "ClaimDao.query.claim_by_mbi.mockType",
+        "ClaimDao.query.claim_by_mbi.carrier",
         ClaimDao.createMetricNameForResourceQuery(claimType, ClaimDao.CLAIM_BY_MBI_QUERY));
   }
 
@@ -99,9 +102,9 @@ class ClaimDaoTest {
   void shouldGetEntityById() {
     String claimId = "123";
 
-    Object expected = 5L;
+    Object expected = mock(CarrierClaim.class);
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
 
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
     // rawtypes - Due to mocking the object.
@@ -150,7 +153,8 @@ class ClaimDaoTest {
             sizeCaptor.capture());
 
     assertEquals(1, sizeCaptor.getValue());
-    assertEquals(expected, actual);
+    //    (ClaimWithSecurityTags<?>) claimEntity).getClaimEntity()
+    assertEquals(expected, ((ClaimWithSecurityTags<?>) actual).getClaimEntity());
   }
 
   /**
@@ -161,7 +165,7 @@ class ClaimDaoTest {
   void shouldGetEntityByIdWhenNull() {
     String claimId = "123";
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
 
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
     // rawtypes - Due to mocking the object.
@@ -223,7 +227,7 @@ class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -245,7 +249,15 @@ class ClaimDaoTest {
 
     doReturn(mockQuery).when(mockBuilder).createQuery(any());
 
-    List<Long> mockList = List.of(1L, 1L, 1L, 1L, 1L);
+    List<Object> mockList = new ArrayList<>();
+    CarrierClaim claim = mock(CarrierClaim.class);
+    mockList.add(claim);
+
+    CarrierClaim claim1 = mock(CarrierClaim.class);
+    mockList.add(claim1);
+
+    CarrierClaim claim2 = mock(CarrierClaim.class);
+    mockList.add(claim2);
 
     doReturn(mockList).when(mockTypedQuery).getResultList();
 
@@ -267,7 +279,7 @@ class ClaimDaoTest {
             timeCaptor.capture(),
             sizeCaptor.capture());
 
-    assertEquals(5, sizeCaptor.getValue());
+    assertEquals(3, sizeCaptor.getValue());
   }
 
   /**
@@ -279,7 +291,7 @@ class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -329,7 +341,7 @@ class ClaimDaoTest {
   @Test
   @SuppressWarnings("unchecked") // untyped mock creation is harmless
   public void testCreateServiceDatePredicates() {
-    final var daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    final var daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
     final Root<RdaFissClaim> root = mock(Root.class);
     final var serviceDateParam = mock(DateRangeParam.class);
 
@@ -415,7 +427,8 @@ class ClaimDaoTest {
     final Root<TEntity> claim = mock(Root.class);
     doReturn(claim).when(claimsQuery).from(resourceType.getEntityClass());
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     final Predicate wherePredicate = mock(Predicate.class);
     doReturn(List.of(wherePredicate))
@@ -443,17 +456,6 @@ class ClaimDaoTest {
             param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
 
     doReturn(queryResult).when(query).getResultList();
-
-    TypedQuery<Object[]> mockTypedQuery = mock(TypedQuery.class);
-    // Mock the behavior of createQuery to return the mock TypedQuery
-    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(anyString(), eq(String[].class));
-
-    // Mock the behavior of setParameter to return the same mock TypedQuery (for method chaining)
-    doReturn(mockTypedQuery).when(mockTypedQuery).setParameter(anyString(), any());
-
-    // Mock the behavior of getResultList to return the desired result
-    Object[] expectedResult = new Object[] {}; // Example result
-    doReturn(Arrays.asList(expectedResult)).when(mockTypedQuery).getResultList();
 
     List<ClaimWithSecurityTags<TEntity>> claimsWithTags =
         dao.findAllByMbiAttribute(
@@ -514,7 +516,8 @@ class ClaimDaoTest {
     final Path<?> mbiRecord = mock(Path.class);
     doReturn(mbiRecord).when(claim).get(resourceType.getEntityMbiRecordAttribute());
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     final List<Predicate> expectedPredicates = new ArrayList<>();
 
@@ -568,7 +571,8 @@ class ClaimDaoTest {
     doReturn(mbiPredicate).when(mockBuilder).equal(mbi, searchString);
     doReturn(mbi).when(root).get(Mbi.Fields.mbi);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
     assertSame(mbiPredicate, dao.createMbiPredicate(root, searchString, false, mockBuilder));
   }
 
@@ -586,7 +590,8 @@ class ClaimDaoTest {
     doReturn(hashPredicate).when(mockBuilder).equal(hash, searchString);
     doReturn(hash).when(root).get(Mbi.Fields.hash);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
     assertSame(hashPredicate, dao.createMbiPredicate(root, searchString, true, mockBuilder));
   }
 
@@ -610,7 +615,8 @@ class ClaimDaoTest {
     doReturn(hash).when(root).get(Mbi.Fields.hash);
     doReturn(oldHash).when(root).get(Mbi.Fields.oldHash);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
     assertSame(combinedPredicate, dao.createMbiPredicate(root, searchString, true, mockBuilder));
   }
 
@@ -619,8 +625,8 @@ class ClaimDaoTest {
     /** A mock claim type for testing. */
     public MockClaimType() {
       super(
-          "mock",
-          "mockType",
+          "CARRIER",
+          "carrier",
           Long.class,
           "mbiAttribute",
           "somePropertyName",

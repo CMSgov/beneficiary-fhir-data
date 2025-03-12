@@ -1,7 +1,17 @@
 package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.PartDEvent;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import gov.cms.bfd.sharedutils.TagCode;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -100,13 +110,15 @@ public final class SecurityTagManager {
    * Builds a mapping from claim IDs to their security tags.
    *
    * @param claimEntities the claim entity
-   * @param entityIdAttribute the claim type
+   * @param claimType the claim type
+   * @param resourceType the claim type
    * @return set of ClaimIds
    */
-  public Set<String> collectClaimIds(List<Object> claimEntities, String entityIdAttribute) {
+  public Set<String> collectClaimIds(
+      List<Object> claimEntities, ClaimType claimType, ResourceTypeV2 resourceType) {
     Set<String> claimIds = new HashSet<>();
     for (Object claimEntity : claimEntities) {
-      String claimId = extractClaimId(claimEntity, entityIdAttribute);
+      String claimId = extractClaimId(claimEntity, claimType, resourceType);
       if (!claimId.isEmpty()) {
         claimIds.add(claimId);
       }
@@ -118,25 +130,67 @@ public final class SecurityTagManager {
    * extracts ClaimId.
    *
    * @param claimEntity the claim entity
-   * @param entityIdAttribute the entityIdAttribute
+   * @param claimType the entityIdAttribute
+   * @param resourceType the entityIdAttribute
    * @return claim Id
    */
-  public String extractClaimId(Object claimEntity, String entityIdAttribute) {
-    try {
-      Field entityIdField = claimEntity.getClass().getDeclaredField(entityIdAttribute);
-      entityIdField.setAccessible(true);
+  public String extractClaimId(
+      Object claimEntity, ClaimType claimType, ResourceTypeV2 resourceType) {
 
-      Object claimIdValue = entityIdField.get(claimEntity);
+    if (claimEntity == null) {
+      return "";
+    }
 
-      if (claimIdValue != null) {
-        return claimIdValue.toString();
-      }
-    } catch (NoSuchFieldException e) {
-      LOGGER.error("Field entityIdAttribute not found for claim entity: {}", claimEntity, e);
-      throw new RuntimeException("Field not found for claim entity: " + entityIdAttribute, e);
-    } catch (IllegalAccessException e) {
-      LOGGER.error("Failed to access entity ID attribute for claim entity: {}", claimEntity, e);
+    if (claimType != null) {
+      return getClaimIdByClaimType(claimType, claimEntity);
+    } else if (resourceType != null) {
+      return getClaimIdByResourceType(resourceType, claimEntity);
     }
     return "";
+  }
+
+  /**
+   * Gets the claim ID for the given entity based on the claim type.
+   *
+   * @param claim the claim entity (CarrierClaim, DMEClaim, etc.)
+   * @param claimType the claim type
+   * @return the claim ID
+   */
+  public String getClaimIdByClaimType(ClaimType claimType, Object claim) {
+
+    return switch (claimType) {
+      case CARRIER -> String.valueOf(((CarrierClaim) claim).getClaimId());
+      case DME -> String.valueOf(((DMEClaim) claim).getClaimId());
+      case HHA -> String.valueOf(((HHAClaim) claim).getClaimId());
+      case HOSPICE -> String.valueOf(((HospiceClaim) claim).getClaimId());
+      case INPATIENT -> String.valueOf(((InpatientClaim) claim).getClaimId());
+      case OUTPATIENT -> String.valueOf(((OutpatientClaim) claim).getClaimId());
+      case PDE -> String.valueOf(((PartDEvent) claim).getEventId());
+      case SNF -> String.valueOf(((SNFClaim) claim).getClaimId());
+      default -> throw new IllegalArgumentException("Unsupported claim type: " + this);
+    };
+  }
+
+  /**
+   * Gets the claim ID for the given entity based on the resource type.
+   *
+   * @param resourceType the resource type (e.g., ResourceTypeV2)
+   * @param claim the claim
+   * @return claim id
+   */
+  private String getClaimIdByResourceType(ResourceTypeV2 resourceType, Object claim) {
+
+    return switch (resourceType.getTypeLabel()) {
+      case "carrier" -> String.valueOf(((CarrierClaim) claim).getClaimId());
+      case "dme" -> String.valueOf(((DMEClaim) claim).getClaimId());
+      case "hha" -> String.valueOf(((HHAClaim) claim).getClaimId());
+      case "hospice" -> String.valueOf(((HospiceClaim) claim).getClaimId());
+      case "inpatient" -> String.valueOf(((InpatientClaim) claim).getClaimId());
+      case "outpatient" -> String.valueOf(((OutpatientClaim) claim).getClaimId());
+      case "mcs" -> String.valueOf(((RdaMcsClaim) claim).getIdrClmHdIcn());
+      case "fiss" -> String.valueOf(((RdaFissClaim) claim).getClaimId());
+      case "snfclaim" -> String.valueOf(((SNFClaim) claim).getClaimId());
+      default -> throw new IllegalArgumentException("Unsupported claim type: " + resourceType);
+    };
   }
 }

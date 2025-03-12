@@ -9,6 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    * @param oldMbiHashEnabled true if old MBI hash should be used
    * @param fissClaimResponseTransformerV2 the fiss claim response transformer
    * @param mcsClaimResponseTransformerV2 the mcs claim response transformer
+   * @param securityTagsDao security Tags Dao
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
    *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
    *     org.hl7.fhir.r4.model.ClaimResponse}
@@ -46,8 +48,9 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
       @Qualifier(PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
       FissClaimResponseTransformerV2 fissClaimResponseTransformerV2,
       McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
-      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames,
-      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow) {
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      SecurityTagsDao securityTagsDao,
+      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
     super(
         metricRegistry,
         samhsaMatcher,
@@ -56,6 +59,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
         mcsClaimResponseTransformerV2,
         claimSourceTypeNames,
         samhsaV2InterceptorShadow,
+        securityTagsDao,
         false);
   }
 

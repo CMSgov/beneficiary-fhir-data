@@ -21,12 +21,15 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
@@ -64,6 +67,8 @@ public final class SNFClaimTransformerTest {
   /** The NPI org lookup to use for the test. */
   private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   public void setup() throws IOException {
@@ -98,7 +103,7 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    snfClaimTransformer.transform(claim, false);
+    snfClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
 
     String expectedTimerName = snfClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -124,7 +129,8 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = snfClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit eob =
+        snfClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

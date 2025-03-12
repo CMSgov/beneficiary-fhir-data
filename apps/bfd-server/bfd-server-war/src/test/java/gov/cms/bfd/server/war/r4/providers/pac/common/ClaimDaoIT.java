@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.pac.ClaimResponseTypeV2;
 import gov.cms.bfd.server.war.r4.providers.pac.ClaimTypeV2;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
 
 /** Integration tests for the {@link gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao}. */
 public class ClaimDaoIT {
@@ -32,10 +34,13 @@ public class ClaimDaoIT {
   /** The test metric registry. */
   private final MetricRegistry metricRegistry = new MetricRegistry();
 
+  @Mock private static final SecurityTagsDao securityTagsDao = new SecurityTagsDao();
+
   /** Initializes test resources. */
   @BeforeAll
   public static void init() {
     testUtils.init();
+    securityTagsDao.setEntityManager(testUtils.getEntityManager());
   }
 
   /** Cleans up testing resources after all tests have run. */
@@ -56,7 +61,9 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithKnownMbiFindsMatch() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
+
     testUtils.seedData(false);
     var claims = runFissMbiQuery(claimDao, RDATestUtils.MBI);
     assertEquals(3, claims.size());
@@ -65,7 +72,8 @@ public class ClaimDaoIT {
   /** Verifies that doing a claims search with an unknown MBI will return no claims. */
   @Test
   public void verifyQueryWithUnknownMbiFindsNothing() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
     testUtils.seedData(false);
     var claims = runFissMbiQuery(claimDao, "not-an-mbi");
     assertEquals(0, claims.size());
@@ -77,7 +85,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithKnownMbiHashFindsMatch() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
     testUtils.seedData(false);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
     assertEquals(3, claims.size());
@@ -86,7 +95,8 @@ public class ClaimDaoIT {
   /** Verifies that doing a claims search with an unknown MBI hash will return no claims. */
   @Test
   public void verifyQueryWithUnknownMbiHashFindsNothing() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
     testUtils.seedData(false);
     var claims = runMcsMbiHashQuery(claimDao, "not-an-mbi-hash");
     assertEquals(0, claims.size());
@@ -98,7 +108,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashDisabledIgnoresOldHash() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
     assertEquals(0, claims.size());
@@ -110,7 +121,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashEnabledFindsHash() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, true, securityTagsDao);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_HASH);
     assertEquals(3, claims.size());
@@ -122,7 +134,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashEnabledFindsOldHash() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, true, securityTagsDao);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, RDATestUtils.MBI_OLD_HASH);
     assertEquals(3, claims.size());
@@ -134,7 +147,8 @@ public class ClaimDaoIT {
    */
   @Test
   public void verifyQueryWithOldHashEnabledAndUnknownHashFindsNothing() {
-    ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, true);
+    ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, true, securityTagsDao);
     testUtils.seedData(true);
     var claims = runMcsMbiHashQuery(claimDao, "not-a-hash");
     assertEquals(0, claims.size());
@@ -225,7 +239,8 @@ public class ClaimDaoIT {
   @ParameterizedTest()
   @MethodSource("getFissServiceDateQueryParameters")
   protected void testFissServiceDateQuery(ServiceDateQueryParam testParam) {
-    final ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    final ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
     testUtils.seedData(false);
     final var claims =
         claimDao.findAllByMbiAttribute(
@@ -311,7 +326,8 @@ public class ClaimDaoIT {
   @ParameterizedTest()
   @MethodSource("getMcsServiceDateQueryParameters")
   protected void testMcsServiceDateQuery(ServiceDateQueryParam testParam) {
-    final ClaimDao claimDao = new ClaimDao(testUtils.getEntityManager(), metricRegistry, false);
+    final ClaimDao claimDao =
+        new ClaimDao(testUtils.getEntityManager(), metricRegistry, false, securityTagsDao);
     testUtils.seedMbiRecord();
     testUtils.seedMcsClaimForServiceIdTest("no-dates", LocalDate.of(2022, 6, 1), null, List.of());
     testUtils.seedMcsClaimForServiceIdTest(
