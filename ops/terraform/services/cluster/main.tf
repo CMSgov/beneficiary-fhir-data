@@ -37,6 +37,11 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_ecs_cluster" "this" {
   name = local.full_name
 
+  # TODO: More fully address security concerns such as this in BFD-3945
+  tags = {
+    GuardDutyManaged = true
+  }
+
   setting {
     name  = "containerInsights"
     value = !local.is_ephemeral_env || var.container_insights_enabled_ephemeral_override ? "enhanced" : "disabled"
