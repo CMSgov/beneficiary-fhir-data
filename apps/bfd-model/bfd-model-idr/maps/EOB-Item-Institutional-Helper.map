@@ -82,7 +82,7 @@ group addAdjudicationNonCoveredAmount(source src: String, target tgt: BackboneEl
 group addAdjudicationEligibleAmount(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication",
         tgtCoding.code="eligible" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
@@ -101,7 +101,7 @@ group addAdjudicationEligibleAmount(source src: String, target tgt: BackboneElem
 group addAdjudicationSubmittedAmount(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication",
         tgtCoding.code="submitted" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
@@ -172,7 +172,7 @@ group addAdjudicationPaidToBene(source src: String, target tgt: BackboneElement)
 group addAdjudicationPaidByMedicare(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication",
         tgtCoding.code="benefit" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
@@ -190,7 +190,7 @@ group addAdjudicationPaidByMedicare(source src: String, target tgt: BackboneElem
 group addAdjudicationBloodDeductible(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication",
         tgtCoding.code="deductible" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
@@ -207,7 +207,7 @@ group addAdjudicationBloodDeductible(source src: String, target tgt: BackboneEle
 group addAdjudicationPartBDeductible(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication",
         tgtCoding.code="deductible" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
@@ -259,7 +259,7 @@ group addAdjudicationMSP1(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
         tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
-        tgtCoding.code="priorpayorpaid" "Set coding";
+        tgtCoding.code="priorpayerpaid" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
@@ -276,7 +276,7 @@ group addAdjudicationMSP2(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
         tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
-        tgtCoding.code="priorpayorpaid" "Set coding";
+        tgtCoding.code="priorpayerpaid" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
@@ -292,7 +292,7 @@ group addAdjudicationMSP2(source src: String, target tgt: BackboneElement){
 group addAdjudicationRateAmt(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+        tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication",
         tgtCoding.code="submitted" "Set coding";
     } "set category for adjudication";
     src -> tgt.category = create('CodeableConcept') as tgtCC then{
