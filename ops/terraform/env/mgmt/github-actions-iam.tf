@@ -76,18 +76,9 @@ resource "aws_iam_policy" "github_actions_ecr" {
             "ecr:PutImage",
             "ecr:UploadLayerPart",
           ]
-          Effect = "Allow"
-          Resource = [
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-db-migrator",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-server",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-pipeline-app",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-server-regression",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-eft-sftp-outbound-transfer-lambda",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-base-jdk",
-            "arn:aws:ecr:us-east-1:${local.account_id}:repository/bfd-mgmt-base-python",
-          ]
-          Sid = "AllowPushPull"
+          Effect   = "Allow"
+          Resource = [for repo in aws_ecr_repository.bfd : repo.arn]
+          Sid      = "AllowPushPull"
         },
         {
           Sid    = "AllowDescribeRegistry",
