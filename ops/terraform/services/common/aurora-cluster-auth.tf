@@ -152,3 +152,13 @@ resource "aws_iam_role_policy_attachment" "db_auth" {
   role       = data.aws_iam_role.db_auth[0].name
   policy_arn = aws_iam_policy.db_auth_ephemeral[0].arn
 }
+
+
+# Role allowing monitoring for RDS Clusters and instances
+resource "aws_iam_role" "db_monitoring" {
+  name               = "bfd-fhirdb-${local.env}-rds-monitoring"
+  path = var.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  assume_role_policy = data.aws_iam_policy_document.rds_monitoring_assume_role_policy.json
+  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
+}
