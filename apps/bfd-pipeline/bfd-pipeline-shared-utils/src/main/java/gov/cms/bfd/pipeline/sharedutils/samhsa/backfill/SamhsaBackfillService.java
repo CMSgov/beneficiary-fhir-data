@@ -47,16 +47,10 @@ public class SamhsaBackfillService {
           CCW_TABLES.SNF_CLAIM_LINES);
 
   /** Contains the list of callables for RDA. Each callable will be a different table. */
-  List<Callable> rdaCallables;
+  List<Callable<Long>> rdaCallables;
 
   /** Contains the list of callables for CCW. Each callable will be a different table. */
-  List<Callable> ccwCallables;
-
-  /** The CCW transaction manager. */
-  TransactionManager transactionManagerCcw;
-
-  /** The RDA transaction manager. */
-  TransactionManager transactionManagerRda;
+  List<Callable<Long>> ccwCallables;
 
   /** This service. Will be a singleton. */
   static SamhsaBackfillService service;
@@ -119,8 +113,9 @@ public class SamhsaBackfillService {
    * @param tm The TransactionManager
    * @return A list of callables
    */
-  private List<Callable> createRdaCallables(List<RDA_TABLES> tables, List<TransactionManager> tm) {
-    List<Callable> callables = new ArrayList<>();
+  private List<Callable<Long>> createRdaCallables(
+      List<RDA_TABLES> tables, List<TransactionManager> tm) {
+    List<Callable<Long>> callables = new ArrayList<>();
     int i = 0;
     for (RDASamhsaBackfill.RDA_TABLES table : tables) {
       callables.add(new RDASamhsaBackfill(tm.get(i), batchSize, logInterval, table));
@@ -136,8 +131,9 @@ public class SamhsaBackfillService {
    * @param tm The TransactionManager.
    * @return A list of callables
    */
-  private List<Callable> createCcwCallables(List<CCW_TABLES> tables, List<TransactionManager> tm) {
-    List<Callable> callables = new ArrayList<>();
+  private List<Callable<Long>> createCcwCallables(
+      List<CCW_TABLES> tables, List<TransactionManager> tm) {
+    List<Callable<Long>> callables = new ArrayList<>();
     int i = 0;
     for (CCW_TABLES table : tables) {
       callables.add(new CCWSamhsaBackfill(tm.get(i), batchSize, logInterval, table));
@@ -186,10 +182,8 @@ public class SamhsaBackfillService {
    * @return the total number of SAMHSA tags created.
    */
   public Long startBackFill(boolean ccw, boolean rda) {
-    Future<Long> totalRda = null;
-    Future<Long> totalCcw = null;
-    Long total = 0L;
-    Integer threadPoolSize = 0;
+    long total = 0L;
+    int threadPoolSize = 0;
     ccw = ccw && ccwCallables != null;
     rda = rda && rdaCallables != null;
     if (ccw) {
@@ -198,30 +192,31 @@ public class SamhsaBackfillService {
     if (rda) {
       threadPoolSize += rdaCallables.size();
     }
-    ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-    List<Future<Long>> totals = new ArrayList<>();
-    if (rda) {
+    try (ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize)) {
+      List<Future<Long>> totals = new ArrayList<>();
+      if (rda) {
 
-      for (Callable callable : rdaCallables) {
-        totals.add(executor.submit(callable));
+        for (Callable<Long> callable : rdaCallables) {
+          totals.add(executor.submit(callable));
+        }
       }
-    }
-    if (ccw) {
-      for (Callable callable : ccwCallables) {
-        totals.add(executor.submit(callable));
+      if (ccw) {
+        for (Callable<Long> callable : ccwCallables) {
+          totals.add(executor.submit(callable));
+        }
       }
+      total =
+          totals.stream()
+              .mapToLong(
+                  f -> {
+                    try {
+                      return f.get();
+                    } catch (InterruptedException | ExecutionException ex) {
+                      throw new RuntimeException(ex);
+                    }
+                  })
+              .sum();
     }
-    total =
-        totals.stream()
-            .mapToLong(
-                f -> {
-                  try {
-                    return f.get();
-                  } catch (InterruptedException | ExecutionException ex) {
-                    throw new RuntimeException(ex);
-                  }
-                })
-            .sum();
     return total;
   }
 }

@@ -54,11 +54,54 @@ import org.apache.logging.log4j.util.Strings;
  * the claim as SAMHSA.
  */
 public class SamhsaUtil {
-  /**
-   * Will contain the list of the methods for each entity to retrieve the fields with possible
-   * SAMHSA codes.
-   */
-  public static final String CLAIM_SAMHSA_METHODS_YAML = "claim_samhsa_methods.yaml";
+
+  /** fiss_claims constant. */
+  public static final String FISS_CLAIMS = "fiss_claims";
+
+  /** admit_diag_code constant. */
+  public static final String ADMIT_DIAG_CODE = "admit_diag_code";
+
+  /** fiss_revenue_lines constant. */
+  public static final String FISS_REVENUE_LINES = "fiss_revenue_lines";
+
+  /** apc_hcpcs_apc constant. */
+  public static final String APC_HCPCS_APC = "apc_hcpcs_apc";
+
+  /** hcpcs_cd constant. */
+  public static final String HCPCS_CD = "hcpcs_cd";
+
+  /** drg_cd constant. */
+  public static final String DRG_CD = "drg_cd";
+
+  /** principle_diag constant. */
+  public static final String PRINCIPLE_DIAG = "principle_diag";
+
+  /** fiss_diagnosis_codes constant. */
+  public static final String FISS_DIAGNOSIS_CODES = "fiss_diagnosis_codes";
+
+  /** diag_cd2 constant. */
+  public static final String DIAG_CD_2 = "diag_cd2";
+
+  /** fiss_proc_codes constant. */
+  public static final String FISS_PROC_CODES = "fiss_proc_codes";
+
+  /** proc_code constant. */
+  public static final String PROC_CODE = "proc_code";
+
+  /** mcs_diagnosis_codes constant. */
+  public static final String MCS_DIAGNOSIS_CODES = "mcs_diagnosis_codes";
+
+  /** idr_diag_code constant. */
+  public static final String IDR_DIAG_CODE = "idr_diag_code";
+
+  /** mcs_details constant. */
+  public static final String MCS_DETAILS = "mcs_details";
+
+  /** idr_dtl_primary_diag_code constant. */
+  public static final String IDR_DTL_PRIMARY_DIAG_CODE = "idr_dtl_primary_diag_code";
+
+  /** idr_proc_code constant. */
+  public static final String IDR_PROC_CODE = "idr_proc_code";
 
   /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
   private static Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
@@ -130,8 +173,7 @@ public class SamhsaUtil {
     String queryStr = strSub.replace(tableEntry.getDatesQuery());
     Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("claimId", claimId);
-    Object[] dates = (Object[]) query.getSingleResult();
-    return dates;
+    return (Object[]) query.getSingleResult();
   }
 
   /**
@@ -151,7 +193,7 @@ public class SamhsaUtil {
       TableEntry tableEntry,
       Object claimId,
       Optional<Object[]> dates,
-      HashMap<String, Object[]> datesMap,
+      Map<String, Object[]> datesMap,
       EntityManager entityManager) {
     for (String code : codes) {
       // Found a samhsa code
@@ -198,18 +240,17 @@ public class SamhsaUtil {
    *
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
-   * @return true if a claim was persisted.
    * @param <TClaim> Generic type of the claim.
    */
-  public <TClaim> boolean processRdaClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> void processRdaClaim(TClaim claim, EntityManager entityManager) {
     switch (claim) {
       case RdaFissClaim fissClaim -> {
         Optional<List<FissTag>> tags = Optional.of(checkAndProcessFissClaim(fissClaim));
-        return persistTags(tags, entityManager);
+        persistTags(tags, entityManager);
       }
       case RdaMcsClaim mcsClaim -> {
         Optional<List<McsTag>> tags = Optional.of(checkAndProcessMcsClaim(mcsClaim));
-        return persistTags(tags, entityManager);
+        persistTags(tags, entityManager);
       }
       default -> throw new RuntimeException("Unknown claim type.");
     }
@@ -241,9 +282,8 @@ public class SamhsaUtil {
    * @param claim The claim to process.
    * @param entityManager the EntityManager used to persist the tag.
    * @param <TClaim> Generic type of the claim.
-   * @return true if a tag was persisted.
    */
-  public <TClaim> boolean processCcwClaim(TClaim claim, EntityManager entityManager) {
+  public <TClaim> void processCcwClaim(TClaim claim, EntityManager entityManager) {
     try {
       SamhsaAdapterBase adapter =
           switch (claim) {
@@ -256,7 +296,7 @@ public class SamhsaUtil {
             case SNFClaim snfClaim -> new SamhsaSnfAdapter(snfClaim);
             default -> throw new RuntimeException("Error: unknown claim type.");
           };
-      return adapter.checkAndProcessClaim(entityManager);
+      adapter.checkAndProcessClaim(entityManager);
     } catch (Exception e) {
       throw new RuntimeException("There was an error creating SAMHSA tags.", e);
     }
@@ -333,8 +373,8 @@ public class SamhsaUtil {
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
           getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
-          "mcs_diagnosis_codes",
-          "idr_diag_code",
+          MCS_DIAGNOSIS_CODES,
+          IDR_DIAG_CODE,
           (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
@@ -343,8 +383,8 @@ public class SamhsaUtil {
     for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       buildDetails(
           getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
-          "mcs_details",
-          "idr_dtl_primary_diag_code",
+          MCS_DETAILS,
+          IDR_DTL_PRIMARY_DIAG_CODE,
           (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
@@ -352,8 +392,8 @@ public class SamhsaUtil {
 
       buildDetails(
           getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
-          "mcs_details",
-          "idr_proc_code",
+          MCS_DETAILS,
+          IDR_PROC_CODE,
           (int) detail.getIdrDtlNumber(),
           entries,
           serviceDate,
@@ -440,8 +480,8 @@ public class SamhsaUtil {
 
     buildDetails(
         getSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
-        "fiss_claims",
-        "admit_diag_code",
+        FISS_CLAIMS,
+        ADMIT_DIAG_CODE,
         null,
         entries,
         serviceDate,
@@ -451,16 +491,16 @@ public class SamhsaUtil {
           // Ideally, this column should never contain SAMHSA data, but it is
           // possible that SAMHSA data could end up here due to user error.
           getSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
-          "fiss_revenue_lines",
-          "apc_hcpcs_apc",
+          FISS_REVENUE_LINES,
+          APC_HCPCS_APC,
           (int) revenueLine.getRdaPosition(),
           entries,
           serviceDate,
           throughDate);
       buildDetails(
           getSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
-          "fiss_revenue_lines",
-          "hcpcs_cd",
+          FISS_REVENUE_LINES,
+          HCPCS_CD,
           (int) revenueLine.getRdaPosition(),
           entries,
           serviceDate,
@@ -468,16 +508,16 @@ public class SamhsaUtil {
     }
     buildDetails(
         getSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
-        "fiss_claims",
-        "drg_cd",
+        FISS_CLAIMS,
+        DRG_CD,
         null,
         entries,
         serviceDate,
         throughDate);
     buildDetails(
         getSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
-        "fiss_claims",
-        "principle_diag",
+        FISS_CLAIMS,
+        PRINCIPLE_DIAG,
         null,
         entries,
         serviceDate,
@@ -485,8 +525,8 @@ public class SamhsaUtil {
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
           getSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
-          "fiss_diagnosis_codes",
-          "diag_cd2",
+          FISS_DIAGNOSIS_CODES,
+          DIAG_CD_2,
           (int) diagCode.getRdaPosition(),
           entries,
           serviceDate,
@@ -495,8 +535,8 @@ public class SamhsaUtil {
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
       buildDetails(
           getSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
-          "fiss_proc_codes",
-          "proc_code",
+          FISS_PROC_CODES,
+          PROC_CODE,
           (int) procCode.getRdaPosition(),
           entries,
           serviceDate,
@@ -512,7 +552,7 @@ public class SamhsaUtil {
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
   public static Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
-    if (!code.isPresent()) {
+    if (code.isEmpty()) {
       return Optional.empty();
     }
     if (samhsaMap.isEmpty()) {
