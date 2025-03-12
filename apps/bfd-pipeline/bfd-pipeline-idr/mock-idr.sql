@@ -41,6 +41,26 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
+    bene_sk BIGINT NOT NULL,
+    cntrct_pbp_sk BIGINT NOT NULL,
+    bene_cntrct_num VARCHAR(5),
+    bene_pbp_num VARCHAR(3),
+    bene_elctn_enrlmt_disenrlmt_cd VARCHAR(1),
+    bene_elctn_aplctn_dt DATE,
+    bene_enrlmt_efctv_dt DATE,
+    idr_trans_efctv_ts TIMESTAMPTZ,
+    idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
+    cntrct_pbp_sk BIGINT NOT NULL,
+    cntrct_drug_plan_ind_cd VARCHAR(1),
+    cntrct_pbp_type_cd VARCHAR(2),
+    cntrct_pbp_sk_obslt_dt DATE
+);
+
 INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene(
     bene_sk, 
     bene_xref_efctv_sk, 
@@ -115,7 +135,7 @@ VALUES(
     '',-- bene_line_6_adr,
     'ENG',-- cntct_lang_cd,
     NOW(),-- idr_trans_efctv_ts,
-    '2099-12-31',-- idr_trans_obslt_ts
+    '9999-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
 );
 
@@ -134,6 +154,45 @@ VALUES(
     '1S000000000',-- bene_mbi_id,
     '000000000',-- bene_ssn_num,
     NOW(),-- idr_trans_efctv_ts,
-    '2099-12-31',-- idr_trans_obslt_ts
+    '9999-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
+);
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
+    bene_sk,
+    cntrct_pbp_sk,
+    bene_cntrct_num,
+    bene_pbp_num,
+    bene_elctn_enrlmt_disenrlmt_cd,
+    bene_elctn_aplctn_dt,
+    bene_enrlmt_efctv_dt,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    1, -- bene_sk,
+    1, -- cntrct_pbp_sk,
+    'S0001', -- bene_cntrct_num,
+    '001', -- bene_pbp_num,
+    'E', -- bene_elctn_enrlmt_disenrlmt_cd,
+    NOW(),--bene_elctn_aplctn_dt DATE,
+    NOW(),--bene_enrlmt_efctv_dt DATE,
+    NOW(),-- idr_trans_efctv_ts
+    '9999-12-31', --idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
+(
+    cntrct_pbp_sk,
+    cntrct_drug_plan_ind_cd,
+    cntrct_pbp_type_cd,
+    cntrct_pbp_sk_obslt_dt
+)
+VALUES (
+    1, -- cntrct_pbp_sk,
+    '1', -- cntrct_drug_plan_ind_cd,
+    '01', --cntrct_pbp_type_cd,
+    '9999-12-31' --cntrct_pbp_sk_obslt_dt DATE
 );

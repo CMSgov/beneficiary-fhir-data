@@ -1,7 +1,12 @@
 import logging
 from loader import PostgresLoader
-from model import IdrBeneficiary, IdrBeneficiaryHistory, LoadProgress
-from extractor import Extractor, PostgresExtractor, fetch_bene_data
+from model import (
+    IdrBeneficiary,
+    IdrBeneficiaryHistory,
+    IdrContractPbpNumber,
+    IdrElectionPeriodUsage,
+)
+from extractor import Extractor, PostgresExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +24,8 @@ def main():
 
     run_pipeline(
         PostgresExtractor(
-            "host=localhost dbname=idr user=bfd password=InsecureLocalDev", 100_000
+            connection_string="host=localhost dbname=idr user=bfd password=InsecureLocalDev",
+            batch_size=100_000,
         ),
         "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev",
     )
@@ -29,25 +35,22 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     logger.info("load start")
 
     history_fetch_query = """
-    SELECT
-        {COLUMNS}
-    FROM
-        cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+    SELECT {COLUMNS}
+    FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
     {WHERE_CLAUSE}
     ORDER BY idr_trans_efctv_ts, bene_sk
     """
-    history_iter = fetch_bene_data(
-        extractor,
+    history_iter = extractor.extract_idr_data(
         IdrBeneficiaryHistory,
-        connection_string,
-        "idr.beneficiary_history",
-        history_fetch_query,
+        connection_string=connection_string,
+        fetch_query=history_fetch_query,
+        progress_col="bene_sk",
+        table="idr.beneficiary_history",
     )
 
     history_loader = PostgresLoader(
         connection_string=connection_string,
         table="idr.beneficiary_history",
-        temp_table="beneficiary_history_temp",
         unique_key=["bene_sk", "idr_trans_efctv_ts"],
         sort_key="bene_sk",
         exclude_keys=["bene_xref_efctv_sk_computed"],
@@ -55,31 +58,70 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     history_loader.load(history_iter, IdrBeneficiaryHistory)
 
     bene_fetch_query = """
-    SELECT
-        {COLUMNS}
-    FROM
-        cms_vdm_view_mdcr_prd.v2_mdcr_bene
+    SELECT {COLUMNS}
+    FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene
     {WHERE_CLAUSE}
     ORDER BY idr_trans_efctv_ts, bene_sk
     """
-    bene_iter = fetch_bene_data(
-        extractor,
+    bene_iter = extractor.extract_idr_data(
         IdrBeneficiary,
-        connection_string,
-        "idr.beneficiary",
-        bene_fetch_query,
+        connection_string=connection_string,
+        fetch_query=bene_fetch_query,
+        progress_col="bene_sk",
+        table="idr.beneficiary",
     )
 
     bene_loader = PostgresLoader(
         connection_string=connection_string,
         table="idr.beneficiary",
-        temp_table="beneficiary_temp",
         unique_key=["bene_sk"],
         sort_key="bene_sk",
         exclude_keys=["bene_xref_efctv_sk_computed"],
     )
     bene_loader.load(bene_iter, IdrBeneficiary)
     bene_loader.refresh_materialized_view("idr.overshare_mbis")
+
+    # number of records in this table is relatively small (~300,000) and we don't have created/updated timestamps
+    # so we can just sync all of the non-obsolete records each time
+    pbp_fetch_query = extractor.get_query(
+        IdrContractPbpNumber,
+        """
+        SELECT {COLUMNS}
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
+        WHERE cntrct_pbp_sk_obslt_dt >= '9999-12-31'
+        """,
+    )
+    pbp_iter = extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
+    pbp_loader = PostgresLoader(
+        connection_string=connection_string,
+        table="idr.contract_pbp_number",
+        unique_key=["cntrct_pbp_sk"],
+        sort_key="cntrct_pbp_sk",
+        exclude_keys=[],
+    )
+    pbp_loader.load(pbp_iter, IdrContractPbpNumber)
+
+    bene_fetch_query = """
+    SELECT {COLUMNS}
+    FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
+    {WHERE_CLAUSE}
+    ORDER BY idr_trans_efctv_ts, bene_sk
+    """
+    contract_iter = extractor.extract_idr_data(
+        IdrElectionPeriodUsage,
+        connection_string=connection_string,
+        fetch_query=bene_fetch_query,
+        progress_col="bene_sk",
+        table="idr.beneficiary_election_period_usage",
+    )
+    contract_loader = PostgresLoader(
+        connection_string=connection_string,
+        table="idr.beneficiary_election_period_usage",
+        unique_key=["bene_sk", "cntrct_pbp_sk", "bene_enrlmt_efctv_dt"],
+        sort_key="bene_sk",
+        exclude_keys=[],
+    )
+    contract_loader.load(contract_iter, IdrElectionPeriodUsage)
 
     logger.info("done")
 

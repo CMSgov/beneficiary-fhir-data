@@ -11,20 +11,18 @@ class PostgresLoader:
         self,
         connection_string: str,
         table: str,
-        temp_table: str,
         unique_key: list[str],
         sort_key: str,
         exclude_keys: list[str],
     ):
         self.conn = psycopg.connect(connection_string)
         self.table = table
-        self.temp_table = temp_table
         self.unique_key = unique_key
         self.sort_key = sort_key
         self.exclude_keys = exclude_keys
 
     def refresh_materialized_view(self, view_name: str):
-        self.conn.execute(f"REFRESH MATERIALIZED VIEW {view_name}")
+        self.conn.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view_name}")
         self.conn.commit()
 
     def load(self, fetch_results: Iterator[list[T]], model: type[T]):
@@ -36,6 +34,8 @@ class PostgresLoader:
             [f"{v}=EXCLUDED.{v}" for v in insert_cols if not v in self.unique_key]
         )
         timestamp = datetime.now(timezone.utc)
+        # trim the schema from the table name to create the temp table (temp tables can't be created with an explicit schema set)
+        temp_table = self.table.split(".")[1] + "_temp"
         with self.conn.cursor() as cur:
             # load each batch in a separate transaction
             for results in fetch_results:
@@ -46,7 +46,7 @@ class PostgresLoader:
                 #
                 # For simplicity's sake, we'll create our temp tables using the existing schema and just drop the columns we need to ignore
                 cur.execute(
-                    f"CREATE TEMPORARY TABLE {self.temp_table} (LIKE {self.table}) ON COMMIT DROP"
+                    f"CREATE TEMPORARY TABLE {temp_table} (LIKE {self.table}) ON COMMIT DROP"
                 )
                 # Created/updated columns don't need to be loaded from the source.
                 exclude_cols = self.exclude_keys + [
@@ -54,7 +54,7 @@ class PostgresLoader:
                     "bfd_updated_ts",
                 ]
                 for col in exclude_cols:
-                    cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")
+                    cur.execute(f"ALTER TABLE {temp_table} DROP COLUMN {col}")
 
                 # Use COPY to load the batch into Postgres.
                 # COPY has a number of optimizations that make bulk loading more efficient than a bunch of INSERTs.
@@ -63,9 +63,7 @@ class PostgresLoader:
 
                 # Even though we need to move the data from the temp table in the next step, it should still be
                 # faster than alternatives.
-                with cur.copy(
-                    f"COPY {self.temp_table} ({cols_str}) FROM STDIN"
-                ) as copy:
+                with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:
                     for row in results:
                         model_dump = row.model_dump()
                         copy.write_row([model_dump[k] for k in insert_cols])
@@ -74,7 +72,7 @@ class PostgresLoader:
                     cur.execute(
                         f"""
                         INSERT INTO {self.table}({cols_str}, bfd_created_ts, bfd_updated_ts)
-                        SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {self.temp_table}
+                        SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {temp_table}
                         ON CONFLICT ({",".join(self.unique_key)}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
                         """,
                         {"timestamp": timestamp},
@@ -82,17 +80,20 @@ class PostgresLoader:
 
                     last = results[len(results) - 1].model_dump()
                     last_id = last[self.sort_key]
-                    last_timestamp = last["idr_trans_efctv_ts"]
-                    cur.execute(
-                        f"""
-                        INSERT INTO idr.load_progress(table_name, last_id, last_timestamp)
-                        VALUES(%(table)s, %(last_id)s, %(last_timestamp)s)
-                        ON CONFLICT (table_name) DO UPDATE SET last_id = EXCLUDED.last_id, last_timestamp = EXCLUDED.last_timestamp
-                        """,
-                        {
-                            "table": self.table,
-                            "last_id": last_id,
-                            "last_timestamp": last_timestamp,
-                        },
-                    )
+                    # Some tables that contain reference data (like contract info) may not have the normal IDR timestamps
+                    # For now we won't support incremental refreshes for those tables
+                    if "idr_trans_efctv_ts" in last:
+                        last_timestamp = last["idr_trans_efctv_ts"]
+                        cur.execute(
+                            f"""
+                            INSERT INTO idr.load_progress(table_name, last_id, last_timestamp)
+                            VALUES(%(table)s, %(last_id)s, %(last_timestamp)s)
+                            ON CONFLICT (table_name) DO UPDATE SET last_id = EXCLUDED.last_id, last_timestamp = EXCLUDED.last_timestamp
+                            """,
+                            {
+                                "table": self.table,
+                                "last_id": last_id,
+                                "last_timestamp": last_timestamp,
+                            },
+                        )
                 self.conn.commit()

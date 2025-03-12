@@ -36,6 +36,24 @@ class IdrBeneficiaryHistory(BaseModel):
     idr_trans_obslt_ts: datetime
 
 
+class IdrElectionPeriodUsage(BaseModel):
+    bene_sk: int
+    cntrct_pbp_sk: int
+    bene_cntrct_num: str
+    bene_pbp_num: str
+    bene_elctn_enrlmt_disenrlmt_cd: str
+    bene_elctn_aplctn_dt: date
+    bene_enrlmt_efctv_dt: date
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+
+
+class IdrContractPbpNumber(BaseModel):
+    cntrct_pbp_sk: int
+    cntrct_drug_plan_ind_cd: str
+    cntrct_pbp_type_cd: str
+
+
 class LoadProgress(BaseModel):
     table_name: str
     last_id: str
