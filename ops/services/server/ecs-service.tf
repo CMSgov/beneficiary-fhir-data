@@ -187,6 +187,31 @@ resource "aws_vpc_security_group_egress_rule" "server_allow_all_traffic_ipv4" {
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
+data "aws_security_groups" "aurora_cluster" {
+  filter {
+    name = "tag:Name"
+    values = toset([
+      local.db_cluster_identifier,
+      "bfd-${local.seed_env}-aurora-cluster"
+    ])
+  }
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
+  for_each = toset(data.aws_security_groups.aurora_cluster.ids)
+
+  security_group_id            = each.value
+  referenced_security_group_id = aws_security_group.server.id
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "TCP"
+  description                  = "Grants ${local.env} ${local.service} ECS service containers access to the ${local.env} database"
+}
+
 resource "aws_ecs_service" "server" {
   depends_on = [aws_s3_object.keystore, aws_s3_object.truststore]
 
