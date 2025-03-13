@@ -83,7 +83,7 @@ public class R4EobSamhsaMatcherTest {
   @MethodSource
   public void abstractR4SamhsaMatcherTest(
       String name, List<String> systems, boolean expectedResult, String errorMessage) {
-    R4EobSamhsaMatcher matcher = new R4EobSamhsaMatcher();
+    R4EobSamhsaMatcher matcher = new R4EobSamhsaMatcher(false);
 
     CodeableConcept mockConcept = mock(CodeableConcept.class);
 

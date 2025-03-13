@@ -5,7 +5,9 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
@@ -34,6 +37,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -82,9 +88,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * Instantiates a new Mcs claim response transformer v2. @param metricRegistry the metric registry
    *
    * @param metricRegistry the metric registry
+   * @param securityTagManager the security tag manager
    */
-  public McsClaimResponseTransformerV2(MetricRegistry metricRegistry) {
+  public McsClaimResponseTransformerV2(
+      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
     this.metricRegistry = metricRegistry;
+    this.securityTagManager = securityTagManager;
   }
 
   /**
@@ -101,7 +110,10 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaMcsClaim) claimEntity);
+      RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claimEntity;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(rdaMcsClaim.getIdrClmHdIcn(), McsTag.class);
+      return transformClaim(rdaMcsClaim, securityTags);
     }
   }
 
@@ -109,9 +121,10 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * Transforms a {@link RdaMcsClaim} into a FHIR {@link Claim}.
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link RdaMcsClaim}
    */
-  private ClaimResponse transformClaim(RdaMcsClaim claimGroup) {
+  private ClaimResponse transformClaim(RdaMcsClaim claimGroup, List<Coding> securityTags) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -128,7 +141,9 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
+    Meta meta =
+        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    claim.setMeta(meta);
     claim.setCreated(new Date());
 
     return claim;

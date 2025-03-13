@@ -1,13 +1,17 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
@@ -44,6 +48,9 @@ import org.springframework.stereotype.Component;
 public class McsClaimTransformerV2 extends AbstractTransformerV2
     implements ResourceTransformer<Claim> {
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
@@ -72,9 +79,12 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
-  public McsClaimTransformerV2(MetricRegistry metricRegistry) {
+  public McsClaimTransformerV2(
+      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
     this.metricRegistry = metricRegistry;
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -92,7 +102,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((RdaMcsClaim) claimEntity, includeTaxNumbers);
+      RdaMcsClaim claim = (RdaMcsClaim) claimEntity;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(claim.getIdrClmHdIcn(), McsTag.class);
+      return transformClaim(claim, includeTaxNumbers, securityTags);
     }
   }
 
@@ -101,9 +114,11 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param claimGroup the {@link RdaMcsClaim} to transform
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
+   * @param securityTags securityTags tag of a claim
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaMcsClaim}
    */
-  private Claim transformClaim(RdaMcsClaim claimGroup, boolean includeTaxNumbers) {
+  private Claim transformClaim(
+      RdaMcsClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -129,8 +144,10 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     claim.setItem(getItems(claimGroup));
 
     claim.setCreated(new Date());
-    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
 
+    Meta meta =
+        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    claim.setMeta(meta);
     return claim;
   }
 
