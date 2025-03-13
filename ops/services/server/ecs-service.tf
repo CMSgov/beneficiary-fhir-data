@@ -72,7 +72,7 @@ resource "aws_ecs_task_definition" "server" {
           logDriver = "awslogs"
           options = {
             awslogs-group         = aws_cloudwatch_log_group.server_service.name
-            awslogs-stream-prefix = "/"
+            awslogs-stream-prefix = "stdout"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
             mode                  = "non-blocking"
@@ -139,7 +139,7 @@ resource "aws_ecs_task_definition" "server" {
           logDriver = "awslogs"
           options = {
             awslogs-group         = aws_cloudwatch_log_group.server_service.name
-            awslogs-stream-prefix = "/"
+            awslogs-stream-prefix = "stdout"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
             mode                  = "non-blocking"
