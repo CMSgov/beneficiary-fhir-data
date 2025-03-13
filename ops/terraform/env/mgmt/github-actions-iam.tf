@@ -512,10 +512,10 @@ resource "aws_iam_openid_connect_provider" "github_actions" {
   url             = "https://token.actions.githubusercontent.com"
 }
 
+# TO add permission boundary in BFD-3953
 resource "aws_iam_role" "github_actions" {
   name        = "bfd-${local.env}-github-actions"
   path        = local.cloudtamer_iam_path
-#  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn # Commented out until an official migration due to incompatabilities
   description = "OIDC Assumable GitHub Actions Role"
 
   managed_policy_arns = [

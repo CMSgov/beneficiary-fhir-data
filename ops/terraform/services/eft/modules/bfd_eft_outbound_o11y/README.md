@@ -45,7 +45,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | The current environment's default KMS key ARN | `string` | n/a | yes |
 | <a name="input_outbound_bfd_sns_topic_arn"></a> [outbound\_bfd\_sns\_topic\_arn](#input\_outbound\_bfd\_sns\_topic\_arn) | The ARN of the catch-all/BFD BFD EFT Outbound SNS Topic | `string` | n/a | yes |
 | <a name="input_outbound_bfd_sns_topic_name"></a> [outbound\_bfd\_sns\_topic\_name](#input\_outbound\_bfd\_sns\_topic\_name) | The name of the catch-all/BFD BFD EFT Outbound SNS Topic | `string` | n/a | yes |

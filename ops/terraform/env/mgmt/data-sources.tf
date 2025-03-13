@@ -70,5 +70,5 @@ data "aws_ec2_managed_prefix_list" "vpn" {
 }
 
 data "aws_iam_policy" "permissions_boundary" {
-    name = "ct-ado-poweruser-permissions-boundary-policy"
+  name = "ct-ado-poweruser-permissions-boundary-policy"
 }

@@ -10,7 +10,7 @@ locals {
   project              = "bfd"
   region               = "us-east-1"
   account_id           = data.aws_caller_identity.current.account_id
-  cloudtamer_iam_path = "/delegatedadmin/developer/"
+  cloudtamer_iam_path  = "/delegatedadmin/developer/"
   tags = {
     business    = "OEDA",
     application = "bfd-insights",

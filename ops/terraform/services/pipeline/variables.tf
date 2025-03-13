@@ -64,4 +64,3 @@ variable "db_environment_override" {
   sensitive   = false
   type        = string
 }
-

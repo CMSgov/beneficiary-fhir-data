@@ -3,4 +3,3 @@ variable "docker_image_tag_override" {
   type        = string
   default     = null
 }
-

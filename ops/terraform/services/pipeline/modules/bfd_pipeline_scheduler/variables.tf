@@ -22,5 +22,3 @@ variable "ccw_pipeline_asg_details" {
   description = "Details about the BFD CCW Pipeline ASG"
   type        = object({ arn = string, name = string })
 }
-
-

@@ -79,9 +79,9 @@ data "aws_iam_policy_document" "rds_monitoring_assume_role_policy" {
       identifiers = ["monitoring.rds.amazonaws.com"]
     }
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "aws:SourceAccount"
-      values = [local.account_id]
+      values   = [local.account_id]
     }
   }
 }

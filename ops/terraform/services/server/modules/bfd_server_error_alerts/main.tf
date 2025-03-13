@@ -1,11 +1,11 @@
 locals {
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-  env        = terraform.workspace
-  service    = "server"
-  app        = "bfd-${local.service}"
-  namespace  = "bfd-${local.env}/${local.app}"
-  kms_key_id = data.aws_kms_key.cmk.arn
+  account_id          = data.aws_caller_identity.current.account_id
+  region              = data.aws_region.current.name
+  env                 = terraform.workspace
+  service             = "server"
+  app                 = "bfd-${local.service}"
+  namespace           = "bfd-${local.env}/${local.app}"
+  kms_key_id          = data.aws_kms_key.cmk.arn
   cloudtamer_iam_path = "/delegatedadmin/developer/"
   nonsensitive_common_map = zipmap(
     data.aws_ssm_parameters_by_path.nonsensitive_common.names,

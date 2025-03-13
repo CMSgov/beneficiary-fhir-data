@@ -22,4 +22,3 @@ variable "disable_rds_scheduling_override" {
   EOF
   type        = bool
 }
-

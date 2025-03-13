@@ -27,4 +27,3 @@ variable "etl_bucket_id" {
   type        = string
   description = "Bucket ID of the Pipeline ETL S3 Bucket"
 }
-

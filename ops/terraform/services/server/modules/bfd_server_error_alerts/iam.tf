@@ -82,10 +82,10 @@ resource "aws_iam_policy" "invoke_alerter" {
 }
 
 resource "aws_iam_role" "alerter_lambda_role" {
-  name        = local.alerter_lambda_name
-  path        = local.cloudtamer_iam_path
+  name                 = local.alerter_lambda_name
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  description = "Role for ${local.alerter_lambda_name} Lambda"
+  description          = "Role for ${local.alerter_lambda_name} Lambda"
 
   assume_role_policy = jsonencode(
     {
@@ -106,8 +106,8 @@ resource "aws_iam_role" "alerter_lambda_role" {
 }
 
 resource "aws_iam_role" "scheduler_assume_role" {
-  name = "${local.name_prefix}-scheduler-assume"
-  path = local.cloudtamer_iam_path
+  name                 = "${local.name_prefix}-scheduler-assume"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = join("", [
     "Role for EventBridge Scheduler to assume allowing permissions to invoke the ",

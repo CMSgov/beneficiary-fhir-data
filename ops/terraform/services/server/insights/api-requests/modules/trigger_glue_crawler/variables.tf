@@ -32,4 +32,3 @@ variable "glue_crawler_arn" {
   description = "The ARN of the BFD Server API requests Glue Crawler"
   type        = string
 }
-

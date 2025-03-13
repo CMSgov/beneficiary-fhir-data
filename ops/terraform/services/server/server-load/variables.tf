@@ -123,5 +123,3 @@ variable "locust_master_port" {
   description = "The port to connect to that is used by the locust master for distributed load testing."
   type        = number
 }
-
-

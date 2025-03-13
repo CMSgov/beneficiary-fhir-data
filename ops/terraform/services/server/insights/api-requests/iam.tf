@@ -11,10 +11,10 @@ data "aws_iam_group" "iam-group-bfd-analysts" {
 
 # CloudWatch Role
 resource "aws_iam_role" "iam-role-cloudwatch-logs" {
-  name        = "${local.full_name}-cloudwatch-logs-role"
-  path = local.cloudtamer_iam_path
+  name                 = "${local.full_name}-cloudwatch-logs-role"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  description = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
+  description          = "Allows access to the BFD Insights Firehose Delivery Stream and Export to S3"
   assume_role_policy = jsonencode(
     {
       Statement = [
@@ -50,7 +50,7 @@ resource "aws_iam_role" "iam-role-cloudwatch-logs" {
 resource "aws_iam_policy" "iam-policy-firehose" {
   description = "Allow firehose delivery to insights S3 bucket"
   name        = "${local.full_name}-firehose-to-s3-policy"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Statement = [
@@ -119,7 +119,7 @@ resource "aws_iam_role" "iam-role-firehose" {
   name                  = "${local.full_name}-firehose-role"
   description           = ""
   path                  = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
   force_detach_policies = false
   managed_policy_arns = [
     aws_iam_policy.iam-policy-firehose.arn,
@@ -166,7 +166,7 @@ resource "aws_iam_role" "iam-role-firehose-lambda" {
   name                  = "${local.full_name}-firehose-lambda-role"
   description           = "Allow Lambda to create and write to its log group"
   path                  = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
   max_session_duration  = 3600
   force_detach_policies = false
   assume_role_policy = jsonencode(

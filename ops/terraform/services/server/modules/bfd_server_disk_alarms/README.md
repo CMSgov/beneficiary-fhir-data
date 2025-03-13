@@ -44,7 +44,6 @@ No modules.
 | <a name="input_alarm_action_sns_override"></a> [alarm\_action\_sns\_override](#input\_alarm\_action\_sns\_override) | Overrides the SNS topic that the alarms created by this module's Lambda will post to when transitioning to the ALARM state | `string` | `null` | no |
 | <a name="input_alarm_ok_sns_override"></a> [alarm\_ok\_sns\_override](#input\_alarm\_ok\_sns\_override) | Overrides the SNS topic that the alarms created by this module's Lambda will post to when transitioning to the OK state | `string` | `null` | no |
 | <a name="input_asg_names"></a> [asg\_names](#input\_asg\_names) | Names of the ASG to attach notifications to | `list(string)` | `null` | no |
-| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 
 ## Outputs
 

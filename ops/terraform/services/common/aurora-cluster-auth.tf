@@ -102,7 +102,7 @@ resource "aws_iam_group" "db_users" {
 # group policy
 resource "aws_iam_policy" "db_users" {
   count       = local.is_ephemeral_env ? 0 : 1
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   name        = "bfd-fhirdb-${local.env}-users-gp"
   description = "Group policy for bfd-fhirdb-${local.env}-users"
   policy      = data.aws_iam_policy_document.db_users_group_policy_combined[0].json
@@ -117,12 +117,13 @@ resource "aws_iam_group_policy_attachment" "db_users" {
 
 # The fhirdb auth role users will assume when connecting to this environments clusters (includes ephemeral seeds).
 # Note: the role session name must be set to the callers IAM username (case sensitive) when assuming this role.
+# KION Migration : must adjust path and ensure we can assume this role BFD-3954
 resource "aws_iam_role" "db_auth" {
-  count              = local.is_ephemeral_env ? 0 : 1
-  name               = "bfd-fhirdb-${local.env}-auth"
-  path = local.cloudtamer_iam_path
+  count                = local.is_ephemeral_env ? 0 : 1
+  name                 = "bfd-fhirdb-${local.env}-auth"
+  path                 = "/"
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  assume_role_policy = data.aws_iam_policy_document.db_auth_role_trust_policy[0].json
+  assume_role_policy   = data.aws_iam_policy_document.db_auth_role_trust_policy[0].json
 }
 
 # Policy allowing the rds-db:connect action, as well as allowing assumed role users to describe clusters and endpoints.
@@ -137,7 +138,7 @@ resource "aws_iam_role_policy" "db_auth" {
 resource "aws_iam_policy" "db_auth_ephemeral" {
   count       = local.is_ephemeral_env ? 1 : 0
   name        = "bfd-fhirdb-${local.env}-auth"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Role policy allowing db connect action for ${local.env} ephemeral cluster"
   policy      = data.aws_iam_policy_document.db_rds_connect.json
 }
@@ -156,9 +157,9 @@ resource "aws_iam_role_policy_attachment" "db_auth" {
 
 # Role allowing monitoring for RDS Clusters and instances
 resource "aws_iam_role" "db_monitoring" {
-  name               = "bfd-fhirdb-${local.env}-rds-monitoring"
-  path = local.cloudtamer_iam_path
+  name                 = "bfd-fhirdb-${local.env}-rds-monitoring"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  assume_role_policy = data.aws_iam_policy_document.rds_monitoring_assume_role_policy.json
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
+  assume_role_policy   = data.aws_iam_policy_document.rds_monitoring_assume_role_policy.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
 }

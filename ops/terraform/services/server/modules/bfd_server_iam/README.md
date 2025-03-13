@@ -50,7 +50,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 | <a name="input_kms_config_key_alias"></a> [kms\_config\_key\_alias](#input\_kms\_config\_key\_alias) | Key alias of environment's configuration KMS key | `string` | n/a | yes |
 | <a name="input_kms_key_alias"></a> [kms\_key\_alias](#input\_kms\_key\_alias) | Key alias of environment's KMS key | `string` | n/a | yes |
 | <a name="input_legacy_service"></a> [legacy\_service](#input\_legacy\_service) | Legacy service name for BFD FHIR API server | `string` | `"fhir"` | no |

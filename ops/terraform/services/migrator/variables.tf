@@ -9,4 +9,3 @@ variable "create_migrator_instance" {
   description = "When true, create the migrator instance, security group, and RDS security group rules"
   type        = bool
 }
-

@@ -11,7 +11,7 @@ data "aws_iam_policy" "cloudwatch_agent_xray_policy" {
 
 resource "aws_iam_policy" "sqs" {
   name        = "bfd-${local.env}-${local.service}-sqs"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions to specific SQS queue for ${local.service} in ${local.env}"
   policy      = <<-EOF
   {
@@ -43,7 +43,7 @@ resource "aws_iam_policy" "sqs" {
 
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service}, /bfd/mgmt/common/sensitive/user SSM hierarchies"
   policy = jsonencode(
     {
@@ -77,10 +77,10 @@ resource "aws_iam_policy" "ssm" {
 }
 
 resource "aws_iam_role" "this" {
-  name        = "bfd-${local.env}-${local.service}"
-  path        = local.cloudtamer_iam_path
+  name                 = "bfd-${local.env}-${local.service}"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  description = "Role for instance profile use for ${local.service} in ${local.env}"
+  description          = "Role for instance profile use for ${local.service} in ${local.env}"
 
   assume_role_policy = <<-EOF
   {

@@ -32,4 +32,3 @@ variable "outbound_partner_sns_topic_names" {
   type        = list(string)
   description = "List of names of the partner-specific BFD EFT Outbound SNS Topics"
 }
-

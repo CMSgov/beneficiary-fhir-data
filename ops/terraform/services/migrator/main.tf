@@ -11,13 +11,13 @@ module "terraservice" {
 }
 
 locals {
-  default_tags       = module.terraservice.default_tags
-  env                = module.terraservice.env
-  latest_bfd_release = module.terraservice.latest_bfd_release
-  seed_env           = module.terraservice.seed_env
+  default_tags        = module.terraservice.default_tags
+  env                 = module.terraservice.env
+  latest_bfd_release  = module.terraservice.latest_bfd_release
+  seed_env            = module.terraservice.seed_env
   cloudtamer_iam_path = "/delegatedadmin/developer/"
-  service = "migrator"
-  layer   = "data"
+  service             = "migrator"
+  layer               = "data"
 
   nonsensitive_common_map    = zipmap(data.aws_ssm_parameters_by_path.nonsensitive_common.names, nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values))
   nonsensitive_common_config = { for key, value in local.nonsensitive_common_map : basename(key) => value }

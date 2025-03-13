@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "ssm_policy_doc" {
 
 resource "aws_iam_policy" "ssm" {
   name        = "${local.lambda_full_name}-ssm"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.lambda_full_name} Lambda to get relevant SSM parameters"
   policy      = data.aws_iam_policy_document.ssm_policy_doc.json
 }
@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "rds_policy_doc" {
 
 resource "aws_iam_policy" "rds" {
   name        = "${local.lambda_full_name}-rds"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.lambda_full_name} Lambda to describe the ${data.aws_rds_cluster.cluster.cluster_identifier} cluster"
   policy      = data.aws_iam_policy_document.rds_policy_doc.json
 }
@@ -97,7 +97,7 @@ data "aws_iam_policy_document" "s3_policy_doc" {
 
 resource "aws_iam_policy" "s3" {
   name        = "${local.lambda_full_name}-s3"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.lambda_full_name} Lambda to list objects in the ${var.etl_bucket_id} Bucket"
   policy      = data.aws_iam_policy_document.s3_policy_doc.json
 }
@@ -112,7 +112,7 @@ data "aws_iam_policy_document" "sns_policy_doc" {
 
 resource "aws_iam_policy" "sns" {
   name        = "${local.lambda_full_name}-sns"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.lambda_full_name} Lambda to publish to the configured SNS Topic(s)"
   policy      = data.aws_iam_policy_document.sns_policy_doc.json
 }
@@ -130,7 +130,7 @@ data "aws_iam_policy_document" "lambda_role_assume_policy_doc" {
 resource "aws_iam_role" "this" {
   name                  = local.lambda_full_name
   path                  = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
   description           = "Role for ${local.lambda_full_name} Lambda"
   assume_role_policy    = data.aws_iam_policy_document.lambda_role_assume_policy_doc.json
   force_detach_policies = true
@@ -180,8 +180,8 @@ data "aws_iam_policy_document" "scheduler_role_assume_policy_doc" {
 }
 
 resource "aws_iam_role" "scheduler_assume_role" {
-  name = "${local.lambda_full_name}-scheduler-assumee"
-  path = local.cloudtamer_iam_path
+  name                 = "${local.lambda_full_name}-scheduler-assumee"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = join("", [
     "Role for EventBridge Scheduler allowing permissions to invoke the ",

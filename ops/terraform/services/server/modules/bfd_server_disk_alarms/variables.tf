@@ -15,4 +15,3 @@ variable "alarm_ok_sns_override" {
   type        = string
   default     = null
 }
-

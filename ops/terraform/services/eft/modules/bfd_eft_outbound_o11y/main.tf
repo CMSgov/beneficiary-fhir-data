@@ -1,9 +1,9 @@
 locals {
-  env        = terraform.workspace
-  service    = "eft"
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-  cloudtamer_iam_path = "/delegatedadmin/developer/"
+  env                      = terraform.workspace
+  service                  = "eft"
+  account_id               = data.aws_caller_identity.current.account_id
+  region                   = data.aws_region.current.name
+  cloudtamer_iam_path      = "/delegatedadmin/developer/"
   lambda_metrics_namespace = "AWS/Lambda"
   sns_metrics_namespace    = "AWS/SNS"
 

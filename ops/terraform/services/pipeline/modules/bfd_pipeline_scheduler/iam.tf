@@ -94,10 +94,10 @@ EOF
 }
 
 resource "aws_iam_role" "this" {
-  name        = local.lambda_full_name
-  path        = local.cloudtamer_iam_path
+  name                 = local.lambda_full_name
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  description = "Role for ${local.lambda_full_name} Lambda"
+  description          = "Role for ${local.lambda_full_name} Lambda"
 
   assume_role_policy = <<-EOF
 {

@@ -1,9 +1,9 @@
 locals {
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-  alt_region = data.aws_region.alt.name
+  account_id          = data.aws_caller_identity.current.account_id
+  region              = data.aws_region.current.name
+  alt_region          = data.aws_region.alt.name
   cloudtamer_iam_path = "/delegatedadmin/developer/"
-  env = "mgmt"
+  env                 = "mgmt"
   established_envs = [
     "test",
     "prod-sbx",

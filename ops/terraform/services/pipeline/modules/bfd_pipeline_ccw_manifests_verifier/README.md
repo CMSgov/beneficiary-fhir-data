@@ -30,7 +30,6 @@ No requirements.
 | <a name="input_kms_config_key_alias"></a> [kms\_config\_key\_alias](#input\_kms\_config\_key\_alias) | Alias/ID of the config CMK | `string` | n/a | yes |
 | <a name="input_kms_key_alias"></a> [kms\_key\_alias](#input\_kms\_key\_alias) | Alias/ID of the main CMK | `string` | n/a | yes |
 | <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | Name of the current VPC | `string` | n/a | yes |
-| <a name="input_cloudtamer_iam_path"></a> [cloudtamer\_iam\_path](#input\_cloudtamer\_iam\_path) | IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts | `string` | `"/delegatedadmin/developer/"` | no |
 
 <!-- GENERATED WITH `terraform-docs .`
      Manually updating the README.md will be overwritten.

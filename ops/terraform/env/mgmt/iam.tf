@@ -133,6 +133,7 @@ POLICY
 
 }
 
+# TO add permission boundary in BFD-3953
 resource "aws_iam_role" "cloudbees" {
   assume_role_policy    = <<-POLICY
 {
@@ -151,7 +152,6 @@ resource "aws_iam_role" "cloudbees" {
 POLICY
   description           = "Assume role for our cloudbees jenkins"
   force_detach_policies = false
-#  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn # Temporarily commented out due to incompatabilities
   managed_policy_arns = [
     aws_iam_policy.jenkins_permission_boundary.arn,
     aws_iam_policy.jenkins_volume.arn,

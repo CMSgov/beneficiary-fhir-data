@@ -11,16 +11,16 @@ module "terraservice" {
 }
 
 locals {
-  default_tags       = module.terraservice.default_tags
-  env                = module.terraservice.env
-  seed_env           = module.terraservice.seed_env
-  is_ephemeral_env   = module.terraservice.is_ephemeral_env
-  latest_bfd_release = module.terraservice.latest_bfd_release
-  bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
+  default_tags        = module.terraservice.default_tags
+  env                 = module.terraservice.env
+  seed_env            = module.terraservice.seed_env
+  is_ephemeral_env    = module.terraservice.is_ephemeral_env
+  latest_bfd_release  = module.terraservice.latest_bfd_release
+  bfd_version         = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
   cloudtamer_iam_path = "/delegatedadmin/developer/"
-  service   = "eft"
-  layer     = "data"
-  full_name = "bfd-${local.env}-${local.service}"
+  service             = "eft"
+  layer               = "data"
+  full_name           = "bfd-${local.env}-${local.service}"
 
   inbound_eft_partners  = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json["inbound"].value))
   outbound_eft_partners = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json["outbound"].value))

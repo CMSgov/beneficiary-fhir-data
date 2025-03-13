@@ -1,7 +1,7 @@
 locals {
-  region     = data.aws_region.current.name
-  account_id = data.aws_caller_identity.current.account_id
-  env        = terraform.workspace
+  region              = data.aws_region.current.name
+  account_id          = data.aws_caller_identity.current.account_id
+  env                 = terraform.workspace
   cloudtamer_iam_path = "/delegatedadmin/developer/"
   kms_config_key_arns = flatten(
     [
@@ -25,8 +25,8 @@ resource "aws_iam_instance_profile" "instance" {
 
 # EC2 instance role
 resource "aws_iam_role" "instance" {
-  name = "bfd-${local.env}-${var.legacy_service}-role"
-  path = local.cloudtamer_iam_path
+  name                 = "bfd-${local.env}-${var.legacy_service}-role"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
 
   assume_role_policy = <<-EOF
@@ -60,7 +60,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${var.service}-kms"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions to use the default environment KMS key"
   policy      = <<-EOF
 {
@@ -93,7 +93,7 @@ resource "aws_iam_role_policy_attachment" "kms" {
 
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${var.service}-ssm-parameters"
-  path = local.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${var.service} SSM hierarchies"
   policy = jsonencode(
     {
@@ -185,7 +185,7 @@ resource "aws_iam_policy" "kms_mgmt" {
 
 # attach policy allowing BFD Server to decrypt using mgmt KMS to all EC2 instances
 resource "aws_iam_role_policy_attachment" "kms_mgmt" {
-  role       = aws_iam_role.instance.id
+  role       = aws_iam_role.instance.name
   policy_arn = aws_iam_policy.kms_mgmt.arn
 }
 
