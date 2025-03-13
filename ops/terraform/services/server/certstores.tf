@@ -123,9 +123,10 @@ resource "aws_s3_object" "truststore" {
     replace_triggered_by = [null_resource.generate_truststore]
   }
 
-  key    = local.truststore_s3_key
-  bucket = aws_s3_bucket.certstores.bucket
-  source = local.truststore_local_path
+  key                = local.truststore_s3_key
+  bucket             = aws_s3_bucket.certstores.bucket
+  source             = local.truststore_local_path
+  bucket_key_enabled = true
 }
 
 resource "terraform_data" "keystore_object_size" {
@@ -137,7 +138,8 @@ resource "aws_s3_object" "keystore" {
     replace_triggered_by = [terraform_data.keystore_object_size]
   }
 
-  key            = local.keystore_s3_key
-  bucket         = aws_s3_bucket.certstores.bucket
-  content_base64 = sensitive(local.keystore_base64)
+  key                = local.keystore_s3_key
+  bucket             = aws_s3_bucket.certstores.bucket
+  content_base64     = sensitive(local.keystore_base64)
+  bucket_key_enabled = true
 }

@@ -1,3 +1,7 @@
+data "aws_kms_alias" "sse_s3" {
+  name = "alias/aws/s3"
+}
+
 # TODO: Further separate the concerns and provide targeted permissions for Jenkins
 resource "aws_iam_policy" "jenkins_permission_boundary" {
   description = "Jenkins Permission Boundary Policy"
@@ -102,6 +106,14 @@ resource "aws_iam_policy" "jenkins_permission_boundary" {
             local.all_kms_config_key_arns
           ),
           "Sid" : "AllowRoutineKeyAccess"
+        },
+        {
+          "Sid" : "AllowDescribeDefaultS3BucketKey",
+          "Effect" : "Allow",
+          "Action" : [
+            "kms:DescribeKey"
+          ],
+          "Resource" : data.aws_kms_alias.sse_s3.target_key_arn
         },
         {
           "Action" : [
