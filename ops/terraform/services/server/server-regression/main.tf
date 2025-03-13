@@ -16,7 +16,7 @@ locals {
   seed_env                  = module.terraservice.seed_env
   region                    = data.aws_region.current.name
   spice_trigger_lambda_name = "bfd-${local.env}-${local.service}-refresh-spice-trigger"
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   account_id = data.aws_caller_identity.current.account_id
   layer      = "app"
   service    = "server-regression"

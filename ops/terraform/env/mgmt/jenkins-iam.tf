@@ -2,7 +2,7 @@
 resource "aws_iam_policy" "jenkins_permission_boundary" {
   description = "Jenkins Permission Boundary Policy"
   name        = "bfd-${local.env}-jenkins-permission-boundary"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [

@@ -4,7 +4,7 @@ resource "aws_iam_role" "glue_role" {
   name        = "bfd-insights-${var.project}-glue-role"
   description = "Allow the Glue service to access the Insights buckets" 
   tags        = var.tags
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
 
   assume_role_policy = <<-POLICY
@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "s3_access" {
 
 resource "aws_iam_policy" "s3_access" {
   name    = "bfd-insights-${var.project}-glue-role-s3-access"
-  path    = var.cloudtamer_iam_path
+  path    = local.cloudtamer_iam_path
   policy  = data.aws_iam_policy_document.s3_access.json
 }
 

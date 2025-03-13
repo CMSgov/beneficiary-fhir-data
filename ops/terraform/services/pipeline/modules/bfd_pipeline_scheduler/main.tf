@@ -1,7 +1,7 @@
 locals {
   env    = terraform.workspace
   region = data.aws_region.current.name
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   kms_key_arn = data.aws_kms_key.env_cmk.arn
 
   lambda_full_name = "bfd-${local.env}-pipeline-scheduler"

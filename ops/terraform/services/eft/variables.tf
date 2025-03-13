@@ -4,8 +4,3 @@ variable "bfd_version_override" {
   type        = string
 }
 
-variable "cloudtamer_iam_path" {
-  type = string
-  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
-  default = "/delegatedadmin/developer/"
-}

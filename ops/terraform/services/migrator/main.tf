@@ -15,7 +15,7 @@ locals {
   env                = module.terraservice.env
   latest_bfd_release = module.terraservice.latest_bfd_release
   seed_env           = module.terraservice.seed_env
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   service = "migrator"
   layer   = "data"
 

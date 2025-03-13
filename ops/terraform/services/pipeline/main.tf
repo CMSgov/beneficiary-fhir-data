@@ -12,7 +12,7 @@ locals {
   is_ephemeral_env   = module.terraservice.is_ephemeral_env
   is_prod            = local.env == "prod"
   latest_bfd_release = module.terraservice.latest_bfd_release
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   account_id        = data.aws_caller_identity.current.account_id
   layer             = "data"
   create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation

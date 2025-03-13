@@ -17,7 +17,7 @@ locals {
   is_ephemeral_env   = module.terraservice.is_ephemeral_env
   latest_bfd_release = module.terraservice.latest_bfd_release
   bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   service   = "eft"
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"

@@ -6,7 +6,7 @@ locals {
   app        = "bfd-${local.service}"
   namespace  = "bfd-${local.env}/${local.app}"
   kms_key_id = data.aws_kms_key.cmk.arn
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   nonsensitive_common_map = zipmap(
     data.aws_ssm_parameters_by_path.nonsensitive_common.names,
     nonsensitive(data.aws_ssm_parameters_by_path.nonsensitive_common.values)

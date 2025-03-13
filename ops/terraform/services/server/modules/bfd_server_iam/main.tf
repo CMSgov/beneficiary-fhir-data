@@ -2,7 +2,7 @@ locals {
   region     = data.aws_region.current.name
   account_id = data.aws_caller_identity.current.account_id
   env        = terraform.workspace
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   kms_config_key_arns = flatten(
     [
       for v in data.aws_kms_key.config_key.multi_region_configuration :
@@ -20,13 +20,13 @@ locals {
 resource "aws_iam_instance_profile" "instance" {
   name = "bfd-${local.env}-${var.legacy_service}-profile"
   role = aws_iam_role.instance.name
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
 }
 
 # EC2 instance role
 resource "aws_iam_role" "instance" {
   name = "bfd-${local.env}-${var.legacy_service}-role"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
 
   assume_role_policy = <<-EOF
@@ -60,7 +60,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_xray_policy" {
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${var.service}-kms"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = "Permissions to use the default environment KMS key"
   policy      = <<-EOF
 {
@@ -93,7 +93,7 @@ resource "aws_iam_role_policy_attachment" "kms" {
 
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${var.service}-ssm-parameters"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${var.service} SSM hierarchies"
   policy = jsonencode(
     {
@@ -134,7 +134,7 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 resource "aws_iam_policy" "ssm_mgmt" {
   description = "Policy granting BFD Server in ${local.env} environment access to certain mgmt SSM hierarchies"
   name        = "bfd-${local.env}-${var.service}-ssm-mgmt-parameters"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -165,7 +165,7 @@ resource "aws_iam_role_policy_attachment" "ssm_mgmt" {
 resource "aws_iam_policy" "kms_mgmt" {
   description = "Policy granting BFD Server in ${local.env} environment access to decrypt using the mgmt KMS keys"
   name        = "bfd-${local.env}-${var.service}-kms-mgmt"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [
@@ -197,7 +197,7 @@ resource "aws_iam_policy" "asg" {
     "on the ${local.env} AutoScaling Group"
   ])
   name = "bfd-${local.env}-${var.service}-asg"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Version = "2012-10-17"
@@ -233,7 +233,7 @@ data "aws_iam_policy_document" "rds_policy_doc" {
 resource "aws_iam_policy" "rds" {
   description = "Policy granting BFD Server in ${local.env} environment access to describe RDS instances"
   name        = "bfd-${local.env}-${var.service}-rds"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy      = data.aws_iam_policy_document.rds_policy_doc.json
 }
 

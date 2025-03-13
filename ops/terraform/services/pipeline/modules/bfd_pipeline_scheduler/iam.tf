@@ -1,6 +1,6 @@
 resource "aws_iam_policy" "s3" {
   name = "${local.lambda_full_name}-s3"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to list and get objects in the ",
     "${data.aws_s3_bucket.etl.id} S3 bucket in the root and Synthetic Done/ and Incoming/ folders"
@@ -28,7 +28,7 @@ EOF
 
 resource "aws_iam_policy" "autoscaling" {
   name = "${local.lambda_full_name}-autoscaling"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to describe ASGs and their Scheduled ",
     "Actions and to put Scheduled Actions to the ${var.ccw_pipeline_asg_details.name} ASG"
@@ -66,7 +66,7 @@ EOF
 
 resource "aws_iam_policy" "logs" {
   name = "${local.lambda_full_name}-logs"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.lambda_full_name} Lambda to write to its corresponding CloudWatch ",
     "Log Group and Log Stream"
@@ -95,7 +95,7 @@ EOF
 
 resource "aws_iam_role" "this" {
   name        = local.lambda_full_name
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for ${local.lambda_full_name} Lambda"
 

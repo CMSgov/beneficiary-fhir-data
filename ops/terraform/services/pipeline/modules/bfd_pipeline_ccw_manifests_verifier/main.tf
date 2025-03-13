@@ -3,7 +3,7 @@ locals {
   service             = "pipeline"
   layer               = "app"
   service_name_prefix = "bfd-${local.env}-${local.service}"
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   account_id = data.aws_caller_identity.current.account_id
   region     = data.aws_region.current.name
   vpc_id     = data.aws_vpc.main.id

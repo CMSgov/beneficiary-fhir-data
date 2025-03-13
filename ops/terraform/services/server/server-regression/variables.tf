@@ -4,8 +4,3 @@ variable "docker_image_tag_override" {
   default     = null
 }
 
-variable "cloudtamer_iam_path" {
-  type = string
-  description = "IAM Pathing scheme used within Cloudtamer / KION managed AWS Accounts"
-  default = "/delegatedadmin/developer/"
-}

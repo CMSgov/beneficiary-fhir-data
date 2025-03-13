@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "github_actions_s3its" {
   description = "GitHub Actions policy for S3 integration tests"
   name        = "bfd-${local.env}-github-actions-s3its"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -53,7 +53,7 @@ POLICY
 
 resource "aws_iam_policy" "github_actions_ecr" {
   name = "bfd-${local.env}-ecr-rw"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Statement = [
@@ -105,7 +105,7 @@ resource "aws_iam_policy" "github_actions_ecr" {
 resource "aws_iam_policy" "github_actions_tf_state" {
   name        = "bfd-${local.env}-gha-tf-state"
   description = "Grants permissions necessary for GHA to modify/read Terraform state"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Statement = [
@@ -150,7 +150,7 @@ resource "aws_iam_policy" "github_actions_tf_state" {
 resource "aws_iam_policy" "github_actions_tf_logs" {
   name        = "bfd-${local.env}-gha-tf-logs"
   description = "Grants permissions necessary for GHA to submit Terraform logs to CloudWatch Logs"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Statement = [
@@ -197,7 +197,7 @@ resource "aws_iam_policy" "github_actions_static_site" {
     "Grants permissions necessary to apply the static-site Terraservice and manipulate the Static",
     " Site artifacts in any environment"
   ])
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Statement = [
@@ -339,7 +339,7 @@ resource "aws_iam_policy" "github_actions_static_site" {
 resource "aws_iam_policy" "github_actions_ci_ops" {
   name        = "bfd-${local.env}-ci-ops-infra"
   description = "Grants permissions necessary to allow CI/CD Pipeline for MGMT baseline config"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       Statement = [
@@ -514,7 +514,7 @@ resource "aws_iam_openid_connect_provider" "github_actions" {
 
 resource "aws_iam_role" "github_actions" {
   name        = "bfd-${local.env}-github-actions"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
 #  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn # Commented out until an official migration due to incompatabilities
   description = "OIDC Assumable GitHub Actions Role"
 

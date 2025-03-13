@@ -1,6 +1,6 @@
 resource "aws_iam_role" "logs" {
   name        = "${local.full_name}-logs"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role allowing the ${local.full_name}-sftp Transfer Server to write logs"
 
@@ -28,7 +28,7 @@ resource "aws_iam_role" "logs" {
 resource "aws_iam_role" "eft_user" {
   name        = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
   description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.inbound_sftp_user_username} SFTP user"
-path = var.cloudtamer_iam_path
+path = local.cloudtamer_iam_path
 permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   assume_role_policy = jsonencode(
     {
@@ -51,7 +51,7 @@ permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
 
 resource "aws_iam_policy" "eft_user" {
   name = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Allows the ${local.inbound_sftp_user_username} SFTP user to access their restricted portion ",
     "of the ${aws_s3_bucket.this.id} S3 bucket when using SFTP"
@@ -142,7 +142,7 @@ resource "aws_iam_role" "partner_bucket_role" {
 
 resource "aws_iam_role" "ct_partner_bucket_role" {
   for_each = local.eft_partners_config
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   name = "${local.full_name}-${each.key}-bucket-role"
   description = join("", [
@@ -205,7 +205,7 @@ resource "aws_iam_role" "ct_isp_bcda_bucket_role" {
 
   name = "${local.full_name}-isp-to-bcda-bucket-role"
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
     "path within the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
@@ -233,7 +233,7 @@ resource "aws_iam_role" "ct_isp_bcda_bucket_role" {
 
 resource "aws_iam_policy" "partner_bucket_access" {
   for_each = local.eft_partners_config
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.full_name}-${each.key}-allow-eft-s3-path"
   description = join("", [
     "Allows ${each.key} to access their specific EFT data when this policy's corresponding IAM ",
@@ -300,7 +300,7 @@ resource "aws_iam_policy" "isp_bcda_bucket_access" {
   count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
 
   name = "${local.full_name}-isp-to-bcda-allow-eft-s3-path"
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Allows ISP to access the BCDA inbound path when this policy's corresponding IAM ",
     "role is assumed by ISP"
@@ -357,7 +357,7 @@ resource "aws_iam_policy" "isp_bcda_bucket_access" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_lambda_full_name}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_lambda_full_name} Lambda to write to its corresponding ",
@@ -387,7 +387,7 @@ resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name        = "${local.outbound_lambda_full_name}-ssm"
   description = "Permissions to get parameters from the appropriate hierarchies"
   policy = jsonencode(
@@ -413,7 +413,7 @@ resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_lambda_full_name}-kms"
   description = join("", [
     "Permissions to decrypt config KMS keys and encrypt and decrypt master KMS keys for ",
@@ -453,7 +453,7 @@ resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_lambda_full_name}-s3"
   description = join("", [
     "Allows the ${local.outbound_lambda_full_name} to manipulate objects within the ",
@@ -508,7 +508,7 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_sqs_dlq" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_lambda_full_name}-sqs-dlq"
   description = join("", [
     "Allows the ${local.outbound_lambda_full_name} to push events into its DLQ upon any failures"
@@ -534,7 +534,7 @@ resource "aws_iam_policy" "sftp_outbound_transfer_sqs_dlq" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_sns" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_lambda_full_name}-sns"
   description = join("", [
     "Allows the ${local.outbound_lambda_full_name} to publish status notifications to the ",
@@ -568,7 +568,7 @@ resource "aws_iam_role" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name        = local.outbound_lambda_full_name
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for ${local.outbound_lambda_full_name} Lambda"
 
@@ -610,7 +610,7 @@ resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
 
 resource "aws_iam_policy" "outbound_notifs_logs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_notifs_topic_prefix}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_notifs_topic_prefix} SNS topic to write to its corresponding ",
@@ -643,7 +643,7 @@ resource "aws_iam_policy" "outbound_notifs_logs" {
 
 resource "aws_iam_policy" "outbound_partner_notifs_logs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
-  path = var.cloudtamer_iam_path
+  path = local.cloudtamer_iam_path
   name = "${local.outbound_notifs_topic_prefix}-${each.key}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_notifs_topic_prefix}-${each.key} SNS topic to write to ",
@@ -678,7 +678,7 @@ resource "aws_iam_role" "outbound_notifs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name        = local.outbound_notifs_topic_prefix
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for ${local.outbound_notifs_topic_prefix} SNS Topic"
 
@@ -704,7 +704,7 @@ resource "aws_iam_role" "outbound_partner_notifs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
 
   name        = "${local.outbound_notifs_topic_prefix}-${each.key}"
-  path        = var.cloudtamer_iam_path
+  path        = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description = "Role for ${local.outbound_notifs_topic_prefix}-${each.key} SNS Topic"
 

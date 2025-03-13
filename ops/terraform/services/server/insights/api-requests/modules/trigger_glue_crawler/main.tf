@@ -2,7 +2,7 @@ locals {
   env              = terraform.workspace
   established_envs = ["test", "prod-sbx", "prod"]
   seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", local.env))])
-
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
   kms_key_arn = data.aws_kms_key.cmk.arn
   kms_key_id  = data.aws_kms_key.cmk.key_id
 
