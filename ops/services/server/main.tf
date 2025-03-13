@@ -26,8 +26,8 @@ locals {
 
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
-  kms_key_alias        = local.ssm_config["/bfd/common/kms_key_alias"]
-  kms_config_key_alias = local.ssm_config["/bfd/common/kms_config_key_alias"]
+  kms_key_alias        = nonsensitive(local.ssm_config["/bfd/common/kms_key_alias"])
+  kms_config_key_alias = nonsensitive(local.ssm_config["/bfd/common/kms_config_key_alias"])
 
   # TODO: Remove "ecs" from the name prefix once we accept this as the new server service
   name_prefix = "bfd-${local.env}-${local.service}-ecs"

@@ -2,14 +2,14 @@ locals {
   truststore_filename   = "truststore.pfx"
   truststore_local_path = "${path.module}/generated/${local.truststore_filename}"
   truststore_s3_key     = local.truststore_filename
-  truststore_certs = [
+  truststore_certs = nonsensitive([
     for ssm_path, pubkey in local.ssm_config
     : {
       alias  = element(split("/", ssm_path), length(split("/", ssm_path)) - 1)
       pubkey = pubkey
     }
     if strcontains(ssm_path, "/client_certificates/")
-  ]
+  ])
 
   keystore_filename   = "keystore.pfx"
   keystore_local_path = "${path.module}/generated/${local.keystore_filename}"

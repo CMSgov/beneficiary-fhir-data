@@ -1,6 +1,8 @@
 locals {
-  db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
-  server_port           = local.ssm_config["/bfd/${local.service}/service_port"]
+  db_cluster_identifier  = "bfd-${local.db_environment}-aurora-cluster"
+  server_truststore_path = "/data/${local.truststore_filename}"
+  server_keystore_path   = "/data/${local.keystore_filename}"
+  server_port            = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
   server_ssm_hierarchies = [
     "/bfd/${local.env}/${local.service}/sensitive/",
     "/bfd/${local.env}/${local.service}/nonsensitive/",
@@ -62,9 +64,25 @@ resource "aws_ecs_task_definition" "server" {
             value = aws_s3_bucket.certstores.bucket
           },
           {
-            name  = "OUTPUT_PATH"
-            value = "/data"
+            name  = "TRUSTSTORE_KEY"
+            value = local.truststore_s3_key
           },
+          {
+            name  = "KEYSTORE_KEY"
+            value = local.keystore_s3_key
+          },
+          {
+            name  = "TRUSTSTORE_OUTPUT_PATH"
+            value = local.server_truststore_path
+          },
+          {
+            name  = "KEYSTORE_OUTPUT_PATH"
+            value = local.server_keystore_path
+          },
+          {
+            name  = "REGION"
+            value = local.region
+          }
         ]
         essential = false
         image     = data.aws_ecr_image.certstores.image_uri
@@ -106,11 +124,11 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "BFD_PATHS_FILES_KEYSTORE"
-            value = "/data/${local.keystore_filename}"
+            value = local.server_keystore_path
           },
           {
             name  = "BFD_PATHS_FILES_TRUSTSTORE"
-            value = "/data/${local.truststore_filename}"
+            value = local.server_truststore_path
           },
           {
             name  = "BFD_PATHS_FILES_WAR"
