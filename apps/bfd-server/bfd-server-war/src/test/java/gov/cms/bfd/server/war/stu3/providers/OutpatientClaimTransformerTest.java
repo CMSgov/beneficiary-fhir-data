@@ -74,7 +74,7 @@ public final class OutpatientClaimTransformerTest {
 
     outpatientClaimTransformer =
         new OutpatientClaimTransformer(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
   }
 
   /** Releases the static mock NPIOrgLookup. */

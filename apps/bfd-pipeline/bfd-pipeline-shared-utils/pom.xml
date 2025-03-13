@@ -133,6 +133,7 @@
             <artifactId>commons-text</artifactId>
         </dependency>
     </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
