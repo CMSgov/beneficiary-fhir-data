@@ -1,12 +1,9 @@
 locals {
-  client_certificates_map = zipmap(
-    data.aws_ssm_parameters_by_path.client_certificates.names,
-    nonsensitive(data.aws_ssm_parameters_by_path.client_certificates.values)
-  )
-  truststore_local_path = "${path.module}/generated/truststore.pfx"
-  truststore_s3_key     = "truststore.pfx"
+  truststore_filename   = "truststore.pfx"
+  truststore_local_path = "${path.module}/generated/${local.truststore_filename}"
+  truststore_s3_key     = local.truststore_filename
   truststore_certs = [
-    for ssm_path, pubkey in local.client_certificates_map
+    for ssm_path, pubkey in local.ssm_config
     : {
       alias  = element(split("/", ssm_path), length(split("/", ssm_path)) - 1)
       pubkey = pubkey
@@ -14,13 +11,10 @@ locals {
     if strcontains(ssm_path, "/client_certificates/")
   ]
 
-  keystore_local_path = "${path.module}/generated/keystore.pfx"
-  keystore_s3_key     = "keystore.pfx"
-  keystore_base64     = local.sensitive_service_config["server_keystore_base64"]
-}
-
-data "aws_ssm_parameters_by_path" "client_certificates" {
-  path = "/bfd/${local.env}/${local.service}/nonsensitive/client_certificates"
+  keystore_filename   = "keystore.pfx"
+  keystore_local_path = "${path.module}/generated/${local.keystore_filename}"
+  keystore_s3_key     = local.keystore_filename
+  keystore_base64     = local.ssm_config["/bfd/server/server_keystore_base64"]
 }
 
 resource "aws_s3_bucket" "certstores" {
@@ -53,7 +47,7 @@ resource "aws_s3_bucket_policy" "certstores" {
   policy = data.aws_iam_policy_document.certstores_bucket_policy_doc.json
 }
 
-resource "aws_s3_bucket_public_access_block" "this" {
+resource "aws_s3_bucket_public_access_block" "certstores" {
   bucket = aws_s3_bucket.certstores.bucket
 
   block_public_acls       = true
@@ -62,12 +56,12 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "certstores" {
   bucket = aws_s3_bucket.certstores.bucket
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = data.aws_kms_key.env_key.arn
+      kms_master_key_id = data.aws_kms_alias.env_cmk.target_key_arn
       sse_algorithm     = "aws:kms"
     }
 
