@@ -20,3 +20,14 @@ variable "additional_tags" {
   description = "Additional tags to merge into final default_tags output"
   type        = map(string)
 }
+
+variable "ssm_hierarchy_roots" {
+  default     = ["bfd"]
+  description = "List of SSM Hierarchy roots. Module executes a recursive lookup for all roots for `common` and service-specific hierarchies."
+  type        = list(string)
+}
+
+variable "service" {
+  description = "Service _or_ terraservice name."
+  type        = string
+}

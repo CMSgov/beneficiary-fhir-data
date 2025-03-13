@@ -14,6 +14,7 @@ locals {
   default_tags              = module.terraservice.default_tags
   env                       = module.terraservice.env
   seed_env                  = module.terraservice.seed_env
+  latest_bfd_release        = module.terraservice.latest_bfd_release
   region                    = data.aws_region.current.name
   spice_trigger_lambda_name = "bfd-${local.env}-${local.service}-refresh-spice-trigger"
 
@@ -41,8 +42,7 @@ locals {
   queue_name                 = "bfd-${local.env}-${local.service}"
   pipeline_signal_queue_name = "bfd-${local.env}-${local.service}-signal"
 
-  docker_image_tag = coalesce(var.docker_image_tag_override, nonsensitive(data.aws_ssm_parameter.docker_image_tag.value))
-
+  docker_image_tag = coalesce(var.docker_image_tag_override, local.latest_bfd_release)
   docker_image_uri = "${data.aws_ecr_repository.ecr.repository_url}:${local.docker_image_tag}"
 
   lambda_timeout_seconds              = 600
@@ -63,8 +63,10 @@ resource "aws_lambda_function" "this" {
   description   = "Lambda to run the Locust regression suite against the ${local.env} BFD Server"
   kms_key_arn   = local.kms_key_arn
 
-  image_uri    = local.docker_image_uri
-  package_type = "Image"
+  image_uri        = local.docker_image_uri
+  source_code_hash = trimprefix(data.aws_ecr_image.image.id, "sha256:")
+  architectures    = ["arm64"]
+  package_type     = "Image"
 
   memory_size = 2048
   timeout     = local.lambda_timeout_seconds
