@@ -35,3 +35,4 @@ variable "buffer_interval" {
   type        = number
   default     = 300
 }
+

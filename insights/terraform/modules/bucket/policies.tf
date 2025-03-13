@@ -2,7 +2,7 @@
 
 resource "aws_iam_policy" "full" {
   name        = "bfd-insights-full-${var.name}"
-  path        = local.cloudtamer_iam_path
+  path        = "/bfd-insights/"
   description = "Allow full access and use of the ${var.name} bucket"
   policy      = <<-POLICY
 {
@@ -124,7 +124,7 @@ resource "aws_iam_group_policy_attachment" "full_attach" {
 # Allows writes to outputs
 resource "aws_iam_policy" "athena_query" {
   name        = "bfd-insights-athena-query-${var.name}"
-  path        = local.cloudtamer_iam_path
+  path        = "/bfd-insights/"
   description = "Rights needed for athena query access"
   policy      = <<-POLICY
   {

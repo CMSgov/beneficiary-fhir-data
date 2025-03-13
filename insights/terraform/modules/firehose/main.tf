@@ -17,8 +17,7 @@ locals {
 resource "aws_iam_role" "firehose" {
   name = local.full_name
   tags = var.tags
-  path = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+
   assume_role_policy = <<-EOF
   {
     "Version": "2012-10-17",

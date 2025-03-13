@@ -27,8 +27,7 @@ data "aws_iam_policy_document" "trust_rel_assume_role_policy" {
 resource "aws_iam_role" "cwl2firehose_role" {
   name               = "${local.full_name}-cwl2firehose-role"
   assume_role_policy = data.aws_iam_policy_document.trust_rel_assume_role_policy.json
-  path = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+
   inline_policy {
     name = "${local.full_name}-cwl2firehose-policy"
 

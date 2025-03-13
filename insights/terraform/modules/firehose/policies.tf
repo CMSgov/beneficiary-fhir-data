@@ -1,6 +1,6 @@
 resource "aws_iam_policy" "firehose" {
   name        = local.full_name
-  path        = local.cloudtamer_iam_path
+  path        = "/bfd-insights/"
   description = "Allow firehose delivery to ${var.bucket}"
   policy      = <<-EOF
 {

@@ -151,8 +151,6 @@ resource "aws_cloudwatch_log_group" "bcda_load_partitions" {
 
 resource "aws_iam_role" "bcda_load_partitions" {
   name_prefix = "BcdaLoadPartitions-"
-  path = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   assume_role_policy = jsonencode(
     {
       Version = "2012-10-17"

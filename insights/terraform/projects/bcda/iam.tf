@@ -41,8 +41,6 @@ locals {
 # account.
 resource "aws_iam_role" "dev" {
   name = "bfd-insights-bcda-developer"
-  path = local.cloudtamer_iam_path
-  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -66,7 +64,6 @@ resource "aws_iam_role" "dev" {
 # Policy allowing allowed actions on tagged resources and denying denied actions on untagged resources
 resource "aws_iam_policy" "dev" {
   name        = "bfd-insights-bcda-developer-policy"
-  path = local.cloudtamer_iam_path
   description = "ABAC policy allowing developers to maintain BCDA related Insights resources."
 
   policy = jsonencode({
@@ -102,7 +99,6 @@ resource "aws_iam_role_policy_attachment" "dev" {
 
 resource "aws_iam_policy" "terraform" {
   name        = "bfd-insights-bcda-terraform-policy"
-  path = local.cloudtamer_iam_path
   description = "Allow BCDA developers to apply terraform changes to the BCDA Insights project."
 
   policy = jsonencode({
