@@ -41,6 +41,7 @@ public enum ClaimType {
       CarrierClaim_.claimId,
       CarrierClaim_.beneficiaryId,
       (entity) -> ((CarrierClaim) entity).getDateThrough(),
+      "CarrierTag",
       CarrierClaim_.lines),
   /** Represents the DME claim type. */
   DME(
@@ -48,6 +49,7 @@ public enum ClaimType {
       DMEClaim_.claimId,
       DMEClaim_.beneficiaryId,
       (entity) -> ((DMEClaim) entity).getDateThrough(),
+      "DmeTag",
       DMEClaim_.lines),
   /** Represents the hha claim type. */
   HHA(
@@ -55,6 +57,7 @@ public enum ClaimType {
       HHAClaim_.claimId,
       HHAClaim_.beneficiaryId,
       (entity) -> ((HHAClaim) entity).getDateThrough(),
+      "HhaTag",
       HHAClaim_.lines),
   /** Represents the hospice claim type. */
   HOSPICE(
@@ -62,6 +65,7 @@ public enum ClaimType {
       HospiceClaim_.claimId,
       HospiceClaim_.beneficiaryId,
       (entity) -> ((HospiceClaim) entity).getDateThrough(),
+      "HospiceTag",
       HospiceClaim_.lines),
   /** Represents the inpatient claim type. */
   INPATIENT(
@@ -69,6 +73,7 @@ public enum ClaimType {
       InpatientClaim_.claimId,
       InpatientClaim_.beneficiaryId,
       (entity) -> ((InpatientClaim) entity).getDateThrough(),
+      "InpatientTag",
       InpatientClaim_.lines),
   /** Represents the outpatient claim type. */
   OUTPATIENT(
@@ -76,19 +81,22 @@ public enum ClaimType {
       OutpatientClaim_.claimId,
       OutpatientClaim_.beneficiaryId,
       (entity) -> ((OutpatientClaim) entity).getDateThrough(),
+      "OutpatientTag",
       OutpatientClaim_.lines),
   /** Represents the PDE claim type. */
   PDE(
       PartDEvent.class,
       PartDEvent_.eventId,
       PartDEvent_.beneficiaryId,
-      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate()),
+      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate(),
+      null),
   /** Represents the SNF claim type. */
   SNF(
       SNFClaim.class,
       SNFClaim_.claimId,
       SNFClaim_.beneficiaryId,
       (entity) -> ((SNFClaim) entity).getDateThrough(),
+      "SnfTag",
       SNFClaim_.lines);
 
   /** The entity class. */
@@ -106,6 +114,9 @@ public enum ClaimType {
   /** The entity lazy attributes. */
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
+  /** entity security Tag Type. */
+  private final String entityTagType;
+
   /**
    * Enum constant constructor.
    *
@@ -114,6 +125,7 @@ public enum ClaimType {
    * @param entityBeneficiaryIdAttribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
    * @param serviceEndAttributeFunction the service end attribute function
+   * @param entityTagType the entity security Tag Type
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
   ClaimType(
@@ -121,11 +133,13 @@ public enum ClaimType {
       SingularAttribute<?, Long> entityIdAttribute,
       SingularAttribute<?, Long> entityBeneficiaryIdAttribute,
       Function<Object, LocalDate> serviceEndAttributeFunction,
+      String entityTagType,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
     this.serviceEndAttributeFunction = serviceEndAttributeFunction;
+    this.entityTagType = entityTagType;
     this.entityLazyAttributes =
         entityLazyAttributes != null
             ? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes))
@@ -169,6 +183,15 @@ public enum ClaimType {
    */
   public Function<Object, LocalDate> getServiceEndAttributeFunction() {
     return serviceEndAttributeFunction;
+  }
+
+  /**
+   * Gets the {@link #entityTagType}.
+   *
+   * @return the entity security Tag Type
+   */
+  public String getEntityTagType() {
+    return entityTagType;
   }
 
   /**
