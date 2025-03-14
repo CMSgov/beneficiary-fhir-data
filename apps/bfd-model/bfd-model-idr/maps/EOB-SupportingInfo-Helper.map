@@ -23,7 +23,7 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
 
 }
 group addAdmissionPeriod(source src: SupportingInfoComponent, target tgt: BackboneElement){
-    src -> tgt.timing = create('Period') as tgtPeriod then{
+    src -> tgt.timing = create('Period') as tgtPeriod then {
         src.VALUE as startValue -> tgtPeriod.start = evaluate(startValue,substring(0,10)) "set start";
         src.VALUE as endValue where (endValue.substring(11) != '1000-01-01') -> tgtPeriod.end = evaluate(endValue,substring(11)) "set end";
     } "Add admission period";
@@ -45,67 +45,67 @@ group addPointOfOrigin(source src: SupportingInfoComponent, target tgt: Backbone
     } "set category";
 
     //https://www.nubc.org/CodeSystem/PointOfOrigin
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://www.nubc.org/CodeSystem/PointOfOrigin" "Set coding";
-        }"Add coding #1";
-    }"Add CC";
+        } "Add coding #1";
+    } "Add CC";
     //https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd/ for non-proprietary
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd/" "Set coding";
-        }"Add coding #2";
-    }"Add CC";
+        } "Add coding #2";
+    } "Add CC";
 }
 group addMSDRG(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src.COL_NAME as category -> tgtCC.coding = translate(category,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_SupportingInfo_Categories','coding') "set coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software" "Set coding";
-        }"Add coding ";
-    }"Add CC";
+        } "Add coding ";
+    } "Add CC";
 }
 group addDischargeStatus(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src.COL_NAME as category -> tgtCC.coding = translate(category,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_SupportingInfo_Categories','coding') "set coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://www.nubc.org/CodeSystem/PatDischargeStatus" "Set coding";
-        }"Add coding #1";
-    }"Add CC";
+        } "Add coding #1";
+    } "Add CC";
 
     //Note, we need to host this one. From table BENE_PTNT_STUS_CD. 
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/BENE_PTNT_STUS_CD" "Set coding";
-        }"Add coding #2";
-    }"Add CC";
+        } "Add coding #2";
+    } "Add CC";
 }
 group addAdmitType(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src.COL_NAME as category -> tgtCC.coding = translate(category,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_SupportingInfo_Categories','coding') "set coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit" "Set coding";
-        }"Add coding #1";
-    }"Add CC";
+        } "Add coding #1";
+    } "Add CC";
 
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd" "Set coding";
-        }"Add coding #2";
-    }"Add CC";
+        } "Add coding #2";
+    } "Add CC";
 }
 
 group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -122,12 +122,12 @@ group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: Ba
     } "set category";
 
 
-    src -> tgt.value = create('SimpleQuantity') as tgtQuantity then{
+    src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
         src.VALUE as val -> tgtQuantity.value = cast(val,"decimal") "Set value";
         src -> tgtQuantity.system="http://unitsofmeasure.org" "Set system";
         src -> tgtQuantity.unit="pint" "Set unit";
         src -> tgtQuantity.code="[pt_us]" "Set code";
-    }"Add blood Furnished";
+    } "Add blood Furnished";
 }
 group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -141,12 +141,12 @@ group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneE
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="clm_mco_pd_sw" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -160,12 +160,12 @@ group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt:
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="nch_ptnt_stus_ind_cd" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 group addProcessingDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -179,12 +179,12 @@ group addProcessingDate(source src: SupportingInfoComponent, target tgt: Backbon
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="nch_wkly_proc_dt" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 group addNCHThroughDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -198,12 +198,12 @@ group addNCHThroughDate(source src: SupportingInfoComponent, target tgt: Backbon
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="nch_actv_or_cvrd_lvl_care_thru" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/nch_actv_or_cvrd_lvl_care_thru" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 
 group addNCStayFromDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -218,12 +218,12 @@ group addNCStayFromDate(source src: SupportingInfoComponent, target tgt: Backbon
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="ncv_vrfd_ncvrd_stay_from_dt" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/ncv_vrfd_ncvrd_stay_from_dt" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 group addNCStayToDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -237,12 +237,12 @@ group addNCStayToDate(source src: SupportingInfoComponent, target tgt: BackboneE
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="ncv_vrfd_ncvrd_stay_to_dt" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/ncv_vrfd_ncvrd_stay_to_dt" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 group addBenefitsExhaustedDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
@@ -256,12 +256,12 @@ group addBenefitsExhaustedDate(source src: SupportingInfoComponent, target tgt: 
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="clm_mdcr_exhstd_dt" "set target coding";
     } "set category";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_mdcr_exhstd_dt" "Set coding";
-        }"Add coding";
-    }"Add CC";
+        } "Add coding";
+    } "Add CC";
 }
 
 group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -269,31 +269,31 @@ group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneEle
         src.COL_NAME as category -> tgtCC.coding = translate(category,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_SupportingInfo_Categories','coding') "set coding";
     } "set category";
     
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=val, 
             tgtCoding.system="https://www.nubc.org/CodeSystem/TypeOfBill" "Set coding";
-        }"Add coding #1";
-    }"Add CC";
+        } "Add coding #1";
+    } "Add CC";
 
     //This field is actually a combination of multiple fields, so we need to isolate those.
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=evaluate(val,substring(1,1)), 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd" "Set coding";
-        }"Add coding #2";
-    }"Add CC";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+        } "Add coding #2";
+    } "Add CC";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=evaluate(val,substring(2,1)), 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd" "Set coding";
-        }"Add coding #3";
-    }"Add CC";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+        } "Add coding #3";
+    } "Add CC";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.VALUE as val -> tgtCoding.code=evaluate(val,substring(3,1)), 
             tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_freq_cd" "Set coding";
-        }"Add coding #4";
-    }"Add CC";
+        } "Add coding #4";
+    } "Add CC";
 
 }
