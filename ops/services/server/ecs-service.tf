@@ -205,17 +205,19 @@ resource "aws_ecs_task_definition" "server" {
 
 resource "aws_security_group" "server" {
   name        = "${local.name_prefix}-sg"
-  description = "Allow internal ingress to ${local.env} ${local.service} ECS service containers; egress anywhere"
+  description = "Allow igress from NLBs to ${local.service} ECS service containers; egress anywhere"
   vpc_id      = data.aws_vpc.main.id
   tags        = { Name = "${local.name_prefix}-sg" }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "server_allow_tls_vpn" {
-  security_group_id = aws_security_group.server.id
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.vpn.id
-  from_port         = local.server_port
-  ip_protocol       = local.server_protocol
-  to_port           = local.server_port
+resource "aws_vpc_security_group_ingress_rule" "server_allow_tls_nlb" {
+  for_each = aws_security_group.lb
+
+  security_group_id            = aws_security_group.server.id
+  referenced_security_group_id = each.value.id
+  from_port                    = local.server_port
+  ip_protocol                  = local.server_protocol
+  to_port                      = local.server_port
 }
 
 resource "aws_vpc_security_group_egress_rule" "server_allow_all_traffic_ipv4" {
@@ -252,6 +254,10 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
 resource "aws_ecs_service" "server" {
   depends_on = [aws_s3_object.keystore, aws_s3_object.truststore]
 
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+
   cluster                            = data.aws_ecs_cluster.main.arn
   availability_zone_rebalancing      = "ENABLED"
   deployment_maximum_percent         = 200
@@ -268,6 +274,12 @@ resource "aws_ecs_service" "server" {
   triggers                           = {}
 
   force_new_deployment = true
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.main[local.blue_state].arn
+    container_name   = local.service
+    container_port   = local.server_port
+  }
 
   capacity_provider_strategy {
     base              = 1
