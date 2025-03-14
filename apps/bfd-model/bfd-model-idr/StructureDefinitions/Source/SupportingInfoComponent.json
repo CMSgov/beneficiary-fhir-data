@@ -1,0 +1,65 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "SupportingInfoComponent",
+    "url": "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent",
+    "name": "Supporting info",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "SupportingInfoComponent",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "SupportingInfoComponent",
+                "path": "SupportingInfoComponent",
+                "label": "Supporting Info for IDR. Ignore in DD Generation",
+                "definition": "SupportingInfoComponent definition.",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "SupportingInfoComponent.ROW_NUM",
+                "path": "SupportingInfoComponent.ROW_NUM",
+                "label": "Supporting Info Sequence Number",
+                "definition": "This field represents the supporting info sequence number.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.COL_NAME",
+                "path": "SupportingInfoComponent.COL_NAME",
+                "label": "The originating column for the supporting info component.",
+                "definition": "This is a non-overlapping number that should be used as the sequence number for a diagnosis on a given claim.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.VALUE",
+                "path": "SupportingInfoComponent.VALUE",
+                "label": "Supporting info component value",
+                "definition": "The value for a given component in the SupportingInfo key.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
+            
+        ]
+    }
+}
