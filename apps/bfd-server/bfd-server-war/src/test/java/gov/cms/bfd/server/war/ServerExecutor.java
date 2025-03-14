@@ -53,6 +53,21 @@ public class ServerExecutor {
    */
   public static synchronized boolean startServer(String dbUrl, String dbUsername, String dbPassword)
       throws IOException {
+
+    return startServer(dbUrl, dbUsername, dbPassword, false);
+  }
+
+  /**
+   * Starts the BFD server for tests. If already running, does nothing.
+   *
+   * @param dbUrl the db url
+   * @param dbUsername the db username
+   * @param dbPassword the db password
+   * @return {@code true} if the server is running, if {@code false} the server failed to start up
+   * @throws IOException if there is an issue setting up the server relating to accessing files
+   */
+  public static synchronized boolean startServer(
+      String dbUrl, String dbUsername, String dbPassword, boolean shadowSamhsa) throws IOException {
     if (serverInfo != null) {
       // Nothing to do since its already running.
       return true;
@@ -78,7 +93,13 @@ public class ServerExecutor {
     String serverPort = "0";
 
     final var appSettings = new HashMap<String, String>();
-    addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
+
+    if (shadowSamhsa) {
+      addServerSettings(appSettings, dbUrl, dbUsername, dbPassword, true);
+    } else {
+      addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
+    }
+
     final var configLoader = ConfigLoader.builder().addMap(appSettings).build();
     appSettings.put(AppConfiguration.SSM_PATH_PORT, serverPort);
     appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
@@ -142,9 +163,27 @@ public class ServerExecutor {
    */
   private static void addServerSettings(
       Map<String, String> appSettings, String dbUrl, String dbUsername, String dbPassword) {
+    addServerSettings(appSettings, dbUrl, dbUsername, dbPassword, false);
+  }
+
+  /**
+   * Add the necessary BFD settings to the {@link Map} used by our {@link ConfigLoader}.
+   *
+   * @param appSettings map to receive the settings
+   * @param dbUrl the db url
+   * @param dbUsername the db username
+   * @param dbPassword the db password
+   */
+  private static void addServerSettings(
+      Map<String, String> appSettings,
+      String dbUrl,
+      String dbUsername,
+      String dbPassword,
+      boolean shadowSamhsa) {
     // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
     final String pacEnabled = "true";
     final String samhsaEnabled = "false";
+    final String samhsaShadow = shadowSamhsa ? "true" : "false";
     final String pacOldMbiHashEnabled = "true";
     final String pacClaimSourceTypes = "fiss,mcs";
     final String drugCodeFileName = "fakeDrugOrg.tsv";
@@ -152,6 +191,7 @@ public class ServerExecutor {
 
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);
     appSettings.put(SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED, samhsaEnabled);
+    appSettings.put(SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW, samhsaShadow);
     appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);

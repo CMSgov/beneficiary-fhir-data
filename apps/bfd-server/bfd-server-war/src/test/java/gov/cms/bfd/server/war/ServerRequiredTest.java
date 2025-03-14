@@ -52,7 +52,11 @@ public class ServerRequiredTest {
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
   protected static synchronized void setup() throws IOException {
-    if (!ServerExecutor.isRunning()) {
+    setup(false);
+  }
+
+  protected static synchronized void setup(boolean shadowSamhsa) throws IOException {
+    if (!ServerExecutor.isRunning() || shadowSamhsa) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
@@ -73,7 +77,13 @@ public class ServerRequiredTest {
         throw new IllegalStateException("Unable to setup test server with requested datasource.");
       }
 
-      boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
+      boolean startedServer = false;
+      if (shadowSamhsa) {
+        ServerExecutor.stopServer();
+        startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword, true);
+      } else if (!ServerExecutor.isRunning()) {
+        startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
+      }
       assertTrue(startedServer, "Could not startup server for tests.");
       baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       requestAuth = getRequestAuth("test-keystore.p12");
