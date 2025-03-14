@@ -267,6 +267,8 @@ resource "aws_ecs_service" "server" {
   task_definition                    = aws_ecs_task_definition.server.arn
   triggers                           = {}
 
+  force_new_deployment = true
+
   capacity_provider_strategy {
     base              = 1
     capacity_provider = "FARGATE_SPOT"
