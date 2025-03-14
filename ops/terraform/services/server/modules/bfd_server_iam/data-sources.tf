@@ -30,3 +30,7 @@ data "aws_iam_policy" "cloudwatch_xray_policy" {
 data "aws_iam_policy" "ec2_instance_tags_ro" {
   name = "bfd-mgmt-ec2-instance-tags-ro"
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

@@ -17,10 +17,10 @@ locals {
   latest_bfd_release        = module.terraservice.latest_bfd_release
   region                    = data.aws_region.current.name
   spice_trigger_lambda_name = "bfd-${local.env}-${local.service}-refresh-spice-trigger"
-
-  account_id = data.aws_caller_identity.current.account_id
-  layer      = "app"
-  service    = "server-regression"
+  cloudtamer_iam_path       = "/delegatedadmin/developer/"
+  account_id                = data.aws_caller_identity.current.account_id
+  layer                     = "app"
+  service                   = "server-regression"
 
   insights_db_prefix    = "bfd-insights-bfd"
   insights_table_prefix = "bfd_insights_bfd"

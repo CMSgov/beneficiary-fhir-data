@@ -126,3 +126,7 @@ data "aws_security_group" "vpn" {
 data "aws_availability_zones" "this" {
   state = "available"
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

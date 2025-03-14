@@ -61,3 +61,7 @@ data "aws_sns_topic" "alert_topic" {
 data "aws_s3_bucket" "etl_bucket" {
   bucket = var.etl_bucket_id
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

@@ -18,3 +18,7 @@ data "aws_ssm_parameter" "victor_ops_url" {
   name            = "/bfd/${local.env}/common/sensitive/victor_ops_url"
   with_decryption = true
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

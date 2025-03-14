@@ -19,3 +19,7 @@ data "archive_file" "this" {
   source_file = "${path.module}/lambda_src/manage_disk_usage_alarms.py"
   output_path = "${path.module}/lambda_src/manage_disk_usage_alarms.zip"
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}
