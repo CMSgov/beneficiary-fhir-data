@@ -8,7 +8,10 @@ locals {
     "/bfd/${local.env}/${local.service}/nonsensitive/",
     "/bfd/${local.env}/common/nonsensitive/",
   ]
-  server_protocol = "tcp"
+  server_protocol             = "tcp"
+  server_healthcheck_pem_path = "/data/healthcheck.pem"
+  server_healthcheck_bene_id  = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
+  server_healthcheck_uri      = "https://localhost:${local.server_port}/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=${local.server_healthcheck_bene_id}"
 }
 
 data "aws_rds_cluster" "main" {
@@ -60,6 +63,10 @@ resource "aws_ecs_task_definition" "server" {
         cpu = 0
         environment = [
           {
+            name  = "BFD_ENV"
+            value = local.env
+          },
+          {
             name  = "BUCKET"
             value = aws_s3_bucket.certstores.bucket
           },
@@ -78,6 +85,10 @@ resource "aws_ecs_task_definition" "server" {
           {
             name  = "KEYSTORE_OUTPUT_PATH"
             value = local.server_keystore_path
+          },
+          {
+            name  = "HEALTHCHECK_CERT_OUTPUT_PATH"
+            value = local.server_healthcheck_pem_path
           },
           {
             name  = "REGION"
@@ -151,6 +162,14 @@ resource "aws_ecs_task_definition" "server" {
             value = "UTC"
           },
         ]
+        healthCheck = {
+          command = ["CMD-SHELL", "curl --silent --insecure --cert '${local.server_healthcheck_pem_path}' --output /dev/null --fail '${local.server_healthcheck_uri}' || exit 1"]
+          # TOOD: Get this in SSM
+          interval    = 10
+          timeout     = 15
+          retries     = 10
+          startPeriod = 30
+        }
         essential = true
         image     = data.aws_ecr_image.server.image_uri
         logConfiguration = {
