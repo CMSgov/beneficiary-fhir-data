@@ -549,16 +549,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         entitiesWithType.stream()
             .filter(
                 pair -> {
-                  boolean hasSamhsaData =
-                      !samhsaMatcher.hasNoSamhsaData(pair.left); // Store the result
+                  boolean hasNoSamhsaData =
+                      samhsaMatcher.hasNoSamhsaData(pair.left); // Store the result
 
                   if (samhsaV2Shadow) {
                     // Log if missing claim for samhsa V2 Shadow check before filtering
-                    samhsaV2InterceptorShadow.logMissingClaim(pair.left, hasSamhsaData);
+                    samhsaV2InterceptorShadow.logMissingClaim(pair.left, !hasNoSamhsaData);
                   }
 
                   // Perform filtering logic based on the result of hasSamhsaData and excludeSamhsa
-                  return !bundleOptions.excludeSamhsa || hasSamhsaData;
+                  return !bundleOptions.excludeSamhsa || hasNoSamhsaData;
                 })
             .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.

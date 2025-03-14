@@ -255,7 +255,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
 
               if (samhsaV2Shadow) {
                 // Log the missing claim along with the EOB
-                samhsaV2InterceptorShadow.logMissingClaim(c, samhsaMatcher.test(eob));
+                samhsaV2InterceptorShadow.logMissingClaimV1(c, samhsaMatcher.test(eob));
               }
 
               return eob;
@@ -381,8 +381,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
 
     if (claimEntities != null && !claimEntities.isEmpty()) {
-      Set<String> claimIds =
-          securityTagManager.collectClaimIds((List<Object>) claimEntities, claimType, null);
+      Set<String> claimIds = securityTagManager.collectClaimIds((List<Object>) claimEntities);
 
       if (!claimIds.isEmpty()) {
         // Query the claim-tag relationships in one batch
@@ -394,8 +393,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
             claimEntities.stream()
                 .map(
                     claimEntity -> {
-                      String claimId =
-                          securityTagManager.extractClaimId(claimEntity, claimType, null);
+                      String claimId = securityTagManager.extractClaimId(claimEntity);
                       // Ensure claimId is valid (not null or empty) before attempting to fetch tags
                       Set<String> claimSpecificTags =
                           claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());

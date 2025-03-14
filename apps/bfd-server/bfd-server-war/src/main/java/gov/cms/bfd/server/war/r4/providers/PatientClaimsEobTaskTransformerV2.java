@@ -387,8 +387,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
 
     if (claimEntities != null && !claimEntities.isEmpty()) {
-      Set<String> claimIds =
-          securityTagManager.collectClaimIds((List<Object>) claimEntities, claimType, null);
+      Set<String> claimIds = securityTagManager.collectClaimIds((List<Object>) claimEntities);
 
       if (!claimIds.isEmpty()) {
         // Query the claim-tag relationships in one batch
@@ -400,8 +399,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
             claimEntities.stream()
                 .map(
                     claimEntity -> {
-                      String claimId =
-                          securityTagManager.extractClaimId(claimEntity, claimType, null);
+                      String claimId = securityTagManager.extractClaimId(claimEntity);
                       // Ensure claimId is valid (not null or empty) before attempting to fetch tags
                       Set<String> claimSpecificTags =
                           claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());

@@ -85,7 +85,7 @@ public class ClaimDao {
     SecurityTagManager securityTagManager = new SecurityTagManager();
 
     if (claimEntity != null) {
-      claimId = securityTagManager.extractClaimId(claimEntity, null, resourceType);
+      claimId = securityTagManager.extractClaimId(claimEntity);
 
       if (!claimId.isEmpty()) {
         Map<String, Set<String>> claimIdToTagsMap =
@@ -164,8 +164,7 @@ public class ClaimDao {
     SecurityTagManager securityTagManager = new SecurityTagManager();
 
     if (claimEntities != null) {
-      claimIds =
-          securityTagManager.collectClaimIds((List<Object>) claimEntities, null, resourceType);
+      claimIds = securityTagManager.collectClaimIds((List<Object>) claimEntities);
 
       if (!claimIds.isEmpty()) {
         // Query for security tags by the collected claim IDs
@@ -177,8 +176,7 @@ public class ClaimDao {
             .forEach(
                 claimEntity -> {
                   // Get the claim ID
-                  String claimId =
-                      securityTagManager.extractClaimId(claimEntity, null, resourceType);
+                  String claimId = securityTagManager.extractClaimId(claimEntity);
 
                   // Look up this claim's tags from our pre-fetched map (no additional DB query)
                   Set<String> claimSpecificTags =
