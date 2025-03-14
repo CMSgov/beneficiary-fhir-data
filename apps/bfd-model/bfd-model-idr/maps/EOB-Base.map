@@ -164,7 +164,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then {
       src -> tgtAdjudication.reason = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+            src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
             tgtCoding.code="other" "Set adjudication status";
         } "Add coding";
       } "Set reason";
