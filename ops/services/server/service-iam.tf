@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "certstores_s3_policy_doc" {
+data "aws_iam_policy_document" "certstores_s3" {
   statement {
     sid = "AllowGetCertstores"
     actions = [
@@ -17,10 +17,10 @@ resource "aws_iam_policy" "certstores_s3" {
   name        = "${local.name_prefix}-certstores-s3-policy"
   path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to pull certstores from S3"
-  policy      = data.aws_iam_policy_document.certstores_s3_policy_doc.json
+  policy      = data.aws_iam_policy_document.certstores_s3.json
 }
 
-data "aws_iam_policy_document" "kms_policy_doc" {
+data "aws_iam_policy_document" "kms" {
   statement {
     sid = "AllowEnvCMKAccess"
     actions = [
@@ -40,10 +40,10 @@ resource "aws_iam_policy" "kms" {
   name        = "${local.name_prefix}-kms-policy"
   path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to use the ${local.env} CMK"
-  policy      = data.aws_iam_policy_document.kms_policy_doc.json
+  policy      = data.aws_iam_policy_document.kms.json
 }
 
-data "aws_iam_policy_document" "rds_policy_doc" {
+data "aws_iam_policy_document" "rds" {
   statement {
     sid       = "AllowDescribeRDSInstances"
     actions   = ["rds:DescribeDBInstances"]
@@ -55,10 +55,10 @@ resource "aws_iam_policy" "rds" {
   name        = "${local.name_prefix}-rds-policy"
   path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to describe RDS DB Instances"
-  policy      = data.aws_iam_policy_document.rds_policy_doc.json
+  policy      = data.aws_iam_policy_document.rds.json
 }
 
-data "aws_iam_policy_document" "ssm_params_policy_doc" {
+data "aws_iam_policy_document" "ssm_params" {
   statement {
     sid = "AllowGetServerAndCommonParameters"
     actions = [
@@ -83,10 +83,10 @@ resource "aws_iam_policy" "ssm_params" {
   name        = "${local.name_prefix}-ssm-params-policy"
   path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to get required SSM parameeters"
-  policy      = data.aws_iam_policy_document.ssm_params_policy_doc.json
+  policy      = data.aws_iam_policy_document.ssm_params.json
 }
 
-data "aws_iam_policy_document" "ecs_exec_policy_doc" {
+data "aws_iam_policy_document" "ecs_exec" {
   statement {
     sid = "AllowECSExec"
     actions = [
@@ -103,10 +103,10 @@ resource "aws_iam_policy" "ecs_exec" {
   name        = "${local.name_prefix}-ecs-exec-policy"
   path        = local.cloudtamer_iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to use ECS Exec"
-  policy      = data.aws_iam_policy_document.ecs_exec_policy_doc.json
+  policy      = data.aws_iam_policy_document.ecs_exec.json
 }
 
-data "aws_iam_policy_document" "ecs_service_role_assume_policy_doc" {
+data "aws_iam_policy_document" "ecs_service_role_assume" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -120,7 +120,7 @@ resource "aws_iam_role" "service_role" {
   name                  = "${local.name_prefix}-service-role"
   path                  = local.cloudtamer_iam_path
   description           = "Role for the ${local.env} ${local.service} ECS service containers"
-  assume_role_policy    = data.aws_iam_policy_document.ecs_service_role_assume_policy_doc.json
+  assume_role_policy    = data.aws_iam_policy_document.ecs_service_role_assume.json
   permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
   force_detach_policies = true
 }
@@ -138,11 +138,11 @@ resource "aws_iam_role_policy_attachment" "service_role" {
   policy_arn = each.value
 }
 
-data "aws_iam_policy" "ecs_execution_role_policy" {
+data "aws_iam_policy" "ecs_execution_role" {
   name = "AmazonECSTaskExecutionRolePolicy"
 }
 
-data "aws_iam_policy_document" "ecs_task_execution_role_assume_policy_doc" {
+data "aws_iam_policy_document" "ecs_task_execution_role_assume" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -156,12 +156,12 @@ resource "aws_iam_role" "execution_role" {
   name                  = "${local.name_prefix}-execution-role"
   path                  = local.cloudtamer_iam_path
   description           = "${local.env} ${local.service} ECS task execution role"
-  assume_role_policy    = data.aws_iam_policy_document.ecs_task_execution_role_assume_policy_doc.json
+  assume_role_policy    = data.aws_iam_policy_document.ecs_task_execution_role_assume.json
   permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
   force_detach_policies = true
 }
 
 resource "aws_iam_role_policy_attachment" "execution_role" {
   role       = aws_iam_role.execution_role.name
-  policy_arn = data.aws_iam_policy.ecs_execution_role_policy.arn
+  policy_arn = data.aws_iam_policy.ecs_execution_role.arn
 }
