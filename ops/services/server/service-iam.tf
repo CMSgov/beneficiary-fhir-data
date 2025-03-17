@@ -1,11 +1,3 @@
-locals {
-  cloudtamer_iam_path = "/delegatedadmin/developer/"
-}
-
-data "aws_iam_policy" "permissions_boundary" {
-  name = "ct-ado-poweruser-permissions-boundary-policy"
-}
-
 data "aws_iam_policy_document" "certstores_s3_policy_doc" {
   statement {
     sid = "AllowGetCertstores"
