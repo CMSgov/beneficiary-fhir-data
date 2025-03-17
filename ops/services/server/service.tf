@@ -5,9 +5,8 @@ locals {
   server_port            = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
   # TOOD: SSM
   # TODO: Reduce memory usage when BFD-3958 is done
-  server_cpu         = 4096
-  server_memory      = 8192
-  server_java_memory = floor(local.server_memory * 0.9)
+  server_cpu    = 4096
+  server_memory = 8192
   server_ssm_hierarchies = [
     "/bfd/${local.env}/${local.service}/sensitive/",
     "/bfd/${local.env}/${local.service}/nonsensitive/",
@@ -132,7 +131,7 @@ resource "aws_ecs_task_definition" "server" {
         environment = [
           {
             name  = "JDK_JAVA_OPTIONS"
-            value = "-Xms${local.server_java_memory}m -Xmx${local.server_java_memory}m -XX:+PreserveFramePointer -Dnetworkaddress.cache.ttl=5 -Dsun.net.inetaddr.ttl=0"
+            value = "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+PreserveFramePointer -Dnetworkaddress.cache.ttl=5 -Dsun.net.inetaddr.ttl=0"
           },
           {
             name  = "BFD_DB_URL"
