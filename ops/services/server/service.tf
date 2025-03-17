@@ -168,9 +168,9 @@ resource "aws_ecs_task_definition" "server" {
           command = ["CMD-SHELL", "curl --silent --insecure --cert '${local.server_healthcheck_pem_path}' --output /dev/null --fail '${local.server_healthcheck_uri}' || exit 1"]
           # TOOD: Get this in SSM
           interval    = 10
-          timeout     = 5
-          retries     = 3
-          startPeriod = 30
+          timeout     = 10
+          retries     = 6
+          startPeriod = 60
         }
         essential = true
         image     = data.aws_ecr_image.server.image_uri
