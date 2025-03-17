@@ -3,6 +3,11 @@ locals {
   server_truststore_path = "/data/${local.truststore_filename}"
   server_keystore_path   = "/data/${local.keystore_filename}"
   server_port            = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
+  # TOOD: SSM
+  # TODO: Reduce memory usage when BFD-3958 is done
+  server_cpu         = 4096
+  server_memory      = 8192
+  server_java_memory = floor(local.server_memory * 0.9)
   server_ssm_hierarchies = [
     "/bfd/${local.env}/${local.service}/sensitive/",
     "/bfd/${local.env}/${local.service}/nonsensitive/",
@@ -45,10 +50,8 @@ resource "aws_ecs_task_definition" "server" {
   track_latest             = false
 
   network_mode = "awsvpc"
-  # Must be high because NPI loading on startup consumes an astronomical amount of resources
-  # TODO: Reduce the below substantially when NPI/FDA data is in database
-  cpu    = "16384"
-  memory = "32768"
+  cpu          = local.server_cpu
+  memory       = local.server_memory
   runtime_platform {
     cpu_architecture        = "ARM64"
     operating_system_family = "LINUX"
@@ -127,6 +130,10 @@ resource "aws_ecs_task_definition" "server" {
           },
         ]
         environment = [
+          {
+            name  = "JDK_JAVA_OPTIONS"
+            value = "-Xms${local.server_java_memory}m -Xmx${local.server_java_memory}m -XX:+PreserveFramePointer -Dnetworkaddress.cache.ttl=5 -Dsun.net.inetaddr.ttl=0"
+          },
           {
             name  = "BFD_DB_URL"
             value = "jdbc:postgresql://${data.aws_rds_cluster.main.reader_endpoint}:5432/fhirdb?logServerErrorDetail=false"
