@@ -296,3 +296,29 @@ resource "aws_ecs_service" "server" {
     subnets          = [for _, subnet in data.aws_subnet.app_subnets : subnet.id]
   }
 }
+
+resource "aws_appautoscaling_target" "server" {
+  max_capacity       = 10
+  min_capacity       = 1
+  resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service.server.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "server_track_cpu" {
+  name               = "${local.name_prefix}-cpu-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.server.resource_id
+  scalable_dimension = aws_appautoscaling_target.server.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.server.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value       = 70
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+  }
+}
