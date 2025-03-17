@@ -107,7 +107,7 @@ resource "aws_lb_target_group" "this" {
   connection_termination = true
   target_type            = "ip"
   health_check {
-    healthy_threshold   = 3
+    healthy_threshold   = 2
     interval            = 5
     timeout             = 5
     unhealthy_threshold = 5
