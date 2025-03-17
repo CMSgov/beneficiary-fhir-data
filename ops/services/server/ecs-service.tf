@@ -166,8 +166,8 @@ resource "aws_ecs_task_definition" "server" {
           command = ["CMD-SHELL", "curl --silent --insecure --cert '${local.server_healthcheck_pem_path}' --output /dev/null --fail '${local.server_healthcheck_uri}' || exit 1"]
           # TOOD: Get this in SSM
           interval    = 10
-          timeout     = 15
-          retries     = 10
+          timeout     = 5
+          retries     = 3
           startPeriod = 30
         }
         essential = true
@@ -255,7 +255,7 @@ resource "aws_ecs_service" "server" {
   depends_on = [aws_s3_object.keystore, aws_s3_object.truststore]
 
   lifecycle {
-    ignore_changes = [desired_count]
+    ignore_changes = [task_definition, desired_count, load_balancer, capacity_provider_strategy]
   }
 
   cluster                            = data.aws_ecs_cluster.main.arn
@@ -267,16 +267,13 @@ resource "aws_ecs_service" "server" {
   enable_execute_command             = true
   health_check_grace_period_seconds  = 0
   name                               = local.service
-  platform_version                   = "LATEST"
   propagate_tags                     = "NONE"
   scheduling_strategy                = "REPLICA"
   task_definition                    = aws_ecs_task_definition.server.arn
   triggers                           = {}
 
-  force_new_deployment = true
-
   load_balancer {
-    target_group_arn = aws_lb_target_group.main[local.blue_state].arn
+    target_group_arn = aws_lb_target_group.this[0].arn
     container_name   = local.service
     container_port   = local.server_port
   }
@@ -287,13 +284,8 @@ resource "aws_ecs_service" "server" {
     weight            = 100
   }
 
-  deployment_circuit_breaker {
-    enable   = true
-    rollback = true
-  }
-
   deployment_controller {
-    type = "ECS"
+    type = "CODE_DEPLOY"
   }
 
   network_configuration {
