@@ -7,20 +7,18 @@ locals {
   lb_ingress_port               = 443
   lb_protocol                   = "TCP"
   lb_name_prefix                = "${local.name_prefix}-nlb"
-  lbs = {
+  lb_subnets                    = !local.lb_blue_is_public ? local.app_subnet_ids : local.dmz_subnet_ids
+  listeners = {
+    # TODO: Fundamentally incompatible with public LBs; need to figure out how to reconcile with port rules
     "${local.green_state}" = {
-      name     = "${local.lb_name_prefix}-${local.green_state}"
-      internal = true # green is always internal, regardless of whether blue is public
-      subnets  = local.app_subnet_ids
+      port = local.server_port
       ingress = {
         cidrs        = local.lb_internal_ingress_cidrs
         prefix_lists = local.lb_internal_ingress_pl_ids
       }
     }
     "${local.blue_state}" = {
-      name     = "${local.lb_name_prefix}-${local.blue_state}"
-      internal = !local.lb_blue_is_public
-      subnets  = !local.lb_blue_is_public ? local.app_subnet_ids : local.dmz_subnet_ids
+      port = 443
       ingress = {
         cidrs        = !local.lb_blue_is_public ? local.lb_internal_ingress_cidrs : ["0.0.0.0/0"]
         prefix_lists = !local.lb_blue_is_public ? local.lb_internal_ingress_pl_ids : []
@@ -29,14 +27,12 @@ locals {
   }
 }
 
-resource "aws_lb" "main" {
-  for_each = local.lbs
-
-  name                             = each.value.name
-  internal                         = each.value.internal
+resource "aws_lb" "this" {
+  name                             = local.lb_name_prefix
+  internal                         = !local.lb_blue_is_public
   load_balancer_type               = "network"
-  security_groups                  = [aws_security_group.lb[each.key].id]
-  subnets                          = each.value.subnets
+  security_groups                  = [for _, v in aws_security_group.lb : v.id]
+  subnets                          = local.lb_subnets
   enable_deletion_protection       = !local.is_ephemeral_env
   idle_timeout                     = 60
   ip_address_type                  = "ipv4"
@@ -45,34 +41,35 @@ resource "aws_lb" "main" {
   enable_cross_zone_load_balancing = true
 }
 
-resource "aws_lb_listener" "main" {
-  for_each = local.lbs
+resource "aws_lb_listener" "this" {
+  for_each = local.listeners
+  lifecycle {
+    # CodeDeploy will swap the target group during a blue/green deployment, so we need to ignore any
+    # changes
+    ignore_changes = [default_action]
+  }
 
-  load_balancer_arn = aws_lb.main[each.key].arn
-  port              = local.lb_ingress_port
+  load_balancer_arn = aws_lb.this.arn
+  port              = each.value.port
   protocol          = local.lb_protocol
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.main[each.key].arn
+    target_group_arn = aws_lb_target_group.this[0].arn
   }
 }
 
-# security group
 resource "aws_security_group" "lb" {
-  for_each = local.lbs
-  lifecycle {
-    create_before_destroy = true
-  }
+  for_each = local.listeners
 
-  name        = "${each.value.name}-sg"
-  description = "Allow ${each.value.internal ? "internal" : "public"} ingress to the ${each.value.name} NLB; egress to ${local.service} ECS Service containers"
+  name        = "${local.lb_name_prefix}-${each.key}-sg"
+  description = "Allow blue/green ingress to the ${local.lb_name_prefix} NLB; egress to ${local.service} ECS Service containers"
   vpc_id      = data.aws_vpc.main.id
-  tags        = merge({ Name = "${each.value.name}-sg" })
+  tags        = merge({ Name = "${local.lb_name_prefix}-${each.key}-sg" })
 
   ingress {
-    from_port   = local.lb_ingress_port
-    to_port     = local.lb_ingress_port
+    from_port   = each.value.port
+    to_port     = each.value.port
     protocol    = local.lb_protocol
     cidr_blocks = each.value.ingress.cidrs
   }
@@ -81,8 +78,8 @@ resource "aws_security_group" "lb" {
   dynamic "ingress" {
     for_each = length(each.value.ingress.prefix_lists) > 0 ? [1] : []
     content {
-      from_port       = local.lb_ingress_port
-      to_port         = local.lb_ingress_port
+      from_port       = each.value.port
+      to_port         = each.value.port
       protocol        = local.lb_protocol
       prefix_list_ids = each.value.ingress.prefix_lists
     }
@@ -96,21 +93,24 @@ resource "aws_security_group" "lb" {
   }
 }
 
-resource "aws_lb_target_group" "main" {
-  for_each = local.lbs
+resource "aws_lb_target_group" "this" {
+  # We don't do a for_each because it would be a misnomer to name the Target Groups "blue" or
+  # "green" in a CodeDeploy-based deployment since they are not actually the blue or green
+  # resources--the Listeners are.
+  count = length(local.listeners)
 
-  name                   = "${aws_lb.main[each.key].name}-tg"
+  name                   = "${aws_lb.this.name}-tg-${count.index}"
   port                   = local.server_port
   protocol               = upper(local.server_protocol)
   vpc_id                 = data.aws_vpc.main.id
-  deregistration_delay   = 60
+  deregistration_delay   = 30
   connection_termination = true
   target_type            = "ip"
   health_check {
     healthy_threshold   = 3
-    interval            = 10
-    timeout             = 8
-    unhealthy_threshold = 2
+    interval            = 5
+    timeout             = 5
+    unhealthy_threshold = 5
     port                = local.server_port
     protocol            = upper(local.server_protocol)
   }
