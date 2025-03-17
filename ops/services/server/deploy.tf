@@ -86,7 +86,7 @@ resource "null_resource" "codedeploy_server" {
         if [[ $deployment_status == "Succeeded" ]]; then
             echo "Deployment succeeded."
             break
-        elif [[ $deployment_status == "Failed" ]]; then
+        elif [[ $deployment_status == "Failed" || $deployment_status == "Stopped" ]]; then
             echo "Deployment failed!"
             exit 1
         fi
