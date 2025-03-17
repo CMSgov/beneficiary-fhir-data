@@ -6,7 +6,7 @@ data "aws_kms_alias" "sse_s3" {
 resource "aws_iam_policy" "jenkins_permission_boundary" {
   description = "Jenkins Permission Boundary Policy"
   name        = "bfd-${local.env}-jenkins-permission-boundary"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [
