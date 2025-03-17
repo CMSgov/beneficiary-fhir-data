@@ -45,8 +45,10 @@ resource "aws_ecs_task_definition" "server" {
   track_latest             = false
 
   network_mode = "awsvpc"
-  cpu          = "16384"
-  memory       = "32768"
+  # Must be high because NPI loading on startup consumes an astronomical amount of resources
+  # TODO: Reduce the below substantially when NPI/FDA data is in database
+  cpu    = "16384"
+  memory = "32768"
   runtime_platform {
     cpu_architecture        = "ARM64"
     operating_system_family = "LINUX"
