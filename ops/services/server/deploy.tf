@@ -58,7 +58,7 @@ resource "aws_codedeploy_deployment_group" "server" {
   }
 }
 
-resource "null_resource" "deploy" {
+resource "null_resource" "codedeploy_server" {
   triggers = {
     task_definition_revision = aws_ecs_task_definition.server.revision
   }
