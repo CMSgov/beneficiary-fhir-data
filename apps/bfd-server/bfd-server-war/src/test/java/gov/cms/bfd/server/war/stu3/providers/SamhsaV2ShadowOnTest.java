@@ -7,16 +7,15 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
 
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.server.war.ServerRequiredTest;
+import gov.cms.bfd.server.war.ServerRequiredTest2;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
-import java.io.IOException;
 import java.util.List;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /** Tests in the case where Samhsa 2.0 shadow flag is ON* */
-class SamhsaV2ShadowOnTest extends ServerRequiredTest {
+class SamhsaV2ShadowOnTest extends ServerRequiredTest2 {
 
   /** Test utils. */
   private static final RDATestUtils rdaTestUtils = new RDATestUtils();
@@ -30,9 +29,10 @@ class SamhsaV2ShadowOnTest extends ServerRequiredTest {
   /** The base claim response endpoint. */
   private static String claimResponseEndpoint;
 
-  @BeforeAll
-  protected static synchronized void setup() throws IOException {
-    //    setup(true);
+  @BeforeEach
+  public void setupTest() {
+    //    rdaTestUtils.init();
+    //    rdaTestUtils.seedData(true);
     eobEndpoint = baseServerUrl + "/v2/fhir/ExplanationOfBenefit/";
     claimEndpoint = baseServerUrl + "/v2/fhir/Claim/";
     claimResponseEndpoint = baseServerUrl + "/v2/fhir/ClaimResponse/";
@@ -122,6 +122,8 @@ class SamhsaV2ShadowOnTest extends ServerRequiredTest {
         .expect()
         // our top level is a bundle
         .body("resourceType", equalTo("Bundle"))
+        // we should have 8 claim type entries
+        .body("entry.size()", equalTo(8))
         // the claim types of these entries should all be ExplanationOfBenefit
         .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
         // Check our response has the various claim types by checking their metadata ids for
@@ -161,6 +163,7 @@ class SamhsaV2ShadowOnTest extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         .body("resourceType", equalTo("Bundle"))
+        // since we start on the last item's index with 2 items per page, 1 item returned
         .statusCode(200)
         .when()
         .get(requestString);

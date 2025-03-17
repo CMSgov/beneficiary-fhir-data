@@ -47,6 +47,9 @@ jobs:
 
   mvn-verify:
     runs-on: ubuntu-24.04
+    env:
+      ACTIONS_RUNNER_DEBUG: true
+      ACTIONS_STEP_DEBUG: true
     needs: workflow
     if: needs.workflow.outputs.files
     steps:

@@ -25,7 +25,7 @@ import org.postgresql.ds.PGSimpleDataSource;
  * properties: 'its.db.url', 'its.db.username', 'its.db.password'. Only local databases are allowed,
  * since the database is truncated after each test.
  */
-public class ServerRequiredTest {
+public class ServerRequiredTest2 {
 
   /** The database url used to set up the tests. */
   private static final String DB_URL = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
@@ -52,44 +52,12 @@ public class ServerRequiredTest {
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
   protected static synchronized void setup() throws IOException {
-    //    System.out.println("Starting server setup with false...");
-    //    setup(false);
-    //    System.out.println("Starting server setup with false...");
-    if (!ServerExecutor.isRunning()) {
-      assertTrue(
-          ServerTestUtils.isValidServerDatabase(DB_URL),
-          "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
-      // Initialize/get the database/datasource, so we can just pass a connection string to the
-      // server
-      dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
-      String resolvedDbUrl;
-      String dbUsername;
-      String dbPassword;
-      // Grab the previously set-up local database url to pass to the test server
-      if (dataSource instanceof PGSimpleDataSource && DB_URL.endsWith("tc")) {
-        resolvedDbUrl = ((PGSimpleDataSource) dataSource).getUrl();
-        dbUsername = TEST_CONTAINER_DATABASE_USERNAME;
-        dbPassword = TEST_CONTAINER_DATABASE_PASSWORD;
-      } else {
-        // If we support other datasources in the future, cast and pull the actual URL from them
-        // like above
-        throw new IllegalStateException("Unable to setup test server with requested datasource.");
-      }
 
-      boolean startedServer = ServerExecutor.startServer(resolvedDbUrl, dbUsername, dbPassword);
-
-      System.out.println("Server setup completed with true.");
-      assertTrue(startedServer, "Could not startup server for tests.");
-      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
-      requestAuth = getRequestAuth("test-keystore.p12");
-
-      // Set up a shutdown hook to shut down the server when we are finished with all tests
-      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
+    if (ServerExecutor.isRunning()) {
+      ServerExecutor.stopServer();
     }
-  }
 
-  protected static synchronized void setup(boolean shadowSamhsa) throws IOException {
-    if (!ServerExecutor.isRunning() || shadowSamhsa) {
+    if (!ServerExecutor.isRunning()) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
