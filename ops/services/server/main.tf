@@ -36,4 +36,6 @@ locals {
 
   green_state = "green"
   blue_state  = "blue"
+
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
 }
