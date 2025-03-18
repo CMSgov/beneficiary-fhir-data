@@ -467,8 +467,8 @@ public class McsTransformerIT {
     /** Beneficiary DOB. */
     private static final String BENE_DOB = "2020-01-01";
 
-    /** Beneficiary gender. */
-    private static final int BENE_GENDER = 1;
+    /** Beneficiary sex. */
+    private static final int BENE_SEX = 1;
 
     /** Carrier Claim Control Number.. */
     private static final String CARR_CLM_CNTL_NUM = "icn12345678";
@@ -569,7 +569,7 @@ public class McsTransformerIT {
           .setIdrBeneFirstInit(BENE_FIRST_NAME)
           .setIdrBeneMidInit(BENE_MID_INIT)
           .setIdrBeneLast16(BENE_LAST_NAME)
-          .setIdrBeneSexEnumValue(BENE_GENDER - 1)
+          .setIdrBeneSexEnumValue(BENE_SEX - 1)
           .setIdrBillProvNpi(ORG_NPI_NUM)
           .setIdrTotBilledAmt(NCH_CARR_CLM_SBMTD_CHRG_AMT)
           .addMcsDiagnosisCodes(
@@ -675,7 +675,7 @@ public class McsTransformerIT {
               BENE_LAST_NAME,
               BENE_MID_INIT,
               BENE_DOB,
-              String.valueOf(BENE_GENDER)));
+              String.valueOf(BENE_SEX)));
     }
 
     /**

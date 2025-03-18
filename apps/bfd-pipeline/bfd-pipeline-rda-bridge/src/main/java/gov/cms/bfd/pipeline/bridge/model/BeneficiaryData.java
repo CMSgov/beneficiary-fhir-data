@@ -57,8 +57,8 @@ public class BeneficiaryData {
   /** Beneficiary Date of Birth. */
   private final String dob;
 
-  /** Beneficiary Gender. */
-  private final String gender;
+  /** Beneficiary sex. */
+  private final String sex;
 
   /**
    * Creates a single {@link BeneficiaryData} object from the given {@link Parser.Data}.
@@ -74,8 +74,8 @@ public class BeneficiaryData {
     String lastName = data.get(BENE_SRNM_NAME).orElse(null);
     String midName = data.get(BENE_MDL_NAME).orElse(null);
     String dob = data.getFromType(BENE_BIRTH_DT, Parser.Data.Type.DATE).orElse(null);
-    String gender = data.get(BENE_SEX_IDENT_CD).orElse(null);
+    String sex = data.get(BENE_SEX_IDENT_CD).orElse(null);
 
-    return new BeneficiaryData(beneId, mbi, hicNo, firstName, lastName, midName, dob, gender);
+    return new BeneficiaryData(beneId, mbi, hicNo, firstName, lastName, midName, dob, sex);
   }
 }
