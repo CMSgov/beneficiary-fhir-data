@@ -9,6 +9,7 @@ Intended as temporary glue until the Server's ECS migration is complete.
 """
 
 import os
+import time
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from typing import Any
@@ -70,6 +71,17 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
     try:
         if not all([REGION, LOCUST_HOST, BFD_ENVIRONMENT, INVOKE_SQS_QUEUE, RESULT_SQS_QUEUE]):
             raise RuntimeError("Not all necessary environment variables were defined")
+
+        # This is unfortunately necessary as there appears to be a delay between NLBs indicating
+        # that a listener has switched to a new Target Group and it actually happening. 3 minutes
+        # seems to be the maxiumm amount of time it takes an NLB to properly register a new TG See
+        # https://github.com/aws/containers-roadmap/issues/470
+        logger.info(
+            "Started for deployment ID '%s'. Waiting 3 minutes to allow test listener time to be "
+            "available...",
+            codedeploy_event.deployment_id,
+        )
+        time.sleep(3 * 60)
 
         # Post message to invoke queue to start the Regression Suite test
         logger.info("Starting Regression Suite test by sending to %s...", INVOKE_SQS_QUEUE)
