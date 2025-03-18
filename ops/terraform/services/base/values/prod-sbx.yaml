@@ -736,3 +736,8 @@
   VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
   uasJ/R5hG+geJ+ydxt8EmVKpmA==
   -----END CERTIFICATE-----
+# TODO: Remove the /ecs/ part when ECS Fargate migration is complete
+/bfd/${env}/server/nonsensitive/ecs/capacity/min: 3
+/bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
+/bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
