@@ -3,10 +3,10 @@ locals {
   server_truststore_path = "/data/${local.truststore_filename}"
   server_keystore_path   = "/data/${local.keystore_filename}"
   server_port            = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
-  # TOOD: SSM
-  # TODO: Reduce memory usage when BFD-3958 is done
-  server_cpu    = 4096
-  server_memory = 8192
+  server_min_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/min"])
+  server_max_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
+  server_cpu             = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  server_memory          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   server_ssm_hierarchies = [
     "/bfd/${local.env}/${local.service}/sensitive/",
     "/bfd/${local.env}/${local.service}/nonsensitive/",
@@ -177,8 +177,7 @@ resource "aws_ecs_task_definition" "server" {
           },
         ]
         healthCheck = {
-          command = ["CMD-SHELL", "curl --silent --insecure --cert '${local.server_healthcheck_pem_path}' --output /dev/null --fail '${local.server_healthcheck_uri}' || exit 1"]
-          # TOOD: Get this in SSM
+          command     = ["CMD-SHELL", "curl --silent --insecure --cert '${local.server_healthcheck_pem_path}' --output /dev/null --fail '${local.server_healthcheck_uri}' || exit 1"]
           interval    = 10
           timeout     = 10
           retries     = 6
@@ -276,7 +275,7 @@ resource "aws_ecs_service" "server" {
   availability_zone_rebalancing      = "ENABLED"
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
-  desired_count                      = 1
+  desired_count                      = local.server_min_capacity
   enable_ecs_managed_tags            = true
   enable_execute_command             = true
   health_check_grace_period_seconds  = 0
@@ -310,8 +309,8 @@ resource "aws_ecs_service" "server" {
 }
 
 resource "aws_appautoscaling_target" "server" {
-  max_capacity       = 10
-  min_capacity       = 1
+  max_capacity       = local.server_max_capacity
+  min_capacity       = local.server_min_capacity
   resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service.server.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
