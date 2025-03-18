@@ -130,8 +130,14 @@ resource "aws_ecs_task_definition" "server" {
         ]
         environment = [
           {
-            name  = "JDK_JAVA_OPTIONS"
-            value = "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+PreserveFramePointer -Dnetworkaddress.cache.ttl=5 -Dsun.net.inetaddr.ttl=0"
+            name = "JDK_JAVA_OPTIONS"
+            value = join(" ", [
+              "-XX:+UseContainerSupport",
+              "-XX:MaxRAMPercentage=75.0",
+              "-XX:+PreserveFramePointer",
+              "-Dnetworkaddress.cache.ttl=5",
+              "-Dsun.net.inetaddr.ttl=0"
+            ])
           },
           {
             name  = "BFD_DB_URL"
