@@ -49,7 +49,7 @@ resource "aws_lambda_function" "regression_wrapper" {
   environment {
     variables = {
       BFD_ENVIRONMENT  = local.env
-      LOCUST_HOST      = "https://${aws_lb.this.dns_name}:${local.server_port}"
+      LOCUST_HOST      = "https://${aws_lb.this.dns_name}:${aws_lb_listener.this[local.green_state].port}"
       INVOKE_SQS_QUEUE = data.aws_sqs_queue.regression_invoke.url
       RESULT_SQS_QUEUE = data.aws_sqs_queue.regression_result.url
     }
