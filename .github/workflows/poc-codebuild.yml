@@ -1,0 +1,10 @@
+---
+# Following through on tutorial https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html
+name: Hello World
+on: [push]
+jobs:
+  Hello-World-Job:
+    runs-on:
+      - codebuild-burling-gha-poc-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - run: echo "Hello World"
