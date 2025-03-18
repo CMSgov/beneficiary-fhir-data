@@ -91,6 +91,15 @@ data "aws_iam_policy_document" "codedeploy" {
       aws_iam_role.execution_role.arn
     ]
   }
+
+  statement {
+    sid    = "AllowUsageOfRegressionWrapperLambda"
+    effect = "Allow"
+
+    actions = ["lambda:InvokeFunction", "lambda:GetFunction"]
+
+    resources = [aws_lambda_function.regression_wrapper.arn]
+  }
 }
 
 resource "aws_iam_policy" "codedeploy" {

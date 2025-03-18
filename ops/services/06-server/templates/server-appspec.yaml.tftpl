@@ -13,5 +13,5 @@ revision:
               LoadBalancerInfo:
                 ContainerName: "${container_name}"
                 ContainerPort: ${container_port}
-      # Hooks:
-      #   - AfterAllowTestTraffic: "TODO_RegressionSuite"
+      Hooks:
+        - AfterAllowTestTraffic: "${validation_lambda_arn}"
