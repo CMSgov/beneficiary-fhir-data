@@ -40,7 +40,7 @@ resource "aws_lambda_function" "regression_wrapper" {
   memory_size      = 128
   package_type     = "Zip"
   runtime          = "python3.13"
-  timeout          = 180
+  timeout          = 360
 
   tags = {
     Name = local.rw_lambda_full_name
