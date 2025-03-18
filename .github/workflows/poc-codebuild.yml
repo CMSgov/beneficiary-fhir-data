@@ -1,10 +1,62 @@
 ---
-# Following through on tutorial https://docs.aws.amazon.com/codebuild/latest/userguide/action-runner.html
 name: Hello World
 on: [push]
+env:
+  # workflow file matchers - workflow jobs will only run if matching files are found
+  # please see https://github.com/CMSgov/beneficiary-fhir-data/pull/773 for why we
+  # are using this workflow logic
+  # NOTE: The expression below can be extended to multi-line
+  # using a '\' as a continuation character.
+  # https://stackoverflow.com/questions/6268391/is-there-a-way-to-represent-a-long-string-that-doesnt-have-any-whitespace-on-mul
+  workflow_files_re: "^apps/(?!bfd-pipeline/bfd-pipeline-idr|bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
+
 jobs:
-  Hello-World-Job:
-    runs-on:
-      - codebuild-burling-gha-poc-${{ github.run_id }}-${{ github.run_attempt }}
+  workflow:
+    name: Checking workflow
+    runs-on: codebuild-burling-gha-poc-${{ github.run_id }}-${{ github.run_attempt }}
+    outputs:
+      files: ${{ steps.workflow_files.outputs.files }}
     steps:
-      - run: echo "Hello World"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: workflow_files
+        name: Set output
+        run: |
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -P '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  mvn-fmt-maven-plugin:
+    runs-on: codebuild-burling-gha-poc-${{ github.run_id }}-${{ github.run_attempt }}
+    needs: workflow
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+      - name: 'Run maven ${{ matrix.mvn_commmand }}'
+        run: mvn com.spotify.fmt:fmt-maven-plugin:check
+        working-directory: ./apps
+
+  mvn-verify:
+    runs-on: codebuild-burling-gha-poc-${{ github.run_id }}-${{ github.run_attempt }}
+    needs: workflow
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v4
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: 'maven'
+
+      - name: 'Run Maven Build'
+        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false -DbfdOps.skip=false verify
+        working-directory: ./apps
+
+# TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
