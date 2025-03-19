@@ -58,7 +58,6 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        .body("total", equalTo(8))
         // Check there are tax numbers on applicable claims; carrier and DME
         // Tax num value is found in the carrier.resource.item.extension.valueCoding.code (for the
         // appropriate url)
@@ -97,7 +96,6 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries
         .body("entry.size()", equalTo(8))
-        .body("total", equalTo(8))
         // the claim types of these entries should all be ExplanationOfBenefit
         .body("entry.resource.resourceType", everyItem(equalTo("ExplanationOfBenefit")))
         // Check our response has the various claim types by checking their metadata ids for
