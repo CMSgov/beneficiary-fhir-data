@@ -47,9 +47,6 @@ jobs:
 
   mvn-verify:
     runs-on: ubuntu-24.04
-    env:
-      ACTIONS_RUNNER_DEBUG: true
-      ACTIONS_STEP_DEBUG: true
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
@@ -63,7 +60,7 @@ jobs:
           cache: 'maven'
 
       - name: 'Run Maven Build'
-        run: mvn --threads 1C --debug -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false -DbfdOps.skip=false verify
+        run: mvn --threads 1C --no-transfer-progress --debug -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false -DbfdOps.skip=false verify
         working-directory: ./apps
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
