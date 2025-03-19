@@ -1,12 +1,23 @@
 formatter: markdown table
 sections:
   show:
+    - requirements
+    - data-sources
     - inputs
     - outputs
+
 
 # this `content` string is implemented with as a golang template https://pkg.go.dev/text/template
 # updates here correspond to `{{ .Content }}` in `output.template` setting below
 content: |-
+    {{ .Requirements  }}
+
+    <!-- GENERATED WITH `terraform-docs .`
+         Manually updating the README.md will be overwritten.
+         For more details, see the file '.terraform-docs.yml' or
+         https://terraform-docs.io/user-guide/configuration/
+    -->
+
     {{ .Inputs }}
 
     <!-- GENERATED WITH `terraform-docs .`
@@ -16,6 +27,14 @@ content: |-
     -->
 
     {{ .Outputs }}
+
+    <!-- GENERATED WITH `terraform-docs .`
+         Manually updating the README.md will be overwritten.
+         For more details, see the file '.terraform-docs.yml' or
+         https://terraform-docs.io/user-guide/configuration/
+    -->
+
+    {{ .Resources }}
 
 output:
   file: README.md

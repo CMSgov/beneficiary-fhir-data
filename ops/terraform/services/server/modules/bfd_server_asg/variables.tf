@@ -35,8 +35,14 @@ variable "db_config" {
 
 variable "lb_config" {
   description = "Load balancer information"
-  type        = object({ name = string, port = number, sg = string })
-  default     = null
+  type = object({
+    is_public                  = bool
+    enable_deletion_protection = bool
+    server_listen_port         = string
+    internal_ingress_cidrs     = list(string)
+    internal_prefix_lists      = list(string)
+  })
+  default = null
 }
 
 variable "mgmt_config" {
@@ -63,3 +69,17 @@ variable "jdbc_suffix" {
   description = "boolean controlling logging of detail SQL values if a BatchUpdateException occurs; false disables detail logging"
   type        = string
 }
+
+# TODO: Remove below code in BFD-3878
+variable "legacy_clb_name" {
+  default     = null
+  type        = string
+  description = "Name of the legacy CLB to associate ASGs to; only necessary for established environments"
+}
+
+variable "legacy_sg_id" {
+  default     = null
+  type        = string
+  description = "Name of the legacy Security Group to allow ingress from in the app SG"
+}
+# TODO: Remove above code in BFD-3878

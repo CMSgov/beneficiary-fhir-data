@@ -103,3 +103,7 @@ data "aws_route53_zone" "this" {
     "ConfigId" = local.inbound_r53_hosted_zone
   }
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

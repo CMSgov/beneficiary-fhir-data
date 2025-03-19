@@ -1,6 +1,8 @@
 resource "aws_iam_role" "logs" {
-  name        = "${local.full_name}-logs"
-  description = "Role allowing the ${local.full_name}-sftp Transfer Server to write logs"
+  name                 = "${local.full_name}-logs"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role allowing the ${local.full_name}-sftp Transfer Server to write logs"
 
   assume_role_policy = jsonencode(
     {
@@ -21,13 +23,13 @@ resource "aws_iam_role" "logs" {
     "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess",
   ]
   max_session_duration = 3600
-  path                 = "/"
 }
 
 resource "aws_iam_role" "eft_user" {
-  name        = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
-  description = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.inbound_sftp_user_username} SFTP user"
-
+  name                 = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
+  description          = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.inbound_sftp_user_username} SFTP user"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   assume_role_policy = jsonencode(
     {
       Statement = [
@@ -49,6 +51,7 @@ resource "aws_iam_role" "eft_user" {
 
 resource "aws_iam_policy" "eft_user" {
   name = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Allows the ${local.inbound_sftp_user_username} SFTP user to access their restricted portion ",
     "of the ${aws_s3_bucket.this.id} S3 bucket when using SFTP"
@@ -108,10 +111,11 @@ resource "aws_iam_policy" "eft_user" {
   )
 }
 
+# TODO: Kion Migration Must Replace Path and add permission boundary, partners need made aware of new role arn to assume BFD-3953
 resource "aws_iam_role" "partner_bucket_role" {
   for_each = local.eft_partners_config
-
-  name = "${local.full_name}-${each.key}-bucket-role"
+  path     = "/"
+  name     = "${local.full_name}-${each.key}-bucket-role"
   description = join("", [
     "Role granting cross-account permissions to partner-specific folder for ${each.key} within ",
     "the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
@@ -137,10 +141,105 @@ resource "aws_iam_role" "partner_bucket_role" {
   force_detach_policies = true
 }
 
+# TODO: Kion Migration Must Replace / Remove  BFD-3953
+resource "aws_iam_role" "ct_partner_bucket_role" {
+  for_each             = local.eft_partners_config
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  name                 = "${local.full_name}-${each.key}-ct-bucket-role"
+  description = join("", [
+    "Role granting cross-account permissions to partner-specific folder for ${each.key} within ",
+    "the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
+  ])
+
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        for index, assumer_arn in each.value.bucket_iam_assumer_arns : {
+          Sid    = "AllowAssumeRole${index}"
+          Effect = "Allow"
+          Action = "sts:AssumeRole"
+          Principal = {
+            AWS = assumer_arn
+          }
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = [aws_iam_policy.partner_bucket_access[each.key].arn]
+
+  force_detach_policies = true
+}
+
+# TODO: Kion Migration Must Replace Path and add permission boundary, partners need made aware of new role arn to assume BFD-3953
+resource "aws_iam_role" "isp_bcda_bucket_role" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name = "${local.full_name}-isp-to-bcda-bucket-role"
+  path = "/"
+  description = join("", [
+    "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
+    "path within the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
+  ])
+
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Sid    = "AllowAssumeRole"
+          Effect = "Allow"
+          Action = "sts:AssumeRole"
+          Principal = {
+            AWS = local.bcda_isp_bucket_assumer_arns
+          }
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = aws_iam_policy.isp_bcda_bucket_access[*].arn
+
+  force_detach_policies = true
+}
+
+# TODO: Kion Migration Must Replace / Remove  BFD-3953
+resource "aws_iam_role" "ct_isp_bcda_bucket_role" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name                 = "${local.full_name}-ct-isp-to-bcda-bucket-role"
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  path                 = local.cloudtamer_iam_path
+  description = join("", [
+    "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
+    "path within the ${aws_s3_bucket.this.id} EFT bucket when role is assumed"
+  ])
+
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
+        {
+          Sid    = "AllowAssumeRole"
+          Effect = "Allow"
+          Action = "sts:AssumeRole"
+          Principal = {
+            AWS = local.bcda_isp_bucket_assumer_arns
+          }
+        }
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  managed_policy_arns = aws_iam_policy.isp_bcda_bucket_access[*].arn
+
+  force_detach_policies = true
+}
+
+# TODO: Kion Migration Must Replace Path during Migration BFD-3953
 resource "aws_iam_policy" "partner_bucket_access" {
   for_each = local.eft_partners_config
-
-  name = "${local.full_name}-${each.key}-allow-eft-s3-path"
+  path     = "/" # Must Change During KION Migration
+  name     = "${local.full_name}-${each.key}-allow-eft-s3-path"
   description = join("", [
     "Allows ${each.key} to access their specific EFT data when this policy's corresponding IAM ",
     "role is assumed by ${each.key}"
@@ -202,10 +301,69 @@ resource "aws_iam_policy" "partner_bucket_access" {
   )
 }
 
+resource "aws_iam_policy" "isp_bcda_bucket_access" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name = "${local.full_name}-isp-to-bcda-allow-eft-s3-path"
+  path = local.cloudtamer_iam_path
+  description = join("", [
+    "Allows ISP to access the BCDA inbound path when this policy's corresponding IAM ",
+    "role is assumed by ISP"
+  ])
+
+  policy = jsonencode(
+    {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AllowListingOfBCDAHomePath"
+          Effect = "Allow"
+          Action = [
+            "s3:ListBucket",
+            "s3:GetBucketLocation"
+          ]
+          Resource = [aws_s3_bucket.this.arn]
+          Condition = {
+            StringLike = {
+              "s3:prefix" = ["${local.eft_partners_config["bcda"].bucket_home_path}/*"]
+            }
+          }
+        },
+        {
+          Sid    = "AllowRestrictedAccessToBCDAHomePath"
+          Effect = "Allow"
+          Action = [
+            "s3:AbortMultipartUpload",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:PutObjectVersionAcl"
+          ],
+          Resource = [
+            "${aws_s3_bucket.this.arn}/${local.eft_partners_config["bcda"].bucket_home_path}/*"
+          ]
+        },
+        {
+          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
+          Effect = "Allow"
+          Action = [
+            "kms:Encrypt",
+            "kms:ReEncrypt*",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey",
+          ]
+          Resource = [
+            local.kms_key_id
+          ]
+        },
+      ]
+    }
+  )
+}
+
 resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  name = "${local.outbound_lambda_full_name}-logs"
+  path  = local.cloudtamer_iam_path
+  name  = "${local.outbound_lambda_full_name}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_lambda_full_name} Lambda to write to its corresponding ",
     "CloudWatch Log Group and Log Stream",
@@ -233,8 +391,8 @@ resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
 }
 
 resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
+  count       = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+  path        = local.cloudtamer_iam_path
   name        = "${local.outbound_lambda_full_name}-ssm"
   description = "Permissions to get parameters from the appropriate hierarchies"
   policy = jsonencode(
@@ -260,8 +418,8 @@ resource "aws_iam_policy" "sftp_outbound_transfer_ssm" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  name = "${local.outbound_lambda_full_name}-kms"
+  path  = local.cloudtamer_iam_path
+  name  = "${local.outbound_lambda_full_name}-kms"
   description = join("", [
     "Permissions to decrypt config KMS keys and encrypt and decrypt master KMS keys for ",
     "${local.env}"
@@ -300,8 +458,8 @@ resource "aws_iam_policy" "sftp_outbound_transfer_kms" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  name = "${local.outbound_lambda_full_name}-s3"
+  path  = local.cloudtamer_iam_path
+  name  = "${local.outbound_lambda_full_name}-s3"
   description = join("", [
     "Allows the ${local.outbound_lambda_full_name} to manipulate objects within the ",
     "${local.full_name} S3 bucket",
@@ -355,8 +513,8 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_sqs_dlq" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  name = "${local.outbound_lambda_full_name}-sqs-dlq"
+  path  = local.cloudtamer_iam_path
+  name  = "${local.outbound_lambda_full_name}-sqs-dlq"
   description = join("", [
     "Allows the ${local.outbound_lambda_full_name} to push events into its DLQ upon any failures"
   ])
@@ -381,8 +539,8 @@ resource "aws_iam_policy" "sftp_outbound_transfer_sqs_dlq" {
 
 resource "aws_iam_policy" "sftp_outbound_transfer_sns" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  name = "${local.outbound_lambda_full_name}-sns"
+  path  = local.cloudtamer_iam_path
+  name  = "${local.outbound_lambda_full_name}-sns"
   description = join("", [
     "Allows the ${local.outbound_lambda_full_name} to publish status notifications to the ",
     "${local.outbound_notifs_topic_prefix} SNS Topic and partner-specific Topics"
@@ -414,9 +572,10 @@ resource "aws_iam_policy" "sftp_outbound_transfer_sns" {
 resource "aws_iam_role" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name        = local.outbound_lambda_full_name
-  path        = "/"
-  description = "Role for ${local.outbound_lambda_full_name} Lambda"
+  name                 = local.outbound_lambda_full_name
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for ${local.outbound_lambda_full_name} Lambda"
 
   assume_role_policy = jsonencode(
     {
@@ -456,8 +615,8 @@ resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
 
 resource "aws_iam_policy" "outbound_notifs_logs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  name = "${local.outbound_notifs_topic_prefix}-logs"
+  path  = local.cloudtamer_iam_path
+  name  = "${local.outbound_notifs_topic_prefix}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_notifs_topic_prefix} SNS topic to write to its corresponding ",
     "CloudWatch Log Group and Log Stream",
@@ -489,8 +648,8 @@ resource "aws_iam_policy" "outbound_notifs_logs" {
 
 resource "aws_iam_policy" "outbound_partner_notifs_logs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
-
-  name = "${local.outbound_notifs_topic_prefix}-${each.key}-logs"
+  path     = local.cloudtamer_iam_path
+  name     = "${local.outbound_notifs_topic_prefix}-${each.key}-logs"
   description = join("", [
     "Permissions for the ${local.outbound_notifs_topic_prefix}-${each.key} SNS topic to write to ",
     "its corresponding CloudWatch Log Group and Log Stream",
@@ -523,9 +682,10 @@ resource "aws_iam_policy" "outbound_partner_notifs_logs" {
 resource "aws_iam_role" "outbound_notifs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name        = local.outbound_notifs_topic_prefix
-  path        = "/"
-  description = "Role for ${local.outbound_notifs_topic_prefix} SNS Topic"
+  name                 = local.outbound_notifs_topic_prefix
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for ${local.outbound_notifs_topic_prefix} SNS Topic"
 
   assume_role_policy = jsonencode(
     {
@@ -548,9 +708,10 @@ resource "aws_iam_role" "outbound_notifs" {
 resource "aws_iam_role" "outbound_partner_notifs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
 
-  name        = "${local.outbound_notifs_topic_prefix}-${each.key}"
-  path        = "/"
-  description = "Role for ${local.outbound_notifs_topic_prefix}-${each.key} SNS Topic"
+  name                 = "${local.outbound_notifs_topic_prefix}-${each.key}"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for ${local.outbound_notifs_topic_prefix}-${each.key} SNS Topic"
 
   assume_role_policy = jsonencode(
     {

@@ -1,0 +1,171 @@
+---
+name: "Build Container Images"
+on:
+  # GHA does not support "shared_inputs" or some other form of workflow_call and workflow_dispatch
+  # input consolidation; instead, we must duplicate the input definitions for each event
+  # FUTURE: Consolidate the input definitions whenever possible
+  workflow_call:
+    inputs:
+      branch:
+        description: "The branch on which the build is based."
+        type: string
+        required: true
+      versionTag:
+        description: "The string to be used for the container image tag."
+        type: string
+        required: true
+      awsRegion:
+        description: "Override the AWS Region destination for uploaded artifacts. Default to `us-east-1`."
+        default: us-east-1
+        type: string
+        required: true
+      imagesCsv:
+        description: "Comma-separated list of image names to build. Defaults to all images ('*')"
+        default: "*"
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: >-
+          branch: Override the branch on which the build is based.
+          Default to selected reference in the `Use workflow from` drop-down when empty.
+        required: false
+      versionTag:
+        description: >-
+          versionTag: the string to be used for the container image tag.
+        required: true
+        default: X.Y.Z
+      awsRegion:
+        description: >-
+          awsRegion: Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
+        default: us-east-1
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
+      imagesCsv:
+        description: "Comma-separated list of image names to build. Defaults to all images ('*')"
+        default: "*"
+        type: string
+        required: true
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: read # This is required for actions/checkout
+
+env:
+  AWS_REGION: ${{ inputs.awsRegion }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  compute-matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+
+      # Generates a JSON string array of JMESPath contains expression "fragments".
+      # Given an input like:
+      #    image1, image2
+      # The following JSON string will be the output:
+      #    ["contains('image1', name)", "contains('image2', name)"]
+      - name: Mutate images list for JMESPath
+        if: inputs.imagesCsv != '*'
+        id: mutate-images-csv
+        env:
+          IMAGES_CSV: ${{ inputs.imagesCsv }}
+        run: |
+          images_jmespath_fragments="$(jq -cR $'gsub("\\\\s*"; "") | split(",") | map("contains(\'"+.+"\', name)")' <<< "$IMAGES_CSV")"
+          echo "images_jmespath_fragments=$images_jmespath_fragments" >> $GITHUB_OUTPUT
+
+      # Consumes the output of the previous step and generates a full JMESPath expression that will
+      # be used to filter the list of images.
+      # Given an input like:
+      #    ["contains('image1', name)", "contains('image2', name)"]
+      # Generates a JMESPath expression like:
+      #    [?contains('image1', name) || contains('image2', name)]
+      - name: Generate JMESPath
+        if: inputs.imagesCsv != '*'
+        id: gen-jmespath
+        run: |
+          jmes_path="[?${{ join(fromJson(steps.mutate-images-csv.outputs.images_jmespath_fragments), ' || ') }}]"
+          echo "jmes_path=$jmes_path" >> $GITHUB_OUTPUT
+
+      # Uses the above JMESPath expression to filter the list of buildable images based upon their
+      # names.
+      - name: Setup CI jobs matrix
+        id: set-matrix
+        uses: JoshuaTheMiller/conditional-build-matrix@main
+        with:
+          filter: "${{ steps.gen-jmespath.outputs.jmes_path || '[]' }}"
+          addInclude: "false"
+          inputFile: ".github/workflows/build_container_images_matrix.json"
+
+  build-images:
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    needs: compute-matrix
+    strategy:
+      matrix:
+        image: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+    runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    steps:
+      - name: Validate Inputs
+        run: |
+          echo "Validating inputs to ensure they conform to expected formats..."
+          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref_name }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: build-images
+          aws-region: ${{ inputs.awsRegion }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Get ECR Registry Namespace
+        run: |
+          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
+          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
+          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          file: ${{ matrix.image.dockerfile }}
+          context: ${{ matrix.image.contextDir }}
+          push: true
+          tags: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+          # AWS Lambda does not support multi-platform images, something that is enabled by default
+          # by this Action via the "provenance" flag. Until AWS Lambda supports this feature
+          # properly, we must explicitly disable provenance and specify the platform directly.
+          # See https://github.com/docker/buildx/issues/1533
+          provenance: false
+          platforms: ${{ matrix.image.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        env:
+          DOCKER_BUILDKIT: 1

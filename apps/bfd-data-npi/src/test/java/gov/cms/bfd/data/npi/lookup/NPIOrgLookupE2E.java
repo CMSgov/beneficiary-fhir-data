@@ -3,6 +3,7 @@ package gov.cms.bfd.data.npi.lookup;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +18,7 @@ public class NPIOrgLookupE2E {
   NPIOrgLookup npiOrgDataLookup;
 
   /** Global variable for npiOrgDisplay. */
-  Optional<String> npiOrgDisplay;
+  Optional<NPIData> npiOrgDisplay;
 
   /** Global variable for NPI taxonomy. */
   Optional<String> npiTaxonomyDisplay;
@@ -29,7 +30,7 @@ public class NPIOrgLookupE2E {
   private final String practitionerNPI = "1679576722";
 
   /** Global variable for valid taxonomy code. */
-  private final String taxononomyCode = "207X00000X";
+  private final String taxonomyCode = "207X00000X";
 
   /** Global variable for valid taxonomy display. */
   private final String taxonomyDisplay = "Allopathic & Osteopathic Physicians";
@@ -44,15 +45,30 @@ public class NPIOrgLookupE2E {
   @BeforeEach
   void setup() throws IOException {
     StringBuilder initialString = new StringBuilder();
-    initialString.append(npiOrgNumber);
-    initialString.append("\t");
-    initialString.append(npiOrgName);
+    initialString.append(
+        String.format(
+            " {"
+                + " \"npi\": \"%s\","
+                + " \"entityTypeCode\": \"2\","
+                + " \"providerOrganizationName\": \"%s\""
+                + " }",
+            npiOrgNumber, npiOrgName));
     initialString.append("\n");
-    initialString.append(practitionerNPI);
-    initialString.append("\t");
-    initialString.append(taxononomyCode);
-    initialString.append("\t");
-    initialString.append(taxonomyDisplay);
+    initialString.append(
+        String.format(
+            " {"
+                + " \"npi\": \"%s\","
+                + " \"taxonomyCode\": \"%s\","
+                + " \"taxonomyDisplay\": \"%s\","
+                + " \"providerNamePrefix\": \"Dr\","
+                + " \"providerFirstName\": \"Stephen\","
+                + " \"providerMiddleName\": \"J.\","
+                + " \"providerLastName\": \"Smith\","
+                + " \"providerNameSuffix\": \"Sr.\","
+                + " \"providerCredential\": \"MD\""
+                + " }",
+            practitionerNPI, taxonomyCode, taxonomyDisplay));
+
     InputStream npiDataStream = new ByteArrayInputStream(initialString.toString().getBytes());
     npiOrgDataLookup = new NPIOrgLookup(npiDataStream);
     npiOrgDisplay = Optional.empty();
@@ -61,21 +77,22 @@ public class NPIOrgLookupE2E {
 
   /** End to End test for Npi Org Data with npi number. */
   @Test
-  public void shouldCorrectlyReturnNpiNameObtainedFromFileStream() throws IOException {
+  public void shouldCorrectlyReturnNpiNameObtainedFromFileStream() {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(npiOrgNumber));
-    assertEquals(npiOrgName, npiOrgDisplay.get());
+    assertEquals(npiOrgName, npiOrgDisplay.get().getProviderOrganizationName());
   }
 
   /** End to End test for NPI Taxononomy Dislplay. */
   @Test
-  public void shouldCorrectlyReturnTaxonomyForNPI() throws IOException {
-    npiTaxonomyDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(practitionerNPI));
-    assertEquals(taxononomyCode + "\t" + taxonomyDisplay, npiTaxonomyDisplay.get());
+  public void shouldCorrectlyReturnTaxonomyForNPI() {
+    npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(practitionerNPI));
+    assertEquals(taxonomyCode, npiOrgDisplay.get().getTaxonomyCode());
+    assertEquals(taxonomyDisplay, npiOrgDisplay.get().getTaxonomyDisplay());
   }
 
   /** End to End test for Npi Org Data with wrong npi number. */
   @Test
-  public void shouldReturnEmptyOrganizationWithAWrongNpiNumber() throws IOException {
+  public void shouldReturnEmptyOrganizationWithAWrongNpiNumber() {
     npiOrgDisplay = npiOrgDataLookup.retrieveNPIOrgDisplay(Optional.of(invalidNpiOrgNumber));
     assertFalse(npiOrgDisplay.isPresent());
   }

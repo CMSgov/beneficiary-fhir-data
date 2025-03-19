@@ -1,16 +1,14 @@
 package gov.cms.bfd.data.npi.utility;
 
-import com.google.common.base.Strings;
-import java.io.BufferedOutputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -21,27 +19,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Data Utility Commons class for npi. * */
 public class DataUtilityCommons {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataUtilityCommons.class);
-
-  /** Size of the buffer to read/write data. */
-  private static final int BUFFER_SIZE = 4096;
 
   /** The day of the month we should check to see if the file has posted. */
   private static final int DAYS_IN_EXPIRATION = 10;
@@ -58,6 +51,30 @@ public class DataUtilityCommons {
 
   /** Field for Entity Type Code in CSV. */
   public static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
+
+  /** Field for Provider Credential code in CSV. */
+  private static final String PROVIDER_CREDENTIAL_FIELD = "Provider Credential Text";
+
+  /** Field for Provider first name in CSV. */
+  private static final String PROVIDER_FIRST_NAME_FIELD = "Provider First Name";
+
+  /** Field for Provider middle name in CSV. */
+  private static final String PROVIDER_MIDDLE_NAME_FIELD = "Provider Middle Name";
+
+  /** Field for Provider last name in CSV. */
+  private static final String PROVIDER_LAST_NAME_FIELD = "Provider Last Name (Legal Name)";
+
+  /** Field for Provider prefix in CSV. */
+  private static final String PROVIDER_PREFIX_FIELD = "Provider Name Prefix Text";
+
+  /** Field for Provider Suffix in CSV. */
+  private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
+
+  /** Code for Provider entity type. */
+  public static final String ENTITY_TYPE_CODE_PROVIDER = "1";
+
+  /** Code for Organization entity type. */
+  public static final String ENTITY_TYPE_CODE_ORGANIZATION = "2";
 
   /**
    * Gets the org names from the npi file.
@@ -76,156 +93,47 @@ public class DataUtilityCommons {
       throw new IllegalStateException("OUTPUT_DIR does not exist for NPI download.");
     }
 
-    // Create a temp directory that will be recursively deleted when we're done.
-    Path tempDir = null;
-    try {
-      tempDir = Files.createTempDirectory("npi-data");
-    } catch (IOException e) {
-      throw new IllegalStateException("Cannot create temporary directory.");
-    }
-
     // If the output file isn't already there, go build it.
     Path convertedNpiDataFile = outputPath.resolve(npiFile);
     try {
-      buildNPIResource(convertedNpiDataFile, downloadUrl, tempDir);
+      buildNPIResource(convertedNpiDataFile, downloadUrl);
     } catch (IOException exception) {
       LOGGER.error("NPI data file could not be read.  Error:", exception);
       throw new IOException(exception);
-    } finally {
-      recursivelyDelete(tempDir);
     }
   }
 
   /**
-   * Extracts a zip file specified by the zipFilePath to a directory specified by destDirectory
-   * (will be created if does not exists).
+   * Streams the zip file and calls a method to create the NPI csv file.
    *
-   * @param zipFilePath the zip file path
-   * @param destDirectory the destination directory
-   * @throws IOException (any errors encountered will be bubbled up)
-   */
-  @SuppressWarnings("java:S5042")
-  public static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
-    try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile()))) {
-      ZipEntry entry = zipIn.getNextEntry();
-      // iterates over entries in the zip file
-      while (entry != null) {
-        Path filePath = destDirectory.resolve(entry.getName()).normalize();
-        if (!filePath.startsWith(destDirectory)) {
-          // Checks if resolved path is trying to escape from the destination directory
-          throw new IOException("ZipSlip: Entry is outside of the target directory");
-        }
-        if (!entry.isDirectory()) {
-          // if the entry is a file, extracts it
-          extractFile(zipIn, filePath);
-        } else {
-          // if the entry is a directory, make the directory
-          Files.createDirectories(filePath);
-        }
-        zipIn.closeEntry();
-        entry = zipIn.getNextEntry();
-      }
-    }
-  }
-
-  /**
-   * Extracts a zip entry (file entry).
-   *
-   * @param zipIn the zip file coming in
-   * @param filePath the file path for the file
-   * @throws IOException (any errors encountered will be bubbled up)
-   */
-  public static void extractFile(ZipInputStream zipIn, Path filePath) throws IOException {
-    Files.createDirectories(filePath.getParent());
-    try (BufferedOutputStream bos =
-        new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()))) {
-      byte[] bytesIn = new byte[BUFFER_SIZE];
-      int read;
-      while ((read = zipIn.read(bytesIn)) != -1) {
-        bos.write(bytesIn, 0, read);
-      }
-    }
-  }
-
-  /**
-   * Creates the file in the specified location.
-   *
-   * @param workingDir a directory that temporary/working files can be written to
+   * @param convertedNpiDataFile Data file.
    * @param fileName the output file/resource to produce
    * @throws IOException (any errors encountered will be bubbled up)
    * @throws IllegalStateException if there is an issue with NPI File
-   * @return path to file
    */
-  public static Path getOriginalNpiDataFile(Path workingDir, String fileName)
+  @SuppressWarnings("java:S5042")
+  public static void getOriginalNpiDataFile(Path convertedNpiDataFile, String fileName)
       throws IOException, IllegalStateException {
     // download NPI file
-    Path downloadedNpiZipFile =
-        Paths.get(workingDir.resolve("npidata.zip").toFile().getAbsolutePath());
     URL ndctextZipUrl = new URL(fileName);
-    if (!Files.isReadable(downloadedNpiZipFile)) {
-      // connectionTimeout, readTimeout = 10 seconds
-      final Integer connectionTimeout = 100000;
-      final Integer readTimeout = 100000;
-
-      FileUtils.copyURLToFile(
-          ndctextZipUrl,
-          new File(downloadedNpiZipFile.toFile().getAbsolutePath()),
-          connectionTimeout,
-          readTimeout);
+    HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
+    boolean foundMatch = false;
+    try (ZipInputStream zipInputStream = new ZipInputStream(connection.getInputStream())) {
+      ZipEntry entry;
+      while ((entry = zipInputStream.getNextEntry()) != null) {
+        if (entry.getName().startsWith("npidata_pfile_")
+            && !entry.getName().endsWith("_FileHeader.csv")
+            && !entry.getName().endsWith("_fileheader.csv")) {
+          InputStreamReader ir = new InputStreamReader(zipInputStream);
+          convertNpiDataFile(convertedNpiDataFile, ir);
+          foundMatch = true;
+          break;
+        }
+        zipInputStream.closeEntry();
+      }
     }
-
-    // unzip NPI file.  Zip file contains these files
-    // pl_pfile_20050523-20220410.csv
-    // pl_pfile_20050523-20220410_FileHeader.csv
-    // othername_pfile_20050523-20220410.csv
-    // othername_pfile_20050523-20220410_FileHeader.csv
-    // NPPES_Data_Dissemination_Readme.pdf
-    // NPPES_Data_Dissemination_CodeValues.pdf
-    // npidata_pfile_20050523-20220410.csv
-    // npidata_pfile_20050523-20220410_FileHeader.csv
-    // endpoint_pfile_20050523-20220410.csv
-    // endpoint_pfile_20050523-20220410_FileHeader.csv
-    unzip(downloadedNpiZipFile, workingDir);
-    File f = new File(workingDir.toString());
-    File[] matchingFiles =
-        f.listFiles(
-            new FilenameFilter() {
-              public boolean accept(File dir, String name) {
-                return name.startsWith("npidata_pfile_")
-                    && !name.endsWith("_FileHeader.csv")
-                    && !name.endsWith("_fileheader.csv");
-              }
-            });
-
-    if (matchingFiles.length == 0) {
+    if (!foundMatch) {
       throw new IllegalStateException("No NPI file found");
-    }
-
-    if (matchingFiles.length > 1) {
-      throw new IllegalStateException("More than one NPI file found");
-    }
-
-    Path originalNpiDataFile = workingDir.resolve(matchingFiles[0].getName());
-    if (!Files.isReadable(originalNpiDataFile))
-      throw new IllegalStateException("Unable to locate npidata_pfile in " + ndctextZipUrl);
-    return originalNpiDataFile;
-  }
-
-  /**
-   * Deletes the directory.
-   *
-   * @param tempDir for the temp directory
-   */
-  private static void recursivelyDelete(Path tempDir) {
-    // Recursively delete the working dir.
-    try (Stream<Path> paths = Files.walk(tempDir)) {
-      paths
-          .sorted(Comparator.reverseOrder())
-          .map(Path::toFile)
-          .peek(f -> LOGGER.info("deleting {}", f))
-          .forEach(File::delete);
-    } catch (IOException e) {
-      LOGGER.warn("Failed to cleanup the temporary folder", e);
     }
   }
 
@@ -234,14 +142,11 @@ public class DataUtilityCommons {
    *
    * @param convertedNpiDataFile the output file/resource to produce
    * @param downloadUrl is the download url
-   * @param workingDir a directory that temporary/working files can be written to
    * @throws IOException (any errors encountered will be bubbled up)
    */
-  private static void buildNPIResource(
-      Path convertedNpiDataFile, Optional<String> downloadUrl, Path workingDir) throws IOException {
-    Path originalNpiDataFile;
+  private static void buildNPIResource(Path convertedNpiDataFile, Optional<String> downloadUrl)
+      throws IOException {
     String fileUrl;
-
     // don't recreate the file if it already exists
     if (Files.isRegularFile(convertedNpiDataFile)) {
       LOGGER.info(
@@ -252,8 +157,7 @@ public class DataUtilityCommons {
 
     if (downloadUrl.isPresent()) {
       try {
-        originalNpiDataFile = getOriginalNpiDataFile(workingDir, downloadUrl.get());
-        convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
+        getOriginalNpiDataFile(convertedNpiDataFile, downloadUrl.get());
       } catch (IOException e) {
         Calendar cal = Calendar.getInstance();
         int day = cal.get(Calendar.DAY_OF_MONTH);
@@ -268,12 +172,11 @@ public class DataUtilityCommons {
     } else {
       try {
         fileUrl = FileNameCalculation.getFileName(false);
-        originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileUrl);
+        getOriginalNpiDataFile(convertedNpiDataFile, fileUrl);
       } catch (IOException e) {
         fileUrl = FileNameCalculation.getFileName(true);
-        originalNpiDataFile = getOriginalNpiDataFile(workingDir, fileUrl);
+        getOriginalNpiDataFile(convertedNpiDataFile, fileUrl);
       }
-      convertNpiDataFile(convertedNpiDataFile, originalNpiDataFile);
     }
   }
 
@@ -308,10 +211,10 @@ public class DataUtilityCommons {
    * Converts the npi data file.
    *
    * @param convertedNpiDataFile converted npi data file.
-   * @param originalNpiDataFile original npi data file.
+   * @param is the file input stream.
    * @throws IOException exception thrown.
    */
-  private static void convertNpiDataFile(Path convertedNpiDataFile, Path originalNpiDataFile)
+  private static void convertNpiDataFile(Path convertedNpiDataFile, InputStreamReader is)
       throws IOException {
 
     Map<String, String> taxonomyMap = DataUtilityCommons.processTaxonomyDescriptions();
@@ -326,31 +229,45 @@ public class DataUtilityCommons {
             .newEncoder()
             .onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT);
-    try (FileInputStream is = new FileInputStream(originalNpiDataFile.toFile().getAbsolutePath());
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
+    try (BufferedReader reader = new BufferedReader(is);
         FileOutputStream fw =
             new FileOutputStream(convertedNpiDataFile.toFile().getAbsolutePath());
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
+        DeflaterOutputStream dos = new DeflaterOutputStream(fw); ) {
       CSVParser csvParser =
           new CSVParser(
               reader,
               CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+      ObjectMapper objectMapper = new ObjectMapper();
       for (CSVRecord csvRecord : csvParser) {
         String orgName = csvRecord.get(PROVIDER_ORGANIZATION_NAME_FIELD);
         String npi = csvRecord.get(NPI_FIELD);
         String entityTypeCode = csvRecord.get(ENTITY_TYPE_CODE_FIELD);
         String taxonomyCode = csvRecord.get(TAXONOMY_CODE_FIELD);
-        // entity type code 2 is organization
-        if (!Strings.isNullOrEmpty(entityTypeCode)) {
-          if (Integer.parseInt(entityTypeCode) == 2) {
-            out.write(npi + "\t" + orgName);
-            out.newLine();
-          } else if (!Strings.isNullOrEmpty(taxonomyCode)) {
-            out.write(npi + "\t" + taxonomyCode + "\t" + taxonomyMap.get(taxonomyCode));
-            out.newLine();
-          }
-        }
+        String providerFirstName = csvRecord.get(PROVIDER_FIRST_NAME_FIELD);
+        String providerMiddleName = csvRecord.get(PROVIDER_MIDDLE_NAME_FIELD);
+        String providerLastName = csvRecord.get(PROVIDER_LAST_NAME_FIELD);
+        String providerPrefix = csvRecord.get(PROVIDER_PREFIX_FIELD);
+        String providerSuffix = csvRecord.get(PROVIDER_SUFFIX_FIELD);
+        String providerCredential = csvRecord.get(PROVIDER_CREDENTIAL_FIELD);
+        NPIData npiData =
+            NPIData.builder()
+                .npi(npi)
+                .providerOrganizationName(orgName)
+                .entityTypeCode(entityTypeCode)
+                .taxonomyCode(taxonomyCode)
+                .taxonomyDisplay(taxonomyMap.get(taxonomyCode))
+                .providerFirstName(providerFirstName)
+                .providerMiddleName(providerMiddleName)
+                .providerLastName(providerLastName)
+                .providerNamePrefix(providerPrefix)
+                .providerNameSuffix(providerSuffix)
+                .providerCredential(providerCredential)
+                .build();
+        String json = objectMapper.writeValueAsString(npiData);
+        dos.write(json.getBytes());
+        dos.write("\n".getBytes());
       }
+      dos.close();
     }
   }
 

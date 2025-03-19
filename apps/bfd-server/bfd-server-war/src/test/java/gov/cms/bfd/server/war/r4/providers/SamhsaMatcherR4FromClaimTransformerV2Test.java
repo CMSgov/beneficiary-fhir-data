@@ -128,7 +128,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             .getContextClassLoader()
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
         new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);

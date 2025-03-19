@@ -1,9 +1,9 @@
 locals {
-  env        = terraform.workspace
-  service    = "eft"
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-
+  env                      = terraform.workspace
+  service                  = "eft"
+  account_id               = data.aws_caller_identity.current.account_id
+  region                   = data.aws_region.current.name
+  cloudtamer_iam_path      = "/delegatedadmin/developer/"
   lambda_metrics_namespace = "AWS/Lambda"
   sns_metrics_namespace    = "AWS/SNS"
 
@@ -57,16 +57,16 @@ locals {
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   alarm_name          = local.alarms_config.lambda_errors.alarm_name
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
+  evaluation_periods  = "10"
   period              = "60"
   statistic           = "Sum"
   threshold           = "1"
-  datapoints_to_alarm = "1"
+  datapoints_to_alarm = "3"
   treat_missing_data  = "notBreaching"
 
   alarm_description = join("", [
-    "The ${var.outbound_lambda_name} has failed to transfer a file in ${local.env}. View the ",
-    "linked CloudWatch Log Group for more details on the failure, and inspect the failing event ",
+    "The ${var.outbound_lambda_name} has failed 3 times in 10 minutes in ${local.env}. View the ",
+    "linked CloudWatch Log Group for more details on the failures, and inspect the failing events ",
     "in the linked DLQ",
     "\n",
     "\n* CloudWatch Log Group: <${local.alarms_config.lambda_errors.log_group_url}|${local.alarms_config.lambda_errors.log_group_name}>",

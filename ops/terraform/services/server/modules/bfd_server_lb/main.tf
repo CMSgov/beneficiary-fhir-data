@@ -1,16 +1,15 @@
-# Create an internal application LB with TCP listeners. 
+# Create an internal application LB with TCP listeners.
 #
 
 locals {
   env             = terraform.workspace
   additional_tags = { Layer = var.layer, role = var.role }
-  log_prefix      = "${var.role}_elb_access_logs"
 }
 
 ## RESOURCES
 #
 
-# classic ELB 
+# classic ELB
 resource "aws_elb" "main" {
   name = "bfd-${local.env}-${var.role}"
   tags = local.additional_tags
@@ -32,23 +31,20 @@ resource "aws_elb" "main" {
   }
 
   health_check {
-    healthy_threshold   = 3 
+    healthy_threshold   = 3
     unhealthy_threshold = 5 # Server, on avg, inits within 40 seconds; this gives enough time for it to do so
     target              = "TCP:${var.egress.port}"
     interval            = 10 # (seconds) Match HealthApt
     timeout             = 5  # (seconds) Match HealthApt
   }
-
-  access_logs {
-    enabled       = false
-    bucket        = var.log_bucket
-    bucket_prefix = local.log_prefix
-    interval      = 5 # (minutes) Match HealthApt      
-  }
 }
 
 # security group
 resource "aws_security_group" "lb" {
+  lifecycle {
+    create_before_destroy = true
+  }
+
   name        = "bfd-${local.env}-${var.role}-lb"
   description = "Allow access to the ${var.role} load-balancer"
   vpc_id      = var.env_config.vpc_id
@@ -81,41 +77,4 @@ resource "aws_security_group" "lb" {
     cidr_blocks = var.egress.cidr_blocks
     description = var.egress.description
   }
-}
-
-# policy for S3 log access
-resource "aws_s3_bucket_policy" "logs" {
-  bucket = data.aws_s3_bucket.logs.id
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Id": "LBAccessLogs",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-          "AWS": "${data.aws_elb_service_account.main.arn}"
-      },
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::${var.log_bucket}/*"
-    },
-    {
-      "Sid": "AllowSSLRequestsOnly",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": [
-          "arn:aws:s3:::${var.log_bucket}",
-          "arn:aws:s3:::${var.log_bucket}/*"
-      ],
-      "Condition": {
-          "Bool": {
-              "aws:SecureTransport": "false"
-          }
-      }
-    }
-  ]
-}
-POLICY
 }

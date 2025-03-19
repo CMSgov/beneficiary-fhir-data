@@ -1,0 +1,10 @@
+*
+!common/*.py
+!common/stats/*.py
+!config/
+!v1/*.py
+!v2/*.py
+!lambda/server-regression/app.py
+!pyproject.toml
+!uv.lock
+!__init__.py

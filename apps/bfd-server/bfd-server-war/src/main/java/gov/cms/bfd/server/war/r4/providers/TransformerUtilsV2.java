@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -927,16 +928,16 @@ public final class TransformerUtilsV2 {
   public static Coding createUnitOfMeasureCoding(String codingSystem, String codingCode) {
     String display =
         switch (codingCode) {
-          case TransformerConstants.CODING_SYSTEM_UCUM_F2 -> TransformerConstants
-              .CODING_SYSTEM_UCUM_F2_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_GR -> TransformerConstants
-              .CODING_SYSTEM_UCUM_GR_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_ML -> TransformerConstants
-              .CODING_SYSTEM_UCUM_ML_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_ME -> TransformerConstants
-              .CODING_SYSTEM_UCUM_ME_DISPLAY;
-          case TransformerConstants.CODING_SYSTEM_UCUM_UN -> TransformerConstants
-              .CODING_SYSTEM_UCUM_UN_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_F2 ->
+              TransformerConstants.CODING_SYSTEM_UCUM_F2_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_GR ->
+              TransformerConstants.CODING_SYSTEM_UCUM_GR_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ML ->
+              TransformerConstants.CODING_SYSTEM_UCUM_ML_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_ME ->
+              TransformerConstants.CODING_SYSTEM_UCUM_ME_DISPLAY;
+          case TransformerConstants.CODING_SYSTEM_UCUM_UN ->
+              TransformerConstants.CODING_SYSTEM_UCUM_UN_DISPLAY;
           default -> null;
         };
 
@@ -1935,7 +1936,7 @@ public final class TransformerUtilsV2 {
       String roleSystem,
       String roleCode,
       String roleDisplay,
-      Optional<String> taxonomy) {
+      Optional<NPIData> taxonomy) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
@@ -1967,17 +1968,11 @@ public final class TransformerUtilsV2 {
       careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
       if (taxonomy.isPresent()) {
-        String[] taxonomyArray = taxonomy.get().split("\t");
-        if (taxonomyArray.length == 2) {
-          String taxonomyCode = taxonomyArray[0];
-          String taxonomyDisplay = taxonomyArray[1];
-          addCodingToCodeableConcept(
-              careTeamEntry.getQualification(),
-              TransformerConstants.NUCC_TAXONOMY_SYSTEM,
-              null,
-              taxonomyDisplay,
-              taxonomyCode);
-        }
+        String taxonomyCode = taxonomy.get().getTaxonomyCode();
+        String taxonomyDisplay = taxonomy.get().getTaxonomyDisplay();
+        careTeamEntry.setQualification(
+            createCodeableConcept(
+                TransformerConstants.NUCC_TAXONOMY_SYSTEM, null, taxonomyDisplay, taxonomyCode));
       }
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
       careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
@@ -2488,7 +2483,7 @@ public final class TransformerUtilsV2 {
       BigDecimal beneficiaryPartBDeductAmount,
       String paymentDenialCode,
       Optional<String> referringPhysicianNpi,
-      Optional<String> referringPhysicianTaxonomy,
+      Optional<NPIData> referringPhysicianTaxonomy,
       Optional<String> referringPhysicianUpin,
       Optional<Character> providerAssignmentIndicator,
       BigDecimal providerPaymentAmount,
@@ -2953,7 +2948,7 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimInstitutionalCareTeamRole role,
       Optional<String> id,
-      Optional<String> taxonomy) {
+      Optional<NPIData> taxonomy) {
     return id.map(
         i ->
             addCareTeamPractitioner(
@@ -2998,7 +2993,7 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimInstitutionalCareTeamRole role,
       Optional<String> id,
-      Optional<String> taxonomy) {
+      Optional<NPIData> taxonomy) {
     return addCareTeamMember(eob, null, type, role, id, taxonomy);
   }
 
@@ -3022,7 +3017,7 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimPharmacyTeamRole role,
       Optional<String> id,
-      Optional<String> taxonomy) {
+      Optional<NPIData> taxonomy) {
     return id.map(
         i ->
             addCareTeamPractitioner(
@@ -3081,7 +3076,7 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
       Optional<String> id,
-      Optional<String> taxonomy) {
+      Optional<NPIData> taxonomy) {
     return id.map(
         i ->
             addCareTeamPractitioner(
@@ -3165,7 +3160,7 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
       Optional<String> id,
-      Optional<String> taxonomy) {
+      Optional<NPIData> taxonomy) {
     return addCareTeamMember(eob, null, type, role, id, taxonomy);
   }
 
@@ -3191,11 +3186,11 @@ public final class TransformerUtilsV2 {
   static void mapCareTeam(
       ExplanationOfBenefit eob,
       Optional<String> attendingPhysicianNpi,
-      Optional<String> attendingPhysicianTaxonomy,
+      Optional<NPIData> attendingPhysicianTaxonomy,
       Optional<String> operatingPhysicianNpi,
-      Optional<String> operatingPhysicianTaxonomy,
+      Optional<NPIData> operatingPhysicianTaxonomy,
       Optional<String> otherPhysicianNpi,
-      Optional<String> otherPhysicianTaxonomy,
+      Optional<NPIData> otherPhysicianTaxonomy,
       Optional<String> attendingPhysicianUpin,
       Optional<String> operatingPhysicianUpin,
       Optional<String> otherPhysicianUpin) {

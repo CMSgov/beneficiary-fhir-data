@@ -1,8 +1,0 @@
-*
-!common/*.py
-!common/stats/*.py
-!config/
-!v1/*.py
-!v2/*.py
-!requirements.txt
-!lambda/server-regression/app.py

@@ -114,6 +114,7 @@ public class RdaSourceConfigIT {
                     .serverType(RdaSourceConfig.ServerType.InProcess)
                     .inProcessServerName("some name")
                     .maxIdle(Duration.ofSeconds(2))
+                    .sequenceRangeUpdateIntervalSeconds(300)
                     .authenticationToken(token)
                     .build()
                     .createCallOptions());

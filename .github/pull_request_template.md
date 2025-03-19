@@ -48,7 +48,7 @@ Please indicate if this PR does any of the following:
 * Any other changes that could possibly affect security? 
 
 * [ ] I have considered the above security implications as it relates to this PR. (If one or more of the above apply, it cannot be merged without the ISSO or team security engineer's (`@sb-benohe`) approval.) 
-
+* [ ] I have created tests to sufficiently ensure the reliability of my code, if applicable. If this is a modification to an existing piece of code, I have audited the associated tests to ensure everything works as expected.
 
 ### Validation
 

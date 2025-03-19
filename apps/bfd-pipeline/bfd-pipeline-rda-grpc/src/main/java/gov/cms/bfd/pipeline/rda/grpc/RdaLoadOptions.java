@@ -80,15 +80,6 @@ public class RdaLoadOptions {
   }
 
   /**
-   * Gets the {@link #rdaSourceConfig}.
-   *
-   * @return settings for the gRPC service caller.
-   */
-  public RdaSourceConfig getRdaSourceConfig() {
-    return rdaSourceConfig;
-  }
-
-  /**
    * Creates an RDA server job.
    *
    * @return the job, or an empty {@link Optional} if the server type is not configured as a mock

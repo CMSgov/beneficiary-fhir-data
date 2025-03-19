@@ -1,3 +1,48 @@
+[project]
+requires-python = ">=3.13"
+name = "locust-tests"
+version = "1.0.0"
+dependencies = [
+  "locust>=2.33.0",
+  "psycopg2-binary>=2.9.7",
+  "psycogreen>=1.0.2",
+  "boto3>=1.37.7",
+  "flask>=3.1.0",
+  "flask-cors>=5.0.1",
+  "requests>=2.32.2",
+  "gevent>=24.11.1",
+  "urllib3>=2.3.0",
+  "werkzeug>=3.0.6",
+  "jinja2>=3.1.6",
+  "idna>=3.7",
+  "certifi>=2025.1.31",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.9.9", "uv>=0.6.4"]
+
+[tool.ruff]
+# Set the maximum line length to 100.
+line-length = 100
+
+[tool.locust]
+# Specify locust test parameters here or on the command line
+# See https://docs.locust.io/en/stable/configuration.html#pyproject-toml
+headless = true
+# users = <# users>
+# spawn-rate = <# users to spawn>
+
+# These parameters are custom-defined parameters needed to run BFD-specific tests.
+# See the README for more information
+# spawned-runtime = 10s
+# table-sample-percent = 0.25
+# client-cert-path = /some/path/to/client/cert
+# stats-store-file = true
+# stats-env = TEST
+# stats-store-tag = some_tag
+# stats-store-tag = some_tag2
+# stats-compare-previous = true
+
 [tool.black]
 # Compromise between Black's default of 88 and wasting horizontal screen space.
 # According to Black's style guide, line lengths greater than 100 cause issues
@@ -9,7 +54,7 @@ profile = "isort"
 
 [tool.pyright]
 typeCheckingMode = "strict"
-# Compromising between practicality and strictness here by enabling strict type checking and 
+# Compromising between practicality and strictness here by enabling strict type checking and
 # selectively disabling rules that are, realistically, not possible to fully resolve in a project
 # using boto3 and Locust
 # TODO: In the future, consider enabling some of these where possible to take full advantage of Pyright

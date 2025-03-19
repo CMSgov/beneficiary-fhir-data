@@ -28,8 +28,8 @@ on:
         default: us-east-1
         type: choice
         options:
-         - us-east-1
-         - us-west-2
+          - us-east-1
+          - us-west-2
         required: true
       forceRelease:
         description: >-
@@ -57,40 +57,23 @@ defaults:
     shell: bash
 
 jobs:
-  run-mvn-release:
-    runs-on: ubuntu-latest
+  compute-version-strings:
+    runs-on: ubuntu-24.04
     outputs:
-      BFD_RELEASE: ${{ steps.bfd-version-strings.outputs.BFD_RELEASE }}
+      bfd_release: ${{ steps.bfd-version-strings.outputs.BFD_RELEASE }}
+      bfd_dev_version: ${{ steps.bfd-version-strings.outputs.BFD_DEV_VERSION }}
     steps:
-      - name: "Generate an App Token"
-        id: generate_token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
-          private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
-
       - name: Checkout
         if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ inputs.releaseBranch || github.ref_name }}
-          token: ${{ steps.generate_token.outputs.token }}
 
-      - name: 'Install yq'
+      - name: "Install yq"
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
-
-      - name: Install gitleaks
-        run: |
-          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
-            | grep "browser_download_url.*linux_x64.tar.gz" \
-            | cut -d : -f 2,3 \
-            | tr -d \" \
-            | wget -qi -
-          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
-          sudo chmod +x /usr/bin/gitleaks
 
       - name: Set and Validate Version Strings
         id: bfd-version-strings
@@ -108,11 +91,56 @@ jobs:
 
           # Validate and set BFD_RELASE and BFD_DEV_VERSION
           echo "$BFD_RELEASE" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
-          echo BFD_RELEASE="${BFD_RELEASE}" >> "$GITHUB_ENV"
           echo BFD_RELEASE="${BFD_RELEASE}" >> "$GITHUB_OUTPUT"
-
           echo "$BFD_DEV_VERSION" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
-          echo BFD_DEV_VERSION="${BFD_DEV_VERSION_OVERRIDE:-$BFD_DEV_VERSION_DEFAULT}" >> "$GITHUB_ENV"
+          echo BFD_DEV_VERSION="${BFD_DEV_VERSION_OVERRIDE:-$BFD_DEV_VERSION_DEFAULT}" >> "$GITHUB_OUTPUT"
+
+  build-base-images:
+    uses: ./.github/workflows/build-container-images.yml
+    needs: compute-version-strings
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      branch: ${{ inputs.releaseBranch || github.ref_name }}
+      versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
+      awsRegion: ${{ inputs.awsRegion }}
+      # Build the base images prior to building the application images with jib in "run-mvn-release"
+      # See .github/workflows/build_container_images_matrix.json for list of buildable images
+      imagesCsv: "bfd-mgmt-base-jdk, bfd-mgmt-base-python"
+    secrets: inherit
+
+  run-mvn-release:
+    runs-on: ubuntu-24.04
+    needs: [compute-version-strings, build-base-images]
+    env:
+      BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
+      BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
+    steps:
+      - name: "Generate an App Token"
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
+          private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
+
+      - name: Checkout
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.releaseBranch || github.ref_name }}
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Install gitleaks
+        run: |
+          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | grep "browser_download_url.*linux_x64.tar.gz" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | wget -qi -
+          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
+          sudo chmod +x /usr/bin/gitleaks
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -190,22 +218,31 @@ jobs:
         run: mvn release:rollback
         working-directory: ./apps
 
-  build-docker-images:
-    uses: ./.github/workflows/build-docker-images.yml
-    needs: run-mvn-release
+  build-other-images:
+    uses: ./.github/workflows/build-container-images.yml
+    needs: [compute-version-strings, run-mvn-release]
     permissions:
       contents: read
       id-token: write
     with:
       branch: ${{ inputs.releaseBranch || github.ref_name }}
-      versionTag: ${{ needs.run-mvn-release.outputs.BFD_RELEASE }}
+      versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
       awsRegion: ${{ inputs.awsRegion }}
+      # Build other images, like Lambda images, Python applications, etc.
+      # See .github/workflows/build_container_images_matrix.json for list of buildable images
+      imagesCsv: "bfd-mgmt-server-regression, bfd-mgmt-eft-sftp-outbound-transfer-lambda, bfd-mgmt-pipeline-ccw-manifests-verifier-lambda"
     secrets: inherit
 
   create-gh-release:
-    if: ${{ !contains(needs.run-mvn-release.outputs.BFD_RELEASE, '-') || inputs.forceRelease }}
-    runs-on: ubuntu-latest
-    needs: [run-mvn-release, build-docker-images]
+    if: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') || inputs.forceRelease }}
+    runs-on: ubuntu-24.04
+    needs:
+      [
+        compute-version-strings,
+        build-base-images,
+        run-mvn-release,
+        build-other-images,
+      ]
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -245,26 +282,26 @@ jobs:
           mv ./openapi.yaml "openapi-${BFD_RELEASE}.yaml"
 
         env:
-          BFD_RELEASE: ${{ needs.run-mvn-release.outputs.BFD_RELEASE }}
+          BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
           CA_NAMESPACE: gov.cms.bfd
           CA_PACKAGE: bfd-server-war
           CA_ASSETS: |
             [
-              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-data-dictionary.xlsx",
-              "bfd-server-war-${{ needs.run-mvn-release.outputs.BFD_RELEASE }}-openapi.yaml"
+              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v1-data-dictionary.csv",
+              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v2-data-dictionary.csv",
+              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v1-data-dictionary.json",
+              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v2-data-dictionary.json",
+              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-data-dictionary.xlsx",
+              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-openapi.yaml"
             ]
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
           # NOTE: Prevent automatic promotion of pre-release objects to latest
-          makeLatest: "${{ !contains(needs.run-mvn-release.outputs.BFD_RELEASE, '-') }}"
+          makeLatest: "${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}"
           generateReleaseNotes: true
           artifactErrorsFailBuild: true
-          tag: ${{ needs.run-mvn-release.outputs.BFD_RELEASE }}
-          name: "v${{ needs.run-mvn-release.outputs.BFD_RELEASE }}"
+          tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
+          name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
@@ -63,7 +64,7 @@ public final class HHAClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hhaClaimTransformer =
-        new HHAClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new HHAClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup());
   }
 
   /** Releases the static mock NPIOrgLookup. */
@@ -132,7 +133,7 @@ public final class HHAClaimTransformerTest {
     // interesting conumdrum here....we should be using Mock(s) for unit tests, but this static
     // method is invoked from ITs (integration tests) which means that our BeforeEach setup will
     // not create the NPIOrgLookup so we need to explicitly create one here.
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
 
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
@@ -155,7 +156,9 @@ public final class HHAClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        localNpiLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        localNpiLookup
+            .retrieveNPIOrgDisplay(claim.getOrganizationNpi())
+            .map(NPIData::getProviderOrganizationName),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

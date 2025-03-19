@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
+import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_ORGANIZATION;
+import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_PROVIDER;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -8,6 +11,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.data.npi.dto.NPIData;
+import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
@@ -32,12 +37,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +55,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class CommonTransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(CommonTransformerUtils.class);
-
-  /** file containing NPI code entries. */
-  private static final String NPI_CODE_FILE = "NPI_Coded_Display_Values_Tab.txt";
 
   /** file containing NPI code entries. */
   private static final String PROCEDURE_CODE_FILE = "PRCDR_CD.txt";
@@ -115,6 +119,18 @@ public final class CommonTransformerUtils {
 
   /** Tracks the NPI codes that have already had code lookup failures. */
   private static final Set<String> npiCodeLookupMissingFailures = ConcurrentHashMap.newKeySet();
+
+  /** Instance of NPIOrgLookup. */
+  private static NPIOrgLookup npiOrgLookup;
+
+  /**
+   * Sets NPIOrgLookup to lookup NPI information.
+   *
+   * @param orgLookup The instance of NPIOrgLookup.
+   */
+  public static void setNpiOrgLookup(NPIOrgLookup orgLookup) {
+    npiOrgLookup = orgLookup;
+  }
 
   /**
    * Builds an id for an FHIR STU3/R4 ExplanationOfBenefit.
@@ -321,87 +337,36 @@ public final class CommonTransformerUtils {
   }
 
   /**
-   * Retrieves the NPI display value from an NPI code look up file.
+   * Retrieves the NPI display value using the NPIOrgLookup class.
    *
    * @param npiCode NPI code
    * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
-    if (npiCode.isEmpty()) {
-      return null;
-    }
-    // read the entire NPI file the first time and put in a Map
-    if (npiMap == null) {
-      // There's a race condition here: we may initialize this static field more than
-      // once if multiple concurrent requests come in. However, the assignment is
-      // atomic, so the
-      // race and reinitialization is harmless other than maybe wasting a bit of time.
-      npiMap = readNpiCodeFile();
-    }
-    if (npiMap.containsKey(npiCode.toUpperCase())) {
-      return npiMap.get(npiCode);
-    }
-
-    // log which NPI codes we couldn't find a match for in our downloaded NPI file
-    if (!npiCodeLookupMissingFailures.contains(npiCode)) {
-      // LOGGER.info("NPI code: {} not found in NPI code file: {}", npiCode, NPI_CODE_FILE);
-      npiCodeLookupMissingFailures.add(npiCode);
+    if (npiOrgLookup != null) {
+      Optional<NPIData> npiData = npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
+      if (npiData.isPresent()) {
+        String entityTypeCode = npiData.get().getEntityTypeCode();
+        if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
+          String[] name =
+              new String[] {
+                npiData.get().getProviderNamePrefix(),
+                npiData.get().getProviderFirstName(),
+                npiData.get().getProviderMiddleName(),
+                npiData.get().getProviderLastName(),
+                npiData.get().getProviderNameSuffix(),
+                npiData.get().getProviderCredential()
+              };
+          return Arrays.stream(name)
+              .map(Strings::trimToNull)
+              .filter(Objects::nonNull)
+              .collect(Collectors.joining(" "));
+        } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
+          return npiData.get().getProviderOrganizationName();
+        }
+      }
     }
     return null;
-  }
-
-  /**
-   * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
-   * Refer to the README file in the src/main/resources directory.
-   *
-   * @return the map of npi codes
-   */
-  private static Map<String, String> readNpiCodeFile() {
-
-    Map<String, String> npiCodeMap = new HashMap<String, String>();
-    try (final InputStream npiCodeDisplayStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(NPI_CODE_FILE);
-        final BufferedReader reader =
-            new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
-      /*
-       * We want to extract the NPI codes and display values and put in a map for easy
-       * retrieval to get the display value:
-       * npiColumns [0] : NPI Code
-       * npiColumns [4] : NPI Organization Code
-       * npiColumns [8] : NPI provider name prefix
-       * npiColumns [6] : NPI provider first name
-       * npiColumns [7] : NPI provider middle name
-       * npiColumns [5] : NPI provider last name
-       * npiColumns [9] : NPI provider suffix name
-       * npiColumns[10] : NPI provider credential
-       */
-      String line = "";
-      reader.readLine();
-
-      while ((line = reader.readLine()) != null) {
-        String[] npiColumns = line.split("\t");
-
-        if (!npiColumns[4].isEmpty()) {
-          npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
-          continue;
-        }
-
-        String displayName =
-            String.join(
-                " ",
-                npiColumns[8].trim(),
-                npiColumns[6].trim(),
-                npiColumns[7].trim(),
-                npiColumns[5].trim(),
-                npiColumns[9].trim(),
-                npiColumns[10].trim());
-
-        npiCodeMap.put(npiColumns[0], displayName.replace("  ", " ").trim());
-      }
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read NPI code data.", e);
-    }
-    return npiCodeMap;
   }
 
   /**

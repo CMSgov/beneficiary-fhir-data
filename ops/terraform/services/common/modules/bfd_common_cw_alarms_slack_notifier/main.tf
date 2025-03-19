@@ -2,7 +2,7 @@ locals {
   account_id             = data.aws_caller_identity.current.account_id
   lambda_timeout_seconds = 30
   lambda_name            = "cloudwatch-alarms-slack-notifier"
-
+  cloudtamer_iam_path    = "/delegatedadmin/developer/"
   mgmt_config_kms_key_arns = flatten(
     [
       for v in data.aws_kms_key.mgmt_cmk.multi_region_configuration :
@@ -36,8 +36,8 @@ locals {
 }
 
 resource "aws_iam_policy" "logs" {
-  for_each = local.lambdas
-
+  for_each    = local.lambdas
+  path        = local.cloudtamer_iam_path
   name        = "bfd-${var.env}-${each.value.full_name}-logs"
   description = "Permissions to create and write to bfd-${var.env}-${each.value.full_name} logs"
   policy      = <<-EOF
@@ -65,8 +65,8 @@ EOF
 }
 
 resource "aws_iam_policy" "kms" {
-  for_each = local.lambdas
-
+  for_each    = local.lambdas
+  path        = local.cloudtamer_iam_path
   name        = "bfd-${var.env}-${each.value.full_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
   policy = jsonencode(
@@ -86,8 +86,8 @@ resource "aws_iam_policy" "kms" {
 }
 
 resource "aws_iam_policy" "ssm" {
-  for_each = local.lambdas
-
+  for_each    = local.lambdas
+  path        = local.cloudtamer_iam_path
   name        = "bfd-${var.env}-${each.value.full_name}-ssm-parameters"
   description = "Permissions to /bfd/mgmt/common/sensitive/* SSM hierarchies"
   policy      = <<-EOF
@@ -113,9 +113,10 @@ EOF
 resource "aws_iam_role" "this" {
   for_each = local.lambdas
 
-  name        = "bfd-${var.env}-${each.value.full_name}"
-  path        = "/"
-  description = "Role for bfd-${var.env}-${each.value.full_name} Lambda"
+  name                 = "bfd-${var.env}-${each.value.full_name}"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for bfd-${var.env}-${each.value.full_name} Lambda"
 
   assume_role_policy = <<-EOF
   {

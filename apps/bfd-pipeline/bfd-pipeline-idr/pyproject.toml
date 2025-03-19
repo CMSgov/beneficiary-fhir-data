@@ -1,0 +1,18 @@
+[project]
+name = "bfd-pipeline-idr"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "psycopg>=3.2.4",
+    "pydantic>=2.10.6",
+    "snowflake-connector-python>=3.13.2",
+]
+
+[dependency-groups]
+dev = ["mypy>=1.15.0", "pytest>=8.3.4", "testcontainers>=4.9.1"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*"]
+follow_untyped_imports = true

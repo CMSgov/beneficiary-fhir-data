@@ -22,7 +22,8 @@ public class JacksonJsonConverterTest {
   "anInt" : 1,
   "manyStrings" : [ "world!" ],
   "oneString" : "hello"
-}""", json);
+}""",
+        json);
     assertEquals(sample, converter.jsonToObject(json, SampleBean.class));
   }
 

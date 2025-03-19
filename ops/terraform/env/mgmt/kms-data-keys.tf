@@ -66,14 +66,14 @@ resource "aws_kms_alias" "data_keys_alt" {
 
 data "aws_iam_policy_document" "primary_data_key_policy_combined" {
   source_policy_documents = [
-    data.aws_iam_policy_document.default_kms_key_policy.json,
+    local.kms_default_key_policy.json,
     data.aws_iam_policy_document.data_keys.json
   ]
 }
 
 data "aws_iam_policy_document" "alt_data_key_policy_combined" {
   source_policy_documents = [
-    data.aws_iam_policy_document.default_kms_key_policy.json,
+    local.kms_default_key_policy.json,
     data.aws_iam_policy_document.data_keys.json,
     data.aws_iam_policy_document.data_keys_alt.json
   ]

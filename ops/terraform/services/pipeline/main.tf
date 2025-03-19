@@ -1,23 +1,23 @@
 module "terraservice" {
-  source = "../_modules/bfd-terraservice"
+  source = "git::https://github.com/CMSgov/beneficiary-fhir-data.git//ops/terraform/services/_modules/bfd-terraservice?ref=2.181.0"
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/terraform/services/pipeline"
 }
 
 locals {
-  default_tags       = module.terraservice.default_tags
-  env                = module.terraservice.env
-  seed_env           = module.terraservice.seed_env
-  is_ephemeral_env   = module.terraservice.is_ephemeral_env
-  is_prod            = local.env == "prod"
-  latest_bfd_release = module.terraservice.latest_bfd_release
-
-  account_id        = data.aws_caller_identity.current.account_id
-  layer             = "data"
-  create_dashboard  = !local.is_ephemeral_env || var.force_dashboard_creation
-  create_slo_alarms = !local.is_ephemeral_env || var.force_slo_alarms_creation
-  jdbc_suffix       = var.jdbc_suffix
+  default_tags        = module.terraservice.default_tags
+  env                 = module.terraservice.env
+  seed_env            = module.terraservice.seed_env
+  is_ephemeral_env    = module.terraservice.is_ephemeral_env
+  is_prod             = local.env == "prod"
+  latest_bfd_release  = module.terraservice.latest_bfd_release
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
+  account_id          = data.aws_caller_identity.current.account_id
+  layer               = "data"
+  create_dashboard    = !local.is_ephemeral_env || var.force_dashboard_creation
+  create_slo_alarms   = !local.is_ephemeral_env || var.force_slo_alarms_creation
+  jdbc_suffix         = var.jdbc_suffix
 
   # NOTE: Some resources use a 'pipeline' name while others use 'etl'. There's no simple solution for renaming all resources.
   # We must tolerate this for now.
@@ -81,7 +81,8 @@ locals {
   }
 
   log_groups = {
-    messages = "/bfd/${local.env}/bfd-pipeline/messages.txt"
+    rda_messages = "/bfd/${local.env}/bfd-pipeline-rda/messages.txt"
+    ccw_messages = "/bfd/${local.env}/bfd-pipeline-ccw/messages.txt"
   }
 
   alarm_actions = local.is_prod ? [data.aws_sns_topic.alarm[0].arn] : []

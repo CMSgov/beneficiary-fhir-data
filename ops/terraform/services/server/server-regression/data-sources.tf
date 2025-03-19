@@ -8,6 +8,10 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_master_key_alias
 }
 
+data "aws_kms_key" "mgmt_key" {
+  key_id = "alias/bfd-mgmt-cmk"
+}
+
 data "aws_kms_key" "config_cmk" {
   key_id = local.kms_config_key_alias
 }
@@ -37,11 +41,6 @@ data "aws_ecr_repository" "ecr" {
 data "aws_ecr_image" "image" {
   repository_name = data.aws_ecr_repository.ecr.name
   image_tag       = local.docker_image_tag
-}
-
-data "aws_ssm_parameter" "docker_image_tag" {
-  # TODO: consider making this more environment-specific, versioning RFC in BFD-1743 may inform us of how
-  name = "/bfd/mgmt/server/nonsensitive/server_regression_latest_image_tag"
 }
 
 data "aws_security_group" "rds" {
@@ -78,4 +77,8 @@ data "archive_file" "spice_trigger" {
   type        = "zip"
   source_file = "${path.module}/lambda-src/spice-trigger/spice-trigger.py"
   output_path = "${path.module}/lambda-src/spice-trigger/out/spice-trigger.zip"
+}
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
 }

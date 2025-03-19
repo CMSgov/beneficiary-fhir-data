@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.data.npi.dto.NPIData;
 import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
@@ -63,7 +64,7 @@ public final class HospiceClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformer(metricRegistry, NPIOrgLookup.createNpiOrgLookup());
+        new HospiceClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup());
   }
 
   /** Releases the static mock NPIOrgLookup. */
@@ -129,7 +130,7 @@ public final class HospiceClaimTransformerTest {
    */
   static void assertMatches(HospiceClaim claim, ExplanationOfBenefit eob)
       throws FHIRException, IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -162,7 +163,9 @@ public final class HospiceClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        localNpiLookup.retrieveNPIOrgDisplay(claim.getOrganizationNpi()),
+        localNpiLookup
+            .retrieveNPIOrgDisplay(claim.getOrganizationNpi())
+            .map(NPIData::getProviderOrganizationName),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),

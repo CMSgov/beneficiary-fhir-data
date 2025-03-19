@@ -1,5 +1,5 @@
 module "terraservice" {
-  source = "../_modules/bfd-terraservice"
+  source = "git::https://github.com/CMSgov/beneficiary-fhir-data.git//ops/terraform/services/_modules/bfd-terraservice?ref=2.181.0"
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/terraform/services/eft"
@@ -11,16 +11,16 @@ module "terraservice" {
 }
 
 locals {
-  default_tags       = module.terraservice.default_tags
-  env                = module.terraservice.env
-  seed_env           = module.terraservice.seed_env
-  is_ephemeral_env   = module.terraservice.is_ephemeral_env
-  latest_bfd_release = module.terraservice.latest_bfd_release
-  bfd_version        = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
-
-  service   = "eft"
-  layer     = "data"
-  full_name = "bfd-${local.env}-${local.service}"
+  default_tags        = module.terraservice.default_tags
+  env                 = module.terraservice.env
+  seed_env            = module.terraservice.seed_env
+  is_ephemeral_env    = module.terraservice.is_ephemeral_env
+  latest_bfd_release  = module.terraservice.latest_bfd_release
+  bfd_version         = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
+  service             = "eft"
+  layer               = "data"
+  full_name           = "bfd-${local.env}-${local.service}"
 
   inbound_eft_partners  = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json["inbound"].value))
   outbound_eft_partners = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json["outbound"].value))
@@ -66,6 +66,11 @@ locals {
   inbound_sftp_user_pub_key  = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_public_key"]
   inbound_sftp_user_username = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_username"]
   inbound_sftp_s3_home_dir   = trim(local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_home_dir"], "/")
+  # Special case for BCDA. ISP does not use the typical BFD EFT Inbound process, they instead upload
+  # directly to the BCDA inbound path. These configuration parameters are used to create an IAM Role
+  # that ISP assumes to do the aforementioned upload.
+  bcda_isp_bucket_assumer_arns = jsondecode(lookup(local.ssm_config, "/bcda/${local.service}/inbound/isp_bucket_iam_assumer_arns_json", "[]"))
+  bcda_isp_vpc_endpoint_id     = lookup(local.ssm_config, "/bcda/${local.service}/inbound/isp_vpc_endpoint_id", null)
   # Global Inbound configuration is required, as the SFTP server should always be running and the
   # home directory is global, but this outbound configuration is not required. If any are undefined,
   # outbound is considered to be disabled globally for all partners and corresponding resources will
@@ -313,22 +318,17 @@ resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
 resource "aws_lambda_function_event_invoke_config" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  function_name = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
-  # This Lambda is invoked by SNS, which invokes the Lambda asynchronously. By default, AWS Lambda
-  # retries failing Functions twice before dropping the event, but because this Lambda has side
-  # effects we don't want to retry if it fails. Instead, we will drop failing events into a DLQ for
-  # the on-call to process it again, if possible
-  maximum_retry_attempts = 0
+  function_name          = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  maximum_retry_attempts = 2
 
-  # On failure we want failing events to land into a DLQ such that responding engineers can analyze
-  # the event and retry, if necessary
+  # If the Lambda exhausts all of its retry attempts, we want failing events to land into a DLQ such
+  # that responding engineers can analyze the event and retry, if necessary
   destination_config {
     on_failure {
       destination = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn)
     }
   }
 }
-
 
 resource "aws_security_group" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
@@ -540,8 +540,8 @@ resource "aws_s3_bucket_policy" "this" {
   policy = jsonencode(
     {
       Version = "2012-10-17",
-      Statement = [
-        {
+      Statement = concat(
+        [{
           Sid       = "AllowSSLRequestsOnly",
           Effect    = "Deny",
           Principal = "*",
@@ -555,8 +555,25 @@ resource "aws_s3_bucket_policy" "this" {
               "aws:SecureTransport" = "false"
             }
           }
-        }
-      ]
+        }],
+        length(aws_iam_role.isp_bcda_bucket_role) > 0 ? [{
+          Sid    = "AllowISPFromVPCEOnly",
+          Effect = "Deny",
+          Principal = {
+            AWS = one(aws_iam_role.isp_bcda_bucket_role[*].arn)
+          },
+          Action = "s3:*",
+          Resource = [
+            "${aws_s3_bucket.this.arn}",
+            "${aws_s3_bucket.this.arn}/*"
+          ],
+          Condition = {
+            StringNotEquals = {
+              "aws:SourceVpce" = local.bcda_isp_vpc_endpoint_id
+            }
+          }
+        }] : []
+      )
     }
   )
 }

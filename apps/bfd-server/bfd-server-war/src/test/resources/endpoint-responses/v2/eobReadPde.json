@@ -109,6 +109,13 @@
         "code" : "prescribing",
         "display" : "Prescribing provider"
       } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "http://nucc.org/provider-taxonomy",
+        "code" : "207T00000X",
+        "display" : "Neurological Surgery Physician"
+      } ]
     }
   } ],
   "supportingInfo" : [ {
