@@ -1,10 +1,10 @@
 locals {
   env = terraform.workspace
 
-  account_id = data.aws_caller_identity.current.account_id
-
-  kms_key_arn = data.aws_kms_key.mgmt_cmk.arn
-  kms_key_id  = data.aws_kms_key.mgmt_cmk.key_id
+  account_id          = data.aws_caller_identity.current.account_id
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
+  kms_key_arn         = data.aws_kms_key.mgmt_cmk.arn
+  kms_key_id          = data.aws_kms_key.mgmt_cmk.key_id
 
   topic_name = "bfd-server-${local.env}-instance-launch-terminate"
 
@@ -57,6 +57,7 @@ resource "aws_sns_topic_subscription" "this" {
 resource "aws_iam_policy" "logs" {
   name        = "bfd-${local.env}-${local.lambda_name}-logs"
   description = "Permissions to create and write to bfd-${local.env}-${local.lambda_name} logs"
+  path        = local.cloudtamer_iam_path
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -81,6 +82,7 @@ EOF
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${local.lambda_name}-kms"
   description = "Permissions to decrypt mgmt KMS key"
+  path        = local.cloudtamer_iam_path
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -98,6 +100,7 @@ EOF
 resource "aws_iam_policy" "autoscaling" {
   name        = "bfd-${local.env}-${local.lambda_name}-autoscaling"
   description = "Permissions for bfd-${local.env}-${local.lambda_name} to describe ASGs"
+  path        = local.cloudtamer_iam_path
   # Unfortunately AWS does not support anything but wildcarding for the resource definition for the
   # DescribeAutoScalingGroups action
   policy = <<-EOF
@@ -120,6 +123,7 @@ EOF
 resource "aws_iam_policy" "cloudwatch" {
   name        = "bfd-${local.env}-${local.lambda_name}-cloudwatch"
   description = "Permissions for bfd-${local.env}-${local.lambda_name} to create and destroy metric alarms"
+  path        = local.cloudtamer_iam_path
   policy      = <<-EOF
 {
   "Version": "2012-10-17",
@@ -140,9 +144,10 @@ EOF
 }
 
 resource "aws_iam_role" "this" {
-  name        = "bfd-${local.env}-${local.lambda_name}"
-  path        = "/"
-  description = "Role for bfd-${local.env}-${local.lambda_name} Lambda"
+  name                 = "bfd-${local.env}-${local.lambda_name}"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for bfd-${local.env}-${local.lambda_name} Lambda"
 
   assume_role_policy = <<-EOF
 {

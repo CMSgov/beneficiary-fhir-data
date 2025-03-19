@@ -96,7 +96,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
       DB_CLUSTER_ID                    = self.cluster_identifier
       KMS_KEY_ID                       = self.kms_key_id
       ENHANCED_MONITORING_INTERVAL     = 15
-      ENHANCED_MONITORING_IAM_ROLE_ARN = data.aws_iam_role.monitoring.arn
+      ENHANCED_MONITORING_IAM_ROLE_ARN = aws_iam_role.db_monitoring.arn
     }
     command     = <<-EOF
     aws rds modify-db-cluster --db-cluster-identifier "$DB_CLUSTER_ID" \
@@ -172,7 +172,7 @@ resource "aws_rds_cluster_instance" "writer" {
   identifier                      = "${aws_rds_cluster.aurora_cluster.id}-writer-node"
   instance_class                  = local.rds_instance_class
   monitoring_interval             = 15
-  monitoring_role_arn             = data.aws_iam_role.monitoring.arn
+  monitoring_role_arn             = aws_iam_role.db_monitoring.arn
   performance_insights_enabled    = true
   performance_insights_kms_key_id = aws_rds_cluster.aurora_cluster.kms_key_id
   preferred_maintenance_window    = aws_rds_cluster.aurora_cluster.preferred_maintenance_window
