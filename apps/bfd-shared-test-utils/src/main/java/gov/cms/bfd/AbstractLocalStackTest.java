@@ -13,7 +13,8 @@ public abstract class AbstractLocalStackTest {
   public static final String TEST_CONTAINER_AWS_IMAGE_PROPERTY = "its.testcontainer.aws.image";
 
   /** The default test container image to use when nothing is provided. */
-  public static final String TEST_CONTAINER_AWS_IMAGE_DEFAULT = "localstack/localstack:2.2.0";
+  public static final String TEST_CONTAINER_AWS_IMAGE_DEFAULT =
+      "public.ecr.aws/localstack/localstack:3.0.2";
 
   /** Global container used by multiple tests. Will be destroyed automatically by test container. */
   protected static final LocalStackContainer localstack;
@@ -24,7 +25,9 @@ public abstract class AbstractLocalStackTest {
     var localStackImageName =
         System.getProperty(TEST_CONTAINER_AWS_IMAGE_PROPERTY, TEST_CONTAINER_AWS_IMAGE_DEFAULT);
     localstack =
-        new LocalStackContainer(DockerImageName.parse(localStackImageName))
+        new LocalStackContainer(
+                DockerImageName.parse(localStackImageName)
+                    .asCompatibleSubstituteFor("localstack/localstack"))
             .withServices(
                 LocalStackContainer.Service.S3,
                 LocalStackContainer.Service.SQS,
