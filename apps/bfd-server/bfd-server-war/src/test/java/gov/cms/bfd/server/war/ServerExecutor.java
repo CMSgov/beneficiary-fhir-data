@@ -74,6 +74,7 @@ public class ServerExecutor {
     }
 
     LOGGER.info("Starting IT server with DB: {}", dbUrl);
+    System.out.println("P*Starting IT server with DB: {}" + dbUrl);
 
     // Set up the paths we require for the server war dependencies
     String targetPath = "target";
@@ -126,14 +127,18 @@ public class ServerExecutor {
 
     // OK - fire it up.  This is asynchronous so it returns immediately.
     try {
+      System.out.println("serverInfo.getServer() before");
       serverInfo.getServer().start();
+      System.out.println("serverInfo.getServer() after");
     } catch (Exception ex) {
+      System.out.println("Caught exception when starting server." + ex);
       throw new RuntimeException("Caught exception when starting server.", ex);
     }
 
     // Wait for the server to begin listening on its port.
     final String finalServerPort = Integer.toString(serverInfo.getServer().getURI().getPort());
     LOGGER.info("Configured server to run on HTTPS port {}.", finalServerPort);
+    System.out.println("P*Configured server to run on HTTPS port {}." + finalServerPort);
 
     try {
       Awaitility.await()
