@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Iterator, Mapping, TypeVar
 import psycopg
+import os
 from psycopg.rows import class_row
 from pydantic import BaseModel
 import snowflake.connector
@@ -87,7 +88,14 @@ class PostgresExtractor(Extractor):
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int):
         super().__init__()
-        self.conn = snowflake.connector.connect(user="", password="", account="")
+        self.conn = snowflake.connector.connect(
+            user=os.environ["IDR_USERNAME"],
+            password=os.environ["IDR_PASSWORD"],
+            account=os.environ["IDR_ACCOUNT"],
+            warehouse=os.environ["IDR_WAREHOUSE"],
+            database=os.environ["IDR_DATABASE"],
+            schema=os.environ["IDR_SCHEMA"],
+        )
         self.batch_size = batch_size
 
     def extract_many(
