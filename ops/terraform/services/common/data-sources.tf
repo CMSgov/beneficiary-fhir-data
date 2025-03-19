@@ -66,6 +66,22 @@ data "aws_kms_key" "cmk" {
   key_id = local.kms_key_alias
 }
 
-data "aws_iam_role" "monitoring" {
-  name = "rds-monitoring-role"
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}
+
+data "aws_iam_policy_document" "rds_monitoring_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["monitoring.rds.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [local.account_id]
+    }
+  }
 }

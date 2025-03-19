@@ -10,17 +10,20 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
+import gov.cms.bfd.model.rif.samhsa.InpatientTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -44,6 +47,9 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(InpatientClaimTransformerV2.class.getSimpleName(), "transform");
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /**
    * Instantiates a new transformer.
    *
@@ -53,10 +59,15 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
+   * @param securityTagManager SamhsaSecurityTag lookup
    */
-  public InpatientClaimTransformerV2(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+  public InpatientClaimTransformerV2(
+      MetricRegistry metricRegistry,
+      NPIOrgLookup npiOrgLookup,
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -75,7 +86,11 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((InpatientClaim) claim);
+      InpatientClaim inpatientClaim = (InpatientClaim) claim;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(
+              String.valueOf(inpatientClaim.getClaimId()), InpatientTag.class);
+      eob = transformClaim(inpatientClaim, securityTags);
     }
     return eob;
   }
@@ -84,14 +99,17 @@ final class InpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a specified {@link InpatientClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  private ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(
+      InpatientClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
+    eob.getMeta().setSecurity(securityTags);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

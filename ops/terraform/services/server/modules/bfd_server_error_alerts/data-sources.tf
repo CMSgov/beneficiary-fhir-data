@@ -28,3 +28,7 @@ data "archive_file" "alerter_lambda_src" {
     filename = "${local.alerter_lambda_src}.py"
   }
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}

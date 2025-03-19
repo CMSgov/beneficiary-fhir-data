@@ -72,7 +72,9 @@ resource "aws_cloudwatch_log_group" "ami_pruner" {
 
 # iam role
 resource "aws_iam_role" "ami_pruner" {
-  name = "bfd-${local.env}-backups-ami-pruner"
+  name                 = "bfd-${local.env}-backups-ami-pruner"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
