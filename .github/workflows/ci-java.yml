@@ -41,8 +41,8 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-      - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn com.spotify.fmt:fmt-maven-plugin:check
+      - name: 'Run maven formatter'
+        run: mvn --threads 1C com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
 
   mvn-verify:
