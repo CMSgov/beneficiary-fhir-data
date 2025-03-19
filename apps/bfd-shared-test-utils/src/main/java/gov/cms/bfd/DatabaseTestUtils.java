@@ -115,8 +115,9 @@ public final class DatabaseTestUtils {
      */
     Optional<Properties> bfdServerTestDatabaseProperties = readTestDatabaseProperties();
 
-    String url, username, password;
-    url = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
+    String url = System.getProperty("its.db.url", DEFAULT_IT_DATABASE);
+    String username;
+    String password;
 
     if (bfdServerTestDatabaseProperties.isPresent()) {
       LOGGER.info("Setting up data source using server properties ({})", url);
