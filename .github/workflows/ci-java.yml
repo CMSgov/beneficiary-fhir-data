@@ -1,5 +1,6 @@
 name: 'CI - Java'
 on:
+  push:
   pull_request:
   merge_group:
 
