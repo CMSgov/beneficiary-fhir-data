@@ -1,0 +1,64 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "CoverageBase",
+    "url": "https://bfd.cms.gov/fhir/StructureDefinition/CoverageBase",
+    "name": "CoverageBase",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "CoverageBase",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "CoverageBase",
+                "path": "CoverageBase",
+                "label": "IDR Coverage Base. Ignore in DD Generation",
+                "definition": "Covrage Base definition",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "CoverageBase.coveragePart",
+                "path": "CoverageBase.coveragePart",
+                "label": "Coverage Part",
+                "definition": "The 'Part' of Medicare Coverage desired to transform.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_MBI_ID",
+                "path": "CoverageBase.BENE_MBI_ID",
+                "label": "Beneficiary MBI ID",
+                "definition": "The current Medicare Beneficiary Identifier of the Beneficiary",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.XREF_EFCTV_BENE_SK",
+                "path": "CoverageBase.XREF_EFCTV_BENE_SK",
+                "label": "Beneficiary XREF Effective Bene SK",
+                "definition": "The current ID of the individual. ",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
+        ]
+    }
+}

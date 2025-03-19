@@ -1,0 +1,78 @@
+//See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
+//Must appear in order map -> conceptmap -> uses -> imports -> groups
+map "https://bfd.cms.gov/MappingLanguage/maps/CoverageBase" = "BFD-Coverage-Base-Map"
+
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/CoverageBase" alias CoverageBase as source
+//hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
+
+//The first specified target is what the default output will output as the ResourceType
+uses "http://hl7.org/fhir/StructureDefinition/Coverage" alias BFDCoverage as target
+uses "http://hl7.org/fhir/StructureDefinition/Organization" alias OrgCoverage as target
+
+//imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+
+group createCoverageBase(source src: CoverageBase, target tgt: BFDCoverage){
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0" "Set C4BB profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" "Set US Core profile";
+    } "add metadata";
+    src.XREF_EFCTV_BENE_SK as bene_sk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = append("Patient/",bene_sk) "Set bene_sk";
+    src -> tgt.relationship=create('CodeableConcept') as relationshipCode,
+        relationshipCode.coding= create('Coding') as tempCode,
+        tempCode.system="http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+        tempCode.code="self",
+        tempCode.display="self" "set code";
+    src.coveragePart as coveragePart where coveragePart="A" or coveragePart="B" -> tgt then createCoverageFFS(src,tgt) "Create Fee For Service Coverage";
+    //We'll separate out each type of coverage. 
+
+
+    //DUAL status will be at the coverage level.
+    
+}
+
+group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+    src -> tgtID.type = create('CodeableConcept') as idCC,
+        idCC.coding = create('Coding') as tempCode,
+        tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+        tempCode.code = "MB",
+        tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+        src.BENE_MBI_ID as mbi -> tgtID.value = mbi "Set identifier Value";
+    }"Add MBI";
+    src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    //https://nahdo.org/sopt|1 -> MEDICARE is pretty all-encompassing
+    //121 -> Medicare FFS -> 
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="Organization/cms-org" "set reference";
+    } "create and set payor reference";
+    src -> tgt.contained = create('Organization') as tgtOrg then SetOrganizationEntryCMS(src, tgtOrg) "Add CMS reference";
+}
+group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organization) {
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.responseCreated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" "set profile";
+    } "add metadata";
+    src -> tgt.id = "cms-org" "set org id";
+    src -> tgt.active = true "set org as active";
+    src -> tgt.name = 'Centers for Medicare and Medicaid Services' "set org name";
+    src -> tgt.contact = create('BackboneElement') as tgtContact then{
+        src -> tgtContact.purpose = create('CodeableConcept') as purposeCC,
+            purposeCC.coding = create('Coding') as tempCode,
+            tempCode.system="http://terminology.hl7.org/CodeSystem/contactentity-type",
+            tempCode.code="PATINF",
+            tempCode.display="Patient" "set target contact purpose";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTele,
+            tgtTele.system="phone",
+            tgtTele.value="1-800-633-4227" "set main telephone";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTeleTTY,
+            tgtTeleTTY.system="phone",
+            tgtTeleTTY.value="TTY: 1-877-486-2048" "set TTY";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTeleURL,
+            tgtTeleURL.system="url",
+            tgtTeleURL.value="www.medicare.gov" "set url";
+    } "set organization contact info";
+ 
+}
