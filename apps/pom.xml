@@ -188,7 +188,7 @@
         <!-- Docker image used with testcontainers to simulate AWS services for testing. -->
         <!-- This has a default value in gov.cms.bfd.AbstractLocalStackTest that must also be
         changed when changing this property. -->
-        <its.testcontainer.aws.image>localstack/localstack:3.0.2</its.testcontainer.aws.image>
+        <its.testcontainer.aws.image>public.ecr.aws/localstack/localstack:3.0.2</its.testcontainer.aws.image>
 
         <!-- Whether the old MBI hash query feature should be enabled -->
         <local.pac.oldMbiHash.enabled>true</local.pac.oldMbiHash.enabled>

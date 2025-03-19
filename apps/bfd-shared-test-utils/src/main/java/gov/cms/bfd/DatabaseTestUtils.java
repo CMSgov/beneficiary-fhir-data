@@ -29,6 +29,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.testcontainers.utility.DockerImageName;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -53,7 +54,8 @@ public final class DatabaseTestUtils {
   public static final String TEST_CONTAINER_DATABASE_IMAGE_PROPERTY = "its.testcontainer.db.image";
 
   /** The default test container image to use when nothing is provided. */
-  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT = "public.ecr.aws/docker/library/postgres:16.4-alpine";
+  public static final String TEST_CONTAINER_DATABASE_IMAGE_DEFAULT =
+      "public.ecr.aws/docker/library/postgres:16.4-alpine";
 
   /** The username used for test container database username. */
   public static final String TEST_CONTAINER_DATABASE_USERNAME = "bfd";
@@ -284,7 +286,9 @@ public final class DatabaseTestUtils {
             TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
     LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
     container =
-        new PostgreSQLContainer(testContainerDatabaseImage)
+        new PostgreSQLContainer(
+                DockerImageName.parse(testContainerDatabaseImage)
+                    .asCompatibleSubstituteFor("postgres"))
             .withDatabaseName("fhirdb")
             .withUsername(username)
             .withPassword(password)
