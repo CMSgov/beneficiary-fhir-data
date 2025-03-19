@@ -5,8 +5,6 @@ import static java.util.Collections.singletonMap;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.Inet4Address;
-import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -197,22 +195,6 @@ public final class DatabaseTestUtils {
     }
 
     return dataSource;
-  }
-
-  /**
-   * Note: It's possible for this to result in race conditions, if the random port selected enters
-   * use after this method returns and before whatever called this method gets a chance to grab it.
-   * It's pretty unlikely, though, and there's not much we can do about it, either. So.
-   *
-   * @return a free local port number
-   */
-  private static int findFreePort() {
-    try (ServerSocket socket = new ServerSocket(0, 50, Inet4Address.getByName("127.0.0.1"))) {
-      socket.setReuseAddress(true);
-      return socket.getLocalPort();
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
   }
 
   /**
