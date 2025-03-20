@@ -11,13 +11,17 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.samhsa.HhaTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -38,6 +42,9 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /**
    * Instantiates a new transformer.
    *
@@ -47,10 +54,15 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
-  public HHAClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+  public HHAClaimTransformer(
+      MetricRegistry metricRegistry,
+      NPIOrgLookup npiOrgLookup,
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -68,7 +80,11 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((HHAClaim) claim);
+      HHAClaim hhaClaim = (HHAClaim) claim;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(
+              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
+      eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;
   }
@@ -77,10 +93,11 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HHAClaim} to transform
+   * @param securityTags securityTags tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(HHAClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -200,6 +217,8 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     }
 
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
+
+    eob.getMeta().setSecurity(securityTags);
     return eob;
   }
 }

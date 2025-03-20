@@ -105,6 +105,9 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
             "eobByPatientIdAll",
             (Supplier<String>) EndpointJsonResponseComparatorE2E::eobByPatientIdAll),
         arguments(
+            "eobByPatientIdAllWithSamhsa",
+            (Supplier<String>) EndpointJsonResponseComparatorE2E::eobByPatientIdAllWithSamhsa),
+        arguments(
             "eobByPatientIdPaged",
             (Supplier<String>) EndpointJsonResponseComparatorE2E::eobByPatientIdPaged),
         arguments(
@@ -573,6 +576,26 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
                 + beneficiary.getBeneficiaryId());
 
     return sortDiagnosisTypes(response, "/entry/3/resource/diagnosis/7/type");
+  }
+
+  /**
+   * Executes a search against the EOB endpoint using the sample A bene id and returns the sorted
+   * results.
+   *
+   * @return the sorted results
+   */
+  public static String eobByPatientIdAllWithSamhsa() {
+    Beneficiary beneficiary = getSampleABeneSamhsa();
+
+    String url =
+        baseServerUrl
+            + "/v1/fhir/ExplanationOfBenefit/?patient="
+            + beneficiary.getBeneficiaryId()
+            + "&_count="
+            + 2
+            + "&_page="
+            + (6);
+    return getJsonResponseFor(url, getRequestAuth(SAMHSA_KEYSTORE));
   }
 
   /**

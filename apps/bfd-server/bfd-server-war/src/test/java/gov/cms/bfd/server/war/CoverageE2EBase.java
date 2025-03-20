@@ -157,7 +157,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         .body("resourceType", equalTo("Bundle"))
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -241,7 +241,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // should get back all records
-        .body("total", equalTo(4))
+        .body("entry.size()", equalTo(4))
         .statusCode(200)
         .when()
         .get(requestString + inBoundsLastUpdatedParam);
@@ -274,7 +274,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .spec(requestAuth)
         .expect()
         // should filter all records
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString + outOfBoundsLastUpdatedParam);
@@ -348,7 +348,6 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .ifError()
         .body("resourceType", equalTo("Bundle"))
         .body("entry.size()", equalTo(1))
-        .body("total", equalTo(4))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -370,7 +369,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .expect()
         .log()
         .ifError()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
@@ -383,7 +382,7 @@ public abstract class CoverageE2EBase extends ServerRequiredTest {
         .expect()
         .log()
         .ifError()
-        .body("total", equalTo(0))
+        .body("entry", equalTo(null))
         .statusCode(200)
         .when()
         .get(requestString);
