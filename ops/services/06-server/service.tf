@@ -148,6 +148,10 @@ resource "aws_ecs_task_definition" "server" {
             sourceVolume  = "certstores"
           },
         ]
+        # Empty declarations reduce Terraform diff noise
+        portMappings   = []
+        systemControls = []
+        volumesFrom    = []
       },
       {
         name              = "log_router"
@@ -156,6 +160,7 @@ resource "aws_ecs_task_definition" "server" {
         cpu               = 128
         memoryReservation = 50
         memory            = 100
+        user              = "0" # Default; reduces unnecessary terraform diff output
         environment = [
           {
             name  = "AWS_REGION"
@@ -188,6 +193,11 @@ resource "aws_ecs_task_definition" "server" {
             mode                  = "non-blocking"
           }
         }
+        # Empty declarations reduce Terraform diff noise
+        mountPoints    = []
+        portMappings   = []
+        systemControls = []
+        volumesFrom    = []
       },
       {
         name      = local.service
@@ -274,6 +284,9 @@ resource "aws_ecs_task_definition" "server" {
             protocol      = "${local.server_protocol}"
           },
         ]
+        # Empty declarations reduce Terraform diff noise
+        systemControls = []
+        volumesFrom    = []
       },
     ]
   )
