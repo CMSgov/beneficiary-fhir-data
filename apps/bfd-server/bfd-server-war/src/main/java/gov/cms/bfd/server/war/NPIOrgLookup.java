@@ -48,9 +48,24 @@ public class NPIOrgLookup {
     this.testInstance = testInstance;
   }
 
+  /**
+   * Constructor.
+   *
+   * @param dataStream initializes the Map with the provided input stream.
+   */
   public NPIOrgLookup(InputStream dataStream) {
     testInstance = true;
     initializeNpiMap(dataStream);
+  }
+
+  /**
+   * Constructor that takes an entityManager param, for production use.
+   *
+   * @param entityManager The entity manager to use.
+   */
+  public NPIOrgLookup(EntityManager entityManager) {
+    this.entityManager = entityManager;
+    testInstance = false;
   }
 
   /** The query that will return the NPI Data for an NPI. */
@@ -61,7 +76,11 @@ public class NPIOrgLookup {
     initializeNpiMap(npiStream);
   }
 
-  /** Initializes the NPIData map with the test data. */
+  /**
+   * Initializes the NPIData map with the test data.
+   *
+   * @param dataStream The datastream to use for the map.
+   */
   private void initializeNpiMap(InputStream dataStream) {
     npiMap = new HashMap<>();
     String line;
@@ -79,7 +98,11 @@ public class NPIOrgLookup {
     }
   }
 
-  /** Gets the input stream for the test data file. */
+  /**
+   * Gets the input stream for the test data file.
+   *
+   * @return the input stream for the test file.
+   */
   private InputStream getFileInputStream() {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_NPI_FILENAME);
   }
@@ -101,10 +124,6 @@ public class NPIOrgLookup {
     }
   }
 
-  public Map<String, NPIData> getNpiMap() {
-    return npiMap;
-  }
-
   /**
    * Retrieves an NPIData entity from the database for a given NPI.
    *
@@ -124,7 +143,11 @@ public class NPIOrgLookup {
     return Optional.empty();
   }
 
-  /** Creates a test instance of this class. */
+  /**
+   * Creates a test instance of this class.
+   *
+   * @return Returns an npiOrgLookup for testing.
+   */
   public static NPIOrgLookup createTestNpiOrgLookup() {
     if (npiOrgLookup == null) {
       npiOrgLookup = new NPIOrgLookup(true);

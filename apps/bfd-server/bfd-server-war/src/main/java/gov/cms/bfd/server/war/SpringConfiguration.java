@@ -464,18 +464,22 @@ public class SpringConfiguration extends BaseConfiguration {
    * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
    *
    * @param orgFileName file name for fake org data. If not null, it will load the test data
+   * @param entityManagerFactory The entity manager factory to use.
    * @return the {@link NPIOrgLookup} for the application.
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
-  public NPIOrgLookup npiOrgLookup(@Value("${" + PROP_ORG_FILE_NAME + "}") String orgFileName)
+  public NPIOrgLookup npiOrgLookup(
+      @Value("${" + PROP_ORG_FILE_NAME + "}") String orgFileName,
+      EntityManagerFactory entityManagerFactory)
       throws IOException {
     try {
       InputStream npiDataStream =
           Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
       return new NPIOrgLookup(npiDataStream);
     } catch (Exception e) {
-      return new NPIOrgLookup(false);
+
+      return new NPIOrgLookup(entityManagerFactory.createEntityManager());
     }
   }
 
