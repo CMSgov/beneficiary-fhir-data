@@ -17,7 +17,7 @@ Initialize the database with test data
 Run the app
 
 ```sh
-uv run ./pipeline.py
+uv run ./pipeline.py local
 ```
 
 Run tests

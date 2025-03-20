@@ -1,4 +1,6 @@
 import logging
+import sys
+import os
 from loader import PostgresLoader
 from model import (
     IdrBeneficiary,
@@ -6,7 +8,7 @@ from model import (
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
-from extractor import Extractor, PostgresExtractor
+from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +24,21 @@ def init_logger():
 def main():
     init_logger()
 
-    run_pipeline(
-        PostgresExtractor(
-            connection_string="host=localhost dbname=idr user=bfd password=InsecureLocalDev",
-            batch_size=100_000,
-        ),
-        "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev",
-    )
+    if len(sys.argv) > 1 and sys.argv[1] == "local":
+        run_pipeline(
+            PostgresExtractor(
+                connection_string="host=localhost dbname=idr user=bfd password=InsecureLocalDev",
+                batch_size=100_000,
+            ),
+            "host=localhost dbname=idr user=bfd password=InsecureLocalDev",
+        )
+    else:
+        run_pipeline(
+            SnowflakeExtractor(
+                batch_size=100_000,
+            ),
+            f"host={os.environ["BFD_DB_ENDPOINT"]} dbname=idr user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}",
+        )
 
 
 def run_pipeline(extractor: Extractor, connection_string: str):
@@ -101,16 +111,20 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     )
     pbp_loader.load(pbp_iter, IdrContractPbpNumber)
 
-    bene_fetch_query = """
-    SELECT {COLUMNS}
-    FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
-    {WHERE_CLAUSE}
-    ORDER BY idr_trans_efctv_ts, bene_sk
+    # equivalent to "select distinct on", but Snowflake has different syntax for that so it's unfortunately not portable
+    prd_fetch_query = """
+    WITH dupes as (
+        SELECT {COLUMNS}, ROW_NUMBER() OVER (PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt ORDER BY idr_trans_efctv_ts DESC) as row_order
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
+        {WHERE_CLAUSE}
+        ORDER BY idr_trans_efctv_ts, bene_sk
+    )
+    SELECT {COLUMNS} FROM dupes WHERE row_order = 1
     """
     contract_iter = extractor.extract_idr_data(
         IdrElectionPeriodUsage,
         connection_string=connection_string,
-        fetch_query=bene_fetch_query,
+        fetch_query=prd_fetch_query,
         progress_col="bene_sk",
         table="idr.beneficiary_election_period_usage",
     )
