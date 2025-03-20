@@ -9,8 +9,8 @@ import org.hl7.fhir.r4.model.Resource;
 /** Class for performing common MCS based transformation logic. */
 public class McsTransformerV2 {
 
-  /** The MCS specific gender mapping to use to map from RDA to FHIR. */
-  private static final Map<String, Enumerations.AdministrativeGender> GENDER_MAP =
+  /** The MCS specific sex mapping to use to map from RDA to FHIR. */
+  private static final Map<String, Enumerations.AdministrativeGender> SEX_MAP =
       Map.of(
           "m", Enumerations.AdministrativeGender.MALE,
           "f", Enumerations.AdministrativeGender.FEMALE,
@@ -34,7 +34,7 @@ public class McsTransformerV2 {
             AbstractTransformerV2.ifNotNull(claimGroup.getIdrBeneMidInit(), s -> s + "."),
             null, // MCS claims don't contain dob
             claimGroup.getIdrBeneSex(),
-            GENDER_MAP,
+            SEX_MAP,
             "first initial",
             "middle initial",
             "max 6 chars of last");
