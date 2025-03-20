@@ -133,7 +133,8 @@ POLICY
 
 }
 
-# TO add permission boundary in BFD-3953
+# TODO: remove this and related in BFD-3953
+# NOTE: `cloudbees` is not to be migrated as part of the greenfield migration
 resource "aws_iam_role" "cloudbees" {
   assume_role_policy    = <<-POLICY
 {
@@ -159,8 +160,6 @@ POLICY
   ]
   max_session_duration = 3600
   name                 = "cloudbees-jenkins"
-  path                 = local.cloudtamer_iam_path
-
 }
 
 resource "aws_iam_group" "app_engineers" {
