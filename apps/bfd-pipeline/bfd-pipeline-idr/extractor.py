@@ -82,8 +82,8 @@ class Extractor(ABC):
                     "{WHERE_CLAUSE}",
                     f"""
                     WHERE ((
-                        idr_trans_efctv_ts = %(timestamp)s AND idr_updt_ts <= %(timestamp)s AND {progress_col} > %(last_id)s
-                    ) OR idr_trans_efctv_ts > %(timestamp)s OR idr_updt_ts > %(timestamp)s) AND idr_trans_efctv_ts >= '{get_min_transaction_date()}'""",
+                        idr_trans_efctv_ts = %(timestamp)s AND {progress_col} > %(last_id)s
+                    ) OR idr_trans_efctv_ts > %(timestamp)s OR idr_updt_ts >= %(timestamp)s) AND idr_trans_efctv_ts >= '{get_min_transaction_date()}'""",
                 ),
                 {"timestamp": progress.last_timestamp, "last_id": progress.last_id},
             )
