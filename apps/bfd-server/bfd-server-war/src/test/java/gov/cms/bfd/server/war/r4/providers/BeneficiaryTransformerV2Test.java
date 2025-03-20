@@ -535,10 +535,10 @@ public final class BeneficiaryTransformerV2Test {
 
   /**
    * Verifies that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} correctly
-   * handles patient gender attribute.
+   * handles patient sex attribute.
    */
   @Test
-  public void shouldMatchBeneficiaryGender() {
+  public void shouldMatchBeneficiarySex() {
     assertEquals(AdministrativeGender.MALE, patient.getGender());
   }
 

@@ -150,7 +150,7 @@ public class McsTransformer extends AbstractTransformer {
         mbiMap.get(beneId).getMidName(),
         value -> claimBuilder.setIdrBeneMidInit(value.substring(0, 1)));
     consumeIfNotNull(
-        mbiMap.get(beneId).getGender(),
+        mbiMap.get(beneId).getSex(),
         value -> {
           // RIF mappings are  0 - unknown, 1 - male, 2 - female
           // RDA mappings are -1 - unrecognized, 0 - male, 1 - female

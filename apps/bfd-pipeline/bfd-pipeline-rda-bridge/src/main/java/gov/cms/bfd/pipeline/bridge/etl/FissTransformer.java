@@ -181,7 +181,7 @@ public class FissTransformer extends AbstractTransformer {
     consumeIfNotNull(
         mbiMap.get(beneId).getMidName(), s -> payerBuilder.setBeneMidInit(s.substring(0, 1)));
     consumeIf(
-        mbiMap.get(beneId).getGender(),
+        mbiMap.get(beneId).getSex(),
         NumberUtils::isDigits,
         value -> {
           // RIF mappings are  0 - unknown, 1 - male, 2 - female
