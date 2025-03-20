@@ -1,5 +1,14 @@
 locals {
-  db_cluster_identifier  = "bfd-${local.db_environment}-aurora-cluster"
+  db_environment        = coalesce(var.db_environment_override, local.env)
+  db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
+
+  certstores_repository_name = coalesce(var.certstores_repository_override, "bfd-mgmt-mount-certstores")
+  log_router_repository_name = coalesce(var.log_router_repository_override, "bfd-mgmt-server-fluent-bit")
+  server_repository_name     = coalesce(var.server_repository_override, "bfd-server")
+  certstores_version         = coalesce(var.certstores_version_override, local.latest_bfd_release)
+  log_router_version         = coalesce(var.log_router_version_override, local.latest_bfd_release)
+  server_version             = coalesce(var.server_version_override, local.latest_bfd_release)
+
   server_truststore_path = "/data/${local.truststore_filename}"
   server_keystore_path   = "/data/${local.keystore_filename}"
   server_port            = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
@@ -31,13 +40,33 @@ data "aws_ecr_image" "certstores" {
   image_tag       = local.certstores_version
 }
 
+data "aws_ecr_image" "log_router" {
+  repository_name = local.log_router_repository_name
+  image_tag       = local.log_router_version
+}
+
 data "aws_ecr_image" "server" {
   repository_name = local.server_repository_name
   image_tag       = local.server_version
 }
 
-resource "aws_cloudwatch_log_group" "server_service" {
-  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/service/${local.service}"
+resource "aws_cloudwatch_log_group" "certstores_messages" {
+  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
+  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+}
+
+resource "aws_cloudwatch_log_group" "log_router_messages" {
+  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+}
+
+resource "aws_cloudwatch_log_group" "server_messages" {
+  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+}
+
+resource "aws_cloudwatch_log_group" "server_access" {
+  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
   kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
 }
 
@@ -104,8 +133,8 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = aws_cloudwatch_log_group.server_service.name
-            awslogs-stream-prefix = "stdout"
+            awslogs-group         = aws_cloudwatch_log_group.certstores_messages.name
+            awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
             max-buffer-size       = "25m"
             mode                  = "non-blocking"
@@ -121,6 +150,46 @@ resource "aws_ecs_task_definition" "server" {
         name = "certstores"
       },
       {
+        name              = "log_router"
+        cpu               = 128
+        memoryReservation = 50
+        memory            = 100
+        essential         = true
+        image             = data.aws_ecr_image.log_router.image_uri
+        environment = [
+          {
+            name  = "AWS_REGION"
+            value = local.region
+          },
+          {
+            name  = "MESSAGES_LOG_GROUP"
+            value = aws_cloudwatch_log_group.server_messages.name
+          },
+          {
+            name  = "ACCESS_LOG_GROUP"
+            value = aws_cloudwatch_log_group.server_access.name
+          },
+        ]
+        firelensConfiguration = {
+          type = "fluentbit"
+          options = {
+            "config-file-type"        = "file"
+            "config-file-value"       = "/server-fluentbit.conf"
+            "enable-ecs-log-metadata" = "false"
+          }
+        }
+        logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group         = aws_cloudwatch_log_group.log_router_messages.name
+            awslogs-stream-prefix = "messages"
+            awslogs-region        = local.region
+            max-buffer-size       = "25m"
+            mode                  = "non-blocking"
+          }
+        }
+      },
+      {
         cpu = 0
         dependsOn = [
           {
@@ -132,6 +201,7 @@ resource "aws_ecs_task_definition" "server" {
           {
             name = "JDK_JAVA_OPTIONS"
             value = join(" ", [
+              "-Dlogback.configurationFile=all-stdout.logback.xml",
               "-XX:+UseContainerSupport",
               "-XX:MaxRAMPercentage=75.0",
               "-XX:+PreserveFramePointer",
@@ -186,14 +256,7 @@ resource "aws_ecs_task_definition" "server" {
         essential = true
         image     = data.aws_ecr_image.server.image_uri
         logConfiguration = {
-          logDriver = "awslogs"
-          options = {
-            awslogs-group         = aws_cloudwatch_log_group.server_service.name
-            awslogs-stream-prefix = "stdout"
-            awslogs-region        = local.region
-            max-buffer-size       = "25m"
-            mode                  = "non-blocking"
-          }
+          logDriver = "awsfirelens"
         }
         mountPoints = [
           {

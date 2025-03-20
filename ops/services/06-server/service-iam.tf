@@ -58,6 +58,21 @@ resource "aws_iam_policy" "rds" {
   policy      = data.aws_iam_policy_document.rds.json
 }
 
+data "aws_iam_policy_document" "logs" {
+  statement {
+    sid       = "AllowFireLensPutLogEventsAndCreateStream"
+    actions   = ["logs:PutLogEvents", "logs:CreateLogStream"]
+    resources = ["${aws_cloudwatch_log_group.server_access.arn}:log-stream:*", "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*"]
+  }
+}
+
+resource "aws_iam_policy" "logs" {
+  name        = "${local.name_prefix}-logs-policy"
+  path        = local.cloudtamer_iam_path
+  description = "Permissions for the ${local.env} ${local.service} firelens sidecar container to submit logs from the ${local.service} container"
+  policy      = data.aws_iam_policy_document.logs.json
+}
+
 data "aws_iam_policy_document" "ssm_params" {
   statement {
     sid = "AllowGetServerAndCommonParameters"
@@ -130,6 +145,7 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     certstores_s3 = aws_iam_policy.certstores_s3.arn
     kms           = aws_iam_policy.kms.arn
     rds           = aws_iam_policy.rds.arn
+    logs          = aws_iam_policy.logs.arn
     ssm_params    = aws_iam_policy.ssm_params.arn
     ecs_exec      = aws_iam_policy.ecs_exec.arn
   }
