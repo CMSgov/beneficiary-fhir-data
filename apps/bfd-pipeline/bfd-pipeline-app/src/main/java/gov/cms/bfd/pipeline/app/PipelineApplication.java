@@ -585,7 +585,9 @@ public final class PipelineApplication {
     }
     final Optional<NpiFdaLoadJobConfig> npiFdaConfig = appConfig.getNpiFdaLoadConfigOptions();
     if (npiFdaConfig.isPresent()) {
-      final var npiFdaJob = createNpiFdaJob(appMeters, appMetrics, pooledDataSource, clock);
+      final var npiFdaJob =
+          createNpiFdaJob(
+              appMeters, appMetrics, pooledDataSource, clock, npiFdaConfig.get().getBatchSize());
       jobs.add(npiFdaJob);
       LOGGER.warn("Registered NpiFda job.");
     } else {
@@ -599,7 +601,8 @@ public final class PipelineApplication {
       MeterRegistry appMeters,
       MetricRegistry appMetrics,
       HikariDataSource pooledDataSource,
-      Clock clock) {
+      Clock clock,
+      int batchSize) {
     PipelineApplicationState appState =
         new PipelineApplicationState(
             appMeters,
@@ -607,7 +610,7 @@ public final class PipelineApplication {
             pooledDataSource,
             PipelineApplicationState.PERSISTENCE_UNIT_NAME,
             clock);
-    return new NpiFdaLoadJob(appState);
+    return new NpiFdaLoadJob(appState, batchSize);
   }
 
   /**

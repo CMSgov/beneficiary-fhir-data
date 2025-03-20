@@ -15,4 +15,7 @@ import lombok.Setter;
 public class NpiFdaLoadJobConfig {
   /** True if the job is enabled. */
   boolean enabled = false;
+
+  /** The number of records to save before committing a transaction. */
+  int batchSize = 100000;
 }

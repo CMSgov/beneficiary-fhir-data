@@ -415,6 +415,7 @@ case $run_mode in
     setvar rda/samhsa/backfill/log_interval "15" #in seconds
     ;;
   npifda)
+    setvar rda/npi_fda_load_job/batch_size "100"
     setvar rda/npi_fda_load_job/enabled "true"
     ;;
   rif)

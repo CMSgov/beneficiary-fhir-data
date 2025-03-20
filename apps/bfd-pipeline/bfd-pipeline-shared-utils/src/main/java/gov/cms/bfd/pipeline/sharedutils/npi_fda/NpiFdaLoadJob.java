@@ -27,6 +27,9 @@ public class NpiFdaLoadJob implements PipelineJob {
   /** The PipelineApplicationState. */
   EntityManager entityManager;
 
+  /** The number of records to save before commiting the transasction. */
+  int batchSize;
+
   /** The logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(NpiFdaLoadJob.class);
 
@@ -34,10 +37,12 @@ public class NpiFdaLoadJob implements PipelineJob {
    * Constructor.
    *
    * @param appState The PipelineApplicationState.
+   * @param batchSize The number of records to save before committing a transaction.
    */
-  public NpiFdaLoadJob(PipelineApplicationState appState) {
+  public NpiFdaLoadJob(PipelineApplicationState appState, int batchSize) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     runningSemaphore = new Semaphore(1);
+    this.batchSize = batchSize;
   }
 
   /** {@inheritDoc} */
@@ -75,12 +80,15 @@ public class NpiFdaLoadJob implements PipelineJob {
     int total = 0;
     try {
       Instant start = Instant.now();
-      LoadNpiDataFiles loadNpiDataFiles = new LoadNpiDataFiles(entityManager);
+      LoadNpiDataFiles loadNpiDataFiles = new LoadNpiDataFiles(entityManager, batchSize);
       try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
         Future<Integer> npiTotal = executor.submit(loadNpiDataFiles);
-        total = npiTotal.get();
-      } catch (InterruptedException | ExecutionException ex) {
-        throw new Exception(ex);
+        try {
+          total = npiTotal.get();
+        } catch (InterruptedException | ExecutionException ex) {
+          npiTotal.cancel(true);
+          throw new Exception(ex);
+        }
       }
       Instant finish = Instant.now();
       Long totalTime = ChronoUnit.SECONDS.between(start, finish);

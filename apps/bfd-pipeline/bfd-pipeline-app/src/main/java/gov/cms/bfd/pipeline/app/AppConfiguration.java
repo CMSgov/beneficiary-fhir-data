@@ -379,6 +379,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /** Enabled flag for NpiFdaLoadJob. */
   public static final String SSM_PATH_NPI_FDA_LOAD_JOB = "rda/npi_fda_load_job/enabled";
 
+  /** The number of records to save before commiting a transaction. */
+  public static final String SSM_PATH_NPI_FDA_BATCH_SIZE = "rda/npi_fda_load_job/batch_size";
+
   /**
    * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
    * allowed list avoids increasing AWS charges as new metrics are defined for use in NewRelic that
@@ -445,6 +448,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(SSM_PATH_RDA_GRPC_INPROC_SERVER_NAME, "MockRdaServer")
           .put(SSM_PATH_RDA_GRPC_MAX_IDLE_SECONDS, String.valueOf(Integer.MAX_VALUE))
           .put(SSM_PATH_NPI_FDA_LOAD_JOB, "false")
+          .put(SSM_PATH_NPI_FDA_BATCH_SIZE, "100000")
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
@@ -541,7 +545,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
     if (!enabled || ccwPipelineEnabled) {
       return null;
     }
-    return NpiFdaLoadJobConfig.builder().enabled(enabled).build();
+    int batchSize = config.intValue(SSM_PATH_NPI_FDA_BATCH_SIZE, 100000);
+    return NpiFdaLoadJobConfig.builder().enabled(enabled).batchSize(batchSize).build();
   }
 
   /**

@@ -86,13 +86,18 @@ public class LoadNpiDataFiles implements Callable<Integer> {
   /** The transaction manager to use for database operations. */
   private final EntityManager entityManager;
 
+  /** The number of records to save before commiting a transaction. */
+  int batchSize;
+
   /**
    * Constructor.
    *
    * @param entityManager the entityManager;
+   * @param batchSize The number of records saved before committing a transaction.
    */
-  public LoadNpiDataFiles(EntityManager entityManager) {
+  public LoadNpiDataFiles(EntityManager entityManager, int batchSize) {
     this.entityManager = entityManager;
+    this.batchSize = batchSize;
   }
 
   /**
@@ -237,12 +242,16 @@ public class LoadNpiDataFiles implements Callable<Integer> {
         NPIData npiData = getNpiDataFromCsv(csvRecord, taxonomyMap);
         entityManager.merge(npiData);
         savedCount++;
+
         // commit and begin a new transaction every 100 thousand records.
-        if (savedCount % 100000 == 0) {
+        if (savedCount % batchSize == 0) {
           entityManager.getTransaction().commit();
           entityManager.clear();
           LOGGER.info("Progress: Saved {}", savedCount);
           entityManager.getTransaction().begin();
+        }
+        if (Thread.currentThread().isInterrupted()) {
+          break;
         }
       }
       // final commit
