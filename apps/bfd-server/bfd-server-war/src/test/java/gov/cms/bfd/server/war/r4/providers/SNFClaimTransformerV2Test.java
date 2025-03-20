@@ -20,6 +20,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -81,6 +82,9 @@ public class SNFClaimTransformerV2Test {
   /** The metrics registry. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The SamhsaSecurityTag lookup. */
+  @Mock SecurityTagManager securityTagManager;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -122,7 +126,8 @@ public class SNFClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
     snfClaimTransformer =
-        new SNFClaimTransformerV2(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup());
+        new SNFClaimTransformerV2(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

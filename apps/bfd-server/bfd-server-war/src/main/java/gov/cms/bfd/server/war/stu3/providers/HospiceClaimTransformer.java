@@ -10,13 +10,17 @@ import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.server.war.NPIOrgLookup;
+import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.springframework.stereotype.Component;
@@ -36,6 +40,9 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
   private static final String METRIC_NAME =
       MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform");
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /**
    * Instantiates a new transformer.
    *
@@ -45,10 +52,15 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
+   * @param securityTagManager securityTagManager
    */
-  public HospiceClaimTransformer(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+  public HospiceClaimTransformer(
+      MetricRegistry metricRegistry,
+      NPIOrgLookup npiOrgLookup,
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -66,7 +78,11 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((HospiceClaim) claim);
+      HospiceClaim hospiceClaim = (HospiceClaim) claim;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevelDstu3(
+              String.valueOf(hospiceClaim.getClaimId()), HospiceTag.class);
+      eob = transformClaim(hospiceClaim, securityTags);
     }
     return eob;
   }
@@ -75,10 +91,11 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link HospiceClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link HospiceClaim} to transform
+   * @param securityTags securityTags tag of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
-  private ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(HospiceClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -200,6 +217,9 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
+
+    eob.getMeta().setSecurity(securityTags);
+
     return eob;
   }
 }

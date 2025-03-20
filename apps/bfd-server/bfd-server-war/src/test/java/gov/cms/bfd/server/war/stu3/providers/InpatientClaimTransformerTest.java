@@ -21,6 +21,7 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
@@ -50,6 +51,9 @@ public final class InpatientClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
+  /** The securityTagManager. */
+  @Mock SecurityTagManager securityTagManager;
+
   /** The metrics timer. Used for determining the timer was started. */
   @Mock Timer metricsTimer;
 
@@ -67,7 +71,8 @@ public final class InpatientClaimTransformerTest {
     npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     inpatientClaimTransformer =
-        new InpatientClaimTransformer(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup());
+        new InpatientClaimTransformer(
+            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
   }
 
   /** Releases the static mock NPIOrgLookup. */

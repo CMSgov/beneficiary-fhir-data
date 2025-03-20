@@ -11,19 +11,23 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.server.war.NPIOrgLookup;
+import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Period;
@@ -43,6 +47,9 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform");
 
+  /** The securityTagManager. */
+  private final SecurityTagManager securityTagManager;
+
   /**
    * Instantiates a new transformer.
    *
@@ -52,10 +59,15 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
+   * @param securityTagManager SamhsaSecurityTags lookup
    */
-  public SNFClaimTransformerV2(MetricRegistry metricRegistry, NPIOrgLookup npiOrgLookup) {
+  public SNFClaimTransformerV2(
+      MetricRegistry metricRegistry,
+      NPIOrgLookup npiOrgLookup,
+      SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.securityTagManager = requireNonNull(securityTagManager);
   }
 
   /**
@@ -74,7 +86,11 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      eob = transformClaim((SNFClaim) claim);
+      SNFClaim snfClaim = (SNFClaim) claim;
+      List<Coding> securityTags =
+          securityTagManager.getClaimSecurityLevel(
+              String.valueOf(snfClaim.getClaimId()), SnfTag.class);
+      eob = transformClaim(snfClaim, securityTags);
     }
     return eob;
   }
@@ -83,14 +99,16 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a specified {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link SNFClaim} to transform
+   * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     SNFClaim}
    */
-  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
+  private ExplanationOfBenefit transformClaim(SNFClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
+    eob.getMeta().setSecurity(securityTags);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id

@@ -40,6 +40,7 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -2255,6 +2256,7 @@ final class TransformerTestUtils {
    * @param includeTaxNumbers if tax numbers should be included in the response
    * @param drugCodeDisplayLookup the drug code display lookup
    * @param npiOrgLookup the npi org lookup
+   * @param securityTagManager SamhsaSecurityTag lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
@@ -2262,26 +2264,34 @@ final class TransformerTestUtils {
       MetricRegistry metricRegistry,
       Boolean includeTaxNumbers,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterface claimTransformerInterface = null;
     if (rifRecord instanceof CarrierClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformer(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
+          new CarrierClaimTransformer(
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof DMEClaim) {
-      claimTransformerInterface = new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup);
+      claimTransformerInterface =
+          new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup, securityTagManager);
     } else if (rifRecord instanceof HHAClaim) {
-      claimTransformerInterface = new HHAClaimTransformer(metricRegistry, npiOrgLookup);
+      claimTransformerInterface =
+          new HHAClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof HospiceClaim) {
-      claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, npiOrgLookup);
+      claimTransformerInterface =
+          new HospiceClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof InpatientClaim) {
-      claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, npiOrgLookup);
+      claimTransformerInterface =
+          new InpatientClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof OutpatientClaim) {
-      claimTransformerInterface = new OutpatientClaimTransformer(metricRegistry, npiOrgLookup);
+      claimTransformerInterface =
+          new OutpatientClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
     } else if (rifRecord instanceof PartDEvent) {
       claimTransformerInterface = new PartDEventTransformer(metricRegistry, drugCodeDisplayLookup);
     } else if (rifRecord instanceof SNFClaim) {
-      claimTransformerInterface = new SNFClaimTransformer(metricRegistry, npiOrgLookup);
+      claimTransformerInterface =
+          new SNFClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
