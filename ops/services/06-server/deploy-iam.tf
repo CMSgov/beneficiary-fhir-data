@@ -1,13 +1,91 @@
 data "aws_iam_policy_document" "codedeploy_assume" {
   statement {
-    effect  = "Allow"
     actions = ["sts:AssumeRole"]
-
     principals {
       type        = "Service"
       identifiers = ["codedeploy.amazonaws.com"]
     }
   }
+}
+
+data "aws_iam_policy_document" "codedeploy_ecs" {
+  statement {
+    sid       = "AllowECSServiceModification"
+    actions   = ["ecs:DescribeServices", "ecs:UpdateServicePrimaryTaskSet"]
+    resources = [aws_ecs_service.server.id]
+  }
+
+  statement {
+    sid       = "AllowECSServiceTaskSetModification"
+    actions   = ["ecs:CreateTaskSet", "ecs:DeleteTaskSet", ]
+    resources = ["${replace(aws_ecs_service.server.id, "service/", "task-set/")}/*"]
+  }
+}
+
+resource "aws_iam_policy" "codedeploy_ecs" {
+  name   = "${local.name_prefix}-codedeploy-ecs-policy"
+  path   = local.cloudtamer_iam_path
+  policy = data.aws_iam_policy_document.codedeploy_ecs.json
+}
+
+data "aws_iam_policy_document" "codedeploy_elbv2" {
+  statement {
+    sid = "AllowELBDescribe"
+    actions = [
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeRules",
+      "elasticloadbalancing:DescribeTargetGroups",
+    ]
+    # Unfortunately, these Describe Actions do not allow for any resource restrictions or conditions
+    # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_awselasticloadbalancingv2.html#awselasticloadbalancingv2-listener-rule_net
+    resources = ["*"]
+  }
+
+  statement {
+    sid       = "AllowELBListenerModification"
+    actions   = ["elasticloadbalancing:ModifyListener", "elasticloadbalancing:ModifyRule"]
+    resources = [for _, v in aws_lb_listener.this : v.arn]
+  }
+
+  statement {
+    sid       = "AllowELBListenerRuleModification"
+    actions   = ["elasticloadbalancing:ModifyRule"]
+    resources = [for _, v in aws_lb_listener.this : "${replace(v.arn, "listener/", "listener-rule/")}/*"]
+  }
+}
+
+resource "aws_iam_policy" "codedeploy_elbv2" {
+  name   = "${local.name_prefix}-codedeploy-elbv2-policy"
+  path   = local.cloudtamer_iam_path
+  policy = data.aws_iam_policy_document.codedeploy_elbv2.json
+}
+
+data "aws_iam_policy_document" "codedeploy_iam" {
+  statement {
+    sid       = "AllowPassRole"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.service_role.arn, aws_iam_role.execution_role.arn]
+  }
+}
+
+resource "aws_iam_policy" "codedeploy_iam" {
+  name   = "${local.name_prefix}-codedeploy-iam-policy"
+  path   = local.cloudtamer_iam_path
+  policy = data.aws_iam_policy_document.codedeploy_iam.json
+}
+
+data "aws_iam_policy_document" "codedeploy_lambda" {
+  statement {
+    sid       = "AllowUsageOfRegressionWrapperLambda"
+    actions   = ["lambda:InvokeFunction", "lambda:GetFunction"]
+    resources = [aws_lambda_function.regression_wrapper.arn]
+  }
+}
+
+resource "aws_iam_policy" "codedeploy_lambda" {
+  name   = "${local.name_prefix}-codedeploy-lambda-policy"
+  path   = local.cloudtamer_iam_path
+  policy = data.aws_iam_policy_document.codedeploy_lambda.json
 }
 
 resource "aws_iam_role" "codedeploy" {
@@ -18,97 +96,14 @@ resource "aws_iam_role" "codedeploy" {
   force_detach_policies = true
 }
 
-data "aws_iam_policy_document" "codedeploy" {
-  statement {
-    sid    = "AllowECSServiceModification"
-    effect = "Allow"
-
-    actions = [
-      "ecs:DescribeServices",
-      "ecs:UpdateServicePrimaryTaskSet",
-    ]
-
-    resources = [aws_ecs_service.server.id]
-  }
-
-  statement {
-    sid = "AllowECSServiceTaskSetModification"
-    actions = [
-      "ecs:CreateTaskSet",
-      "ecs:DeleteTaskSet",
-    ]
-    effect = "Allow"
-
-    resources = ["${replace(aws_ecs_service.server.id, "service/", "task-set/")}/*"]
-  }
-
-  statement {
-    sid    = "AllowELBDescribe"
-    effect = "Allow"
-
-    actions = [
-      "elasticloadbalancing:DescribeListeners",
-      "elasticloadbalancing:DescribeRules",
-      "elasticloadbalancing:DescribeTargetGroups",
-    ]
-
-    # Unfortunately, these Describe Actions do not allow for any resource restrictions or conditions
-    # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_awselasticloadbalancingv2.html#awselasticloadbalancingv2-listener-rule_net
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "AllowELBListenerModification"
-    effect = "Allow"
-
-    actions = [
-      "elasticloadbalancing:ModifyListener",
-      "elasticloadbalancing:ModifyRule"
-    ]
-
-    resources = [for _, v in aws_lb_listener.this : v.arn]
-  }
-
-  statement {
-    sid    = "AllowELBListenerRuleModification"
-    effect = "Allow"
-
-    actions = [
-      "elasticloadbalancing:ModifyRule"
-    ]
-
-    resources = [for _, v in aws_lb_listener.this : "${replace(v.arn, "listener/", "listener-rule/")}/*"]
-  }
-
-  statement {
-    sid    = "AllowPassRole"
-    effect = "Allow"
-
-    actions = ["iam:PassRole"]
-
-    resources = [
-      aws_iam_role.service_role.arn,
-      aws_iam_role.execution_role.arn
-    ]
-  }
-
-  statement {
-    sid    = "AllowUsageOfRegressionWrapperLambda"
-    effect = "Allow"
-
-    actions = ["lambda:InvokeFunction", "lambda:GetFunction"]
-
-    resources = [aws_lambda_function.regression_wrapper.arn]
-  }
-}
-
-resource "aws_iam_policy" "codedeploy" {
-  name   = "${local.name_prefix}-codedeploy-policy"
-  path   = local.cloudtamer_iam_path
-  policy = data.aws_iam_policy_document.codedeploy.json
-}
-
 resource "aws_iam_role_policy_attachment" "codedeploy" {
-  policy_arn = aws_iam_policy.codedeploy.arn
+  for_each = {
+    ecs    = aws_iam_policy.codedeploy_ecs.arn
+    elbv2  = aws_iam_policy.codedeploy_elbv2.arn
+    iam    = aws_iam_policy.codedeploy_iam.arn
+    lambda = aws_iam_policy.codedeploy_lambda.arn
+  }
+
   role       = aws_iam_role.codedeploy.name
+  policy_arn = each.value
 }

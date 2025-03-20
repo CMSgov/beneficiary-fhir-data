@@ -59,6 +59,7 @@ resource "aws_codedeploy_deployment_group" "server" {
 }
 
 resource "null_resource" "codedeploy_server" {
+  depends_on = [aws_iam_role.codedeploy, aws_iam_role_policy_attachment.codedeploy]
   triggers = {
     task_definition_revision = aws_ecs_task_definition.server.revision
   }
