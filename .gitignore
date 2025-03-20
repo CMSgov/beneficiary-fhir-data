@@ -22,7 +22,3 @@
 *.ipr
 *.iws
 *.pid
-
-#ignore artifacts from FHIR Mapping Language
-apps/bfd-model/bfd-model-idr/StructureMaps/*
-apps/bfd-model/bfd-model-idr/outputs/*

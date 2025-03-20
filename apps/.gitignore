@@ -8,3 +8,7 @@
 # Ignore NetBeans settings files
 **/nb-configuration.xml
 **/nbactions.xml
+
+#ignore artifacts from FHIR Mapping Language
+bfd-model/bfd-model-idr/StructureMaps/*
+bfd-model/bfd-model-idr/outputs/*
