@@ -18,12 +18,6 @@ locals {
   latest_bfd_release = module.terraservice.latest_bfd_release
   ssm_config         = module.terraservice.ssm_config
 
-  db_environment             = coalesce(var.db_environment_override, local.env)
-  certstores_repository_name = coalesce(var.certstores_repository_override, "bfd-mgmt-mount-certstores")
-  server_repository_name     = coalesce(var.server_repository_override, "bfd-server")
-  certstores_version         = coalesce(var.certstores_version_override, local.latest_bfd_release)
-  server_version             = coalesce(var.server_version_override, local.latest_bfd_release)
-
   azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
   app_subnet_ids = [for _, v in data.aws_subnet.app_subnets : v.id]
   dmz_subnet_ids = [for _, v in data.aws_subnet.dmz_subnets : v.id]
