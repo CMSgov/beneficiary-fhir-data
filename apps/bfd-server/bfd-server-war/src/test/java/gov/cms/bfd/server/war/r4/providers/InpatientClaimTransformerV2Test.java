@@ -302,7 +302,9 @@ public final class InpatientClaimTransformerV2Test {
             "345345345",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "performing",
-            "Performing provider");
+            "Performing provider",
+            "207ZH0000X",
+            "Hematology (Pathology) Physician");
 
     assertTrue(compare4.equalsDeep(member4));
   }

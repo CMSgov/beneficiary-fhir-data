@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,13 +12,11 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
 /**
  * Interface for NPIOrgLookup. This allows us to have both a test implementation, and a prod
  * implementation.
  */
-@Component
 public class NPIOrgLookup {
   /** Provider Entity. */
   public static String ENTITY_TYPE_CODE_PROVIDER = "1";
@@ -34,7 +31,7 @@ public class NPIOrgLookup {
   private static final String TEST_NPI_FILENAME = "npi_e2e_it.json";
 
   /** Production implementation of NPIOrgLookup. */
-  @PersistenceContext EntityManager entityManager;
+  EntityManager entityManager;
 
   /** The singleton. */
   private static NPIOrgLookup npiOrgLookup;
@@ -51,14 +48,24 @@ public class NPIOrgLookup {
     this.testInstance = testInstance;
   }
 
+  public NPIOrgLookup(InputStream dataStream) {
+    testInstance = true;
+    initializeNpiMap(dataStream);
+  }
+
   /** The query that will return the NPI Data for an NPI. */
   private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi = :npi";
 
-  /** Initializes the NPIData map with the test data. */
   private void initializeNpiMap() {
+    final InputStream npiStream = getFileInputStream();
+    initializeNpiMap(npiStream);
+  }
+
+  /** Initializes the NPIData map with the test data. */
+  private void initializeNpiMap(InputStream dataStream) {
     npiMap = new HashMap<>();
     String line;
-    try (final InputStream npiStream = getFileInputStream();
+    try (final InputStream npiStream = dataStream;
         final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
       ObjectMapper objectMapper = new ObjectMapper();
       while ((line = reader.readLine()) != null) {
@@ -94,6 +101,10 @@ public class NPIOrgLookup {
     }
   }
 
+  public Map<String, NPIData> getNpiMap() {
+    return npiMap;
+  }
+
   /**
    * Retrieves an NPIData entity from the database for a given NPI.
    *
@@ -111,14 +122,6 @@ public class NPIOrgLookup {
       return Optional.ofNullable(npiData);
     }
     return Optional.empty();
-  }
-
-  /** Creates an instance of this class. */
-  public static NPIOrgLookup createNpiOrgLookup() {
-    if (npiOrgLookup == null) {
-      npiOrgLookup = new NPIOrgLookup(false);
-    }
-    return npiOrgLookup;
   }
 
   /** Creates a test instance of this class. */

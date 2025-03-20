@@ -1288,7 +1288,30 @@ public final class TransformerTestUtilsV2 {
    */
   static CareTeamComponent createNpiCareTeamMember(
       int sequence, String npi, String system, String code, String display) {
-    return new CareTeamComponent()
+    return createNpiCareTeamMember(sequence, npi, system, code, display, null, null);
+  }
+
+  /**
+   * Helper that creates a {@link CareTeamComponent} to be used in unit tests.
+   *
+   * @param sequence The sequence to set
+   * @param npi The NPI for the member
+   * @param system System defining the type of member
+   * @param code Code defining the type of member
+   * @param display Display for the type of member
+   * @param taxonomyCode The taxonomy code.
+   * @return {@link CareTeamComponent}
+   */
+  static CareTeamComponent createNpiCareTeamMember(
+      int sequence,
+      String npi,
+      String system,
+      String code,
+      String display,
+      String taxonomyCode,
+      String taxonomyDisplay) {
+    CareTeamComponent component = new CareTeamComponent();
+    component
         .setSequence(sequence)
         .setProvider(
             new Reference()
@@ -1300,6 +1323,15 @@ public final class TransformerTestUtilsV2 {
                         "npi",
                         "National Provider Identifier")))
         .setRole(new CodeableConcept().setCoding(Arrays.asList(new Coding(system, code, display))));
+    if (taxonomyCode != null) {
+      component.setQualification(
+          new CodeableConcept(
+              new Coding()
+                  .setCode(taxonomyCode)
+                  .setDisplay(taxonomyDisplay)
+                  .setSystem("http://nucc.org/provider-taxonomy")));
+    }
+    return component;
   }
 
   /**

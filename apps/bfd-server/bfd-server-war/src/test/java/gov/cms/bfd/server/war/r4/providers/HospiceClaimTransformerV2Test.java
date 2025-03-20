@@ -578,7 +578,15 @@ public final class HospiceClaimTransformerV2Test {
                             new Coding(
                                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
                                 "performing",
-                                "Performing provider"))));
+                                "Performing provider"))))
+            .setQualification(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://nucc.org/provider-taxonomy",
+                                "207ZH0000X",
+                                "Hematology (Pathology) Physician"))));
 
     assertTrue(compare3.equalsDeep(member3));
   }

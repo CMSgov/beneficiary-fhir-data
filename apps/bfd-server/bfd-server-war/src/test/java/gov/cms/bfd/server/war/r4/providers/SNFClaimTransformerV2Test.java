@@ -21,7 +21,6 @@ import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,7 +58,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -89,8 +87,7 @@ public class SNFClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+  NPIOrgLookup npiOrgLookup;
 
   /**
    * Generates the Claim object to be used in multiple tests.
@@ -123,8 +120,7 @@ public class SNFClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-
+    npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
     snfClaimTransformer =
         new SNFClaimTransformerV2(metricRegistry, NPIOrgLookup.createTestNpiOrgLookup());
     claim = generateClaim();
@@ -136,9 +132,7 @@ public class SNFClaimTransformerV2Test {
 
   /** Releases the static mock NPIOrgLookup. */
   @AfterEach
-  public void after() {
-    npiOrgLookup.close();
-  }
+  public void after() {}
 
   /**
    * Verifies that when transform is called, the metric registry is passed the correct class and
@@ -268,8 +262,9 @@ public class SNFClaimTransformerV2Test {
             "2222222222",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "attending",
-            "Attending");
-
+            "Attending",
+            "207R00000X",
+            "Internal Medicine Physician");
     assertTrue(compare1.equalsDeep(member1));
 
     // Second member
@@ -280,7 +275,9 @@ public class SNFClaimTransformerV2Test {
             "3333333333",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "operating",
-            "Operating");
+            "Operating",
+            "207T00000X",
+            "Neurological Surgery Physician");
 
     assertTrue(compare2.equalsDeep(member2));
 
@@ -292,7 +289,9 @@ public class SNFClaimTransformerV2Test {
             "4444444444",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "otheroperating",
-            "Other Operating");
+            "Other Operating",
+            "207R00000X",
+            "Internal Medicine Physician");
 
     assertTrue(compare3.equalsDeep(member3));
 
@@ -304,7 +303,9 @@ public class SNFClaimTransformerV2Test {
             "345345345",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "performing",
-            "Performing provider");
+            "Performing provider",
+            "207ZH0000X",
+            "Hematology (Pathology) Physician");
 
     assertTrue(compare4.equalsDeep(member4));
   }

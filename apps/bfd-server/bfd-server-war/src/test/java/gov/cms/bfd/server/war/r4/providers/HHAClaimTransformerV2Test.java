@@ -327,8 +327,9 @@ public class HHAClaimTransformerV2Test {
             "2222222222",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "attending",
-            "Attending");
-
+            "Attending",
+            "207R00000X",
+            "Internal Medicine Physician");
     assertTrue(compare1.equalsDeep(member1));
 
     // Second member
@@ -339,7 +340,9 @@ public class HHAClaimTransformerV2Test {
             "345345345",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "performing",
-            "Performing provider");
+            "Performing provider",
+            "207ZH0000X",
+            "Hematology (Pathology) Physician");
 
     assertTrue(compare2.equalsDeep(member2));
   }
