@@ -157,7 +157,7 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "BFD_PATHS_FILES_WAR"
-            value = "/app/bfd-server-war-${local.server_version}.war"
+            value = "/app/bfd-server.war"
           },
           {
             name  = "BFD_PORT"
