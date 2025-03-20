@@ -12,7 +12,7 @@ insert_timer = Timer("insert")
 commit_timer = Timer("commit")
 
 
-def loader_print_all():
+def print_timers():
     temp_table_timer.print_results()
     copy_timer.print_results()
     insert_timer.print_results()

@@ -2,13 +2,15 @@ import logging
 import sys
 import os
 from loader import PostgresLoader
+import loader
 from model import (
     IdrBeneficiary,
     IdrBeneficiaryHistory,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
-from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
+from extractor import Extractor, PostgresExtractor, SnowflakeExtractor, print_timers
+import extractor
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ def main():
         )
 
 
-def run_pipeline(extractor: Extractor, connection_string: str):
+def run_pipeline(data_extractor: Extractor, connection_string: str):
     logger.info("load start")
 
     history_fetch_query = """
@@ -50,7 +52,7 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     {WHERE_CLAUSE}
     ORDER BY idr_trans_efctv_ts, bene_sk
     """
-    history_iter = extractor.extract_idr_data(
+    history_iter = data_extractor.extract_idr_data(
         IdrBeneficiaryHistory,
         connection_string=connection_string,
         fetch_query=history_fetch_query,
@@ -73,7 +75,7 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     {WHERE_CLAUSE}
     ORDER BY idr_trans_efctv_ts, bene_sk
     """
-    bene_iter = extractor.extract_idr_data(
+    bene_iter = data_extractor.extract_idr_data(
         IdrBeneficiary,
         connection_string=connection_string,
         fetch_query=bene_fetch_query,
@@ -93,7 +95,7 @@ def run_pipeline(extractor: Extractor, connection_string: str):
 
     # number of records in this table is relatively small (~300,000) and we don't have created/updated timestamps
     # so we can just sync all of the non-obsolete records each time
-    pbp_fetch_query = extractor.get_query(
+    pbp_fetch_query = data_extractor.get_query(
         IdrContractPbpNumber,
         """
         SELECT {COLUMNS}
@@ -101,7 +103,7 @@ def run_pipeline(extractor: Extractor, connection_string: str):
         WHERE cntrct_pbp_sk_obslt_dt >= '9999-12-31'
         """,
     )
-    pbp_iter = extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
+    pbp_iter = data_extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
     pbp_loader = PostgresLoader(
         connection_string=connection_string,
         table="idr.contract_pbp_number",
@@ -121,7 +123,7 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     )
     SELECT {COLUMNS} FROM dupes WHERE row_order = 1
     """
-    contract_iter = extractor.extract_idr_data(
+    contract_iter = data_extractor.extract_idr_data(
         IdrElectionPeriodUsage,
         connection_string=connection_string,
         fetch_query=prd_fetch_query,
@@ -138,6 +140,8 @@ def run_pipeline(extractor: Extractor, connection_string: str):
     contract_loader.load(contract_iter, IdrElectionPeriodUsage)
 
     logger.info("done")
+    extractor.print_timers()
+    loader.print_timers()
 
 
 if __name__ == "__main__":
