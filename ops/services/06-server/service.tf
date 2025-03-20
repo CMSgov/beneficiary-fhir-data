@@ -93,7 +93,10 @@ resource "aws_ecs_task_definition" "server" {
   container_definitions = jsonencode(
     [
       {
-        cpu = 0
+        name      = "certstores"
+        image     = data.aws_ecr_image.certstores.image_uri
+        essential = false
+        cpu       = 0
         environment = [
           {
             name  = "BFD_ENV"
@@ -128,8 +131,6 @@ resource "aws_ecs_task_definition" "server" {
             value = local.region
           }
         ]
-        essential = false
-        image     = data.aws_ecr_image.certstores.image_uri
         logConfiguration = {
           logDriver = "awslogs"
           options = {
@@ -147,15 +148,14 @@ resource "aws_ecs_task_definition" "server" {
             sourceVolume  = "certstores"
           },
         ]
-        name = "certstores"
       },
       {
         name              = "log_router"
+        image             = data.aws_ecr_image.log_router.image_uri
+        essential         = true
         cpu               = 128
         memoryReservation = 50
         memory            = 100
-        essential         = true
-        image             = data.aws_ecr_image.log_router.image_uri
         environment = [
           {
             name  = "AWS_REGION"
@@ -190,7 +190,10 @@ resource "aws_ecs_task_definition" "server" {
         }
       },
       {
-        cpu = 0
+        name      = local.service
+        image     = data.aws_ecr_image.server.image_uri
+        essential = true
+        cpu       = 0
         dependsOn = [
           {
             condition     = "COMPLETE"
@@ -253,8 +256,6 @@ resource "aws_ecs_task_definition" "server" {
           retries     = 6
           startPeriod = 60
         }
-        essential = true
-        image     = data.aws_ecr_image.server.image_uri
         logConfiguration = {
           logDriver = "awsfirelens"
         }
@@ -265,7 +266,6 @@ resource "aws_ecs_task_definition" "server" {
             sourceVolume  = "certstores"
           },
         ]
-        name = local.service
         portMappings = [
           {
             containerPort = tonumber(local.server_port)
