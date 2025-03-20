@@ -470,9 +470,8 @@ public final class AppConfiguration extends BaseAppConfiguration {
       AwsClientConfig awsClientConfig,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
       @Nullable RdaLoadOptions rdaLoadOptions,
+      @Nullable BackfillConfigOptions backFillConfigOptions,
       @Nullable NpiFdaLoadJobConfig npiFdaLoadConfig) {
-      @Nullable RdaLoadOptions rdaLoadOptions,
-      @Nullable BackfillConfigOptions backFillConfigOptions) {
     super(metricOptions, databaseOptions, awsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
