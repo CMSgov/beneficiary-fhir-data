@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war;
 
 import static gov.cms.bfd.data.fda.utility.App.FDA_PRODUCTS_RESOURCE;
-import static gov.cms.bfd.data.npi.utility.App.NPI_RESOURCE;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
@@ -14,7 +13,6 @@ import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -465,17 +463,14 @@ public class SpringConfiguration extends BaseConfiguration {
   /**
    * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
    *
-   * @param orgFileName file name for fake org data. If not null, it will load the test data
+   * @param entityManager The entityManager to use.
    * @return the {@link NPIOrgLookup} for the application.
    * @throws IOException if there is an error accessing the resource
    */
   @Bean
-  public NPIOrgLookup npiOrgLookup(
-      @Value("${" + PROP_ORG_FILE_NAME + ":" + NPI_RESOURCE + "}") String orgFileName)
-      throws IOException {
-    InputStream npiDataStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
-    return new NPIOrgLookup(npiDataStream);
+  public NPIOrgLookup npiOrgLookup(EntityManager entityManager) throws IOException {
+
+    return NPIOrgLookup.createNpiOrgLookup();
   }
 
   /**

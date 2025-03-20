@@ -3,8 +3,6 @@ package gov.cms.bfd.server.war.utils;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.fda.utility.App;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
@@ -14,6 +12,8 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -970,7 +970,7 @@ public class RDATestUtils {
         .when(NPIOrgLookup::createTestNpiOrgLookup)
         .thenAnswer(
             i -> {
-              NPIOrgLookup mockInstance = new NPIOrgLookup(npiOrgHashMap);
+              NPIOrgLookup mockInstance = new NPIOrgLookup(true);
               return mockInstance;
             });
     return npiOrgLookup;

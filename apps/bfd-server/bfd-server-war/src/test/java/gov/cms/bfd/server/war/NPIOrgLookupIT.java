@@ -3,8 +3,7 @@ package gov.cms.bfd.server.war;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import java.io.IOException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

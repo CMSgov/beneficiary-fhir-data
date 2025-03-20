@@ -10,7 +10,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -25,6 +24,7 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -33,8 +33,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -82,14 +80,8 @@ public final class TransformerTestUtilsV2 {
   private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
 
   static {
-    try {
-      InputStream npiDataStream =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(ORG_FILE_NAME);
-      npiOrgLookup = new NPIOrgLookup(npiDataStream);
-      CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
-    } catch (IOException e) {
-      throw new RuntimeException("Error loading test data for NPIOrgLookup.");
-    }
+    npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
   }
 
   /**
