@@ -72,3 +72,41 @@ data "aws_ec2_managed_prefix_list" "vpn" {
 data "aws_iam_policy" "permissions_boundary" {
   name = "ct-ado-poweruser-permissions-boundary-policy"
 }
+
+data "aws_iam_policy_document" "snyk_container_scanning" {
+  statement {
+    actions = [
+      "ecr:GetLifecyclePolicyPreview",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:DescribeImages",
+      "ecr:GetAuthorizationToken",
+      "ecr:DescribeRepositories",
+      "ecr:ListTagsForResource",
+      "ecr:ListImages",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetRepositoryPolicy",
+      "ecr:GetLifecyclePolicy"
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "snyk_container_scanning_trust_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::198361731867:user/ecr-integration-user"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [jsondecode(lookup(local.ssm_config, "/bfd/snyk/organization_id", "[]"))]
+    }
+  }
+}
