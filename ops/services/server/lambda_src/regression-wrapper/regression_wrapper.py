@@ -4,8 +4,6 @@ This Lambda acts as a proxy between the existing Regression Suite Lambda, which 
 and ECS CodeDeploy Hook invocations. Simply, this Lambda receives the CodeDeploy event, starts the
 Regression Suite Lambda by posting a message on its invocation queue, and then waits for a response
 on the result queue.
-
-Intended as temporary glue until the Server's ECS migration is complete.
 """
 
 import os

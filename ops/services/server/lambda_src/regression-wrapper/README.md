@@ -1,7 +1,5 @@
 # `regression-wrapper` Lambda Source
 
-**NOTE**: This Lambda is a temporary stopgap to enable full Blue/Green functionality in ECS without needing to migrate `server-regression`
-
 This subdirectory contains the Python source code for the `regression-wrapper` Lambda.
 
 ## Environment Setup
