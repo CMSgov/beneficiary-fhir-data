@@ -268,6 +268,9 @@ resource "aws_ecs_task_definition" "server" {
         }
         logConfiguration = {
           logDriver = "awsfirelens"
+          options = {
+            "log-driver-buffer-limit" = "2097152"
+          }
         }
         mountPoints = [
           {
