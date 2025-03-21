@@ -36,11 +36,17 @@ public class ServerExecutor {
 
   /** Holds information about the running server. */
   @GuardedBy("class synchronized")
-  private static DataServerLauncherApp.ServerInfo serverInfo;
+  private static HashMap<String, DataServerLauncherApp.ServerInfo> serverInfo = new HashMap<>();
+
+  ;
+
+  //  private static DataServerLauncherApp.ServerInfo serverInfo;
 
   /** Keeps track of the server port we're running the server on. */
   @GuardedBy("class synchronized")
-  private static String testServerPort;
+  private static HashMap<String, String> testServerPort = new HashMap<>();
+
+  //  private static String testServerPort;
 
   /**
    * Starts the BFD server for tests. If already running, does nothing.
@@ -68,7 +74,7 @@ public class ServerExecutor {
    */
   public static synchronized boolean startServer(
       String dbUrl, String dbUsername, String dbPassword, boolean shadowSamhsa) throws IOException {
-    if (serverInfo != null) {
+    if (serverInfo.get(String.valueOf(shadowSamhsa)) != null) {
       // Nothing to do since its already running.
       return true;
     }
@@ -108,12 +114,13 @@ public class ServerExecutor {
     appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
     appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, App.NPI_TESTING_RESOURCE_FILE);
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
-    serverInfo = DataServerLauncherApp.createServer(appConfig);
+    serverInfo.put(String.valueOf(shadowSamhsa), DataServerLauncherApp.createServer(appConfig));
 
     // Tells jetty to scan the classes in our normal classpath instead of
     // scanning jars and class files within the webapp directory.  This is
     // necessary to allow spring to find our configuration class.
     serverInfo
+        .get(String.valueOf(shadowSamhsa))
         .getWebapp()
         .setAttribute(
             "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern", ".*/classes/.*");
@@ -122,13 +129,14 @@ public class ServerExecutor {
     // ServerInitializer can reuse it.  This prevents it trying to configure the
     // application using environment variables and system properties.
     serverInfo
+        .get(String.valueOf(shadowSamhsa))
         .getWebapp()
         .setAttribute(SpringConfiguration.CONFIG_LOADER_CONTEXT_NAME, configLoader);
 
     // OK - fire it up.  This is asynchronous so it returns immediately.
     try {
       System.out.println("serverInfo.getServer() before");
-      serverInfo.getServer().start();
+      serverInfo.get(String.valueOf(shadowSamhsa)).getServer().start();
       System.out.println("serverInfo.getServer() after");
     } catch (Exception ex) {
       System.out.println("Caught exception when starting server." + ex);
@@ -136,7 +144,11 @@ public class ServerExecutor {
     }
 
     // Wait for the server to begin listening on its port.
-    final String finalServerPort = Integer.toString(serverInfo.getServer().getURI().getPort());
+    //    final String finalServerPort =
+    // Integer.toString(serverInfo.getServer().getURI().getPort());
+    final String finalServerPort =
+        Integer.toString(
+            serverInfo.get(String.valueOf(shadowSamhsa)).getServer().getURI().getPort());
     LOGGER.info("Configured server to run on HTTPS port {}.", finalServerPort);
     System.out.println("P*Configured server to run on HTTPS port {}." + finalServerPort);
 
@@ -154,7 +166,8 @@ public class ServerExecutor {
     } catch (ConditionTimeoutException e) {
       throw new RuntimeException("Error: Server failed to start within 120 seconds.", e);
     }
-    testServerPort = finalServerPort;
+    //    testServerPort = finalServerPort;
+    testServerPort.put(String.valueOf(shadowSamhsa), finalServerPort);
     return true;
   }
 
@@ -215,8 +228,9 @@ public class ServerExecutor {
    * @return the port as a string
    */
   @Nullable
-  public static synchronized String getServerPort() {
-    return testServerPort;
+  public static synchronized String getServerPort(String shadowSamhsa) {
+    //    return testServerPort;
+    return testServerPort != null ? testServerPort.get(shadowSamhsa) : null;
   }
 
   /**
@@ -224,16 +238,21 @@ public class ServerExecutor {
    *
    * @return true if the server is running
    */
-  public static synchronized boolean isRunning() {
-    return serverInfo != null && serverInfo.getServer().isRunning();
+  public static synchronized boolean isRunning(String shadowSamhsa) {
+    //    return serverInfo != null && serverInfo.getServer().isRunning();
+    return !serverInfo.isEmpty()
+        && serverInfo.get(shadowSamhsa) != null
+        && serverInfo.get(shadowSamhsa).getServer().isRunning();
   }
 
   /** Stops the server process. */
-  public static synchronized void stopServer() {
-    if (isRunning()) {
+  public static synchronized void stopServer(String shadowSamhsa) {
+    if (isRunning(shadowSamhsa)) {
       try {
-        serverInfo.getServer().stop();
-        serverInfo.getServer().join();
+        //        serverInfo.getServer().stop();
+        //        serverInfo.getServer().join();
+        serverInfo.get(shadowSamhsa).getServer().stop();
+        serverInfo.get(shadowSamhsa).getServer().join();
       } catch (Exception ex) {
         LOGGER.error("Caught exception while stopping server: message={}", ex.getMessage(), ex);
         throw new RuntimeException(ex);

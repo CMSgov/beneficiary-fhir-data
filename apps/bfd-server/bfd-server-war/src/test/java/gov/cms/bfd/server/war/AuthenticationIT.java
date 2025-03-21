@@ -19,7 +19,7 @@ public final class AuthenticationIT extends ServerRequiredTest {
   public void authenticationWorksForTrustedClient() {
     // Construct a FHIR client using a trusted client identity certificate.
     IGenericClient fhirClient =
-        ServerTestUtils.get().createFhirClient(Optional.of(ClientSslIdentity.TRUSTED));
+        ServerTestUtils.get("false").createFhirClient(Optional.of(ClientSslIdentity.TRUSTED));
 
     /*
      * Just check an arbitrary endpoint (all trusted clients have access to
@@ -36,7 +36,7 @@ public final class AuthenticationIT extends ServerRequiredTest {
   @Test
   public void accessDeniedForNoClientCert() {
     // Construct a FHIR client using no client identity certificate.
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient(Optional.empty());
+    IGenericClient fhirClient = ServerTestUtils.get("false").createFhirClient(Optional.empty());
 
     /*
      * Just check an arbitrary endpoint (all trusted clients have access to
@@ -60,7 +60,7 @@ public final class AuthenticationIT extends ServerRequiredTest {
      * certificate.
      */
     IGenericClient fhirClient =
-        ServerTestUtils.get().createFhirClient(Optional.of(ClientSslIdentity.UNTRUSTED));
+        ServerTestUtils.get("false").createFhirClient(Optional.of(ClientSslIdentity.UNTRUSTED));
 
     /*
      * Just check an arbitrary endpoint (all trusted clients have access to

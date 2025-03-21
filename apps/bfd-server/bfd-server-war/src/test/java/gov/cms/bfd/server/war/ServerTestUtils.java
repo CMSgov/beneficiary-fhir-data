@@ -71,6 +71,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -143,10 +144,10 @@ public final class ServerTestUtils {
 
   /**
    * Constructs a new {@link ServerTestUtils} instance. Marked <code>private</code>; use {@link
-   * #get()}, instead.
+   * #get(String)}, instead.
    */
-  private ServerTestUtils() {
-    this.serverBaseUrl = initServerBaseUrl();
+  private ServerTestUtils(String shadowSamhsa) {
+    this.serverBaseUrl = initServerBaseUrl(shadowSamhsa);
   }
 
   /**
@@ -158,9 +159,9 @@ public final class ServerTestUtils {
    *
    * @return the singleton {@link ServerTestUtils} instance to use everywhere
    */
-  public static synchronized ServerTestUtils get() {
+  public static synchronized ServerTestUtils get(String shadowSamhsa) {
     if (SINGLETON == null) {
-      SINGLETON = new ServerTestUtils();
+      SINGLETON = new ServerTestUtils(shadowSamhsa);
     }
 
     return SINGLETON;
@@ -171,8 +172,9 @@ public final class ServerTestUtils {
    *
    * @return the value to use for {@link #getServerBaseUrl()}
    */
-  private static String initServerBaseUrl() {
-    int httpsPort = Integer.parseInt(ServerExecutor.getServerPort());
+  private static String initServerBaseUrl(String shadowSamhsa) {
+    int httpsPort =
+        Integer.parseInt(Objects.requireNonNull(ServerExecutor.getServerPort(shadowSamhsa)));
     String serverBaseUrl = String.format("https://localhost:%d", httpsPort);
     return serverBaseUrl;
   }

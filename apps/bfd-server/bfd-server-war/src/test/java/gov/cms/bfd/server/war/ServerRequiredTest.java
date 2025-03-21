@@ -47,7 +47,7 @@ public class ServerRequiredTest {
   protected static final String SAMHSA_KEYSTORE = "test-samhsa-keystore.p12";
 
   /** The Server test utils instance, for convenience and brevity. */
-  protected ServerTestUtils testUtils = ServerTestUtils.get();
+  protected ServerTestUtils testUtils = ServerTestUtils.get("false");
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
@@ -55,7 +55,7 @@ public class ServerRequiredTest {
     //    System.out.println("Starting server setup with false...");
     //    setup(false);
     //    System.out.println("Starting server setup with false...");
-    if (!ServerExecutor.isRunning()) {
+    if (!ServerExecutor.isRunning("false")) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
@@ -80,16 +80,17 @@ public class ServerRequiredTest {
 
       System.out.println("Server setup completed with true.");
       assertTrue(startedServer, "Could not startup server for tests.");
-      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort("false");
       requestAuth = getRequestAuth("test-keystore.p12");
 
       // Set up a shutdown hook to shut down the server when we are finished with all tests
-      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
+      //      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer(false)));
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> ServerExecutor.stopServer("false")));
     }
   }
 
   protected static synchronized void setup(boolean shadowSamhsa) throws IOException {
-    if (!ServerExecutor.isRunning() || shadowSamhsa) {
+    if (!ServerExecutor.isRunning("false") || shadowSamhsa) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
@@ -128,11 +129,12 @@ public class ServerRequiredTest {
       //      }
       System.out.println("Server setup completed with true.");
       assertTrue(startedServer, "Could not startup server for tests.");
-      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort("false");
       requestAuth = getRequestAuth("test-keystore.p12");
 
       // Set up a shutdown hook to shut down the server when we are finished with all tests
-      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
+      //      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> ServerExecutor.stopServer("false")));
     }
   }
 
@@ -170,7 +172,7 @@ public class ServerRequiredTest {
   public void cleanDatabaseServerAfterEachTestCase() {
     final DataSource dataSource = getDataSource();
     if (dataSource != null && ServerTestUtils.isValidServerDatabase(DB_URL)) {
-      ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
+      ServerTestUtils.get("false").truncateNonRdaTablesInDataSource(dataSource);
     }
   }
 

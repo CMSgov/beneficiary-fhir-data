@@ -625,7 +625,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadCarrierWithTaxNumbers() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
@@ -650,7 +650,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadCarrierWithMultipleLines() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(
                 Arrays.asList(
                     StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -674,7 +674,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadCarrier() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
@@ -691,7 +691,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadDmeWithTaxNumbers() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String dmeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.DME);
@@ -713,7 +713,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadDme() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String dmeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.DME);
@@ -730,7 +730,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadHha() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String hhaClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.HHA);
@@ -747,7 +747,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadHospice() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String hospClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.HOSPICE);
@@ -764,7 +764,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadInpatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String inpClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.INPATIENT);
@@ -781,7 +781,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadOutpatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String outClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.OUTPATIENT);
@@ -798,7 +798,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadPde() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String pdeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.PDE);
@@ -815,7 +815,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
    */
   public static String eobReadSnf() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     String snfClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.SNF);

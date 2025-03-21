@@ -95,7 +95,7 @@ public class PatientE2E extends PatientE2EBase {
    */
   @Test
   public void testPatientByPartDContractWhenPaginationExpectPagingLinks() {
-    ServerTestUtils.get()
+    ServerTestUtils.get("false")
         .loadData(
             Arrays.asList(
                 StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
@@ -163,7 +163,7 @@ public class PatientE2E extends PatientE2EBase {
   @Test
   public void testPatientByPartDContractWithNoPagingAndMultipleMbisExpectNoDupes() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(
                 Arrays.asList(
                     StaticRifResource.SAMPLE_A_BENES,
@@ -231,7 +231,7 @@ public class PatientE2E extends PatientE2EBase {
   @Test
   public void testPatientByPartDContractWithPagingAndMultipleMbisExpectNoDupes() {
     List<Object> loadedRecords =
-        ServerTestUtils.get()
+        ServerTestUtils.get("false")
             .loadData(
                 Arrays.asList(
                     StaticRifResource.SAMPLE_A_BENES,
@@ -270,7 +270,7 @@ public class PatientE2E extends PatientE2EBase {
   /** Tests the pagination response using a POST request. */
   @Test
   public void testPatientByPartDContractWhenPaginationExpectPagingLinksPost() {
-    ServerTestUtils.get()
+    ServerTestUtils.get("false")
         .loadData(
             Arrays.asList(
                 StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
@@ -330,7 +330,7 @@ public class PatientE2E extends PatientE2EBase {
   /** Tests the pagination links using a POST request with the pagination info in the POST body. */
   @Test
   public void testPatientByPartDContractWhenPaginationExpectPagingLinksPostBody() {
-    ServerTestUtils.get()
+    ServerTestUtils.get("false")
         .loadData(
             Arrays.asList(
                 StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
