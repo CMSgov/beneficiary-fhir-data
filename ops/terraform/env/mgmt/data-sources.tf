@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "snyk_container_scanning_trust_policy" {
     condition {
       test     = "StringEquals"
       variable = "sts:ExternalId"
-      values   = [lookup(local.ssm_config, "/bfd/common/snyk/organization_id", "[]")]
+      values   = [local.ssm_config["/bfd/common/snyk/organization_id"]]
     }
   }
 }
