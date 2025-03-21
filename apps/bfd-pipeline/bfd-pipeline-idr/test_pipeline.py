@@ -59,3 +59,13 @@ class TestPipeline:
         rows = cur.fetchmany(2)
         assert rows[0]["bene_mbi_id"] == "1S000000002"
         assert rows[1]["bene_mbi_id"] == "1S000000001"
+
+        cur = conn.execute("select * from idr.beneficiary_election_period_usage")
+        rows = cur.fetchall()
+        assert len(rows) == 1
+        assert rows[0]["cntrct_pbp_sk"] == 1
+
+        cur = conn.execute("select * from idr.contract_pbp_number")
+        rows = cur.fetchall()
+        assert len(rows) == 1
+        assert rows[0]["cntrct_pbp_sk"] == 1
