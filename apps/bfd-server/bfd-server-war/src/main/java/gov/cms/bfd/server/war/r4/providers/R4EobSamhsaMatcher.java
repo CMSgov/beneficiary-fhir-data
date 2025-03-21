@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.Coding;
@@ -67,7 +66,6 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
   // S128 - Fallthrough is intentional.
   @SuppressWarnings("squid:S128")
   @Override
-  @Trace
   public boolean test(ExplanationOfBenefit eob) {
 
     // check here for the future flag samhsaV2Enabled and return false to skip the Samhsa matcher
