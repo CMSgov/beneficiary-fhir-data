@@ -1,5 +1,5 @@
 module "terraservice" {
-  source = "../_modules/bfd-terraservice"
+  source = "../../terraform-modules/bfd/bfd-terraservice"
 
   environment_name     = terraform.workspace
   service              = local.service
