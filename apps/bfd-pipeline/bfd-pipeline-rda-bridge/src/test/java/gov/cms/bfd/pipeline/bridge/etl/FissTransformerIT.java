@@ -457,8 +457,8 @@ public class FissTransformerIT {
     /** Beneficiary Date of Birth. */
     private static final String BENE_DOB = "2020-01-01";
 
-    /** Beneficiary Gender. */
-    private static final String BENE_GENDER = "1";
+    /** Beneficiary Sex. */
+    private static final String BENE_SEX = "1";
 
     /** Fi Document Claim Control Number. */
     private static final String FI_DOC_CLM_CNTL_NUM = "dcn12345678";
@@ -698,7 +698,7 @@ public class FissTransformerIT {
               BENE_LAST_NAME,
               BENE_MID_INIT,
               BENE_DOB,
-              BENE_GENDER));
+              BENE_SEX));
     }
 
     /**
