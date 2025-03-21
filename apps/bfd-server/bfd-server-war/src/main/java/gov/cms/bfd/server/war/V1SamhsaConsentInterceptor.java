@@ -40,7 +40,7 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
     logger.debug("V1SamhsaConsentInterceptor - Processing willSeeResource.");
 
     // No filtering needed, proceed
-    if (!applySamhsaFiltering(theRequestDetails)) {
+    if (!shouldFilterSamhsa(theRequestDetails)) {
       return ConsentOutcome.PROCEED;
     }
 
@@ -52,7 +52,7 @@ public class V1SamhsaConsentInterceptor implements IConsentService {
     return ConsentOutcome.PROCEED;
   }
 
-  boolean applySamhsaFiltering(RequestDetails theRequestDetails) {
+  boolean shouldFilterSamhsa(RequestDetails theRequestDetails) {
     boolean excludeSamhsaParam =
         parseBooleansFromRequest(theRequestDetails, AbstractResourceProvider.EXCLUDE_SAMHSA)
             .stream()
