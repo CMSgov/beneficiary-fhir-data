@@ -18,17 +18,18 @@ locals {
   latest_bfd_release = module.terraservice.latest_bfd_release
   ssm_config         = module.terraservice.ssm_config
 
-  db_environment             = coalesce(var.db_environment_override, local.env)
-  certstores_repository_name = coalesce(var.certstores_repository_override, "bfd-mgmt-mount-certstores")
-  server_repository_name     = coalesce(var.server_repository_override, "bfd-server")
-  certstores_version         = coalesce(var.certstores_version_override, local.latest_bfd_release)
-  server_version             = coalesce(var.server_version_override, local.latest_bfd_release)
-
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  app_subnet_ids = [for _, v in data.aws_subnet.app_subnets : v.id]
+  dmz_subnet_ids = [for _, v in data.aws_subnet.dmz_subnets : v.id]
 
   kms_key_alias        = nonsensitive(local.ssm_config["/bfd/common/kms_key_alias"])
   kms_config_key_alias = nonsensitive(local.ssm_config["/bfd/common/kms_config_key_alias"])
 
   # TODO: Remove "ecs" from the name prefix once we accept this as the new server service
   name_prefix = "bfd-${local.env}-${local.service}-ecs"
+
+  green_state = "green"
+  blue_state  = "blue"
+
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
 }

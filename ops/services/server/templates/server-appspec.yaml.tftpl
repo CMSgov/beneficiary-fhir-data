@@ -1,0 +1,17 @@
+applicationName: "${application_name}"
+deploymentGroupName: "${deployment_group_name}"
+revision:
+  revisionType: AppSpecContent
+  appSpecContent:
+    content: |
+      version: 0.0
+      Resources:
+        - TargetService:
+            Type: AWS::ECS::Service
+            Properties:
+              TaskDefinition: "${task_definition_arn}"
+              LoadBalancerInfo:
+                ContainerName: "${container_name}"
+                ContainerPort: ${container_port}
+      Hooks:
+        - AfterAllowTestTraffic: "${validation_lambda_arn}"
