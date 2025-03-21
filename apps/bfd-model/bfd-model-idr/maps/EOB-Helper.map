@@ -1,0 +1,205 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" = "eob-support-map"
+
+conceptmap "FinalActionIndicator" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/explanationofbenefit-status"
+
+  s:Y = t:"active"
+  s:N = t:"cancelled"
+}
+
+conceptmap "ClM_TYPE_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://terminology.hl7.org/CodeSystem/claim-type"
+
+  s:1 = t:"pharmacy"
+  s:2 = t:"pharmacy"
+  s:3 = t:"pharmacy"
+  s:4 = t:"pharmacy"
+  s:10 = t:"institutional"
+  s:20 = t:"institutional"
+  s:30 = t:"institutional"
+  s:40 = t:"institutional"
+  s:50 = t:"institutional"
+  s:60 = t:"institutional"
+  s:61 = t:"institutional"
+  s:62 = t:"institutional"
+  s:63 = t:"institutional"
+  s:71 = t:"professional"
+  s:72 = t:"professional"
+  s:81 = t:"professional"
+  s:82 = t:"professional"
+}
+
+conceptmap "profile_metadata" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:1 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
+  s:2 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
+  s:3 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
+  s:4 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
+  s:10 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:20 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:30 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:40 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"
+  s:50 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:60 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:61 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:62 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:63 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:71 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
+  s:72 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
+  s:81 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
+  s:82 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
+}
+
+conceptmap "ClM_TYPE_CD_RAW" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://terminology.hl7.org/CodeSystem/claim-type"
+
+  s:1 = t:"pharmacy"
+  s:2 = t:"pharmacy"
+  s:3 = t:"pharmacy"
+  s:4 = t:"pharmacy"
+  s:10 = t:"HHA Claim"
+  s:20 = t:"Non swing bed (SNF)"
+  s:20 = t:"Swing bed SNF claim"
+  s:40 = t:"Hospital Outpatient claim"
+  s:50 = t:"Hospice claim"
+  s:60 = t:"Inpatient"
+  s:61 = t:"Inpatient"
+  s:62 = t:"Inpatient"
+  s:63 = t:"Inpatient"
+  s:71 = t:"Local carrier non-durable medical equipment, prosthetics, orthotics, and supplies (DMEPOS) claim"
+  s:72 = t:"Local carrier DMEPOS claim"
+  s:81 = t:"Durable medical equipment regional carrier (DMERC); non-DMEPOS claim"
+  s:82 = t:"DMERC; DMEPOS claim"
+}
+
+conceptmap "subtype" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType"
+
+  s:10 = t:"inpatient"
+  s:20 = t:"inpatient"
+  s:30 = t:"inpatient"
+  s:40 = t:"outpatient"
+  s:50 = t:"inpatient"
+  s:60 = t:"inpatient"
+  s:61 = t:"inpatient"
+  s:62 = t:"inpatient"
+  s:63 = t:"inpatient"
+}
+
+conceptmap "CLM_SRC_ID" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"N/A" = t:"Medicaid"
+  s:"20000" = t:"NationalClaimsHistory"
+  s:"21000" = t:"FISS"
+  s:"22000" = t:"MCS"
+  s:"23000" = t:"VIPS"
+  s:"24000" = t:"EDPS"
+  s:"25000" = t:"EncounterMedicaidDuals"
+}
+
+conceptmap "CLM_DGNS_PRCDR_ICD_IND_PROCEDURE" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:" " = t:"http://www.cms.gov/Medicare/Coding/ICD9"
+  s:"9" = t:"http://www.cms.gov/Medicare/Coding/ICD9"
+  s:"0" = t:"http://www.cms.gov/Medicare/Coding/ICD10"
+}
+
+conceptmap "CLM_DGNS_PRCDR_ICD_IND_DIAGNOSIS" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:" " = t:"http://hl7.org/fhir/sid/icd-9-cm"
+  s:"9" = t:"http://hl7.org/fhir/sid/icd-9-cm"
+  s:"0" = t:"http://hl7.org/fhir/sid/icd-10-cm"
+}
+
+conceptmap "HL7_DIAGTYPE" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+
+  s:"A" = t:"principal"
+  s:"P" = t:"admitting"
+}
+
+conceptmap "C4BB_DIAGTYPE" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+
+  s:"1" = t:"externalcauseofinjury"
+  s:"D" = t:"other"
+  s:"E" = t:"externalcauseofinjury"
+}
+
+conceptmap "C4BB_SupportingInfo_Categories" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+
+  s:"ACTIVE_CARE_PERIOD" = t:"admissionperiod"
+  s:"ADM_TYPE_CD" = t:"admtype"
+  s:"CLM_RECV_DATE" = t:"clmrecvddate"
+  s:"DISCHARGE_STATUS_CODE" = t:"discharge-status"
+  s:"DRG_CODE" = t:"drg"
+  s:"POINT_OF_ORIGIN" = t:"pointoforigin"
+  s:"TYPE_OF_BILL_CD" = t:"typeofbill"
+
+}
+
+conceptmap "UnitTransform" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://unitsofmeasure.org"
+
+  s:"ML" = t:"mL"
+  s:"ME" = t:"mg"
+  s:"UN" = t:"[arb'U]"
+  s:"F2" = t:"[IU]"
+  s:"GR" = t:"g"
+  s:"EA" = t:"[arb'U]"
+
+}
+
+//Not completed, this is an example.
+conceptmap "SSAToUSPSState" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"01" = t:"AL"
+  s:"02" = t:"AK"
+  s:"03" = t:"AZ"
+  s:"04" = t:"AR"
+  s:"05" = t:"CA"
+  s:"06" = t:"CO"
+
+}
+
+conceptmap "BENEFITBALANCE" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://bluebutton.cms.gov/resources/codesystem/benefit-balance"
+
+  s:"CLM_MDCR_IP_LRD_USE_CNT" = t:"https://bluebutton.cms.gov/resources/variables/bene_lrd_used_cnt"
+  s:"CLM_INSTNL_MDCR_COINS_DAY_CNT" = t:"https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt"
+  s:"CLM_INSTNL_NCVRD_DAY_CNT" = t:"https://bluebutton.cms.gov/resources/variables/clm_non_utlztn_days_cnt"
+  s:"CLM_INSTNL_PER_DIEM_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pass_thru_per_diem_amt"
+  s:"CLM_INSTNL_CVRD_DAY_CNT" = t:"https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt"
+  s:"CLM_MDCR_IP_PPS_DRG_WT_NUM" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_drg_wt_num"
+  s:"CLM_MDCR_IP_PPS_DSPRPRTNT_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt"
+  s:"CLM_MDCR_IP_PPS_EXCPTN_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_excptn_amt"
+  s:"CLM_PPS_CPTL_FSP_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_fsp_amt"
+  s:"CLM_PPS_CPTL_IME_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_ime_amt"
+  s:"CLM_PPS_CPTL_OUTLIER_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_outlier_amt"
+  s:"CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_old_cptl_hld_hrmls_amt"
+  s:"CLM_MDCR_IP_PPS_CPTL_TOT_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_tot_pps_cptl_amt"
+  s:"CLM_MDCR_INSTNL_PRMRY_PYR_AMT" = t:"https://bluebutton.cms.gov/resources/variables/prpayamt"
+  s:"CLM_INSTNL_PRFNL_AMT" = t:"https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt"
+  s:"CLM_INSTNL_DRG_OUTLIER_AMT" = t:"https://bluebutton.cms.gov/resources/variables/nch_drg_outlier_aprvd_pmt_amt"
+  s:"CLM_MDCR_IP_BENE_DDCTBL_AMT" = t:"https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt"
+}
