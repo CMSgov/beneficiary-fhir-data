@@ -133,7 +133,8 @@ POLICY
 
 }
 
-# TO add permission boundary in BFD-3953
+# TODO: remove this and related in BFD-3953
+# NOTE: `cloudbees` is not to be migrated as part of the greenfield migration
 resource "aws_iam_role" "cloudbees" {
   assume_role_policy    = <<-POLICY
 {
@@ -159,8 +160,6 @@ POLICY
   ]
   max_session_duration = 3600
   name                 = "cloudbees-jenkins"
-  path                 = local.cloudtamer_iam_path
-
 }
 
 resource "aws_iam_group" "app_engineers" {
@@ -376,4 +375,26 @@ resource "aws_iam_policy" "rda_ssm_ro" {
       ]
     }
   )
+}
+
+# Resources for Snyk Container scanning - These allow Snyk to assume this role based on an external org identifier.
+# Snyk is granted ReadOnly Access to all ECR repositories within the Account.
+resource "aws_iam_policy" "snyk_container_scanning" {
+  name        = "bfd-snyk-ecr-readonly-access"
+  path        = local.cloudtamer_iam_path
+  description = "Allows Access to ECR for the Snyk container scanning application"
+  policy      = data.aws_iam_policy_document.snyk_container_scanning.json
+}
+
+resource "aws_iam_role" "snyk_container_scanning" {
+  name                 = "bfd-mgmt-snyk-service-role"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  assume_role_policy   = data.aws_iam_policy_document.snyk_container_scanning_trust_policy.json
+  max_session_duration = 3600
+}
+
+resource "aws_iam_role_policy_attachment" "snyk_container_scanning" {
+  role       = aws_iam_role.snyk_container_scanning.name
+  policy_arn = aws_iam_policy.snyk_container_scanning.arn
 }

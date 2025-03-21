@@ -11,8 +11,8 @@ import org.hl7.fhir.r4.model.Resource;
 /** Class for performing common FISS based transformation logic. */
 public class FissTransformerV2 {
 
-  /** The FISS specific gender mapping to use to map from RDA to FHIR. */
-  private static final Map<String, Enumerations.AdministrativeGender> GENDER_MAP =
+  /** The FISS specific sex mapping to use to map from RDA to FHIR. */
+  private static final Map<String, Enumerations.AdministrativeGender> SEX_MAP =
       Map.of(
           "m", Enumerations.AdministrativeGender.MALE,
           "f", Enumerations.AdministrativeGender.FEMALE,
@@ -49,7 +49,7 @@ public class FissTransformerV2 {
                       benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
                   benePayer.getBeneDob(),
                   benePayer.getBeneSex(),
-                  GENDER_MAP,
+                  SEX_MAP,
                   "max 10 chars of first",
                   "middle initial",
                   "max 15 chars of last"));
