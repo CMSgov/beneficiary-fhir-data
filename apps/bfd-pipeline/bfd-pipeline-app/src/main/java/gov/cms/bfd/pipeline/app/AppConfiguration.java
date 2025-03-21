@@ -382,6 +382,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /** The number of records to save before commiting a transaction. */
   public static final String SSM_PATH_NPI_FDA_BATCH_SIZE = "rda/npi_fda_load_job/batch_size";
 
+  /** The run interval for the NPI Load Job, in days. */
+  public static final String SSM_PATH_NPI_FDA_RUN_INTERVAL = "rda/npi_fda_load_job/run_interval";
+
   /**
    * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
    * allowed list avoids increasing AWS charges as new metrics are defined for use in NewRelic that
@@ -449,6 +452,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(SSM_PATH_RDA_GRPC_MAX_IDLE_SECONDS, String.valueOf(Integer.MAX_VALUE))
           .put(SSM_PATH_NPI_FDA_LOAD_JOB, "false")
           .put(SSM_PATH_NPI_FDA_BATCH_SIZE, "100000")
+          .put(SSM_PATH_NPI_FDA_RUN_INTERVAL, "168")
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
@@ -546,7 +550,12 @@ public final class AppConfiguration extends BaseAppConfiguration {
       return null;
     }
     int batchSize = config.intValue(SSM_PATH_NPI_FDA_BATCH_SIZE, 100000);
-    return NpiFdaLoadJobConfig.builder().enabled(enabled).batchSize(batchSize).build();
+    int runInterval = config.intValue(SSM_PATH_NPI_FDA_RUN_INTERVAL, 168);
+    return NpiFdaLoadJobConfig.builder()
+        .enabled(enabled)
+        .batchSize(batchSize)
+        .runInterval(runInterval)
+        .build();
   }
 
   /**

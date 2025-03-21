@@ -24,7 +24,6 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -36,12 +35,10 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.MockedStatic;
 
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
 public class SamhsaMatcherFromClaimTransformerTest {
@@ -95,20 +92,10 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /** Claim indicator for Carrier. */
   private static final String CARRIER_CLAIM = "CARRIER";
 
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
-
   /** Sets up the test. */
   @BeforeEach
   public void setup() {
     samhsaMatcher = new Stu3EobSamhsaMatcher(false);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-  }
-
-  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
   }
 
   /**

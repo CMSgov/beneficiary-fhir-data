@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,11 +15,15 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
- * Interface for NPIOrgLookup. This allows us to have both a test implementation, and a prod
- * implementation.
+ * This class will query the npi_data table for an NPI, and return an NPIData entity if found. There
+ * is also the option to create a test version of the class, which will use test data stored in a
+ * file.
  */
+@Service
 public class NPIOrgLookup {
   /** Provider Entity. */
   public static String ENTITY_TYPE_CODE_PROVIDER = "1";
@@ -31,7 +38,7 @@ public class NPIOrgLookup {
   private static final String TEST_NPI_FILENAME = "npi_e2e_it.json";
 
   /** Production implementation of NPIOrgLookup. */
-  EntityManager entityManager;
+  @PersistenceContext EntityManager entityManager;
 
   /** The singleton. */
   private static NPIOrgLookup npiOrgLookup;
@@ -42,30 +49,18 @@ public class NPIOrgLookup {
   /**
    * Constructor.
    *
-   * @param testInstance True if this should be a test instance.
+   * @param orgFileName File name to use for test purposes.
    */
-  public NPIOrgLookup(boolean testInstance) {
-    this.testInstance = testInstance;
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param dataStream initializes the Map with the provided input stream.
-   */
-  public NPIOrgLookup(InputStream dataStream) {
-    testInstance = true;
-    initializeNpiMap(dataStream);
-  }
-
-  /**
-   * Constructor that takes an entityManager param, for production use.
-   *
-   * @param entityManager The entity manager to use.
-   */
-  public NPIOrgLookup(EntityManager entityManager) {
-    this.entityManager = entityManager;
-    testInstance = false;
+  public NPIOrgLookup(
+      @Value("${" + SpringConfiguration.PROP_ORG_FILE_NAME + "}") String orgFileName) {
+    InputStream npiDataStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
+    if (npiDataStream != null) {
+      initializeNpiMap(npiDataStream);
+      testInstance = true;
+    } else {
+      testInstance = false;
+    }
   }
 
   /** The query that will return the NPI Data for an NPI. */
@@ -130,6 +125,7 @@ public class NPIOrgLookup {
    * @param npi The provider or organization's NPI.
    * @return an NPIData entity.
    */
+  @Transactional
   public Optional<NPIData> retrieveNPIOrgDisplay(Optional<String> npi) {
     if (testInstance) {
       return retrieveTestData(npi);
@@ -137,8 +133,12 @@ public class NPIOrgLookup {
     if (npi.isPresent()) {
       Query query = entityManager.createQuery(NPI_DATA_QUERY, NPIData.class);
       query.setParameter("npi", npi.get());
-      NPIData npiData = (NPIData) query.getSingleResult();
-      return Optional.ofNullable(npiData);
+      try {
+        NPIData npiData = (NPIData) query.getSingleResult();
+        return Optional.ofNullable(npiData);
+      } catch (NoResultException e) {
+        return Optional.empty();
+      }
     }
     return Optional.empty();
   }
@@ -150,7 +150,7 @@ public class NPIOrgLookup {
    */
   public static NPIOrgLookup createTestNpiOrgLookup() {
     if (npiOrgLookup == null) {
-      npiOrgLookup = new NPIOrgLookup(true);
+      npiOrgLookup = new NPIOrgLookup(TEST_NPI_FILENAME);
     }
     return npiOrgLookup;
   }

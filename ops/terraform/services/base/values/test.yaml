@@ -369,3 +369,6 @@
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-test-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/ok_topic: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 30

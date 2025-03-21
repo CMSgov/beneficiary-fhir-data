@@ -4,11 +4,15 @@ import static java.util.Map.entry;
 
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,12 +61,6 @@ public class LoadNpiDataFiles implements Callable<Integer> {
   /** Field for Provider Suffix in CSV. */
   private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
 
-  /** Code for Provider entity type. */
-  public static final String ENTITY_TYPE_CODE_PROVIDER = "1";
-
-  /** Code for Organization entity type. */
-  public static final String ENTITY_TYPE_CODE_ORGANIZATION = "2";
-
   /** Base url for the nppes download. */
   protected static final String BASE_URL =
       "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
@@ -83,21 +81,39 @@ public class LoadNpiDataFiles implements Callable<Integer> {
           entry(10, "November"),
           entry(11, "December"));
 
-  /** The transaction manager to use for database operations. */
+  /** The EntityManager to use for database operations. */
   private final EntityManager entityManager;
 
-  /** The number of records to save before commiting a transaction. */
+  /** The number of records to save before committing a transaction. */
   int batchSize;
+
+  /** How often to run the job, in days. */
+  int runInterval;
+
+  /** Query for checking lastUpdated of the table. */
+  private static final String GET_LAST_UPDATED_QUERY =
+      "SELECT last_updated FROM ccw.npi_fda_meta WHERE table_name = 'npi_data'";
+
+  private static final String SAVE_LAST_UPDATED_QUERY =
+      """
+          INSERT INTO ccw.npi_fda_meta (table_name, last_updated)
+          VALUES('npi_data', :lastUpdated)
+          ON CONFLICT (table_name)
+          DO UPDATE SET
+          last_updated = :lastUpdated
+          """;
 
   /**
    * Constructor.
    *
-   * @param entityManager the entityManager;
+   * @param entityManager the EntityManager to use for database operations;
    * @param batchSize The number of records saved before committing a transaction.
+   * @param runInterval How often to run the job, in days.
    */
-  public LoadNpiDataFiles(EntityManager entityManager, int batchSize) {
+  public LoadNpiDataFiles(EntityManager entityManager, int batchSize, int runInterval) {
     this.entityManager = entityManager;
     this.batchSize = batchSize;
+    this.runInterval = runInterval;
   }
 
   /**
@@ -143,7 +159,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
   }
 
   /**
-   * Streams the zip file and calls a method to create the NPI csv file.
+   * Streams the zip file and calls a method to create the NPI records.
    *
    * @param fileName the output file/resource to produce
    * @return Total number of records saved.
@@ -155,7 +171,6 @@ public class LoadNpiDataFiles implements Callable<Integer> {
     // download NPI file
     URL ndctextZipUrl = new URL(fileName);
     HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
-    boolean foundMatch = false;
     try (ZipInputStream zipInputStream = new ZipInputStream(connection.getInputStream())) {
       ZipEntry entry;
       while ((entry = zipInputStream.getNextEntry()) != null) {
@@ -168,10 +183,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
         zipInputStream.closeEntry();
       }
     }
-    if (!foundMatch) {
-      throw new IllegalStateException("No NPI file found");
-    }
-    return 0;
+    throw new IllegalStateException("No NPI file found");
   }
 
   /**
@@ -225,7 +237,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @return Total number of records saved.
    * @throws IOException exception thrown.
    */
-  private Integer saveNpiDataFile(InputStreamReader is) throws IOException {
+  Integer saveNpiDataFile(InputStreamReader is) throws IOException {
 
     Map<String, String> taxonomyMap = processTaxonomyDescriptions();
 
@@ -238,12 +250,13 @@ public class LoadNpiDataFiles implements Callable<Integer> {
 
       LOGGER.info("Starting to save records to the database.");
       entityManager.getTransaction().begin();
+      boolean interrupted = false;
       for (CSVRecord csvRecord : csvParser) {
         NPIData npiData = getNpiDataFromCsv(csvRecord, taxonomyMap);
         entityManager.merge(npiData);
         savedCount++;
 
-        // commit and begin a new transaction every 100 thousand records.
+        // The commit frequency is determined by an SSM parameter.
         if (savedCount % batchSize == 0) {
           entityManager.getTransaction().commit();
           entityManager.clear();
@@ -251,16 +264,29 @@ public class LoadNpiDataFiles implements Callable<Integer> {
           entityManager.getTransaction().begin();
         }
         if (Thread.currentThread().isInterrupted()) {
+          interrupted = true;
           break;
         }
       }
       // final commit
       entityManager.getTransaction().commit();
-
-    } finally {
-      entityManager.close();
+      entityManager.clear();
+      if (!interrupted) {
+        setLastUpdated();
+      }
     }
     return savedCount;
+  }
+
+  /** Updates the lastUpdated Date. */
+  void setLastUpdated() {
+    Date lastUpdated = new Date(System.currentTimeMillis());
+    entityManager.getTransaction().begin();
+    Query query = entityManager.createNativeQuery(SAVE_LAST_UPDATED_QUERY);
+    query.setParameter("lastUpdated", lastUpdated);
+    query.executeUpdate();
+    entityManager.getTransaction().commit();
+    entityManager.clear();
   }
 
   /**
@@ -298,8 +324,28 @@ public class LoadNpiDataFiles implements Callable<Integer> {
     return npiData;
   }
 
+  /**
+   * Determines if the data should be loaded based on the lastUpdated date.
+   *
+   * @return true if the data should be loaded.
+   */
+  boolean shouldLoadData() {
+    Date lastUpdated;
+    Query query = entityManager.createNativeQuery(GET_LAST_UPDATED_QUERY);
+    try {
+      lastUpdated = (Date) query.getSingleResult();
+    } catch (NoResultException e) {
+      return true;
+    }
+    return LocalDate.now().isAfter(lastUpdated.toLocalDate().plusDays(runInterval));
+  }
+
   @Override
   public Integer call() throws Exception {
-    return persistNPIResource();
+    if (shouldLoadData()) {
+      return persistNPIResource();
+    } else {
+      return -1;
+    }
   }
 }

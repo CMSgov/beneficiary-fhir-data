@@ -56,7 +56,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,9 +90,6 @@ public class CarrierClaimTransformerV2Test {
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The mock NPIOrgLookup. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
-
   /** The mock FdaDrugCodeDisplayLookup. */
   private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
 
@@ -127,7 +123,6 @@ public class CarrierClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
@@ -143,12 +138,6 @@ public class CarrierClaimTransformerV2Test {
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
-  }
-
-  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
   }
 
   /**

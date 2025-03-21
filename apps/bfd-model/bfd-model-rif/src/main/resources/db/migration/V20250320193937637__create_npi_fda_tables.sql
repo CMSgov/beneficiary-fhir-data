@@ -12,3 +12,8 @@ CREATE TABLE IF NOT EXISTS ccw.npi_data (
     provider_credential CHARACTER VARYING,
     PRIMARY KEY(npi)
     );
+CREATE TABLE IF NOT EXISTS ccw.npi_fda_meta (
+    table_name CHARACTER VARYING,
+    last_updated DATE,
+    PRIMARY KEY(table_name)
+);

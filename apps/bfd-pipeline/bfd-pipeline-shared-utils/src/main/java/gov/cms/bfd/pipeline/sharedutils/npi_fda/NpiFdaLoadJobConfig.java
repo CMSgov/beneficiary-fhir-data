@@ -18,4 +18,7 @@ public class NpiFdaLoadJobConfig {
 
   /** The number of records to save before committing a transaction. */
   int batchSize = 100000;
+
+  /** How often to run the job, in days. */
+  int runInterval;
 }
