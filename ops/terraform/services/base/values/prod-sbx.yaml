@@ -105,6 +105,9 @@
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 30  
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/job/sequence_range_update_interval_seconds: 300

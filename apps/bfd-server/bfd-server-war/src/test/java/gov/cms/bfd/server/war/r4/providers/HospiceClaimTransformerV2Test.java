@@ -13,13 +13,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -58,12 +58,10 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -96,9 +94,6 @@ public final class HospiceClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
-
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -108,7 +103,6 @@ public final class HospiceClaimTransformerV2Test {
   public void generateClaim() throws FHIRException, IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
         new HospiceClaimTransformerV2(
@@ -124,12 +118,6 @@ public final class HospiceClaimTransformerV2Test {
             .get();
     claim.setLastUpdated(Instant.now());
     createEOB();
-  }
-
-  /** Releases the static mock NPIOrgLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
   }
 
   /** Creates an eob for the test. */
@@ -583,7 +571,15 @@ public final class HospiceClaimTransformerV2Test {
                             new Coding(
                                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
                                 "performing",
-                                "Performing provider"))));
+                                "Performing provider"))))
+            .setQualification(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://nucc.org/provider-taxonomy",
+                                "207ZH0000X",
+                                "Hematology (Pathology) Physician"))));
 
     assertTrue(compare3.equalsDeep(member3));
   }
