@@ -81,9 +81,9 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
-    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
-    Object claim = claimWithSecurityTags.getClaimEntity();
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+    Object claim = claimEntity.getClaimEntity();
 
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();

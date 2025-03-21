@@ -2307,6 +2307,6 @@ final class TransformerTestUtils {
     }
     Set<String> securityTags = new HashSet<>();
     return claimTransformerInterface.transform(
-        new ClaimWithSecurityTags(rifRecord, securityTags), includeTaxNumbers);
+        new ClaimWithSecurityTags<>(rifRecord, securityTags), includeTaxNumbers);
   }
 }

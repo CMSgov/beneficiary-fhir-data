@@ -53,28 +53,12 @@ public class ServerExecutor {
    */
   public static synchronized boolean startServer(String dbUrl, String dbUsername, String dbPassword)
       throws IOException {
-
-    return startServer(dbUrl, dbUsername, dbPassword, false);
-  }
-
-  /**
-   * Starts the BFD server for tests. If already running, does nothing.
-   *
-   * @param dbUrl the db url
-   * @param dbUsername the db username
-   * @param dbPassword the db password
-   * @return {@code true} if the server is running, if {@code false} the server failed to start up
-   * @throws IOException if there is an issue setting up the server relating to accessing files
-   */
-  public static synchronized boolean startServer(
-      String dbUrl, String dbUsername, String dbPassword, boolean shadowSamhsa) throws IOException {
     if (serverInfo != null) {
       // Nothing to do since its already running.
       return true;
     }
 
     LOGGER.info("Starting IT server with DB: {}", dbUrl);
-    System.out.println("P*Starting IT server with DB: {}" + dbUrl);
 
     // Set up the paths we require for the server war dependencies
     String targetPath = "target";
@@ -94,13 +78,7 @@ public class ServerExecutor {
     String serverPort = "0";
 
     final var appSettings = new HashMap<String, String>();
-
-    if (shadowSamhsa) {
-      addServerSettings(appSettings, dbUrl, dbUsername, dbPassword, true);
-    } else {
-      addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
-    }
-
+    addServerSettings(appSettings, dbUrl, dbUsername, dbPassword);
     final var configLoader = ConfigLoader.builder().addMap(appSettings).build();
     appSettings.put(AppConfiguration.SSM_PATH_PORT, serverPort);
     appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
@@ -127,18 +105,14 @@ public class ServerExecutor {
 
     // OK - fire it up.  This is asynchronous so it returns immediately.
     try {
-      System.out.println("serverInfo.getServer() before");
       serverInfo.getServer().start();
-      System.out.println("serverInfo.getServer() after");
     } catch (Exception ex) {
-      System.out.println("Caught exception when starting server." + ex);
       throw new RuntimeException("Caught exception when starting server.", ex);
     }
 
     // Wait for the server to begin listening on its port.
     final String finalServerPort = Integer.toString(serverInfo.getServer().getURI().getPort());
     LOGGER.info("Configured server to run on HTTPS port {}.", finalServerPort);
-    System.out.println("P*Configured server to run on HTTPS port {}." + finalServerPort);
 
     try {
       Awaitility.await()
@@ -168,27 +142,10 @@ public class ServerExecutor {
    */
   private static void addServerSettings(
       Map<String, String> appSettings, String dbUrl, String dbUsername, String dbPassword) {
-    addServerSettings(appSettings, dbUrl, dbUsername, dbPassword, false);
-  }
-
-  /**
-   * Add the necessary BFD settings to the {@link Map} used by our {@link ConfigLoader}.
-   *
-   * @param appSettings map to receive the settings
-   * @param dbUrl the db url
-   * @param dbUsername the db username
-   * @param dbPassword the db password
-   */
-  private static void addServerSettings(
-      Map<String, String> appSettings,
-      String dbUrl,
-      String dbUsername,
-      String dbPassword,
-      boolean shadowSamhsa) {
     // FUTURE: Inherit these from system properties? Which of these are valuable to pass?
     final String pacEnabled = "true";
     final String samhsaEnabled = "false";
-    final String samhsaShadow = shadowSamhsa ? "true" : "false";
+    final String samhsaV2Shadow = "true";
     final String pacOldMbiHashEnabled = "true";
     final String pacClaimSourceTypes = "fiss,mcs";
     final String drugCodeFileName = "fakeDrugOrg.tsv";
@@ -196,7 +153,7 @@ public class ServerExecutor {
 
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);
     appSettings.put(SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED, samhsaEnabled);
-    appSettings.put(SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW, samhsaShadow);
+    appSettings.put(SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW, samhsaV2Shadow);
     appSettings.put(SpringConfiguration.PROP_PAC_OLD_MBI_HASH_ENABLED, pacOldMbiHashEnabled);
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES, pacClaimSourceTypes);
     appSettings.put(BaseAppConfiguration.SSM_PATH_DATABASE_URL, dbUrl);

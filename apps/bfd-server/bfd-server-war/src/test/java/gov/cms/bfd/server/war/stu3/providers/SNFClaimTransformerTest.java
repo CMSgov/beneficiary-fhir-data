@@ -103,7 +103,7 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    snfClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = snfClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -130,7 +130,7 @@ public final class SNFClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        snfClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

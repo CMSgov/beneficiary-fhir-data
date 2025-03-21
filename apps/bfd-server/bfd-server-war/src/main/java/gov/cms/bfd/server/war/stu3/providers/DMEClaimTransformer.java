@@ -81,11 +81,12 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
-    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
-    Object claim = claimWithSecurityTags.getClaimEntity();
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
-        securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
+        securityTagManager.getClaimSecurityLevelDstu3(claimEntity.getSecurityTags());
 
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();

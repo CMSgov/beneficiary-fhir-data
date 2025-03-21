@@ -113,11 +113,11 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  public ClaimResponse transform(Object claimEntity, boolean includeTaxNumbers) {
-    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
-    Object claim = claimWithSecurityTags.getClaimEntity();
+  public ClaimResponse transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
+
+    Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
-        securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
 
     if (!(claim instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();

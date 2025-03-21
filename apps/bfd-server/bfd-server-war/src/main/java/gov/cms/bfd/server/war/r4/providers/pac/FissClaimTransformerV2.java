@@ -103,11 +103,11 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
-    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
-    Object claim = claimWithSecurityTags.getClaimEntity();
+  public Claim transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
+
+    Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
-        securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
 
     if (!(claim instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();

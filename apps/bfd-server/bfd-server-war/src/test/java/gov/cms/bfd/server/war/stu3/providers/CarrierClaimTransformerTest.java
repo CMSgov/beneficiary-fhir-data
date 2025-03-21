@@ -119,7 +119,7 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+    carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     String expectedTimerName = carrierClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -148,13 +148,13 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     assertMatches(claim, eobWithLastUpdated, true);
 
     claim.setLastUpdated(Optional.empty());
     ExplanationOfBenefit eobWithoutLastUpdated =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     assertMatches(claim, eobWithoutLastUpdated, true);
   }
@@ -182,7 +182,7 @@ public final class CarrierClaimTransformerTest {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit eob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -214,7 +214,7 @@ public final class CarrierClaimTransformerTest {
 
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags(loadedClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
@@ -249,7 +249,7 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
     assertMatches(claim, eob, true);
   }
 

@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -64,7 +63,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -148,7 +146,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       String claimSourceTypeNames,
       SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
       SecurityTagsDao securityTagsDao,
-      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
+      boolean samhsaV2Shadow) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
@@ -251,7 +249,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     ImmutablePair<String, ResourceTypeV2<T, ?>> claimIdObj =
         getClaimIdType(claimIdMatcher, claimId);
 
-    Object claimEntity;
+    ClaimWithSecurityTags<?> claimEntity;
 
     try {
       claimEntity = claimDao.getEntityById(claimIdObj.getRight(), claimIdObj.getLeft());
@@ -259,16 +257,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    Mbi claimEntityMbi =
-        getClaimEntityMbi(
-            claimIdObj.getRight(), ((ClaimWithSecurityTags<?>) claimEntity).getClaimEntity());
+    Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity.getClaimEntity());
     if (claimEntityMbi != null) logMbiIdentifiersToMdc(claimEntityMbi);
 
     return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);
   }
 
   /**
-   * Helper to extract id type and id string.
+   * Helper to extract id type and id strFing.
    *
    * @param claimIdMatcher - regex with matching groups
    * @param claimId - the full claim id object with type string 'f' or 'm' as prefix
@@ -303,7 +299,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return the transformed claim
    */
   private T transformEntity(
-      ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
+      ResourceTypeV2<T, ?> claimIdType,
+      ClaimWithSecurityTags<?> claimEntity,
+      boolean includeTaxNumbers) {
 
     if (claimIdType.getTypeLabel().equals("fiss")) {
       return fissTransformer.transform(claimEntity, includeTaxNumbers);
@@ -549,18 +547,18 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         entitiesWithType.stream()
             .filter(
                 pair -> {
-                  boolean hasNoSamhsaData =
-                      samhsaMatcher.hasNoSamhsaData(pair.left); // Store the result
+                  boolean hasNoSamhsaData = samhsaMatcher.hasNoSamhsaData(pair.left);
 
                   if (samhsaV2Shadow) {
                     // Log if missing claim for samhsa V2 Shadow check before filtering
                     samhsaV2InterceptorShadow.logMissingClaim(pair.left, !hasNoSamhsaData);
                   }
 
-                  // Perform filtering logic based on the result of hasSamhsaData and excludeSamhsa
                   return !bundleOptions.excludeSamhsa || hasNoSamhsaData;
                 })
-            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
+            .map(
+                pair ->
+                    transformEntity(pair.right, pair.getLeft(), bundleOptions.includeTaxNumbers))
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());

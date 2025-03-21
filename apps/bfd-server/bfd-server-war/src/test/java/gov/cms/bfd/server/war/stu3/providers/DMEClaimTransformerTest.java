@@ -100,7 +100,7 @@ public final class DMEClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    dmeClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+    dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     String expectedTimerName = dmeClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -127,7 +127,7 @@ public final class DMEClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        dmeClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), true);
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
     assertMatches(claim, eob, true);
   }
 
@@ -156,7 +156,8 @@ public final class DMEClaimTransformerTest {
     }
 
     ExplanationOfBenefit genEob =
-        dmeClaimTransformer.transform(new ClaimWithSecurityTags(loadedClaim, securityTags), false);
+        dmeClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set

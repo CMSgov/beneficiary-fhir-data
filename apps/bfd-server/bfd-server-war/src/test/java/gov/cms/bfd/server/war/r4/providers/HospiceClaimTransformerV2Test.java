@@ -140,7 +140,7 @@ public final class HospiceClaimTransformerV2Test {
   /** Creates an eob for the test. */
   private void createEOB() {
     ExplanationOfBenefit genEob =
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -170,7 +170,7 @@ public final class HospiceClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException, IOException {
     assertMatches(
         claim,
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false));
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false));
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -482,7 +482,7 @@ public final class HospiceClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

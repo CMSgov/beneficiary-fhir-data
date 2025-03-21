@@ -139,7 +139,8 @@ public final class InpatientClaimTransformerV2Test {
             metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        inpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        inpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -483,7 +484,8 @@ public final class InpatientClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        inpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        inpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

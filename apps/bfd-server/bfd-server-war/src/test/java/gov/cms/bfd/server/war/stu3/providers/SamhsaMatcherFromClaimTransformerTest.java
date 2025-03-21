@@ -852,6 +852,6 @@ public class SamhsaMatcherFromClaimTransformerTest {
           "Test setup issue, did not find expected InpatientClaim in sample record.");
     }
     Set<String> securityTags = new HashSet<>();
-    return new ClaimWithSecurityTags(claim, securityTags);
+    return new ClaimWithSecurityTags<>(claim, securityTags);
   }
 }

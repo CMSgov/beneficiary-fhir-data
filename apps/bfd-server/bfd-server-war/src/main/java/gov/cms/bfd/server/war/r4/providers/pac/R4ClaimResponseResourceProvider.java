@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED;
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES;
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
@@ -38,8 +39,8 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
    * @param mcsClaimResponseTransformerV2 the mcs claim response transformer
    * @param securityTagsDao security Tags Dao
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param samhsaV2Shadow the samhsa V2 Shadow flag resources ({@link org.hl7.fhir.r4.model.Claim}
+   *     / {@link org.hl7.fhir.r4.model.ClaimResponse}
    * @param samhsaV2InterceptorShadow v2SamhsaConsentSimulation
    */
   public R4ClaimResponseResourceProvider(
@@ -50,7 +51,8 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
       McsClaimResponseTransformerV2 mcsClaimResponseTransformerV2,
       SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
       SecurityTagsDao securityTagsDao,
-      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
+      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames,
+      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") boolean samhsaV2Shadow) {
     super(
         metricRegistry,
         samhsaMatcher,
@@ -60,7 +62,7 @@ public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<
         claimSourceTypeNames,
         samhsaV2InterceptorShadow,
         securityTagsDao,
-        false);
+        samhsaV2Shadow);
   }
 
   /** {@inheritDoc} */

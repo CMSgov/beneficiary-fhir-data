@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.sharedutils.TagCode;
 import java.util.ArrayList;
@@ -155,6 +156,8 @@ public final class SecurityTagManager {
       case InpatientClaim inpatientClaim -> String.valueOf(inpatientClaim.getClaimId());
       case OutpatientClaim outpatientClaim -> String.valueOf(outpatientClaim.getClaimId());
       case SNFClaim snfClaim -> String.valueOf(snfClaim.getClaimId());
+      case PartDEvent partDEvent -> String.valueOf(partDEvent.getEventId());
+
       default -> null; // Return null for unsupported claim types
     };
   }

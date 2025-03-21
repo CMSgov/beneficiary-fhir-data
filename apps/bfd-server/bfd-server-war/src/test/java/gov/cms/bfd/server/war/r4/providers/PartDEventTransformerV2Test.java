@@ -142,7 +142,7 @@ public final class PartDEventTransformerV2Test {
     partdEventTransformer =
         new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
     claim = generateClaim();
-    eob = partdEventTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    eob = partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
   }
 
   /**

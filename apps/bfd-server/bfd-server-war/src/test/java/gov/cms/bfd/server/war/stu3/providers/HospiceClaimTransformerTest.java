@@ -99,7 +99,7 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    hospiceClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = hospiceClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -126,7 +126,7 @@ public final class HospiceClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

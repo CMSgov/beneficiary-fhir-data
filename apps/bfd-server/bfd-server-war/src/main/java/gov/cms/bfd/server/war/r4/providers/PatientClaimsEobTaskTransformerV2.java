@@ -38,7 +38,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import org.apache.poi.ss.formula.functions.T;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,10 +244,11 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * Transform a list of claims to a list of {@link ExplanationOfBenefit} objects.
    *
    * @param claims the claims/events to transform
+   * @param <T> type of claims
    * @return the {@link ExplanationOfBenefit} instances, one per claim/event
    */
   @Trace
-  private List<ExplanationOfBenefit> transformToEobs(List<ClaimWithSecurityTags<T>> claims) {
+  private <T> List<ExplanationOfBenefit> transformToEobs(List<ClaimWithSecurityTags<T>> claims) {
     return claims.stream()
         .map(
             c -> {
@@ -271,7 +271,7 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * @return the {@link ExplanationOfBenefit} result
    */
   @VisibleForTesting
-  private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
+  private ExplanationOfBenefit transformEobClaim(ClaimWithSecurityTags<?> claimEntity) {
     return claimTransformer.transform(claimEntity, includeTaxNumbers);
   }
 
@@ -390,11 +390,9 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       Set<String> claimIds = securityTagManager.collectClaimIds((List<Object>) claimEntities);
 
       if (!claimIds.isEmpty()) {
-        // Query the claim-tag relationships in one batch
         Map<String, Set<String>> claimIdToTagsMap =
             securityTagsDao.buildClaimIdToTagsMap(claimType.getEntityTagType(), claimIds);
 
-        // Process each claim entity, associating it with its tags
         claimEntitiesWithTags =
             claimEntities.stream()
                 .map(
@@ -462,7 +460,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
     samhsaIgnoredCount.getAndIncrement();
     while (eobsIter.hasNext()) {
       ExplanationOfBenefit eob = eobsIter.next();
-      // log here
       if (samhsaMatcher.test(eob)) {
         eobsIter.remove();
         samhsaRemovedCount.getAndIncrement();

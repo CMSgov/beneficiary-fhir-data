@@ -141,7 +141,7 @@ public final class DMEClaimTransformerV2Test {
             metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        dmeClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -307,7 +307,8 @@ public final class DMEClaimTransformerV2Test {
     }
 
     ExplanationOfBenefit genEob =
-        dmeClaimTransformer.transform(new ClaimWithSecurityTags(loadedClaim, securityTags), false);
+        dmeClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set

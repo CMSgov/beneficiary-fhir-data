@@ -104,7 +104,7 @@ public final class InpatientClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    inpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = inpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -133,7 +133,8 @@ public final class InpatientClaimTransformerTest {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit eob =
-        inpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        inpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

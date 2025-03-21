@@ -104,7 +104,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    outpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    outpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = outpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -131,7 +131,8 @@ public final class OutpatientClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        outpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        outpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

@@ -87,7 +87,7 @@ public class ClaimDao {
     if (claimEntity != null) {
       claimId = securityTagManager.extractClaimId(claimEntity);
 
-      if (!claimId.isEmpty()) {
+      if (claimId != null && !claimId.isEmpty()) {
         Map<String, Set<String>> claimIdToTagsMap =
             securityTagsDao.buildClaimIdToTagsMap(
                 resourceType.getEntityTagType(), Collections.singleton(claimId));

@@ -140,7 +140,8 @@ public final class OutpatientClaimTransformerV2Test {
             false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        outpatientClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        outpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

@@ -99,7 +99,7 @@ public final class HHAClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    hhaClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = hhaClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -126,7 +126,7 @@ public final class HHAClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        hhaClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

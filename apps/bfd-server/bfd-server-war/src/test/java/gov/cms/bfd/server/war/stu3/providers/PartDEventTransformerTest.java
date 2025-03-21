@@ -82,7 +82,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void testTransformRunsMetricTimer() {
     PartDEvent claim = getPartDEventClaim();
-    partdEventTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+    partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = partdEventTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -101,7 +101,7 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
-        partdEventTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     assertMatches(claim, eob);
   }
@@ -189,7 +189,7 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
-        partdEventTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());

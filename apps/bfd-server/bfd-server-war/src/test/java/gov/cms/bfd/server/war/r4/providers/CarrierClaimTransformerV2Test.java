@@ -146,7 +146,7 @@ public class CarrierClaimTransformerV2Test {
 
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -185,7 +185,7 @@ public class CarrierClaimTransformerV2Test {
 
     assertMatches(
         claim,
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false));
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false));
   }
 
   /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
@@ -213,7 +213,7 @@ public class CarrierClaimTransformerV2Test {
     claim = generateClaim();
     claim.setCarrierClaimBlgNpiNumber(Optional.empty());
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -755,7 +755,7 @@ public class CarrierClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags(loadedClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
     // First member
     CareTeamComponent member1 =
@@ -864,7 +864,7 @@ public class CarrierClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags(loadedClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
@@ -895,7 +895,7 @@ public class CarrierClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags(claim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1480,7 +1480,7 @@ public class CarrierClaimTransformerV2Test {
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags(claimWithoutNpi, securityTags), false);
+            new ClaimWithSecurityTags<>(claimWithoutNpi, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);

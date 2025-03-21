@@ -931,7 +931,7 @@ public class TransformerUtilsV2Test {
         new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager, false);
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
-            new ClaimWithSecurityTags(hhaClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -950,7 +950,7 @@ public class TransformerUtilsV2Test {
             new MetricRegistry(), npiOrgLookup, securityTagManager, false);
     genEob =
         claimTransformerInterface.transform(
-            new ClaimWithSecurityTags(hospiceClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(hospiceClaim, securityTags), false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -975,7 +975,7 @@ public class TransformerUtilsV2Test {
             false);
     genEob =
         claimTransformerInterface.transform(
-            new ClaimWithSecurityTags(dmeClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(dmeClaim, securityTags), false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -993,7 +993,7 @@ public class TransformerUtilsV2Test {
             new MetricRegistry(), npiOrgLookup, securityTagManager, false);
     genEob =
         claimTransformerInterface.transform(
-            new ClaimWithSecurityTags(inpatientClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(inpatientClaim, securityTags), false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -1123,7 +1123,7 @@ public class TransformerUtilsV2Test {
             new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
-            new ClaimWithSecurityTags(hhaClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();

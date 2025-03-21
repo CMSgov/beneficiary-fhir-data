@@ -95,11 +95,12 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumber) {
-    ClaimWithSecurityTags<?> claimWithSecurityTags = (ClaimWithSecurityTags<?>) claimEntity;
-    Object claim = claimWithSecurityTags.getClaimEntity();
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
-        securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
 
     if (!(claim instanceof OutpatientClaim)) {
       throw new BadCodeMonkeyException();
