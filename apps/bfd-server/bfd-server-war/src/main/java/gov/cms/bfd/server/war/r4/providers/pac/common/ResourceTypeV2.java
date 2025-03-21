@@ -49,4 +49,11 @@ public interface ResourceTypeV2<TResource extends IBaseResource, TEntity> {
    * @return the list of attribute names
    */
   List<String> getEntityServiceDateAttributes();
+
+  /**
+   * List of tag Class for the entity.
+   *
+   * @return the list of attribute names
+   */
+  String getEntityTagType();
 }

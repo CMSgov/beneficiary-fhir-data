@@ -42,6 +42,7 @@ import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
@@ -53,8 +54,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.BaseDateTimeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -2278,30 +2281,32 @@ final class TransformerTestUtils {
     if (rifRecord instanceof CarrierClaim) {
       claimTransformerInterface =
           new CarrierClaimTransformer(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof DMEClaim) {
       claimTransformerInterface =
-          new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup, securityTagManager);
+          new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
     } else if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface =
-          new HHAClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
+          new HHAClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof HospiceClaim) {
       claimTransformerInterface =
-          new HospiceClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
+          new HospiceClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof InpatientClaim) {
       claimTransformerInterface =
-          new InpatientClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
+          new InpatientClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof OutpatientClaim) {
       claimTransformerInterface =
-          new OutpatientClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
+          new OutpatientClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else if (rifRecord instanceof PartDEvent) {
       claimTransformerInterface = new PartDEventTransformer(metricRegistry, drugCodeDisplayLookup);
     } else if (rifRecord instanceof SNFClaim) {
       claimTransformerInterface =
-          new SNFClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager);
+          new SNFClaimTransformer(metricRegistry, npiOrgLookup, securityTagManager, false);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
-    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    Set<String> securityTags = new HashSet<>();
+    return claimTransformerInterface.transform(
+        new ClaimWithSecurityTags(rifRecord, securityTags), includeTaxNumbers);
   }
 }

@@ -40,6 +40,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
@@ -52,9 +53,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -99,6 +102,8 @@ public class TransformerUtilsV2Test {
   public void after() {
     npiOrgLookup.close();
   }
+
+  Set<String> securityTags = new HashSet<>();
 
   /**
    * Ensures the revenue status code is correctly mapped to an item's revenue as an extension when
@@ -923,8 +928,10 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
+        new HHAClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager, false);
+    ExplanationOfBenefit genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags(hhaClaim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -939,8 +946,11 @@ public class TransformerUtilsV2Test {
     hospiceClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
-    genEob = claimTransformerInterface.transform(hospiceClaim, false);
+        new HospiceClaimTransformerV2(
+            new MetricRegistry(), npiOrgLookup, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags(hospiceClaim, securityTags), false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -961,8 +971,11 @@ public class TransformerUtilsV2Test {
             new MetricRegistry(),
             new FdaDrugCodeDisplayLookup(npiDataStream),
             npiOrgLookup,
-            securityTagManager);
-    genEob = claimTransformerInterface.transform(dmeClaim, false);
+            securityTagManager,
+            false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags(dmeClaim, securityTags), false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -976,8 +989,11 @@ public class TransformerUtilsV2Test {
     inpatientClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new InpatientClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
-    genEob = claimTransformerInterface.transform(inpatientClaim, false);
+        new InpatientClaimTransformerV2(
+            new MetricRegistry(), npiOrgLookup, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags(inpatientClaim, securityTags), false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -1104,8 +1120,10 @@ public class TransformerUtilsV2Test {
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(
-            new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
+            new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
+    ExplanationOfBenefit genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags(hhaClaim, securityTags), false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
