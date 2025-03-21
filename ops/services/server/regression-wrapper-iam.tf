@@ -1,4 +1,3 @@
-# TODO: Remove this, and the Lambda source, when the server-regression Terraservice and Lambda are migrated
 data "aws_iam_policy_document" "regression_wrapper_logs" {
   statement {
     sid       = "AllowLogGroupCreate"

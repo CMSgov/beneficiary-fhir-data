@@ -1,4 +1,3 @@
-# TODO: Remove this, and the Lambda source, when the server-regression Terraservice and Lambda are migrated
 locals {
   rw_lambda_name      = "regression-wrapper"
   rw_lambda_full_name = "${local.name_prefix}-${local.rw_lambda_name}"
