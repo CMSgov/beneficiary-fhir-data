@@ -866,7 +866,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
             .getValueAsString();
 
     // Clear lastupdated in the database
-    ServerTestUtils.get("false")
+    ServerTestUtils.get()
         .doTransaction(
             (em) -> {
               em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")

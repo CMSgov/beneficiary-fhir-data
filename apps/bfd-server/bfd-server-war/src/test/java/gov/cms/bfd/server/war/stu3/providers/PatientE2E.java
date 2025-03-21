@@ -653,7 +653,7 @@ public class PatientE2E extends PatientE2EBase {
    */
   @Test
   public void testPatientByPartDContractWhenPaginationExpectPagingLinks() {
-    ServerTestUtils.get("false")
+    ServerTestUtils.get()
         .loadData(
             Arrays.asList(
                 StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));
@@ -775,7 +775,7 @@ public class PatientE2E extends PatientE2EBase {
   /** Tests the pagination links using a POST request with the pagination info in the POST body. */
   @Test
   public void testPatientByPartDContractWhenPaginationExpectPagingLinksPost() {
-    ServerTestUtils.get("false")
+    ServerTestUtils.get()
         .loadData(
             Arrays.asList(
                 StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY));

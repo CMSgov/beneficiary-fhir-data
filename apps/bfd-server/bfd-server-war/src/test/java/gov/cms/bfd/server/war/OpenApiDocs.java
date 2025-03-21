@@ -173,11 +173,9 @@ public class OpenApiDocs {
         ServerExecutor.startServer(
             resolvedDbUrl, TEST_CONTAINER_DATABASE_USERNAME, TEST_CONTAINER_DATABASE_PASSWORD);
     if (startedServer) {
-      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort("false");
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       setRequestAuth();
-      //      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> ServerExecutor.stopServer("false")));
-
+      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     } else {
       throw new RuntimeException("Could not start server instance.");
     }

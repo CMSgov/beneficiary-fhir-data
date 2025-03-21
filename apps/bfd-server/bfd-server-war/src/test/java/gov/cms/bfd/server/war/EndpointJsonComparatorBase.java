@@ -233,8 +233,8 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
    * @return the first sample A beneficiary
    */
   protected static Beneficiary getSampleABene() {
-    List<Object> loadedRecords = ServerTestUtils.get("false").loadSampleAData();
-    return ServerTestUtils.get("false").getFirstBeneficiary(loadedRecords);
+    List<Object> loadedRecords = ServerTestUtils.get().loadSampleAData();
+    return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
   }
 
   /**
@@ -243,8 +243,8 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
    * @return the first sample A beneficiary
    */
   protected static Beneficiary getSampleABeneSamhsa() {
-    List<Object> loadedRecords = ServerTestUtils.get("false").loadSampleASamhsaData();
-    return ServerTestUtils.get("false").getFirstBeneficiary(loadedRecords);
+    List<Object> loadedRecords = ServerTestUtils.get().loadSampleASamhsaData();
+    return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
   }
 
   /**
@@ -254,10 +254,10 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
    */
   protected static Beneficiary getSampleABeneWithoutRefYear() {
     List<Object> loadedRecords =
-        ServerTestUtils.get("false")
+        ServerTestUtils.get()
             .loadData(
                 Arrays.asList(
                     StaticRifResourceGroup.SAMPLE_A_WITHOUT_REFERENCE_YEAR.getResources()));
-    return ServerTestUtils.get("false").getFirstBeneficiary(loadedRecords);
+    return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
   }
 }

@@ -47,13 +47,17 @@ public class ServerRequiredTest2 {
   protected static final String SAMHSA_KEYSTORE = "test-samhsa-keystore.p12";
 
   /** The Server test utils instance, for convenience and brevity. */
-  protected ServerTestUtils testUtils = ServerTestUtils.get("true");
+  protected ServerTestUtils testUtils = ServerTestUtils.get();
 
   /** Sets up the test server (and required datasource) if the server is not already running. */
   @BeforeAll
   protected static synchronized void setup() throws IOException {
 
-    if (!ServerExecutor.isRunning("true")) {
+    if (ServerExecutor.isRunning()) {
+      ServerExecutor.stopServer();
+    }
+
+    if (!ServerExecutor.isRunning()) {
       assertTrue(
           ServerTestUtils.isValidServerDatabase(DB_URL),
           "'its.db.url' was set to an illegal db value; should be a local database (container or otherwise).");
@@ -92,12 +96,11 @@ public class ServerRequiredTest2 {
       //      }
       System.out.println("Server setup completed with true.");
       assertTrue(startedServer, "Could not startup server for tests.");
-      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort("true");
+      baseServerUrl = "https://localhost:" + ServerExecutor.getServerPort();
       requestAuth = getRequestAuth("test-keystore.p12");
 
       // Set up a shutdown hook to shut down the server when we are finished with all tests
-      //      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> ServerExecutor.stopServer("true")));
+      Runtime.getRuntime().addShutdownHook(new Thread(ServerExecutor::stopServer));
     }
   }
 
@@ -135,7 +138,7 @@ public class ServerRequiredTest2 {
   public void cleanDatabaseServerAfterEachTestCase() {
     final DataSource dataSource = getDataSource();
     if (dataSource != null && ServerTestUtils.isValidServerDatabase(DB_URL)) {
-      ServerTestUtils.get("true").truncateNonRdaTablesInDataSource(dataSource);
+      ServerTestUtils.get().truncateNonRdaTablesInDataSource(dataSource);
     }
   }
 

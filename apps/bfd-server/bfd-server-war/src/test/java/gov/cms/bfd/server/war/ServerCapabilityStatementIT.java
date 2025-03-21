@@ -36,7 +36,7 @@ public final class ServerCapabilityStatementIT extends ServerRequiredTest {
    */
   @Test
   public void getCapabilities() {
-    IGenericClient fhirClient = ServerTestUtils.get("false").createFhirClient();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     CapabilityStatement capabilities =
         fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
