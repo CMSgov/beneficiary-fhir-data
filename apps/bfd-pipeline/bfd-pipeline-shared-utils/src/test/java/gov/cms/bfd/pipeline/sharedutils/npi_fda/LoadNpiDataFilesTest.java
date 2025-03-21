@@ -1,4 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils.npi_fda;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -13,10 +14,8 @@ import java.io.InputStreamReader;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class LoadNpiDataFilesTest {
@@ -42,7 +41,8 @@ public class LoadNpiDataFilesTest {
     EntityTransaction entityTransaction = Mockito.mock(EntityTransaction.class);
     Mockito.when(entityManager.createNativeQuery(anyString())).thenReturn(query);
     Mockito.when(entityManager.getTransaction()).thenReturn(entityTransaction);
-    Mockito.when(query.getSingleResult()).thenReturn(new Date(Instant.now().minus(31, ChronoUnit.DAYS).toEpochMilli()));
+    Mockito.when(query.getSingleResult())
+        .thenReturn(new Date(Instant.now().minus(31, ChronoUnit.DAYS).toEpochMilli()));
   }
 
   @Test
@@ -52,10 +52,10 @@ public class LoadNpiDataFilesTest {
         new InputStreamReader(new ByteArrayInputStream(TEST_CSV.getBytes())));
     Mockito.verify(entityManager, times(8)).merge(any());
   }
+
   @Test
   void ShouldLoadData() {
     LoadNpiDataFiles loadNpiDataFiles = new LoadNpiDataFiles(entityManager, 1, 30);
     assertTrue(loadNpiDataFiles.shouldLoadData());
-
   }
 }
