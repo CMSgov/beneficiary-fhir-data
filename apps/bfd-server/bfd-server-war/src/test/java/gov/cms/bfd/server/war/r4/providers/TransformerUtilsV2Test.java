@@ -68,7 +68,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -82,10 +81,6 @@ import org.mockito.quality.Strictness;
 public class TransformerUtilsV2Test {
   /** The SamhsaSecurityTag lookup. */
   @Mock SecurityTagManager securityTagManager;
-
-  /** One-time setup of objects that are normally injected. */
-  @BeforeEach
-  protected void setup() {}
 
   /**
    * Ensures the revenue status code is correctly mapped to an item's revenue as an extension when

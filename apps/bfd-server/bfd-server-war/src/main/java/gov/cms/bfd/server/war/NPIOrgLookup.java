@@ -37,17 +37,18 @@ public class NPIOrgLookup {
   /** Filename of the test data. */
   private static final String TEST_NPI_FILENAME = "npi_e2e_it.json";
 
-  /** Production implementation of NPIOrgLookup. */
+  /** The entityManager. */
   @PersistenceContext EntityManager entityManager;
 
-  /** The singleton. */
+  /** The instance of NPIOrgLookup that will be returned for testing. */
   private static NPIOrgLookup npiOrgLookup;
 
   /** True if this is a test instance. */
   private final boolean testInstance;
 
   /**
-   * Constructor.
+   * Constructor. If orgFileName can be successfully loaded, then this is treated as a test
+   * instance. Otherwise, we can assume that this is a production instance.
    *
    * @param orgFileName File name to use for test purposes.
    */
@@ -127,6 +128,8 @@ public class NPIOrgLookup {
    */
   @Transactional
   public Optional<NPIData> retrieveNPIOrgDisplay(Optional<String> npi) {
+    // if testInstance is true, we will return a value from the HashMap.
+    // Otherwise, we query the database.
     if (testInstance) {
       return retrieveTestData(npi);
     }

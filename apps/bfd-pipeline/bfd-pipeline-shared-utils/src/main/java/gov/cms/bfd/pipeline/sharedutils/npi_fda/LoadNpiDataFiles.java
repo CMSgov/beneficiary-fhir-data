@@ -34,14 +34,14 @@ public class LoadNpiDataFiles implements Callable<Integer> {
   private static final String TAXONOMY_CODE_FIELD = "Healthcare Provider Taxonomy Code_1";
 
   /** Field for provider organization name in CSV. */
-  public static final String PROVIDER_ORGANIZATION_NAME_FIELD =
+  private static final String PROVIDER_ORGANIZATION_NAME_FIELD =
       "Provider Organization Name (Legal Business Name)";
 
   /** Field for NPI in CSV. */
-  public static final String NPI_FIELD = "NPI";
+  private static final String NPI_FIELD = "NPI";
 
   /** Field for Entity Type Code in CSV. */
-  public static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
+  private static final String ENTITY_TYPE_CODE_FIELD = "Entity Type Code";
 
   /** Field for Provider Credential code in CSV. */
   private static final String PROVIDER_CREDENTIAL_FIELD = "Provider Credential Text";
@@ -62,8 +62,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
   private static final String PROVIDER_SUFFIX_FIELD = "Provider Name Suffix Text";
 
   /** Base url for the nppes download. */
-  protected static final String BASE_URL =
-      "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
+  private static final String BASE_URL = "https://download.cms.gov/nppes/NPPES_Data_Dissemination_";
 
   /** Map of months. */
   private static final Map<Integer, String> months =
@@ -122,7 +121,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @param getMonthBefore gets the month before
    * @return a file name string
    */
-  public static String getFileName(boolean getMonthBefore) {
+  private static String getFileName(boolean getMonthBefore) {
     Calendar cal = Calendar.getInstance();
     int currentMonth = cal.get(Calendar.MONTH);
     int currentYear = cal.get(Calendar.YEAR);
@@ -138,7 +137,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @param currentYear is the integer for year
    * @return a file name string
    */
-  public static String getMonthAndYearForFile(
+  private static String getMonthAndYearForFile(
       boolean getMonthBefore, int currentMonth, int currentYear) {
     String month;
     int year;
@@ -166,8 +165,8 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @throws IOException (any errors encountered will be bubbled up)
    * @throws IllegalStateException if there is an issue with NPI File
    */
-  @SuppressWarnings("java:S5042")
-  public Integer getOriginalNpiDataFile(String fileName) throws IOException, IllegalStateException {
+  private Integer getOriginalNpiDataFile(String fileName)
+      throws IOException, IllegalStateException {
     // download NPI file
     URL ndctextZipUrl = new URL(fileName);
     HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
@@ -192,7 +191,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @return Total number of records saved.
    * @throws IOException (any errors encountered will be bubbled up)
    */
-  public Integer persistNPIResource() throws IOException {
+  private Integer persistNPIResource() throws IOException {
     String fileUrl;
     try {
       fileUrl = getFileName(false);
@@ -209,7 +208,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @return map of taxonomy groupings.
    * @throws IOException exception thrown.
    */
-  public static Map<String, String> processTaxonomyDescriptions() throws IOException {
+  private static Map<String, String> processTaxonomyDescriptions() throws IOException {
     ClassLoader classLoader = LoadNpiDataFiles.class.getClassLoader();
     Map<String, String> taxonomyMapping = new HashMap<>();
     try (BufferedReader reader =
