@@ -596,21 +596,26 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "AWS/RDS", "CPUUtilization", "Role", "READER", "DBClusterIdentifier", "bfd-${env}-aurora-cluster", { "label": "Reader CPU Utilization" } ]
+                    [ "AWS/RDS", "CPUUtilization", "Role", "READER", "DBClusterIdentifier", "bfd-${env}-aurora-cluster", { "label": "Reader CPU Utilization", "region": "${region}" } ],
+                    [ "...", "WRITER", ".", ".", { "region": "${region}", "label": "Writer CPU Utilization", "yAxis": "right" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
                 "stat": "Average",
                 "period": 60,
-                "title": "RDS Reader CPU Utilization",
+                "title": "RDS Reader Nodes and Writer CPU Utilization",
                 "yAxis": {
                     "left": {
                         "label": "",
-                        "showUnits": true
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
                     },
                     "right": {
-                        "showUnits": true
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
                     }
                 },
                 "liveData": true
