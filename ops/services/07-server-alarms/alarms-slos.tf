@@ -1,17 +1,20 @@
 locals {
   # Ensures that prod and prod-sbx always have a valid alarm alert destination, as the application
   # of this Terraservice will fail-fast otherwise
+  slos_high_alert_topic_path = "/bfd/${local.service}/sns_topics/slos/high_alert"
+  slos_alert_topic_path      = "/bfd/${local.service}/sns_topics/slos/alert"
+  slos_warning_topic_path    = "/bfd/${local.service}/sns_topics/slos/warning"
   slos_env_sns = contains(["prod", "prod-sbx"], local.env) ? {
-    high_alert = local.ssm_config["/bfd/${local.service}/sns_topics/slos/high_alert"]
-    alert      = local.ssm_config["/bfd/${local.service}/sns_topics/slos/alert"]
-    warning    = local.ssm_config["/bfd/${local.service}/sns_topics/slos/warning"]
+    high_alert = local.ssm_config[local.slos_high_alert_topic_path]
+    alert      = local.ssm_config[local.slos_alert_topic_path]
+    warning    = local.ssm_config[local.slos_warning_topic_path]
     } : {
     # In the event this module is being applied in a non-critical environment (i.e. an ephemeral
     # environment/test) these lookups will ensure that an empty configuration will be returned
     # instead of an error if no configuration is available.
-    high_alert = lookup(local.ssm_config, "/bfd/${local.service}/sns_topics/slos/high_alert", null)
-    alert      = lookup(local.ssm_config, "/bfd/${local.service}/sns_topics/slos/alert", null)
-    warning    = lookup(local.ssm_config, "/bfd/${local.service}/sns_topics/slos/warning", null)
+    high_alert = lookup(local.ssm_config, local.slos_high_alert_topic_path, null)
+    alert      = lookup(local.ssm_config, local.slos_alert_topic_path, null)
+    warning    = lookup(local.ssm_config, local.slos_warning_topic_path, null)
   }
   # Use Terraform's "splat" operator to automatically return either an empty list, if no SNS topic
   # was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that is the ARN of
