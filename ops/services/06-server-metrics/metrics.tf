@@ -1,7 +1,4 @@
 locals {
-  # TODO: Remove ecs suffix part when server is fully migrated to Fargate
-  namespace = "bfd-${local.env}/${local.target_service}/ecs"
-
   log_groups = {
     access   = data.aws_cloudwatch_log_group.access.name
     messages = data.aws_cloudwatch_log_group.messages.name
