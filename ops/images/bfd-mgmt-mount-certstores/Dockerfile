@@ -1,9 +1,7 @@
 ARG base_version
 ARG registry_uri
 
-# ECR_REPOSITORY_NAMESPACE and BFD_VERSION are both exported as part of the "Build Release" GHA
-# Workflow, so we take them as defaults if the arguments are unspecified
-FROM ${registry_uri:-${ECR_REPOSITORY_NAMESPACE}}/bfd-mgmt-base-python:${base_version:-${BFD_VERSION}} as deps
+FROM ${registry_uri}/bfd-mgmt-base-python:${base_version} as deps
 # Enable copy mode to support bind mount caching.
 ENV UV_LINK_MODE=copy
 # Change the working directory to the `app` directory
