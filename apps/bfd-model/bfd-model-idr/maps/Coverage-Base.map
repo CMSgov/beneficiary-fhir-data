@@ -145,8 +145,6 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     src.coveragePart as coveragePart where coveragePart="A" -> tgt then AddPartACoverageElements(src, tgt) "Add Part A Elements";
     src.coveragePart as coveragePart where coveragePart="B" -> tgt then AddPartACoverageElements(src, tgt) "Add Part B Elements";
 
-    
-
 }
 
 group AddPartACoverageElements(source src: CoverageBase, target tgt: BFDCoverage){
@@ -214,5 +212,5 @@ group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organizati
             tgtTeleURL.system="url",
             tgtTeleURL.value="www.medicare.gov" "set url";
     } "set organization contact info";
- 
+
 }
