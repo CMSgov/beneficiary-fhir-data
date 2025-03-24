@@ -1,3 +1,21 @@
+output "service" {
+  description = "The name of the current Terraservice"
+  sensitive   = false
+  value       = var.service
+}
+
+output "region" {
+  description = "The region name associated with the current caller identity"
+  sensitive   = false
+  value       = data.aws_region.current.name
+}
+
+output "account_id" {
+  description = "The account ID associated with the current caller identity"
+  sensitive   = false
+  value       = data.aws_caller_identity.current.account_id
+}
+
 output "env" {
   description = "The solution's environment name. Generally, `terraform.workspace`"
   sensitive   = false

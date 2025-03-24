@@ -19,6 +19,10 @@ locals {
   }
 }
 
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
 data "external" "github_token" {
   program = ["${path.module}/scripts/get_github_token.sh"]
 }
