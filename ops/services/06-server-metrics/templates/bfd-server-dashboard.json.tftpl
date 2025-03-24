@@ -533,8 +533,8 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "AWS/ELB", "HealthyHostCount", "LoadBalancerName", "bfd-${env}-fhir" ],
-                    [ "AWS/AutoScaling", "GroupDesiredCapacity", "AutoScalingGroupName", "bfd-${env}-fhir-375", { "yAxis": "right", "visible": false } ]
+                    [ { "expression": "SEARCH('{AWS/NetworkELB,LoadBalancer,TargetGroup} bfd-${env}-server-ecs-nlb healthyhostcount', 'Average', 60)", "label": "Healthy Hosts", "id": "e2", "period": 60 } ],
+                    [ { "expression": "SEARCH('{AWS/NetworkELB,LoadBalancer,TargetGroup} bfd-${env}-server-ecs-nlb unhealthyhostcount', 'Average', 60)", "label": "Unhealthy Hosts", "id": "e1", "yAxis": "right", "period": 60 } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -545,18 +545,19 @@
                 "yAxis": {
                     "left": {
                         "min": 0,
-                        "max": 1.2
+                        "showUnits": false,
+                        "label": "Healthy Hosts"
+                    },
+                    "right": {
+                        "showUnits": false,
+                        "label": "Unhealthy Hosts",
+                        "min": 0
                     }
                 },
-                "annotations": {
-                    "horizontal": [
-                        {
-                            "label": "Alert Threshold",
-                            "value": 1
-                        }
-                    ]
-                },
-                "title": "Average of Healthy Hosts in bfd-${env}-fhir Elastic Load Balancer"
+                "title": "Healthy and Unhealthy Hosts in bfd-${env}-server-ecs NLB",
+                "legend": {
+                    "position": "hidden"
+                }
             }
         },
         {
