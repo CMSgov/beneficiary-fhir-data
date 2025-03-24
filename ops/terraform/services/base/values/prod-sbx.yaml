@@ -742,6 +742,8 @@
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
