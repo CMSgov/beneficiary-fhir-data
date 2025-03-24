@@ -8,23 +8,19 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "id": "e2" } ]
+                    [ "ECS/ContainerInsights", "RunningTaskCount", "ServiceName", "${service}", "ClusterName", "bfd-${env}-cluster", { "region": "${region}" } ],
+                    [ ".", "DesiredTaskCount", ".", ".", ".", ".", { "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 300,
-                "title": "Instance Count in Auto Scaling Groups with 1 Minute Period",
-                "yAxis": {
-                    "left": {
-                        "showUnits": false,
-                        "label": "Instances"
-                    },
-                    "right": {
-                        "showUnits": false
-                    }
-                }
+                "region": "${region}",
+                "period": 60,
+                "stat": "Average",
+                "title": "${service} Service Running and Desired Task Count",
+                "legend": {
+                    "position": "bottom"
+                },
+                "liveData": true
             }
         },
         {
@@ -35,23 +31,27 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Average', 60)", "label": "", "id": "e1", "period": 300 } ],
-                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Minimum', 60)", "label": "", "id": "e2", "period": 300 } ],
-                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Maximum', 60)", "label": "", "id": "e3", "period": 300 } ]
+                    [ "ECS/ContainerInsights", "TaskMemoryUtilization", "ServiceName", "${service}", "ClusterName", "bfd-${env}-cluster", { "yAxis": "right", "label": "Memory Utilization %" } ],
+                    [ ".", "TaskCpuUtilization", ".", ".", ".", ".", { "label": "CPU Utilization %" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
-                "stat": "Maximum",
-                "period": 300,
-                "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period",
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "CPU and Memory Utilization of ${service} Service",
                 "yAxis": {
                     "left": {
-                        "label": "Percent",
-                        "showUnits": false
+                        "label": "",
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
                     },
                     "right": {
-                        "showUnits": false
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
                     }
                 }
             }
