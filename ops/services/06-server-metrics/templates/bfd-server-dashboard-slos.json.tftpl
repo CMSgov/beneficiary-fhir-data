@@ -69,7 +69,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Coverage 15-minute Mean Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
                 "period": 900,
                 "annotations": {
@@ -101,7 +101,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Coverage 99th Percentile (BULK) Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -142,7 +142,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Coverage 99th Percentile (NON-BULK) Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -173,7 +173,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/ExplanationOfBenefit 15-minute Mean (No resources returned) Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
                 "period": 900,
                 "annotations": {
@@ -203,7 +203,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/ExplanationOfBenefit 15-minute Mean Latency per KB",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
                 "period": 900,
                 "annotations": {
@@ -244,7 +244,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/ExplanationOfBenefit 15-minute 99th Percentile (BULK) Latency (ALERT only)",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -282,7 +282,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/ExplanationOfBenefit 15-minute 99th Percentile (BULK) Latency per KB (WARNING only)",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -318,7 +318,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/ExplanationOfBenefit 15-minute 99th Percentile (NON-BULK) Latency per KB",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -359,7 +359,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Patient by_contract=false 15-minute 99th Percentile (BULK) Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -400,7 +400,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Patient by_contract=false 15-minute 99th Percentile (NON-BULK) Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -430,7 +430,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Patient by_contract=true count=4000 15-minute Mean Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Average",
                 "period": 900,
                 "annotations": {
@@ -463,7 +463,7 @@
                 "view": "timeSeries",
                 "stacked": false,
                 "title": "/v*/fhir/Patient by_contract=true count=4000 15-minute 99th Percentile Latency",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "p99",
                 "period": 900,
                 "annotations": {
@@ -510,7 +510,7 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 3600,
                 "annotations": {
@@ -551,7 +551,7 @@
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 86400,
                 "annotations": {
@@ -586,13 +586,13 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1", "period": 86400 } ],
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "${region}", "period": 86400 } ],
                     [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
                     [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
                 ],
                 "sparkline": false,
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 86400,
                 "setPeriodToTimeRange": false,
@@ -637,7 +637,7 @@
                 ],
                 "sparkline": false,
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 300,
                 "setPeriodToTimeRange": false,
@@ -676,13 +676,13 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "us-east-1" } ],
+                    [ { "expression": "100*(m1/(m1+m2))", "label": "% Uptime", "id": "e1", "yAxis": "left", "region": "${region}" } ],
                     [ "${namespace}", "availability/success", { "id": "m1", "label": "Count of Successful Checks", "visible": false } ],
                     [ ".", "availability/failure", { "id": "m2", "label": "Count of Failing Checks", "visible": false } ]
                 ],
                 "sparkline": false,
                 "view": "gauge",
-                "region": "us-east-1",
+                "region": "${region}",
                 "stat": "Sum",
                 "period": 2592000,
                 "setPeriodToTimeRange": false,
