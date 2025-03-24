@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import time
 from typing import Any, Iterator, Mapping, TypeVar
 from snowflake.connector import DictCursor
 import psycopg
