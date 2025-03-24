@@ -108,74 +108,29 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Average', 60)", "label": "", "id": "e1", "period": 300 } ],
-                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Minimum', 60)", "label": "", "id": "e2", "period": 300 } ],
-                    [ { "expression": "SEARCH('AWS/EC2 CPUUtilization AutoScaling bfd-${env}-fhir', 'Maximum', 60)", "label": "", "id": "e3", "period": 300 } ]
+                    [ "ECS/ContainerInsights", "TaskMemoryUtilization", "ServiceName", "${service}", "ClusterName", "bfd-${env}-cluster", { "yAxis": "right", "label": "Memory Utilization %" } ],
+                    [ ".", "TaskCpuUtilization", ".", ".", ".", ".", { "label": "CPU Utilization %" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
-                "stat": "Maximum",
-                "period": 300,
+                "stat": "Average",
+                "period": 60,
                 "liveData": true,
-                "title": "CPU Utilization Across all EC2 Instances in ASG with 1 Minute Period",
+                "title": "CPU and Memory Utilization of ${service} Service",
                 "yAxis": {
                     "left": {
-                        "label": "Percent",
-                        "showUnits": false
+                        "label": "",
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
                     },
                     "right": {
-                        "showUnits": false
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
                     }
                 }
-            }
-        },
-        {
-            "height": 4,
-            "width": 24,
-            "y": 58,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/count/500-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton 500 Response Count" } ],
-                    [ "...", "${dpc_client_ssl}", { "label": "DPC 500 Response Count" } ],
-                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D 500 Response Count" } ],
-                    [ "...", "${ab2d_validation_client_ssl}", { "label": "AB2D Val 500 Response Count" } ],
-                    [ "...", "${bcda_client_ssl}", { "label": "BCDA 500 Response Count" } ],
-                    [ "...", "${internal_client_ssl}", { "label": "Internal 500 Response Count" } ],
-                    [ ".", ".", { "label": "All 500 Response Count" } ]
-                ],
-                "view": "singleValue",
-                "region": "${region}",
-                "title": "Total number of HTTP 500s errors in the last 24 hours",
-                "period": 86400,
-                "liveData": true,
-                "stat": "Sum"
-            }
-        },
-        {
-            "height": 4,
-            "width": 24,
-            "y": 62,
-            "x": 0,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/count/non-2xx-responses", "client_ssl", "${bb_client_ssl}", { "label": "BlueButton non-2xx Response Count" } ],
-                    [ "...", "${dpc_client_ssl}", { "label": "DPC non-2xx Response Count" } ],
-                    [ "...", "${ab2d_client_ssl}", { "label": "AB2D non-2xx Response Count" } ],
-                    [ "...", "${ab2d_validation_client_ssl}", { "label": "AB2D Val non-2xx Response Count" } ],
-                    [ "...", "${bcda_client_ssl}", { "label": "BCDA non-2xx Response Count" } ],
-                    [ "...", "${internal_client_ssl}", { "label": "Internal non-2xx Response Count" } ],
-                    [ ".", ".", { "label": "All non-2xx Response Count" } ]
-                ],
-                "view": "singleValue",
-                "region": "${region}",
-                "title": "Total number of HTTP non-2XXs errors in the last 24 hours",
-                "period": 86400,
-                "liveData": true,
-                "stat": "Sum"
             }
         },
         {
@@ -555,54 +510,17 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "IF( e3/e2 > 0.01, e2 , 0)", "label": "FilteredNetworkIn", "id": "e1", "region": "${region}", "period": 60, "yAxis": "right" } ],
-                    [ { "expression": "LAST(SEARCH('{AWS/EC2,AutoScalingGroupName} AWS/EC2 NetworkIn AutoScalingGroupName bfd-${env}-fhir', 'Average', 60))", "label": "Expression2", "id": "e2", "visible": false, "region": "${region}" } ],
-                    [ { "expression": "LAST(SEARCH('{AWS/EC2,AutoScalingGroupName} AWS/EC2 NetworkOut AutoScalingGroupName bfd-${env}-fhir', 'Average', 60))", "label": "Expression3", "id": "e3", "visible": false, "region": "${region}" } ],
-                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupInServiceInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "label": "InstanceCount", "id": "e4", "region": "${region}" } ],
-                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupPendingInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "label": "GroupPending", "id": "e5", "region": "${region}", "visible": false } ],
-                    [ { "expression": "SLICE(SEARCH('{AWS/AutoScaling,AutoScalingGroupName} AWS/AutoScaling GroupTerminatingInstances AutoScalingGroupName bfd-${env}-fhir', 'Maximum', 60),1)", "label": "Expression6", "id": "e6", "region": "${region}", "visible": false } ]
+                    [ "ECS/ContainerInsights", "RunningTaskCount", "ServiceName", "${service}", "ClusterName", "bfd-${env}-cluster", { "region": "${region}" } ],
+                    [ ".", "DesiredTaskCount", ".", ".", ".", ".", { "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
-                "period": 300,
+                "period": 60,
                 "stat": "Average",
-                "title": "Instance Count w/ FilteredNetworkIn",
+                "title": "${service} Service Running and Desired Task Count",
                 "legend": {
-                    "position": "hidden"
-                },
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "max": 12
-                    }
-                },
-                "annotations": {
-                    "horizontal": [
-                        {
-                            "color": "#69ae34",
-                            "label": "Minimum InService instances",
-                            "value": 3
-                        },
-                        {
-                            "color": "#b088f5",
-                            "label": "0 - 3 instances",
-                            "value": 100000000,
-                            "yAxis": "right"
-                        },
-                        {
-                            "color": "#b088f5",
-                            "label": "3 - 6 instances",
-                            "value": 200000000,
-                            "yAxis": "right"
-                        },
-                        {
-                            "color": "#b088f5",
-                            "label": "6 - 9 instances",
-                            "value": 400000000,
-                            "yAxis": "right"
-                        }
-                    ]
+                    "position": "bottom"
                 },
                 "liveData": true
             }
@@ -677,23 +595,21 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "bfd-${env}-aurora-cluster-node-1", { "period": 60 } ],
-                    [ "...", "bfd-${env}-aurora-cluster-node-2", { "period": 60 } ],
-                    [ "...", "bfd-${env}-aurora-cluster-node-3", { "period": 60 } ]
+                    [ "AWS/RDS", "CPUUtilization", "Role", "READER", "DBClusterIdentifier", "bfd-${env}-aurora-cluster", { "label": "Reader CPU Utilization" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
-                "stat": "Maximum",
-                "period": 300,
-                "title": "RDS Cluster CPUUtilization",
+                "stat": "Average",
+                "period": 60,
+                "title": "RDS Reader CPU Utilization",
                 "yAxis": {
                     "left": {
-                        "label": "Percent",
-                        "showUnits": false
+                        "label": "",
+                        "showUnits": true
                     },
                     "right": {
-                        "showUnits": false
+                        "showUnits": true
                     }
                 },
                 "liveData": true
