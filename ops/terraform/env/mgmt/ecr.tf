@@ -1,4 +1,8 @@
 locals {
+  #ECR Pull/Push IAM Roles
+  ecr_pull_role_name = "ecr_pull_role"
+  ecr_push_role_name = "ecr_push_role"
+
   ecr_container_repositories = toset([
     # utility container image repositories
     "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
@@ -36,4 +40,62 @@ resource "aws_ecr_repository" "bfd" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "aws_ecr_repository_policy" "bfd_repo_policy" {
+  for_each = local.ecr_container_repositories
+
+  repository = each.value
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      #Allow to Pull Images by the PullImages role
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${local.account_id}:role/${local.ecr_pull_role_name}"
+        }
+        Action = [
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchCheckLayerAvailability"
+        ]
+      },
+      #Allow to Push Images by the PushImages role
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${local.account_id}:role/${local.ecr_push_role_name}"
+        }
+        Action = [
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "bfd" {
+    for_each = local.ecr_container_repositories
+    repository = each.value
+    policy = jsonencode({
+      rules = [
+        {
+          rulePriority = 1
+          description = "Expire images older than 90 days"
+          selection = {
+            tagStatus = "untagged"
+            countType = "sinceImagePushed"
+            countUnit = "days"
+            countNumber = 90
+          }
+          action = {
+            type = "expire"
+          }
+        }
+      ]
+    })
 }
