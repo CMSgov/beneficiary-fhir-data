@@ -100,7 +100,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
           ON CONFLICT (table_name)
           DO UPDATE SET
           last_updated = :lastUpdated
-          """;
+       """;
 
   /**
    * Constructor.

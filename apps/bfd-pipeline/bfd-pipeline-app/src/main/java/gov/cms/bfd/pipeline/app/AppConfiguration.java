@@ -452,7 +452,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(SSM_PATH_RDA_GRPC_MAX_IDLE_SECONDS, String.valueOf(Integer.MAX_VALUE))
           .put(SSM_PATH_NPI_FDA_LOAD_JOB, "false")
           .put(SSM_PATH_NPI_FDA_BATCH_SIZE, "100000")
-          .put(SSM_PATH_NPI_FDA_RUN_INTERVAL, "168")
+          .put(SSM_PATH_NPI_FDA_RUN_INTERVAL, "30")
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
@@ -550,7 +550,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
       return null;
     }
     int batchSize = config.intValue(SSM_PATH_NPI_FDA_BATCH_SIZE, 100000);
-    int runInterval = config.intValue(SSM_PATH_NPI_FDA_RUN_INTERVAL, 168);
+    int runInterval = config.intValue(SSM_PATH_NPI_FDA_RUN_INTERVAL, 30);
     return NpiFdaLoadJobConfig.builder()
         .enabled(enabled)
         .batchSize(batchSize)
