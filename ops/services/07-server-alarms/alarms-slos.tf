@@ -16,9 +16,9 @@ locals {
   # Use Terraform's "splat" operator to automatically return either an empty list, if no SNS topic
   # was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that is the ARN of
   # the SNS topic. Functionally equivalent to [for o in data.aws_sns_topic.sns : o.arn]
-  slos_high_alert_arn = data.aws_sns_topic.high_alert_sns[*].arn
-  slos_alert_arn      = data.aws_sns_topic.alert_sns[*].arn
-  slos_warning_arn    = data.aws_sns_topic.warning_sns[*].arn
+  slos_high_alert_arn = data.aws_sns_topic.slos_high_alert_sns[*].arn
+  slos_alert_arn      = data.aws_sns_topic.slos_alert_sns[*].arn
+  slos_warning_arn    = data.aws_sns_topic.slos_warning_sns[*].arn
 
   slos_metrics = {
     coverage_latency                      = "http-requests/latency/coverage-all"
@@ -144,17 +144,17 @@ locals {
   }
 }
 
-data "aws_sns_topic" "high_alert_sns" {
+data "aws_sns_topic" "slos_high_alert_sns" {
   count = local.slos_env_sns.high_alert != null ? 1 : 0
   name  = local.slos_env_sns.high_alert
 }
 
-data "aws_sns_topic" "alert_sns" {
+data "aws_sns_topic" "slos_alert_sns" {
   count = local.slos_env_sns.alert != null ? 1 : 0
   name  = local.slos_env_sns.alert
 }
 
-data "aws_sns_topic" "warning_sns" {
+data "aws_sns_topic" "slos_warning_sns" {
   count = local.slos_env_sns.warning != null ? 1 : 0
   name  = local.slos_env_sns.warning
 }
