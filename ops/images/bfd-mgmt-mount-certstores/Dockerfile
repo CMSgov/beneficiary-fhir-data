@@ -9,14 +9,14 @@ WORKDIR /app
 # Install dependencies
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --frozen --no-install-project --compile-bytecode
+  uv sync --frozen --no-install-project --compile-bytecode --no-dev
 
 FROM deps
 # Copy the application code to the `app` directory
 COPY . /app
 # Sync the project
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --frozen
+  uv sync --frozen --no-dev
 RUN mkdir -p /data
 VOLUME ["/data"]
-ENTRYPOINT ["uv", "run", "main.py"]
+ENTRYPOINT ["uv", "run", "--no-dev", "main.py"]

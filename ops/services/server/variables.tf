@@ -12,6 +12,13 @@ variable "certstores_repository_override" {
   type        = string
 }
 
+variable "log_router_repository_override" {
+  default     = null
+  description = "Overrides the ECR repository for the log_router container image. If not provided, the default will be used"
+  sensitive   = false
+  type        = string
+}
+
 variable "server_repository_override" {
   default     = null
   description = "Overrides the ECR repository for the server container image. If not provided, the default will be used"
@@ -22,6 +29,13 @@ variable "server_repository_override" {
 variable "certstores_version_override" {
   default     = null
   description = "Overrides the version for certstores container image resolution. If not provided, the latest BFD version will be used"
+  sensitive   = false
+  type        = string
+}
+
+variable "log_router_version_override" {
+  default     = null
+  description = "Overrides the version for log_router container image resolution. If not provided, the latest BFD version will be used"
   sensitive   = false
   type        = string
 }

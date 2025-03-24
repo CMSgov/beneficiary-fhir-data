@@ -70,6 +70,7 @@
                                     <version>${project.version}</version>
                                     <type>war</type>
                                     <outputDirectory>${project.build.directory}/war-file</outputDirectory>
+                                    <destFileName>bfd-server.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
