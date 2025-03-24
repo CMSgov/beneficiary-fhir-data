@@ -16,7 +16,7 @@
                 "id": "CoverageBase",
                 "path": "CoverageBase",
                 "label": "IDR Coverage Base. Ignore in DD Generation",
-                "definition": "Covrage Base definition",
+                "definition": "Coverage Base definition",
                 "min": 1,
                 "max": "1"
             },
