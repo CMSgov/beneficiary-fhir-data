@@ -118,9 +118,9 @@ public class AbstractTransformerV2 {
           .setName(createHumanNameFrom(patientInfo))
           .setBirthDate(localDateToDate(patientInfo.getDob()))
           .setGender(
-              patientInfo.getGender() == null
+              patientInfo.getSex() == null
                   ? null
-                  : patientInfo.getGenderMap().get(patientInfo.getGender().toLowerCase()));
+                  : patientInfo.getSexMap().get(patientInfo.getSex().toLowerCase()));
     }
 
     return patient;
@@ -499,11 +499,11 @@ public class AbstractTransformerV2 {
     /** The date of birth. */
     private final LocalDate dob;
 
-    /** The gender. */
-    private final String gender;
+    /** The sex. */
+    private final String sex;
 
-    /** The map of gender strings to the enum values. */
-    private final Map<String, Enumerations.AdministrativeGender> genderMap;
+    /** The map of sex strings to the enum values. */
+    private final Map<String, Enumerations.AdministrativeGender> sexMap;
 
     /** The first name format. */
     private final String firstNameFormat;
@@ -521,8 +521,8 @@ public class AbstractTransformerV2 {
      * @param lastName the last name
      * @param middleName the middle name
      * @param dob the dob
-     * @param gender the gender
-     * @param genderMap the gender map
+     * @param sex the sex
+     * @param sexMap the sex map
      * @param firstNameFormat the first name format
      * @param middleNameFormat the middle name format
      * @param lastNameFormat the last name format
@@ -532,8 +532,8 @@ public class AbstractTransformerV2 {
         String lastName,
         String middleName,
         LocalDate dob,
-        String gender,
-        Map<String, Enumerations.AdministrativeGender> genderMap,
+        String sex,
+        Map<String, Enumerations.AdministrativeGender> sexMap,
         String firstNameFormat,
         String middleNameFormat,
         String lastNameFormat) {
@@ -541,8 +541,8 @@ public class AbstractTransformerV2 {
       this.lastName = lastName;
       this.middleName = middleName;
       this.dob = dob;
-      this.gender = gender;
-      this.genderMap = genderMap;
+      this.sex = sex;
+      this.sexMap = sexMap;
       this.firstNameFormat = firstNameFormat;
       this.middleNameFormat = middleNameFormat;
       this.lastNameFormat = lastNameFormat;
@@ -585,21 +585,21 @@ public class AbstractTransformerV2 {
     }
 
     /**
-     * Gets the {@link #gender}.
+     * Gets the {@link #sex}.
      *
-     * @return the gender
+     * @return the sex
      */
-    public String getGender() {
-      return gender;
+    public String getSex() {
+      return sex;
     }
 
     /**
-     * Gets the {@link #genderMap}.
+     * Gets the {@link #sexMap}.
      *
-     * @return the gender map
+     * @return the sex map
      */
-    public Map<String, Enumerations.AdministrativeGender> getGenderMap() {
-      return genderMap;
+    public Map<String, Enumerations.AdministrativeGender> getSexMap() {
+      return sexMap;
     }
 
     /**
