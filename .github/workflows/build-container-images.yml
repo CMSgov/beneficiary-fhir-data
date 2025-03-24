@@ -24,6 +24,12 @@ on:
         default: "*"
         type: string
         required: true
+      baseImagesVersion:
+        description: >-
+          Version string tag for the Base Images that will be used to build application images.
+          If omitted, the latest GitHub release version will be used.
+        type: string
+        required: false
   workflow_dispatch:
     inputs:
       branch:
@@ -51,6 +57,12 @@ on:
         default: "*"
         type: string
         required: true
+      baseImagesVersion:
+        description: >-
+          Version string tag for the Base Images that will be used to build application images.
+          If omitted, the latest GitHub release version will be used.
+        type: string
+        required: false
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
@@ -64,12 +76,21 @@ defaults:
     shell: bash
 
 jobs:
-  compute-matrix:
+  compute-matrix-and-version:
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      base-images-version: ${{ inputs.baseImagesVersion || steps.determine-latest-release.outputs.release }}
     steps:
       - uses: actions/checkout@v2
+
+      - name: Determine latest release version
+        if: inputs.baseImagesVersion == ''
+        id: determine-latest-release
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # Generates a JSON string array of JMESPath contains expression "fragments".
       # Given an input like:
@@ -109,11 +130,11 @@ jobs:
           inputFile: ".github/workflows/build_container_images_matrix.json"
 
   build-images:
-    if: needs.compute-matrix.outputs.matrix != '[]'
-    needs: compute-matrix
+    if: needs.compute-matrix-and-version.outputs.matrix != '[]'
+    needs: compute-matrix-and-version
     strategy:
       matrix:
-        image: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+        image: ${{ fromJson(needs.compute-matrix-and-version.outputs.matrix) }}
     runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
       - name: Validate Inputs
@@ -158,6 +179,9 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: true
+          build-args: |
+            registry_uri=${{ env.ECR_REPOSITORY_NAMESPACE }}
+            base_version=${{ needs.compute-matrix-and-version.outputs.base-images-version }}
           tags: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
           # AWS Lambda does not support multi-platform images, something that is enabled by default
           # by this Action via the "provenance" flag. Until AWS Lambda supports this feature
