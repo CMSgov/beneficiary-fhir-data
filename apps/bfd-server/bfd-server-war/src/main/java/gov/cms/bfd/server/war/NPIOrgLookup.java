@@ -28,7 +28,7 @@ public class NPIOrgLookup {
   /** Provider Entity. */
   public static String ENTITY_TYPE_CODE_PROVIDER = "1";
 
-  /** Organazation Entity. */
+  /** Organization Entity. */
   public static String ENTITY_TYPE_CODE_ORGANIZATION = "2";
 
   /** NPIData entities mapped to an NPI. */
@@ -46,6 +46,9 @@ public class NPIOrgLookup {
   /** True if this is a test instance. */
   private final boolean testInstance;
 
+  /** The query that will return the NPI Data for an NPI. */
+  private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi = :npi";
+
   /**
    * Constructor. If orgFileName can be successfully loaded, then this is treated as a test
    * instance. Otherwise, we can assume that this is a production instance.
@@ -54,8 +57,7 @@ public class NPIOrgLookup {
    */
   public NPIOrgLookup(
       @Value("${" + SpringConfiguration.PROP_ORG_FILE_NAME + "}") String orgFileName) {
-    InputStream npiDataStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
+    InputStream npiDataStream = getFileInputStream(orgFileName);
     if (npiDataStream != null) {
       initializeNpiMap(npiDataStream);
       testInstance = true;
@@ -64,18 +66,15 @@ public class NPIOrgLookup {
     }
   }
 
-  /** The query that will return the NPI Data for an NPI. */
-  private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi = :npi";
-
   private void initializeNpiMap() {
-    final InputStream npiStream = getFileInputStream();
+    final InputStream npiStream = getFileInputStream(TEST_NPI_FILENAME);
     initializeNpiMap(npiStream);
   }
 
   /**
    * Initializes the NPIData map with the test data.
    *
-   * @param dataStream The datastream to use for the map.
+   * @param dataStream The dataStream to use for the map.
    */
   private void initializeNpiMap(InputStream dataStream) {
     npiMap = new HashMap<>();
@@ -97,17 +96,18 @@ public class NPIOrgLookup {
   /**
    * Gets the input stream for the test data file.
    *
+   * @param filename The file to stream.
    * @return the input stream for the test file.
    */
-  private InputStream getFileInputStream() {
-    return Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_NPI_FILENAME);
+  private InputStream getFileInputStream(String filename) {
+    return Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
   }
 
   /**
    * Retrieves test data for a particular NPI.
    *
    * @param npi The npi to find.
-   * @return an the NPIData entity.
+   * @return the NPIData entity.
    */
   private Optional<NPIData> retrieveTestData(Optional<String> npi) {
     if (npiMap == null) {
