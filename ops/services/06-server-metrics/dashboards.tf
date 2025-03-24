@@ -59,8 +59,9 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
     "${path.module}/templates/bfd-server-dashboard.json.tftpl",
     merge({
       namespace = local.namespace
-      env       = local.env,
+      env       = local.env
       region    = local.region
+      service   = local.target_service
     }, local.client_ssls)
   )
 }
@@ -72,6 +73,8 @@ resource "aws_cloudwatch_dashboard" "bfd_dashboard_slos" {
     merge({
       namespace = local.namespace
       env       = local.env
+      region    = local.region
+      service   = local.target_service
     }, local.client_ssls)
   )
 }
