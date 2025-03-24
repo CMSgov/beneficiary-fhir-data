@@ -18,6 +18,6 @@ Terraservices are opinionated, top-level, _flat_ modules that aim to describe th
 
 ## Service Folder Naming Conventions
 
-In order to make Terraservice depdendency ordering more explicit, we have adopted a ordered prefix strategy starting at `01` and incrementing by 1 for each dependency layer, e.g. `01-base`, `02-config`, `03-cluster`, etc. This explicit ordering can be thought of as creating a tree, with each level of the tree indicating what services could be `apply`'d in parallel.
+In order to make Terraservice depdendency ordering more explicit, we have adopted a ordered prefix strategy starting at `01` and incrementing by 1 for each dependency layer, e.g. `01-base`, `02-config`, `03-cluster`, etc. Terraservices can exist at the same "layer" as each other, e.g.: `03-cluster`, `03-eft`, `03-database`, etc. This explicit ordering can be thought of as creating a tree, with each level of the tree indicating what services could be `apply`'d in parallel.
 
-Terraservices can exist at the same "layer" as each other, e.g.: `03-cluster`, `03-eft`, `03-database`, etc. This makes it obvious that these Terraservices have no depedencies on each other, and so can be `apply`'d in any order or at the same time.
+This ordering is strict with respect to our established environments (`test`, `prod-sbx`, `prod`), but some services may expose overrides or have defaults for ephemeral environments that make it possible to apply them without their dependent Terraservices having been `apply`'d (for example, specifying `db_environment_override` in an ephemeral `server` would allow an operator to skip applying `database`). Consult the `README` of the various services for more detail.
