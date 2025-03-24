@@ -58,6 +58,149 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "CoverageBase.BENE_MDCR_ENTLMT_STUS_CD",
+                "path": "CoverageBase.BENE_MDCR_ENTLMT_STUS_CD",
+                "label": "Medicare Entitlement Status code",
+                "definition": "The reason for entitlement or termination of a beneficiary's benefits during a period of coverage.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.DUAL_STUS_CD",
+                "path": "CoverageBase.DUAL_STUS_CD",
+                "label": "Medicare/Medicaid Dual Status Code",
+                "definition": "Medicare/Medicaid dual status code as of the date that the resource was generated.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_DUAL_TYPE_CD",
+                "path": "CoverageBase.BENE_DUAL_TYPE_CD",
+                "label": "Medicare/Medicaid Dual Type Code",
+                "definition": "Medicare/Medicaid dual type as of the date of resource generation.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_BUYIN_CD",
+                "path": "CoverageBase.BENE_BUYIN_CD",
+                "label": "Buy in Code",
+                "definition": "A code that indicates the reason for Part A/Part B state buy-in eligibility.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_MDCR_STUS_CD",
+                "path": "CoverageBase.BENE_MDCR_STUS_CD",
+                "label": "Medicare Status Code",
+                "definition": "This variable indicates how a beneficiary currently qualifies for Medicare.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_RNG_BGN_DT",
+                "path": "CoverageBase.BENE_RNG_BGN_DT",
+                "label": "Beneficiary Range Begin Date",
+                "definition": "THE PRIMARY BEGIN DATE FOR A BENEFICIARY DATE RANGE.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_RNG_END_DT",
+                "path": "CoverageBase.BENE_RNG_END_DT",
+                "label": "Beneficiary Range End Date",
+                "definition": "THE PRIMARY END DATE FOR A BENEFICIARY DATE RANGE.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.current_date",
+                "path": "CoverageBase.current_date",
+                "label": "Current Date",
+                "definition": "The current date. Ignore in DD creation. Used to determine status key.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.lastUpdated",
+                "path": "CoverageBase.lastUpdated",
+                "label": "Last Updated Date",
+                "definition": "The date the coverage information was last updated",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_MDCR_ENRLMT_RSN_CD",
+                "path": "CoverageBase.BENE_MDCR_ENRLMT_RSN_CD",
+                "label": "Beneficiary Enrollment Reason Code",
+                "definition": "The reason for a beneficiary's enrollment in Part A/Part B benefits.                ",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "CoverageBase.BENE_MDCR_ENTLMT_RSN_CD",
+                "path": "CoverageBase.BENE_MDCR_ENTLMT_RSN_CD",
+                "label": "Beneficiary Entitlement Reason Code",
+                "definition": "A code identifying the basis in determining a beneficiary's entitlement to Medicare benefits.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
