@@ -47,7 +47,30 @@ CREATE TABLE idr.beneficiary_history(
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
-    
+
+CREATE TABLE idr.beneficiary_election_period_usage (
+    bene_sk BIGINT NOT NULL,
+    cntrct_pbp_sk BIGINT NOT NULL,
+    bene_cntrct_num VARCHAR(5),
+    bene_pbp_num VARCHAR(3),
+    bene_elctn_enrlmt_disenrlmt_cd VARCHAR(1),
+    bene_elctn_aplctn_dt DATE,
+    bene_enrlmt_efctv_dt DATE,
+    idr_trans_efctv_ts TIMESTAMPTZ,
+    idr_trans_obslt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt)
+);
+
+CREATE TABLE idr.contract_pbp_number (
+    cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
+    cntrct_drug_plan_ind_cd VARCHAR(1),
+    cntrct_pbp_type_cd VARCHAR(2),
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
+);
+
 CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
@@ -58,4 +81,7 @@ CREATE TABLE idr.load_progress(
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
 SELECT bene_mbi_id FROM idr.beneficiary
 GROUP BY bene_mbi_id
-HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1
+HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
+
+-- required to refresh view with CONCURRENTLY
+CREATE UNIQUE INDEX ON idr.overshare_mbis (bene_mbi_id);
