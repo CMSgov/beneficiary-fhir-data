@@ -17,6 +17,20 @@ locals {
       [for k, v in data.aws_ssm_parameters_by_path.params : nonsensitive(v.values)]
     )
   }
+  ssm_config = zipmap(
+    [
+      for name in local.ssm_flattened_data.names :
+      replace(name, "/((non)*sensitive|${local.env})//", "")
+    ],
+    local.ssm_flattened_data.values
+  )
+
+  # Using lookup to ensure that this module can be used in Terraservices that may not have SSM
+  # configuration, or could be applied before SSM configuration exists at all
+  kms_key_alias           = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
+  kms_config_key_alias    = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
+  kms_config_key_primary  = try([one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration).primary_key.arn], [])
+  kms_config_key_replicas = try(one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration).replica_keys[*].arn, [])
 }
 
 data "aws_region" "current" {}
@@ -41,4 +55,14 @@ data "aws_ssm_parameters_by_path" "params" {
   recursive       = true
   path            = each.value
   with_decryption = true
+}
+
+data "aws_kms_key" "env_cmk" {
+  count  = local.kms_key_alias != null ? 1 : 0
+  key_id = local.kms_key_alias
+}
+
+data "aws_kms_key" "env_config_cmk" {
+  count  = local.kms_config_key_alias != null ? 1 : 0
+  key_id = local.kms_config_key_alias
 }
