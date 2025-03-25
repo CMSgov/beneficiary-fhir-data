@@ -151,8 +151,8 @@
                 ]
             },
             {
-                "id": "CoverageBase.current_date",
-                "path": "CoverageBase.current_date",
+                "id": "CoverageBase.currentDate",
+                "path": "CoverageBase.currentDate",
                 "label": "Current Date",
                 "definition": "The current date. Ignore in DD creation. Used to determine status key.",
                 "min": 0,
