@@ -30,7 +30,7 @@
   appliesTo:
     - PartA
     - PartB
-- inputPath: CoverageBase.current_date
+- inputPath: CoverageBase.currentDate
   appliesTo:
     - PartA
     - PartB
