@@ -102,7 +102,7 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
 
     //Add status! If today > end date and today > start date, active
     //Else, cancelled. 
-    src.current_date as currentDate -> tgt then{
+    src.currentDate as currentDate -> tgt then{
         src.BENE_RNG_END_DT as endDate -> tgt then{
             src.BENE_RNG_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
             src.BENE_RNG_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
