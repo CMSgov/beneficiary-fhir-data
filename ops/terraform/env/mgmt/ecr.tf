@@ -42,6 +42,7 @@ resource "aws_ecr_repository" "bfd" {
   }
 }
 
+#BFD-3965
 resource "aws_ecr_repository_policy" "bfd_repo_policy" {
   for_each = local.ecr_container_repositories
 
@@ -78,6 +79,7 @@ resource "aws_ecr_repository_policy" "bfd_repo_policy" {
   })
 }
 
+#BFD-3965
 resource "aws_ecr_lifecycle_policy" "bfd" {
     for_each = local.ecr_container_repositories
     repository = each.value
