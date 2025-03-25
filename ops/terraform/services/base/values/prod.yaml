@@ -152,7 +152,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/job/batch_size: "20"
 /bfd/${env}/pipeline/nonsensitive/rda/job/write_thread_count: "20"
 /bfd/${env}/pipeline/nonsensitive/rda/job/process_dlq: "true"
-/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: UNDEFINED
@@ -481,6 +481,11 @@
   clnTv2aEV8UuG1e6ceb43KdpMxJM/DVo03brksPEqKBe42vTa/5fVCSEy6M4CMdc
   NgIzEFpYbI1ODGAJ8fQv0TzOSHlUbEzG0e+/jw==
   -----END CERTIFICATE-----
+# TODO: Remove the /ecs/ part when ECS Fargate migration is complete
+/bfd/${env}/server/nonsensitive/ecs/capacity/min: 6
+/bfd/${env}/server/nonsensitive/ecs/capacity/max: 24
+/bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/breach_topic: bfd-prod-cloudwatch-alarms
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-prod-cloudwatch-alarms-slack-bfd-alerts
