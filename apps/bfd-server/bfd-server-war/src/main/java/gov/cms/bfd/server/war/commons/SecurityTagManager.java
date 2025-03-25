@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.sharedutils.TagCode;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -143,7 +144,7 @@ public final class SecurityTagManager {
    */
   public String getClaimId(Object entity) {
     if (entity == null) {
-      return null; // return null if the entity is null
+      return null;
     }
 
     return switch (entity) {
@@ -158,7 +159,7 @@ public final class SecurityTagManager {
       case SNFClaim snfClaim -> String.valueOf(snfClaim.getClaimId());
       case PartDEvent partDEvent -> String.valueOf(partDEvent.getEventId());
 
-      default -> null; // Return null for unsupported claim types
+      default -> throw new BadCodeMonkeyException("Invalid entity");
     };
   }
 }

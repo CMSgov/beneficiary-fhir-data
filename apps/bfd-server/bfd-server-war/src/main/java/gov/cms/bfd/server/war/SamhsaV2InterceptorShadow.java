@@ -49,28 +49,26 @@ public class SamhsaV2InterceptorShadow {
   public void logMissingClaim(
       ClaimWithSecurityTags<?> claimWithSecurityTags, boolean hasSamhsaData) {
 
-    // Get security tags from the claim entity
     List<Coding> securityTags =
         securityTagManager.getClaimSecurityLevel(claimWithSecurityTags.getSecurityTags());
 
     // Check the redaction status of the interceptor against the SAMHSA exclusion flag
-    boolean toRedact = v2SamhsaConsentInterceptor.shouldRedactResource(securityTags);
+    boolean hasSamhsaDataV2 = v2SamhsaConsentInterceptor.shouldRedactResource(securityTags);
 
-    // If redaction status doesn't match the SAMHSA exclusion flag, log the claim
-    if (toRedact != hasSamhsaData) {
+    if (hasSamhsaDataV2 != hasSamhsaData) {
       String claimId = securityTagManager.getClaimId(claimWithSecurityTags.getClaimEntity());
-      String claim =
-          claimWithSecurityTags
-              .getClaimEntity()
-              .getClass()
-              .getSimpleName(); // Add class type for context
+      String claimClass = claimWithSecurityTags.getClaimEntity().getClass().getSimpleName();
 
-      // Logging the error with better message formatting and more context
+      // Identify which flag has the mismatch
+      String missingSource = (hasSamhsaDataV2 ? "hasSamhsaData" : "hasSamhsaDataV2");
+
+      // Log the mismatch between the old and new SAMHSA filters
       logger.error(
-          "Samhsa: claim IDs not matching between old SAMHSA filter and new SAMHSA 2.0 - "
-              + "Claim ID: {} (Class: {})",
+          "Samhsa: Claim ID mismatch between old SAMHSA filter (hasSamhsaData) and new SAMHSA 2.0 (hasSamhsaDataV2) - "
+              + "Claim ID: {} (Class: {}) - Missing in: {}",
           claimId,
-          claim);
+          claimClass,
+          missingSource);
     }
   }
 
@@ -83,28 +81,26 @@ public class SamhsaV2InterceptorShadow {
   public void logMissingClaimV1(
       ClaimWithSecurityTags<?> claimWithSecurityTags, boolean hasSamhsaData) {
 
-    // Get security tags from the claim entity
     List<org.hl7.fhir.dstu3.model.Coding> securityTags =
         securityTagManager.getClaimSecurityLevelDstu3(claimWithSecurityTags.getSecurityTags());
 
     // Check the redaction status of the interceptor against the SAMHSA exclusion flag
-    boolean toRedact = v1SamhsaConsentInterceptor.shouldRedactResource(securityTags);
+    boolean hasSamhsaDataV2 = v1SamhsaConsentInterceptor.shouldRedactResource(securityTags);
 
-    // If redaction status doesn't match the SAMHSA exclusion flag, log the claim
-    if (toRedact != hasSamhsaData) {
+    if (hasSamhsaDataV2 != hasSamhsaData) {
       String claimId = securityTagManager.getClaimId(claimWithSecurityTags.getClaimEntity());
-      String claim =
-          claimWithSecurityTags
-              .getClaimEntity()
-              .getClass()
-              .getSimpleName(); // Add class type for context
+      String claimClass = claimWithSecurityTags.getClaimEntity().getClass().getSimpleName();
 
-      // Logging the error with better message formatting and more context
+      // Identify which flag has the mismatch
+      String missingSource = (hasSamhsaDataV2 ? "hasSamhsaData" : "hasSamhsaDataV2");
+
+      // Log the mismatch between the old and new SAMHSA filters
       logger.error(
-          "Samhsa: claim IDs not matching between old SAMHSA filter and new SAMHSA 2.0 - "
-              + "Claim ID: {} (Class: {})",
+          "Samhsa: Claim ID mismatch between old SAMHSA filter (hasSamhsaData) and new SAMHSA 2.0 (hasSamhsaDataV2) - "
+              + "Claim ID: {} (Class: {}) - Missing in: {}",
           claimId,
-          claim);
+          claimClass,
+          missingSource);
     }
   }
 }
