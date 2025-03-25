@@ -59,5 +59,9 @@
     "family_name_atndg":"Hello, world!",
     "CLM_ATNDG_PRVDR_NPI_NUM":"1234123412",
     "family_name_oprtg":"friendly provider last name here",
-    "CLM_OPRTG_PRVDR_NPI_NUM":"1987654321"
+    "CLM_OPRTG_PRVDR_NPI_NUM":"1987654321",
+    "family_name_othr":"Monster",
+    "CLM_OTHR_PRVDR_NPI_NUM":"1987651321",
+    "family_name_rndrg":"Dazed",
+    "CLM_RNDRG_PRVDR_NPI_NUM":"2987651321"
 }

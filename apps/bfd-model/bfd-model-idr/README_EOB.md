@@ -26,7 +26,7 @@ java -jar validator_cli.jar sample-data/EOBBaseSample.json \
   -ig StructureDefinitions/Source/DiagnosisComponent.json \
   -ig StructureDefinitions/Source/SupportingInfoComponent.json \
   -ig StructureDefinitions/Source/LineItemComponent.json \
-  -ig hl7.fhir.us.carin-bb#2.0.0 \
+  -ig hl7.fhir.us.carin-bb#2.1.0 \
   -ig maps/EOB-Helper.map \
   -ig maps/EOB-SupportingInfo-Helper.map \
   -ig maps/EOB-Item-Institutional-Helper.map

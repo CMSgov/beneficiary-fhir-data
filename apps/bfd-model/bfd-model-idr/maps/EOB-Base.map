@@ -23,7 +23,6 @@ imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper"
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_FINL_ACTN_IND as fa_ind -> tgt.status = translate(fa_ind,"https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#FinalActionIndicator",'code') "Set status";
 
-    
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
       src.CLM_TYPE_CD as type_cd -> tgtCC.coding = translate(type_cd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#ClM_TYPE_CD','coding') "translate code";
@@ -56,7 +55,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src -> tgtIdentifier.system = "https://bluebutton.cms.gov/resources/variables/CLM_CNTL_NUM" "set system";
       src.CLM_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
     } "Add CLM_CNTL_NUM as identifier";
-
 
     src -> tgt.billablePeriod = create('Period') as billablePeriod then {
       src.CLM_FROM_DT as from_date -> billablePeriod.start = from_date "Set from date";
@@ -126,7 +124,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
 
 
-    //TODO: Provider -> organization for institutional, Practitioner for others
+    //For institutional claims, the provider will be an institution. For others, it will generally be a practitioner.
     src.CLM_TYPE_CD as type_cd where(type_cd > 4 and type_cd < 70) -> tgt.contained = create('Organization') as tgtOrg then createProviderOrg(src,tgtOrg) "Create contained org."; 
     src.CLM_TYPE_CD as type_cd where(type_cd > 4 and type_cd < 70) -> tgt.provider = create('Reference') as tgtRef, 
     tgtRef.reference="#provider-org" "Set reference to contained provider org";
@@ -157,6 +155,10 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
    // src.careTeamComponents as careTeamComponent -> tgt as careTeamTarget then addCareTeamMembers(src, careTeamTarget) "Add care team";
 
     src.CLM_ATNDG_PRVDR_NPI_NUM as prvdr_npi -> tgt then addAttendingCareTeamMember(src,tgt) "Add attending";
+    src.CLM_OPRTG_PRVDR_NPI_NUM as prvdr_npi -> tgt then addOperatingCareTeamMember(src,tgt) "Add operating";
+    src.CLM_OTHR_PRVDR_NPI_NUM as prvdr_npi -> tgt then addOtherCareTeamMember(src,tgt) "Add other";
+    //The below is commented out pending feedback on constraint validity in C4BB for the Inpatient Institutional Profile.
+    //src.CLM_RNDRG_PRVDR_NPI_NUM as prvdr_npi -> tgt then addRenderingCareTeamMember(src,tgt) "Add rendering";
 
     //Add header level adjudication.
     //NOTE: removed to comply with C4BB Profile.
@@ -577,7 +579,7 @@ group addAttendingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
 }
 group addOperatingCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
   src -> tgt.contained = create('Practitioner') as tgtPract then {
-    src -> tgtPract.id = "careteam-provider-1" "Set practitioner id";
+    src -> tgtPract.id = "careteam-provider-2" "Set practitioner id";
     src -> tgtPract.meta = create('Meta') as tgtMeta then {
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
@@ -601,15 +603,15 @@ group addOperatingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
         tgtCoding.code="operating" "Add role";
       } "Add coding";
     } "Add codeableConcept for role";
-    src -> tgtBBElement.sequence = "1" "Set sequence";
+    src -> tgtBBElement.sequence = "2" "Set sequence";
     src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-      src -> tgtReference.reference = "#careteam-provider-1" "Add practitioner";
+      src -> tgtReference.reference = "#careteam-provider-2" "Add practitioner";
     } "Add practitioner reference to EOB";
   } "Add CareTeam Element";
 }
 group addOtherCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
   src -> tgt.contained = create('Practitioner') as tgtPract then {
-    src -> tgtPract.id = "careteam-provider-1" "Set practitioner id";
+    src -> tgtPract.id = "careteam-provider-3" "Set practitioner id";
     src -> tgtPract.meta = create('Meta') as tgtMeta then {
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
@@ -633,15 +635,16 @@ group addOtherCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: B
         tgtCoding.code="otheroperating" "Add role";
       } "Add coding";
     } "Add codeableConcept for role";
-    src -> tgtBBElement.sequence = "1" "Set sequence";
+    src -> tgtBBElement.sequence = "3" "Set sequence";
     src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-      src -> tgtReference.reference = "#careteam-provider-1" "Add practitioner";
+      src -> tgtReference.reference = "#careteam-provider-3" "Add practitioner";
     } "Add practitioner reference to EOB";
   } "Add CareTeam Element";
 }
+//Note, this may need to be changed to an Organization situationally. C4BB defines it as constrained to an Organization, which doesn't make sense at first glance. 
 group addRenderingCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
   src -> tgt.contained = create('Practitioner') as tgtPract then {
-    src -> tgtPract.id = "careteam-provider-1" "Set practitioner id";
+    src -> tgtPract.id = "careteam-provider-4" "Set practitioner id";
     src -> tgtPract.meta = create('Meta') as tgtMeta then {
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
       src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
@@ -665,9 +668,9 @@ group addRenderingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
         tgtCoding.code="rendering" "Add role";
       } "Add coding";
     } "Add codeableConcept for role";
-    src -> tgtBBElement.sequence = "1" "Set sequence";
+    src -> tgtBBElement.sequence = "4" "Set sequence";
     src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-      src -> tgtReference.reference = "#careteam-provider-1" "Add practitioner";
+      src -> tgtReference.reference = "#careteam-provider-4" "Add practitioner";
     } "Add practitioner reference to EOB";
   } "Add CareTeam Element";
 }

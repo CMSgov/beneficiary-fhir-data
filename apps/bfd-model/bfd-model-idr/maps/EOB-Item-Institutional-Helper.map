@@ -42,7 +42,6 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Add state";
     
     src.REV_CNTR_DT as rev_ctr_date -> tgt.servicedDate = rev_ctr_date "add revenue center date";
-   
 
 }
 
@@ -306,9 +305,6 @@ group addAdjudicationRateAmt(source src: String, target tgt: BackboneElement){
     } "Set value";
 }
 
-
-
-
 group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
     src.CLM_LINE_REV_CTR_CD as rev_ctr_code -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/rev_cntr" "set system";
@@ -319,13 +315,11 @@ group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
         src -> tgtCoding.code=rev_ctr_code "set rev center code";
     } "Add revenue center coding";
 
-
     //https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd
     src.CLM_DDCTBL_COINSRNC_CD as ddctbl_cd -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd" "set system";
         src -> tgtCoding.code=ddctbl_cd "set deductible/coinsurance code";
     } "Add deductible code";
-
 }
 
 group addModifier(source src: LineItemComponent, target tgt: CodeableConcept){
@@ -384,15 +378,7 @@ group addModifier(source src: LineItemComponent, target tgt: CodeableConcept){
 
 }
 
-
-
-
 group addProductOrService(source src: LineItemComponent, target tgt: CodeableConcept){
-    /*src -> tgt.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system="HI" "set system";
-        src -> tgtCoding.code="NO" "set code";
-    } "Add codings";
-    */
     src.CLM_LINE_HCPCS_CD as hcpcs_cd where(hcpcs_cd.length()=5 and hcpcs_cd.substring(0,1).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
         src -> tgtCoding.code=hcpcs_cd "set code";
@@ -410,7 +396,6 @@ group addProductOrService(source src: LineItemComponent, target tgt: CodeableCon
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes" "set system";
         src -> tgtCoding.code=hipps_cd "set code";
     } "Add codings";
-
 }
 
 group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneElement){

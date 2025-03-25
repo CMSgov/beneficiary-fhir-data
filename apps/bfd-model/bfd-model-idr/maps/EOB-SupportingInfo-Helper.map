@@ -17,11 +17,10 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.COL_NAME as category where category="CLM_ACTV_CARE_THRU_DT" -> tgt then addNCHThroughDate(src, tgt) "Add processing date";
     src.COL_NAME as category where category="CLM_NCVRD_FROM_DT" -> tgt then addNCStayFromDate(src, tgt) "Add processing date";
     src.COL_NAME as category where category="CLM_NCVRD_THRU_DT" -> tgt then addNCStayToDate(src, tgt) "Add processing date";
-    //CLM_DSCHRG_DT
+    //CLM_DSCHRG_DT? - Consider in the future.
     src.COL_NAME as category where category="CLM_MDCR_EXHSTD_DT" -> tgt then addBenefitsExhaustedDate(src, tgt) "Add benefits exhausted date";
-
-
 }
+
 group addAdmissionPeriod(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.timing = create('Period') as tgtPeriod then {
         src.VALUE as startValue -> tgtPeriod.start = evaluate(startValue,substring(0,10)) "set start";
@@ -39,7 +38,6 @@ group addClaimReceivedDate(source src: SupportingInfoComponent, target tgt: Back
     } "set category";
 }
 group addPointOfOrigin(source src: SupportingInfoComponent, target tgt: BackboneElement){
-    //src.VALUE as dateReceived -> tgt.timing = cast(dateReceived,"date") "set date";
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src.COL_NAME as category -> tgtCC.coding = translate(category,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_SupportingInfo_Categories','coding') "set coding";
     } "set category";
@@ -120,8 +118,6 @@ group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: Ba
         tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/information",
         tgtCoding.code="nch_blood_pnts_frnshd_qty" "set target coding";
     } "set category";
-
-
     src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
         src.VALUE as val -> tgtQuantity.value = cast(val,"decimal") "Set value";
         src -> tgtQuantity.system="http://unitsofmeasure.org" "Set system";
@@ -205,7 +201,6 @@ group addNCHThroughDate(source src: SupportingInfoComponent, target tgt: Backbon
         } "Add coding";
     } "Add CC";
 }
-
 group addNCStayFromDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding,
