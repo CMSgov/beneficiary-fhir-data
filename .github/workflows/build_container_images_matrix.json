@@ -12,6 +12,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-mgmt-mount-certstores",
+    "dockerfile": "ops/images/bfd-mgmt-mount-certstores/Dockerfile",
+    "contextDir": "ops/images/bfd-mgmt-mount-certstores",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-mgmt-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
     "contextDir": "apps/utils/locust_tests",
