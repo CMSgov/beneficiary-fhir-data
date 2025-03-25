@@ -5,4 +5,4 @@ jobs:
     runs-on:
       - codebuild-bfd-mgmt-gha-sonarqube-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - run: curl https://sonarqube.cloud.cms.gov
+      - run: curl https://sonarqube.cloud.cms.gov/
