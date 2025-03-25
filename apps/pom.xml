@@ -1370,6 +1370,26 @@
                 </repository>
             </distributionManagement>
         </profile>
+        <profile>
+            <id>gha</id>
+            <properties>
+                <jib.skip>true</jib.skip>
+                <maven.build.cache.enabled>false</maven.build.cache.enabled>
+                <maven.source.skip>true</maven.source.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.jacoco.skip>false</maven.jacoco.skip>
+                <jacoco.skip>false</jacoco.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+                <apidocgen.skip>false</apidocgen.skip>
+                <bfdOps.skip>false</bfdOps.skip>
+            </properties>
+            <distributionManagement>
+                <repository>
+                    <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
+                    <url>${env.CA_REPOSITORY_ENDPOINT}</url>
+                </repository>
+            </distributionManagement>
+        </profile>
     </profiles>
 
 </project>
