@@ -88,3 +88,9 @@ output "default_iam_path" {
   sensitive   = false
   value       = "/delegatedadmin/developer/"
 }
+
+output "default_permissions_boundary_arn" {
+  description = "ARN of the default permissions boundary for IAM Roles."
+  sensitive   = false
+  value       = data.aws_iam_policy.permissions_boundary.arn
+}

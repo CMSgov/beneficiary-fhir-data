@@ -66,3 +66,7 @@ data "aws_kms_key" "env_config_cmk" {
   count  = local.kms_config_key_alias != null ? 1 : 0
   key_id = local.kms_config_key_alias
 }
+
+data "aws_iam_policy" "permissions_boundary" {
+  name = "ct-ado-poweruser-permissions-boundary-policy"
+}
