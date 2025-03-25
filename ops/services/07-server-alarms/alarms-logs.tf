@@ -46,7 +46,7 @@ resource "aws_cloudwatch_metric_alarm" "server_log_availability_1hr" {
   namespace   = "AWS/Logs"
 
   dimensions = {
-    LogGroupName = "/aws/ecs/bfd-${local.env}-cluster/${local.target_service}/${local.target_service}/access"
+    LogGroupName = data.aws_cloudwatch_log_group.server_access.name
   }
 
   alarm_actions = local.logs_alert_arn
@@ -74,7 +74,7 @@ resource "aws_cloudwatch_metric_alarm" "server_query_logging_listener_warning" {
   namespace   = local.namespace
 
   dimensions = {
-    LogGroupName = "/aws/ecs/bfd-${local.env}-cluster/${local.target_service}/${local.target_service}/messages"
+    LogGroupName = data.aws_cloudwatch_log_group.server_messages.name
   }
 
   # NOTE: alarm should always be a low severity notification

@@ -370,6 +370,9 @@
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/mgmt/common/sensitive/slack_webhook_bfd_test
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
