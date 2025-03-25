@@ -239,10 +239,6 @@ resource "aws_ecs_task_definition" "server" {
             value = local.server_truststore_path
           },
           {
-            name  = "BFD_PATHS_FILES_WAR"
-            value = "/app/bfd-server.war"
-          },
-          {
             name  = "BFD_PORT"
             value = local.server_port
           },

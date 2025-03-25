@@ -57,51 +57,6 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <!-- Copy the BFD war file into a directory for use in docker build. -->
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>bfd-server-war</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>war</type>
-                                    <outputDirectory>${project.build.directory}/war-file</outputDirectory>
-                                    <destFileName>bfd-server.war</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                        <id>server-copy-war-for-docker</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <!-- Unpack the server launcher assembly for use in docker build. -->
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>bfd-server-launcher</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/server-launcher</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                        <id>server-unpack-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <!-- Used to build docker image for the project. -->
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
@@ -113,25 +68,17 @@
                         </tags>
                     </to>
                     <container>
+                        <environment>
+                            <BFD_PATHS_FILES_WAR>/app/libs/bfd-server-war-${project.version}.war</BFD_PATHS_FILES_WAR>
+                        </environment>
+                        <jvmFlags>
+                            <jvmFlag>-Dorg.jboss.logging.provider=slf4j</jvmFlag>
+                        </jvmFlags>
                         <mainClass>gov.cms.bfd.server.launcher.DataServerLauncherApp</mainClass>
                         <ports>
                             <port>6500</port>
                         </ports>
                     </container>
-                    <extraDirectories>
-                        <paths>
-                            <!-- Copies war file into /app directory in container -->
-                            <path>
-                                <from>${project.build.directory}/war-file</from>
-                                <into>/app</into>
-                            </path>
-                            <!-- Copies Launcher artifacts into /app directory in container -->
-                            <path>
-                                <from>${project.build.directory}/server-launcher</from>
-                                <into>/app</into>
-                            </path>
-                        </paths>
-                    </extraDirectories>
                 </configuration>
                 <executions>
                     <execution>
