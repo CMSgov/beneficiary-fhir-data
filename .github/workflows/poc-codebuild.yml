@@ -1,8 +1,31 @@
 name: SonarQube
 on: [push]
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+defaults:
+  run:
+    shell: bash
 jobs:
   SonarQube:
     runs-on:
       - codebuild-bfd-mgmt-gha-sonarqube-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - run: curl https://sonarqube.cloud.cms.gov/
+      - name: Configure AWS credentials
+        id: config-aws-creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: sonar-qube
+          aws-region: us-east-1
+      - name: Mask sensitive AWS data
+        id: mask-sensitive-aws-data
+        run: |
+          caller_id="$(aws sts get-caller-identity)"
+          account_num="$(jq -r '.Account' <<<${caller_id})"
+          role_arn="$(jq -r '.Arn' <<<${caller_id})"
+          user_id="$(jq -r '.UserId' <<<${caller_id})"
+
+          echo "::add-mask::$account_num"
+          echo "::add-mask::$role_arn"
+          echo "::add-mask::$user_id"
