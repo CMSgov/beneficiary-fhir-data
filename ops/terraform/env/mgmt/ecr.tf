@@ -97,6 +97,19 @@ resource "aws_ecr_lifecycle_policy" "bfd" {
           action = {
             type = "expire"
           }
+        },
+        {
+          rulePriority = 2
+          description = "Expire images older than 90 days"
+          selection = {
+            tagStatus = "tagged"
+            countType = "sinceImagePushed"
+            countUnit = "days"
+            countNumber = 90
+          }
+          action = {
+            type = "expire"
+          }
         }
       ]
     })
