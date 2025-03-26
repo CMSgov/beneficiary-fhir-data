@@ -1,8 +1,16 @@
 variable "db_environment_override" {
   default     = null
-  description = "For use in database maintenance contexts only."
+  description = "For use in database maintenance contexts or in ephemeral environments only"
   sensitive   = false
   type        = string
+}
+
+variable "ephemeral_regression_override" {
+  default     = false
+  description = "Enables the execution and creation of the regression-wrapper during CodeDeploy deployment. Applies _only_ to ephemeral environments, ignored in established environments"
+  sensitive   = false
+  nullable    = false
+  type        = bool
 }
 
 variable "certstores_repository_override" {

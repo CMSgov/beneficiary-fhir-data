@@ -2,8 +2,8 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   environment_name     = terraform.workspace
-  service              = "server"
-  relative_module_root = "ops/services/server"
+  service              = "locust"
+  relative_module_root = "ops/services/locust"
 }
 
 locals {
@@ -23,13 +23,16 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
-  azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  app_subnet_ids = [for _, v in data.aws_subnet.app_subnets : v.id]
-  dmz_subnet_ids = [for _, v in data.aws_subnet.dmz_subnets : v.id]
-
-  # TODO: Remove "ecs" from the name prefix once we accept this as the new server service
-  name_prefix = "bfd-${local.env}-${local.service}-ecs"
-
-  green_state = "green"
-  blue_state  = "blue"
+  name_prefix = "bfd-${local.env}-${local.service}"
 }
+
+data "aws_iam_policy_document" "lambda_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
