@@ -25,7 +25,6 @@ jobs:
           account_num="$(jq -r '.Account' <<<${caller_id})"
           role_arn="$(jq -r '.Arn' <<<${caller_id})"
           user_id="$(jq -r '.UserId' <<<${caller_id})"
-
           echo "::add-mask::$account_num"
           echo "::add-mask::$role_arn"
           echo "::add-mask::$user_id"
