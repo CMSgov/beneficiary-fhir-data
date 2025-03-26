@@ -7,6 +7,7 @@ locals {
     "bfd-mgmt-server-load-controller",
     "bfd-mgmt-server-load-node",
     "bfd-mgmt-server-regression",
+    "bfd-mgmt-run-locust",
     "bfd-mgmt-synthea-generation",
     # base container image repositories
     "bfd-mgmt-base-python",
