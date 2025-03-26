@@ -1,0 +1,256 @@
+- inputPath: ExplanationOfBenefitBase.CLM_UNIQ_ID
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_FINL_ACTN_IND
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_TYPE_CD
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_CNTL_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_BENE_XREF_EFCTV_SK
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_FROM_DT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_THRU_DT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_EFCTV_DT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_SRC_ID
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.PRVDR_BLG_PRVDR_NPI_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_QUERY_CD
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_NCVRD_CHRG_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_MDCR_DDCTBL_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_NRLN_RIC_CD
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_OPRTNL_DSPRTNT_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_CMS_PROC_DT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_PMT_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.family_name_atndg
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_ATNDG_PRVDR_NPI_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.family_name_oprtg
+  appliesTo:
+    - Inpatient
+- inputPath: ExplanationOfBenefitBase.CLM_OPRTG_PRVDR_NPI_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: DiagnosisComponent.CLM_VAL_SQNC_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: DiagnosisComponent.ROW_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: DiagnosisComponent.CLM_DGNS_CD
+  appliesTo:
+    - Inpatient
+- inputPath: DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND
+  appliesTo:
+    - Inpatient
+- inputPath: DiagnosisComponent.CLM_PROD_TYPE_CD
+  appliesTo:
+    - Inpatient
+- inputPath: DiagnosisComponent.CLM_POA_IND
+  appliesTo:
+    - Inpatient
+- inputPath: ProcedureComponent.CLM_VAL_SQNC_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: ProcedureComponent.CLM_PRCDR_PRFRM_DT
+  appliesTo:
+    - Inpatient
+- inputPath: ProcedureComponent.CLM_PRCDR_CD
+  appliesTo:
+    - Inpatient
+- inputPath: ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_NUM
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_HCPCS_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+    - DME
+    - Carrier
+- inputPath: LineItemComponent.CLM_REV_APC_HIPPS_CD
+  appliesTo:
+    - Outpatient
+    - HHA
+- inputPath: LineItemComponent.CLM_LINE_NDC_CD
+  appliesTo:
+    - Outpatient
+- inputPath: LineItemComponent.CLM_LINE_NDC_QTY
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.CLM_LINE_SRVC_UNIT_QTY
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.CLM_LINE_REV_CTR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.CLM_DDCTBL_COINSRNC_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.HCPCS_1_MDFR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - Carrier
+    - DME
+- inputPath: LineItemComponent.HCPCS_2_MDFR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - Carrier
+    - DME
+- inputPath: LineItemComponent.HCPCS_3_MDFR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - Carrier
+    - DME
+- inputPath: LineItemComponent.HCPCS_4_MDFR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - Carrier
+    - DME
+- inputPath: LineItemComponent.HCPCS_5_MDFR_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - Carrier
+    - DME
+- inputPath: LineItemComponent.CLM_LINE_INSTNL_RATE_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD
+  appliesTo:
+    - Outpatient
+    - HHA
+- inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD
+  appliesTo:
+    - Outpatient
+- inputPath: LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD
+  appliesTo:
+    - Outpatient
+- inputPath: LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD
+  appliesTo:
+    - Outpatient
+- inputPath: LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD
+  appliesTo:
+    - Outpatient
+- inputPath: LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+- inputPath: LineItemComponent.CLM_LINE_PRVDR_PMT_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+- inputPath: LineItemComponent.CLM_LINE_BENE_PMT_AMT
+  appliesTo:
+    - Outpatient
+- inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.GEO_FAC_SSA_STATE_CD
+  appliesTo:
+    - Inpatient
+- inputPath: LineItemComponent.REV_CNTR_DT
+  appliesTo:
+    - Outpatient
+    - Hospice
+    - HHA
