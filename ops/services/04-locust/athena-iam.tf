@@ -120,6 +120,16 @@ data "aws_iam_policy_document" "locust_stats_glue_trigger_glue" {
     actions   = ["glue:StartCrawler"]
     resources = [aws_glue_crawler.locust_stats.arn]
   }
+
+  statement {
+    sid     = "AllowGetGluePartitions"
+    actions = ["glue:GetPartition"]
+    resources = [
+      "arn:aws:glue:${local.region}:${local.account_id}:catalog",
+      "arn:aws:glue:${local.region}:${local.account_id}:database/${local.locust_stats_db_name}",
+      "arn:aws:glue:${local.region}:${local.account_id}:table/${local.locust_stats_db_name}/${local.locust_stats_table}"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "locust_stats_glue_trigger_glue" {

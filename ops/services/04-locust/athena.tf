@@ -81,6 +81,7 @@ resource "aws_lambda_function" "locust_stats_glue_trigger" {
 
   filename         = data.archive_file.locust_stats_glue_trigger_src.output_path
   source_code_hash = data.archive_file.locust_stats_glue_trigger_src.output_base64sha256
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:7"]
   architectures    = ["arm64"]
   handler          = "${local.glue_trigger_lambda_src}.handler"
   memory_size      = 128
@@ -90,7 +91,10 @@ resource "aws_lambda_function" "locust_stats_glue_trigger" {
 
   environment {
     variables = {
-      CRAWLER_NAME = aws_glue_crawler.locust_stats.name
+      CRAWLER_NAME  = aws_glue_crawler.locust_stats.name
+      DATABASE_NAME = local.locust_stats_db_name
+      TABLE_NAME    = local.locust_stats_table
+      PARTITIONS    = "hash"
     }
   }
 
