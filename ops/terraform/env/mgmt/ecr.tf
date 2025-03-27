@@ -1,6 +1,8 @@
 locals {
-  #Admin Role with Access to delete images
-  admin_role = "admin_role"
+  #Defined Admin Roles with Access to perform destructive actions on the repository
+  admin_roles_arn = toset([
+    aws_iam_role.github_actions.arn
+  ])
 
   ecr_container_repositories = toset([
     # utility container image repositories
@@ -81,9 +83,7 @@ resource "aws_ecr_repository_policy" "bfd_repo_policy" {
         ],
         Condition = {
           "ArnNotEquals" = {
-            "aws:PrincipalArn" = [
-              "arn:aws:iam::${local.account_id}:role/${local.admin_role}",
-            ]
+            "aws:PrincipalArn" = local.admin_roles_arn 
           }
         }
       },
