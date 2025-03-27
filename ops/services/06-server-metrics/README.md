@@ -10,10 +10,10 @@ The resources created by the following Terraservices _must_ exist in the current
 - `server`
 
 <!-- BEGIN_TF_DOCS -->
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
 ## Requirements
 
@@ -21,34 +21,31 @@ The resources created by the following Terraservices _must_ exist in the current
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Inputs
 
 No inputs.
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Resources
 
 | Name | Type |
@@ -77,12 +74,11 @@ No inputs.
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecs_cluster) | data source |
 | [external_external.client_ssls](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Outputs
 
 No outputs.
