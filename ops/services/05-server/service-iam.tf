@@ -6,16 +6,16 @@ data "aws_iam_policy_document" "certstores_s3" {
       "s3:ListBucket"
     ]
     resources = [
-      aws_s3_bucket.certstores.arn,
-      "${aws_s3_bucket.certstores.arn}/${local.keystore_s3_key}",
-      "${aws_s3_bucket.certstores.arn}/${local.truststore_s3_key}"
+      module.bucket_certstores.bucket.arn,
+      "${module.bucket_certstores.bucket.arn}/${local.keystore_s3_key}",
+      "${module.bucket_certstores.bucket.arn}/${local.truststore_s3_key}"
     ]
   }
 }
 
 resource "aws_iam_policy" "certstores_s3" {
   name        = "${local.name_prefix}-certstores-s3-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to pull certstores from S3"
   policy      = data.aws_iam_policy_document.certstores_s3.json
 }
@@ -32,13 +32,13 @@ data "aws_iam_policy_document" "kms" {
       "kms:ListGrants",
       "kms:RevokeGrant"
     ]
-    resources = [data.aws_kms_alias.env_cmk.target_key_arn]
+    resources = [local.env_key_arn]
   }
 }
 
 resource "aws_iam_policy" "kms" {
   name        = "${local.name_prefix}-kms-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to use the ${local.env} CMK"
   policy      = data.aws_iam_policy_document.kms.json
 }
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "rds" {
 
 resource "aws_iam_policy" "rds" {
   name        = "${local.name_prefix}-rds-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to describe RDS DB Instances"
   policy      = data.aws_iam_policy_document.rds.json
 }
@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "logs" {
 
 resource "aws_iam_policy" "logs" {
   name        = "${local.name_prefix}-logs-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} firelens sidecar container to submit logs from the ${local.service} container"
   policy      = data.aws_iam_policy_document.logs.json
 }
@@ -90,13 +90,13 @@ data "aws_iam_policy_document" "ssm_params" {
   statement {
     sid       = "AllowDecryptParametersWithConfigCMK"
     actions   = ["kms:Decrypt"]
-    resources = [data.aws_kms_alias.env_config_cmk.target_key_arn]
+    resources = local.env_config_key_arns
   }
 }
 
 resource "aws_iam_policy" "ssm_params" {
   name        = "${local.name_prefix}-ssm-params-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to get required SSM parameeters"
   policy      = data.aws_iam_policy_document.ssm_params.json
 }
@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "ecs_exec" {
 
 resource "aws_iam_policy" "ecs_exec" {
   name        = "${local.name_prefix}-ecs-exec-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to use ECS Exec"
   policy      = data.aws_iam_policy_document.ecs_exec.json
 }
@@ -133,10 +133,10 @@ data "aws_iam_policy_document" "ecs_service_role_assume" {
 
 resource "aws_iam_role" "service_role" {
   name                  = "${local.name_prefix}-service-role"
-  path                  = local.cloudtamer_iam_path
+  path                  = local.iam_path
   description           = "Role for the ${local.env} ${local.service} ECS service containers"
   assume_role_policy    = data.aws_iam_policy_document.ecs_service_role_assume.json
-  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
+  permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
 
@@ -170,10 +170,10 @@ data "aws_iam_policy_document" "ecs_task_execution_role_assume" {
 
 resource "aws_iam_role" "execution_role" {
   name                  = "${local.name_prefix}-execution-role"
-  path                  = local.cloudtamer_iam_path
+  path                  = local.iam_path
   description           = "${local.env} ${local.service} ECS task execution role"
   assume_role_policy    = data.aws_iam_policy_document.ecs_task_execution_role_assume.json
-  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
+  permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
 
