@@ -1,8 +1,7 @@
 locals {
-  locust_stats_crawler_name = "${local.locust_stats_db_name}-crawler"
   locust_stats_table        = "data"
   locust_stats_db_name      = replace(module.bucket_athena.bucket.bucket, "-", "_")
-  locust_stats_s3_path      = "${module.bucket_athena.bucket.id}/databases/${local.locust_stats_db_name}/${local.locust_stats_table}"
+  locust_stats_crawler_name = "${replace(local.locust_stats_db_name, "_", "-")}-crawler"
 
   glue_trigger_lambda_name      = "locust-stats-glue-trigger"
   glue_trigger_lambda_full_name = "${local.name_prefix}-${local.glue_trigger_lambda_name}"
@@ -50,7 +49,7 @@ resource "aws_glue_crawler" "locust_stats" {
   }
 
   s3_target {
-    path = "s3://${local.locust_stats_s3_path}"
+    path = "s3://${module.bucket_athena.bucket.id}/databases/${local.locust_stats_db_name}/${local.locust_stats_table}"
   }
 
   schema_change_policy {
@@ -95,7 +94,7 @@ resource "aws_lambda_function" "locust_stats_glue_trigger" {
     }
   }
 
-  role = aws_iam_role.glue_trigger.arn
+  role = aws_iam_role.locust_stats_glue_trigger.arn
 }
 
 resource "aws_s3_bucket_notification" "locust_stats_glue_trigger" {
@@ -105,7 +104,7 @@ resource "aws_s3_bucket_notification" "locust_stats_glue_trigger" {
     events = [
       "s3:ObjectCreated:*",
     ]
-    filter_prefix       = "${local.locust_stats_s3_path}/"
+    filter_prefix       = "databases/${local.locust_stats_db_name}/${local.locust_stats_table}/"
     filter_suffix       = ".stats.json"
     id                  = "${aws_lambda_function.locust_stats_glue_trigger.function_name}-s3-notifs"
     lambda_function_arn = aws_lambda_function.locust_stats_glue_trigger.arn
