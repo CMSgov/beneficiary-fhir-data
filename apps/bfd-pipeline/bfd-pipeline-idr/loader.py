@@ -1,9 +1,22 @@
 from datetime import datetime, timezone
 from typing import Iterator, TypeVar
+from timer import Timer
 import psycopg
 from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
+
+temp_table_timer = Timer("temp_table")
+copy_timer = Timer("copy")
+insert_timer = Timer("insert")
+commit_timer = Timer("commit")
+
+
+def print_timers():
+    temp_table_timer.print_results()
+    copy_timer.print_results()
+    insert_timer.print_results()
+    commit_timer.print_results()
 
 
 class PostgresLoader:
@@ -45,6 +58,7 @@ class PostgresLoader:
                 # Note that temp tables don't use WAL so that helps with throughput as well.
                 #
                 # For simplicity's sake, we'll create our temp tables using the existing schema and just drop the columns we need to ignore
+                temp_table_timer.start()
                 cur.execute(
                     f"CREATE TEMPORARY TABLE {temp_table} (LIKE {self.table}) ON COMMIT DROP"
                 )
@@ -55,6 +69,7 @@ class PostgresLoader:
                 ]
                 for col in exclude_cols:
                     cur.execute(f"ALTER TABLE {temp_table} DROP COLUMN {col}")
+                temp_table_timer.stop()
 
                 # Use COPY to load the batch into Postgres.
                 # COPY has a number of optimizations that make bulk loading more efficient than a bunch of INSERTs.
@@ -63,12 +78,16 @@ class PostgresLoader:
 
                 # Even though we need to move the data from the temp table in the next step, it should still be
                 # faster than alternatives.
+                copy_timer.start()
                 with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:
                     for row in results:
                         model_dump = row.model_dump()
                         copy.write_row([model_dump[k] for k in insert_cols])
+                copy_timer.stop()
+
                 if len(results) > 0:
                     # Upsert into the main table
+                    insert_timer.start()
                     cur.execute(
                         f"""
                         INSERT INTO {self.table}({cols_str}, bfd_created_ts, bfd_updated_ts)
@@ -77,6 +96,7 @@ class PostgresLoader:
                         """,
                         {"timestamp": timestamp},
                     )
+                    insert_timer.stop()
 
                     last = results[len(results) - 1].model_dump()
                     last_id = last[self.sort_key]
@@ -96,4 +116,7 @@ class PostgresLoader:
                                 "last_timestamp": last_timestamp,
                             },
                         )
+
+                commit_timer.start()
                 self.conn.commit()
+                commit_timer.stop()
