@@ -176,7 +176,6 @@ public final class Stu3EobSamhsaMatcherTest {
                         new MetricRegistry(),
                         false,
                         fdaDrugCodeDisplayLookup,
-                        localNpiLookup,
                         securityTagManager);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
@@ -858,7 +857,6 @@ public final class Stu3EobSamhsaMatcherTest {
               new MetricRegistry(),
               false,
               RDATestUtils.fdaDrugCodeDisplayLookup(),
-              NPIOrgLookup.createTestNpiOrgLookup(),
               securityTagManager);
 
       return sampleEobForClaimType;

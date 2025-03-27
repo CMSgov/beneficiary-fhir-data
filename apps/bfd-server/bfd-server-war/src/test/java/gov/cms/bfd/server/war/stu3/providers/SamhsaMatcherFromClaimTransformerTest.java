@@ -112,16 +112,15 @@ public class SamhsaMatcherFromClaimTransformerTest {
             .getContextClassLoader()
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
-
     // Load and transform the various claim types for testing
     ClaimTransformerInterface claimTransformerInterface =
-        new InpatientClaimTransformer(new MetricRegistry(), localNpiLookup, securityTagManager);
+        new InpatientClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit inpatientEob =
         claimTransformerInterface.transform(getClaim(InpatientClaim.class), false);
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     claimTransformerInterface =
-        new OutpatientClaimTransformer(new MetricRegistry(), localNpiLookup, securityTagManager);
+        new OutpatientClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit outpatientEob =
         claimTransformerInterface.transform(getClaim(OutpatientClaim.class), false);
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
@@ -132,27 +131,25 @@ public class SamhsaMatcherFromClaimTransformerTest {
         claimTransformerInterface.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
-    claimTransformerInterface =
-        new HHAClaimTransformer(new MetricRegistry(), localNpiLookup, securityTagManager);
+    claimTransformerInterface = new HHAClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit hhaEob =
         claimTransformerInterface.transform(getClaim(HHAClaim.class), false);
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     claimTransformerInterface =
-        new HospiceClaimTransformer(new MetricRegistry(), localNpiLookup, securityTagManager);
+        new HospiceClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit hospiceEob =
         claimTransformerInterface.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
-    claimTransformerInterface =
-        new SNFClaimTransformer(new MetricRegistry(), localNpiLookup, securityTagManager);
+    claimTransformerInterface = new SNFClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit snfEob =
         claimTransformerInterface.transform(getClaim(SNFClaim.class), false);
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     claimTransformerInterface =
         new CarrierClaimTransformer(
-            new MetricRegistry(), drugCodeDisplayLookup, localNpiLookup, securityTagManager);
+            new MetricRegistry(), drugCodeDisplayLookup, securityTagManager);
     ExplanationOfBenefit carrierEob =
         claimTransformerInterface.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();

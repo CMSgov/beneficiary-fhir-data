@@ -125,9 +125,7 @@ public class SNFClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
-    snfClaimTransformer =
-        new SNFClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+    snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

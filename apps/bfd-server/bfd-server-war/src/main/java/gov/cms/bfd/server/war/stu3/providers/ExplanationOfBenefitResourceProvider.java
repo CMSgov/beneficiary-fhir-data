@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonQueries;
@@ -58,6 +59,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -109,6 +111,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
 
   /** The transformer for snf claims. */
   private final SNFClaimTransformer snfClaimTransformer;
+
+  @Autowired NPIOrgLookup npiOrgLookup;
 
   /**
    * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
@@ -248,6 +252,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
+    TransformerUtils.enrichResource(eob, npiOrgLookup);
     return eob;
   }
 
@@ -392,6 +397,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
           TransformerUtils.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
+    TransformerUtils.enrichEobBundle(bundle, npiOrgLookup);
     return bundle;
   }
 

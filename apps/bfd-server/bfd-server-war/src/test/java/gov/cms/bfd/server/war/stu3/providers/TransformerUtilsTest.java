@@ -427,8 +427,7 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(
-            new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+        new HHAClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -483,9 +482,8 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     MetricRegistry metricRegistry = new MetricRegistry();
-
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(metricRegistry, localNpiLookup, securityTagManager);
+        new HHAClaimTransformer(metricRegistry, securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
 
     IParser parser = fhirContext.newJsonParser();
@@ -500,9 +498,7 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
     hospiceClaim.setLastUpdated(Instant.now());
-
-    claimTransformerInterface =
-        new HospiceClaimTransformer(metricRegistry, localNpiLookup, securityTagManager);
+    claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, securityTagManager);
     genEob = claimTransformerInterface.transform(hospiceClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
@@ -533,9 +529,7 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
     inpatientClaim.setLastUpdated(Instant.now());
-
-    claimTransformerInterface =
-        new InpatientClaimTransformer(metricRegistry, localNpiLookup, securityTagManager);
+    claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, securityTagManager);
     genEob = claimTransformerInterface.transform(inpatientClaim, false);
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);

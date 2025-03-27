@@ -121,22 +121,20 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     MetricRegistry metricRegistry = new MetricRegistry();
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
     DMEClaimTransformerV2 dmeClaimTransformerV2 =
-        new DMEClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, securityTagManager);
     CarrierClaimTransformerV2 carrierClaimTransformerV2 =
-        new CarrierClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+        new CarrierClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, securityTagManager);
     HHAClaimTransformerV2 hhaClaimTransformerV2 =
-        new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+        new HHAClaimTransformerV2(metricRegistry, securityTagManager);
     InpatientClaimTransformerV2 inpatientClaimTransformerV2 =
-        new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+        new InpatientClaimTransformerV2(metricRegistry, securityTagManager);
     OutpatientClaimTransformerV2 outpatientClaimTransformerV2 =
         new OutpatientClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup, securityTagManager);
+            metricRegistry, fdaDrugCodeDisplayLookup, securityTagManager);
     PartDEventTransformerV2 partDEventTransformer =
-        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, npiOrgLookup);
+        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     SNFClaimTransformerV2 snfClaimTransformerV2 =
-        new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+        new SNFClaimTransformerV2(metricRegistry, securityTagManager);
 
     ExplanationOfBenefit inpatientEob =
         inpatientClaimTransformerV2.transform(getClaim(InpatientClaim.class), false);
@@ -153,7 +151,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(new MetricRegistry(), npiOrgLookup, securityTagManager);
+        new HospiceClaimTransformerV2(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit hospiceEob =
         hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();

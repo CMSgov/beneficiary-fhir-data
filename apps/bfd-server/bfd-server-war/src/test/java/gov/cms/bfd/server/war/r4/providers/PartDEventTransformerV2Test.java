@@ -125,7 +125,6 @@ public final class PartDEventTransformerV2Test {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of(npiData));
     InputStream npiDataStream =
         Thread.currentThread()
             .getContextClassLoader()
@@ -134,8 +133,7 @@ public final class PartDEventTransformerV2Test {
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         new FdaDrugCodeDisplayLookup(ndcProductHashMap);
 
-    partdEventTransformer =
-        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
+    partdEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     claim = generateClaim();
     eob = partdEventTransformer.transform(claim, false);
   }

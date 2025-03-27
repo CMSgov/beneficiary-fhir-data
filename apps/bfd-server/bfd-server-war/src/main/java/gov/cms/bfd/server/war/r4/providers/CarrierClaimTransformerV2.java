@@ -11,8 +11,8 @@ import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samhsa.CarrierTag;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -46,9 +46,6 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(CarrierClaimTransformerV2.class.getSimpleName(), "transform");
@@ -65,16 +62,13 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    */
   public CarrierClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
   }
@@ -199,7 +193,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getBeneficiaryPartBDeductAmount(),
         claimGroup.getPaymentDenialCode(),
         claimGroup.getReferringPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getReferringPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getReferringPhysicianNpi()),
         claimGroup.getReferringPhysicianUpin(),
         claimGroup.getProviderAssignmentIndicator(),
         claimGroup.getProviderPaymentAmount(),
@@ -222,8 +216,8 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimProfessionalAndNonClinicianCareTeamRole.REFERRING,
         Optional.ofNullable(claimGroup.getReferringProviderIdNumber()),
-        npiOrgLookup.retrieveNPIOrgDisplay(
-            Optional.ofNullable(claimGroup.getReferringProviderIdNumber())));
+        CommonTransformerUtils.buildReplaceTaxonomy(
+            Optional.of(claimGroup.getReferringProviderIdNumber())));
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
     eob.addExtension(
@@ -253,7 +247,8 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               C4BBPractitionerIdentifierType.NPI,
               C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
               line.getPerformingPhysicianNpi(),
-              npiOrgLookup.retrieveNPIOrgDisplay(line.getPerformingPhysicianNpi()));
+              CommonTransformerUtils.buildReplaceTaxonomy(line.getPerformingPhysicianNpi()));
+
       // Fall back to UPIN if NPI not present
       if (line.getPerformingPhysicianNpi().isEmpty()) {
         performing =
@@ -294,8 +289,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
             C4BBPractitionerIdentifierType.NPI,
             C4BBClaimProfessionalAndNonClinicianCareTeamRole.PRIMARY,
             line.getOrganizationNpi().get(),
-            npiOrgLookup
-                .retrieveNPIOrgDisplay(line.getOrganizationNpi())
+            CommonTransformerUtils.buildReplaceOrganization(line.getOrganizationNpi())
                 .map(NPIData::getProviderOrganizationName));
       }
 

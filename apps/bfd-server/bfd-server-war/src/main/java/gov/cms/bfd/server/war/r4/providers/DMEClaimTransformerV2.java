@@ -10,8 +10,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.model.rif.samhsa.DmeTag;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -43,9 +43,6 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform");
@@ -62,17 +59,14 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi display lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    */
   DMEClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = npiOrgLookup;
     this.securityTagManager = requireNonNull(securityTagManager);
   }
 
@@ -193,7 +187,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getBeneficiaryPartBDeductAmount(),
         claimGroup.getPaymentDenialCode(),
         claimGroup.getReferringPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getReferringPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getReferringPhysicianNpi()),
         claimGroup.getReferringPhysicianUpin(),
         Optional.of(claimGroup.getProviderAssignmentIndicator()),
         claimGroup.getProviderPaymentAmount(),
@@ -255,7 +249,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               C4BBPractitionerIdentifierType.NPI,
               C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
               line.getProviderNPI(),
-              npiOrgLookup.retrieveNPIOrgDisplay(line.getProviderNPI()));
+              CommonTransformerUtils.buildReplaceTaxonomy(line.getProviderNPI()));
 
       // Update the responsible flag
       if (performing.isPresent()) {

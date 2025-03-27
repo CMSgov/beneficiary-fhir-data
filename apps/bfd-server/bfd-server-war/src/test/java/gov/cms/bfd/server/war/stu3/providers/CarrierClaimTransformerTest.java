@@ -85,14 +85,11 @@ public final class CarrierClaimTransformerTest {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of(npiData));
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 
     carrierClaimTransformer =
-        new CarrierClaimTransformer(
-            metricRegistry, drugDisplayLookup, npiOrgLookup, securityTagManager);
+        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager);
   }
 
   /**

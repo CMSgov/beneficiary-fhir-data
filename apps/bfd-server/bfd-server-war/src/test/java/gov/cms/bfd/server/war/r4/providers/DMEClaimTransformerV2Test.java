@@ -19,7 +19,6 @@ import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -87,9 +86,6 @@ public final class DMEClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The NPI Org lookup. */
-  @Mock NPIOrgLookup mockNpiOrgLookup;
-
   /** The SamhsaSecurityTag lookup. */
   @Mock SecurityTagManager securityTagManager;
 
@@ -130,10 +126,8 @@ public final class DMEClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(any())).thenReturn(Optional.of(npiData));
     dmeClaimTransformer =
-        new DMEClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup, securityTagManager);
+        new DMEClaimTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
     IParser parser = fhirContext.newJsonParser();

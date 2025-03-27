@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
@@ -13,8 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +49,7 @@ public class NPIOrgLookup {
   private final boolean testInstance;
 
   /** The query that will return the NPI Data for an NPI. */
-  private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi = :npi";
+  private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi in :npiSet";
 
   /**
    * Constructor. If orgFileName can be successfully loaded, then this is treated as a test
@@ -123,27 +125,21 @@ public class NPIOrgLookup {
   /**
    * Retrieves an NPIData entity from the database for a given NPI.
    *
-   * @param npi The provider or organization's NPI.
+   * @param npiSet Set of NPIs to enrich.
    * @return an NPIData entity.
    */
   @Transactional
-  public Optional<NPIData> retrieveNPIOrgDisplay(Optional<String> npi) {
+  public Map<String, NPIData> retrieveNPIOrgDisplay(Set<String> npiSet) {
     // if testInstance is true, we will return a value from the HashMap.
     // Otherwise, we query the database.
     if (testInstance) {
-      return retrieveTestData(npi);
+      return npiMap;
     }
-    if (npi.isPresent()) {
-      Query query = entityManager.createQuery(NPI_DATA_QUERY, NPIData.class);
-      query.setParameter("npi", npi.get());
-      try {
-        NPIData npiData = (NPIData) query.getSingleResult();
-        return Optional.ofNullable(npiData);
-      } catch (NoResultException e) {
-        return Optional.empty();
-      }
-    }
-    return Optional.empty();
+
+    Query query = entityManager.createQuery(NPI_DATA_QUERY);
+    query.setParameter("npiSet", npiSet);
+    List<NPIData> npiData = query.getResultList();
+    return npiData.stream().collect(Collectors.toMap(NPIData::getNpi, entry -> entry));
   }
 
   /**

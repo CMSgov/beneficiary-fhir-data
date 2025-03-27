@@ -20,7 +20,6 @@ import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -127,11 +126,7 @@ public class CarrierClaimTransformerV2Test {
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
     carrierClaimTransformer =
-        new CarrierClaimTransformerV2(
-            metricRegistry,
-            drugCodeDisplayLookup,
-            NPIOrgLookup.createTestNpiOrgLookup(),
-            securityTagManager);
+        new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, securityTagManager);
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
