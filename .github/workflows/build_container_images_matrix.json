@@ -18,6 +18,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-mgmt-server-fluent-bit",
+    "dockerfile": "ops/images/bfd-mgmt-server-fluent-bit/Dockerfile",
+    "contextDir": "ops/images/bfd-mgmt-server-fluent-bit",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-mgmt-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
     "contextDir": "apps/utils/locust_tests",
