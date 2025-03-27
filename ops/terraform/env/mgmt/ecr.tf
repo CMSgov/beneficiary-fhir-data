@@ -1,7 +1,6 @@
 locals {
-  #ECR Pull/Push IAM Roles
-  ecr_pull_role_name = "ecr_pull_role"
-  ecr_push_role_name = "ecr_push_role"
+  #Admin Role with Access to delete images
+  admin_role = "admin_role"
 
   ecr_container_repositories = toset([
     # utility container image repositories
@@ -50,30 +49,54 @@ resource "aws_ecr_repository_policy" "bfd_repo_policy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      #Allow to Pull Images by the PullImages role
+      #Deny request if the Principal is not an Assumed Role with an IAM role in the account
       {
-        Effect = "Allow"
+        Effect = "Deny",
         Principal = {
-          AWS = "arn:aws:iam::${local.account_id}:role/${local.ecr_pull_role_name}"
+          "AWS": "*"
+        },
+        Action = ["ecr:*"],
+        Condition = {
+          "StringNotLike" = {
+            "aws:PrincipalType" = "AssumedRole"
+          },
+          "StringNotEquals": {
+            "aws:SourceAccount": "${local.account_id}"
+          }
         }
-        Action = [
-          "ecr:BatchGetImage",
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchCheckLayerAvailability"
-        ]
       },
-      #Allow to Push Images by the PushImages role
+
+      #Deny destructive actions on the repository if user does not have the administrative role to perform the action
       {
-        Effect = "Allow"
+        Effect = "Deny",
         Principal = {
-          AWS = "arn:aws:iam::${local.account_id}:role/${local.ecr_push_role_name}"
-        }
+          "AWS": "*"
+        },
         Action = [
-          "ecr:PutImage",
-          "ecr:InitiateLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload"
-        ]
+          "ecr:BatchDeleteImage",
+          "ecr:DeleteRepository",
+          "ecr:DeleteRepositoryPolicy",
+          "ecr:PutImageTagMutability",
+          "ecr:DeleteLifecyclePolicy"
+        ],
+        Condition = {
+          "ArnNotEquals" = {
+            "aws:PrincipalArn" = [
+              "arn:aws:iam::${local.account_id}:role/${local.admin_role}",
+            ]
+          }
+        }
+      },
+
+      #untagged images are not allow
+      {
+        Effect = "Deny",
+        Action = "ecr:PutImage",
+        Condition = {
+          "StringLike" = {
+            "ecr:ImageTag": [""]
+          }
+        }
       }
     ]
   })
@@ -89,7 +112,7 @@ resource "aws_ecr_lifecycle_policy" "bfd" {
           rulePriority = 1
           description = "Expire images older than 90 days"
           selection = {
-            tagStatus = "untagged"
+            tagStatus = "tagged"
             countType = "sinceImagePushed"
             countUnit = "days"
             countNumber = 90
@@ -100,12 +123,11 @@ resource "aws_ecr_lifecycle_policy" "bfd" {
         },
         {
           rulePriority = 2
-          description = "Expire images older than 90 days"
+          description = "Ensure at least one image is retained"
           selection = {
-            tagStatus = "tagged"
-            countType = "sinceImagePushed"
-            countUnit = "days"
-            countNumber = 90
+            tagStatus = "any"
+            countType = "imageCountMoreThan"
+            countNumber = 1
           }
           action = {
             type = "expire"
