@@ -1,0 +1,2 @@
+Unfortunately this folder needs to exist in order for the spring boot maven plugin to function properly.
+There appears to be some bug in the plugin that expects the maven wrapper script to be present here even if you don't use it.
