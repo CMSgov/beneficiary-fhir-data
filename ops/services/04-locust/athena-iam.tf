@@ -133,10 +133,10 @@ resource "aws_iam_policy" "locust_stats_glue_trigger_glue" {
 }
 
 resource "aws_iam_role" "locust_stats_glue_trigger" {
-  name                  = "${local.locust_stats_crawler_name}-role"
+  name                  = "${local.glue_trigger_lambda_full_name}-role"
   path                  = local.iam_path
-  description           = "Role for the ${local.locust_stats_crawler_name} Glue Crawler"
-  assume_role_policy    = data.aws_iam_policy_document.glue_assume_crawler.json
+  description           = "Role for the ${local.glue_trigger_lambda_full_name} Lambda"
+  assume_role_policy    = data.aws_iam_policy_document.lambda_assume.json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
