@@ -21,7 +21,8 @@
         "PRVDR_NUM"
     ],
     "cclfMapping": [
-        "CCLF1.PRVDR_OSCAR_NUM"
+        "CCLF1.PRVDR_OSCAR_NUM",
+        "CCLF1.CLM_BLG_PRVDR_OSCAR_NUM"
     ],
     "fhirMapping": [
         {

@@ -26,6 +26,7 @@
     ],
     "cclfMapping": [
         "CCLF1.PRVDR_OSCAR_NUM",
+        "CCLF1.CLM_BLG_PRVDR_OSCAR_NUM",
         "CCLF2.PRVDR_OSCAR_NUM",
         "CCLF3.PRVDR_OSCAR_NUM",
         "CCLF4.PRVDR_OSCAR_NUM"
