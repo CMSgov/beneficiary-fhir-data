@@ -3,11 +3,11 @@ locals {
   service             = "pipeline"
   layer               = "app"
   service_name_prefix = "bfd-${local.env}-${local.service}"
-
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-  vpc_id     = data.aws_vpc.main.id
-  kms_key_id = data.aws_kms_key.cmk.arn
+  cloudtamer_iam_path = "/delegatedadmin/developer/"
+  account_id          = data.aws_caller_identity.current.account_id
+  region              = data.aws_region.current.name
+  vpc_id              = data.aws_vpc.main.id
+  kms_key_id          = data.aws_kms_key.cmk.arn
   kms_config_key_arns = flatten(
     [
       for v in data.aws_kms_key.config_cmk.multi_region_configuration :

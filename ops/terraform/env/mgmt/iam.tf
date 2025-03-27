@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "ec2_instance_tags_ro" {
   description = "Global EC2 Instances and Tags RO Policy"
   name        = "bfd-${local.env}-ec2-instance-tags-ro"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Version": "2012-10-17",
@@ -23,7 +23,7 @@ POLICY
 resource "aws_iam_policy" "code_artifact_rw" {
   description = "CodeArtifact read/write permissions"
   name        = "bfd-${local.env}-codeartifact-rw"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -71,7 +71,7 @@ POLICY
 resource "aws_iam_policy" "code_artifact_ro" {
   description = "Allows Access to env:mgmt AWS Code Artifact Resources"
   name        = "bfd-${local.env}-code-artifact-ro"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
     "Version": "2012-10-17",
@@ -109,7 +109,7 @@ POLICY
 resource "aws_iam_policy" "jenkins_volume" {
   description = "Jenkins Data Volume Policy"
   name        = "bfd-${local.env}-jenkins-volume"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
   "Statement": [
@@ -133,6 +133,8 @@ POLICY
 
 }
 
+# TODO: remove this and related in BFD-3953
+# NOTE: `cloudbees` is not to be migrated as part of the greenfield migration
 resource "aws_iam_role" "cloudbees" {
   assume_role_policy    = <<-POLICY
 {
@@ -158,8 +160,6 @@ POLICY
   ]
   max_session_duration = 3600
   name                 = "cloudbees-jenkins"
-  path                 = "/"
-
 }
 
 resource "aws_iam_group" "app_engineers" {
@@ -195,7 +195,7 @@ POLICY
 
 resource "aws_iam_policy" "s3_integration_tests" {
   name   = "bfd-s3-for-integration-tests"
-  path   = "/"
+  path   = local.cloudtamer_iam_path
   policy = <<-POLICY
 {
   "Statement": [
@@ -273,7 +273,7 @@ resource "aws_iam_group_policy_attachment" "app_engineers_vpc_ro" {
 resource "aws_iam_policy" "bfd_ssm_ro" {
   description = "Permissions to /bfd SSM hierarchies"
   name        = "bfd-ssm-parameters-ro"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [
@@ -321,7 +321,7 @@ resource "aws_iam_group_policy_attachment" "app_engineers_bfd_ssm_ro" {
 resource "aws_iam_policy" "rda_ec2_instance_manager" {
   name        = "bfd-rda-pipeline-ec2-instance-manager"
   description = "Allow management of RDA pipeline instances"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-POLICY
 {
     "Version": "2012-10-17",
@@ -347,7 +347,7 @@ POLICY
 resource "aws_iam_policy" "rda_ssm_ro" {
   description = "Allow reading RDA pipeline SSM hierarchies"
   name        = "bfd-rda-pipeline-ssm-parameters-ro"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
@@ -375,4 +375,26 @@ resource "aws_iam_policy" "rda_ssm_ro" {
       ]
     }
   )
+}
+
+# Resources for Snyk Container scanning - These allow Snyk to assume this role based on an external org identifier.
+# Snyk is granted ReadOnly Access to all ECR repositories within the Account.
+resource "aws_iam_policy" "snyk_container_scanning" {
+  name        = "bfd-snyk-ecr-readonly-access"
+  path        = local.cloudtamer_iam_path
+  description = "Allows Access to ECR for the Snyk container scanning application"
+  policy      = data.aws_iam_policy_document.snyk_container_scanning.json
+}
+
+resource "aws_iam_role" "snyk_container_scanning" {
+  name                 = "bfd-mgmt-snyk-service-role"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  assume_role_policy   = data.aws_iam_policy_document.snyk_container_scanning_trust_policy.json
+  max_session_duration = 3600
+}
+
+resource "aws_iam_role_policy_attachment" "snyk_container_scanning" {
+  role       = aws_iam_role.snyk_container_scanning.name
+  policy_arn = aws_iam_policy.snyk_container_scanning.arn
 }

@@ -1,0 +1,51 @@
+formatter: markdown table
+sections:
+  show:
+    - requirements
+    - inputs
+    - resources
+    - outputs
+    - data-sources
+    - modules
+
+# this `content` string is implemented as a golang template https://pkg.go.dev/text/template
+# updates here correspond to `{{ .Content }}` in `output.template` setting below
+content: |-
+    {{ $warning := `<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+         'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+         Manually updating sections between TF_DOCS tags may be overwritten.
+         See https://terraform-docs.io/user-guide/configuration/ for more information.
+    -->`}}
+
+    {{- $warning }}
+    {{ .Requirements }}
+
+    {{ $warning }}
+    {{ .Inputs }}
+
+    {{ $warning }}
+    {{ .Modules }}
+
+    {{ $warning }}
+    {{ .Resources }}
+
+    {{ $warning }}
+    {{ .Outputs }}
+
+output:
+  file: README.md
+  mode: inject
+  template: |-
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->
+
+sort:
+  enabled: true
+  by: required
+
+settings:
+  indent: 2
+  default: true
+  required: true
+  type: true

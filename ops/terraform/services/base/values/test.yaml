@@ -162,6 +162,9 @@
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server (${env})
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
@@ -183,6 +186,7 @@
 /bfd/${env}/server/nonsensitive/pac/enabled: "true"
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "true"
+/bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"
 /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
@@ -361,6 +365,20 @@
   2A4JGl9KxtrXpP9mI6jTLsNsLtgkllbIRLySTl7kcqpQW+chTsHTupIxeLsi4V0m
   qN983wo6kAit3mgkEAU=
   -----END CERTIFICATE-----
+# TODO: Remove the /ecs/ part when ECS Fargate migration is complete
+/bfd/${env}/server/nonsensitive/ecs/capacity/min: 1
+/bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
+/bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/mgmt/common/sensitive/slack_webhook_bfd_test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/breach_topic: bfd-test-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-test-cloudwatch-alarms-slack-bfd-test

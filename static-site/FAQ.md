@@ -26,7 +26,7 @@ permalink: /faq.html
   - [What Substance Abuse and Mental Health Services Administration (SAMHSA) filtering takes place in BFD or upstream?](#what-substance-abuse-and-mental-health-services-administration-samhsa-filtering-takes-place-in-bfd-or-upstream)
   - [What are the payment-related monetary fields in BFD on the Explanation of Benefits (EOB) endpoint?](#what-are-the-payment-related-monetary-fields-in-bfd-on-the-explanation-of-benefits-eob-endpoint)
   - [What adjudicated claim types are supported by BFD?](#what-adjudicated-claim-types-are-supported-by-bfd)
-  - [What values for the 'gender' field are supported by Medicare?](#what-values-for-the-gender-field-are-supported-by-medicare)
+  - [What values for the 'sex' field are supported by Medicare?](#what-values-for-the-sex-field-are-supported-by-medicare)
   - [I have a question for CCW. How do I ask it?](#i-have-a-question-for-ccw-how-do-i-ask-it)
   - [What PAC (Partially Adjudicated Claim) data does BFD contain?](#what-pac-partially-adjudicated-claim-data-does-bfd-contain)
 - [Data Retention/Lifecycle](#data-retentionlifecycle)
@@ -175,9 +175,9 @@ PDE:
 - Skilled Nursing Facility (SNF)
 - Part D
 
-#### What values for the 'gender' field are supported by Medicare?
+#### What values for the 'sex' field are supported by Medicare?
 
-The 'gender' value can be: 'male', 'female', or 'unknown'.
+The 'sex' value can be: 'male', 'female', or 'unknown'.
 
 #### I have a question for CCW. How do I ask it?
 

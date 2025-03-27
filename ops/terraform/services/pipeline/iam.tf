@@ -1,6 +1,7 @@
 resource "aws_iam_role" "ccw_rif" {
   count                = local.is_prod ? 1 : 0
   name                 = "bfd-${local.env}-ccw-rif"
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description          = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
   max_session_duration = 43200 # max session duration is 12 hours (43200 seconds)- going big for long data-loads
   assume_role_policy = jsonencode({
@@ -32,6 +33,7 @@ resource "aws_iam_role_policy_attachment" "ccw_rif" {
 
 resource "aws_iam_policy" "etl-rw-s3" {
   count       = local.is_prod ? 1 : 0
+  path        = local.cloudtamer_iam_path
   description = "ETL read-write S3 policy"
   policy = jsonencode(
     {
@@ -77,7 +79,7 @@ resource "aws_iam_policy" "etl-rw-s3" {
 resource "aws_iam_policy" "aws_cli" {
   description = "AWS cli privileges for the BFD Pipeline instance role."
   name        = "bfd-${local.service}-${local.env}-cli"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-EOF
 {
   "Statement": [
@@ -99,7 +101,7 @@ EOF
 resource "aws_iam_policy" "bfd_pipeline_rif" {
   description = "Allow the BFD Pipeline application to read-write the S3 bucket with the RIF in it."
   name        = "bfd-${local.env}-${local.service}-rw-s3-rif"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy      = <<-EOF
 {
   "Statement": [
@@ -168,14 +170,14 @@ EOF
 
 resource "aws_iam_instance_profile" "this" {
   name = "bfd-${local.env}-bfd_${local.service}-profile"
-  path = "/"
+  path = local.cloudtamer_iam_path
   role = aws_iam_role.this.name
 }
 
 resource "aws_iam_policy" "ssm" {
   description = "Permissions to /bfd/${local.env}/common/nonsensitive, /bfd/${local.env}/${local.service}, /bfd/mgmt/common/sensitive/user SSM hierarchies"
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
-  path        = "/"
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Statement" : [
@@ -235,12 +237,14 @@ EOF
   ]
   max_session_duration = 3600
   name                 = "bfd-${local.env}-bfd_${local.service}-role"
-  path                 = "/"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
 }
 
 resource "aws_iam_policy" "etl_s3_rda_paths_rw" {
   name        = "bfd-${local.env}-${local.service}-etl-s3-rda-paths-rw"
   description = "Read and Write objects within RDA paths"
+  path        = local.cloudtamer_iam_path
   policy = jsonencode(
     {
       "Version" : "2012-10-17",

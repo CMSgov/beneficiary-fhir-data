@@ -1,5 +1,6 @@
 resource "aws_iam_policy" "ssm" {
   name        = "bfd-${local.env}-${local.service}-ssm-parameters"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to /bfd/${local.env}/common and /bfd/${local.env}/server SSM hierarchies"
   policy      = <<-EOF
 {
@@ -24,6 +25,7 @@ EOF
 
 resource "aws_iam_policy" "kms" {
   name        = "bfd-${local.env}-${local.service}-kms"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to decrypt master, config, and insights S3 bucket KMS key for ${local.env}"
   policy = jsonencode(
     {
@@ -50,6 +52,7 @@ resource "aws_iam_policy" "kms" {
 
 resource "aws_iam_policy" "rds" {
   name        = "bfd-${local.env}-${local.service}-rds"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to describe ${local.env} RDS clusters"
   policy      = <<-EOF
 {
@@ -71,6 +74,7 @@ EOF
 
 resource "aws_iam_policy" "logs" {
   name        = "bfd-${local.env}-${local.service}-logs"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to create and write to bfd-${local.env}-${local.service} logs"
   policy      = <<-EOF
 {
@@ -98,6 +102,7 @@ EOF
 
 resource "aws_iam_policy" "sqs_send" {
   name        = "bfd-${local.env}-${local.service}-sqs-send"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to send to ${local.pipeline_signal_queue_name} SQS queue"
   policy      = <<-EOF
 {
@@ -129,6 +134,7 @@ EOF
 
 resource "aws_iam_policy" "s3" {
   name        = "bfd-${local.env}-${local.service}-s3"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to write to ${data.aws_s3_bucket.insights.arn} S3 bucket and associated ${local.service} paths"
   policy      = <<-EOF
 {
@@ -162,6 +168,7 @@ EOF
 
 resource "aws_iam_policy" "athena" {
   name        = "bfd-${local.env}-${local.service}-athena"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to query Athena tables and put query results at a particular S3 path in ${data.aws_s3_bucket.insights.arn}"
   policy      = <<-EOF
 {
@@ -226,9 +233,10 @@ EOF
 }
 
 resource "aws_iam_role" "this" {
-  name        = "bfd-${local.env}-${local.service}"
-  path        = "/"
-  description = "Role for lambda profile use for ${local.service} in ${local.env}"
+  name                 = "bfd-${local.env}-${local.service}"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for lambda profile use for ${local.service} in ${local.env}"
 
   assume_role_policy = <<-EOF
   {
@@ -260,6 +268,7 @@ resource "aws_iam_role" "this" {
 
 resource "aws_iam_policy" "glue" {
   name        = "bfd-${local.env}-${local.service}-glue"
+  path        = local.cloudtamer_iam_path
   description = "Permissions start the bfd-${local.env}-${local.service} Glue crawler"
   policy      = <<-EOF
 {
@@ -277,6 +286,7 @@ EOF
 
 resource "aws_iam_policy" "logs_glue_trigger" {
   name        = "bfd-${local.env}-${local.service}-glue-trigger-logs"
+  path        = local.cloudtamer_iam_path
   description = "Permissions to create and write to bfd-${local.env}-${local.service}-glue-trigger logs"
   policy      = <<-EOF
 {
@@ -303,9 +313,10 @@ EOF
 }
 
 resource "aws_iam_role" "glue_trigger" {
-  name        = "bfd-${local.env}-${local.service}-glue-trigger"
-  path        = "/"
-  description = "Role for bfd-${local.env}-${local.service}-glue-trigger Lambda"
+  name                 = "bfd-${local.env}-${local.service}-glue-trigger"
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
+  description          = "Role for bfd-${local.env}-${local.service}-glue-trigger Lambda"
 
   assume_role_policy = <<-EOF
   {
@@ -329,7 +340,9 @@ resource "aws_iam_role" "glue_trigger" {
 }
 
 resource "aws_iam_role" "spice_refresh_role" {
-  name = local.spice_trigger_lambda_name
+  name                 = local.spice_trigger_lambda_name
+  path                 = local.cloudtamer_iam_path
+  permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   assume_role_policy = jsonencode(
     {
       Statement = [
@@ -349,6 +362,7 @@ resource "aws_iam_role" "spice_refresh_role" {
 
 resource "aws_iam_policy" "spice_refresh_logs_policy" {
   name = "${local.spice_trigger_lambda_name}-logs"
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Permissions for the ${local.spice_trigger_lambda_name} Lambda to write to its corresponding ",
     "CloudWatch Log Group and Log Stream",
@@ -379,6 +393,7 @@ resource "aws_iam_policy" "spice_refresh_logs_policy" {
 
 resource "aws_iam_policy" "spice_refresh_policy" {
   name = "${local.spice_trigger_lambda_name}-quicksight"
+  path = local.cloudtamer_iam_path
   description = join("", [
     "Policy that allows searching and refreshing SPICE data sets for the ",
     "${local.spice_trigger_lambda_name} Lambda",
