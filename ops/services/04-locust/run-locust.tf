@@ -87,8 +87,12 @@ resource "aws_lambda_function" "run_locust" {
   timeout     = 10 * 60 # 10 minutes
   environment {
     variables = {
-      BFD_ENVIRONMENT   = local.env
-      RESULTS_BUCKET_ID = module.bucket_athena.bucket.id
+      BFD_ENVIRONMENT        = local.env
+      STATS_BUCKET_ID        = module.bucket_athena.bucket.id
+      STATS_ATHENA_WORKGROUP = aws_athena_workgroup.locust_stats.name
+      STATS_ATHENA_DATABASE  = local.locust_stats_db_name
+      STATS_ATHENA_TABLE     = local.locust_stats_table
+      READER_ENDPOINT        = data.aws_rds_cluster.main.reader_endpoint
     }
   }
 
