@@ -47,6 +47,12 @@ data "aws_iam_policy_document" "run_locust_kms" {
     actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
     resources = [local.env_key_arn]
   }
+
+  statement {
+    sid       = "AllowDecryptWithEnvConfigCmk"
+    actions   = ["kms:Decrypt"]
+    resources = local.env_config_key_arns
+  }
 }
 
 resource "aws_iam_policy" "run_locust_kms" {
@@ -139,6 +145,10 @@ resource "aws_iam_policy" "run_locust_glue" {
   policy = data.aws_iam_policy_document.run_locust_glue.json
 }
 
+data "aws_iam_policy" "lambda_vps_access_role" {
+  name = "AWSLambdaVPCAccessExecutionRole"
+}
+
 resource "aws_iam_role" "run_locust" {
   name                  = "${local.run_locust_lambda_full_name}-role"
   path                  = local.iam_path
@@ -150,12 +160,13 @@ resource "aws_iam_role" "run_locust" {
 
 resource "aws_iam_role_policy_attachment" "run_locust" {
   for_each = {
-    logs   = aws_iam_policy.run_locust_logs.arn
-    ssm    = aws_iam_policy.run_locust_ssm.arn
-    kms    = aws_iam_policy.run_locust_kms
-    s3     = aws_iam_policy.run_locust_s3.arn
-    athena = aws_iam_policy.run_locust_athena.arn
-    glue   = aws_iam_policy.run_locust_glue.arn
+    logs       = aws_iam_policy.run_locust_logs.arn
+    ssm        = aws_iam_policy.run_locust_ssm.arn
+    kms        = aws_iam_policy.run_locust_kms.arn
+    s3         = aws_iam_policy.run_locust_s3.arn
+    athena     = aws_iam_policy.run_locust_athena.arn
+    glue       = aws_iam_policy.run_locust_glue.arn
+    vpc_access = data.aws_iam_policy.lambda_vps_access_role.arn
   }
 
   role       = aws_iam_role.run_locust.name
