@@ -18,6 +18,11 @@ data "archive_file" "regression_wrapper_src" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "regression_wrapper" {
+  name       = "/aws/lambda/${local.rw_lambda_full_name}"
+  kms_key_id = local.env_key_arn
+}
+
 resource "aws_lambda_function" "regression_wrapper" {
   function_name = local.rw_lambda_full_name
 
@@ -26,7 +31,7 @@ resource "aws_lambda_function" "regression_wrapper" {
     "around the existing Regression Suite Lambda to make it work with CodeDeploy"
   ])
 
-  kms_key_arn      = data.aws_kms_alias.env_cmk.target_key_arn
+  kms_key_arn      = local.env_key_arn
   filename         = data.archive_file.regression_wrapper_src.output_path
   source_code_hash = data.archive_file.regression_wrapper_src.output_base64sha256
   architectures    = ["arm64"]

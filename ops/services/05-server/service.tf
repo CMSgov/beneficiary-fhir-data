@@ -52,22 +52,22 @@ data "aws_ecr_image" "server" {
 
 resource "aws_cloudwatch_log_group" "certstores_messages" {
   name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  kms_key_id = local.env_key_arn
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
   name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  kms_key_id = local.env_key_arn
 }
 
 resource "aws_cloudwatch_log_group" "server_messages" {
   name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  kms_key_id = local.env_key_arn
 }
 
 resource "aws_cloudwatch_log_group" "server_access" {
   name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  kms_key_id = local.env_key_arn
 }
 
 resource "aws_ecs_task_definition" "server" {
@@ -104,7 +104,7 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "BUCKET"
-            value = aws_s3_bucket.certstores.bucket
+            value = module.bucket_certstores.bucket.bucket
           },
           {
             name  = "TRUSTSTORE_KEY"

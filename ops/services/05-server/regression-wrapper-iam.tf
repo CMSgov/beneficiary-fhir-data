@@ -1,22 +1,14 @@
 data "aws_iam_policy_document" "regression_wrapper_logs" {
   statement {
-    sid       = "AllowLogGroupCreate"
-    actions   = ["logs:CreateLogGroup"]
-    resources = ["arn:aws:logs:${local.region}:${local.account_id}:*"]
-  }
-
-  statement {
-    sid     = "AllowLogStreamControl"
-    actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = [
-      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${local.rw_lambda_full_name}:*"
-    ]
+    sid       = "AllowLogStreamControl"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = [aws_cloudwatch_log_group.regression_wrapper.arn]
   }
 }
 
 resource "aws_iam_policy" "regression_wrapper_logs" {
   name = "${local.rw_lambda_full_name}-logs-policy"
-  path = local.cloudtamer_iam_path
+  path = local.iam_path
   description = join("", [
     "Permissions for the ${local.rw_lambda_full_name} Lambda to write to its corresponding ",
     "CloudWatch Log Group and Log Stream",
@@ -35,7 +27,7 @@ data "aws_iam_policy_document" "regression_wrapper_lambda" {
 
 resource "aws_iam_policy" "regression_wrapper_lambda" {
   name        = "${local.rw_lambda_full_name}-lambda-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Grants permission for the ${local.rw_lambda_full_name} to invoke the ${data.aws_lambda_function.run_locust.function_name} Lambda"
   policy      = data.aws_iam_policy_document.regression_wrapper_lambda.json
 }
@@ -44,14 +36,14 @@ data "aws_iam_policy_document" "regression_wrapper_kms" {
   statement {
     sid       = "AllowEncryptAndDecryptWithEnvCmk"
     actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
-    resources = [data.aws_kms_alias.env_cmk.target_key_arn]
+    resources = [local.env_key_arn]
   }
 }
 
 resource "aws_iam_policy" "regression_wrapper_kms" {
   name        = "${local.rw_lambda_full_name}-kms-policy"
-  path        = local.cloudtamer_iam_path
-  description = "Grants permission for the ${local.rw_lambda_full_name} to use the ${data.aws_kms_alias.env_cmk.name} CMK"
+  path        = local.iam_path
+  description = "Grants permission for the ${local.rw_lambda_full_name} to use the ${local.env_key_alias} CMK"
   policy      = data.aws_iam_policy_document.regression_wrapper_kms.json
 }
 
@@ -67,7 +59,7 @@ data "aws_iam_policy_document" "regression_wrapper_codedeploy" {
 
 resource "aws_iam_policy" "regression_wrapper_codedeploy" {
   name        = "${local.rw_lambda_full_name}-codedeploy-policy"
-  path        = local.cloudtamer_iam_path
+  path        = local.iam_path
   description = "Grants permission for the ${local.rw_lambda_full_name} to put a Lifecycle Event Hook status for a deployment"
   policy      = data.aws_iam_policy_document.regression_wrapper_codedeploy.json
 }
@@ -84,10 +76,10 @@ data "aws_iam_policy_document" "lambda_assume_regression_wrapper" {
 
 resource "aws_iam_role" "regression_wrapper" {
   name                  = "${local.rw_lambda_full_name}-role"
-  path                  = local.cloudtamer_iam_path
+  path                  = local.iam_path
   description           = "Role for the ${local.rw_lambda_full_name} Lambda"
   assume_role_policy    = data.aws_iam_policy_document.lambda_assume_regression_wrapper.json
-  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
+  permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
 
