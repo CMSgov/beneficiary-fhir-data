@@ -230,7 +230,7 @@ jobs:
       awsRegion: ${{ inputs.awsRegion }}
       # Build other images, like Lambda images, Python applications, etc.
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
-      imagesCsv: "bfd-mgmt-server-regression, bfd-mgmt-mount-certstores, bfd-mgmt-eft-sftp-outbound-transfer-lambda, bfd-mgmt-pipeline-ccw-manifests-verifier-lambda"
+      imagesCsv: "bfd-mgmt-server-regression, bfd-mgmt-mount-certstores, bfd-mgmt-server-fluent-bit, bfd-mgmt-eft-sftp-outbound-transfer-lambda, bfd-mgmt-pipeline-ccw-manifests-verifier-lambda"
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
     secrets: inherit
 
