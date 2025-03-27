@@ -6,7 +6,7 @@ version = "1.0.0"
 dependencies = ["aws-lambda-powertools[all]>=3.8.0", "boto3>=1.37.14"]
 
 [dependency-groups]
-dev = ["boto3-stubs[sqs,codedeploy]", "ruff", "uv"]
+dev = ["boto3-stubs[lambda,codedeploy]", "ruff", "uv"]
 
 [tool.ruff]
 # Set the maximum line length to 100.
