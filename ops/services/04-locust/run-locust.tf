@@ -46,7 +46,7 @@ resource "aws_security_group" "run_locust" {
   }
 }
 
-data "aws_security_groups" "aurora_cluster" {
+data "aws_security_group" "aurora_cluster" {
   filter {
     name   = "tag:Name"
     values = [data.aws_rds_cluster.main.cluster_identifier]
@@ -58,7 +58,7 @@ data "aws_security_groups" "aurora_cluster" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_run_locust" {
-  security_group_id            = data.aws_security_group.rds.id
+  security_group_id            = data.aws_security_group.aurora_cluster.id
   referenced_security_group_id = aws_security_group.run_locust.id
   from_port                    = 5432
   to_port                      = 5432
