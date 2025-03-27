@@ -1,3 +1,21 @@
+output "service" {
+  description = "The name of the current Terraservice"
+  sensitive   = false
+  value       = var.service
+}
+
+output "region" {
+  description = "The region name associated with the current caller identity"
+  sensitive   = false
+  value       = data.aws_region.current.name
+}
+
+output "account_id" {
+  description = "The account ID associated with the current caller identity"
+  sensitive   = false
+  value       = data.aws_caller_identity.current.account_id
+}
+
 output "env" {
   description = "The solution's environment name. Generally, `terraform.workspace`"
   sensitive   = false
@@ -38,11 +56,41 @@ output "latest_bfd_release" {
 output "ssm_config" {
   description = "Parameter:Value map that elides repetitive keys, e.g. ssm:/bfd/test/common/vpc_name is /bfd/comon/vpc_name"
   sensitive   = true
-  value = zipmap(
-    [
-      for name in local.ssm_flattened_data.names :
-      replace(name, "/((non)*sensitive|${local.env})//", "")
-    ],
-    local.ssm_flattened_data.values
-  )
+  value       = local.ssm_config
+}
+
+output "env_key_alias" {
+  description = "Alias name for the current environment's general-purpose CMK."
+  sensitive   = false
+  value       = local.kms_key_alias
+}
+
+output "env_config_key_alias" {
+  description = "Alias name for the current environment's configuration-specific, multi-region CMK."
+  sensitive   = false
+  value       = local.kms_config_key_alias
+}
+
+output "env_key_arn" {
+  description = "ARN of the current environment's general-purpose CMK."
+  sensitive   = false
+  value       = one(data.aws_kms_key.env_cmk[*].arn)
+}
+
+output "env_config_key_arns" {
+  description = "ARNs of the current environment's configuration-specific, multi-region CMK."
+  sensitive   = false
+  value       = concat(local.kms_config_key_primary, local.kms_config_key_replicas)
+}
+
+output "default_iam_path" {
+  description = "Default path for IAM policies and roles."
+  sensitive   = false
+  value       = "/delegatedadmin/developer/"
+}
+
+output "default_permissions_boundary_arn" {
+  description = "ARN of the default permissions boundary for IAM Roles."
+  sensitive   = false
+  value       = data.aws_iam_policy.permissions_boundary.arn
 }
