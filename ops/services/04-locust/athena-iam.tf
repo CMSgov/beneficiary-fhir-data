@@ -84,7 +84,7 @@ resource "aws_iam_role" "crawler" {
   force_detach_policies = true
 }
 
-resource "aws_iam_role_policy_attachment" "run_locust" {
+resource "aws_iam_role_policy_attachment" "crawler" {
   for_each = {
     s3           = aws_iam_policy.crawler_s3.arn
     kms          = aws_iam_policy.crawler_kms.arn
