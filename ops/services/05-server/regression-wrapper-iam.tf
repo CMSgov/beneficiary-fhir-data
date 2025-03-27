@@ -25,31 +25,19 @@ resource "aws_iam_policy" "regression_wrapper_logs" {
   policy = data.aws_iam_policy_document.regression_wrapper_logs.json
 }
 
-data "aws_iam_policy_document" "regression_wrapper_sqs" {
+data "aws_iam_policy_document" "regression_wrapper_lambda" {
   statement {
-    sid       = "AllowGetQueueUrls"
-    actions   = ["sqs:GetQueueUrl"]
-    resources = [data.aws_sqs_queue.regression_invoke.arn, data.aws_sqs_queue.regression_result.arn]
-  }
-
-  statement {
-    sid       = "AllowSendToInvoke"
-    actions   = ["sqs:SendMessage"]
-    resources = [data.aws_sqs_queue.regression_invoke.arn]
-  }
-
-  statement {
-    sid       = "AllowPurgeAndReceiveFromResult"
-    actions   = ["sqs:ReceiveMessage", "sqs:PurgeQueue"]
-    resources = [data.aws_sqs_queue.regression_result.arn]
+    sid       = "AllowInvokeRunLocustLambda"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [data.aws_lambda_function.run_locust.arn]
   }
 }
 
-resource "aws_iam_policy" "regression_wrapper_sqs" {
-  name        = "${local.rw_lambda_full_name}-sqs-policy"
+resource "aws_iam_policy" "regression_wrapper_lambda" {
+  name        = "${local.rw_lambda_full_name}-lambda-policy"
   path        = local.cloudtamer_iam_path
-  description = "Grants permission for the ${local.rw_lambda_full_name} to interact with certain Queues"
-  policy      = data.aws_iam_policy_document.regression_wrapper_sqs.json
+  description = "Grants permission for the ${local.rw_lambda_full_name} to invoke the ${data.aws_lambda_function.run_locust.function_name} Lambda"
+  policy      = data.aws_iam_policy_document.regression_wrapper_lambda.json
 }
 
 data "aws_iam_policy_document" "regression_wrapper_kms" {
@@ -106,7 +94,7 @@ resource "aws_iam_role" "regression_wrapper" {
 resource "aws_iam_role_policy_attachment" "regression_wrapper" {
   for_each = {
     logs       = aws_iam_policy.regression_wrapper_logs.arn
-    sqs        = aws_iam_policy.regression_wrapper_sqs.arn
+    lambda     = aws_iam_policy.regression_wrapper_lambda.arn
     kms        = aws_iam_policy.regression_wrapper_kms.arn
     codedeploy = aws_iam_policy.regression_wrapper_codedeploy.arn
   }

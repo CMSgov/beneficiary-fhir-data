@@ -8,8 +8,7 @@ on the result queue.
 
 import os
 import time
-from datetime import UTC, datetime, timedelta
-from enum import StrEnum
+from enum import StrEnum, auto
 from typing import Any
 
 import boto3
@@ -19,11 +18,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 from pydantic import BaseModel
 
-REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
-BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
-LOCUST_HOST = os.environ.get("LOCUST_HOST", "")
-INVOKE_SQS_QUEUE = os.environ.get("INVOKE_SQS_QUEUE", "")
-RESULT_SQS_QUEUE = os.environ.get("RESULT_SQS_QUEUE", "")
+REGION = os.environ.get("AWS_CURRENT_REGION", default="us-east-1")
+BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", default="")
+LOCUST_HOST = os.environ.get("LOCUST_HOST", default="")
+RUN_LOCUST_LAMBDA_NAME = os.environ.get("RUN_LOCUST_LAMBDA_NAME", default="")
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -36,26 +34,39 @@ BOTO_CONFIG = Config(
 logger = Logger()
 
 
+class CompareType(StrEnum):
+    PREVIOUS = auto()
+    AVERAGE = auto()
+
+
+class CompareConfigModel(BaseModel):
+    type: CompareType
+    tag: str
+    load_limit: int
+
+
+class StoreConfigModel(BaseModel):
+    tags: list[str]
+
+
 class ServerRegressionInvokeModel(BaseModel):
+    suite: str
     host: str
-    suite_version: str
     spawn_rate: int
     users: int
     spawned_runtime: str
-    compare_tag: str
-    store_tags: list[str]
+    compare: CompareConfigModel
+    store: StoreConfigModel
 
 
-class ServerRegressionResultState(StrEnum):
+class TestResult(StrEnum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
 
 
-class ServerRegressionResultModel(BaseModel):
-    function_name: str
-    result: "ServerRegressionResultState"
+class ResultModel(BaseModel):
+    result: TestResult
     message: str
-    request_id: str
     log_stream_name: str
     log_group_name: str
 
@@ -64,10 +75,10 @@ class ServerRegressionResultModel(BaseModel):
 def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
     codedeploy_event = CodeDeployLifecycleHookEvent(event)
 
-    sqs_client = boto3.client("sqs", config=BOTO_CONFIG)
+    lambda_client = boto3.client("lambda", config=BOTO_CONFIG)
     codedeploy_client = boto3.client("codedeploy", config=BOTO_CONFIG)
     try:
-        if not all([REGION, LOCUST_HOST, BFD_ENVIRONMENT, INVOKE_SQS_QUEUE, RESULT_SQS_QUEUE]):
+        if not all([REGION, LOCUST_HOST, BFD_ENVIRONMENT, RUN_LOCUST_LAMBDA_NAME]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         # This is unfortunately necessary as there appears to be a delay between NLBs indicating
@@ -82,53 +93,35 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
         time.sleep(3 * 60)
 
         # Post message to invoke queue to start the Regression Suite test
-        logger.info("Starting Regression Suite test by sending to %s...", INVOKE_SQS_QUEUE)
+        logger.info(
+            "Starting Regression Suite test by invoking %s Lambda...", RUN_LOCUST_LAMBDA_NAME
+        )
         compare_tag = (
             "ecs_release" if BFD_ENVIRONMENT in ["test", "prod", "prod-sbx"] else BFD_ENVIRONMENT
         )
-        sqs_client.send_message(
-            QueueUrl=INVOKE_SQS_QUEUE,
-            MessageBody=ServerRegressionInvokeModel(
+        response = lambda_client.invoke(
+            FunctionName=RUN_LOCUST_LAMBDA_NAME,
+            InvocationType="RequestResponse",
+            Payload=ServerRegressionInvokeModel(
+                suite="v2/regression_suite_post.py",
                 host=LOCUST_HOST,
-                suite_version="v2",
                 spawn_rate=10,
                 users=10,
                 spawned_runtime="30s",
-                compare_tag=compare_tag,
-                store_tags=[
-                    compare_tag,
-                    f"deploy_id__{codedeploy_event.deployment_id.lower().replace('-', '_')}",
-                ],
+                compare=CompareConfigModel(type=CompareType.AVERAGE, tag=compare_tag, load_limit=5),
+                store=StoreConfigModel(
+                    tags=[
+                        compare_tag,
+                        f"deploy_id__{codedeploy_event.deployment_id.lower().replace('-', '_')}",
+                    ]
+                ),
             ).model_dump_json(),
         )
 
-        logger.info("Invocation message sent to %s, waiting 90s for response...", INVOKE_SQS_QUEUE)
-        sqs_client.purge_queue(QueueUrl=RESULT_SQS_QUEUE)
-        end_time = datetime.now(UTC) + timedelta(seconds=90)
-        result_message: str | None = None
-        while datetime.now(UTC) <= end_time:
-            result_message = next(
-                (
-                    x["Body"]
-                    for x in sqs_client.receive_message(
-                        QueueUrl=RESULT_SQS_QUEUE, WaitTimeSeconds=1
-                    ).get("Messages", [])
-                    if "Body" in x
-                ),
-                None,
-            )
-            if result_message:
-                break
+        result = ResultModel.model_validate_json(response["Payload"].read())
+        logger.info("Received %s from %s", result.model_dump_json(), RUN_LOCUST_LAMBDA_NAME)
 
-        if result_message is None:
-            raise RuntimeError("No regression suite result returned within wait time")
-
-        result = ServerRegressionResultModel.model_validate_json(result_message)
-        logger.info("Received %s from %s", result.model_dump_json(), RESULT_SQS_QUEUE)
-
-        codedeploy_result_status = (
-            "Succeeded" if result.result == ServerRegressionResultState.SUCCESS else "Failed"
-        )
+        codedeploy_result_status = "Succeeded" if result.result == TestResult.SUCCESS else "Failed"
         logger.info(
             "Putting event hook with status '%s' to CodeDeploy...", codedeploy_result_status
         )
