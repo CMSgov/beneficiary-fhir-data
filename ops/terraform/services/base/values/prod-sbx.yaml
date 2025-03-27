@@ -134,6 +134,7 @@
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
+/bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server prod-sbx
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"

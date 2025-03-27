@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rda.samhsa.FissTag;
+import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,8 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaFissClaim.class,
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.claimId,
-          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate));
+          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
+          FissTag.class.getName());
 
   /** Instance for MCS claims. */
   public static final ClaimResponseTypeV2<RdaMcsClaim> M =
@@ -33,7 +36,8 @@ public final class ClaimResponseTypeV2<TEntity>
           RdaMcsClaim.class,
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
-          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc));
+          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc),
+          McsTag.class.getName());
 
   /** Immutable list of all possible instances of this class. */
   private static final List<ClaimResponseTypeV2<?>> VALUES = List.of(F, M);
@@ -47,7 +51,7 @@ public final class ClaimResponseTypeV2<TEntity>
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
    * @param entityServiceDateAttributes the attribute name for the service end date on the entity
-   *     class
+   * @param entityTagType the entity security tag type class
    */
   private ClaimResponseTypeV2(
       String nameForParsing,
@@ -55,14 +59,16 @@ public final class ClaimResponseTypeV2<TEntity>
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      List<String> entityServiceDateAttributes) {
+      List<String> entityServiceDateAttributes,
+      String entityTagType) {
     super(
         nameForParsing,
         typeLabel,
         entityClass,
         entityMbiRecordAttribute,
         entityIdAttribute,
-        entityServiceDateAttributes);
+        entityServiceDateAttributes,
+        entityTagType);
   }
 
   /**

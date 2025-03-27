@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -10,10 +11,10 @@ import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.InpatientClaimLine;
-import gov.cms.bfd.model.rif.samhsa.InpatientTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,6 +44,8 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -52,35 +56,41 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
    * @param metricRegistry the metric registry
    * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTag lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public InpatientClaimTransformer(
       MetricRegistry metricRegistry,
       NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link InpatientClaim} to use
+   * @param claimEntity the {@link InpatientClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevelDstu3(claimEntity.getSecurityTags());
+
     if (!(claim instanceof InpatientClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       InpatientClaim inpatientClaim = (InpatientClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(inpatientClaim.getClaimId()), InpatientTag.class);
       eob = transformClaim(inpatientClaim, securityTags);
     }
     return eob;
@@ -299,7 +309,9 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     return eob;
   }
