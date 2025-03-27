@@ -11,38 +11,25 @@ sections:
 # this `content` string is implemented as a golang template https://pkg.go.dev/text/template
 # updates here correspond to `{{ .Content }}` in `output.template` setting below
 content: |-
+    {{ $warning := `<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+         'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+         Manually updating sections between TF_DOCS tags may be overwritten.
+         See https://terraform-docs.io/user-guide/configuration/ for more information.
+    -->`}}
+
+    {{- $warning }}
     {{ .Requirements }}
 
-    <!-- GENERATED WITH `terraform-docs .`
-         Manually updating the README.md will be overwritten.
-         For more details, see the file '.terraform-docs.yml' or
-         https://terraform-docs.io/user-guide/configuration/
-    -->
-
+    {{ $warning }}
     {{ .Inputs }}
 
-    <!-- GENERATED WITH `terraform-docs .`
-         Manually updating the README.md will be overwritten.
-         For more details, see the file '.terraform-docs.yml' or
-         https://terraform-docs.io/user-guide/configuration/
-    -->
-
+    {{ $warning }}
     {{ .Modules }}
 
-    <!-- GENERATED WITH `terraform-docs .`
-         Manually updating the README.md will be overwritten.
-         For more details, see the file '.terraform-docs.yml' or
-         https://terraform-docs.io/user-guide/configuration/
-    -->
-
+    {{ $warning }}
     {{ .Resources }}
 
-    <!-- GENERATED WITH `terraform-docs .`
-         Manually updating the README.md will be overwritten.
-         For more details, see the file '.terraform-docs.yml' or
-         https://terraform-docs.io/user-guide/configuration/
-    -->
-
+    {{ $warning }}
     {{ .Outputs }}
 
 output:
@@ -50,11 +37,6 @@ output:
   mode: inject
   template: |-
     <!-- BEGIN_TF_DOCS -->
-    <!-- GENERATED WITH `terraform-docs .`
-         Manually updating the README.md will be overwritten.
-         For more details, see the file '.terraform-docs.yml' or
-         https://terraform-docs.io/user-guide/configuration/
-    -->
     {{ .Content }}
     <!-- END_TF_DOCS -->
 
