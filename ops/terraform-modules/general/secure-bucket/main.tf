@@ -30,8 +30,10 @@ data "aws_iam_policy_document" "this" {
     }
   }
 
+  # We yield to the bucket key for unencrypted put requests, so the following statements ensure that
+  # an operator cannot specify a different key or type of encryption other than what is expected
   statement {
-    sid       = "DenyIncorrectKmsKey"
+    sid       = "DenyIncorrectKmsKeyIfSpecified"
     effect    = "Deny"
     actions   = ["s3:PutObject"]
     resources = [aws_s3_bucket.this.arn, "${aws_s3_bucket.this.arn}/*"]
@@ -46,28 +48,16 @@ data "aws_iam_policy_document" "this" {
       variable = "s3:x-amz-server-side-encryption-aws-kms-key-id"
       values   = [var.bucket_kms_key_arn]
     }
-  }
-
-  statement {
-    sid       = "DenyUnencryptedPuts"
-    effect    = "Deny"
-    actions   = ["s3:PutObject"]
-    resources = [aws_s3_bucket.this.arn, "${aws_s3_bucket.this.arn}/*"]
-
-    principals {
-      identifiers = ["*"]
-      type        = "*"
-    }
 
     condition {
       test     = "Null"
-      variable = "s3:x-amz-server-side-encryption"
-      values   = [true]
+      variable = "s3:x-amz-server-side-encryption-aws-kms-key-id"
+      values   = [false]
     }
   }
 
   statement {
-    sid       = "DenyNonKMSPuts"
+    sid       = "DenyNonKMSPutsIfSSESpecified"
     effect    = "Deny"
     actions   = ["s3:PutObject"]
     resources = [aws_s3_bucket.this.arn, "${aws_s3_bucket.this.arn}/*"]
@@ -81,6 +71,12 @@ data "aws_iam_policy_document" "this" {
       test     = "StringNotEquals"
       variable = "s3:x-amz-server-side-encryption"
       values   = ["aws:kms"]
+    }
+
+    condition {
+      test     = "Null"
+      variable = "s3:x-amz-server-side-encryption"
+      values   = [false]
     }
   }
 }
