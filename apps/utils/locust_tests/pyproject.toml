@@ -20,6 +20,7 @@ dependencies = [
 
 [dependency-groups]
 dev = ["ruff>=0.9.9", "uv>=0.6.4"]
+lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 
 [tool.ruff]
 # Set the maximum line length to 100.
