@@ -14,7 +14,7 @@
   {
     "name": "bfd-mgmt-mount-certstores",
     "dockerfile": "ops/images/bfd-mgmt-mount-certstores/Dockerfile",
-    "contextDir": "ops/images/bfd-mgmt-mount-certstorese",
+    "contextDir": "ops/images/bfd-mgmt-mount-certstores",
     "platform": "linux/arm64"
   },
   {

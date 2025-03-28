@@ -71,5 +71,10 @@
 /bfd/${env}/server/nonsensitive/db/wrapper/host_selector_strategy: leastConnections
 /bfd/${env}/server/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
 /bfd/${env}/server/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
+# TODO: Remove the /ecs/ part when ECS Fargate migration is complete
+/bfd/${env}/server/nonsensitive/ecs/capacity/min: 1
+/bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
+/bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true

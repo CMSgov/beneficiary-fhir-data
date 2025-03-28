@@ -14,6 +14,7 @@ locals {
     "bfd-mgmt-pipeline-idr",
     # sidecar container image repositories
     "bfd-mgmt-mount-certstores",
+    "bfd-mgmt-server-fluent-bit",
     # application container image repositories
     "bfd-db-migrator",
     "bfd-pipeline-app",
