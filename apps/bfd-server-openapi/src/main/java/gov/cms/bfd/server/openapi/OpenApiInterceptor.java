@@ -205,6 +205,22 @@ public class OpenApiInterceptor {
     return mySwaggerUiVersion;
   }
 
+  private void redirectToSwaggerUi(
+      HttpServletRequest theRequest,
+      HttpServletResponse theResponse,
+      ServletRequestDetails theRequestDetails)
+      throws IOException {
+    String serverBase = ".";
+    if (theRequestDetails.getServletRequest() != null) {
+      IServerAddressStrategy addressStrategy =
+          theRequestDetails.getServer().getServerAddressStrategy();
+      serverBase = addressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
+    }
+    String redirectUrl = theResponse.encodeRedirectURL(serverBase + "/swagger-ui/");
+    theResponse.sendRedirect(redirectUrl);
+    theResponse.getWriter().close();
+  }
+
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLER_SELECTED)
   public boolean serveSwaggerUi(
       HttpServletRequest theRequest,
@@ -220,16 +236,7 @@ public class OpenApiInterceptor {
             RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequest);
         if (highestRankedAcceptValues.contains(Constants.CT_HTML)) {
 
-          String serverBase = ".";
-          if (theRequestDetails.getServletRequest() != null) {
-            IServerAddressStrategy addressStrategy =
-                theRequestDetails.getServer().getServerAddressStrategy();
-            serverBase =
-                addressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
-          }
-          String redirectUrl = theResponse.encodeRedirectURL(serverBase + "/swagger-ui/");
-          theResponse.sendRedirect(redirectUrl);
-          theResponse.getWriter().close();
+          redirectToSwaggerUi(theRequest, theResponse, theRequestDetails);
           return false;
         }
       }
@@ -239,15 +246,8 @@ public class OpenApiInterceptor {
 
     if (requestPath.startsWith("/swagger-ui")) {
       if (requestPath.equals("/swagger-ui")) {
-        IServerAddressStrategy addressStrategy =
-            theRequestDetails.getServer().getServerAddressStrategy();
-        String serverBase =
-            addressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
-        String redirectUrl = theResponse.encodeRedirectURL(serverBase + "/swagger-ui/");
-        theResponse.sendRedirect(redirectUrl);
-        theResponse.getWriter().close();
+        redirectToSwaggerUi(theRequest, theResponse, theRequestDetails);
         return false;
-        // requestPath = "/swagger-ui/";
       }
       return !handleResourceRequest(theResponse, theRequestDetails, requestPath);
 
