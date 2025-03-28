@@ -193,7 +193,8 @@ public class ExplanationOfBenefitResourceProviderTest {
             Mockito.mock(InpatientClaimTransformer.class),
             Mockito.mock(OutpatientClaimTransformer.class),
             mockPdeTransformer,
-            Mockito.mock(SNFClaimTransformer.class));
+            Mockito.mock(SNFClaimTransformer.class),
+            NPIOrgLookup.createTestNpiOrgLookup());
 
     // entity manager mocking
     mockEntityManager();

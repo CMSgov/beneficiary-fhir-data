@@ -3195,39 +3195,48 @@ public final class TransformerUtilsV2 {
     enrichOrganization(eob, npiSet, enrichmentMap);
     enrichFacility(eob, npiSet, enrichmentMap);
     enrichReferral(eob, npiSet, enrichmentMap);
-
-    enrichResources(eob, npiOrgLookup, enrichmentMap, qualificationEnrich, npiSet);
+    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    enrichResources(List.of(eob), enrichmentMap, qualificationEnrich, npiMap);
   }
 
   /**
    * Enrich the EOB Bundle with NPI Data.
    *
-   * @param eobs The bundle of EOBs
+   * @param bundle The bundle of EOBs
    * @param npiOrgLookup Used to retrieve enrichment data.
    */
-  public static void enrichEobBundle(Bundle eobs, NPIOrgLookup npiOrgLookup) {
-    for (BundleEntryComponent entry : eobs.getEntry()) {
+  public static void enrichEobBundle(Bundle bundle, NPIOrgLookup npiOrgLookup) {
+    Map<String, Set<Base>> enrichmentMap = new HashMap<>();
+    Map<String, Set<Base>> qualificationEnrich = new HashMap<>();
+    Set<String> npiSet = new HashSet<>();
+    for (BundleEntryComponent entry : bundle.getEntry()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) entry.getResource();
-      enrichEob(eob, npiOrgLookup);
+      enrichCareTeam(eob, enrichmentMap, qualificationEnrich, npiSet);
+      enrichOrganization(eob, npiSet, enrichmentMap);
+      enrichFacility(eob, npiSet, enrichmentMap);
+      enrichReferral(eob, npiSet, enrichmentMap);
     }
+    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    List<ExplanationOfBenefit> eobs =
+        bundle.getEntry().stream()
+            .map(entry -> (ExplanationOfBenefit) entry.getResource())
+            .collect(Collectors.toList());
+    enrichResources(eobs, enrichmentMap, qualificationEnrich, npiMap);
   }
 
   /**
    * Method to perform the enrichment.
    *
-   * @param eob The ExplanationOfBenefits
-   * @param npiOrgLookup Retrieves Enrichment data.
+   * @param eobs The ExplanationOfBenefits
    * @param enrichmentMap Map of objects to enrich.
    * @param qualificationEnrich Map of qualifications to enrich.
-   * @param npiSet Set of NPIs to enrich.
+   * @param npiMap Map of NPIs to NPIData
    */
   private static void enrichResources(
-      ExplanationOfBenefit eob,
-      NPIOrgLookup npiOrgLookup,
+      List<ExplanationOfBenefit> eobs,
       Map<String, Set<Base>> enrichmentMap,
       Map<String, Set<Base>> qualificationEnrich,
-      Set<String> npiSet) {
-    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+      Map<String, NPIData> npiMap) {
     for (Map.Entry<String, Set<Base>> entries : enrichmentMap.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
         parseEnrichmentEntries(entries, npiMap, "replaceProvider", EnrichmentDataType.PROVIDER);
@@ -3256,13 +3265,15 @@ public final class TransformerUtilsV2 {
             entries, npiMap, "replaceTaxonomyDisplay", EnrichmentDataType.TAXONOMY);
 
       } else {
-        for (CareTeamComponent careTeam : eob.getCareTeam()) {
-          CodeableConcept qualification = careTeam.getQualification();
-          for (Base coding : entries.getValue()) {
-            qualification.getCoding().remove(coding);
-          }
-          if (qualification.getCoding().isEmpty()) {
-            careTeam.setQualification(null);
+        for (ExplanationOfBenefit eob : eobs) {
+          for (CareTeamComponent careTeam : eob.getCareTeam()) {
+            CodeableConcept qualification = careTeam.getQualification();
+            for (Base coding : entries.getValue()) {
+              qualification.getCoding().remove(coding);
+            }
+            if (qualification.getCoding().isEmpty()) {
+              careTeam.setQualification(null);
+            }
           }
         }
       }

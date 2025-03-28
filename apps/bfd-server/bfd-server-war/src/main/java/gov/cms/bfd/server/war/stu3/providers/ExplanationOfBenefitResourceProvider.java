@@ -59,7 +59,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -112,7 +111,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
   /** The transformer for snf claims. */
   private final SNFClaimTransformer snfClaimTransformer;
 
-  @Autowired NPIOrgLookup npiOrgLookup;
+  NPIOrgLookup npiOrgLookup;
 
   /**
    * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
@@ -132,6 +131,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
+   * @param npiOrgLookup Instance of NPIOrgLookup
    */
   public ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -145,7 +145,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
       InpatientClaimTransformer inpatientClaimTransformer,
       OutpatientClaimTransformer outpatientClaimTransformer,
       PartDEventTransformer partDEventTransformer,
-      SNFClaimTransformer snfClaimTransformer) {
+      SNFClaimTransformer snfClaimTransformer,
+      NPIOrgLookup npiOrgLookup) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -158,6 +159,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
+    this.npiOrgLookup = npiOrgLookup;
   }
 
   /**

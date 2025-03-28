@@ -62,7 +62,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -119,7 +118,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   private final SNFClaimTransformerV2 snfClaimTransformer;
 
   /** Loads the NPI data from the database. */
-  @Autowired NPIOrgLookup npiOrgLookup;
+  NPIOrgLookup npiOrgLookup;
 
   /**
    * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
@@ -139,7 +138,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
-   * @param npiOrgLookup Load the NPI data from the database.
+   * @param npiOrgLookup Instance of NPIOrgLookup
    */
   public R4ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -167,6 +166,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
+    this.npiOrgLookup = npiOrgLookup;
   }
 
   /**

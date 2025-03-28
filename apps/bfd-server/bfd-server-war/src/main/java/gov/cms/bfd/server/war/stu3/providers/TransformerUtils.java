@@ -208,32 +208,38 @@ public final class TransformerUtils {
     enrichOrganization(eob, npiSet, enrichmentMap);
     enrichFacility(eob, npiSet, enrichmentMap);
     enrichReferral(eob, npiSet, enrichmentMap);
-    enrichResources(npiOrgLookup, enrichmentMap, npiSet);
+    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    enrichResources(enrichmentMap, npiMap);
   }
 
   /**
    * Enrich the EOB Bundle with NPI Data.
    *
-   * @param eobs The bundle of EOBs
+   * @param bundle The bundle of EOBs
    * @param npiOrgLookup Used to retrieve enrichment data.
    */
-  public static void enrichEobBundle(Bundle eobs, NPIOrgLookup npiOrgLookup) {
-    for (Bundle.BundleEntryComponent entry : eobs.getEntry()) {
+  public static void enrichEobBundle(Bundle bundle, NPIOrgLookup npiOrgLookup) {
+    Map<String, Set<Type>> enrichmentMap = new HashMap<>();
+    Set<String> npiSet = new HashSet<>();
+    for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) entry.getResource();
-      enrichEob(eob, npiOrgLookup);
+      enrichCareTeam(eob, enrichmentMap, npiSet);
+      enrichOrganization(eob, npiSet, enrichmentMap);
+      enrichFacility(eob, npiSet, enrichmentMap);
+      enrichReferral(eob, npiSet, enrichmentMap);
     }
+    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    enrichResources(enrichmentMap, npiMap);
   }
 
   /**
    * Method to perform the enrichment.
    *
-   * @param npiOrgLookup Retrieves Enrichment data.
-   * @param npiSet Set of NPIs to enrich.
+   * @param npiMap Map of NPIs to NPIData
    * @param enrichmentMap Map of objects to enrich.
    */
   private static void enrichResources(
-      NPIOrgLookup npiOrgLookup, Map<String, Set<Type>> enrichmentMap, Set<String> npiSet) {
-    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+      Map<String, Set<Type>> enrichmentMap, Map<String, NPIData> npiMap) {
     for (Map.Entry<String, Set<Type>> entries : enrichmentMap.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
         parseEnrichmentEntries(entries, npiMap, "replaceProvider", EnrichmentDataType.PROVIDER);
