@@ -14,6 +14,8 @@ The resources created by the following Terraservices _must_ exist in the current
 
 The `run-locust` Lambda can be [invoked synchronously](https://docs.amazonaws.cn/en_us/lambda/latest/dg/invocation-sync.html) using the `InvokeFunction` AWS API Action (e.g. `aws lambda invoke...`) with the following `payload` schema:
 
+**IMPORTANT: It is _vital_ that invocations specify a read timeout _greater_ than the `spawned_runtime` of the Locust test, otherwise the the synchronous invocation will fail and start another Lambda erroneously. This can be done by specifying the `--cli-read-timeout <seconds>` flag in the AWS CLI or `read_timeout` in the [`botocore.config` object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)**
+
 ```json
 {
   "suite": "<path relative to apps/utils/locust_tests to test suite to run>",
