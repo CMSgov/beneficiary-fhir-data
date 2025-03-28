@@ -51,6 +51,7 @@
         <module>bfd-model</module>
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
+        <module>bfd-server-ng</module>
         <module>bfd-db-migrator</module>
         <module>bfd-ops</module>
     </modules>

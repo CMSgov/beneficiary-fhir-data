@@ -36,7 +36,6 @@
         <module>bfd-server-shared-utils</module>
         <module>bfd-server-war</module>
         <module>bfd-server-image</module>
-        <module>bfd-server-ng</module>
     </modules>
 
     <dependencyManagement>
