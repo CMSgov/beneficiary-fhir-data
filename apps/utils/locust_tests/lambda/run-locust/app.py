@@ -2,6 +2,7 @@ import os
 import subprocess
 import urllib.parse
 from enum import StrEnum, auto
+from pathlib import Path
 from typing import Any
 
 from aws_lambda_powertools import Logger
@@ -39,7 +40,7 @@ class CompareType(StrEnum):
 class CompareConfigModel(BaseModel):
     type: CompareType
     tag: str
-    load_limit: int = 5
+    load_limit: int | None = 5
 
 
 class StoreConfigModel(BaseModel):
@@ -71,7 +72,7 @@ class ResultModel(BaseModel):
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[str, Any], context: LambdaContext):
+def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     if not all([
         REGION,
         BFD_ENVIRONMENT,
@@ -103,7 +104,7 @@ def handler(event: dict[str, Any], context: LambdaContext):
         )
 
         cert_path = "/tmp/bfd_test_cert.pem"
-        with open(file=cert_path, mode="w", encoding="utf-8") as file:
+        with Path(cert_path).open(mode="w", encoding="utf-8") as file:
             file.write(cert_key + cert)
 
         password = urllib.parse.quote(raw_password)
@@ -121,9 +122,8 @@ def handler(event: dict[str, Any], context: LambdaContext):
                 f"--client-cert-path={cert_path}",
                 "--headless",
             ]
-            + ["--only-summary"]
-            if invoke_event.only_summary
-            else [] + (invoke_event.extra_args or [])
+            + (["--only-summary"] if invoke_event.only_summary else [])
+            + (invoke_event.extra_args or [])
         )
 
         if invoke_event.compare or invoke_event.store:
@@ -139,10 +139,13 @@ def handler(event: dict[str, Any], context: LambdaContext):
             )
             locust_process_args += [
                 compare_type_flag,
-                f"--stats-compare-load-limit={invoke_event.compare.load_limit}",
                 f"--stats-compare-meta-file={LAMBDA_TASK_ROOT}/app/config/regression_suites_compare_meta.json",
                 f"--stats-compare-tag={invoke_event.compare.tag}",
-            ]
+            ] + (
+                [f"--stats-compare-load-limit={invoke_event.compare.load_limit}"]
+                if invoke_event.compare.load_limit
+                else []
+            )
 
         if invoke_event.store:
             store_tag_args = [f"--stats-store-tag={tag}" for tag in invoke_event.store.tags]
@@ -152,7 +155,8 @@ def handler(event: dict[str, Any], context: LambdaContext):
                 f"--stats-store-s3-bucket={STATS_BUCKET_ID}",
                 f"--stats-store-s3-database={STATS_ATHENA_DATABASE}",
                 f"--stats-store-s3-table={STATS_ATHENA_TABLE}",
-            ] + store_tag_args
+                *store_tag_args,
+            ]
 
         # The command to run Locust with the current test file
         locust_process = subprocess.run(
