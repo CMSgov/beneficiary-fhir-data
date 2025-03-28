@@ -5,6 +5,14 @@ variable "db_environment_override" {
   type        = string
 }
 
+variable "ephemeral_regression_override" {
+  default     = false
+  description = "Enables the execution and creation of the regression-wrapper during CodeDeploy deployment. Applies _only_ to ephemeral environments, ignored in established environments"
+  sensitive   = false
+  nullable    = false
+  type        = bool
+}
+
 variable "certstores_repository_override" {
   default     = null
   description = "Overrides the ECR repository for the certstores container image. If not provided, the default will be used"

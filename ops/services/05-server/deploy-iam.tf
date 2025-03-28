@@ -75,17 +75,21 @@ resource "aws_iam_policy" "codedeploy_iam" {
 }
 
 data "aws_iam_policy_document" "codedeploy_lambda" {
+  count = local.regression_wrapper_enabled ? 1 : 0
+
   statement {
     sid       = "AllowUsageOfRegressionWrapperLambda"
     actions   = ["lambda:InvokeFunction", "lambda:GetFunction"]
-    resources = [aws_lambda_function.regression_wrapper.arn]
+    resources = aws_lambda_function.regression_wrapper[*].arn
   }
 }
 
 resource "aws_iam_policy" "codedeploy_lambda" {
+  count = local.regression_wrapper_enabled ? 1 : 0
+
   name   = "${local.name_prefix}-codedeploy-lambda-policy"
   path   = local.iam_path
-  policy = data.aws_iam_policy_document.codedeploy_lambda.json
+  policy = one(data.aws_iam_policy_document.codedeploy_lambda[*].json)
 }
 
 resource "aws_iam_role" "codedeploy" {
@@ -97,12 +101,11 @@ resource "aws_iam_role" "codedeploy" {
 }
 
 resource "aws_iam_role_policy_attachment" "codedeploy" {
-  for_each = {
-    ecs    = aws_iam_policy.codedeploy_ecs.arn
-    elbv2  = aws_iam_policy.codedeploy_elbv2.arn
-    iam    = aws_iam_policy.codedeploy_iam.arn
-    lambda = aws_iam_policy.codedeploy_lambda.arn
-  }
+  for_each = merge({
+    ecs   = aws_iam_policy.codedeploy_ecs.arn
+    elbv2 = aws_iam_policy.codedeploy_elbv2.arn
+    iam   = aws_iam_policy.codedeploy_iam.arn
+  }, local.regression_wrapper_enabled ? { lambda = one(aws_iam_policy.codedeploy_lambda[*].arn) } : {})
 
   role       = aws_iam_role.codedeploy.name
   policy_arn = each.value
