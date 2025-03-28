@@ -44,10 +44,9 @@ resource "aws_ecr_repository" "bfd" {
 }
 
 #BFD-3965
-resource "aws_ecr_repository_policy" "bfd_repo_policy" {
-  for_each = local.ecr_container_repositories
+#Enforce a general policy for all repository in the registry
+resource "aws_ecr_registry_policy" "for_bfd" {
 
-  repository = each.value
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -103,7 +102,7 @@ resource "aws_ecr_repository_policy" "bfd_repo_policy" {
 }
 
 #BFD-3965
-resource "aws_ecr_lifecycle_policy" "bfd" {
+resource "aws_ecr_lifecycle_policy" "for_bfd_repositories" {
     for_each = local.ecr_container_repositories
     repository = each.value
     policy = jsonencode({
