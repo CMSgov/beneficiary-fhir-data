@@ -10,6 +10,40 @@ The resources created by the following Terraservices _must_ exist in the current
 - `cluster`
 - `database`
 
+## `run-locust` Lambda
+
+The `run-locust` Lambda can be [invoked synchronously](https://docs.amazonaws.cn/en_us/lambda/latest/dg/invocation-sync.html) using the `InvokeFunction` AWS API Action (e.g. `aws lambda invoke...`) with the following `payload` schema:
+
+```json
+{
+  "suite": "<path relative to apps/utils/locust_tests to test suite to run>",
+  "host": "<locust --host to run the test suite against>",
+  "spawn_rate": <num users to spawn every second>,
+  "users": <num users to spawn in total>,
+  "spawned_runtime": "<human-readable span of time to run the tests for after full spawn>",
+  "only_summary": <true|false; bool specifying whether to display only a summary of results after test; optional, defaults to false>
+  "compare": { // optional, can be omitted and Lambda will not do any comparisons
+    "type": "<average|previous; specifies the type of comparison>",
+    "tag": "<tagged results to compare against>",
+    "load_limit": <number of previous results to average if type is average, ignore otherwise; optional, defaults to null (taking the built-in default of 5)>
+  },
+  "store": { // optional, can be omitted and Lambda will not store any results to S3
+    "tags": <non-empty list of string tags to store with the results of the test run in S3/Athena>
+  }
+}
+```
+
+The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just that the `run-locust` Lambda ran) will return the following `payload` response schema:
+
+```json
+{
+  "result": "<success|failed; overall result of the Locust test run>",
+  "message": "Locust finished running. See 'log_stream_name' and 'log_group_name' properties for CloudWatch Log output location",
+  "log_stream_name": "<log stream name>",
+  "log_group_name": "<log group name>"
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
