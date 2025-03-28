@@ -72,7 +72,7 @@ resource "null_resource" "codedeploy_server" {
         task_definition_arn   = aws_ecs_task_definition.server.arn
         container_name        = local.service
         container_port        = local.server_port
-        validation_lambda_arn = aws_lambda_function.regression_wrapper.arn
+        validation_lambda_arn = one(aws_lambda_function.regression_wrapper[*].arn)
       })
     }
     interpreter = ["/bin/bash", "-c"]

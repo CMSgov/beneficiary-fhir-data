@@ -11,8 +11,12 @@ The resources created by the following Terraservices _must_ exist in the current
 
 ## Soft Terraservice Dependencies
 
+Overrides or environment-conditional behavior exists in this Terraservice that allows for skipping the creation of the following Terraservice dependencies under certain circumstances:
+
 - `database`
   - This Terraservice may be skipped by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment
+- `locust`
+  - This Terraservice may be skipped in **ephemeral environments** if `ephemeral_regression_override` is unspecified or `false`
 
 ## Deployment
 
