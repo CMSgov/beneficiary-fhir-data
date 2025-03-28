@@ -2,11 +2,24 @@
 
 This subfolder contains the Terraform configuration (Task Definitions, ECS Service definitions, etc.) for the BFD Server ECS Service and all related infrastructure.
 
+## Strict Terraservice Dependencies
+
+The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
+
+- `base`
+- `cluster`
+
+## Soft Terraservice Dependencies
+
+- `database`
+  - This Terraservice may be skipped by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment
+
 ## Deployment
 
 1. Run `terraform init` to initialize the Terraform configuration
 2. Select an appropriate workspace, i.e. `terraform workspace test`
 3. Run `terraform apply` to deploy the infrastructure
+   1. If there are any changes to the Task Definition, a Blue/Green deployment will be started
 
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -31,7 +44,8 @@ This subfolder contains the Terraform configuration (Task Definitions, ECS Servi
 |------|-------------|------|---------|:--------:|
 | <a name="input_certstores_repository_override"></a> [certstores\_repository\_override](#input\_certstores\_repository\_override) | Overrides the ECR repository for the certstores container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_certstores_version_override"></a> [certstores\_version\_override](#input\_certstores\_version\_override) | Overrides the version for certstores container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
-| <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts only. | `string` | `null` | no |
+| <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
+| <a name="input_ephemeral_regression_override"></a> [ephemeral\_regression\_override](#input\_ephemeral\_regression\_override) | Enables the execution and creation of the regression-wrapper during CodeDeploy deployment. Applies _only_ to ephemeral environments, ignored in established environments | `bool` | `false` | no |
 | <a name="input_log_router_repository_override"></a> [log\_router\_repository\_override](#input\_log\_router\_repository\_override) | Overrides the ECR repository for the log\_router container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_log_router_version_override"></a> [log\_router\_version\_override](#input\_log\_router\_version\_override) | Overrides the version for log\_router container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_server_repository_override"></a> [server\_repository\_override](#input\_server\_repository\_override) | Overrides the ECR repository for the server container image. If not provided, the default will be used | `string` | `null` | no |
