@@ -9,10 +9,10 @@ This subfolder contains the Terraform configuration (Task Definitions, ECS Servi
 3. Run `terraform apply` to deploy the infrastructure
 
 <!-- BEGIN_TF_DOCS -->
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
 ## Requirements
 
@@ -20,12 +20,11 @@ This subfolder contains the Terraform configuration (Task Definitions, ECS Servi
 |------|---------|
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -38,24 +37,22 @@ This subfolder contains the Terraform configuration (Task Definitions, ECS Servi
 | <a name="input_server_repository_override"></a> [server\_repository\_override](#input\_server\_repository\_override) | Overrides the ECR repository for the server container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_server_version_override"></a> [server\_version\_override](#input\_server\_version\_override) | Overrides the version for server container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../_modules/bfd-terraservice | n/a |
+| <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Resources
 
 | Name | Type |
@@ -155,12 +152,11 @@ This subfolder contains the Terraform configuration (Task Definitions, ECS Servi
 | [external_external.keystore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [external_external.truststore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Outputs
 
 No outputs.

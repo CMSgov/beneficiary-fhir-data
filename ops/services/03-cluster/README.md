@@ -1,46 +1,43 @@
 <!-- BEGIN_TF_DOCS -->
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | 1.5.0 |
-| <a name="requirement_aws"></a> [aws](#requirement_aws) | ~> 5 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5 |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_container_insights_enabled_ephemeral_override"></a> [container_insights_enabled_ephemeral_override](#input_container_insights_enabled_ephemeral_override) | Override for ephemeral environments. When true, ECS Cluster `containerInsights` will be enabled. Established/Seed environments are always enabled. | `bool` | `false` | no |
+| <a name="input_container_insights_enabled_ephemeral_override"></a> [container\_insights\_enabled\_ephemeral\_override](#input\_container\_insights\_enabled\_ephemeral\_override) | Override for ephemeral environments. When true, ECS Cluster `containerInsights` will be enabled. Established/Seed environments are always enabled. | `bool` | `false` | no |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_terraservice"></a> [terraservice](#module_terraservice) | ../_modules/bfd-terraservice | n/a |
+| <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Resources
 
 | Name | Type |
@@ -49,4 +46,13 @@
 | [aws_ecs_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_ecs_cluster_capacity_providers.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers) | resource |
 | [aws_kms_key.cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
+-->
+## Outputs
+
+No outputs.
 <!-- END_TF_DOCS -->
