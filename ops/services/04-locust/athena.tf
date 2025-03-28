@@ -70,8 +70,9 @@ data "archive_file" "locust_stats_glue_trigger_src" {
 }
 
 resource "aws_cloudwatch_log_group" "locust_stats_glue_trigger" {
-  name       = "/aws/lambda/${local.glue_trigger_lambda_full_name}"
-  kms_key_id = local.env_key_arn
+  name         = "/aws/lambda/${local.glue_trigger_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_lambda_function" "locust_stats_glue_trigger" {

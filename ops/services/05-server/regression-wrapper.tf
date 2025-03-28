@@ -29,6 +29,7 @@ resource "aws_cloudwatch_log_group" "regression_wrapper" {
 
   name         = "/aws/lambda/${local.rw_lambda_full_name}"
   kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_lambda_function" "regression_wrapper" {
