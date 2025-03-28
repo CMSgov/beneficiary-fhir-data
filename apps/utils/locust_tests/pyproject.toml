@@ -20,7 +20,50 @@ dependencies = [
 
 [dependency-groups]
 dev = ["ruff>=0.9.9", "uv>=0.6.4"]
+# Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
+# run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
+
+[tool.ruff.lint]
+select = [
+  "D",    # pydocstyle
+  "E501",
+  # pycodestyle
+  "E",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # isort
+  "I",
+  "ANN",
+  "LOG",
+  "G",
+  "PT",
+  "RSE",
+  "PIE",
+  "RET",
+  "SLF",
+  "ARG",
+  "PTH",
+  "PLE",
+  "PLW",
+  "PERF",
+  "FURB",
+  "RUF",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
 
 [tool.ruff]
 # Set the maximum line length to 100.
