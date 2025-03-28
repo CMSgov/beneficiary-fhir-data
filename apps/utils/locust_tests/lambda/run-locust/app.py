@@ -61,8 +61,8 @@ class InvokeEventModel(BaseModel):
 
 
 class TestResult(StrEnum):
-    SUCCESS = "SUCCESS"
-    FAILURE = "FAILURE"
+    SUCCESS = auto()
+    FAILURE = auto()
 
 
 class ResultModel(BaseModel):
