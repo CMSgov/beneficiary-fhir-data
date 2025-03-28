@@ -3,8 +3,9 @@ import subprocess
 import urllib.parse
 from enum import StrEnum, auto
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
+from annotated_types import Len
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.parameters import get_parameter
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -40,11 +41,11 @@ class CompareType(StrEnum):
 class CompareConfigModel(BaseModel):
     type: CompareType
     tag: str
-    load_limit: int | None = 5
+    load_limit: int | None = None
 
 
 class StoreConfigModel(BaseModel):
-    tags: list[str]
+    tags: Annotated[list[str], Len(min_length=1)]
 
 
 class InvokeEventModel(BaseModel):
