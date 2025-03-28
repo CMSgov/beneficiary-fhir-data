@@ -78,7 +78,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,6 +91,7 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -147,6 +147,13 @@ public final class TransformerUtilsV2 {
 
   /** Constant for finding a provider org reference. */
   private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
+
+  /** Data type of the enrichment. */
+  enum EnrichmentDataType {
+    ORGANIZATION,
+    PROVIDER,
+    TAXONOMY
+  }
 
   /**
    * Creates a {@link CodeableConcept} from the specified system and code.
@@ -3180,29 +3187,16 @@ public final class TransformerUtilsV2 {
    * @param eob The ExplanationOfBenefit
    * @param npiOrgLookup Used to retrieve enrichment data
    */
-  public static void enrichResource(ExplanationOfBenefit eob, NPIOrgLookup npiOrgLookup) {
-
-    Map<String, Reference> providerEnrich = new HashMap<>();
-    Map<String, Coding> qualificationEnrich = new HashMap<>();
-    Map<String, Organization> organizationEnrich = new HashMap<>();
-    Map<String, Reference> facilityEnrich = new HashMap<>();
-    Map<String, Reference> referralEnrich = new HashMap<>();
-    Map<String, Reference> careTeamOrganizationEnrich = new HashMap<>();
+  public static void enrichEob(ExplanationOfBenefit eob, NPIOrgLookup npiOrgLookup) {
+    Map<String, Set<Base>> enrichmentMap = new HashMap<>();
+    Map<String, Set<Base>> qualificationEnrich = new HashMap<>();
     Set<String> npiSet = new HashSet<>();
-    enrichCareTeam(eob, providerEnrich, qualificationEnrich, careTeamOrganizationEnrich, npiSet);
-    enrichOrganization(eob, npiSet, organizationEnrich);
-    enrichFacility(eob, npiSet, facilityEnrich);
-    enrichReferral(eob, npiSet, referralEnrich);
-    enrichResources(
-        eob,
-        npiOrgLookup,
-        npiSet,
-        providerEnrich,
-        careTeamOrganizationEnrich,
-        qualificationEnrich,
-        organizationEnrich,
-        facilityEnrich,
-        referralEnrich);
+    enrichCareTeam(eob, enrichmentMap, qualificationEnrich, npiSet);
+    enrichOrganization(eob, npiSet, enrichmentMap);
+    enrichFacility(eob, npiSet, enrichmentMap);
+    enrichReferral(eob, npiSet, enrichmentMap);
+
+    enrichResources(eob, npiOrgLookup, enrichmentMap, qualificationEnrich, npiSet);
   }
 
   /**
@@ -3213,113 +3207,108 @@ public final class TransformerUtilsV2 {
    */
   public static void enrichEobBundle(Bundle eobs, NPIOrgLookup npiOrgLookup) {
     for (BundleEntryComponent entry : eobs.getEntry()) {
-      Map<String, Reference> providerEnrich = new HashMap<>();
-      Map<String, Coding> qualificationEnrich = new HashMap<>();
-      Map<String, Organization> organizationEnrich = new HashMap<>();
-      Map<String, Reference> facilityEnrich = new HashMap<>();
-      Map<String, Reference> referralEnrich = new HashMap<>();
-      Map<String, Reference> careTeamOrganizationEnrich = new HashMap<>();
-      Set<String> npiSet = new HashSet<>();
       ExplanationOfBenefit eob = (ExplanationOfBenefit) entry.getResource();
-      enrichCareTeam(eob, providerEnrich, qualificationEnrich, careTeamOrganizationEnrich, npiSet);
-      enrichOrganization(eob, npiSet, organizationEnrich);
-      enrichFacility(eob, npiSet, facilityEnrich);
-      enrichReferral(eob, npiSet, referralEnrich);
-      enrichResources(
-          eob,
-          npiOrgLookup,
-          npiSet,
-          providerEnrich,
-          careTeamOrganizationEnrich,
-          qualificationEnrich,
-          organizationEnrich,
-          facilityEnrich,
-          referralEnrich);
+      enrichEob(eob, npiOrgLookup);
     }
   }
 
   /**
    * Method to perform the enrichment.
    *
-   * @param eob The ExplanationOfBenefit
+   * @param eob The ExplanationOfBenefits
    * @param npiOrgLookup Retrieves Enrichment data.
+   * @param enrichmentMap Map of objects to enrich.
+   * @param qualificationEnrich Map of qualifications to enrich.
    * @param npiSet Set of NPIs to enrich.
-   * @param providerEnrich List of provider resources to enrich.
-   * @param careTeamOrganiationEnrich List of organization resources for careteam.
-   * @param qualificationEnrich List of qualification resources to enrich.
-   * @param organizationEnrich List of organization resources to enrich.
-   * @param facilityEnrich List of facility resources to enrich.
-   * @param referralEnrich List fo referral resources to enrich.
    */
   private static void enrichResources(
       ExplanationOfBenefit eob,
       NPIOrgLookup npiOrgLookup,
-      Set<String> npiSet,
-      Map<String, Reference> providerEnrich,
-      Map<String, Reference> careTeamOrganiationEnrich,
-      Map<String, Coding> qualificationEnrich,
-      Map<String, Organization> organizationEnrich,
-      Map<String, Reference> facilityEnrich,
-      Map<String, Reference> referralEnrich) {
+      Map<String, Set<Base>> enrichmentMap,
+      Map<String, Set<Base>> qualificationEnrich,
+      Set<String> npiSet) {
     Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
-    for (Map.Entry<String, Reference> entries : providerEnrich.entrySet()) {
+    for (Map.Entry<String, Set<Base>> entries : enrichmentMap.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
-        NPIData npiData = npiMap.get(entries.getKey());
-        entries.getValue().setDisplay(buildProviderName(npiData));
+        parseEnrichmentEntries(entries, npiMap, "replaceProvider", EnrichmentDataType.PROVIDER);
+        parseEnrichmentEntries(
+            entries, npiMap, "replaceOrganization", EnrichmentDataType.ORGANIZATION);
+
       } else {
-        entries.getValue().setDisplay(null);
-      }
-    }
-    for (Map.Entry<String, Reference> entries : careTeamOrganiationEnrich.entrySet()) {
-      if (npiMap.containsKey(entries.getKey())) {
-        NPIData npiData = npiMap.get(entries.getKey());
-        entries.getValue().setDisplay(npiData.getProviderOrganizationName());
-      } else {
-        entries.getValue().setDisplay(null);
+        entries
+            .getValue()
+            .forEach(
+                (Base b) -> {
+                  if (b instanceof Reference reference) {
+                    reference.setDisplay(null);
+                  } else if (b instanceof Coding coding) {
+                    coding.setDisplay(null);
+                  } else if (b instanceof Organization organization) {
+                    organization.setName(null);
+                  }
+                });
       }
     }
 
-    for (Map.Entry<String, Coding> entries : qualificationEnrich.entrySet()) {
+    for (Map.Entry<String, Set<Base>> entries : qualificationEnrich.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
-        NPIData npiData = npiMap.get(entries.getKey());
-        entries.getValue().setDisplay(npiData.getTaxonomyDisplay());
-        entries.getValue().setCode(npiData.getTaxonomyCode());
+        parseEnrichmentEntries(
+            entries, npiMap, "replaceTaxonomyDisplay", EnrichmentDataType.TAXONOMY);
+
       } else {
-        Iterator<CareTeamComponent> iter = eob.getCareTeam().iterator();
-        while (iter.hasNext()) {
-          CareTeamComponent careTeam = iter.next();
+        for (CareTeamComponent careTeam : eob.getCareTeam()) {
           CodeableConcept qualification = careTeam.getQualification();
-          qualification.getCoding().remove(entries.getValue());
+          for (Base coding : entries.getValue()) {
+            qualification.getCoding().remove(coding);
+          }
           if (qualification.getCoding().isEmpty()) {
             careTeam.setQualification(null);
           }
         }
       }
     }
-    for (Map.Entry<String, Organization> entries : organizationEnrich.entrySet()) {
-      if (npiMap.containsKey(entries.getKey())) {
-        NPIData npiData = npiMap.get(entries.getKey());
-        entries.getValue().setName(npiData.getProviderOrganizationName());
-      } else {
-        entries.getValue().setName(NPI_ORG_DISPLAY_DEFAULT);
-      }
-    }
-    for (Map.Entry<String, Reference> entries : facilityEnrich.entrySet()) {
-      if (npiMap.containsKey(entries.getKey())) {
-        NPIData npiData = npiMap.get(entries.getKey());
-        entries.getValue().setDisplay(npiData.getProviderOrganizationName());
-      } else {
-        entries.getValue().setDisplay(NPI_ORG_DISPLAY_DEFAULT);
-      }
-    }
-    for (Map.Entry<String, Reference> entries : referralEnrich.entrySet()) {
-      if (npiMap.containsKey(entries.getKey())) {
-        NPIData npiData = npiMap.get(entries.getKey());
-        entries.getValue().setDisplay(buildProviderName(npiData));
-      } else {
-        entries.getValue().setDisplay(null);
-      }
-    }
+  }
+
+  private static void parseEnrichmentEntries(
+      Map.Entry<String, Set<Base>> entries,
+      Map<String, NPIData> npiMap,
+      String displayString,
+      EnrichmentDataType dataType) {
+    entries.getValue().stream()
+        .filter(
+            (Base b) -> {
+              if (b instanceof Reference reference) {
+                return reference.getDisplay() != null
+                    && reference.getDisplay().contains(displayString);
+              } else if (b instanceof Coding coding) {
+                return coding.getDisplay().contains(displayString);
+              } else if (b instanceof Organization organization) {
+                return organization.getName().contains(displayString);
+              }
+              return false;
+            })
+        .forEach(
+            (Base b) -> {
+              NPIData npiData = npiMap.get(entries.getKey());
+              if (b instanceof Reference reference) {
+                if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+                  reference.setDisplay(buildProviderName(npiData));
+                } else {
+                  reference.setDisplay(npiData.getProviderOrganizationName());
+                }
+              } else if (b instanceof Coding coding) {
+                if (dataType.equals(EnrichmentDataType.TAXONOMY)) {
+                  coding.setDisplay(npiData.getTaxonomyDisplay());
+                  coding.setCode(npiData.getTaxonomyCode());
+                } else if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+                  coding.setDisplay(buildProviderName(npiData));
+                } else {
+                  coding.setDisplay(npiData.getProviderOrganizationName());
+                }
+              } else if (b instanceof Organization organization) {
+                organization.setName(npiData.getProviderOrganizationName());
+              }
+            });
   }
 
   /**
@@ -3327,20 +3316,17 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the EOB
    * @param npiSet Stores a list of NPIs that will be enriched.
-   * @param facilityEnrich Stores a list of facilties to enrich.
+   * @param enrichmentMap Stores a list of facilties to enrich.
    */
   public static void enrichFacility(
-      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Reference> facilityEnrich) {
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
 
     if (eob.getFacility() != null && eob.getFacility().getDisplay() != null) {
       String display = eob.getFacility().getDisplay();
-      Pattern pattern = Pattern.compile("replaceProvider\\[(.*)\\]");
-      Matcher matcher = pattern.matcher(display);
-      if (matcher.matches()) {
-        String replaceNpi = matcher.group(1);
-        facilityEnrich.put(replaceNpi, eob.getFacility());
-        npiSet.add(replaceNpi);
-      }
+      enrichReference(
+          "replaceOrganization\\[(.*)\\]", display, enrichmentMap, eob.getFacility(), npiSet);
+      enrichReference(
+          "replaceProvider\\[(.*)\\]", display, enrichmentMap, eob.getFacility(), npiSet);
     }
   }
 
@@ -3349,28 +3335,23 @@ public final class TransformerUtilsV2 {
    *
    * @param eob The eob to enrich.
    * @param npiSet Stores a list of NPIs that will be enriched.
-   * @param organizationEnrich Stores a list of organizations to enrich.
+   * @param enrichmentMap Stores a list of organizations to enrich.
    */
   public static void enrichOrganization(
-      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Organization> organizationEnrich) {
-
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
     if (eob.getContained() != null) {
       eob.getContained()
           .forEach(
               contained -> {
-                if (contained instanceof Organization organization) {
-                  if (organization.getName() != null) {
-                    if (organization.getName().contains("replaceOrganization")) {
-                      String name = organization.getName();
-                      Pattern pattern = Pattern.compile("replaceOrganization\\[(.*)\\]");
-                      Matcher matcher = pattern.matcher(name);
-                      if (matcher.matches()) {
-                        String replaceNpi = matcher.group(1);
-                        organizationEnrich.put(replaceNpi, organization);
-                        npiSet.add(replaceNpi);
-                      }
-                    }
-                  }
+                if (contained instanceof Organization organization
+                    && organization.getName() != null
+                    && organization.getName().contains("replaceOrganization")) {
+                  enrichReference(
+                      "replaceOrganization\\[(.*)\\]",
+                      organization.getName(),
+                      enrichmentMap,
+                      organization,
+                      npiSet);
                 }
               });
     }
@@ -3410,20 +3391,15 @@ public final class TransformerUtilsV2 {
    *
    * @param eob The eob to enrich.
    * @param npiSet Stores a list of NPIs that will be enriched.
-   * @param referralEnrich Stores a list of referrals to enrich.
+   * @param enrichmentMap Map of objects to enrich
    */
   private static void enrichReferral(
-      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Reference> referralEnrich) {
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
 
     if (eob.getReferral() != null && eob.getReferral().getDisplay() != null) {
       String providerDisplay = eob.getReferral().getDisplay();
-      Pattern pattern = Pattern.compile("replaceProvider\\[(.*)\\]");
-      Matcher matcher = pattern.matcher(providerDisplay);
-      if (matcher.matches()) {
-        String providerNpi = matcher.group(1);
-        referralEnrich.put(providerNpi, eob.getReferral());
-        npiSet.add(providerNpi);
-      }
+      enrichReference(
+          "replaceProvider\\[(.*)\\]", providerDisplay, enrichmentMap, eob.getReferral(), npiSet);
     }
   }
 
@@ -3432,57 +3408,70 @@ public final class TransformerUtilsV2 {
    *
    * @param eob The eob to enrich.
    * @param npiSet Stores a list of NPIs that will be enriched.
-   * @param providerEnrich Stores a list of providers to enrich.
-   * @param qualificationEnrich Stores a list of qualifications to enrich.
-   * @param careTeamOrganizationEnrich Stores a list of Careteam orgs to enrich.
+   * @param enrichmentMap Map of objects to enrich.
+   * @param qualificationEnrich Map of qualifications to enrich.
    */
   private static void enrichCareTeam(
       ExplanationOfBenefit eob,
-      Map<String, Reference> providerEnrich,
-      Map<String, Coding> qualificationEnrich,
-      Map<String, Reference> careTeamOrganizationEnrich,
+      Map<String, Set<Base>> enrichmentMap,
+      Map<String, Set<Base>> qualificationEnrich,
       Set<String> npiSet) {
     if (eob.getCareTeam() != null) {
-      eob.getCareTeam().stream()
+      eob.getCareTeam()
           .forEach(
               careteam -> {
                 if (careteam.getProvider() != null) {
                   String providerDisplay = careteam.getProvider().getDisplay();
 
-                  Pattern pattern = Pattern.compile("replaceProvider\\[(.*)\\]");
-                  Matcher matcher = pattern.matcher(providerDisplay);
-                  if (matcher.matches()) {
-                    String providerNpi = matcher.group(1);
-                    providerEnrich.put(providerNpi, careteam.getProvider());
-                    npiSet.add(providerNpi);
-                  }
-
-                  pattern = Pattern.compile("replaceOrganization\\[(.*)\\]");
-                  matcher = pattern.matcher(providerDisplay);
-                  if (matcher.matches()) {
-                    String providerNpi = matcher.group(1);
-                    careTeamOrganizationEnrich.put(providerNpi, careteam.getProvider());
-                    npiSet.add(providerNpi);
-                  }
+                  enrichReference(
+                      "replaceProvider\\[(.*)\\]",
+                      providerDisplay,
+                      enrichmentMap,
+                      careteam.getProvider(),
+                      npiSet);
+                  enrichReference(
+                      "replaceOrganization\\[(.*)\\]",
+                      providerDisplay,
+                      enrichmentMap,
+                      careteam.getProvider(),
+                      npiSet);
                 }
                 if (careteam.getQualification() != null) {
-                  Iterator<Coding> codingIterator =
-                      careteam.getQualification().getCoding().iterator();
-                  while (codingIterator.hasNext()) {
-                    Coding coding = codingIterator.next();
-                    String qualificationDisplay = coding.getDisplay();
-                    if (qualificationDisplay.contains("replaceTaxonomyDisplay")) {
-                      Pattern pattern = Pattern.compile("replaceTaxonomyDisplay\\[(.*)\\]");
-                      Matcher matcher = pattern.matcher(qualificationDisplay);
-                      if (matcher.matches()) {
-                        String qualificationNpi = matcher.group(1);
-                        qualificationEnrich.put(qualificationNpi, coding);
-                        npiSet.add(qualificationNpi);
-                      }
-                    }
-                  }
+                  careteam
+                      .getQualification()
+                      .getCoding()
+                      .forEach(
+                          coding -> {
+                            String qualificationDisplay = coding.getDisplay();
+                            enrichReference(
+                                "replaceTaxonomyDisplay\\[(.*)\\]",
+                                qualificationDisplay,
+                                qualificationEnrich,
+                                coding,
+                                npiSet);
+                          });
                 }
               });
+    }
+  }
+
+  private static void enrichReference(
+      String regex,
+      String display,
+      Map<String, Set<Base>> enrichmentMap,
+      Base reference,
+      Set<String> npiSet) {
+    if (display != null) {
+      Pattern pattern = Pattern.compile(regex);
+      Matcher matcher = pattern.matcher(display);
+      if (matcher.matches()) {
+        String providerNpi = matcher.group(1);
+        if (!enrichmentMap.containsKey(providerNpi)) {
+          enrichmentMap.put(providerNpi, new HashSet<>());
+        }
+        enrichmentMap.get(providerNpi).add(reference);
+        npiSet.add(providerNpi);
+      }
     }
   }
 

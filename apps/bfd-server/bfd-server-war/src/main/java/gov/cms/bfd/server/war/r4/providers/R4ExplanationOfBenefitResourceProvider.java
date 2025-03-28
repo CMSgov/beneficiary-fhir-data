@@ -257,7 +257,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
-    TransformerUtilsV2.enrichResource(eob, npiOrgLookup);
+    TransformerUtilsV2.enrichEob(eob, npiOrgLookup);
     return eob;
   }
 
