@@ -28,7 +28,8 @@ resource "aws_lambda_function" "regression_wrapper" {
 
   description = join("", [
     "Invoked on the AfterAllowTestTraffic CodeDeploy Lifecycle Event. This Lambda is a wrapper ",
-    "around the existing Regression Suite Lambda to make it work with CodeDeploy"
+    "around the ${data.aws_lambda_function.run_locust.function_name} Lambda to run the Regression ",
+    "test suite on replacement tasks"
   ])
 
   kms_key_arn      = local.env_key_arn
