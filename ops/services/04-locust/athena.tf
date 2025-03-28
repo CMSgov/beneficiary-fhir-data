@@ -13,6 +13,7 @@ module "bucket_athena" {
 
   bucket_kms_key_arn = local.env_key_arn
   bucket_name        = "${local.name_prefix}-stats"
+  force_destroy      = local.is_ephemeral_env
 }
 
 resource "aws_athena_workgroup" "locust_stats" {
