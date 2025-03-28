@@ -772,7 +772,7 @@ public class OpenApiInterceptor {
         nextSearchParam : nextResource.getSearchParam()) {
       final Parameter parametersItem = new Parameter();
       operation.addParametersItem(parametersItem);
-      example.put(nextSearchParam.getName(), nextSearchParam.getType().name());
+      example.put(nextSearchParam.getName(), toExamplePlaceholder(nextSearchParam.getType()));
 
       parametersItem.setName(nextSearchParam.getName());
       parametersItem.setRequired(false);
@@ -1397,6 +1397,27 @@ public class OpenApiInterceptor {
       case NULL:
       default:
         return new StringSchema();
+    }
+  }
+
+  private String toExamplePlaceholder(Enumerations.SearchParamType type) {
+    if (type == null) {
+      return "string";
+    }
+    switch (type) {
+      case NUMBER, QUANTITY:
+        return "0";
+      case DATE:
+        return "0001-01-01T00:00+00:00";
+      case STRING:
+      case TOKEN:
+      case REFERENCE:
+      case COMPOSITE:
+      case URI:
+      case SPECIAL:
+      case NULL:
+      default:
+        return "string";
     }
   }
 }
