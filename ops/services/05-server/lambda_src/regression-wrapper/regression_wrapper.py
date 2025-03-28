@@ -29,6 +29,8 @@ BOTO_CONFIG = Config(
         "total_max_attempts": 10,
         "mode": "adaptive",
     },
+    # Double the read timeout for some extra safety when synchrnously invoking the run-locust Lambda
+    read_timeout=120,
 )
 
 logger = Logger()
