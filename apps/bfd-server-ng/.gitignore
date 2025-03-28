@@ -1,0 +1,2 @@
+# .mvn needs to exist in order for the spring boot maven plugin to function
+!.mvn
