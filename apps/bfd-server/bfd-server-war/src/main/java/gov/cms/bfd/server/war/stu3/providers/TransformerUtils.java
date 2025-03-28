@@ -272,7 +272,7 @@ public final class TransformerUtils {
                 return reference.getDisplay() != null
                     && reference.getDisplay().contains(displayString);
               } else if (t instanceof Coding coding) {
-                return coding.getDisplay().contains(displayString);
+                return coding.getDisplay() != null && coding.getDisplay().contains(displayString);
               }
               return false;
             })

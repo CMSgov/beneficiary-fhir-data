@@ -3269,7 +3269,9 @@ public final class TransformerUtilsV2 {
           for (CareTeamComponent careTeam : eob.getCareTeam()) {
             CodeableConcept qualification = careTeam.getQualification();
             for (Base coding : entries.getValue()) {
-              qualification.getCoding().remove(coding);
+              if (qualification != null) {
+                qualification.getCoding().remove(coding);
+              }
             }
             if (qualification.getCoding().isEmpty()) {
               careTeam.setQualification(null);
@@ -3292,7 +3294,7 @@ public final class TransformerUtilsV2 {
                 return reference.getDisplay() != null
                     && reference.getDisplay().contains(displayString);
               } else if (b instanceof Coding coding) {
-                return coding.getDisplay().contains(displayString);
+                return coding.getDisplay() != null && coding.getDisplay().contains(displayString);
               } else if (b instanceof Organization organization) {
                 return organization.getName().contains(displayString);
               }
