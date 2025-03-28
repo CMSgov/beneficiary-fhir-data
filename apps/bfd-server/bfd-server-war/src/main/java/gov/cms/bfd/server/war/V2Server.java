@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -10,6 +9,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
+import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
