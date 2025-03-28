@@ -19,6 +19,7 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -120,6 +121,7 @@ public final class HospiceClaimTransformerV2Test {
   /** Creates an eob for the test. */
   private void createEOB() {
     ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -459,6 +461,7 @@ public final class HospiceClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

@@ -20,6 +20,7 @@ import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -130,6 +131,7 @@ public class CarrierClaimTransformerV2Test {
 
     claim = generateClaim();
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -188,6 +190,7 @@ public class CarrierClaimTransformerV2Test {
     claim = generateClaim();
     claim.setCarrierClaimBlgNpiNumber(Optional.empty());
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -728,7 +731,7 @@ public class CarrierClaimTransformerV2Test {
     loadedClaim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
-
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     // First member
     CareTeamComponent member1 =
         TransformerTestUtilsV2.findCareTeamBySequence(1, genEob.getCareTeam());
@@ -835,7 +838,7 @@ public class CarrierClaimTransformerV2Test {
     }
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
-
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
     String prtIndCdUrl =
@@ -865,6 +868,7 @@ public class CarrierClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1448,6 +1452,7 @@ public class CarrierClaimTransformerV2Test {
 
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claimWithoutNpi, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);

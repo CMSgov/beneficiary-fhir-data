@@ -338,30 +338,6 @@ public final class CommonTransformerUtils {
    * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
-    //    if (npiOrgLookup != null) {
-    //      Optional<NPIData> npiData =
-    // npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
-    //      if (npiData.isPresent()) {
-    //        String entityTypeCode = npiData.get().getEntityTypeCode();
-    //        if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
-    //          String[] name =
-    //              new String[] {
-    //                npiData.get().getProviderNamePrefix(),
-    //                npiData.get().getProviderFirstName(),
-    //                npiData.get().getProviderMiddleName(),
-    //                npiData.get().getProviderLastName(),
-    //                npiData.get().getProviderNameSuffix(),
-    //                npiData.get().getProviderCredential()
-    //              };
-    //          return Arrays.stream(name)
-    //              .map(Strings::trimToNull)
-    //              .filter(Objects::nonNull)
-    //              .collect(Collectors.joining(" "));
-    //        } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
-    //          return npiData.get().getProviderOrganizationName();
-    //        }
-    //      }
-    //    }
     return "replaceProvider[" + npiCode + "]";
   }
 

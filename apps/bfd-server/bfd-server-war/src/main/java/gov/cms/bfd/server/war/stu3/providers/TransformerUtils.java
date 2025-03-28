@@ -333,7 +333,7 @@ public final class TransformerUtils {
    * @param npiData the NPIData
    * @return a String with the Provider name.
    */
-  private static String buildProviderName(NPIData npiData) {
+  public static String buildProviderName(NPIData npiData) {
 
     if (npiData.getEntityTypeCode().equals(ENTITY_TYPE_CODE_PROVIDER)) {
       String[] name =

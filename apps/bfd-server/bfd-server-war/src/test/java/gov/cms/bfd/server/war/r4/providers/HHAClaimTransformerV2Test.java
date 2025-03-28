@@ -18,6 +18,7 @@ import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
@@ -126,6 +127,7 @@ public class HHAClaimTransformerV2Test {
     hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -226,6 +228,7 @@ public class HHAClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -251,6 +254,7 @@ public class HHAClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

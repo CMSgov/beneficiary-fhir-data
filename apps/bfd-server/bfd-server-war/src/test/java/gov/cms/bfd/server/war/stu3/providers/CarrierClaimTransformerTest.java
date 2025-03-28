@@ -202,6 +202,7 @@ public final class CarrierClaimTransformerTest {
     }
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
+    TransformerUtils.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
