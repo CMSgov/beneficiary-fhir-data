@@ -17,6 +17,11 @@
  * limitations under the License.
  * #L%
  */
+
+// The following changes have been added to the original source:
+// Redirect /swagger-ui to /swagger-ui/ so users don't have to remember the trailing slash
+// Automatically include POST variants of search endpoints
+
 package gov.cms.bfd.server.openapi;
 
 import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
