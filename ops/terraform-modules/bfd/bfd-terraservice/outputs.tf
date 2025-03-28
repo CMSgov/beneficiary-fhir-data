@@ -80,7 +80,12 @@ output "env_key_arn" {
 output "env_config_key_arns" {
   description = "ARNs of the current environment's configuration-specific, multi-region CMK."
   sensitive   = false
-  value       = concat(local.kms_config_key_primary, local.kms_config_key_replicas)
+  value = flatten(
+    [
+      for v in local.kms_config_key_mrk_config :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 }
 
 output "default_iam_path" {

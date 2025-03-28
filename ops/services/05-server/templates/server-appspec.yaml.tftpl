@@ -13,5 +13,7 @@ revision:
               LoadBalancerInfo:
                 ContainerName: "${container_name}"
                 ContainerPort: ${container_port}
+      %{~ if validation_lambda_arn != null ~}
       Hooks:
         - AfterAllowTestTraffic: "${validation_lambda_arn}"
+      %{~ endif ~}
