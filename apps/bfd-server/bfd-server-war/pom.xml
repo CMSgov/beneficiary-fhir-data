@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -171,9 +173,9 @@
             <artifactId>metrics-jvm</artifactId>
             <version>${metrics.version}</version>
         </dependency>
-<!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
-<!--                for the number of active requests, and a timer for request duration. Enabled-->
-<!--                via `web.xml`. &ndash;&gt;-->
+        <!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
+        <!--                for the number of active requests, and a timer for request duration. Enabled-->
+        <!--                via `web.xml`. &ndash;&gt;-->
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jakarta-servlets</artifactId>
@@ -282,9 +284,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-server-openapi</artifactId>
-            <version>${hapi-fhir.version}</version>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-server-openapi</artifactId>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
@@ -393,22 +395,24 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>${maven.antrun.plugin.version}</version>
                 <executions>
-                  <execution>
-                    <phase> pre-integration-test </phase>
-                    <configuration>
-                      <target>
-                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
-                              <patternset>
-                                  <exclude name="**/lib/*" />
-                                  <exclude name="**/classes/**" />
-                              </patternset>
-                          </unzip>
-                      </target>
-                    </configuration>
-                    <goals>
-                      <goal>run</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <target>
+                                <unzip
+                                    src="${project.build.directory}/${project.artifactId}-${project.version}.war"
+                                    dest="${project.build.directory}/test-webapp-directory">
+                                    <patternset>
+                                        <exclude name="**/lib/*" />
+                                        <exclude name="**/classes/**" />
+                                    </patternset>
+                                </unzip>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
