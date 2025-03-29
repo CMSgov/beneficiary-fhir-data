@@ -148,11 +148,22 @@ public final class TransformerUtilsV2 {
   /** Constant for finding a provider org reference. */
   private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
 
+  /** String used to determine if a field should be enriched with provider data. */
   public static final String REPLACE_PROVIDER = "replaceProvider";
+
+  /** String used to determine if a field should be enriched with organization data. */
   public static final String REPLACE_ORGANIZATION = "replaceOrganization";
+
+  /** String used to determine if a field should be enriched with taxonomy data. */
   public static final String REPLACE_TAXONOMY_DISPLAY = "replaceTaxonomyDisplay";
+
+  /** REGEX used to get the NPI for organization enrichment. */
   public static final String REPLACE_ORGANIZATION_REGEX = "replaceOrganization\\[(.*)\\]";
+
+  /** REGEX used to get the NPI for provider enrichment. */
   public static final String REPLACE_PROVIDER_REGEX = "replaceProvider\\[(.*)\\]";
+
+  /** REGEX used to get the NPI for taxonomy enrichment. */
   public static final String REPLACE_TAXONOMY_DISPLAY_REGEX = "replaceTaxonomyDisplay\\[(.*)\\]";
 
   /** Data type of the enrichment. */

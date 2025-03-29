@@ -125,10 +125,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public final class TransformerUtils {
 
-  public static final String REPLACE_ORGANIZATION_REGEX = "replaceOrganization\\[(.*)\\]";
-  public static final String REPLACE_PROVIDER_REGEX = "replaceProvider\\[(.*)\\]";
+  /** String used to determine if a field should be enriched with provider data. */
   public static final String REPLACE_PROVIDER = "replaceProvider";
+
+  /** String used to determine if a field should be enriched with organization data. */
   public static final String REPLACE_ORGANIZATION = "replaceOrganization";
+
+  /** REGEX used to get the NPI for organization enrichment. */
+  public static final String REPLACE_ORGANIZATION_REGEX = "replaceOrganization\\[(.*)\\]";
+
+  /** REGEX used to get the NPI for provider enrichment. */
+  public static final String REPLACE_PROVIDER_REGEX = "replaceProvider\\[(.*)\\]";
 
   /** Data type of the enrichment. */
   enum EnrichmentDataType {
