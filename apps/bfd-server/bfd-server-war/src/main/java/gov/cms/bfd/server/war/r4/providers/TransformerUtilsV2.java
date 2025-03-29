@@ -148,6 +148,13 @@ public final class TransformerUtilsV2 {
   /** Constant for finding a provider org reference. */
   private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
 
+  public static final String REPLACE_PROVIDER = "replaceProvider";
+  public static final String REPLACE_ORGANIZATION = "replaceOrganization";
+  public static final String REPLACE_TAXONOMY_DISPLAY = "replaceTaxonomyDisplay";
+  public static final String REPLACE_ORGANIZATION_REGEX = "replaceOrganization\\[(.*)\\]";
+  public static final String REPLACE_PROVIDER_REGEX = "replaceProvider\\[(.*)\\]";
+  public static final String REPLACE_TAXONOMY_DISPLAY_REGEX = "replaceTaxonomyDisplay\\[(.*)\\]";
+
   /** Data type of the enrichment. */
   enum EnrichmentDataType {
     ORGANIZATION,
@@ -3191,12 +3198,28 @@ public final class TransformerUtilsV2 {
     Map<String, Set<Base>> enrichmentMap = new HashMap<>();
     Map<String, Set<Base>> qualificationEnrich = new HashMap<>();
     Set<String> npiSet = new HashSet<>();
-    enrichCareTeam(eob, enrichmentMap, qualificationEnrich, npiSet);
-    enrichOrganization(eob, npiSet, enrichmentMap);
-    enrichFacility(eob, npiSet, enrichmentMap);
-    enrichReferral(eob, npiSet, enrichmentMap);
+    callCollectionMethods(eob, enrichmentMap, qualificationEnrich, npiSet);
     Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
     enrichResources(List.of(eob), enrichmentMap, qualificationEnrich, npiMap);
+  }
+
+  /**
+   * Calls the methods to collect together all of the objects to be enriched.
+   *
+   * @param eob The EOB that will be enriched.
+   * @param enrichmentMap A map of NPIs to the objects that will be enriched.
+   * @param qualificationEnrich Map of NPIs to qualification entries to enrich.
+   * @param npiSet The set of NPIs that will be queried from the database.
+   */
+  private static void callCollectionMethods(
+      ExplanationOfBenefit eob,
+      Map<String, Set<Base>> enrichmentMap,
+      Map<String, Set<Base>> qualificationEnrich,
+      Set<String> npiSet) {
+    collectCareTeamEnrichments(eob, enrichmentMap, qualificationEnrich, npiSet);
+    collectOrganizationEnrichments(eob, npiSet, enrichmentMap);
+    collectFacilityEnrichments(eob, npiSet, enrichmentMap);
+    collectReferralEnrichments(eob, npiSet, enrichmentMap);
   }
 
   /**
@@ -3211,12 +3234,11 @@ public final class TransformerUtilsV2 {
     Set<String> npiSet = new HashSet<>();
     for (BundleEntryComponent entry : bundle.getEntry()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) entry.getResource();
-      enrichCareTeam(eob, enrichmentMap, qualificationEnrich, npiSet);
-      enrichOrganization(eob, npiSet, enrichmentMap);
-      enrichFacility(eob, npiSet, enrichmentMap);
-      enrichReferral(eob, npiSet, enrichmentMap);
+      callCollectionMethods(eob, enrichmentMap, qualificationEnrich, npiSet);
     }
     Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    // The list of EOB's is required here for the sole purpose of cleaning up a qualification if it
+    // has no enrichment data.
     List<ExplanationOfBenefit> eobs =
         bundle.getEntry().stream()
             .map(entry -> (ExplanationOfBenefit) entry.getResource())
@@ -3225,7 +3247,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Method to perform the enrichment.
+   * Performs enrichment of the previously collected objects.
    *
    * @param eobs The ExplanationOfBenefits
    * @param enrichmentMap Map of objects to enrich.
@@ -3239,9 +3261,9 @@ public final class TransformerUtilsV2 {
       Map<String, NPIData> npiMap) {
     for (Map.Entry<String, Set<Base>> entries : enrichmentMap.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
-        parseEnrichmentEntries(entries, npiMap, "replaceProvider", EnrichmentDataType.PROVIDER);
+        parseEnrichmentEntries(entries, npiMap, REPLACE_PROVIDER, EnrichmentDataType.PROVIDER);
         parseEnrichmentEntries(
-            entries, npiMap, "replaceOrganization", EnrichmentDataType.ORGANIZATION);
+            entries, npiMap, REPLACE_ORGANIZATION, EnrichmentDataType.ORGANIZATION);
 
       } else {
         entries
@@ -3262,7 +3284,7 @@ public final class TransformerUtilsV2 {
     for (Map.Entry<String, Set<Base>> entries : qualificationEnrich.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
         parseEnrichmentEntries(
-            entries, npiMap, "replaceTaxonomyDisplay", EnrichmentDataType.TAXONOMY);
+            entries, npiMap, REPLACE_TAXONOMY_DISPLAY, EnrichmentDataType.TAXONOMY);
 
       } else {
         for (ExplanationOfBenefit eob : eobs) {
@@ -3325,32 +3347,31 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Enrich facility with NPI data.
+   * Collects objects to enrich from the EOB's Facility.
    *
    * @param eob the EOB
    * @param npiSet Stores a list of NPIs that will be enriched.
    * @param enrichmentMap Stores a list of facilties to enrich.
    */
-  public static void enrichFacility(
+  public static void collectFacilityEnrichments(
       ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
 
     if (eob.getFacility() != null && eob.getFacility().getDisplay() != null) {
       String display = eob.getFacility().getDisplay();
       enrichReference(
-          "replaceOrganization\\[(.*)\\]", display, enrichmentMap, eob.getFacility(), npiSet);
-      enrichReference(
-          "replaceProvider\\[(.*)\\]", display, enrichmentMap, eob.getFacility(), npiSet);
+          REPLACE_ORGANIZATION_REGEX, display, enrichmentMap, eob.getFacility(), npiSet);
+      enrichReference(REPLACE_PROVIDER_REGEX, display, enrichmentMap, eob.getFacility(), npiSet);
     }
   }
 
   /**
-   * Enrich organization with EOB data.
+   * Collects objects to enrich from the EOB's Organizations.
    *
    * @param eob The eob to enrich.
    * @param npiSet Stores a list of NPIs that will be enriched.
    * @param enrichmentMap Stores a list of organizations to enrich.
    */
-  public static void enrichOrganization(
+  public static void collectOrganizationEnrichments(
       ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
     if (eob.getContained() != null) {
       eob.getContained()
@@ -3360,7 +3381,7 @@ public final class TransformerUtilsV2 {
                     && organization.getName() != null
                     && organization.getName().contains("replaceOrganization")) {
                   enrichReference(
-                      "replaceOrganization\\[(.*)\\]",
+                      REPLACE_ORGANIZATION_REGEX,
                       organization.getName(),
                       enrichmentMap,
                       organization,
@@ -3400,31 +3421,31 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Enrich referral with NPI data.
+   * Collects objects to enrich from the EOB's Referral.
    *
    * @param eob The eob to enrich.
    * @param npiSet Stores a list of NPIs that will be enriched.
    * @param enrichmentMap Map of objects to enrich
    */
-  private static void enrichReferral(
+  private static void collectReferralEnrichments(
       ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
 
     if (eob.getReferral() != null && eob.getReferral().getDisplay() != null) {
       String providerDisplay = eob.getReferral().getDisplay();
       enrichReference(
-          "replaceProvider\\[(.*)\\]", providerDisplay, enrichmentMap, eob.getReferral(), npiSet);
+          REPLACE_PROVIDER_REGEX, providerDisplay, enrichmentMap, eob.getReferral(), npiSet);
     }
   }
 
   /**
-   * Enrich the CareTeam with EOB data.
+   * Collects objects to enrich from the EOB's CareTeams.
    *
    * @param eob The eob to enrich.
    * @param npiSet Stores a list of NPIs that will be enriched.
    * @param enrichmentMap Map of objects to enrich.
    * @param qualificationEnrich Map of qualifications to enrich.
    */
-  private static void enrichCareTeam(
+  private static void collectCareTeamEnrichments(
       ExplanationOfBenefit eob,
       Map<String, Set<Base>> enrichmentMap,
       Map<String, Set<Base>> qualificationEnrich,
@@ -3437,13 +3458,13 @@ public final class TransformerUtilsV2 {
                   String providerDisplay = careteam.getProvider().getDisplay();
 
                   enrichReference(
-                      "replaceProvider\\[(.*)\\]",
+                      REPLACE_PROVIDER_REGEX,
                       providerDisplay,
                       enrichmentMap,
                       careteam.getProvider(),
                       npiSet);
                   enrichReference(
-                      "replaceOrganization\\[(.*)\\]",
+                      REPLACE_ORGANIZATION_REGEX,
                       providerDisplay,
                       enrichmentMap,
                       careteam.getProvider(),
@@ -3457,7 +3478,7 @@ public final class TransformerUtilsV2 {
                           coding -> {
                             String qualificationDisplay = coding.getDisplay();
                             enrichReference(
-                                "replaceTaxonomyDisplay\\[(.*)\\]",
+                                REPLACE_TAXONOMY_DISPLAY_REGEX,
                                 qualificationDisplay,
                                 qualificationEnrich,
                                 coding,
