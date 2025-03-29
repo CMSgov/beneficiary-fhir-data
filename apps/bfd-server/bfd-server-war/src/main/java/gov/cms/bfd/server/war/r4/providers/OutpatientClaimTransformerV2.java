@@ -6,15 +6,15 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samhsa.OutpatientTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
@@ -45,9 +45,6 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
   /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(OutpatientClaimTransformerV2.class.getSimpleName(), "transform");
@@ -64,16 +61,13 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    *
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    */
   public OutpatientClaimTransformerV2(
       MetricRegistry metricRegistry,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
   }
@@ -158,11 +152,11 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getAttendingPhysicianNpi()),
         claimGroup.getOperatingPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOperatingPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getOperatingPhysicianNpi()),
         claimGroup.getOtherPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOtherPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getOtherPhysicianNpi()),
         claimGroup.getAttendingPhysicianUpin(),
         claimGroup.getOperatingPhysicianUpin(),
         claimGroup.getOtherPhysicianUpin());
@@ -242,8 +236,7 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        npiOrgLookup
-            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi())
+        CommonTransformerUtils.buildReplaceOrganization(claimGroup.getOrganizationNpi())
             .map(NPIData::getProviderOrganizationName),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
@@ -449,7 +442,8 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI(),
-          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
+          CommonTransformerUtils.buildReplaceTaxonomy(
+              line.getRevenueCenterRenderingPhysicianNPI()));
 
       // REV_CNTR_STUS_IND_CD => ExplanationOfBenefit.item.revenue.extension
       TransformerUtilsV2.mapEobCommonItemRevenueStatusCode(item, eob, line.getStatusCode());

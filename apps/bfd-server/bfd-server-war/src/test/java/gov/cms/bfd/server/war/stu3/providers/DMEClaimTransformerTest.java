@@ -19,6 +19,7 @@ import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -150,6 +151,7 @@ public final class DMEClaimTransformerTest {
     }
 
     ExplanationOfBenefit genEob = dmeClaimTransformer.transform(loadedClaim, false);
+    TransformerUtils.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set

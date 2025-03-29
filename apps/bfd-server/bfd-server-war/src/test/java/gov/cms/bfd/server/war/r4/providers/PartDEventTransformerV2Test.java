@@ -13,11 +13,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.fda.utility.App;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -125,7 +125,6 @@ public final class PartDEventTransformerV2Test {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of(npiData));
     InputStream npiDataStream =
         Thread.currentThread()
             .getContextClassLoader()
@@ -134,8 +133,7 @@ public final class PartDEventTransformerV2Test {
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         new FdaDrugCodeDisplayLookup(ndcProductHashMap);
 
-    partdEventTransformer =
-        new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup, mockNpiOrgLookup);
+    partdEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     claim = generateClaim();
     eob = partdEventTransformer.transform(claim, false);
   }

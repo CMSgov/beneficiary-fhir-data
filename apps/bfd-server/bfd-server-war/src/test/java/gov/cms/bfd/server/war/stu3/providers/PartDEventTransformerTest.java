@@ -14,6 +14,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
@@ -96,7 +97,7 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
-
+    TransformerUtils.enrichEob(eob, NPIOrgLookup.createTestNpiOrgLookup());
     assertMatches(claim, eob);
   }
 
@@ -183,7 +184,7 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
-
+    TransformerUtils.enrichEob(eob, NPIOrgLookup.createTestNpiOrgLookup());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -390,12 +391,6 @@ public final class PartDEventTransformerTest {
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
           claim.getNationalDrugCode(), RDATestUtils.FAKE_DRUG_CODE_DISPLAY);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    try {
-      TransformerTestUtils.assertNPICodeDisplayEquals(
-          claim.getPrescriberId(), "DR. ROBERT BISBEE MD");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

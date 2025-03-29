@@ -1,8 +1,5 @@
 package gov.cms.bfd.server.war.commons;
 
-import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_ORGANIZATION;
-import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_PROVIDER;
-
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -11,15 +8,15 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,14 +34,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -343,30 +338,7 @@ public final class CommonTransformerUtils {
    * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
-    if (npiOrgLookup != null) {
-      Optional<NPIData> npiData = npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
-      if (npiData.isPresent()) {
-        String entityTypeCode = npiData.get().getEntityTypeCode();
-        if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
-          String[] name =
-              new String[] {
-                npiData.get().getProviderNamePrefix(),
-                npiData.get().getProviderFirstName(),
-                npiData.get().getProviderMiddleName(),
-                npiData.get().getProviderLastName(),
-                npiData.get().getProviderNameSuffix(),
-                npiData.get().getProviderCredential()
-              };
-          return Arrays.stream(name)
-              .map(Strings::trimToNull)
-              .filter(Objects::nonNull)
-              .collect(Collectors.joining(" "));
-        } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
-          return npiData.get().getProviderOrganizationName();
-        }
-      }
-    }
-    return null;
+    return "replaceProvider[" + npiCode + "]";
   }
 
   /**
@@ -776,5 +748,40 @@ public final class CommonTransformerUtils {
       throw new BadCodeMonkeyException(SHOULD_FILTER_SAMHSA + " attribute missing from request");
     }
     return (boolean) shouldFilterSamhsa;
+  }
+
+  /**
+   * Builds taxonomy for future enrichment.
+   *
+   * @param npi NIP
+   * @return the NPIData
+   */
+  public static Optional<NPIData> buildReplaceTaxonomy(Optional<String> npi) {
+    if (npi.isPresent()) {
+      return Optional.of(
+          NPIData.builder()
+              .taxonomyCode(String.format("replaceTaxonomyCode[%s]", npi.get()))
+              .taxonomyDisplay(String.format("replaceTaxonomyDisplay[%s]", npi.get()))
+              .build());
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Replaces organization for future enrichment.
+   *
+   * @param npi NPI
+   * @return NPIData
+   */
+  public static Optional<NPIData> buildReplaceOrganization(Optional<String> npi) {
+    if (npi.isPresent()) {
+      return Optional.of(
+          NPIData.builder()
+              .providerOrganizationName(String.format("replaceOrganization[%s]", npi.get()))
+              .build());
+    } else {
+      return Optional.empty();
+    }
   }
 }
