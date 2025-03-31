@@ -1,3 +1,6 @@
+# "copy" defines a list of parameters that will be copied directly from the seed environment.
+# Typically, this will be sensitive values, keys, credentials, etc. Supports recursive copying.
+# "values" definitons take precedence over any copied parameters
 copy:
   - /bfd/${env}/common/nonsensitive/enterprise_tools_security_group
   - /bfd/${env}/common/nonsensitive/key_pair
@@ -39,6 +42,8 @@ copy:
   - /bfd/${env}/server/sensitive/test_client_samhsa_key
   - /bfd/${env}/server/sensitive/server_regression_cert
   - /bfd/${env}/server/sensitive/server_regression_key
+# "values" defines a key-value map exactly the same as the typical seed environment ".sops.yaml"
+# configuration format. Takes precedence over any copied SSM parameters
 values:
   /bfd/${env}/common/nonsensitive/env_name_std: ${env}
   /bfd/${env}/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
