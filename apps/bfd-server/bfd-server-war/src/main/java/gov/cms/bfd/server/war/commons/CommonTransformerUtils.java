@@ -365,7 +365,7 @@ public final class CommonTransformerUtils {
   }
 
   /**
-   * Retrieves the NPI display value using the NPIOrgLookup class.
+   * Sets a placeholder for NPICodeDisplay for future enrichment.
    *
    * @param npiCode NPI code
    * @return the npi code display
