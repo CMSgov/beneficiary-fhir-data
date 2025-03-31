@@ -19,10 +19,13 @@ fi
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 readonly SCRIPT_DIR
 
+SERVICE_DIR="$(dirname "$SCRIPT_DIR")"
+readonly SERVICE_DIR
+
 BFD_ENVIRONMENT="$1"
 readonly BFD_ENVIRONMENT
 
-YAML_FILE="$SCRIPT_DIR/$BFD_ENVIRONMENT.sops.yaml"
+YAML_FILE="$SERVICE_DIR/values/$BFD_ENVIRONMENT.sops.yaml"
 readonly YAML_FILE
 
 if [[ ! -f "$YAML_FILE" ]]; then
@@ -37,8 +40,8 @@ readonly AWS_ACCOUNT_ID
 ACCOUNT_ID="$AWS_ACCOUNT_ID" envsubst '$ACCOUNT_ID' < "$YAML_FILE" | sponge "$YAML_FILE"
 
 # Then, open with sops for editing now that the full key ARN is there
-sops edit "$YAML_FILE"
+sops edit "$YAML_FILE" || true # Ignore errors so that the account ID is still replaced
 
 # Afterwards, the account ID will be in the key arn. Replace all instances with "${ACCOUNT_ID}",
 # explicitly
-sed -i -e "s/\(arn:.*\)${AWS_ACCOUNT_ID}/\1\$\{ACCOUNT_ID}/" "$YAML_FILE"
+sed "s/\(arn:.*\)${AWS_ACCOUNT_ID}/\1\$\{ACCOUNT_ID}/" < "$YAML_FILE" | sponge "$YAML_FILE"
