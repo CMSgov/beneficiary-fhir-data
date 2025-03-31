@@ -7,6 +7,7 @@ This Terraservice defines the resources that implement the BFD Server's metrics 
 The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
 
 - `base`
+- `config`
 - `server`
 
 <!-- BEGIN_TF_DOCS -->
