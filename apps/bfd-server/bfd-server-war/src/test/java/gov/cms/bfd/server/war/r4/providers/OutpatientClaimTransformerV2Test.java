@@ -18,7 +18,6 @@ import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
@@ -124,7 +123,7 @@ public final class OutpatientClaimTransformerV2Test {
         new OutpatientClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

@@ -13,7 +13,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.commons.CCWUtils;
@@ -157,7 +156,6 @@ public final class Stu3EobSamhsaMatcherTest {
      */
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
-      NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
       FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
           RDATestUtils.fdaFakeDrugCodeDisplayLookup();

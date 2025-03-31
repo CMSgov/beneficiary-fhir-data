@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils.npi_fda;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,6 +15,7 @@ import java.io.InputStreamReader;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -43,6 +45,13 @@ public class LoadNpiDataFilesTest {
     Mockito.when(entityManager.getTransaction()).thenReturn(entityTransaction);
     Mockito.when(query.getSingleResult())
         .thenReturn(new Date(Instant.now().minus(31, ChronoUnit.DAYS).toEpochMilli()));
+  }
+
+  @Test
+  void shouldHaveTaxonomy() throws IOException {
+    Map<String, String> descriptions = LoadNpiDataFiles.processTaxonomyDescriptions();
+    assertTrue(descriptions.containsKey("207KA0200X"));
+    assertEquals("Allergy Physician", descriptions.get("207KA0200X"));
   }
 
   @Test

@@ -174,8 +174,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
       ZipEntry entry;
       while ((entry = zipInputStream.getNextEntry()) != null) {
         if (entry.getName().startsWith("npidata_pfile_")
-            && !entry.getName().endsWith("_FileHeader.csv")
-            && !entry.getName().endsWith("_fileheader.csv")) {
+            && !entry.getName().toLowerCase().endsWith("_fileheader.csv")) {
           InputStreamReader ir = new InputStreamReader(zipInputStream);
           return saveNpiDataFile(ir);
         }
@@ -208,7 +207,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @return map of taxonomy groupings.
    * @throws IOException exception thrown.
    */
-  private static Map<String, String> processTaxonomyDescriptions() throws IOException {
+  static Map<String, String> processTaxonomyDescriptions() throws IOException {
     ClassLoader classLoader = LoadNpiDataFiles.class.getClassLoader();
     Map<String, String> taxonomyMapping = new HashMap<>();
     try (BufferedReader reader =

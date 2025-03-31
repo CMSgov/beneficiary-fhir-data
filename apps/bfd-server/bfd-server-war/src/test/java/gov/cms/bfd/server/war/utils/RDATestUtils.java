@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.utils;
 
+import static org.mockito.ArgumentMatchers.any;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.DatabaseTestUtils;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.data.fda.utility.App;
@@ -12,6 +16,8 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -35,6 +41,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.jetbrains.annotations.NotNull;
+import org.mockito.Mockito;
 
 /** Supplies test data for the RDA based unit tests. */
 public class RDATestUtils {
@@ -51,6 +58,8 @@ public class RDATestUtils {
           RdaMcsDiagnosisCode.class,
           RdaMcsClaim.class,
           Mbi.class);
+
+  public static final String NPI_ORG_TEST_FILE = "npi_e2e_it.json";
 
   /** Path to use for persistence units. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
@@ -930,5 +939,29 @@ public class RDATestUtils {
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
 
     return new FdaDrugCodeDisplayLookup(npiDataStream);
+  }
+
+  public static NPIOrgLookup createTestNpiOrgLookup() {
+    InputStream npiDataStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(NPI_ORG_TEST_FILE);
+
+    Map<String, NPIData> npiMap = new HashMap<>();
+    String line;
+    try (final InputStream npiStream = npiDataStream;
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      while ((line = reader.readLine()) != null) {
+        JsonNode rootNode = objectMapper.readTree(line);
+        String npi = rootNode.path("npi").asText();
+        NPIData npiData = objectMapper.readValue(line, NPIData.class);
+        npiMap.put(npi, npiData);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    NPIOrgLookup npiOrgLookup = Mockito.mock(NPIOrgLookup.class);
+    Mockito.when(npiOrgLookup.retrieveNPIOrgDisplay(any())).thenReturn(npiMap);
+    return npiOrgLookup;
   }
 }

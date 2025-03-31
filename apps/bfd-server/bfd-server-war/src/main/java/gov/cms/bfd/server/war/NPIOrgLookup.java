@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,23 +36,20 @@ public class NPIOrgLookup {
   Map<String, NPIData> npiMap;
 
   /** Filename of the test data. */
-  private static final String TEST_NPI_FILENAME = "npi_e2e_it.json";
+  static final String TEST_NPI_FILENAME = "npi_e2e_it.json";
 
   /** The entityManager. */
   @PersistenceContext EntityManager entityManager;
 
-  /** The instance of NPIOrgLookup that will be returned for testing. */
-  private static NPIOrgLookup npiOrgLookup;
-
-  /** True if this is a test instance. */
-  private final boolean testInstance;
+  /** True if the data is from a file. */
+  private final boolean dataFromFile;
 
   /** The query that will return the NPI Data for an NPI. */
   private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi in :npiSet";
 
   /**
-   * Constructor. If orgFileName can be successfully loaded, then this is treated as a test
-   * instance. Otherwise, we can assume that this is a production instance.
+   * Constructor. If orgFileName can be successfully loaded, we will use it as the datasource.
+   * Otherwise, we will query the database.
    *
    * @param orgFileName File name to use for test purposes.
    */
@@ -62,19 +58,14 @@ public class NPIOrgLookup {
     InputStream npiDataStream = getFileInputStream(orgFileName);
     if (npiDataStream != null) {
       initializeNpiMap(npiDataStream);
-      testInstance = true;
+      dataFromFile = true;
     } else {
-      testInstance = false;
+      dataFromFile = false;
     }
   }
 
-  private void initializeNpiMap() {
-    final InputStream npiStream = getFileInputStream(TEST_NPI_FILENAME);
-    initializeNpiMap(npiStream);
-  }
-
   /**
-   * Initializes the NPIData map with the test data.
+   * Initializes the NPIData map with the data.
    *
    * @param dataStream The dataStream to use for the map.
    */
@@ -96,30 +87,13 @@ public class NPIOrgLookup {
   }
 
   /**
-   * Gets the input stream for the test data file.
+   * Gets the input stream for the data file.
    *
    * @param filename The file to stream.
    * @return the input stream for the test file.
    */
   private InputStream getFileInputStream(String filename) {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
-  }
-
-  /**
-   * Retrieves test data for a particular NPI.
-   *
-   * @param npi The npi to find.
-   * @return the NPIData entity.
-   */
-  private Optional<NPIData> retrieveTestData(Optional<String> npi) {
-    if (npiMap == null) {
-      initializeNpiMap();
-    }
-    if (npi.isPresent() && npiMap.containsKey(npi.get())) {
-      return Optional.of(npiMap.get(npi.get()));
-    } else {
-      return Optional.empty();
-    }
   }
 
   /**
@@ -130,27 +104,14 @@ public class NPIOrgLookup {
    */
   @Transactional
   public Map<String, NPIData> retrieveNPIOrgDisplay(Set<String> npiSet) {
-    // if testInstance is true, we will return a value from the HashMap.
+    // if dataFromFile is true, we will return the HashMap generated from the file.
     // Otherwise, we query the database.
-    if (testInstance) {
+    if (dataFromFile) {
       return npiMap;
     }
-
     Query query = entityManager.createQuery(NPI_DATA_QUERY);
     query.setParameter("npiSet", npiSet);
     List<NPIData> npiData = query.getResultList();
     return npiData.stream().collect(Collectors.toMap(NPIData::getNpi, entry -> entry));
-  }
-
-  /**
-   * Creates a test instance of this class.
-   *
-   * @return Returns an npiOrgLookup for testing.
-   */
-  public static NPIOrgLookup createTestNpiOrgLookup() {
-    if (npiOrgLookup == null) {
-      npiOrgLookup = new NPIOrgLookup(TEST_NPI_FILENAME);
-    }
-    return npiOrgLookup;
   }
 }

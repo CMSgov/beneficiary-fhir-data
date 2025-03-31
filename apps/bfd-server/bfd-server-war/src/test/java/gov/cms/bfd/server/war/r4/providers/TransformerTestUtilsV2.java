@@ -33,6 +33,7 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -81,7 +82,7 @@ public final class TransformerTestUtilsV2 {
   private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
 
   static {
-    npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
     CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
   }
 

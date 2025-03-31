@@ -18,7 +18,6 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -104,7 +103,6 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @return the collection
    */
   public static Stream<Arguments> data() throws IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
     InputStream npiDataStream =

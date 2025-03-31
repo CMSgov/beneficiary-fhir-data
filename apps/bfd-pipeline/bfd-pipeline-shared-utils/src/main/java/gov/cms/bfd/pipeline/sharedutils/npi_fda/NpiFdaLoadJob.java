@@ -7,7 +7,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
-import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -49,12 +48,6 @@ public class NpiFdaLoadJob implements PipelineJob {
     runningSemaphore = new Semaphore(1);
     this.batchSize = batchSize;
     this.runInterval = runInterval;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public PipelineJobType getType() {
-    return PipelineJob.super.getType();
   }
 
   /** {@inheritDoc} */

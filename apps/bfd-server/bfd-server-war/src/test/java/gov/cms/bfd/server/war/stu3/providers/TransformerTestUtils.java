@@ -95,7 +95,7 @@ final class TransformerTestUtils {
   private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
 
   static {
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    NPIOrgLookup npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
     CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
   }
 

@@ -21,6 +21,7 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
@@ -125,7 +126,7 @@ public final class InpatientClaimTransformerTest {
    */
   static void assertMatches(InpatientClaim claim, ExplanationOfBenefit eob)
       throws FHIRException, IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = RDATestUtils.createTestNpiOrgLookup();
 
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(

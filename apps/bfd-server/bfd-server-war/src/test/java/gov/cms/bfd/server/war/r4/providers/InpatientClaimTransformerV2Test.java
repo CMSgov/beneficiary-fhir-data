@@ -16,11 +16,11 @@ import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -124,7 +124,7 @@ public final class InpatientClaimTransformerV2Test {
     inpatientClaimTransformer = new InpatientClaimTransformerV2(metricRegistry, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -464,7 +464,7 @@ public final class InpatientClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = inpatientClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

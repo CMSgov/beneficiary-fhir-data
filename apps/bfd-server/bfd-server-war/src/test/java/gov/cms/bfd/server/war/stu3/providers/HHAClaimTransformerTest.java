@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -122,7 +123,7 @@ public final class HHAClaimTransformerTest {
     // interesting conumdrum here....we should be using Mock(s) for unit tests, but this static
     // method is invoked from ITs (integration tests) which means that our BeforeEach setup will
     // not create the NPIOrgLookup so we need to explicitly create one here.
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = RDATestUtils.createTestNpiOrgLookup();
 
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(

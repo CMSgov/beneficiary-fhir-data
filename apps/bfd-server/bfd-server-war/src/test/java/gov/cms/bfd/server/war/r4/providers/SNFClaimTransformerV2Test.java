@@ -22,6 +22,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -124,11 +125,11 @@ public class SNFClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
     snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
 
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -518,7 +519,7 @@ public class SNFClaimTransformerV2Test {
             .get();
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit genEob = snfClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

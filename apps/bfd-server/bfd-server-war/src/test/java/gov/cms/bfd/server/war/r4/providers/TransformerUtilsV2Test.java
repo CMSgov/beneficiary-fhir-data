@@ -881,7 +881,7 @@ public class TransformerUtilsV2Test {
   @Test
   public void createBundleWithoutPagingWithASizeOf2() throws IOException {
 
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    NPIOrgLookup npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
@@ -906,7 +906,7 @@ public class TransformerUtilsV2Test {
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -923,7 +923,7 @@ public class TransformerUtilsV2Test {
     claimTransformerInterface =
         new HospiceClaimTransformerV2(new MetricRegistry(), securityTagManager);
     genEob = claimTransformerInterface.transform(hospiceClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -943,7 +943,7 @@ public class TransformerUtilsV2Test {
         new DMEClaimTransformerV2(
             new MetricRegistry(), new FdaDrugCodeDisplayLookup(npiDataStream), securityTagManager);
     genEob = claimTransformerInterface.transform(dmeClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -959,7 +959,7 @@ public class TransformerUtilsV2Test {
     claimTransformerInterface =
         new InpatientClaimTransformerV2(new MetricRegistry(), securityTagManager);
     genEob = claimTransformerInterface.transform(inpatientClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -1087,7 +1087,7 @@ public class TransformerUtilsV2Test {
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, NPIOrgLookup.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();

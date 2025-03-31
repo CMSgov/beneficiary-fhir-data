@@ -38,6 +38,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -188,7 +189,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             Mockito.mock(OutpatientClaimTransformerV2.class),
             mockPdeTransformer,
             Mockito.mock(SNFClaimTransformerV2.class),
-            NPIOrgLookup.createTestNpiOrgLookup());
+            RDATestUtils.createTestNpiOrgLookup());
 
     // entity manager mocking
     mockEntityManager();

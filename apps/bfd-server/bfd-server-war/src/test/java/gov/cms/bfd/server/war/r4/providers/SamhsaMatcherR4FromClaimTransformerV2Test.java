@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -117,7 +118,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
             .getContextClassLoader()
             .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
-    NPIOrgLookup npiOrgLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    NPIOrgLookup npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
     MetricRegistry metricRegistry = new MetricRegistry();
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
     DMEClaimTransformerV2 dmeClaimTransformerV2 =

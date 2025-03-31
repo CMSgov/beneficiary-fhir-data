@@ -13,7 +13,6 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -123,7 +122,6 @@ public final class SNFClaimTransformerTest {
    */
   static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob)
       throws FHIRException, IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
