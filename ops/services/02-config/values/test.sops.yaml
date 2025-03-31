@@ -350,11 +350,10 @@
   2A4JGl9KxtrXpP9mI6jTLsNsLtgkllbIRLySTl7kcqpQW+chTsHTupIxeLsi4V0m
   qN983wo6kAit3mgkEAU=
   -----END CERTIFICATE-----
-#ENC[AES256_GCM,data:3VQdTzgJzMnEYcXoUBmD22vLVEGX3mP/HTLQAzUeJnXN7V7b2Mooovr1tn4gnl7gseAanNJG1Du5MqDKzqMJPUakdA==,iv:oxeJRRoXfkvrp5t6lSQNtcxZct2O3QCMTCLtuTYV3kE=,tag:NnjFXg+cuBMPWOrqxA8RdQ==,type:comment]
-/bfd/${env}/server/nonsensitive/ecs/capacity/min: 1
-/bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
-/bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
-/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/server/nonsensitive/capacity/min: 1
+/bfd/${env}/server/nonsensitive/capacity/max: 3
+/bfd/${env}/server/nonsensitive/resources/cpu: 4096
+/bfd/${env}/server/nonsensitive/resources/memory: 8192
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/mgmt/common/sensitive/slack_webhook_bfd_test
@@ -381,8 +380,8 @@ sops:
   azure_kv: []
   hc_vault: []
   age: []
-  lastmodified: "2025-03-29T00:51:32Z"
-  mac: ENC[AES256_GCM,data:7IsXcLdwhf3sJdFeKuQzrrgPVQeOlvkRjOw+rWChX5PxL5K05KtSiqyuoR8gif17a4W9n3B7WB2CfD4U9sGOQdMUrIFy11/MTSU5F12DyezD4wxwsy9VABb2Td1wiuV4k20ygN/CJuftGst/M+/sZ+vxx51Gsv6WdPpDNjfXG8I=,iv:aMIwFHTB/Cxorw2xUC9bviz/5q84BY+u1Rei7cvYhkE=,tag:BRbO3KvU5+5nqiyyMfLcFg==,type:str]
+  lastmodified: "2025-03-31T22:02:41Z"
+  mac: ENC[AES256_GCM,data:h6iWfkYCBy66b0geC/RHY0JhpTSygRu8hrBAEGiz/OBSCpdOyQ/pOgo9MaNGgaSHuXgVVDhVnXxskic63hG1y56zCriY+hBSOKXNM+48a7vezlftTILNLCdKOmooUXGxPicpRhQrOzpUuxU8f3v6YY7BSMBVCb05ix+J92BTgdw=,iv:VBen5SvDe8YUpzHzwLyp6dw+NJ1OKEDmRj63CvkmbOo=,tag:DA80fmdTfok0XYgd0mimOA==,type:str]
   pgp: []
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
