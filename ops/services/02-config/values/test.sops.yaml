@@ -1,5 +1,3 @@
-#ENC[AES256_GCM,data:UDJHIcEPx4ZRCKhFnlcddG51pGqH23vHSN0YbPoA5512qnBHjYieVYIjyCcVRTRxfj0AGU7YrLLiaqnyjXDm2QzuPNwD1U7cap37BhBEehzzwR01,iv:v4ovhiii7LSkdhRiEkpUKRYqJUNFghmodP/PZIgRFWQ=,tag:1jDcTA+sgG1GTMnOPPy07A==,type:comment]
-#ENC[AES256_GCM,data:4E3BYU1nVg0i,iv:jNSruBMhkLd74FTPlmTivv/9NST7OauisYks/tMfnYo=,tag:paC1Je3467xLGLB2N/4Lpg==,type:comment]
 /ab2d/${env}/eft/sensitive/bucket_home_dir: ENC[AES256_GCM,data:uC3Kqw==,iv:gBdHWEsVzt8LKEHpHLpuzWCbeJbTJLGyh6lIy4FnpE8=,tag:WUA3CNfd5yUFgbJfzYgzNw==,type:str]
 /ab2d/${env}/eft/sensitive/bucket_iam_assumer_arns_json: ENC[AES256_GCM,data:NjacysDr8jWDj3jE/Y/H/tw2IubANtB8fTIv0DymTGKjKfT6qIVi0Xl3/9BNT3WwVu1nu+ZCvhwfKrTdz8qU+khOvMfX44gdwvwPlwK404ozJf120VxNbMfZiepuKOx/iIhFaBd47kfIQHEHDi40pQLDo1FtBusjwOH0iJtNwLovmcvMaK3yaw9a7LsAUzsFGyjX9DlbtB6iG3pDWWt8CTP+Zd7RfHCSTdfoiWNJY4vfjTezWXdeW6w4aaEdvbc3qvoJiL91R0eQwOJ3fjcopsPOwBhTe8uP/GYdF1pZEBt+Ve90/Ps3UGn9lTjpIItMqvMvIjIQutbkt8d6Kj9HO+fNLk+ql/7CPswHvp1JZ2+ii4D6Kw24H78tB9H1ld282XjyjhsNtLJW3UkG8yeS3fGMl1MWCpyHNVH0biWJct+HnFtunfVaYB2wfj41NFrjpoTr9eoZcAIEDyfFOd3yP/3pqPL0VHClTKlYP7B/JreGto5ZT7WFfNsb8qM=,iv:7gjhX4cTui6UkyHU36ox6X8BflfAGdtkL8NMKrTd/+8=,tag:d7M+GecBZdb3ukRLRLXILQ==,type:str]
 /ab2d/${env}/eft/sensitive/inbound/dir: ENC[AES256_GCM,data:dzE=,iv:OOmYkyuDNNe0MEftyM9hLAsq0N2lgTe5oTXPx4sHtbU=,tag:TBYH+hNNipX1azcg24p1uA==,type:str]
@@ -367,9 +365,6 @@
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-test-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/ok_topic: UNDEFINED
-/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
-/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
-/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 30
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-test-config-cmk
@@ -380,8 +375,8 @@ sops:
   azure_kv: []
   hc_vault: []
   age: []
-  lastmodified: "2025-03-31T22:02:41Z"
-  mac: ENC[AES256_GCM,data:h6iWfkYCBy66b0geC/RHY0JhpTSygRu8hrBAEGiz/OBSCpdOyQ/pOgo9MaNGgaSHuXgVVDhVnXxskic63hG1y56zCriY+hBSOKXNM+48a7vezlftTILNLCdKOmooUXGxPicpRhQrOzpUuxU8f3v6YY7BSMBVCb05ix+J92BTgdw=,iv:VBen5SvDe8YUpzHzwLyp6dw+NJ1OKEDmRj63CvkmbOo=,tag:DA80fmdTfok0XYgd0mimOA==,type:str]
+  lastmodified: "2025-03-31T22:36:04Z"
+  mac: ENC[AES256_GCM,data:39VyQzQl0xTK30Vz/ywJ9BR7pt5Gfk+Riy71ZwYSsImJrj2ayCpsko4tvwZT4GMuoe3vK5leoubQ2JD3tJonVpsKSYncmE7jtUJHuZ0gkP3j8HFYjdLUcDxltTYDcy4DKnp1bAvV7F+FCV2iyTxwwduJBSSY385LN9rngcEfLLY=,iv:y+yotokL1rpdByPZfC9c2rNj5jAOwhA7Ww+Xs9qbvks=,tag:HbZYmHnt/kQK/GsH9x1E/w==,type:str]
   pgp: []
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
