@@ -155,6 +155,7 @@ public class SamhsaUtil {
   public static void createSamhsaMap() throws IOException {
     InputStream is = getFileInputStream(SAMHSA_LIST_RESOURCE);
     samhsaMap = initializeSamhsaMap(is);
+    normalizeSamhsaMapKeys();
   }
 
   /**
@@ -562,10 +563,33 @@ public class SamhsaUtil {
         throw new RuntimeException("Cannot retrieve list of SAMHSA codes.");
       }
     }
-    if (samhsaMap.containsKey(code.get())) {
-      return Optional.of(samhsaMap.get(code.get()));
+    String normalizedCode = normalizeCode(code.get());
+
+    if (samhsaMap.containsKey(normalizedCode)) {
+      return Optional.of(samhsaMap.get(normalizedCode));
     }
     return Optional.empty();
+  }
+
+  private static void normalizeSamhsaMapKeys() {
+    // Replace the original map with the normalized map
+    samhsaMap =
+        samhsaMap.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> normalizeCode(entry.getKey()),
+                    Map.Entry::getValue,
+                    (existing, replacement) -> existing));
+  }
+
+  private static String normalizeCode(String code) {
+    code = code.trim();
+    code = code.replaceFirst("\\.", "");
+    if (code.startsWith("MS-DRG ")) {
+      code = code.replaceFirst("MS-DRG ", "");
+    }
+    code = code.toUpperCase();
+    return code;
   }
 
   /**
