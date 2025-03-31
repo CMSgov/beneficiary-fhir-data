@@ -7,6 +7,7 @@ This Terraservice defines the resources for a Lambda,`bfd-${env}-locust-run-locu
 The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
 
 - `base`
+- `config`
 - `cluster`
 - `database`
 

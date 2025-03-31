@@ -82,7 +82,7 @@ output "env_config_key_arns" {
   sensitive   = false
   value = flatten(
     [
-      for v in local.kms_config_key_mrk_config :
+      for v in coalesce(local.kms_config_key_mrk_config, []) :
       concat(v.primary_key[*].arn, v.replica_keys[*].arn)
     ]
   )
