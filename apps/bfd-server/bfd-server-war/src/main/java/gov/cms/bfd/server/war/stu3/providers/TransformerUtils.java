@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static gov.cms.bfd.server.war.NPIOrgLookup.ENTITY_TYPE_CODE_ORGANIZATION;
-import static gov.cms.bfd.server.war.NPIOrgLookup.ENTITY_TYPE_CODE_PROVIDER;
 import static gov.cms.bfd.server.war.commons.CommonTransformerUtils.convertToDate;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -303,13 +301,13 @@ public final class TransformerUtils {
               NPIData npiData = npiMap.get(entries.getKey());
               if (t instanceof Reference reference) {
                 if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                  reference.setDisplay(buildProviderName(npiData));
+                  reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
                 } else {
                   reference.setDisplay(npiData.getProviderOrganizationName());
                 }
               } else if (t instanceof Coding coding) {
                 if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                  coding.setDisplay(buildProviderName(npiData));
+                  coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
                 } else {
                   coding.setDisplay(npiData.getProviderOrganizationName());
                 }
@@ -351,35 +349,6 @@ public final class TransformerUtils {
           REPLACE_ORGANIZATION_REGEX, name, enrichmentMap, eob.getOrganization(), npiSet);
       addToEnrichmentMap(
           REPLACE_PROVIDER_REGEX, name, enrichmentMap, eob.getOrganization(), npiSet);
-    }
-  }
-
-  /**
-   * Builds the provider name from NPIData.
-   *
-   * @param npiData the NPIData
-   * @return a String with the Provider name.
-   */
-  public static String buildProviderName(NPIData npiData) {
-
-    if (npiData.getEntityTypeCode().equals(ENTITY_TYPE_CODE_PROVIDER)) {
-      String[] name =
-          new String[] {
-            npiData.getProviderNamePrefix(),
-            npiData.getProviderFirstName(),
-            npiData.getProviderMiddleName(),
-            npiData.getProviderLastName(),
-            npiData.getProviderNameSuffix(),
-            npiData.getProviderCredential()
-          };
-      return Arrays.stream(name)
-          .filter(Objects::nonNull)
-          .map(String::trim)
-          .collect(Collectors.joining(" "));
-    } else if (npiData.getEntityTypeCode().equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
-      return npiData.getProviderOrganizationName();
-    } else {
-      return null;
     }
   }
 

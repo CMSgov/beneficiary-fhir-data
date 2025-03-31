@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.commons;
 
+import static gov.cms.bfd.server.war.NPIOrgLookup.ENTITY_TYPE_CODE_ORGANIZATION;
+import static gov.cms.bfd.server.war.NPIOrgLookup.ENTITY_TYPE_CODE_PROVIDER;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -34,12 +37,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.util.Strings;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -329,6 +334,34 @@ public final class CommonTransformerUtils {
     if (dateFrom.isPresent() && dateThrough.isPresent()) {
       validatePeriodDates(dateFrom.get(), dateThrough.get());
     }
+  }
+
+  /**
+   * Builds the provider name from NPIData.
+   *
+   * @param npiData the NPIData
+   * @return a String with the Provider name.
+   */
+  public static String buildProviderFromNpiData(NPIData npiData) {
+    String entityTypeCode = npiData.getEntityTypeCode();
+    if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
+      String[] name =
+          new String[] {
+            npiData.getProviderNamePrefix(),
+            npiData.getProviderFirstName(),
+            npiData.getProviderMiddleName(),
+            npiData.getProviderLastName(),
+            npiData.getProviderNameSuffix(),
+            npiData.getProviderCredential()
+          };
+      return Arrays.stream(name)
+          .map(Strings::trimToNull)
+          .filter(Objects::nonNull)
+          .collect(Collectors.joining(" "));
+    } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
+      return npiData.getProviderOrganizationName();
+    }
+    return null;
   }
 
   /**
