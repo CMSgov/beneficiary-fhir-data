@@ -7,16 +7,12 @@ module "terraservice" {
 }
 
 locals {
-  service            = module.terraservice.service
-  region             = module.terraservice.region
-  account_id         = module.terraservice.account_id
-  default_tags       = module.terraservice.default_tags
-  env                = module.terraservice.env
-  seed_env           = module.terraservice.seed_env
-  is_ephemeral_env   = module.terraservice.is_ephemeral_env
-  latest_bfd_release = module.terraservice.latest_bfd_release
-
-  name_prefix = "bfd-${local.env}-${local.service}"
+  region           = module.terraservice.region
+  account_id       = module.terraservice.account_id
+  default_tags     = module.terraservice.default_tags
+  env              = module.terraservice.env
+  seed_env         = module.terraservice.seed_env
+  is_ephemeral_env = module.terraservice.is_ephemeral_env
 
   # Terraform v1.5 does not have templatestring, and even if it did templatefile/templatestring
   # require that all templated values be provided. We cannot provide values for ${env} ahead of
