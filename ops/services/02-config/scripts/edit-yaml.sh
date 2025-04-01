@@ -36,12 +36,16 @@ fi
 AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query 'Account' --output text)"
 readonly AWS_ACCOUNT_ID
 
+cleanup() {
+  sed "s/\(arn:.*\)${AWS_ACCOUNT_ID}/\1\$\{ACCOUNT_ID}/" <"$YAML_FILE" | sponge "$YAML_FILE"
+  exit
+}
+# After editing, the account ID will be in the key arn. This trap ensures all literal account IDs
+# will be replaced
+trap cleanup ERR EXIT
+
 # Replace occurrences of ACCOUNT_ID using envsubst and save back to file
-ACCOUNT_ID="$AWS_ACCOUNT_ID" envsubst '$ACCOUNT_ID' < "$YAML_FILE" | sponge "$YAML_FILE"
+ACCOUNT_ID="$AWS_ACCOUNT_ID" envsubst '$ACCOUNT_ID' <"$YAML_FILE" | sponge "$YAML_FILE"
 
 # Then, open with sops for editing now that the full key ARN is there
-sops edit "$YAML_FILE" || true # Ignore errors so that the account ID is still replaced
-
-# Afterwards, the account ID will be in the key arn. Replace all instances with "${ACCOUNT_ID}",
-# explicitly
-sed "s/\(arn:.*\)${AWS_ACCOUNT_ID}/\1\$\{ACCOUNT_ID}/" < "$YAML_FILE" | sponge "$YAML_FILE"
+sops edit "$YAML_FILE" || exit # Exit on failure so that the trap will replace the literal account ID with a placeholder
