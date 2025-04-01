@@ -14,14 +14,17 @@
   appliesTo:
     - PartA
     - PartB
+  referenceTable: BENE_MDCR_STUS_CD
 - inputPath: CoverageBase.BENE_MDCR_ENTLMT_STUS_CD
   appliesTo:
     - PartA
     - PartB
+  referenceTable: BENE_MDCR_ENTLMT_STUS_CD
 - inputPath: CoverageBase.BENE_BUYIN_CD
   appliesTo:
     - PartA
     - PartB
+  referenceTable: BENE_BUYIN_CD
 - inputPath: CoverageBase.BENE_RNG_BGN_DT
   appliesTo:
     - PartA
@@ -42,7 +45,19 @@
   appliesTo:
     - PartA
     - PartB
+  referenceTable: BENE_MDCR_ENRLMT_RSN_CD
 - inputPath: CoverageBase.BENE_MDCR_ENTLMT_RSN_CD
   appliesTo:
     - PartA
     - PartB
+  referenceTable: BENE_MDCR_ENTLMT_RSN_CD
+- inputPath: CoverageBase.BENE_ESRD_STUS_ID
+  appliesTo:
+    - PartA
+    - PartB
+  referenceTable: BENE_ESRD_STUS_ID
+- inputPath: CoverageBase.BENE_DSBLD_STUS_ID
+  appliesTo:
+    - PartA
+    - PartB
+  referenceTable: BENE_DSBLD_STUS_ID
