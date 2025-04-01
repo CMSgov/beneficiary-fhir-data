@@ -46,5 +46,11 @@
     "dockerfile": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
     "contextDir": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
     "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-pipeline-ccw-runner",
+    "dockerfile": "ops/services/05-pipeline/lambda-src/ccw-runner/Dockerfile",
+    "contextDir": "ops/services/05-pipeline/lambda-src/ccw-runner",
+    "platform": "linux/arm64"
   }
 ]

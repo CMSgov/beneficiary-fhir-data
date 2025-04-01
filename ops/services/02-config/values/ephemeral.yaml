@@ -12,11 +12,11 @@ copy:
   - /bfd/${env}/common/nonsensitive/vpn_security_group
   - /bfd/${env}/migrator/sensitive/db/password
   - /bfd/${env}/migrator/sensitive/db/username
-  - /bfd/${env}/pipeline/sensitive/db/password
-  - /bfd/${env}/pipeline/sensitive/db/username
-  - /bfd/${env}/pipeline/sensitive/hicn_hash/iterations
-  - /bfd/${env}/pipeline/sensitive/hicn_hash/pepper
-  - /bfd/${env}/pipeline/nonsensitive/micrometer_cw/interval
+  - /bfd/${env}/ccw-pipeline/sensitive/db/password
+  - /bfd/${env}/ccw-pipeline/sensitive/db/username
+  - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/iterations
+  - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/pepper
+  - /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/interval
   - /bfd/${env}/pipeline/sensitive/rda/grpc/auth_token
   - /bfd/${env}/pipeline/sensitive/rda/grpc/port
   - /bfd/${env}/pipeline/sensitive/rda/grpc/host
@@ -64,15 +64,15 @@ values:
   /bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-${env}-migrator
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
-  /bfd/${env}/pipeline/nonsensitive/thread_multiple: "3"
-  /bfd/${env}/pipeline/nonsensitive/ccw/job/enabled: false
-  /bfd/${env}/pipeline/nonsensitive/ccw/idempotency_enabled: true
-  /bfd/${env}/pipeline/nonsensitive/ccw/instance_type: c6a.4xlarge
-  /bfd/${env}/pipeline/nonsensitive/micrometer_cw/enabled: "false"
-  /bfd/${env}/pipeline/nonsensitive/micrometer_cw/namespace: "bfd-${env}/bfd-pipeline"
-  /bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: "25"
-  /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: false
-  /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topic: UNDEFINED
+  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/idempotency_enabled: true
+  /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/enabled: "false"
+  /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/namespace: "bfd-${env}/ccw-pipeline"
+  /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/cpu: 8192
+  /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/memory: 16384
+  /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50
+  /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(30 minutes)
+  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: false
+  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topic: UNDEFINED
   /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/mode: UNDEFINED
   /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/region: us-east-1
   /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/bucket: UNDEFINED
