@@ -17,7 +17,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
-import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.Arrays;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -60,7 +58,7 @@ public final class BeneficiaryTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    beneficiaryTransformer = new BeneficiaryTransformer(metricRegistry);
+    beneficiaryTransformer = new BeneficiaryTransformer(metricRegistry, true);
   }
 
   /**
@@ -428,10 +426,6 @@ public final class BeneficiaryTransformerTest {
 
     assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
-    if (beneficiary.getSex() == Sex.MALE.getCode())
-      assertEquals(AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
-    else if (beneficiary.getSex() == Sex.FEMALE.getCode())
-      assertEquals(AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
     assertEquals(beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());

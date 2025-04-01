@@ -46,6 +46,7 @@
 /bfd/${env}/server/nonsensitive/pac/enabled: true
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
+/bfd/${env}/server/nonsensitive/sex_extension/enabled: "true"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/lb_is_public: false
 /bfd/${env}/server/nonsensitive/launch_template_volume_iops: 3000

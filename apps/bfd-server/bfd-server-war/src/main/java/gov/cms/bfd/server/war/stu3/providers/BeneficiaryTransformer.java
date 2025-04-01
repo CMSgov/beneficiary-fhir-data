@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -26,6 +27,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
@@ -35,6 +37,8 @@ final class BeneficiaryTransformer {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
+  private final boolean sexExtensionEnabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -43,9 +47,13 @@ final class BeneficiaryTransformer {
    * called by tests.
    *
    * @param metricRegistry the metric registry
+   * @param sexExtensionEnabled whether to enable the sex extension
    */
-  public BeneficiaryTransformer(MetricRegistry metricRegistry) {
+  public BeneficiaryTransformer(
+      MetricRegistry metricRegistry,
+      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
+    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -187,13 +195,15 @@ final class BeneficiaryTransformer {
                 TemporalPrecisionEnum.DAY));
       }
 
-      char sex = beneficiary.getSex();
-      if (sex == Sex.MALE.getCode()) {
-        patient.setGender((AdministrativeGender.MALE));
-      } else if (sex == Sex.FEMALE.getCode()) {
-        patient.setGender((AdministrativeGender.FEMALE));
-      } else {
-        patient.setGender((AdministrativeGender.UNKNOWN));
+      if (!sexExtensionEnabled) {
+        char sex = beneficiary.getSex();
+        if (sex == Sex.MALE.getCode()) {
+          patient.setGender((AdministrativeGender.MALE));
+        } else if (sex == Sex.FEMALE.getCode()) {
+          patient.setGender((AdministrativeGender.FEMALE));
+        } else {
+          patient.setGender((AdministrativeGender.UNKNOWN));
+        }
       }
 
       if (beneficiary.getRace().isPresent()) {

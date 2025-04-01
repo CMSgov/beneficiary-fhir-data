@@ -49,7 +49,6 @@
                 ]
               }
             ],
-            "gender": "male",
             "birthDate": "1975-03-01"
           },
           {
@@ -522,8 +521,7 @@
                   "D."
                 ]
               }
-            ],
-            "gender": "male"
+            ]
           },
           {
             "resourceType": "Organization",

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,7 +26,9 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -42,7 +45,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -91,7 +93,7 @@ public final class BeneficiaryTransformerV2Test {
   public void setup() {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, false);
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, false, true);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -163,10 +165,10 @@ public final class BeneficiaryTransformerV2Test {
   @Test
   public void shouldSetCorrectProfile() {
     List<CanonicalType> profile = patient.getMeta().getProfile();
-    assertEquals(1, profile.size());
+    assertEquals(0, profile.size());
     // The base CanonicalType doesn't seem to compare correctly so lets convert it
     // to a string
-    assertTrue(
+    assertFalse(
         profile.stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
@@ -175,11 +177,11 @@ public final class BeneficiaryTransformerV2Test {
   /** Tests that the transformer sets the expected profile when C4DIC is enabled. */
   @Test
   public void shouldSetCorrectProfilesWithC4DicEnabled() {
-    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, true);
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, true, true);
     createPatient(RequestHeaders.getHeaderWrapper());
     List<CanonicalType> profile = patient.getMeta().getProfile();
-    assertEquals(2, profile.size());
-    assertTrue(
+    assertEquals(1, profile.size());
+    assertFalse(
         profile.stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
@@ -209,7 +211,7 @@ public final class BeneficiaryTransformerV2Test {
 
   /** Tests that the transformer sets the expected medicare extensions with ids. */
   @Test
-  public void shouldIncludeMedicareExtensionIdentifierCurrent() {
+  public void shouldIncludeMedicareExtensionIdentifierCurrent() throws ParseException {
     Identifier mcId =
         TransformerTestUtilsV2.findIdentifierBySystem(
             "http://hl7.org/fhir/sid/us-mbi", patient.getIdentifier());
@@ -223,11 +225,9 @@ public final class BeneficiaryTransformerV2Test {
                 "Current"));
 
     Period period = new Period();
-    try {
-      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
-      period.setStart(start, TemporalPrecisionEnum.DAY);
-    } catch (Exception e) {
-    }
+
+    Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+    period.setStart(start, TemporalPrecisionEnum.DAY);
 
     Identifier compare = new Identifier();
     compare
@@ -249,7 +249,7 @@ public final class BeneficiaryTransformerV2Test {
    * exists.
    */
   @Test
-  public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
+  public void shouldIncludeMedicareExtensionIdentifierWithHistory() throws ParseException {
     List<Identifier> patientIdentList = patient.getIdentifier();
     assertEquals(5, patientIdentList.size());
 
@@ -274,11 +274,9 @@ public final class BeneficiaryTransformerV2Test {
                 "Current"));
 
     Period period = new Period();
-    try {
-      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
-      period.setStart(start, TemporalPrecisionEnum.DAY);
-    } catch (Exception e) {
-    }
+
+    Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+    period.setStart(start, TemporalPrecisionEnum.DAY);
 
     ident = new Identifier();
     ident
@@ -539,7 +537,9 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchBeneficiarySex() {
-    assertEquals(AdministrativeGender.MALE, patient.getGender());
+    assertEquals(
+        TransformerConstants.US_CORE_SEX_MALE,
+        patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());
   }
 
   /**
