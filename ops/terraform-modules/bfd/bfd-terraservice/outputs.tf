@@ -99,3 +99,18 @@ output "default_permissions_boundary_arn" {
   sensitive   = false
   value       = data.aws_iam_policy.permissions_boundary.arn
 }
+
+output "vpc" {
+  description = "The current environment's VPC (data.aws_vpc)."
+  sensitive   = false
+  value       = data.aws_vpc.main
+}
+
+output "subnets_map" {
+  description = "Map of subnet layers to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
+  sensitive   = false
+  value = {
+    for layer in var.subnet_layers
+    : layer => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["Layer"] == layer]
+  }
+}
