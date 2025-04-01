@@ -12,7 +12,7 @@ java -jar validator_cli.jar -ig maps/CoverageBase.map -compile https://bfd.cms.g
 To execute:
 Part A Example:
 ```sh
-java -jar validator_cli.jar sample-data/CoverageFFSSample.json -output outputs/CoverageFFS.json -transform https://bfd.cms.gov/MappingLanguage/maps/CoverageBase -version 4.0.1 -ig StructureMaps/BFDCoverageBaseStructureMap.json -ig StructureDefinitions/Source/CoverageBase.json
+java -jar validator_cli.jar sample-data/CoverageFFSSample.json -output outputs/CoverageFFS.json -transform https://bfd.cms.gov/MappingLanguage/maps/CoverageBase -version 4.0.1 -ig StructureMaps/BFDCoverageBaseStructureMap.json -ig StructureDefinitions/Source/CoverageBase.json -ig maps/CoverageHelper.map
 ```
 
 Validating sample resources against self-defined StructureDefinitions:

@@ -10,6 +10,8 @@ uses "https://bfd.cms.gov/fhir/StructureDefinition/CoverageBase" alias CoverageB
 uses "http://hl7.org/fhir/StructureDefinition/Coverage" alias BFDCoverage as target
 uses "http://hl7.org/fhir/StructureDefinition/Organization" alias OrgCoverage as target
 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/CoverageHelper" 
+
 group createCoverageBase(source src: CoverageBase, target tgt: BFDCoverage){
     src.XREF_EFCTV_BENE_SK as idPt2 -> tgt then {
         src.coveragePart as part -> tgt.id = append("part-",part,"-",idPt2) "concatenate id";
@@ -72,12 +74,12 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     src -> tgt.contained = create('Organization') as tgtOrg then SetOrganizationEntryCMS(src, tgtOrg) "Add CMS reference";
 
     //Medicare Status code - This variable indicates how a beneficiary currently qualifies for Medicare.
-    //https://bluebutton.cms.gov/resources/variables/ms_cd
+    //https://bluebutton.cms.gov/resources/variables/ms_cd -> https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD
     //V2_MDCR_BENE_MDCR_STUS.BENE_MDCR_STUS_CD
     src.BENE_MDCR_STUS_CD as msCd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/ms_cd" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/ms_cd" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD" "add system";
             src -> tgtCoding.code = msCd "Add code";
         } "Add coding";
     } "Add status code type code";
@@ -86,9 +88,9 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     //Note, this variable will need to be hosted by BB2. We also need the root reference table from IDR. 
     //V2_MDCR_BENE_TP.BENE_BUYIN_CD where the BENE_TP_TYPE_CD = coveragePart
     src.BENE_BUYIN_CD as buyinCd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/buyin_ind" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/buyin_ind" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD" "add system";
             src -> tgtCoding.code = buyinCd "Add code";
         } "Add coding";
     } "Add buyin type code";
@@ -110,11 +112,10 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     } "Add status";
 
     //BENE_MDCR_ENTLMT.BENE_MDCR_ENTLMT_STUS_CD
-    //This needs an expansion from IDR. 
     src.BENE_MDCR_ENTLMT_STUS_CD as entitlementCode -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/bene_mdcr_entlmt_stus_cd" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/bene_mdcr_entlmt_stus_cd" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD" "add system";
             src -> tgtCoding.code = entitlementCode "Add code";
         } "Add coding";
     } "Add entitlement status code";
@@ -123,9 +124,9 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     //V2_BENE_MDCR_ENTLMT.BENE_MDCR_ENRLMT_RSN_CD
     //reference table is BENE_ENRLMT_RSN_CD
     src.BENE_MDCR_ENRLMT_RSN_CD as enrlmntRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/enrlmnt_rsn_cd" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-STUS-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/enrlmnt_rsn_cd" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-STUS-CD" "add system";
             src -> tgtCoding.code = enrlmntRsnCd "Add code";
         } "Add coding";
     } "Add enrollment reason code";
@@ -133,12 +134,32 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     //V2_BENE_MDCR_ENTLMT_RSN.BENE_MDCR_ENTLMT_RSN_CD 
     //reference table is V2_MDCR_BENE_ENTLMT_RSN_CD -> same as orec + crec in v2.
     src.BENE_MDCR_ENTLMT_RSN_CD as entlmtRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/crec" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/crec" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD" "add system";
             src -> tgtCoding.code = entlmtRsnCd "Add code";
         } "Add coding";
     } "Add current entitlement reason code";
+
+    //ESRD indicator. We add this on Part A/B since it affects entitlement. We do not add it to Part D since part D requires enrollment in A/B.
+    //It is based upon the BENE_MDCR_STUS_CD.
+    src.BENE_MDCR_STUS_CD as msCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID" "Add system";
+            src -> tgtCoding.code = translate(msCd,"https://bfd.cms.gov/MappingLanguage/Maps/CoverageHelper#BENE_ESRD_STUS_ID", 'code') "Translate code";
+        } "Add coding";
+    } "Add ESRD Extension";
+
+    //Disability indicator. We add this on Part A/B since it affects entitlement. We do not add it to Part D since part D requires enrollment in A/B.
+    //It is based upon the BENE_MDCR_STUS_CD.
+    src.BENE_MDCR_STUS_CD as msCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID" "Add system";
+            src -> tgtCoding.code = translate(msCd,"https://bfd.cms.gov/MappingLanguage/Maps/CoverageHelper#BENE_DSBLD_STUS_ID", 'code') "Translate code";
+        } "Add coding";
+    } "Add ESRD Extension";
 
     src.coveragePart as coveragePart where coveragePart="A" -> tgt then AddPartACoverageElements(src, tgt) "Add Part A Elements";
     src.coveragePart as coveragePart where coveragePart="B" -> tgt then AddPartACoverageElements(src, tgt) "Add Part B Elements";
