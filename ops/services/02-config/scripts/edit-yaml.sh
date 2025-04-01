@@ -3,6 +3,15 @@
 set -Eeou pipefail
 
 if [[ "$#" -ne 1 ]]; then
+  echo "No argument provided. 'test', 'prod-sbx', or 'prod' is required"
+  exit 1
+fi
+
+BFD_ENVIRONMENT="$1"
+readonly BFD_ENVIRONMENT
+
+if [[ $BFD_ENVIRONMENT != "test" && $BFD_ENVIRONMENT != "prod-sbx" && $BFD_ENVIRONMENT != "prod" ]]; then
+  echo "1st argument must be one of 'test', 'prod-sbx', or 'prod'"
   exit 1
 fi
 
@@ -21,9 +30,6 @@ readonly SCRIPT_DIR
 
 SERVICE_DIR="$(dirname "$SCRIPT_DIR")"
 readonly SERVICE_DIR
-
-BFD_ENVIRONMENT="$1"
-readonly BFD_ENVIRONMENT
 
 YAML_FILE="$SERVICE_DIR/values/$BFD_ENVIRONMENT.sops.yaml"
 readonly YAML_FILE
