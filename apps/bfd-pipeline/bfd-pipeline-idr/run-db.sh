@@ -27,7 +27,6 @@ docker exec bfd-idr-db timeout 15 bash -c 'until echo > /dev/tcp/localhost/5432;
 echo
 echo Creating database
 docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd idr
-docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd fhirdb
 
 echo
 echo Database created successfully.
@@ -39,7 +38,7 @@ echo
 echo Creating schema.
 
 docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/mock-idr.sql
-docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d/bfd.sql
+docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/bfd.sql
 
 echo
 echo Schema created successfully.
