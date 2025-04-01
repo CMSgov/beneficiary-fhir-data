@@ -124,9 +124,9 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     //V2_BENE_MDCR_ENTLMT.BENE_MDCR_ENRLMT_RSN_CD
     //reference table is BENE_ENRLMT_RSN_CD
     src.BENE_MDCR_ENRLMT_RSN_CD as enrlmntRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-STUS-CD" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-STUS-CD" "add system";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD" "add system";
             src -> tgtCoding.code = enrlmntRsnCd "Add code";
         } "Add coding";
     } "Add enrollment reason code";
