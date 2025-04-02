@@ -24,6 +24,12 @@
           {
             "resourceType": "Patient",
             "id": "patient",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+                "valueCode": "248153007"
+              }
+            ],
             "identifier": [
               {
                 "type": {
@@ -510,6 +516,12 @@
           {
             "resourceType": "Patient",
             "id": "patient",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+                "valueCode": "248153007"
+              }
+            ],
             "identifier": [
               {
                 "type": {
