@@ -83,7 +83,9 @@
 /bfd/${env}/pipeline/nonsensitive/ccw/job/claims/batch_size: "100"
 /bfd/${env}/pipeline/nonsensitive/ccw/job/claims/queue_size_multiple: "10"
 /bfd/${env}/pipeline/nonsensitive/ccw/idempotency_enabled: "true"
-/bfd/${env}/pipeline/nonsensitive/ccw/instance_type: c6a.4xlarge
+/bfd/${env}/pipeline/nonsensitive/ccw/resources/cpu: 8192
+/bfd/${env}/pipeline/nonsensitive/ccw/resources/memory: 16384
+/bfd/${env}/pipeline/nonsensitive/ccw/resources/disk_size: 50
 /bfd/${env}/pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
 /bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: "25"
 /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true

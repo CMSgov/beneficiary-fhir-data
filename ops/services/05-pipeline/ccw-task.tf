@@ -8,6 +8,7 @@ locals {
   ]
   ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/cpu"])
   ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/memory"])
+  ccw_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/disk_size"])
   ccw_thread_multiple_claims = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/rif_thread_multiple_claims"]))
 }
 
@@ -35,6 +36,11 @@ resource "aws_ecs_task_definition" "ccw" {
   network_mode = "awsvpc"
   cpu          = local.ccw_cpu
   memory       = local.ccw_memory
+
+  ephemeral_storage {
+    size_in_gib = local.ccw_disk_size
+  }
+
   runtime_platform {
     cpu_architecture        = "ARM64"
     operating_system_family = "LINUX"
