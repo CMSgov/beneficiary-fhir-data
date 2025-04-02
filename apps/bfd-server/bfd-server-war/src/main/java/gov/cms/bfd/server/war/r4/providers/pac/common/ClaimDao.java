@@ -8,6 +8,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -17,7 +19,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
@@ -41,6 +46,8 @@ public class ClaimDao {
   /** Whether or not to use old MBI hash functionality. */
   private final boolean isOldMbiHashEnabled;
 
+  private final SecurityTagsDao securityTagsDao;
+
   /**
    * Gets an entity by it's ID for the given claim type.
    *
@@ -50,7 +57,7 @@ public class ClaimDao {
    * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
   @Trace
-  public <T> T getEntityById(ResourceTypeV2<?, T> resourceType, String id) {
+  public <T> ClaimWithSecurityTags<T> getEntityById(ResourceTypeV2<?, T> resourceType, String id) {
     final Class<T> entityClass = resourceType.getEntityClass();
     final String entityIdAttribute = resourceType.getEntityIdAttribute();
 
@@ -72,7 +79,26 @@ public class ClaimDao {
           resourceType, CLAIM_BY_ID_QUERY, timerClaimQuery.stop(), claimEntity == null ? 0 : 1);
     }
 
-    return claimEntity;
+    ClaimWithSecurityTags<T> claimEntitiesWithTags = null;
+    String claimId;
+
+    SecurityTagManager securityTagManager = new SecurityTagManager();
+
+    if (claimEntity != null) {
+      claimId = securityTagManager.extractClaimId(claimEntity);
+
+      if (claimId != null && !claimId.isEmpty()) {
+        Map<String, Set<String>> claimIdToTagsMap =
+            securityTagsDao.buildClaimIdToTagsMap(
+                resourceType.getEntityTagType(), Collections.singleton(claimId));
+
+        Set<String> claimSpecificTags =
+            claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+
+        claimEntitiesWithTags = new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags);
+      }
+    }
+    return claimEntitiesWithTags;
   }
 
   /**
@@ -88,12 +114,13 @@ public class ClaimDao {
    * @return A list of entities of type T retrieved matching the given parameters.
    */
   @Trace
-  public <T> List<T> findAllByMbiAttribute(
+  public <T> List<ClaimWithSecurityTags<T>> findAllByMbiAttribute(
       ResourceTypeV2<?, T> resourceType,
       String mbiSearchValue,
       boolean isMbiSearchValueHashed,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
+
     final Class<T> entityClass = resourceType.getEntityClass();
     final String idAttributeName = resourceType.getEntityIdAttribute();
     final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -102,7 +129,7 @@ public class ClaimDao {
 
     criteria.select(root);
 
-    // Normal case where we do a simple query with all the conditions in its where clause.
+    // Standard predicates for the MBI lookup
     final List<Predicate> predicates =
         createStandardPredicatesForMbiLookup(
             builder,
@@ -115,7 +142,7 @@ public class ClaimDao {
 
     criteria.where(predicates.toArray(new Predicate[0]));
 
-    // This sort will ensure predictable responses for any current/future testing needs
+    // Sorting to ensure predictable responses
     criteria.orderBy(builder.asc(root.get(idAttributeName)));
 
     List<T> claimEntities = null;
@@ -132,7 +159,36 @@ public class ClaimDao {
           claimEntities == null ? 0 : claimEntities.size());
     }
 
-    return claimEntities;
+    List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
+    Set<String> claimIds;
+    SecurityTagManager securityTagManager = new SecurityTagManager();
+
+    if (claimEntities != null) {
+      claimIds = securityTagManager.collectClaimIds((List<Object>) claimEntities);
+
+      if (!claimIds.isEmpty()) {
+        // Query for security tags by the collected claim IDs
+        Map<String, Set<String>> claimIdToTagsMap =
+            securityTagsDao.buildClaimIdToTagsMap(resourceType.getEntityTagType(), claimIds);
+
+        // Process all claims using the map from the single query
+        claimEntities.stream()
+            .forEach(
+                claimEntity -> {
+                  // Get the claim ID
+                  String claimId = securityTagManager.extractClaimId(claimEntity);
+
+                  // Look up this claim's tags from our pre-fetched map (no additional DB query)
+                  Set<String> claimSpecificTags =
+                      claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+
+                  // Wrap the claim and its tags in the response object
+                  claimEntitiesWithTags.add(
+                      new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags));
+                });
+      }
+    }
+    return claimEntitiesWithTags;
   }
 
   /**

@@ -1,135 +1,99 @@
 package gov.cms.bfd.server.war.commons;
 
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
-
+import gov.cms.bfd.model.rda.entities.RdaFissClaim;
+import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.entities.DMEClaim;
+import gov.cms.bfd.model.rif.entities.HHAClaim;
+import gov.cms.bfd.model.rif.entities.HospiceClaim;
+import gov.cms.bfd.model.rif.entities.InpatientClaim;
+import gov.cms.bfd.model.rif.entities.OutpatientClaim;
+import gov.cms.bfd.model.rif.entities.PartDEvent;
+import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.sharedutils.TagCode;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Coding;
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /** Find security level. */
 @Service
 public final class SecurityTagManager {
 
-  /** The Entity manager. */
-  private EntityManager entityManager;
-
-  /** Flag to control whether SAMHSA filtering should be applied. */
-  private final boolean samhsaV2Enabled;
-
-  /**
-   * Instantiates a new SecurityTagManager.
-   *
-   * @param samhsaV2Enabled samhsaV2Enabled flag
-   */
-  public SecurityTagManager(
-      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
-    this.samhsaV2Enabled = samhsaV2Enabled;
-  }
-
-  /**
-   * Sets the {@link #entityManager}.
-   *
-   * @param entityManager a JPA {@link EntityManager} connected to the application's database
-   */
-  @PersistenceContext
-  public void setEntityManager(EntityManager entityManager) {
-    this.entityManager = entityManager;
-  }
-
-  /**
-   * Query tags for a specific claim from a specific table.
-   *
-   * @param claimId the name of the variable
-   * @param tagClass the name of the tag class
-   * @return queryTagsForClaim
-   */
-  public Set<String> queryTagsForClaim(String claimId, Class<?> tagClass) {
-
-    String sql = "SELECT t.code FROM " + tagClass.getSimpleName() + " t WHERE t.claim = :claim";
-
-    Query query = entityManager.createQuery(sql);
-    query.setParameter("claim", claimId);
-
-    @SuppressWarnings("unchecked")
-    List<String> resultList = query.getResultList();
-
-    return new HashSet<>(resultList);
-  }
+  private static final Logger LOGGER = LoggerFactory.getLogger(SecurityTagManager.class);
 
   /**
    * Determines the security level based on the collected tags.
    *
-   * @param claimId value of claimId
-   * @param tagClass value of tagClass
+   * <p>// * @param claimId value of claimId
+   *
+   * @param securityTags value of tagClass
    * @return SecurityLevel
    */
-  public List<Coding> getClaimSecurityLevel(String claimId, Class<?> tagClass) {
+  public List<Coding> getClaimSecurityLevel(Set<String> securityTags) {
+    List<Coding> securityTagCoding = new ArrayList<>();
 
-    if (samhsaV2Enabled) {
-      // Query tags associated with the claim
-      List<String> securityTags = queryTagsForClaim(claimId, tagClass).stream().toList();
-
-      List<Coding> securityTagCoding = new ArrayList<>();
-
-      // If no security tags are found, directly add the default "Normal" tag
-      if (securityTags.isEmpty()) {
-        Coding coding = new Coding();
-        coding
-            .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-            .setCode("N")
-            .setDisplay("Normal");
-        securityTagCoding.add(coding);
-      } else {
-        // Check for each tag and set corresponding code and display
-        for (String securityTag : securityTags) {
-          Coding coding = new Coding();
-          // Convert the securityTag string to the TagCode enum
-          TagCode tagCode = TagCode.fromString(securityTag);
-          // Check each security tag and apply corresponding values
-          if (tagCode != null) {
-            switch (tagCode) {
-              case R:
-                coding
-                    .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
-                    .setCode(TagCode.R.toString())
-                    .setDisplay(TagCode.R.getDisplayName());
-                break;
-              case _42CFRPart2:
-                coding
-                    .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
-                    .setCode(TagCode._42CFRPart2.toString())
-                    .setDisplay(TagCode._42CFRPart2.getDisplayName());
-                break;
-            }
-          }
-          securityTagCoding.add(coding);
-        }
+    if (securityTags.isEmpty()) {
+      addDefaultSecurityTag(securityTagCoding);
+    } else {
+      for (String securityTag : securityTags) {
+        addSecurityTagCoding(securityTag, securityTagCoding);
       }
-      return securityTagCoding;
     }
-    return new ArrayList<>();
+
+    return securityTagCoding;
+  }
+
+  private void addDefaultSecurityTag(List<Coding> securityTagCoding) {
+    Coding coding = new Coding();
+    coding
+        .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+        .setCode("N")
+        .setDisplay("Normal");
+    securityTagCoding.add(coding);
+  }
+
+  private void addSecurityTagCoding(String securityTag, List<Coding> securityTagCoding) {
+    Coding coding = new Coding();
+    TagCode tagCode = TagCode.fromString(securityTag);
+
+    if (tagCode != null) {
+      switch (tagCode) {
+        case R:
+          coding
+              .setSystem(TransformerConstants.SAMHSA_CONFIDENTIALITY_CODE_SYSTEM_URL)
+              .setCode(TagCode.R.toString())
+              .setDisplay(TagCode.R.getDisplayName());
+          break;
+        case _42CFRPart2:
+          coding
+              .setSystem(TransformerConstants.SAMHSA_ACT_CODE_SYSTEM_URL)
+              .setCode(TagCode._42CFRPart2.toString())
+              .setDisplay(TagCode._42CFRPart2.getDisplayName());
+          break;
+      }
+    }
+
+    securityTagCoding.add(coding);
   }
 
   /**
    * Determines the security level based on the collected tags.
    *
-   * @param claimId value of claimId
-   * @param tagClass value of tagClass
+   * @param securityTags value of claimEntity
    * @return SecurityLevel
    */
   public List<org.hl7.fhir.dstu3.model.Coding> getClaimSecurityLevelDstu3(
-      String claimId, Class<?> tagClass) {
+      Set<String> securityTags) {
+    List<Coding> coding = getClaimSecurityLevel(securityTags);
 
     List<org.hl7.fhir.dstu3.model.Coding> securityTagCoding = new ArrayList<>();
-    List<Coding> coding = getClaimSecurityLevel(claimId, tagClass);
+
     for (Coding code : coding) {
       org.hl7.fhir.dstu3.model.Coding securityTag = new org.hl7.fhir.dstu3.model.Coding();
       securityTag
@@ -140,5 +104,62 @@ public final class SecurityTagManager {
       securityTagCoding.add(securityTag);
     }
     return securityTagCoding;
+  }
+
+  /**
+   * Builds a mapping from claim IDs to their security tags.
+   *
+   * @param claimEntities the claim entity
+   * @return set of ClaimIds
+   */
+  public Set<String> collectClaimIds(List<Object> claimEntities) {
+    Set<String> claimIds = new HashSet<>();
+
+    for (Object claimEntity : claimEntities) {
+      String claimId = extractClaimId(claimEntity);
+      claimIds.add(claimId);
+    }
+    return claimIds;
+  }
+
+  /**
+   * extracts ClaimId.
+   *
+   * @param claimEntity the claim entity
+   * @return claim Id
+   */
+  public String extractClaimId(Object claimEntity) {
+
+    if (claimEntity != null) {
+      return getClaimId(claimEntity);
+    }
+    return "";
+  }
+
+  /**
+   * Get Claim Ids.
+   *
+   * @param entity the resource being processed
+   * @return String claim Id
+   */
+  public String getClaimId(Object entity) {
+    if (entity == null) {
+      return null;
+    }
+
+    return switch (entity) {
+      case RdaMcsClaim rdaMcsClaim -> rdaMcsClaim.getIdrClmHdIcn();
+      case RdaFissClaim rdaFissClaim -> rdaFissClaim.getClaimId();
+      case CarrierClaim carrierClaim -> String.valueOf(carrierClaim.getClaimId());
+      case DMEClaim dmeClaim -> String.valueOf(dmeClaim.getClaimId());
+      case HHAClaim hhaClaim -> String.valueOf(hhaClaim.getClaimId());
+      case HospiceClaim hospiceClaim -> String.valueOf(hospiceClaim.getClaimId());
+      case InpatientClaim inpatientClaim -> String.valueOf(inpatientClaim.getClaimId());
+      case OutpatientClaim outpatientClaim -> String.valueOf(outpatientClaim.getClaimId());
+      case SNFClaim snfClaim -> String.valueOf(snfClaim.getClaimId());
+      case PartDEvent partDEvent -> String.valueOf(partDEvent.getEventId());
+
+      default -> throw new BadCodeMonkeyException("Invalid entity");
+    };
   }
 }

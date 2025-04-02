@@ -25,13 +25,16 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import jakarta.annotation.Nonnull;
@@ -90,6 +93,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The samhsa matcher. */
   private final R4ClaimSamhsaMatcher samhsaMatcher;
 
+  /** v2SamhsaConsentSimulation. */
+  private final SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
+
   /** True if old MBI values should be included in queries. */
   private final Boolean oldMbiHashEnabled;
 
@@ -111,6 +117,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** The mcs transformer. */
   private final ResourceTransformer<T> mcsTransformer;
 
+  /** Flag to control whether SAMHSA shadow filtering should be applied. */
+  private final boolean samhsaV2Shadow;
+
+  private final SecurityTagsDao securityTagsDao;
+
   /**
    * Initializes the resource provider beans via spring injection. These should be passed from the
    * child class constructor.
@@ -121,8 +132,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param fissTransformer the fiss transformer
    * @param mcsTransformer the mcs transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param samhsaV2Shadow the samhsa V2 Shadow flag
+   * @param securityTagsDao security Tags Dao
+   * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation resources ({@link
+   *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   protected AbstractR4ResourceProvider(
       MetricRegistry metricRegistry,
@@ -130,12 +143,18 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Boolean oldMbiHashEnabled,
       ResourceTransformer<T> fissTransformer,
       ResourceTransformer<T> mcsTransformer,
-      String claimSourceTypeNames) {
+      String claimSourceTypeNames,
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      SecurityTagsDao securityTagsDao,
+      boolean samhsaV2Shadow) {
     this.metricRegistry = metricRegistry;
     this.samhsaMatcher = samhsaMatcher;
     this.oldMbiHashEnabled = oldMbiHashEnabled;
     this.fissTransformer = requireNonNull(fissTransformer);
     this.mcsTransformer = requireNonNull(mcsTransformer);
+    this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
+    this.securityTagsDao = securityTagsDao;
+    this.samhsaV2Shadow = samhsaV2Shadow;
 
     requireNonNull(claimSourceTypeNames);
     enabledSourceTypes =
@@ -158,7 +177,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   /** Initiates the provider's dependencies. */
   @PostConstruct
   public void init() {
-    claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled);
+    claimDao = new ClaimDao(entityManager, metricRegistry, oldMbiHashEnabled, securityTagsDao);
 
     setResourceType();
   }
@@ -230,7 +249,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     ImmutablePair<String, ResourceTypeV2<T, ?>> claimIdObj =
         getClaimIdType(claimIdMatcher, claimId);
 
-    Object claimEntity;
+    ClaimWithSecurityTags<?> claimEntity;
 
     try {
       claimEntity = claimDao.getEntityById(claimIdObj.getRight(), claimIdObj.getLeft());
@@ -238,14 +257,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       throw new ResourceNotFoundException(claimId);
     }
 
-    Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity);
+    Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity.getClaimEntity());
     if (claimEntityMbi != null) logMbiIdentifiersToMdc(claimEntityMbi);
 
     return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);
   }
 
   /**
-   * Helper to extract id type and id string.
+   * Helper to extract id type and id strFing.
    *
    * @param claimIdMatcher - regex with matching groups
    * @param claimId - the full claim id object with type string 'f' or 'm' as prefix
@@ -280,7 +299,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return the transformed claim
    */
   private T transformEntity(
-      ResourceTypeV2<T, ?> claimIdType, Object claimEntity, boolean includeTaxNumbers) {
+      ResourceTypeV2<T, ?> claimIdType,
+      ClaimWithSecurityTags<?> claimEntity,
+      boolean includeTaxNumbers) {
 
     if (claimIdType.getTypeLabel().equals("fiss")) {
       return fissTransformer.transform(claimEntity, includeTaxNumbers);
@@ -306,6 +327,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   private <T extends IBaseResource> @Nullable Mbi getClaimEntityMbi(
       ResourceTypeV2<T, ?> claimIdType, Object claimEntity) {
+
     return switch (claimIdType.getTypeLabel()) {
       case "fiss" -> ((RdaFissClaim) claimEntity).getMbiRecord();
       case "mcs" -> ((RdaMcsClaim) claimEntity).getMbiRecord();
@@ -470,7 +492,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
             createBundleFor(
                 getResourceTypes(), mbiString, lastUpdated, serviceDate, paging, bundleOptions);
       }
-
       return bundleResource;
     } else {
       throw new InvalidRequestException("Missing required field mbi");
@@ -513,7 +534,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     // Log nonsensitive MBI identifiers for a given Claim/ClaimResponse request for use in
     // historical analysis
     entitiesWithType.stream()
-        .map(pair -> getClaimEntityMbi(pair.right, pair.left))
+        .map(pair -> getClaimEntityMbi(pair.right, pair.left.getClaimEntity()))
         .filter(Objects::nonNull)
         // We choose the first MBI from the first, valid claim entity (technically, all entities
         // should fit these criteria or something is very wrong) in the Stream as the MBI
@@ -525,8 +546,19 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     List<T> resources =
         entitiesWithType.stream()
             .filter(
-                pair -> !bundleOptions.excludeSamhsa || samhsaMatcher.hasNoSamhsaData(pair.left))
-            .map(pair -> transformEntity(pair.right, pair.left, bundleOptions.includeTaxNumbers))
+                pair -> {
+                  boolean hasNoSamhsaData = samhsaMatcher.hasNoSamhsaData(pair.left);
+
+                  if (samhsaV2Shadow) {
+                    // Log if missing claim for samhsa V2 Shadow check before filtering
+                    samhsaV2InterceptorShadow.logMissingClaim(pair.left, !hasNoSamhsaData);
+                  }
+
+                  return !bundleOptions.excludeSamhsa || hasNoSamhsaData;
+                })
+            .map(
+                pair ->
+                    transformEntity(pair.right, pair.getLeft(), bundleOptions.includeTaxNumbers))
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());
