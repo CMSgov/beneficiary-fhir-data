@@ -7,6 +7,7 @@ This subfolder contains the Terraform configuration (Task Definitions, ECS Servi
 The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
 
 - `base`
+- `config`
 - `cluster`
 
 ## Soft Terraservice Dependencies
