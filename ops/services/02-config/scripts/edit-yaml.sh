@@ -54,4 +54,4 @@ trap cleanup ERR EXIT
 ACCOUNT_ID="$AWS_ACCOUNT_ID" envsubst '$ACCOUNT_ID' <"$YAML_FILE" | sponge "$YAML_FILE"
 
 # Then, open with sops for editing now that the full key ARN is there
-sops edit "$YAML_FILE" || exit # Exit on failure so that the trap will replace the literal account ID with a placeholder
+(cd "$SERVICE_DIR/values" && sops edit  "$YAML_FILE") || exit # Exit on failure so that the trap will replace the literal account ID with a placeholder
