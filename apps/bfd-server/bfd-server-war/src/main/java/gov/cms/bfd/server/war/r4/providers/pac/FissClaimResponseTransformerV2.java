@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -29,6 +30,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
@@ -45,6 +47,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean sexExtensionEnabled;
 
   /**
    * The known FISS status codes and their associated {@link ClaimResponse.RemittanceOutcome}
@@ -73,12 +77,16 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager the security tag manager
+   * @param sexExtensionEnabled whether to enable the sex extension
    */
   public FissClaimResponseTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
     requireNonNull(metricRegistry);
     this.metricRegistry = metricRegistry;
     this.securityTagManager = securityTagManager;
+    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -114,7 +122,8 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getClaimId());
-    claim.setContained(List.of(FissTransformerV2.getContainedPatient(claimGroup)));
+    claim.setContained(
+        List.of(FissTransformerV2.getContainedPatient(claimGroup, sexExtensionEnabled)));
     claim.getIdentifier().add(createClaimIdentifier(BBCodingSystems.FISS.DCN, claimGroup.getDcn()));
     claim.setExtension(getExtension(claimGroup));
     claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);

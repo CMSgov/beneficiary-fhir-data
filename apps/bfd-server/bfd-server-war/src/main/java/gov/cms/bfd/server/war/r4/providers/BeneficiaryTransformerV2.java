@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_C4DIC_ENABLED;
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -44,6 +46,8 @@ public class BeneficiaryTransformerV2 {
   /** Enabled CARIN profiles. */
   private final EnumSet<Profile> enabledProfiles;
 
+  private final boolean sexExtensionEnabled;
+
   /**
    * Instantiates a new transformer.
    *
@@ -53,12 +57,15 @@ public class BeneficiaryTransformerV2 {
    *
    * @param metricRegistry the metric registry
    * @param c4dicEnabled whether to enable the C4DIC profile
+   * @param sexExtensionEnabled whether to enable the sex extension
    */
   public BeneficiaryTransformerV2(
       MetricRegistry metricRegistry,
-      @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean c4dicEnabled) {
+      @Value("${" + SSM_PATH_C4DIC_ENABLED + ":false}") Boolean c4dicEnabled,
+      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.enabledProfiles = Profile.getEnabledProfiles(c4dicEnabled);
+    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -98,7 +105,9 @@ public class BeneficiaryTransformerV2 {
       Patient patient = new Patient();
 
       for (Profile profile : enabledProfiles) {
-        patient.getMeta().addProfile(profile.getVersionedPatientUrl());
+        if (!sexExtensionEnabled || profile != Profile.C4BB) {
+          patient.getMeta().addProfile(profile.getVersionedPatientUrl());
+        }
       }
 
       patient.setId(String.valueOf(beneficiary.getBeneficiaryId()));
@@ -188,12 +197,27 @@ public class BeneficiaryTransformerV2 {
       }
 
       char sex = beneficiary.getSex();
-      if (sex == Sex.MALE.getCode()) {
-        patient.setGender((AdministrativeGender.MALE));
-      } else if (sex == Sex.FEMALE.getCode()) {
-        patient.setGender((AdministrativeGender.FEMALE));
+      if (sexExtensionEnabled) {
+        String sexExtensionCode;
+        if (sex == Sex.MALE.getCode()) {
+          sexExtensionCode = TransformerConstants.US_CORE_SEX_MALE;
+        } else if (sex == Sex.FEMALE.getCode()) {
+          sexExtensionCode = TransformerConstants.US_CORE_SEX_FEMALE;
+        } else {
+          sexExtensionCode = TransformerConstants.US_CORE_SEX_UNKNOWN;
+        }
+        patient.addExtension(
+            new Extension()
+                .setValue(new CodeType().setValue(sexExtensionCode))
+                .setUrl(TransformerConstants.US_CORE_SEX_URL));
       } else {
-        patient.setGender((AdministrativeGender.UNKNOWN));
+        if (sex == Sex.MALE.getCode()) {
+          patient.setGender((AdministrativeGender.MALE));
+        } else if (sex == Sex.FEMALE.getCode()) {
+          patient.setGender((AdministrativeGender.FEMALE));
+        } else {
+          patient.setGender((AdministrativeGender.UNKNOWN));
+        }
       }
 
       if (beneficiary.getRace().isPresent()) {
