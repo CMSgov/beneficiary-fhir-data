@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -195,8 +196,21 @@ final class BeneficiaryTransformer {
                 TemporalPrecisionEnum.DAY));
       }
 
-      if (!sexExtensionEnabled) {
-        char sex = beneficiary.getSex();
+      char sex = beneficiary.getSex();
+      if (sexExtensionEnabled) {
+        String sexExtensionCode;
+        if (sex == Sex.MALE.getCode()) {
+          sexExtensionCode = TransformerConstants.US_CORE_SEX_MALE;
+        } else if (sex == Sex.FEMALE.getCode()) {
+          sexExtensionCode = TransformerConstants.US_CORE_SEX_FEMALE;
+        } else {
+          sexExtensionCode = TransformerConstants.US_CORE_SEX_UNKNOWN;
+        }
+        patient.addExtension(
+            new Extension()
+                .setValue(new CodeType().setValue(sexExtensionCode))
+                .setUrl(TransformerConstants.US_CORE_SEX_URL));
+      } else {
         if (sex == Sex.MALE.getCode()) {
           patient.setGender((AdministrativeGender.MALE));
         } else if (sex == Sex.FEMALE.getCode()) {

@@ -17,6 +17,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.Arrays;
@@ -425,6 +426,16 @@ public final class BeneficiaryTransformerTest {
         String.valueOf(beneficiary.getBeneficiaryId()), patient.getIdElement().getIdPart());
 
     assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
+
+    if (beneficiary.getSex() == Sex.MALE.getCode()) {
+      assertEquals(
+          TransformerConstants.US_CORE_SEX_MALE,
+          patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());
+    } else if (beneficiary.getSex() == Sex.FEMALE.getCode()) {
+      assertEquals(
+          TransformerConstants.US_CORE_SEX_FEMALE,
+          patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());
+    }
 
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
