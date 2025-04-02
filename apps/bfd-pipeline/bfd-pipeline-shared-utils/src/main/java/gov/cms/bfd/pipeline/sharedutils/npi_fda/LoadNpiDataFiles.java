@@ -121,7 +121,7 @@ public class LoadNpiDataFiles implements Callable<Integer> {
    * @param getMonthBefore gets the month before
    * @return a file name string
    */
-  private static String getFileName(boolean getMonthBefore) {
+  static String getFileName(boolean getMonthBefore) {
     Calendar cal = Calendar.getInstance();
     int currentMonth = cal.get(Calendar.MONTH);
     int currentYear = cal.get(Calendar.YEAR);

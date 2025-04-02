@@ -69,12 +69,6 @@ public class NpiFdaLoadJob implements PipelineJob {
 
   /** {@inheritDoc} */
   @Override
-  public boolean isSmokeTestSuccessful() throws Exception {
-    return PipelineJob.super.isSmokeTestSuccessful();
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public PipelineJobOutcome call() throws Exception {
     if (!runningSemaphore.tryAcquire()) {
       LOGGER.warn("job is already running");
@@ -107,11 +101,5 @@ public class NpiFdaLoadJob implements PipelineJob {
     } finally {
       runningSemaphore.release();
     }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void close() throws Exception {
-    PipelineJob.super.close();
   }
 }
