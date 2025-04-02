@@ -26,9 +26,10 @@ public class FissTransformerV2 {
    *
    * @param claimGroup The {@link RdaFissClaim} information to use to build the {@link Patient}
    *     object.
+   * @param sexExtensionEnabled whether the sex extension is enabled.
    * @return The constructed {@link Patient} object.
    */
-  public static Resource getContainedPatient(RdaFissClaim claimGroup) {
+  public static Resource getContainedPatient(RdaFissClaim claimGroup, boolean sexExtensionEnabled) {
     Optional<RdaFissPayer> benePayerOptional =
         claimGroup.getPayers().stream()
             .filter(p -> p.getPayerType() == RdaFissPayer.PayerType.BeneZ)
@@ -52,9 +53,11 @@ public class FissTransformerV2 {
                   SEX_MAP,
                   "max 10 chars of first",
                   "middle initial",
-                  "max 15 chars of last"));
+                  "max 15 chars of last"),
+              sexExtensionEnabled);
     } else {
-      patient = AbstractTransformerV2.getContainedPatient(claimGroup.getMbi(), null);
+      patient =
+          AbstractTransformerV2.getContainedPatient(claimGroup.getMbi(), null, sexExtensionEnabled);
     }
 
     return patient;

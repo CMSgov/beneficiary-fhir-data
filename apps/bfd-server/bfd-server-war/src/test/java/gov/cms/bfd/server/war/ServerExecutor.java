@@ -85,6 +85,7 @@ public class ServerExecutor {
     appSettings.put(AppConfiguration.SSM_PATH_TRUSTSTORE, trustStore);
     appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
     appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, App.NPI_TESTING_RESOURCE_FILE);
+    appSettings.put(SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED, "true");
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
     serverInfo = DataServerLauncherApp.createServer(appConfig);
 

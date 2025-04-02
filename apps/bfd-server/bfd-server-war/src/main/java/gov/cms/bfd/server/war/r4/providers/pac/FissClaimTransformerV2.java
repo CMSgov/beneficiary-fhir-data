@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -47,6 +48,7 @@ import org.hl7.fhir.r4.model.codesystems.ClaimInformationcategory;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -67,6 +69,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean sexExtensionEnabled;
+
   /** The METRIC_NAME constant. */
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
@@ -80,11 +84,15 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param sexExtensionEnabled whether to enable the sex extension
    */
   public FissClaimTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -127,7 +135,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setId("f-" + claimGroup.getClaimId());
     claim.setContained(
         List.of(
-            FissTransformerV2.getContainedPatient(claimGroup),
+            FissTransformerV2.getContainedPatient(claimGroup, sexExtensionEnabled),
             getContainedProvider(claimGroup, includeTaxNumbers)));
     claim.getIdentifier().add(createClaimIdentifier(BBCodingSystems.FISS.DCN, claimGroup.getDcn()));
     addExtension(

@@ -24,9 +24,10 @@ public class McsTransformerV2 {
    *
    * @param claimGroup The {@link RdaMcsClaim} information to use to build the {@link Patient}
    *     object.
+   * @param sexExtensionEnabled whether to enable the sex extension.
    * @return The constructed {@link Patient} object.
    */
-  public static Resource getContainedPatient(RdaMcsClaim claimGroup) {
+  public static Resource getContainedPatient(RdaMcsClaim claimGroup, boolean sexExtensionEnabled) {
     AbstractTransformerV2.PatientInfo patientInfo =
         new AbstractTransformerV2.PatientInfo(
             AbstractTransformerV2.ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
@@ -39,6 +40,7 @@ public class McsTransformerV2 {
             "middle initial",
             "max 6 chars of last");
 
-    return AbstractTransformerV2.getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
+    return AbstractTransformerV2.getContainedPatient(
+        claimGroup.getIdrClaimMbi(), patientInfo, sexExtensionEnabled);
   }
 }
