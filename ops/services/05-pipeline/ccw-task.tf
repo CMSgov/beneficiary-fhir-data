@@ -108,6 +108,7 @@ resource "aws_ecs_task_definition" "ccw" {
             mode                  = "non-blocking"
           }
         }
+        stopTimeout = 120 # Allow enough time for Pipeline to gracefully stop on spot termination.
         # Empty declarations reduce Terraform diff noise
         mountPoints    = []
         portMappings   = []
