@@ -50,6 +50,7 @@
         <module>bfd-model</module>
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
+        <module>bfd-server-ng</module>
         <module>bfd-db-migrator</module>
         <module>bfd-ops</module>
     </modules>
@@ -92,6 +93,7 @@
         <spring-data-jpa.version>3.4.3</spring-data-jpa.version>
         <spring-framework.version>6.2.3</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
+        <spring-boot.version>3.4.4</spring-boot.version>
 
         <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.12.0</junit.version>
