@@ -39,12 +39,13 @@ locals {
   thread_multiple = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/thread_multiple"]))
 }
 
-data "aws_iam_policy_document" "ecs_tasks_assume_role" {
+data "aws_iam_policy_document" "service_assume_role" {
+  for_each = toset(["ecs-tasks", "lambda", "scheduler"])
   statement {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
+      identifiers = ["${each.value}.amazonaws.com"]
     }
   }
 }

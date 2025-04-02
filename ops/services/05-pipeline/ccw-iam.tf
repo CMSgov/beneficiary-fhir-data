@@ -96,7 +96,7 @@ resource "aws_iam_role" "ccw_task" {
   name                  = "${local.ccw_name_prefix}-task-role"
   path                  = local.iam_path
   description           = "Role for the ${local.env} ${local.ccw_task_name} ECS task containers"
-  assume_role_policy    = data.aws_iam_policy_document.ecs_tasks_assume_role.json
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs-tasks"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
@@ -122,7 +122,7 @@ resource "aws_iam_role" "ccw_execution" {
   name                  = "${local.ccw_name_prefix}-execution-role"
   path                  = local.iam_path
   description           = "${local.env} ${local.ccw_task_name} ECS task execution role"
-  assume_role_policy    = data.aws_iam_policy_document.ecs_tasks_assume_role.json
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs-tasks"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }

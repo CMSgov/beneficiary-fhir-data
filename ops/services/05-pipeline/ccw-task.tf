@@ -131,17 +131,6 @@ resource "aws_vpc_security_group_egress_rule" "ccw_allow_all_traffic_ipv4" {
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-data "aws_security_group" "aurora_cluster" {
-  filter {
-    name   = "tag:Name"
-    values = [data.aws_rds_cluster.main.cluster_identifier]
-  }
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
-  }
-}
-
 resource "aws_vpc_security_group_ingress_rule" "ccw_allow_db_access" {
   security_group_id            = data.aws_security_group.aurora_cluster.id
   referenced_security_group_id = aws_security_group.ccw.id

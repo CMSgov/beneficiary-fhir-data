@@ -40,8 +40,30 @@ data "aws_subnets" "data" {
   }
 }
 
+data "aws_subnets" "app" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+
+  tags = {
+    Layer = "app"
+  }
+}
+
 data "aws_subnet" "data" {
   for_each = toset(data.aws_subnets.data.ids)
 
   id = each.key
+}
+
+data "aws_security_group" "aurora_cluster" {
+  filter {
+    name   = "tag:Name"
+    values = [data.aws_rds_cluster.main.cluster_identifier]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
 }
