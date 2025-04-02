@@ -3,6 +3,7 @@ locals {
   ccw_runner_version          = coalesce(var.ccw_runner_version_override, local.latest_bfd_release)
   ccw_runner_lambda_name      = "ccw-runner"
   ccw_runner_lambda_full_name = "${local.name_prefix}-${local.ccw_runner_lambda_name}"
+  ccw_runner_schedule_expr    = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/runner_lambda/schedule_expression"])
 }
 
 data "aws_ecr_image" "ccw_runner" {
@@ -91,7 +92,7 @@ resource "aws_scheduler_schedule" "ccw_runner" {
     mode = "OFF"
   }
 
-  schedule_expression = "rate(10 minutes)"
+  schedule_expression = local.ccw_runner_schedule_expr
 
   target {
     arn      = aws_lambda_function.ccw_runner.arn

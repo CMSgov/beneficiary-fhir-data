@@ -86,6 +86,7 @@
 /bfd/${env}/pipeline/nonsensitive/ccw/resources/cpu: 8192
 /bfd/${env}/pipeline/nonsensitive/ccw/resources/memory: 16384
 /bfd/${env}/pipeline/nonsensitive/ccw/resources/disk_size: 50
+/bfd/${env}/pipeline/nonsensitive/ccw/runner_lambda/schedule_expression: rate(30 minutes)
 /bfd/${env}/pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
 /bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: "25"
 /bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
@@ -760,8 +761,8 @@ sops:
   azure_kv: []
   hc_vault: []
   age: []
-  lastmodified: "2025-03-31T22:43:54Z"
-  mac: ENC[AES256_GCM,data:lBc1qM3WwHNTll+Lmj4/crE554vUoFWYzcIiCSaskuVm4rsqnQ0x7Kwm0GrPm5YIMMg6N6D/LjgvG1CciJPnX+BocbkcIWDoR/NYlpALlWDKrmPf+P2K2yEnA7FvIVHvkIzopKFNAAdEMhNW7KrgXh72B1nBpkiHCxo1W1Vs/zE=,iv:lOgB2IxQLYwtuXQgyIdw7Y29wJDziDAPeOSf9tA6gHI=,tag:gDYW8lCYkcyBdX1PawNcvA==,type:str]
+  lastmodified: "2025-04-02T18:55:06Z"
+  mac: ENC[AES256_GCM,data:hPs9MNBUCXdM0SDTpfhFZo2dscnDOIw+Ti6Z61bfhG9IfWFVhgGUJs2szifTOK99czBystKoStXf4Eu8DFLPOduT4UiqKC89imEcuQpuFrXrhknStFkGTf/Kl95awBjc0ETKQ6E9bJsitWP/ITdfjJTgzqLVl+hLzy7xlkVO4X8=,iv:AYiUZ2EfihxaYD9loVQF27fHMbEN3Pq7QwNK4DdLmYw=,tag:WZU13DBkXrfcKX/sbCvOpw==,type:str]
   pgp: []
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
