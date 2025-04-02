@@ -17,8 +17,12 @@ data "aws_db_instance" "writer" {
   db_instance_identifier = data.external.writer_identifier.result.writer
 }
 
+data "aws_ecr_repository" "pipeline" {
+  name = local.pipeline_repository_name
+}
+
 data "aws_ecr_image" "pipeline" {
-  repository_name = local.pipeline_repository_name
+  repository_name = data.aws_ecr_repository.pipeline.name
   image_tag       = local.pipeline_version
 }
 

@@ -113,9 +113,48 @@ resource "aws_iam_role_policy_attachment" "ccw_task" {
   policy_arn = each.value
 }
 
-# TODO: Custom execution role
-data "aws_iam_policy" "ecs_execution_role" {
-  name = "AmazonECSTaskExecutionRolePolicy"
+data "aws_iam_policy_document" "ccw_execution_ecr" {
+  statement {
+    sid = "AllowGetAuthTokenECR"
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+    # This particular action has no conditions or resource types that can constrain access.
+    # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonelasticcontainerregistry.html
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowPullFromECRRepos"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+    ]
+    resources = [data.aws_ecr_repository.pipeline.arn]
+  }
+}
+
+resource "aws_iam_policy" "ccw_execution_ecr" {
+  name        = "${local.ccw_name_prefix}-execution-ecr-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.ccw_task_name} Execution Role to pull images from the ${data.aws_ecr_repository.pipeline.name} ECR repository"
+  policy      = data.aws_iam_policy_document.ccw_execution_ecr.json
+}
+
+data "aws_iam_policy_document" "ccw_execution_logs" {
+  statement {
+    sid       = "AllowLogStreamControl"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["${aws_cloudwatch_log_group.ccw_messages.arn}:*"]
+  }
+}
+
+resource "aws_iam_policy" "ccw_execution_logs" {
+  name        = "${local.ccw_name_prefix}-execution-logs-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.ccw_task_name} Execution Role to write to its corresponding CloudWatch Log Group and Log Streams"
+  policy      = data.aws_iam_policy_document.ccw_execution_logs.json
 }
 
 resource "aws_iam_role" "ccw_execution" {
@@ -128,6 +167,11 @@ resource "aws_iam_role" "ccw_execution" {
 }
 
 resource "aws_iam_role_policy_attachment" "ccw_execution" {
+  for_each = {
+    ecr  = aws_iam_policy.ccw_execution_ecr.arn
+    logs = aws_iam_policy.ccw_execution_logs.arn
+  }
+
   role       = aws_iam_role.ccw_execution.name
-  policy_arn = data.aws_iam_policy.ecs_execution_role.arn
+  policy_arn = each.value
 }
