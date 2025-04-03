@@ -1,10 +1,11 @@
 locals {
   ccw_task_name   = "${local.service}-ccw"
   ccw_name_prefix = "${local.name_prefix}-ccw"
+  # TODO: Remove "/ng/" prefix when config is switched to
   ccw_ssm_hierarchies = [
-    "/bfd/${local.env}/${local.service}/sensitive/",
-    "/bfd/${local.env}/${local.service}/nonsensitive/",
-    "/bfd/${local.env}/common/nonsensitive/",
+    "/ng/bfd/${local.env}/${local.service}/sensitive/",
+    "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
+    "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
   ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/cpu"])
   ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/memory"])
