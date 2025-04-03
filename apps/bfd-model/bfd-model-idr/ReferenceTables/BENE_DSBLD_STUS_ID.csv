@@ -1,0 +1,4 @@
+system,code,display
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID",U,UNKNOWN
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID",N,NO
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID",Y,YES

@@ -1,0 +1,32 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Helper" = "Coverage-Helper"
+
+conceptmap "BENE_ESRD_STUS_ID" {
+  prefix s = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+  prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+
+  s:0 = t:"U"
+  s:00 = t:"U"
+  s:10 = t:"N"
+  s:11 = t:"Y"
+  s:20 = t:"N"
+  s:21 = t:"Y"
+  s:31 = t:"Y"
+  s:40 = t:"N"
+  s:"~" = t:"null"
+}
+
+conceptmap "BENE_DSBLD_STUS_ID" {
+  prefix s = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+  prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+
+  s:0 = t:"U"
+  s:00 = t:"U"
+  s:10 = t:"N"
+  s:11 = t:"N"
+  s:20 = t:"Y"
+  s:21 = t:"Y"
+  s:31 = t:"N"
+  s:40 = t:"N"
+  s:"~" = t:"null"
+}
+

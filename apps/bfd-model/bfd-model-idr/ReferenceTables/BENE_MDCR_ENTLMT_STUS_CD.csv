@@ -1,0 +1,10 @@
+system,code,display
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",C,No longer entitled due to cessation of disability.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",E,Free Part A entitlement.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",F,Terminated due to invalid enrollment or enrollment voided.   
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",G,Entitled due to good cause.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",S,Terminated - no longer entitled under end-stage renal disease provision. 
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",T,Terminated for non-payment of premiums.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",W,Voluntary withdrawal from coverage.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",X,Free Part A terminated because of Title II termination.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",Y,Currently entitled premium is payable.
