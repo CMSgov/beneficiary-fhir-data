@@ -968,7 +968,7 @@
                         <localCheckout>true</localCheckout>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>false</commitByProject>
-                        <arguments>--threads 1C -DskipTests=true -DskipITs -Dmaven.build.cache.enabled=false</arguments>
+                        <arguments>--threads 1C -DskipTests=true -DskipITs</arguments>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1346,14 +1346,26 @@
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>prepare-release</id>
+            <properties>
+                <maven.build.cache.enabled>true</maven.build.cache.enabled>
+                <!-- Source jars are large and we don't need to publish them. -->
+                <maven.source.skip>true</maven.source.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+                <apidocgen.skip>false</apidocgen.skip>
+                <bfdOps.skip>true</bfdOps.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>perform-release</id>
             <properties>
                 <jib.skip>false</jib.skip>
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <!-- Ensure that the base image is pulled from ECR on release -->
                 <jib.from>${jib.namespace}bfd-mgmt-base-jdk:${project.version}</jib.from>
-                <maven.build.cache.enabled>false</maven.build.cache.enabled>
+                <maven.build.cache.enabled>true</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
