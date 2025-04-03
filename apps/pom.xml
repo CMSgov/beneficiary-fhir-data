@@ -1348,7 +1348,7 @@
         <profile>
             <id>prepare-release</id>
             <properties>
-                <maven.build.cache.enabled>true</maven.build.cache.enabled>
+                <maven.build.cache.skipCache>true</maven.build.cache.skipCache>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
