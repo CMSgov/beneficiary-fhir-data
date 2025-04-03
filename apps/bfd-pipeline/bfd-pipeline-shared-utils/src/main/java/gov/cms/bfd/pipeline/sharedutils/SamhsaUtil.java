@@ -585,9 +585,6 @@ public class SamhsaUtil {
   private static String normalizeCode(String code) {
     code = code.trim();
     code = code.replaceFirst("\\.", "");
-    if (code.startsWith("MS-DRG ")) {
-      code = code.replaceFirst("MS-DRG ", "");
-    }
     code = code.toUpperCase();
     return code;
   }
