@@ -77,3 +77,5 @@
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true

@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonQueries;
@@ -116,6 +117,9 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   /** The transformer for snf claims. */
   private final SNFClaimTransformerV2 snfClaimTransformer;
 
+  /** Loads the NPI data from the database. */
+  NPIOrgLookup npiOrgLookup;
+
   /**
    * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
    *
@@ -134,6 +138,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
+   * @param npiOrgLookup Instance of NPIOrgLookup
    */
   public R4ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -147,7 +152,8 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
       InpatientClaimTransformerV2 inpatientClaimTransformer,
       OutpatientClaimTransformerV2 outpatientClaimTransformer,
       PartDEventTransformerV2 partDEventTransformer,
-      SNFClaimTransformerV2 snfClaimTransformer) {
+      SNFClaimTransformerV2 snfClaimTransformer,
+      NPIOrgLookup npiOrgLookup) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -160,6 +166,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
+    this.npiOrgLookup = npiOrgLookup;
   }
 
   /**
@@ -250,6 +257,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
+    TransformerUtilsV2.enrichEob(eob, npiOrgLookup);
     return eob;
   }
 
@@ -412,6 +420,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
           TransformerUtilsV2.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
+    TransformerUtilsV2.enrichEobBundle(bundle, npiOrgLookup);
     return bundle;
   }
 
@@ -475,7 +484,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
         claimType -> {
           PatientClaimsEobTaskTransformerV2 task =
               appContext.getBean(PatientClaimsEobTaskTransformerV2.class);
-
           task.setupTaskParams(
               deriveTransformer(claimType),
               claimType,

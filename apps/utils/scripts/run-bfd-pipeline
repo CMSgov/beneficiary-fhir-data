@@ -144,6 +144,7 @@ Run mode options:
   random   RDA pipeline only.  Using in-process random API server.
   s3       RDA pipeline only.  Using in-process S3 API server.
   rda      RDA pipeline only.  Using remote RDA API server with host/port/token from command line.
+  npifda   NPI and FDA Load Job.
 
 Option defaults:
   -b $batch_size
@@ -406,11 +407,17 @@ setvar micrometer_cw/jmx_enabled "true"
 setvar ccw/job/enabled "false"
 setvar rda/job/enabled "false"
 setvar rda/samhsa/backfill/enabled "false"
+setvar rda/npi_fda_load_job/enabled "false"
 case $run_mode in
   backfill)
     setvar rda/samhsa/backfill/enabled "true"
     setvar rda/samhsa/backfill/batch_size "100000"
     setvar rda/samhsa/backfill/log_interval "15" #in seconds
+    ;;
+  npifda)
+    setvar rda/npi_fda_load_job/batch_size "100000"
+    setvar rda/npi_fda_load_job/enabled "true"
+    setvar rda/npi_fda_load_job/run_interval 30
     ;;
   rif)
     setvar ccw/job/enabled "true"
