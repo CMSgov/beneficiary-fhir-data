@@ -208,7 +208,7 @@ jobs:
               -Dtag="$BFD_RELEASE" \
               -DreleaseVersion="$BFD_RELEASE" \
               -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              clean release:prepare
+              release:prepare
         working-directory: ./apps
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
