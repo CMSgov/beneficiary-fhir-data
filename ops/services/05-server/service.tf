@@ -16,10 +16,11 @@ locals {
   server_max_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/capacity/max"])
   server_cpu             = nonsensitive(local.ssm_config["/bfd/${local.service}/resources/cpu"])
   server_memory          = nonsensitive(local.ssm_config["/bfd/${local.service}/resources/memory"])
+  # TODO: Remove "/ng/" prefix when config is switched to
   server_ssm_hierarchies = [
-    "/bfd/${local.env}/${local.service}/sensitive/",
-    "/bfd/${local.env}/${local.service}/nonsensitive/",
-    "/bfd/${local.env}/common/nonsensitive/",
+    "/ng/bfd/${local.env}/${local.service}/sensitive/",
+    "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
+    "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
   server_protocol             = "tcp"
   server_healthcheck_pem_path = "/data/healthcheck.pem"
