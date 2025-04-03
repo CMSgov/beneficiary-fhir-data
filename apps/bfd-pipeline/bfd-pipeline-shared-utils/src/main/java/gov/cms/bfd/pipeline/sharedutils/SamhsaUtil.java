@@ -155,7 +155,6 @@ public class SamhsaUtil {
   public static void createSamhsaMap() throws IOException {
     InputStream is = getFileInputStream(SAMHSA_LIST_RESOURCE);
     samhsaMap = initializeSamhsaMap(is);
-    normalizeSamhsaMapKeys();
   }
 
   /**
@@ -571,23 +570,9 @@ public class SamhsaUtil {
     return Optional.empty();
   }
 
-  private static void normalizeSamhsaMapKeys() {
-    // Replace the original map with the normalized map
-    samhsaMap =
-        samhsaMap.entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    entry -> normalizeCode(entry.getKey()),
-                    Map.Entry::getValue,
-                    (existing, replacement) -> existing));
-  }
-
   private static String normalizeCode(String code) {
     code = code.trim();
     code = code.replaceFirst("\\.", "");
-    if (code.startsWith("MS-DRG ")) {
-      code = code.replaceFirst("MS-DRG ", "");
-    }
     code = code.toUpperCase();
     return code;
   }
@@ -605,6 +590,11 @@ public class SamhsaUtil {
     List<SamhsaEntry> entries =
         mapper.readValue(
             stream, mapper.getTypeFactory().constructCollectionType(List.class, SamhsaEntry.class));
-    return entries.stream().collect(Collectors.toMap(SamhsaEntry::getCode, entry -> entry));
+
+    return entries.stream()
+        .collect(
+            Collectors.toMap(
+                entry -> normalizeCode(entry.getCode()), // Normalize code here
+                entry -> entry));
   }
 }
