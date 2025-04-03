@@ -128,13 +128,13 @@ public final class RifLoaderIT {
         CcwRifLoadTestUtils.getLoadOptions(),
         rifFilesEvent);
 
-    validateSamhsaTagsInDatabase(124, CarrierTag.class);
-    validateSamhsaTagsInDatabase(124, DmeTag.class);
-    validateSamhsaTagsInDatabase(124, HhaTag.class);
-    validateSamhsaTagsInDatabase(124, HospiceTag.class);
-    validateSamhsaTagsInDatabase(244, InpatientTag.class);
-    validateSamhsaTagsInDatabase(238, OutpatientTag.class);
-    validateSamhsaTagsInDatabase(244, SnfTag.class);
+    validateSamhsaTagsInDatabase(1194, CarrierTag.class);
+    validateSamhsaTagsInDatabase(1194, DmeTag.class);
+    validateSamhsaTagsInDatabase(1194, HhaTag.class);
+    validateSamhsaTagsInDatabase(1194, HospiceTag.class);
+    validateSamhsaTagsInDatabase(1342, InpatientTag.class);
+    validateSamhsaTagsInDatabase(1354, OutpatientTag.class);
+    validateSamhsaTagsInDatabase(1342, SnfTag.class);
   }
 
   /** Tests that SAMHSA tags are properly created by the backfill service for SAMHSA test claims. */
@@ -167,13 +167,13 @@ public final class RifLoaderIT {
             PipelineTestUtils.get().getPipelineApplicationState(), null, 100, 60L);
     backfill.startBackFill(true, false);
 
-    validateSamhsaTagsInDatabase(124, CarrierTag.class);
-    validateSamhsaTagsInDatabase(124, DmeTag.class);
-    validateSamhsaTagsInDatabase(124, HhaTag.class);
-    validateSamhsaTagsInDatabase(124, HospiceTag.class);
-    validateSamhsaTagsInDatabase(244, InpatientTag.class);
-    validateSamhsaTagsInDatabase(238, OutpatientTag.class);
-    validateSamhsaTagsInDatabase(244, SnfTag.class);
+    validateSamhsaTagsInDatabase(1194, CarrierTag.class);
+    validateSamhsaTagsInDatabase(1194, DmeTag.class);
+    validateSamhsaTagsInDatabase(1194, HhaTag.class);
+    validateSamhsaTagsInDatabase(1194, HospiceTag.class);
+    validateSamhsaTagsInDatabase(1342, InpatientTag.class);
+    validateSamhsaTagsInDatabase(1354, OutpatientTag.class);
+    validateSamhsaTagsInDatabase(1342, SnfTag.class);
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */

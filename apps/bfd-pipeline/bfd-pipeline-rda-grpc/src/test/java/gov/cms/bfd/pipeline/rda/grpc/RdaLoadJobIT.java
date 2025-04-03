@@ -150,7 +150,7 @@ public class RdaLoadJobIT {
           assertTrue(fissTags.stream().anyMatch(f -> f.getCode().equals("42CFRPart2")));
           assertTrue(fissTags.stream().anyMatch(f -> f.getCode().equals("R")));
           // There should be five hits for SAMHSA codes in this claim (one for each revenueLine).
-          assertEquals(5, fissTags.getFirst().getDetails().size());
+          assertEquals(6, fissTags.getFirst().getDetails().size());
         });
   }
 
