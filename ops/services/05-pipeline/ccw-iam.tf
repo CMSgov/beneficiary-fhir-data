@@ -92,6 +92,27 @@ resource "aws_iam_policy" "ccw_ecs_exec" {
   policy      = data.aws_iam_policy_document.ccw_ecs_exec.json
 }
 
+data "aws_iam_policy_document" "ccw_metrics" {
+  statement {
+    sid       = "AllowCloudWatchPutMetricsInPipelineNamespace"
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = [local.ssm_config["/bfd/${local.service}/micrometer_cw/namespace"]]
+    }
+  }
+}
+
+resource "aws_iam_policy" "ccw_metrics" {
+  name        = "${local.ccw_name_prefix}-metrics-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.ccw_task_name} ECS task containers to publish metrics to CloudWatch"
+  policy      = data.aws_iam_policy_document.ccw_metrics.json
+}
+
 resource "aws_iam_role" "ccw_task" {
   name                  = "${local.ccw_name_prefix}-task-role"
   path                  = local.iam_path
@@ -107,6 +128,7 @@ resource "aws_iam_role_policy_attachment" "ccw_task" {
     kms        = aws_iam_policy.ccw_kms.arn
     ssm_params = aws_iam_policy.ccw_ssm_params.arn
     ecs_exec   = aws_iam_policy.ccw_ecs_exec.arn
+    metrics    = aws_iam_policy.ccw_metrics.arn
   }
 
   role       = aws_iam_role.ccw_task.name

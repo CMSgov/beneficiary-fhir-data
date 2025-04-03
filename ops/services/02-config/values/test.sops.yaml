@@ -106,7 +106,7 @@
 /bfd/${env}/pipeline/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/micrometer_cw/enabled: "false"
-/bfd/${env}/pipeline/nonsensitive/micrometer_cw/namespace: bfd-test/bfd-pipeline
+/bfd/${env}/pipeline/nonsensitive/micrometer_cw/namespace: bfd-test/pipeline-ccw
 /bfd/${env}/pipeline/nonsensitive/micrometer_cw/interval: PT1M
 /bfd/${env}/pipeline/nonsensitive/new_relic/metrics/period: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/ccw/job/allowed_data_set_type: UNDEFINED
@@ -374,13 +374,8 @@ sops:
       created_at: "2025-03-28T19:06:58Z"
       enc: AQICAHiPbrjkmNx+EYhjapAcRZIMA3ZR2GNT7wyj5sHbBNyOGAFTvWJzywk/N64BhcArx7FEAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMnmX8KKqxENi7eqRDAgEQgDv17T1SvltzOnC2zuQAp5IgI5STa6AP0A3T3yZOo8HRdZfa2JghqYUl7/Pvrb7/kWdUgdUVarRgLHNv5w==
       aws_profile: ""
-  gcp_kms: []
-  azure_kv: []
-  hc_vault: []
-  age: []
-  lastmodified: "2025-04-02T18:54:58Z"
-  mac: ENC[AES256_GCM,data:XQNlyMAZbg8MKnvZV5YUBy2nHpx60wQJqTv2JkqimQWKH0/6i4S2JnIkHskKFHDFm3NkFm4RXyeSVZfkWidVMrsey//0Pmcmj3SLK7NMz3pE21lxZ6YVNDcJlApC3llft4PXneeZjn3I3e1Aa4QVqOFs90tucG7QW2lJaMEysoc=,iv:U2stG9AJaUlenwVk5zIkP5CQo+eXQsVluhIvaIgP04g=,tag:tBIToygPgbPvIArGKN5eEw==,type:str]
-  pgp: []
+  lastmodified: "2025-04-03T14:21:03Z"
+  mac: ENC[AES256_GCM,data:qKfDU8OxET4ojgJbk0Y0XyTsiA8lukGNp/y8lscOvFNOfXT5NK/dOiRquPXaM4FaG+Nm4LkOYnbhS9LKoyrAwrxLWJyNOg2WVEqSgu17wWw52Le126Nhar0DdtimHOc6QBIgXG/3UkuXZuguVZoSsT1/qK+gZIBCYh7E4ALwflo=,iv:G22lEy/jz9Pne4lqhnm/RUxqJMHvPsjCiuXnrw1Eg3A=,tag:/ZG2qKneFSc63MEJkgbl8Q==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
-  version: 3.9.4
+  version: 3.10.1
