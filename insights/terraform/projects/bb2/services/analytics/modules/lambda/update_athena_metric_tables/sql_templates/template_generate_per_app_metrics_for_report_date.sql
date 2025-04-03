@@ -306,6 +306,8 @@ SELECT
   t0.last_active app_last_active,
   t0.user_limit_data_access app_access_grant_enabled,
   t0.data_access_type app_access_grant_category,
+  t0.internal_application_labels app_internal_application_labels,
+  t0.data_facilitator_end_user app_data_facilitator_end_user,
   t0.require_demographic_scopes app_require_demographic_scopes,
   t0.user_organization app_user_organization,
   t0.user_id app_user_id,
