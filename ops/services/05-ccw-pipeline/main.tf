@@ -4,6 +4,7 @@ module "terraservice" {
   environment_name     = terraform.workspace
   service              = "ccw-pipeline"
   relative_module_root = "ops/services/ccw-pipeline"
+  subnet_layers        = ["app", "data"]
 }
 
 locals {
@@ -22,6 +23,9 @@ locals {
   env_config_key_arns      = module.terraservice.env_config_key_arns
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  vpc                      = module.terraservice.vpc
+  app_subnets              = module.terraservice.subnets_map["app"]
+  data_subnets             = module.terraservice.subnets_map["data"]
 
   name_prefix = "bfd-${local.env}-${local.service}"
 
@@ -34,7 +38,7 @@ locals {
   # ECS Fargate does not allow specifying the AZ, but it does allow for specifying the subnet. So,
   # we can control which AZ the pipeline service/task is placed into by filtering the list of
   # subnets by AZ
-  writer_adjacent_subnets = [for subnet in data.aws_subnet.data : subnet.id if subnet.availability_zone == local.rds_writer_az]
+  writer_adjacent_subnets = [for subnet in local.data_subnets : subnet.id if subnet.availability_zone == local.rds_writer_az]
 
   # TODO: Remove "/ng/" prefix when config is switched to
   ccw_ssm_hierarchies = [
@@ -164,7 +168,7 @@ resource "aws_ecs_task_definition" "ccw" {
 resource "aws_security_group" "ccw" {
   name                   = "${local.name_prefix}-sg"
   description            = "Allow ${local.service} egress anywhere"
-  vpc_id                 = data.aws_vpc.main.id
+  vpc_id                 = local.vpc.id
   tags                   = { Name = "${local.name_prefix}-sg" }
   revoke_rules_on_delete = true
 }

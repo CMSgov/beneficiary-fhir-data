@@ -15,7 +15,7 @@ resource "aws_security_group" "ccw_runner" {
   description            = "${local.ccw_runner_lambda_full_name} Lambda security group in ${local.env}"
   name                   = "${local.ccw_runner_lambda_full_name}-sg"
   tags                   = { Name = "${local.ccw_runner_lambda_full_name}-sg" }
-  vpc_id                 = data.aws_vpc.main.id
+  vpc_id                 = local.vpc.id
   revoke_rules_on_delete = true
 }
 
@@ -74,7 +74,7 @@ resource "aws_lambda_function" "ccw_runner" {
 
   vpc_config {
     security_group_ids = [aws_security_group.ccw_runner.id]
-    subnet_ids         = data.aws_subnets.app.ids
+    subnet_ids         = local.app_subnets[*].id
   }
 
   role = aws_iam_role.ccw_runner.arn

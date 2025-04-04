@@ -26,41 +26,6 @@ data "aws_ecr_image" "pipeline" {
   image_tag       = local.pipeline_version
 }
 
-data "aws_vpc" "main" {
-  filter {
-    name   = "tag:stack"
-    values = [local.env]
-  }
-}
-
-data "aws_subnets" "data" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
-  }
-
-  tags = {
-    Layer = "data"
-  }
-}
-
-data "aws_subnets" "app" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
-  }
-
-  tags = {
-    Layer = "app"
-  }
-}
-
-data "aws_subnet" "data" {
-  for_each = toset(data.aws_subnets.data.ids)
-
-  id = each.key
-}
-
 data "aws_security_group" "aurora_cluster" {
   filter {
     name   = "tag:Name"
@@ -68,6 +33,6 @@ data "aws_security_group" "aurora_cluster" {
   }
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    values = [local.vpc.id]
   }
 }
