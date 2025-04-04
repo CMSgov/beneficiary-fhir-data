@@ -74,7 +74,11 @@ locals {
     # At this point, replace all ${env}/$env with the actual environment name so that the SSM
     # parameter contains the name of its environment as expected
     # TODO: When Greenfield/"next-gen" services are migrated to, remove "/ng/" suffix -- remember to change bfd-terraservice as well!
-    : "/ng/${trim(replace(k, format(local.template_var_regex, "env"), local.env), "/")}" => v
+    : "/ng/${trim(replace(k, format(local.template_var_regex, "env"), local.env), "/")}" => {
+      str_val      = replace(v.str_val, format(local.template_var_regex, "env"), local.env)
+      is_sensitive = v.is_sensitive
+      source       = v.source
+    }
   }
 }
 
