@@ -8,7 +8,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "ops/services/pipeline/terraform.tfstate"
+    key            = "services/pipeline/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"
