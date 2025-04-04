@@ -12,10 +12,10 @@ locals {
   server_truststore_path = "/data/${local.truststore_filename}"
   server_keystore_path   = "/data/${local.keystore_filename}"
   server_port            = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
-  server_min_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/capacity/min"])
-  server_max_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/capacity/max"])
-  server_cpu             = nonsensitive(local.ssm_config["/bfd/${local.service}/resources/cpu"])
-  server_memory          = nonsensitive(local.ssm_config["/bfd/${local.service}/resources/memory"])
+  server_min_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/min"])
+  server_max_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
+  server_cpu             = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  server_memory          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   # TODO: Remove "/ng/" prefix when config is switched to
   server_ssm_hierarchies = [
     "/ng/bfd/${local.env}/${local.service}/sensitive/",

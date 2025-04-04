@@ -735,10 +735,10 @@
   VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
   uasJ/R5hG+geJ+ydxt8EmVKpmA==
   -----END CERTIFICATE-----
-/bfd/${env}/server/nonsensitive/capacity/min: 3
-/bfd/${env}/server/nonsensitive/capacity/max: 12
-/bfd/${env}/server/nonsensitive/resources/cpu: 4096
-/bfd/${env}/server/nonsensitive/resources/memory: 8192
+/bfd/${env}/server/nonsensitive/ecs/capacity/min: 3
+/bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
+/bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/mgmt/common/sensitive/slack_webhook_bfd_test
