@@ -39,9 +39,6 @@ locals {
   # TODO: Consolidate invariant config
   thread_multiple = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/thread_multiple"]))
 
-  # TODO: Remove these below
-  ccw_task_name   = "${local.service}-ccw"
-  ccw_name_prefix = "${local.name_prefix}-ccw"
   # TODO: Remove "/ng/" prefix when config is switched to
   ccw_ssm_hierarchies = [
     "/ng/bfd/${local.env}/${local.service}/sensitive/",
@@ -55,7 +52,7 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "ccw_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.ccw_task_name}/${local.service}/messages"
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
@@ -64,12 +61,12 @@ module "bucket_ccw" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = local.ccw_name_prefix
+  bucket_name        = local.name_prefix
   force_destroy      = local.is_ephemeral_env
 }
 
 resource "aws_ecs_task_definition" "ccw" {
-  family                   = local.ccw_name_prefix
+  family                   = local.name_prefix
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.ccw_execution.arn
   task_role_arn            = aws_iam_role.ccw_task.arn
@@ -167,10 +164,10 @@ resource "aws_ecs_task_definition" "ccw" {
 }
 
 resource "aws_security_group" "ccw" {
-  name                   = "${local.ccw_name_prefix}-sg"
-  description            = "Allow ${local.ccw_task_name} egress anywhere"
+  name                   = "${local.name_prefix}-sg"
+  description            = "Allow ${local.service} egress anywhere"
   vpc_id                 = data.aws_vpc.main.id
-  tags                   = { Name = "${local.ccw_name_prefix}-sg" }
+  tags                   = { Name = "${local.name_prefix}-sg" }
   revoke_rules_on_delete = true
 }
 
@@ -186,5 +183,5 @@ resource "aws_vpc_security_group_ingress_rule" "ccw_allow_db_access" {
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "TCP"
-  description                  = "Grants ${local.env} ${local.ccw_task_name} ECS task containers access to the ${local.env} database"
+  description                  = "Grants ${local.env} ${local.service} ECS task containers access to the ${local.env} database"
 }

@@ -28,9 +28,9 @@ data "aws_iam_policy_document" "ccw_s3" {
 }
 
 resource "aws_iam_policy" "ccw_s3" {
-  name        = "${local.ccw_name_prefix}-s3-policy"
+  name        = "${local.name_prefix}-s3-policy"
   path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.ccw_task_name} ECS task containers to access CCW S3 bucket"
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to access CCW S3 bucket"
   policy      = data.aws_iam_policy_document.ccw_s3.json
 }
 
@@ -49,9 +49,9 @@ data "aws_iam_policy_document" "ccw_kms" {
 }
 
 resource "aws_iam_policy" "ccw_kms" {
-  name        = "${local.ccw_name_prefix}-kms-policy"
+  name        = "${local.name_prefix}-kms-policy"
   path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.ccw_task_name} ECS task containers to use the ${local.env} CMK"
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to use the ${local.env} CMK"
   policy      = data.aws_iam_policy_document.ccw_kms.json
 }
 
@@ -77,9 +77,9 @@ data "aws_iam_policy_document" "ccw_ssm_params" {
 }
 
 resource "aws_iam_policy" "ccw_ssm_params" {
-  name        = "${local.ccw_name_prefix}-ssm-params-policy"
+  name        = "${local.name_prefix}-ssm-params-policy"
   path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.ccw_task_name} ECS task containers to get required SSM parameeters"
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to get required SSM parameeters"
   policy      = data.aws_iam_policy_document.ccw_ssm_params.json
 }
 
@@ -97,9 +97,9 @@ data "aws_iam_policy_document" "ccw_ecs_exec" {
 }
 
 resource "aws_iam_policy" "ccw_ecs_exec" {
-  name        = "${local.ccw_name_prefix}-ecs-exec-policy"
+  name        = "${local.name_prefix}-ecs-exec-policy"
   path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.ccw_task_name} ECS task containers to use ECS Exec"
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to use ECS Exec"
   policy      = data.aws_iam_policy_document.ccw_ecs_exec.json
 }
 
@@ -118,16 +118,16 @@ data "aws_iam_policy_document" "ccw_metrics" {
 }
 
 resource "aws_iam_policy" "ccw_metrics" {
-  name        = "${local.ccw_name_prefix}-metrics-policy"
+  name        = "${local.name_prefix}-metrics-policy"
   path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.ccw_task_name} ECS task containers to publish metrics to CloudWatch"
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to publish metrics to CloudWatch"
   policy      = data.aws_iam_policy_document.ccw_metrics.json
 }
 
 resource "aws_iam_role" "ccw_task" {
-  name                  = "${local.ccw_name_prefix}-task-role"
+  name                  = "${local.name_prefix}-task-role"
   path                  = local.iam_path
-  description           = "Role for the ${local.env} ${local.ccw_task_name} ECS task containers"
+  description           = "Role for the ${local.env} ${local.service} ECS task containers"
   assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs-tasks"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
@@ -169,9 +169,9 @@ data "aws_iam_policy_document" "ccw_execution_ecr" {
 }
 
 resource "aws_iam_policy" "ccw_execution_ecr" {
-  name        = "${local.ccw_name_prefix}-execution-ecr-policy"
+  name        = "${local.name_prefix}-execution-ecr-policy"
   path        = local.iam_path
-  description = "Grants permissions for the ${local.ccw_task_name} Execution Role to pull images from the ${data.aws_ecr_repository.pipeline.name} ECR repository"
+  description = "Grants permissions for the ${local.service} Execution Role to pull images from the ${data.aws_ecr_repository.pipeline.name} ECR repository"
   policy      = data.aws_iam_policy_document.ccw_execution_ecr.json
 }
 
@@ -184,16 +184,16 @@ data "aws_iam_policy_document" "ccw_execution_logs" {
 }
 
 resource "aws_iam_policy" "ccw_execution_logs" {
-  name        = "${local.ccw_name_prefix}-execution-logs-policy"
+  name        = "${local.name_prefix}-execution-logs-policy"
   path        = local.iam_path
-  description = "Grants permissions for the ${local.ccw_task_name} Execution Role to write to its corresponding CloudWatch Log Group and Log Streams"
+  description = "Grants permissions for the ${local.service} Execution Role to write to its corresponding CloudWatch Log Group and Log Streams"
   policy      = data.aws_iam_policy_document.ccw_execution_logs.json
 }
 
 resource "aws_iam_role" "ccw_execution" {
-  name                  = "${local.ccw_name_prefix}-execution-role"
+  name                  = "${local.name_prefix}-execution-role"
   path                  = local.iam_path
-  description           = "${local.env} ${local.ccw_task_name} ECS task execution role"
+  description           = "${local.env} ${local.service} ECS task execution role"
   assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs-tasks"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true

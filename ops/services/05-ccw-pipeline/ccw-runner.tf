@@ -66,7 +66,7 @@ resource "aws_lambda_function" "ccw_runner" {
       CCW_BUCKET                 = module.bucket_ccw.bucket.bucket
       ECS_CLUSTER_ARN            = data.aws_ecs_cluster.main.arn
       CCW_TASK_DEFINITION_ARN    = aws_ecs_task_definition.ccw.arn
-      CCW_TASK_GROUP             = local.ccw_task_name
+      CCW_TASK_GROUP             = local.service
       CCW_TASK_SUBNETS           = join(",", local.writer_adjacent_subnets)
       CCW_TASK_SECURITY_GROUP_ID = aws_security_group.ccw_runner.id
     }

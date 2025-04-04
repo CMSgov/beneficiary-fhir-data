@@ -120,7 +120,7 @@ data "aws_iam_policy_document" "ccw_runner_ecs" {
 resource "aws_iam_policy" "ccw_runner_ecs" {
   name        = "${local.ccw_runner_lambda_full_name}-ecs"
   path        = local.iam_path
-  description = "Grants permission for the ${local.ccw_runner_lambda_full_name} Lambda to list ECS and run ${local.ccw_task_name} ECS tasks"
+  description = "Grants permission for the ${local.ccw_runner_lambda_full_name} Lambda to list ECS and run ${local.service} ECS tasks"
   policy      = data.aws_iam_policy_document.ccw_runner_ecs.json
 }
 
@@ -135,7 +135,7 @@ data "aws_iam_policy_document" "ccw_runner_iam" {
 resource "aws_iam_policy" "ccw_runner_iam" {
   name        = "${local.ccw_runner_lambda_full_name}-iam"
   path        = local.iam_path
-  description = "Grants permission for the ${local.ccw_runner_lambda_full_name} to Pass IAM Role to ${local.ccw_task_name} Roles"
+  description = "Grants permission for the ${local.ccw_runner_lambda_full_name} to Pass IAM Role to ${local.service} Roles"
   policy      = data.aws_iam_policy_document.ccw_runner_iam.json
 }
 
