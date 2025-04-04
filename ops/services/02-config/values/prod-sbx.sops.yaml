@@ -81,10 +81,10 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/claims/batch_size: "100"
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/claims/queue_size_multiple: "10"
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/idempotency_enabled: "true"
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/resources/cpu: 8192
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/resources/memory: 16384
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/resources/disk_size: 50
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/runner_lambda/schedule_expression: rate(30 minutes)
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/cpu: 8192
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/memory: 16384
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50
+/bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(30 minutes)
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-prod-sbx-cloudwatch-alarms-slack-bfd-warnings

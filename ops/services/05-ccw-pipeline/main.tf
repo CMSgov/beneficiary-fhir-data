@@ -46,9 +46,9 @@ locals {
     "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
     "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
-  ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/cpu"])
-  ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/memory"])
-  ccw_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/disk_size"])
+  ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  ccw_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
   ccw_loader_thread_multiple = 3
   ccw_thread_multiple_claims = 25
 }
