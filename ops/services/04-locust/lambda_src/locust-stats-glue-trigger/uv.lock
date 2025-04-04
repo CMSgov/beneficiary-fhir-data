@@ -73,63 +73,60 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.37.22"
+version = "1.37.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0b/e0/3b57442eae0c13236f6e966efb2a982e6ca245b8d58e01a1e0d1e8c262f2/boto3-1.37.22.tar.gz", hash = "sha256:78a0ec0aafbf6044104c98ad80b69e6d1c83d8233fda2c2d241029e6c705c510", size = 111377 }
+sdist = { url = "https://files.pythonhosted.org/packages/26/28/2a05ac0315fd6c7f39c2b619e07a63ad44df901a6dda100c5898b326691e/boto3-1.37.21.tar.gz", hash = "sha256:69227716293facaf80d78c6c5c7291bdcc4e2cb5f8e2d3e7258c1cbd071c9cc3", size = 111358 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/62/17/a6ff3259271cbf4a9b0db67c1f9ad77d4442c75498218efb6a06ca125764/boto3-1.37.22-py3-none-any.whl", hash = "sha256:a14324d5fa5f4fea00c0e3c69754cbd28100f7fe194693eeecf2dc07446cf4ef", size = 139561 },
+    { url = "https://files.pythonhosted.org/packages/19/6d/a5be3e0ced4cf4f6b48b549d61955f86ad5d9710d1c4189ffed1ec5e5b80/boto3-1.37.21-py3-none-any.whl", hash = "sha256:722eec9da1305fd7d0af839d80f1e76873faf8c030b8bace70c553c0b836e1d3", size = 139561 },
 ]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.37.22"
+version = "1.37.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore-stubs" },
     { name = "types-s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/aa/eef8d9b0d7da7280691e373be8d7fcf1b2e367faf8853affc61249918b71/boto3_stubs-1.37.22.tar.gz", hash = "sha256:ad6c1471bd503da253420294ca5060a4a24d53cdc2672503a579d9b779d0e5ce", size = 99121 }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/c6/8fcedebb768dfe864d8b542f37d7bdfd2ccf1756d54946f818cf2d5714e3/boto3_stubs-1.37.21.tar.gz", hash = "sha256:fde8ba11f812da6c4f41e3b08f009a56db75808710606f9f6d358293aa659dc0", size = 99109 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/ee/742b5d44a0ed9626d7e853559f2e59ab1756218007af5d1f8be73a5761bb/boto3_stubs-1.37.22-py3-none-any.whl", hash = "sha256:7d41213bef29af9bca6cbf481b00ec1a2535c111ee979ed152249d2c1ec02208", size = 68643 },
+    { url = "https://files.pythonhosted.org/packages/78/bd/298c44477c2b054dfd8077f03e586387641fb84e47aeb04e76095aa6f2f9/boto3_stubs-1.37.21-py3-none-any.whl", hash = "sha256:1e9558e81684251693e37bfb527abecee460aacddceb94fc8ae527cb3540807a", size = 68645 },
 ]
 
 [package.optional-dependencies]
-codedeploy = [
-    { name = "mypy-boto3-codedeploy" },
-]
-lambda = [
-    { name = "mypy-boto3-lambda" },
+glue = [
+    { name = "mypy-boto3-glue" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.37.22"
+version = "1.37.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/06/55/8093a88e2ee26fd2028655a7ebc7f2cf04ec589e1c651fd0fb47edda2af4/botocore-1.37.22.tar.gz", hash = "sha256:b3b26f1a90236bcd17d4092f8c85a256b44e9955a16b633319a2f5678d605e9f", size = 13679309 }
+sdist = { url = "https://files.pythonhosted.org/packages/db/f5/66237aba1ba70a9c73b58d7e3f60704dfc743ecec79e6c72fe86934656f6/botocore-1.37.21.tar.gz", hash = "sha256:b4b08daa9b4b2c379ef978a75a48907d72ac5b3b9247280488109eb41c19be36", size = 13674884 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/b9/f412880f4837fb98d0c06bdbcbe07430f50c49db375d26fa0a2ddce26562/botocore-1.37.22-py3-none-any.whl", hash = "sha256:184db7c9314d13002bc827f511a5140574b5da1acda342d51e093dad6317de98", size = 13441302 },
+    { url = "https://files.pythonhosted.org/packages/19/34/0216e7bfa7918c315c818229ac0327272da04ffee5d64611a48107c38d6f/botocore-1.37.21-py3-none-any.whl", hash = "sha256:2cd6016bff3877bea32c5257ab34f92210400293745ac95f291d6620fea1662a", size = 13436527 },
 ]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.37.22"
+version = "1.37.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "types-awscrt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/12/2c/5c06eb61ad1a73e2de6745d796a0bd19ed2b2fbfec203551f18cd3c74fa2/botocore_stubs-1.37.22.tar.gz", hash = "sha256:02378b50d4ed2b50cee0282d102574a22ff933eeffc4765a2adba25493ee4b10", size = 42121 }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/e7/2adad7b85208f4371e17008e8e77cf28b86b1e8d63f37035a66d75a9552c/botocore_stubs-1.37.21.tar.gz", hash = "sha256:bbe702c43312ded6b40b69e0f81d6bbfb80f96e4aa72a77498809c75b614976a", size = 42129 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/f1/5db089cbd80c4bc3b80fa1c7f29f30a803673bbb47acc2dfd90d84154da6/botocore_stubs-1.37.22-py3-none-any.whl", hash = "sha256:6282da027dfaada36092357043266b3a568dd6e3d3674c0bdf8c52569013c532", size = 65424 },
+    { url = "https://files.pythonhosted.org/packages/3d/4b/f7749b4bacd7d5a21d7136b6ca03e8ade4a12f9fb9ba2e189425e4e55a54/botocore_stubs-1.37.21-py3-none-any.whl", hash = "sha256:b14b98488c258a16ed693f89f789d8fd6bc1542359f55752b394778cb56125ee", size = 65424 },
 ]
 
 [[package]]
@@ -220,21 +217,41 @@ wheels = [
 ]
 
 [[package]]
-name = "mypy-boto3-codedeploy"
-version = "1.37.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/47/e3/e851504acd9597602c468e6fe1bdca9c779e7085b560f4f07a152af9ca75/mypy_boto3_codedeploy-1.37.0.tar.gz", hash = "sha256:27c1a3fcd1f5ed0948eab7eab7891da7e1615b79fe28da7ebd303759ebecd8b9", size = 37125 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/da/77773efb4b103f57cdc4a4361ff5343c93a4b40dfa3c9f0bdb58477f6589/mypy_boto3_codedeploy-1.37.0-py3-none-any.whl", hash = "sha256:872befebf7b57f3c2b592253b93b5e8468cb3e41566ef178ab7cb4ec56bfd765", size = 43489 },
+name = "locust-stats-glue-trigger"
+version = "1.0.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "aws-lambda-powertools", extra = ["all"] },
+    { name = "boto3" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "boto3-stubs", extra = ["glue"] },
+    { name = "ruff" },
+    { name = "uv" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aws-lambda-powertools", extras = ["all"] },
+    { name = "boto3" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "boto3-stubs", extras = ["glue"] },
+    { name = "ruff" },
+    { name = "uv" },
 ]
 
 [[package]]
-name = "mypy-boto3-lambda"
-version = "1.37.16"
+name = "mypy-boto3-glue"
+version = "1.37.13"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/de/09/d7dd80cabde53fe7f39a9d7f6342b59af14707bb775606b1d9ffe82efa8b/mypy_boto3_lambda-1.37.16.tar.gz", hash = "sha256:d58f20bb0416aeb04fda6cfaa8a2f2c31532ca5009004c3e2bcbe8ac50a8cf7c", size = 41727 }
+sdist = { url = "https://files.pythonhosted.org/packages/58/ee/136e8a7cb6801346cdef44ac1160cfec32ffcd2412deff00ac964c7dc2bc/mypy_boto3_glue-1.37.13.tar.gz", hash = "sha256:16b25fb94e797d4337a71b787b2fca2e68170f7c13b3a3e592c08e04243589b0", size = 121535 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/60/0b/6d6256885c2de708d21782ba4ab1d2042c98095ca381e983cb3aeeac5810/mypy_boto3_lambda-1.37.16-py3-none-any.whl", hash = "sha256:22dd22f29ef77febad9f4a2ec3d4560385b9b19a4ca1909de863206392145273", size = 48225 },
+    { url = "https://files.pythonhosted.org/packages/40/9e/53a2527c3d939b5600c1f2de4bd571863c74c9a3db034a3b5364d3ac7da0/mypy_boto3_glue-1.37.13-py3-none-any.whl", hash = "sha256:29c544edfba503077cedeb1eb0cecc9fe9a8c11bc2acde4decc32222a31f9b78", size = 128992 },
 ]
 
 [[package]]
@@ -330,35 +347,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/88/2c/7bb1416c5620485aa793f2de31d3df393d3686aa8a8506d11e10e13c5baf/python_dotenv-1.1.0.tar.gz", hash = "sha256:41f90bc6f5f177fb41f53e87666db362025010eb28f60a01c9143bfa33a2b2d5", size = 39920 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/18/98a99ad95133c6a6e2005fe89faedf294a748bd5dc803008059409ac9b1e/python_dotenv-1.1.0-py3-none-any.whl", hash = "sha256:d7c01d9e2293916c18baf562d95698754b0dbbb5e74d457c45d4f6561fb9d55d", size = 20256 },
-]
-
-[[package]]
-name = "regression-wrapper"
-version = "1.0.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "aws-lambda-powertools", extra = ["all"] },
-    { name = "boto3" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "boto3-stubs", extra = ["codedeploy", "lambda"] },
-    { name = "ruff" },
-    { name = "uv" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aws-lambda-powertools", extras = ["all"], specifier = ">=3.8.0" },
-    { name = "boto3", specifier = ">=1.37.14" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "boto3-stubs", extras = ["lambda", "codedeploy"] },
-    { name = "ruff" },
-    { name = "uv" },
 ]
 
 [[package]]

@@ -27,10 +27,9 @@ locals {
 
   # Using lookup to ensure that this module can be used in Terraservices that may not have SSM
   # configuration, or could be applied before SSM configuration exists at all
-  kms_key_alias           = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
-  kms_config_key_alias    = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
-  kms_config_key_primary  = try([one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration).primary_key.arn], [])
-  kms_config_key_replicas = try(one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration).replica_keys[*].arn, [])
+  kms_key_alias             = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
+  kms_config_key_alias      = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
+  kms_config_key_mrk_config = one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration)
 }
 
 data "aws_region" "current" {}
