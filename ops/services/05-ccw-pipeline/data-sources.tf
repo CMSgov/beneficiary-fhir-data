@@ -6,15 +6,10 @@ data "aws_rds_cluster" "main" {
   cluster_identifier = local.db_cluster_identifier
 }
 
-data "external" "writer_identifier" {
-  program = [
-    "${path.module}/scripts/rds-writer-identifier.sh", # helper script
-    data.aws_rds_cluster.main.cluster_identifier       # verified, positional argument to script
-  ]
-}
+module "data_db_writer_instance" {
+  source = "../../terraform-modules/general/data-db-writer-instance"
 
-data "aws_db_instance" "writer" {
-  db_instance_identifier = data.external.writer_identifier.result.writer
+  cluster_identifier = data.aws_rds_cluster.main.cluster_identifier
 }
 
 data "aws_ecr_repository" "pipeline" {

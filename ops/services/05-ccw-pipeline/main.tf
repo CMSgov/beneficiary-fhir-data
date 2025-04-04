@@ -34,7 +34,7 @@ locals {
 
   db_environment        = coalesce(var.db_environment_override, local.env)
   db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
-  rds_writer_az         = data.aws_db_instance.writer.availability_zone
+  rds_writer_az         = module.data_db_writer_instance.writer.availability_zone
   # ECS Fargate does not allow specifying the AZ, but it does allow for specifying the subnet. So,
   # we can control which AZ the pipeline service/task is placed into by filtering the list of
   # subnets by AZ
@@ -118,7 +118,7 @@ resource "aws_ecs_task_definition" "ccw" {
           },
           {
             name  = "BFD_DB_URL"
-            value = "jdbc:postgresql://${data.aws_db_instance.writer.endpoint}/fhirdb?logServerErrorDetail=false"
+            value = "jdbc:postgresql://${module.data_db_writer_instance.writer.endpoint}/fhirdb?logServerErrorDetail=false"
           },
           {
             name  = "BFD_CCW_S3_BUCKET_NAME"
