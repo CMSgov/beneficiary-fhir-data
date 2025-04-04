@@ -31,3 +31,9 @@ variable "service" {
   description = "Service _or_ terraservice name."
   type        = string
 }
+
+variable "subnet_layers" {
+  default     = []
+  description = "List of subnet 'layers' (app, data, dmz, etc.) from which each subnet associated with that layer will be looked up."
+  type        = list(string)
+}

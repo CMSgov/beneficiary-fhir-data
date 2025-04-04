@@ -71,3 +71,29 @@ data "aws_kms_key" "env_config_cmk" {
 data "aws_iam_policy" "permissions_boundary" {
   name = "ct-ado-poweruser-permissions-boundary-policy"
 }
+
+data "aws_vpc" "main" {
+  filter {
+    name   = "tag:stack"
+    values = [local.env]
+  }
+}
+
+data "aws_subnets" "main" {
+  for_each = toset(var.subnet_layers)
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+
+  tags = {
+    Layer = each.key
+  }
+}
+
+data "aws_subnet" "main" {
+  for_each = toset(flatten([for _, obj in data.aws_subnets.main : obj.ids]))
+
+  id = each.key
+}

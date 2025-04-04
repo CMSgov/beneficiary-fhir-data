@@ -26,7 +26,7 @@ description = '''General allow list'''
 commits = [
     '''af39f8b2a77d0d36197601ce23972735c3bfa382''', # data-sources.tf contained a non-sensitive AWS KMS Key identifier matching a "Generaic API Key" pattern
     '''82cbfb7eb1977caf5c19c25975ff5cd05c642fc1''', # build_bfd-platinum.json contained a non-sensitive AWS KMS Key identifier matching a "Generic API Key" pattern
-    '''3cace202c5af9a3f18d2ac38b3f8b7ff839701f7''', # main.py contained the path to the test_client_key and test_client_cert which matched a "Generic API Key" pattern
+    '''0b8cea2e84703ab5fd86da4759fbf596e1e77e48''', # main.py contained the path to the test_client_key and test_client_cert which matched a "Generic API Key" pattern
 ]
 paths = [
     '''apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/test/resources/FISS.ndjson''',

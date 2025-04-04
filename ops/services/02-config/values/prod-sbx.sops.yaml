@@ -4,12 +4,12 @@
 /bfd/${env}/common/sensitive/victor_ops_url: ENC[AES256_GCM,data:wzZJymVEShpL+MQ7WOTzzhzic3RE+D55AYAP78dC0t5BCNNgcYX4nvNL19XCOG/EvNTo/fC0+DiMuO9CSlc6l/Qh9iKqKdyJoIedSRlHJ0Ru5neeohaWGrh3Urj/aJH2/WKD5gtxTa9R+mI=,iv:Uy/mj5phGn9ubCnuWMqkt3S9nV4ZNizbtGIkOl7b6Dw=,tag:LP8aTgsctYcPRuLs7VeBKg==,type:str]
 /bfd/${env}/migrator/sensitive/db/password: ENC[AES256_GCM,data:VU2bu2TjGv+OERehzwFUHEbQKJHB5fsD,iv:pBc6g1eF4bxfKHEIPattNMVE3b+umRXJxcJNiwE3fDc=,tag:2l1MeQXFMa+KcUAy9CHieA==,type:str]
 /bfd/${env}/migrator/sensitive/db/username: ENC[AES256_GCM,data:bW/eG9c4PJRFasOP9GIwIgq4fg==,iv:RiMWAKu+6ZYPv4rN/KeNqwRywtPs3IP3Qrz3uPYA2bg=,tag:mJjz7+wVjdgpjhmKAijdkQ==,type:str]
-/bfd/${env}/pipeline/sensitive/ccw/ccw_rif_role_external_id: ENC[AES256_GCM,data:ok3wW55Fg8p5,iv:WdGCTl54PgERwM6rT3iSOo3cTez5U7fX6Bf73/E9wvI=,tag:k34PboIp53VMKlaaMOeBsA==,type:str]
-/bfd/${env}/pipeline/sensitive/ccw/ccw_rif_role_principal_arns: ENC[AES256_GCM,data:LBQf01sDcDwn,iv:cBJ9Q1NhQCOS7/Sgc2OfiCC3cUIvyhZ/Setxybezmzw=,tag:1UEyfjah5CPLl7u2mRudew==,type:str]
-/bfd/${env}/pipeline/sensitive/db/password: ENC[AES256_GCM,data:uIkA+iYkx+wlQUDyopz36rO/gwSn1gjq,iv:vhObPsg2rB2hx4K0+AJISRDnH+pvuNKsZ5SxZwpd+g0=,tag:umQJElUkGNb8W0zhiv9D3A==,type:str]
-/bfd/${env}/pipeline/sensitive/db/username: ENC[AES256_GCM,data:Q5FlGbqyW5PO+9LfPygxVrIb,iv:qrQavso0O+gsjLMHgB5R5DQgSwxyJ7ohOIGcHpDpp7s=,tag:5Wp88qqkv8eBMHVNrMQOCA==,type:str]
-/bfd/${env}/pipeline/sensitive/hicn_hash/iterations: ENC[AES256_GCM,data:v7vPEA==,iv:1tDOn+1PEEs9CiZ3sYkUJPVZ+4tQigNmn2cGpkmK9xE=,tag:8BcaPsxegyttE4SxhYp9wg==,type:int]
-/bfd/${env}/pipeline/sensitive/hicn_hash/pepper: ENC[AES256_GCM,data:sYlDn2QRTMKsbctqrrzKeROb+g8XZjf2J1+lF77i/kZbYYjrXUzv72zaVwQ1CJrcyTljmTxsJ0TAEUagg2nO90LEq+ogpYkx8RPoH0M5xhu5sAy8PT8qhMgsfmYmD8p/EPAUcnWVQ7op1ktZaS/XGsFN3/1kQzTqmoC6MZnR2t/fd3ZxQ2c6WO1lmlJRfA+sEdsj6ABEm47yymYvLbnvUXgbalEclPDyp4iPb/y7xU5PEz4taztAbTTRmsnie/ShTDTPnTp/rLNqfSB74q6rn0CugctmzV7YghC4A3mf7qnCEvUdOwjInx/wL/OXS2Doq2ozJKhx6rG0DHkw0uWd+vPqS/RTiX1GAqBIPnYjOpCcGWdTZDW7OTKXgI4J+bvyjmBMu+cRMm4xxwCEnA3p7NRjKLb9JskGA0dy9dnN0lrnVRekvG82JLpMyQPWnQM3BZEvDMKWunzoKkrCjrfQuGjAoBgGKrHD03PRMjSQOn/Vh6soiRvIgrr5rLKTLtkP07C58cOmSfyT2ariOlMl/KB+df7WsC25K2d9QHIf7nunOuMGhkCY7JPEwhzqjucB6UbIKOB4TKZb69P1VAH+dZLslv+MNnyazKQx5JUkwBftc5fYpXgqsm5y3QJ5LpBjQVpGHd54K2jHMuocV1ZuHuldn59EZsy9le0WBy9tK/g=,iv:HfMczikhmXzLnFQSauISyoPciRrV2nSMCjIXfyM3Abw=,tag:8rYxUE8+aJSegdQ4WhubxQ==,type:str]
+/bfd/${env}/ccw-pipeline/sensitive/ccw/ccw_rif_role_external_id: ENC[AES256_GCM,data:fe0s6JpjLQBK,iv:+LaWBDbrEKT4BThDV8pPjPLULTKu+1kDD2vtYQn7BrY=,tag:vM5CGbd06eY3qfQImF6elg==,type:str]
+/bfd/${env}/ccw-pipeline/sensitive/ccw/ccw_rif_role_principal_arns: ENC[AES256_GCM,data:ChJPLJiaKOaW,iv:EGCYIz+H5txnG5RVvm+nESiUmedIkhpHsN6apCeG2QQ=,tag:70HR+Kzw3l/GS4U5dNZclA==,type:str]
+/bfd/${env}/ccw-pipeline/sensitive/db/password: ENC[AES256_GCM,data:42G7vrm1u1aM8UiecwPK6LNQ8WGtrLSr,iv:G6PqhT0TSRG4YDLq7mjfivUc5DfmS6IBPC6ZMn+p9sw=,tag:qibc/oFBafWcWhN1dwMRZw==,type:str]
+/bfd/${env}/ccw-pipeline/sensitive/db/username: ENC[AES256_GCM,data:zkkDBpSlkl/CBZBMpiBSL3II,iv:tTEyRd32SGmy8MFqfupoK5jAO11HemZpt51Ex6jOpZs=,tag:U67D7WLGjQtUbxbS0wPqZw==,type:str]
+/bfd/${env}/ccw-pipeline/sensitive/hicn_hash/iterations: ENC[AES256_GCM,data:WW4+fw==,iv:g5U49VUpYtdqT46WtrYpr/lCJOoCCXHJHEj4ftqLuZI=,tag:QoCEE4joXdsngdt2+7GgzQ==,type:int]
+/bfd/${env}/ccw-pipeline/sensitive/hicn_hash/pepper: ENC[AES256_GCM,data:86GCblhOMTNYJlmutiowzgB5CCii7dytuoHdaqPPRMTwDEUuj42/Z2a6tZL2t06lIXMVKslM8/4tVKFEE2TAzahWOFCfEcACrpBnBclQgY1vfNNNLbooDuGll2rkYk0B2psjydhReev7id9szL8yja+t9yS1AoWXp9WFn9ZD+m5VG9ODEx4fxPMtf6V5UJBak9HGP3MfrZ4hyJYr8w5kEvjLBrULMT2SeXX6c+zYD5JH7zNbhgKPuj9RBekPk6u/UtEDf0PXDBhKgX+Gi84dE0Do26C2B3dLZkuwIF+LrtFm5RznSzfI9ZINKsD8hcUX9JEAsHMM5EDX1e1J06XQAryutb2sVSKywMATJi1EZsXF7R1gJ3qKHcpcy0DMi9mJY42RXKbbsbspQI2jbzu5yXmL2GVOQtTrXKzwHC+ZcZ0zG3tNxXrPbPsw5Fw3ubtpbkWAXF7KkssthJWVegtBwKqoPNPcZpGskhZpvgNyn+yH9uiyssegsAReEak0a53xr3jSlbzcYGmP0EMCSeaV6MDS8fQ673W22RN2Bwq2Hr3SGC/JpzWsp6CO7Utqu+KgBuKKv2V90MIzpe579TpndfSqw4yqfIknr8pgq1LMPUEoc3oth3q5BSId81kNaDf5voR+4bdMdNoxvhLmnvdSLRiPFGzV5vcm7kgSan19FBk=,iv:+y3daEkzR1o48QxxlpZHK0SeXJRiCwzAfxRdKw6mvIk=,tag:Acxh4kWFymbhZgMwGibwvw==,type:str]
 /bfd/${env}/pipeline/sensitive/rda/grpc/inprocess_server/s3/bucket: ENC[AES256_GCM,data:3dfprjYuQlbq,iv:ebQbtmqBb6rDg6I1OTRx6RGeBkaa9k/L/1IwFinC5Ug=,tag:jDRdFyb5CITEmaVQQXY/Dw==,type:str]
 /bfd/${env}/pipeline/sensitive/rda/grpc/inprocess_server/s3/dir: ENC[AES256_GCM,data:QsKYoa85wn+51REUIuFr3A==,iv:ZB3w7V1dWqLiTiL7g+BK+YvvxJDo+Dm59P+srSmuWSU=,tag:z6170tUDzGcBR8z3/PBKjA==,type:str]
 /bfd/${env}/pipeline/sensitive/rda/grpc/inprocess_server/s3/region: ENC[AES256_GCM,data:n2a1EA5+FnL7,iv:7+KU1XetHTpsbA+frfqlhTw63LGodI/T5VzDEAVGhww=,tag:CiYKoalnI9/Fj4eoOpK8BQ==,type:str]
@@ -68,26 +68,26 @@
 /bfd/${env}/migrator/nonsensitive/volume_throughput: "125"
 /bfd/${env}/migrator/nonsensitive/volume_type: gp3
 /bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-prod-sbx-migrator
-/bfd/${env}/pipeline/nonsensitive/thread_multiple: "3"
-/bfd/${env}/pipeline/nonsensitive/db/auth_type: UNDEFINED
-/bfd/${env}/pipeline/nonsensitive/db/data_source_type: HIKARI
-/bfd/${env}/pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
-/bfd/${env}/pipeline/nonsensitive/micrometer_cw/enabled: "true"
-/bfd/${env}/pipeline/nonsensitive/micrometer_cw/namespace: bfd-prod-sbx/bfd-pipeline
-/bfd/${env}/pipeline/nonsensitive/micrometer_cw/interval: PT1M
-/bfd/${env}/pipeline/nonsensitive/new_relic/metrics/period: UNDEFINED
-/bfd/${env}/pipeline/nonsensitive/ccw/job/allowed_data_set_type: UNDEFINED
-/bfd/${env}/pipeline/nonsensitive/ccw/job/enabled: "true"
-/bfd/${env}/pipeline/nonsensitive/ccw/job/batch_size: "7"
-/bfd/${env}/pipeline/nonsensitive/ccw/job/queue_size_multiple: "5"
-/bfd/${env}/pipeline/nonsensitive/ccw/job/claims/batch_size: "100"
-/bfd/${env}/pipeline/nonsensitive/ccw/job/claims/queue_size_multiple: "10"
-/bfd/${env}/pipeline/nonsensitive/ccw/idempotency_enabled: "true"
-/bfd/${env}/pipeline/nonsensitive/ccw/instance_type: c6a.4xlarge
-/bfd/${env}/pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
-/bfd/${env}/pipeline/nonsensitive/ccw/rif_thread_multiple_claims: "25"
-/bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
-/bfd/${env}/pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-prod-sbx-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/ccw-pipeline/nonsensitive/db/auth_type: UNDEFINED
+/bfd/${env}/ccw-pipeline/nonsensitive/db/data_source_type: HIKARI
+/bfd/${env}/ccw-pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
+/bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/enabled: "true"
+/bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/namespace: bfd-prod-sbx/ccw-pipeline
+/bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/interval: PT1M
+/bfd/${env}/ccw-pipeline/nonsensitive/new_relic/metrics/period: UNDEFINED
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/allowed_data_set_type: UNDEFINED
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/batch_size: "7"
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/queue_size_multiple: "5"
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/claims/batch_size: "100"
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/claims/queue_size_multiple: "10"
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/idempotency_enabled: "true"
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/cpu: 8192
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/memory: 16384
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50
+/bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(30 minutes)
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
+/bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-prod-sbx-cloudwatch-alarms-slack-bfd-warnings
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/max_idle_seconds: "600"
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/server_type: InProcess
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/mode: S3
@@ -754,13 +754,8 @@ sops:
       created_at: "2025-03-31T22:39:00Z"
       enc: AQICAHjP/Aj2Cj3mc/evGqWprczmF5nsbcARIepeXMoZGoJjRgHHMxB3kegUw/6fiO3cdCVZAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJQnqvuN34USrb+OHAgEQgDvtFKzb7rjtFOxzEXKjNz/qXq6fCm/+aP9mc2YdaLXDpAtXStvrMPu57z0WIaq1FHdIIc1tpnPZ5OsteQ==
       aws_profile: ""
-  gcp_kms: []
-  azure_kv: []
-  hc_vault: []
-  age: []
-  lastmodified: "2025-03-31T22:43:54Z"
-  mac: ENC[AES256_GCM,data:lBc1qM3WwHNTll+Lmj4/crE554vUoFWYzcIiCSaskuVm4rsqnQ0x7Kwm0GrPm5YIMMg6N6D/LjgvG1CciJPnX+BocbkcIWDoR/NYlpALlWDKrmPf+P2K2yEnA7FvIVHvkIzopKFNAAdEMhNW7KrgXh72B1nBpkiHCxo1W1Vs/zE=,iv:lOgB2IxQLYwtuXQgyIdw7Y29wJDziDAPeOSf9tA6gHI=,tag:gDYW8lCYkcyBdX1PawNcvA==,type:str]
-  pgp: []
+  lastmodified: "2025-04-04T12:30:21Z"
+  mac: ENC[AES256_GCM,data:B899+Qe48RY47afv+gnk2YPrp9IVUZVYcfxP0oBS52dhJZ5gWwNTcyqRHTBW8wKzuF3F270UokE8T703RoTDsLcTJn2z/A6u5WgqL9qJhKj+tYZUtJY1bEgruro0yJHu8o+LYMhHCdwFSO9rJon+v6FcOPKHHAdRHnQXFO2bcy4=,iv:sXVwFx5u0xm8QdJZv0uDyOwcmnOvRJPM0NbpTnmkofY=,tag:81//EAkylNy6hhsTfTnryg==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
-  version: 3.9.4
+  version: 3.10.1
