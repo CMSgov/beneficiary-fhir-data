@@ -15,7 +15,6 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -58,12 +57,10 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -96,9 +93,6 @@ public class HHAClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The mock NPIOrgLookup. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
-
   /**
    * Generates the sample A claim object to be used in multiple tests.
    *
@@ -128,22 +122,14 @@ public class HHAClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
-    hhaClaimTransformer =
-        new HHAClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
+    hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, securityTagManager);
     claim = generateClaim();
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
-  }
-
-  /** Releases the static mock NPIOrgLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
   }
 
   /**
@@ -241,6 +227,7 @@ public class HHAClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -266,6 +253,7 @@ public class HHAClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -332,8 +320,9 @@ public class HHAClaimTransformerV2Test {
             "2222222222",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "attending",
-            "Attending");
-
+            "Attending",
+            "207R00000X",
+            "Internal Medicine Physician");
     assertTrue(compare1.equalsDeep(member1));
 
     // Second member
@@ -344,7 +333,9 @@ public class HHAClaimTransformerV2Test {
             "345345345",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "performing",
-            "Performing provider");
+            "Performing provider",
+            "207ZH0000X",
+            "Hematology (Pathology) Physician");
 
     assertTrue(compare2.equalsDeep(member2));
   }

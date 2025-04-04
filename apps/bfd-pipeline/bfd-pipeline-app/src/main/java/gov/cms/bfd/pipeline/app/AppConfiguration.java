@@ -19,6 +19,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.RdaSourceConfig;
 import gov.cms.bfd.pipeline.rda.grpc.source.RdaVersion;
 import gov.cms.bfd.pipeline.rda.grpc.source.StandardGrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.npi_fda.NpiFdaLoadJobConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.S3ClientConfig;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
@@ -375,6 +376,15 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   public static final String SSM_PATH_MICROMETER_JMX_ENABLED = "micrometer_cw/jmx_enabled";
 
+  /** Enabled flag for NpiFdaLoadJob. */
+  public static final String SSM_PATH_NPI_FDA_LOAD_JOB = "rda/npi_fda_load_job/enabled";
+
+  /** The number of records to save before commiting a transaction. */
+  public static final String SSM_PATH_NPI_FDA_BATCH_SIZE = "rda/npi_fda_load_job/batch_size";
+
+  /** The run interval for the NPI Load Job, in days. */
+  public static final String SSM_PATH_NPI_FDA_RUN_INTERVAL = "rda/npi_fda_load_job/run_interval";
+
   /**
    * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
    * allowed list avoids increasing AWS charges as new metrics are defined for use in NewRelic that
@@ -421,6 +431,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
    */
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
+  /** The Options for NpiFdaLoadJob. */
+  @Nullable private final NpiFdaLoadJobConfig npiFdaLoadConfig;
+
   /** All of the default configuration values. These will be used as the last layer in config. */
   private static final Map<String, String> DEFAULT_CONFIG_VALUES =
       ImmutableMap.<String, String>builder()
@@ -437,6 +450,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
           .put(SSM_PATH_RDA_GRPC_PORT, "443")
           .put(SSM_PATH_RDA_GRPC_INPROC_SERVER_NAME, "MockRdaServer")
           .put(SSM_PATH_RDA_GRPC_MAX_IDLE_SECONDS, String.valueOf(Integer.MAX_VALUE))
+          .put(SSM_PATH_NPI_FDA_LOAD_JOB, "false")
+          .put(SSM_PATH_NPI_FDA_BATCH_SIZE, "100000")
+          .put(SSM_PATH_NPI_FDA_RUN_INTERVAL, "30")
           .put(
               SSM_PATH_RDA_GRPC_SECONDS_BEFORE_CONNECTION_DROP,
               String.valueOf(Duration.ofMinutes(4).toSeconds()))
@@ -453,6 +469,7 @@ public final class AppConfiguration extends BaseAppConfiguration {
    * @param awsClientConfig used to configure AWS services
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
+   * @param npiFdaLoadConfig the value to use for {@link #getNpiFdaLoadConfigOptions}
    * @param backFillConfigOptions the value to use fo {@link #getBackfillConfigOptions()}
    */
   private AppConfiguration(
@@ -461,11 +478,13 @@ public final class AppConfiguration extends BaseAppConfiguration {
       AwsClientConfig awsClientConfig,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
       @Nullable RdaLoadOptions rdaLoadOptions,
-      @Nullable BackfillConfigOptions backFillConfigOptions) {
+      @Nullable BackfillConfigOptions backFillConfigOptions,
+      @Nullable NpiFdaLoadJobConfig npiFdaLoadConfig) {
     super(metricOptions, databaseOptions, awsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
     this.backfillConfigOptions = backFillConfigOptions;
+    this.npiFdaLoadConfig = npiFdaLoadConfig;
   }
 
   /**
@@ -505,6 +524,38 @@ public final class AppConfiguration extends BaseAppConfiguration {
     builder.append(rdaLoadOptions);
     builder.append("]");
     return builder.toString();
+  }
+
+  /**
+   * Get the config options for NpiFdaLoadJob.
+   *
+   * @return the config.
+   */
+  public Optional<NpiFdaLoadJobConfig> getNpiFdaLoadConfigOptions() {
+    return Optional.ofNullable(npiFdaLoadConfig);
+  }
+
+  /**
+   * Loads the config for NpiFdaLoadJob.
+   *
+   * @param config The ConfigLoader.
+   * @param ccwPipelineEnabled True is the CCW pipeline is enabled. We only want to run in an RDA
+   *     pipeline instance.
+   * @return The NpiFdaLoadJob configuration.
+   */
+  public static NpiFdaLoadJobConfig loadNpiFdaLoadConfig(
+      ConfigLoader config, boolean ccwPipelineEnabled) {
+    boolean enabled = config.booleanOption(SSM_PATH_NPI_FDA_LOAD_JOB).orElse(false);
+    if (!enabled || ccwPipelineEnabled) {
+      return null;
+    }
+    int batchSize = config.intValue(SSM_PATH_NPI_FDA_BATCH_SIZE, 100000);
+    int runInterval = config.intValue(SSM_PATH_NPI_FDA_RUN_INTERVAL, 30);
+    return NpiFdaLoadJobConfig.builder()
+        .enabled(enabled)
+        .batchSize(batchSize)
+        .runInterval(runInterval)
+        .build();
   }
 
   /**
@@ -604,13 +655,15 @@ public final class AppConfiguration extends BaseAppConfiguration {
     BackfillConfigOptions backfillConfigOptions =
         loadBackfillConfigOptions(config, ccwRifLoadOptions != null);
     AwsClientConfig awsClientConfig = BaseAppConfiguration.loadAwsClientConfig(config);
+    NpiFdaLoadJobConfig npiFdaConfig = loadNpiFdaLoadConfig(config, ccwRifLoadOptions != null);
     return new AppConfiguration(
         metricOptions,
         databaseOptions,
         awsClientConfig,
         ccwRifLoadOptions,
         rdaLoadOptions,
-        backfillConfigOptions);
+        backfillConfigOptions,
+        npiFdaConfig);
   }
 
   /**
