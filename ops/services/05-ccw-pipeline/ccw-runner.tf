@@ -12,17 +12,17 @@ data "aws_ecr_image" "ccw_runner" {
 }
 
 resource "aws_security_group" "ccw_runner" {
-  description = "${local.ccw_runner_lambda_full_name} Lambda security group in ${local.env}"
-  name        = "${local.ccw_runner_lambda_full_name}-sg"
-  tags        = { Name = "${local.ccw_runner_lambda_full_name}-sg" }
-  vpc_id      = data.aws_vpc.main.id
+  description            = "${local.ccw_runner_lambda_full_name} Lambda security group in ${local.env}"
+  name                   = "${local.ccw_runner_lambda_full_name}-sg"
+  tags                   = { Name = "${local.ccw_runner_lambda_full_name}-sg" }
+  vpc_id                 = data.aws_vpc.main.id
+  revoke_rules_on_delete = true
+}
 
-  egress {
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_vpc_security_group_egress_rule" "ccw_runner_allow_all_traffic_ipv4" {
+  security_group_id = aws_security_group.ccw_runner.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ccw_runner_rds_cluster" {
