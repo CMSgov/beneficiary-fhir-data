@@ -27,6 +27,7 @@
 | <a name="input_service"></a> [service](#input\_service) | Service _or_ terraservice name. | `string` | n/a | yes |
 | <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags to merge into final default\_tags output | `map(string)` | `{}` | no |
 | <a name="input_ssm_hierarchy_roots"></a> [ssm\_hierarchy\_roots](#input\_ssm\_hierarchy\_roots) | List of SSM Hierarchy roots. Module executes a recursive lookup for all roots for `common` and service-specific hierarchies. | `list(string)` | <pre>[<br/>  "bfd"<br/>]</pre> | no |
+| <a name="input_subnet_layers"></a> [subnet\_layers](#input\_subnet\_layers) | List of subnet 'layers' (app, data, dmz, etc.) from which each subnet associated with that layer will be looked up. | `list(string)` | `[]` | no |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -52,6 +53,9 @@ No modules.
 | [aws_kms_key.env_config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_ssm_parameters_by_path.params](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
+| [aws_subnet.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
+| [aws_subnets.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
+| [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 | [external_external.github_token](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [http_http.latest_bfd_release](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
 
@@ -79,4 +83,6 @@ No modules.
 | <a name="output_seed_env"></a> [seed\_env](#output\_seed\_env) | The solution's source environment. For established environments this is equal to the environment's name |
 | <a name="output_service"></a> [service](#output\_service) | The name of the current Terraservice |
 | <a name="output_ssm_config"></a> [ssm\_config](#output\_ssm\_config) | Parameter:Value map that elides repetitive keys, e.g. ssm:/bfd/test/common/vpc\_name is /bfd/comon/vpc\_name |
+| <a name="output_subnets_map"></a> [subnets\_map](#output\_subnets\_map) | Map of subnet layers to the subnets (data.aws\_subnet) in that layer in the current environment's VPC. |
+| <a name="output_vpc"></a> [vpc](#output\_vpc) | The current environment's VPC (data.aws\_vpc). |
 <!-- END_TF_DOCS -->

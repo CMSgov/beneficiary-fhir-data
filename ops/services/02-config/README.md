@@ -2,6 +2,14 @@
 
 This Terraservice is responsible for defining a given BFD environment's configuration through AWS SSM Parameter Store by reading from [sops-encrypted](https://github.com/getsops/sops) YAML files.
 
+## Direct Terraservice Dependencies
+
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
+
+| Terraservice | Required for Established? | Required for Ephemeral? | Details |
+|---|---|---|---|
+| `base` | Yes | Yes | N/A |
+
 ## Overview
 
 Configuration management can get away from us, becoming wildly complex if there isn't a conscious effort to _keep things simple_.

@@ -2,22 +2,18 @@
 
 This subfolder contains the Terraform configuration (Task Definitions, ECS Service definitions, etc.) for the BFD Server ECS Service and all related infrastructure.
 
-## Strict Terraservice Dependencies
+## Direct Terraservice Dependencies
 
-The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
 
-- `base`
-- `config`
-- `cluster`
-
-## Soft Terraservice Dependencies
-
-Overrides or environment-conditional behavior exists in this Terraservice that allows for skipping the creation of the following Terraservice dependencies under certain circumstances:
-
-- `database`
-  - This Terraservice may be skipped by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment
-- `locust`
-  - This Terraservice may be skipped in **ephemeral environments** if `ephemeral_regression_override` is unspecified or `false`
+| Terraservice | Required for Established? | Required for Ephemeral? | Details |
+|---|---|---|---|
+| `base` | Yes | Yes | N/A |
+| `config` | Yes | Yes | N/A |
+| `cluster` | Yes | Yes | N/A |
+| `database` | Yes | No | This Terraservice may be skipped in **ephemeral environments** by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment |
+| `locust` | Yes | No | This Terraservice may be skipped in **ephemeral environments** if `ephemeral_regression_override` is unspecified or `false` |
+| `migrator` | Yes | No | This Terraservice may be skipped in **ephemeral environments**, if is known that there are no new migrations to run |
 
 ## Deployment
 

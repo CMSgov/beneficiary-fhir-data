@@ -92,15 +92,10 @@
 /bfd/${env}/migrator/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/migrator/nonsensitive/db/hikari/max_pool_size: UNDEFINED
-/bfd/${env}/migrator/nonsensitive/sqs/queue_name: bfd-test-migrator
 /bfd/${env}/migrator/nonsensitive/new_relic/app_name: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/new_relic/metrics/period: UNDEFINED
-/bfd/${env}/migrator/nonsensitive/instance_type: m6a.large
-/bfd/${env}/migrator/nonsensitive/volume_iops: "3000"
-/bfd/${env}/migrator/nonsensitive/volume_size: "100"
-/bfd/${env}/migrator/nonsensitive/volume_throughput: "125"
-/bfd/${env}/migrator/nonsensitive/volume_type: gp3
-/bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-test-migrator
+/bfd/${env}/migrator/nonsensitive/ecs/resources/cpu: 2048
+/bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
 /bfd/${env}/ccw-pipeline/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/ccw-pipeline/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/ccw-pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED

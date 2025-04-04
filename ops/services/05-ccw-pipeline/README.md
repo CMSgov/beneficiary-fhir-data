@@ -2,20 +2,17 @@
 
 This subfolder contains the Terraform configuration (Task Definitions, ECS Service definitions, etc.) for the BFD CCW Pipeline ECS Service and all related infrastructure.
 
-## Strict Terraservice Dependencies
+## Direct Terraservice Dependencies
 
-The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
 
-- `base`
-- `config`
-- `cluster`
-
-## Soft Terraservice Dependencies
-
-Overrides or environment-conditional behavior exists in this Terraservice that allows for skipping the creation of the following Terraservice dependencies under certain circumstances:
-
-- `database`
-  - This Terraservice may be skipped by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment
+| Terraservice | Required for Established? | Required for Ephemeral? | Details |
+|---|---|---|---|
+| `base` | Yes | Yes | N/A |
+| `config` | Yes | Yes | N/A |
+| `cluster` | Yes | Yes | N/A |
+| `database` | Yes | No | This Terraservice may be skipped in **ephemeral environments** by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment |
+| `migrator` | Yes | No | This Terraservice may be skipped in **ephemeral environments**, if is known that there are no new migrations to run |
 
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -54,6 +51,7 @@ Overrides or environment-conditional behavior exists in this Terraservice that a
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_bucket_ccw"></a> [bucket\_ccw](#module\_bucket\_ccw) | ../../terraform-modules/general/secure-bucket | n/a |
+| <a name="module_data_db_writer_instance"></a> [data\_db\_writer\_instance](#module\_data\_db\_writer\_instance) | ../../terraform-modules/general/data-db-writer-instance | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -101,7 +99,6 @@ Overrides or environment-conditional behavior exists in this Terraservice that a
 | [aws_vpc_security_group_egress_rule.ccw_runner_allow_all_traffic_ipv4](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.allow_ccw_runner_rds_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.ccw_allow_db_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_db_instance.writer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance) | data source |
 | [aws_ecr_image.ccw_runner](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
 | [aws_ecr_image.pipeline](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
 | [aws_ecr_repository.pipeline](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
@@ -123,11 +120,6 @@ Overrides or environment-conditional behavior exists in this Terraservice that a
 | [aws_iam_policy_document.service_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_security_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
-| [aws_subnet.data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
-| [aws_subnets.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
-| [aws_subnets.data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
-| [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
-| [external_external.writer_identifier](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'

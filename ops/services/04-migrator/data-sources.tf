@@ -12,13 +12,13 @@ module "data_db_writer_instance" {
   cluster_identifier = data.aws_rds_cluster.main.cluster_identifier
 }
 
-data "aws_ecr_repository" "pipeline" {
-  name = local.pipeline_repository_name
+data "aws_ecr_repository" "migrator" {
+  name = local.migrator_repository_name
 }
 
-data "aws_ecr_image" "pipeline" {
-  repository_name = data.aws_ecr_repository.pipeline.name
-  image_tag       = local.pipeline_version
+data "aws_ecr_image" "migrator" {
+  repository_name = data.aws_ecr_repository.migrator.name
+  image_tag       = local.migrator_version
 }
 
 data "aws_security_group" "aurora_cluster" {
