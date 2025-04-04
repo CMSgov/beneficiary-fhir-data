@@ -36,9 +36,6 @@ locals {
   # subnets by AZ
   writer_adjacent_subnets = [for subnet in data.aws_subnet.data : subnet.id if subnet.availability_zone == local.rds_writer_az]
 
-  # TODO: Consolidate invariant config
-  thread_multiple = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/thread_multiple"]))
-
   # TODO: Remove "/ng/" prefix when config is switched to
   ccw_ssm_hierarchies = [
     "/ng/bfd/${local.env}/${local.service}/sensitive/",
@@ -48,7 +45,8 @@ locals {
   ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/cpu"])
   ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/memory"])
   ccw_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/resources/disk_size"])
-  ccw_thread_multiple_claims = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/ccw/rif_thread_multiple_claims"]))
+  ccw_loader_thread_multiple = 3
+  ccw_thread_multiple_claims = 25
 }
 
 resource "aws_cloudwatch_log_group" "ccw_messages" {
@@ -128,7 +126,7 @@ resource "aws_ecs_task_definition" "ccw" {
           },
           {
             name  = "BFD_LOADER_THREAD_COUNT"
-            value = tostring(max(floor(local.ccw_cpu / 1000), 1) * local.thread_multiple)
+            value = tostring(max(floor(local.ccw_cpu / 1000), 1) * local.ccw_loader_thread_multiple)
           },
           {
             name  = "BFD_CCW_JOB_CLAIMS_LOADER_THREAD_COUNT"
