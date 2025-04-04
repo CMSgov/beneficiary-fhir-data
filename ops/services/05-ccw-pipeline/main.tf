@@ -117,10 +117,6 @@ resource "aws_ecs_task_definition" "ccw" {
             value = "true"
           },
           {
-            name  = "BFD_RDA_JOB_ENABLED"
-            value = "false"
-          },
-          {
             name  = "BFD_DB_URL"
             value = "jdbc:postgresql://${data.aws_db_instance.writer.endpoint}/fhirdb?logServerErrorDetail=false"
           },
