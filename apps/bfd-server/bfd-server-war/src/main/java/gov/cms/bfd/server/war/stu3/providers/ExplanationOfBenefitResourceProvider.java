@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonQueries;
@@ -110,6 +111,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
   /** The transformer for snf claims. */
   private final SNFClaimTransformer snfClaimTransformer;
 
+  NPIOrgLookup npiOrgLookup;
+
   /**
    * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
    *
@@ -128,6 +131,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
+   * @param npiOrgLookup Instance of NPIOrgLookup
    */
   public ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -141,7 +145,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
       InpatientClaimTransformer inpatientClaimTransformer,
       OutpatientClaimTransformer outpatientClaimTransformer,
       PartDEventTransformer partDEventTransformer,
-      SNFClaimTransformer snfClaimTransformer) {
+      SNFClaimTransformer snfClaimTransformer,
+      NPIOrgLookup npiOrgLookup) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -154,6 +159,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
+    this.npiOrgLookup = npiOrgLookup;
   }
 
   /**
@@ -248,6 +254,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
+    TransformerUtils.enrichEob(eob, npiOrgLookup);
     return eob;
   }
 
@@ -392,6 +399,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
           TransformerUtils.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
+    TransformerUtils.enrichEobBundle(bundle, npiOrgLookup);
     return bundle;
   }
 
