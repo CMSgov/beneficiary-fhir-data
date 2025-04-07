@@ -9,7 +9,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -145,7 +144,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * @param samhsaMatcher the samhsa matcher bean
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation
-   * @param npiOrgLookup the npi org lookup bean
    * @param securityTagsDao the security Tags Dao
    * @param samhsaV2Shadow the samhsa V2 Shadow flag
    */

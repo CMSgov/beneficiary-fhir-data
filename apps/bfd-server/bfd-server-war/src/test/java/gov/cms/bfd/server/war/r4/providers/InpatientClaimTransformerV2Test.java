@@ -94,6 +94,7 @@ public final class InpatientClaimTransformerV2Test {
   @Mock Timer.Context metricsTimerContext;
 
   Set<String> securityTags = new HashSet<>();
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -127,13 +128,12 @@ public final class InpatientClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     inpatientClaimTransformer =
-        new InpatientClaimTransformerV2(
-            metricRegistry, securityTagManager, false);
+        new InpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         inpatientClaimTransformer.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -475,7 +475,7 @@ public final class InpatientClaimTransformerV2Test {
     ExplanationOfBenefit genEob =
         inpatientClaimTransformer.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

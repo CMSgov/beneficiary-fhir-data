@@ -39,7 +39,6 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -432,8 +431,7 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new HHAClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
@@ -495,7 +493,7 @@ public final class TransformerUtilsTest {
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
-      TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
 
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -535,7 +533,7 @@ public final class TransformerUtilsTest {
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(dmeClaim, securityTags), false);
-      TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 

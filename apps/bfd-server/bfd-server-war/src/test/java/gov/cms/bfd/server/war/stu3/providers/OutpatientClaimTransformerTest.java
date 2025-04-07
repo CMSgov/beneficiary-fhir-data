@@ -71,8 +71,7 @@ public final class OutpatientClaimTransformerTest {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     outpatientClaimTransformer =
-        new OutpatientClaimTransformer(
-            metricRegistry, securityTagManager, false);
+        new OutpatientClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**

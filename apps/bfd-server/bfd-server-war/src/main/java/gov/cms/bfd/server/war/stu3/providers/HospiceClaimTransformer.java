@@ -10,7 +10,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
-import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;

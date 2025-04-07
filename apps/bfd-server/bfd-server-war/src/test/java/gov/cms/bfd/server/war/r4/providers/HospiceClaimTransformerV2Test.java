@@ -109,8 +109,7 @@ public final class HospiceClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformerV2(
-            metricRegistry, securityTagManager, false);
+        new HospiceClaimTransformerV2(metricRegistry, securityTagManager, false);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -128,7 +127,7 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB() {
     ExplanationOfBenefit genEob =
         hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -471,7 +470,7 @@ public final class HospiceClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

@@ -94,8 +94,7 @@ public final class CarrierClaimTransformerTest {
         .thenReturn("UNKNOWN");
 
     carrierClaimTransformer =
-        new CarrierClaimTransformer(
-            metricRegistry, drugDisplayLookup, securityTagManager, false);
+        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager, false);
   }
 
   /**

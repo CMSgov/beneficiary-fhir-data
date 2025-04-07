@@ -27,8 +27,8 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.NPIOrgLookup;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
@@ -219,10 +219,7 @@ class PatientClaimsEobTaskTransformerTest {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterface claimTransformer =
         new CarrierClaimTransformer(
-            new MetricRegistry(),
-            mockDrugDisplayLookup,
-            securityTagManager,
-            false);
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformer taskTransformer =
         new PatientClaimsEobTaskTransformer(
             metricRegistry,
@@ -263,10 +260,7 @@ class PatientClaimsEobTaskTransformerTest {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterface claimTransformer =
         new CarrierClaimTransformer(
-            new MetricRegistry(),
-            mockDrugDisplayLookup,
-            securityTagManager,
-            false);
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformer taskTransformer =
         new PatientClaimsEobTaskTransformer(
             metricRegistry,
@@ -425,8 +419,7 @@ class PatientClaimsEobTaskTransformerTest {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterface claimTransformer =
-        new HospiceClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new HospiceClaimTransformer(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformer taskTransformer =
         new PatientClaimsEobTaskTransformer(
             metricRegistry,
@@ -466,8 +459,7 @@ class PatientClaimsEobTaskTransformerTest {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterface claimTransformer =
-        new InpatientClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new InpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformer taskTransformer =
         new PatientClaimsEobTaskTransformer(
             metricRegistry,
@@ -507,8 +499,7 @@ class PatientClaimsEobTaskTransformerTest {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterface claimTransformer =
-        new OutpatientClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new OutpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformer taskTransformer =
         new PatientClaimsEobTaskTransformer(
             metricRegistry,
@@ -588,7 +579,7 @@ class PatientClaimsEobTaskTransformerTest {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterface claimTransformer =
-        new SNFClaimTransformer(new MetricRegistry(), mockNpiOrgLookup, securityTagManager, false);
+        new SNFClaimTransformer(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformer taskTransformer =
         new PatientClaimsEobTaskTransformer(
             metricRegistry,

@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
-
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 
 import com.codahale.metrics.MetricRegistry;
@@ -50,8 +49,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
 
   private final boolean sexExtensionEnabled;
 
-
-    /**
+  /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
    * "CANCELLED". For brevity, the rest are defaulted to "ACTIVE" using {@link
    * Map#getOrDefault(Object, Object)}.

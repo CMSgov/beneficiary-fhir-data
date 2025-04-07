@@ -53,11 +53,9 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -87,6 +85,7 @@ public class TransformerUtilsV2Test {
   @Mock SecurityTagManager securityTagManager;
 
   Set<String> securityTags = new HashSet<>();
+
   /**
    * Ensures the revenue status code is correctly mapped to an item's revenue as an extension when
    * the input statusCode is present.
@@ -929,8 +928,7 @@ public class TransformerUtilsV2Test {
     hospiceClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new HospiceClaimTransformerV2(
-            new MetricRegistry(), securityTagManager, false);
+        new HospiceClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hospiceClaim, securityTags), false);
@@ -973,8 +971,7 @@ public class TransformerUtilsV2Test {
     inpatientClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new InpatientClaimTransformerV2(
-            new MetricRegistry(), securityTagManager, false);
+        new InpatientClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(inpatientClaim, securityTags), false);
@@ -1104,8 +1101,7 @@ public class TransformerUtilsV2Test {
 
     FhirContext fhirContext = FhirContext.forR4();
     ClaimTransformerInterfaceV2 claimTransformerInterface =
-        new HHAClaimTransformerV2(
-            new MetricRegistry(), securityTagManager, false);
+        new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);

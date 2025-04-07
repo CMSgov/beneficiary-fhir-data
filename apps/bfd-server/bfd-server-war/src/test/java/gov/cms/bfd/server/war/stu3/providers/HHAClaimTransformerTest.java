@@ -65,9 +65,7 @@ public final class HHAClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    hhaClaimTransformer =
-        new HHAClaimTransformer(
-            metricRegistry, securityTagManager, false);
+    hhaClaimTransformer = new HHAClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**

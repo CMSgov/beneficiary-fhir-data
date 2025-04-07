@@ -137,7 +137,7 @@ public final class DMEClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -307,7 +307,7 @@ public final class DMEClaimTransformerV2Test {
         dmeClaimTransformer.transform(
             new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
     String prtIndCdUrl =

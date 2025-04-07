@@ -156,8 +156,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     String hhaClaimType = TransformerUtilsV2.getClaimType(hhaEob).toString();
 
     HospiceClaimTransformerV2 hospiceClaimTransformerV2 =
-        new HospiceClaimTransformerV2(
-            new MetricRegistry(), securityTagManager, false);
+        new HospiceClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit hospiceEob =
         hospiceClaimTransformerV2.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtilsV2.getClaimType(hospiceEob).toString();

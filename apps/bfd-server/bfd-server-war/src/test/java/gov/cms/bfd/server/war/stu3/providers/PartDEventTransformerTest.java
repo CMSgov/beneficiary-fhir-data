@@ -102,7 +102,7 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
 
     assertMatches(claim, eob);
   }
@@ -191,7 +191,7 @@ public final class PartDEventTransformerTest {
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
         partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
 
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());

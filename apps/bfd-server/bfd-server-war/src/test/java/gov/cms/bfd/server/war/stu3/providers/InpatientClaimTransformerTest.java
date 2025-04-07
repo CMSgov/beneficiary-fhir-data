@@ -68,7 +68,8 @@ public final class InpatientClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, securityTagManager, false);
+    inpatientClaimTransformer =
+        new InpatientClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**

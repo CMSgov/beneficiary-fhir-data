@@ -132,9 +132,7 @@ public class SNFClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
     npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
 
-    snfClaimTransformer =
-        new SNFClaimTransformerV2(
-            metricRegistry, securityTagManager, false);
+    snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);

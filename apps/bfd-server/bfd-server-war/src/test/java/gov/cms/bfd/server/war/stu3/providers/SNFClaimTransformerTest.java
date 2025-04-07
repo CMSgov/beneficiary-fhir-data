@@ -20,7 +20,6 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
-import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -68,9 +67,7 @@ public final class SNFClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    snfClaimTransformer =
-        new SNFClaimTransformer(
-            metricRegistry, securityTagManager, false);
+    snfClaimTransformer = new SNFClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**

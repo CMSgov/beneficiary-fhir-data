@@ -128,13 +128,11 @@ public class HHAClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    hhaClaimTransformer =
-        new HHAClaimTransformerV2(
-            metricRegistry, securityTagManager, false);
+    hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

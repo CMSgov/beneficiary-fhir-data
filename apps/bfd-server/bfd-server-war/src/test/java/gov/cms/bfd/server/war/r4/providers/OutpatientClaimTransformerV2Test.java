@@ -126,15 +126,12 @@ public final class OutpatientClaimTransformerV2Test {
 
     outpatientClaimTransformer =
         new OutpatientClaimTransformerV2(
-            metricRegistry,
-            drugCodeDisplayLookup,
-            securityTagManager,
-            false);
+            metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         outpatientClaimTransformer.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

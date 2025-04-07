@@ -132,15 +132,12 @@ public class CarrierClaimTransformerV2Test {
 
     carrierClaimTransformer =
         new CarrierClaimTransformerV2(
-            metricRegistry,
-            drugCodeDisplayLookup,
-            securityTagManager,
-            false);
+            metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
 
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -885,7 +882,8 @@ public class CarrierClaimTransformerV2Test {
             .get();
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);

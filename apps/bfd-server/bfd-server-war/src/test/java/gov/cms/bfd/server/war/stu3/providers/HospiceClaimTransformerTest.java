@@ -65,7 +65,8 @@ public final class HospiceClaimTransformerTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    hospiceClaimTransformer = new HospiceClaimTransformer(metricRegistry, securityTagManager, false);
+    hospiceClaimTransformer =
+        new HospiceClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**

@@ -24,7 +24,6 @@ import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
-import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -116,15 +115,13 @@ public class SamhsaMatcherFromClaimTransformerTest {
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
     // Load and transform the various claim types for testing
     ClaimTransformerInterface claimTransformerInterface =
-        new InpatientClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new InpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit inpatientEob =
         claimTransformerInterface.transform(getClaim(InpatientClaim.class), false);
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     claimTransformerInterface =
-        new OutpatientClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new OutpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit outpatientEob =
         claimTransformerInterface.transform(getClaim(OutpatientClaim.class), false);
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
@@ -143,8 +140,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     claimTransformerInterface =
-        new HospiceClaimTransformer(
-            new MetricRegistry(), securityTagManager, false);
+        new HospiceClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit hospiceEob =
         claimTransformerInterface.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
