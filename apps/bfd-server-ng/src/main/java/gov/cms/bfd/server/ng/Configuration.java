@@ -4,8 +4,7 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import java.time.Duration;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -14,8 +13,7 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DescribeDbClustersRequest;
 
 /** Root configuration class. */
-@Getter
-@Setter
+@Data
 @ConfigurationProperties(prefix = "bfd")
 public class Configuration {
   @Autowired private AwsCredentialsProvider credentialsProvider;
@@ -129,23 +127,21 @@ public class Configuration {
   }
 
   /** Configuration for local-only properties. */
-  @Getter
-  @Setter
+  @Data
   @ConfigurationProperties
   public static class Local {
+    // in AWS, this is loaded dynamically using the RDS API.
     private String dbHost = "localhost";
   }
 
   /** Sensitive configuration. */
-  @Getter
-  @Setter
+  @Data
   @ConfigurationProperties
   public static class Sensitive {
     private Db db = new Db();
 
     /** Sensitive Database configuration. */
-    @Getter
-    @Setter
+    @Data
     @ConfigurationProperties
     public static class Db {
       private String username;
@@ -154,15 +150,13 @@ public class Configuration {
   }
 
   /** Nonsensitive configuration. */
-  @Getter
-  @Setter
+  @Data
   @ConfigurationProperties
   public static class Nonsensitive {
     private Db db = new Db();
 
     /** Nonsensitive database configuration. */
-    @Getter
-    @Setter
+    @Data
     @ConfigurationProperties
     public static class Db {
       private Hikari hikari = new Hikari();
@@ -173,8 +167,7 @@ public class Configuration {
       private String connectionStringTemplate = "jdbc:postgresql://%s:%s/%s";
 
       /** Hikari configuration. */
-      @Getter
-      @Setter
+      @Data
       @ConfigurationProperties
       public static class Hikari {
         // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
@@ -189,8 +182,7 @@ public class Configuration {
       }
 
       /** AWS JDBC wrapper configuration. */
-      @Getter
-      @Setter
+      @Data
       @ConfigurationProperties
       public static class Wrapper {
         private String pluginsCsv = "auroraConnectionTracker,failover,efm2";
