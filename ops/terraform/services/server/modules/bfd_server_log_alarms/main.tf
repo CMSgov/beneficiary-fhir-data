@@ -109,3 +109,31 @@ resource "aws_cloudwatch_metric_alarm" "server-query-logging-listener-warning" {
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
 }
+
+#BFD-3996 Low serverity notification on occurrance of "SAMHSA 2.0 filter mismatch error"
+resource "aws_cloudwatch_metric_alarm" "samhsa-mismatch-error" {
+  alarm_name = "bfd-${local.env}-samhsa-mismatch-error"
+  namespace = "bfd-${local.env}/bfd-server"
+  metric_name = "bfd-${local.env}/bfd-server/samhsa-mismatch/count/error"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods = 1
+  period = 60
+  statistic = "Sum"
+
+  alarm_description = join("",
+    [
+      "BFD Server has encountered a SAMHSA 2.0 fileter mismatch error ",
+      "in APP-ENV: bfd-${local.env}"
+    ])
+
+  dimensions = {
+    LogGroupName = "/bfd/${local.env}/bfd-server/messages.json" 
+  }
+
+  alarm_actions = local.notify_arn
+
+  ok_actions = []
+
+  datapoints_to_alarm = 1
+  treat_missing_data  = "notBreaching"
+}
