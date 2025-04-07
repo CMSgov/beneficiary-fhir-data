@@ -43,7 +43,8 @@ resource "aws_iam_policy" "etl-rw-s3" {
         {
           "Sid" : "ETLRWKMS",
           "Action" : [
-            "kms:Decrypt"
+            "kms:Decrypt",
+            "kms:GenerateDataKey"
           ],
           "Effect" : "Allow",
           "Resource" : [
