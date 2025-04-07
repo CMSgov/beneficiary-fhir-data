@@ -21,12 +21,14 @@ public class Configuration {
   @Autowired private AwsCredentialsProvider credentialsProvider;
   @Autowired private AwsRegionProvider regionProvider;
 
-  private String env;
+  private static final String BFD_ENV_LOCAL = "local";
+
+  // Default to local configuration, this should be overridden on deployment with the correct
+  // environment.
+  private String env = BFD_ENV_LOCAL;
   private Local local = new Local();
   private Sensitive sensitive = new Sensitive();
   private Nonsensitive nonsensitive = new Nonsensitive();
-
-  private static final String BFD_ENV_LOCAL = "local";
 
   /**
    * Creates a new {@link AwsWrapperDataSourceFactory}.
@@ -42,6 +44,11 @@ public class Configuration {
     return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
   }
 
+  private String getConnectionString(String dbHost) {
+    var db = nonsensitive.db;
+    return String.format(db.connectionStringTemplate, dbHost, db.port, db.name);
+  }
+
   private String resolveDatabaseReaderEndpoint() {
     if (useRds()) {
       try (var rdsClient = RdsClient.create()) {
@@ -49,10 +56,10 @@ public class Configuration {
         var clusters =
             rdsClient.describeDBClusters(
                 DescribeDbClustersRequest.builder().dbClusterIdentifier(clusterIdentifier).build());
-        return clusters.dbClusters().getFirst().readerEndpoint();
+        return getConnectionString(clusters.dbClusters().getFirst().readerEndpoint());
       }
     } else {
-      return local.dbUrl;
+      return getConnectionString(local.dbHost);
     }
   }
 
@@ -126,7 +133,7 @@ public class Configuration {
   @Setter
   @ConfigurationProperties
   public static class Local {
-    private final String dbUrl = "jdbc:postgresql://localhost:5432/idr";
+    private String dbHost = "localhost";
   }
 
   /** Sensitive configuration. */
@@ -134,7 +141,7 @@ public class Configuration {
   @Setter
   @ConfigurationProperties
   public static class Sensitive {
-    private final Db db = new Db();
+    private Db db = new Db();
 
     /** Sensitive Database configuration. */
     @Getter
@@ -151,16 +158,19 @@ public class Configuration {
   @Setter
   @ConfigurationProperties
   public static class Nonsensitive {
-    private final Db db = new Db();
+    private Db db = new Db();
 
     /** Nonsensitive database configuration. */
     @Getter
     @Setter
     @ConfigurationProperties
     public static class Db {
-      private final Hikari hikari = new Hikari();
-      private final Wrapper wrapper = new Wrapper();
-      private final String clusterIdentifierTemplate = "bfd-%s-aurora-cluster";
+      private Hikari hikari = new Hikari();
+      private Wrapper wrapper = new Wrapper();
+      private String clusterIdentifierTemplate = "bfd-%s-aurora-cluster";
+      private String name = "idr";
+      private String port = "5432";
+      private String connectionStringTemplate = "jdbc:postgresql://%s:%s/%s";
 
       /** Hikari configuration. */
       @Getter
@@ -168,14 +178,14 @@ public class Configuration {
       @ConfigurationProperties
       public static class Hikari {
         // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
-        private final int maxPoolSize = Runtime.getRuntime().availableProcessors();
-        private final int minIdleConnections = Runtime.getRuntime().availableProcessors();
-        private final long idleTimeoutMs = Duration.ofMinutes(10).toMillis();
-        private final long initFailTimeoutMs = 1;
-        private final long connectionTimeoutMs = Duration.ofSeconds(30).toMillis();
-        private final long keepaliveTimeoutMs = 0;
-        private final long validationTimeoutMs = 0;
-        private final long maxConnectionLifetimeMs = Duration.ofMinutes(30).toMillis();
+        private int maxPoolSize = Runtime.getRuntime().availableProcessors();
+        private int minIdleConnections = Runtime.getRuntime().availableProcessors();
+        private long idleTimeoutMs = Duration.ofMinutes(10).toMillis();
+        private long initFailTimeoutMs = 1;
+        private long connectionTimeoutMs = Duration.ofSeconds(30).toMillis();
+        private long keepaliveTimeoutMs = 0;
+        private long validationTimeoutMs = 0;
+        private long maxConnectionLifetimeMs = Duration.ofMinutes(30).toMillis();
       }
 
       /** AWS JDBC wrapper configuration. */
@@ -183,11 +193,11 @@ public class Configuration {
       @Setter
       @ConfigurationProperties
       public static class Wrapper {
-        private final String pluginsCsv = "auroraConnectionTracker,failover,efm2";
-        private final String hostSelectorStrategy = "roundRobin";
-        private final String basePreset = "E";
-        private final long clusterTopologyRefreshRateMs = Duration.ofSeconds(30).toMillis();
-        private final long instanceStateMonitorRefreshRateMs = Duration.ofSeconds(5).toMillis();
+        private String pluginsCsv = "auroraConnectionTracker,failover,efm2";
+        private String hostSelectorStrategy = "roundRobin";
+        private String basePreset = "E";
+        private long clusterTopologyRefreshRateMs = Duration.ofSeconds(30).toMillis();
+        private long instanceStateMonitorRefreshRateMs = Duration.ofSeconds(5).toMillis();
       }
     }
   }

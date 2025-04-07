@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -26,11 +25,11 @@ public class V3Server extends RestfulServer {
   }
 
   @Override
-  public void initialize() throws ServletException {
+  public void initialize() {
     this.setFhirContext(FhirContext.forR4());
     this.registerProviders(resourceProviders);
-    OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
 
+    OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
     this.registerInterceptor(openApiInterceptor);
   }
 }
