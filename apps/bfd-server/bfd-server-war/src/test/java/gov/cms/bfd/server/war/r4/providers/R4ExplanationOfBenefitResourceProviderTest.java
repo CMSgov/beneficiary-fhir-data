@@ -26,18 +26,19 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -187,7 +188,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             Mockito.mock(InpatientClaimTransformerV2.class),
             Mockito.mock(OutpatientClaimTransformerV2.class),
             mockPdeTransformer,
-            Mockito.mock(SNFClaimTransformerV2.class));
+            Mockito.mock(SNFClaimTransformerV2.class),
+            RDATestUtils.createTestNpiOrgLookup());
 
     // entity manager mocking
     mockEntityManager();

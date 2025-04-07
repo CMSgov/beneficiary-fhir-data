@@ -1,6 +1,7 @@
 resource "aws_iam_role" "ccw_rif" {
   count                = local.is_prod ? 1 : 0
   name                 = "bfd-${local.env}-ccw-rif"
+  path                 = local.cloudtamer_iam_path
   permissions_boundary = data.aws_iam_policy.permissions_boundary.arn
   description          = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
   max_session_duration = 43200 # max session duration is 12 hours (43200 seconds)- going big for long data-loads
