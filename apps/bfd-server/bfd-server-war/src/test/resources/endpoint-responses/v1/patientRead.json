@@ -5,6 +5,9 @@
     "lastUpdated" : "IGNORED_FIELD"
   },
   "extension" : [ {
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+    "valueCode" : "248153007"
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/race",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/race",
@@ -114,7 +117,6 @@
     "family" : "Doe",
     "given" : [ "John", "A" ]
   } ],
-  "gender" : "male",
   "birthDate" : "1981-03-17",
   "deceasedDateTime" : "1981-03-17",
   "address" : [ {

@@ -13,7 +13,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -58,12 +57,10 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -97,10 +94,6 @@ public final class InpatientClaimTransformerV2Test {
   @Mock Timer.Context metricsTimerContext;
 
   Set<String> securityTags = new HashSet<>();
-
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
-
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -132,24 +125,18 @@ public final class InpatientClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     inpatientClaimTransformer =
         new InpatientClaimTransformerV2(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager, false);
+            metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         inpatientClaimTransformer.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
+      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
-  }
-
-  /** Releases the static mock NPIOrgLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
   }
 
   /**
@@ -314,7 +301,9 @@ public final class InpatientClaimTransformerV2Test {
             "345345345",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "performing",
-            "Performing provider");
+            "Performing provider",
+            "207ZH0000X",
+            "Hematology (Pathology) Physician");
 
     assertTrue(compare4.equalsDeep(member4));
   }
@@ -486,6 +475,7 @@ public final class InpatientClaimTransformerV2Test {
     ExplanationOfBenefit genEob =
         inpatientClaimTransformer.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
+      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

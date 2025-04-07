@@ -155,6 +155,9 @@
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 30  
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/job/sequence_range_update_interval_seconds: 300
@@ -183,6 +186,7 @@
 /bfd/${env}/server/nonsensitive/pac/enabled: "true"
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
+/bfd/${env}/server/nonsensitive/sex_extension/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server prod
@@ -487,6 +491,15 @@
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 24
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/mgmt/common/sensitive/slack_webhook_bfd_test
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-${env}-cloudwatch-alarms
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-${env}-cloudwatch-alarms
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/breach_topic: bfd-prod-cloudwatch-alarms
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-prod-cloudwatch-alarms-slack-bfd-alerts

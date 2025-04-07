@@ -15,7 +15,6 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -55,12 +54,10 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -93,9 +90,6 @@ public final class OutpatientClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
-
   Set<String> securityTags = new HashSet<>();
 
   /**
@@ -127,7 +121,6 @@ public final class OutpatientClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
@@ -135,22 +128,16 @@ public final class OutpatientClaimTransformerV2Test {
         new OutpatientClaimTransformerV2(
             metricRegistry,
             drugCodeDisplayLookup,
-            NPIOrgLookup.createTestNpiOrgLookup(),
             securityTagManager,
             false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         outpatientClaimTransformer.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
+      TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
-  }
-
-  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
   }
 
   /**
@@ -278,7 +265,9 @@ public final class OutpatientClaimTransformerV2Test {
             "2222222222",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "attending",
-            "Attending");
+            "Attending",
+            "207R00000X",
+            "Internal Medicine Physician");
 
     assertTrue(compare1.equalsDeep(member1));
 
@@ -290,7 +279,9 @@ public final class OutpatientClaimTransformerV2Test {
             "3333333333",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "operating",
-            "Operating");
+            "Operating",
+            "207T00000X",
+            "Neurological Surgery Physician");
 
     assertTrue(compare2.equalsDeep(member2));
 
@@ -302,7 +293,9 @@ public final class OutpatientClaimTransformerV2Test {
             "4444",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "otheroperating",
-            "Other Operating");
+            "Other Operating",
+            "204D00000X",
+            "Neuromusculoskeletal Medicine & OMM Physician");
 
     assertTrue(compare3.equalsDeep(member3));
 
@@ -314,7 +307,9 @@ public final class OutpatientClaimTransformerV2Test {
             "345345345",
             "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
             "performing",
-            "Performing provider");
+            "Performing provider",
+            "207ZH0000X",
+            "Hematology (Pathology) Physician");
 
     assertTrue(compare4.equalsDeep(member4));
   }

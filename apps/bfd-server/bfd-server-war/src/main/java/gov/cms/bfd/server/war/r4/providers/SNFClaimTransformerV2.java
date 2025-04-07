@@ -7,11 +7,11 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
+import gov.cms.bfd.model.rif.samhsa.SnfTag;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -42,9 +42,6 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform");
@@ -62,17 +59,14 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public SNFClaimTransformerV2(
       MetricRegistry metricRegistry,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager,
       @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
     this.samhsaV2Enabled = samhsaV2Enabled;
   }
@@ -299,11 +293,11 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapCareTeam(
         eob,
         claimGroup.getAttendingPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getAttendingPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getAttendingPhysicianNpi()),
         claimGroup.getOperatingPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOperatingPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getOperatingPhysicianNpi()),
         claimGroup.getOtherPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getOtherPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getOtherPhysicianNpi()),
         claimGroup.getAttendingPhysicianUpin(),
         claimGroup.getOperatingPhysicianUpin(),
         claimGroup.getOtherPhysicianUpin());
@@ -332,8 +326,7 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        npiOrgLookup
-            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi())
+        CommonTransformerUtils.buildReplaceOrganization(claimGroup.getOrganizationNpi())
             .map(NPIData::getProviderOrganizationName),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
@@ -426,7 +419,8 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI(),
-          npiOrgLookup.retrieveNPIOrgDisplay(line.getRevenueCenterRenderingPhysicianNPI()));
+          CommonTransformerUtils.buildReplaceTaxonomy(
+              line.getRevenueCenterRenderingPhysicianNPI()));
     }
 
     // Last Updated => ExplanationOfBenefit.meta.lastUpdated

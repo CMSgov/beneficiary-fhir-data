@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.io.IOException;
 import java.time.Instant;
@@ -158,6 +159,7 @@ public final class DMEClaimTransformerTest {
     ExplanationOfBenefit genEob =
         dmeClaimTransformer.transform(
             new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+      TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set

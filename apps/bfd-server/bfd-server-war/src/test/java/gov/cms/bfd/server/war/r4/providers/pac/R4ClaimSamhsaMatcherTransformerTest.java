@@ -405,9 +405,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     entity.setProcCodes(procedures);
     entity.setRevenueLines(Set.of(line));
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
 
     Claim claim =
         fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
@@ -545,9 +545,9 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     entity.setDetails(procedures);
 
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
 
     Claim claim =
         mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);

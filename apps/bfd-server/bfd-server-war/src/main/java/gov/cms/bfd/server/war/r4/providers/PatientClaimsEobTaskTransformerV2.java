@@ -79,9 +79,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /** drug description lookup table. */
   private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
 
-  /** NPI lookup table. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The samhsa matcher. */
   private final R4EobSamhsaMatcher samhsaMatcher;
 
@@ -156,14 +153,12 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
       MetricRegistry metricRegistry,
       R4EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
       SecurityTagsDao securityTagsDao,
       @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
     this.securityTagsDao = securityTagsDao;
     this.samhsaV2Shadow = samhsaV2Shadow;

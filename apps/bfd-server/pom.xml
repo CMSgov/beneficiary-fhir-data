@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-parent</artifactId>
-        <version>2.191.0-SNAPSHOT</version>
+        <version>2.194.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-parent</artifactId>
@@ -87,11 +87,6 @@
                 less) all of the other BFD modules. -->
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-shared-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd.data.npi</groupId>
-            <artifactId>bfd-data-npi</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

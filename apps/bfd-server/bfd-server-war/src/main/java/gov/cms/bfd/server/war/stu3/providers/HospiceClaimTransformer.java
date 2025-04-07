@@ -6,12 +6,13 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
+import gov.cms.bfd.model.rif.samhsa.HospiceTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
@@ -35,9 +36,6 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(HospiceClaimTransformer.class.getSimpleName(), "transform");
@@ -55,17 +53,14 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager securityTagManager
    * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public HospiceClaimTransformer(
       MetricRegistry metricRegistry,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager,
       @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
     this.samhsaV2Enabled = samhsaV2Enabled;
   }
@@ -159,8 +154,7 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        npiOrgLookup
-            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi())
+        CommonTransformerUtils.buildReplaceOrganization(claimGroup.getOrganizationNpi())
             .map(NPIData::getProviderOrganizationName),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),

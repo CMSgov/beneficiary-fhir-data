@@ -8,7 +8,7 @@ class IdrBeneficiary(BaseModel):
     bene_mbi_id: str
     bene_ssn_num: str
     bene_1st_name: str
-    bene_midl_name: str
+    bene_midl_name: str | None
     bene_last_name: str
     bene_brth_dt: date
     bene_sex_cd: str
@@ -17,12 +17,12 @@ class IdrBeneficiary(BaseModel):
     geo_zip5_cd: str
     geo_zip4_cd: str
     geo_zip_plc_name: str
-    bene_line_1_adr: str
-    bene_line_2_adr: str
-    bene_line_3_adr: str
-    bene_line_4_adr: str
-    bene_line_5_adr: str
-    bene_line_6_adr: str
+    bene_line_1_adr: str | None
+    bene_line_2_adr: str | None
+    bene_line_3_adr: str | None
+    bene_line_4_adr: str | None
+    bene_line_5_adr: str | None
+    bene_line_6_adr: str | None
     cntct_lang_cd: str
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
@@ -31,7 +31,7 @@ class IdrBeneficiary(BaseModel):
 class IdrBeneficiaryHistory(BaseModel):
     bene_sk: int
     bene_xref_efctv_sk: int
-    bene_mbi_id: str
+    bene_mbi_id: str | None
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
 

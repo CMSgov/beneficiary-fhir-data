@@ -14,13 +14,13 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -90,14 +90,12 @@ public final class CarrierClaimTransformerTest {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(anyString())))
-        .thenReturn(Optional.of(npiData));
     when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
         .thenReturn("UNKNOWN");
 
     carrierClaimTransformer =
         new CarrierClaimTransformer(
-            metricRegistry, drugDisplayLookup, npiOrgLookup, securityTagManager, false);
+            metricRegistry, drugDisplayLookup, securityTagManager, false);
   }
 
   /**
@@ -215,6 +213,7 @@ public final class CarrierClaimTransformerTest {
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
             new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
