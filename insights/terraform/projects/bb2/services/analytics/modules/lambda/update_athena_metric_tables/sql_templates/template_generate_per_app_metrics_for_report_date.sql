@@ -88,7 +88,9 @@ WITH report_params AS (
       'app_sdk_requests_python_count',
       'app_sdk_requests_node_count',
       'app_access_grant_enabled',
-      'app_access_grant_category'
+      'app_access_grant_category',
+      'app_internal_application_labels',
+      'app_data_facilitator_end_user'
     ] as enabled_metrics_list 
 ),
 
