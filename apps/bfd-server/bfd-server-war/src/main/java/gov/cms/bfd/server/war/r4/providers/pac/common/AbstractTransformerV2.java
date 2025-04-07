@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import org.apache.logging.log4j.util.Strings;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
@@ -90,24 +89,14 @@ public class AbstractTransformerV2 {
         .setValue(id);
   }
 
-  private static String getSexExtensionCode(String sexCode) {
-    return switch (sexCode.toLowerCase()) {
-      case "m" -> TransformerConstants.US_CORE_SEX_MALE;
-      case "f" -> TransformerConstants.US_CORE_SEX_FEMALE;
-      default -> TransformerConstants.US_CORE_SEX_UNKNOWN;
-    };
-  }
-
   /**
    * Builds a {@link Patient} object from the given MBI and {@link PatientInfo}.
    *
    * @param mbi The MBI to use to build the {@link Patient} object.
    * @param patientInfo The {@link PatientInfo} to use to build the {@link Patient} object.
-   * @param sexExtensionEnabled whether to enable the sex extension.
    * @return The constructed {@link Patient} object.
    */
-  protected static Patient getContainedPatient(
-      String mbi, PatientInfo patientInfo, boolean sexExtensionEnabled) {
+  protected static Patient getContainedPatient(String mbi, PatientInfo patientInfo) {
     Patient patient =
         new Patient()
             .setIdentifier(
@@ -127,20 +116,11 @@ public class AbstractTransformerV2 {
     if (patientInfo != null) {
       patient
           .setName(createHumanNameFrom(patientInfo))
-          .setBirthDate(localDateToDate(patientInfo.getDob()));
-      if (sexExtensionEnabled) {
-        if (patientInfo.getSex() != null) {
-          patient.addExtension(
-              new Extension()
-                  .setValue(new CodeType().setValue(getSexExtensionCode(patientInfo.getSex())))
-                  .setUrl(TransformerConstants.US_CORE_SEX_URL));
-        }
-      } else {
-        patient.setGender(
-            patientInfo.getSex() == null
-                ? null
-                : patientInfo.getSexMap().get(patientInfo.getSex().toLowerCase()));
-      }
+          .setBirthDate(localDateToDate(patientInfo.getDob()))
+          .setGender(
+              patientInfo.getSex() == null
+                  ? null
+                  : patientInfo.getSexMap().get(patientInfo.getSex().toLowerCase()));
     }
 
     return patient;
