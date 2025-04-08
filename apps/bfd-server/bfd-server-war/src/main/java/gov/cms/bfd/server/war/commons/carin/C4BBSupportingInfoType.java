@@ -60,7 +60,7 @@ public enum C4BBSupportingInfoType {
       case RX_ORIGIN_CODE:
         return "rxorigincode";
       case BRAND_GENERIC_CODE:
-        return "brandgenericcode";
+        return "brandgenericindicator";
       case ADMISSION_PERIOD:
         return "admissionperiod";
       case RECEIVED_DATE:

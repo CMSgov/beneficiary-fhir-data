@@ -4633,7 +4633,7 @@
         "category" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-            "code" : "brandgenericcode",
+            "code" : "brandgenericindicator",
             "display" : "Brand Generic Code"
           } ]
         },

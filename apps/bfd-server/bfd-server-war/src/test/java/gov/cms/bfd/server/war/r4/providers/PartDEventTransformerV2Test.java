@@ -572,7 +572,7 @@ public final class PartDEventTransformerV2Test {
   public void shouldHaveBrndGnrcCdSupInfo() {
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode(
-            "brandgenericcode", eob.getSupportingInfo());
+            "brandgenericindicator", eob.getSupportingInfo());
 
     SupportingInformationComponent compare =
         TransformerTestUtilsV2.createSupportingInfo(
@@ -582,7 +582,7 @@ public final class PartDEventTransformerV2Test {
             Arrays.asList(
                 new Coding(
                     "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-                    "brandgenericcode",
+                    "brandgenericindicator",
                     "Brand Generic Code")),
             // Code
             new Coding(
