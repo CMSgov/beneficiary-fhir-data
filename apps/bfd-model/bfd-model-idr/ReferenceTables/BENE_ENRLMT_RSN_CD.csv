@@ -1,0 +1,21 @@
+system,code,display
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,S,STATE BUY-IN
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,G,GENERAL ENROLLMENT PERIOD
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,N,AGE 65 AND UNINSURED
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,K,RENAL DISEASE WAS THE REASON FOR ENTITLEMENT PRIOR TO AGE 65 OR THE 25TH MONTH OF DISABILITY
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,F,WORKING AGED
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,U,"UNKNOWN = NOT APPLICABLE; E.G. PART A DATA IS GENERATED AT AGE 64 YEARS, 8 MONTHS."
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,I,INITIAL ENROLLMENT PERIOD
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,P,POTENTIALLY INSURED BENEFICIARY IS ENROLLED FOR MEDICARE COVERAGE ONLY
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,Q,QUARTERS OF COVERAGE REQUIREMENTS ARE INVOLVED
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,L,LATE FILING
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,A,ATTAINMENT OF AGE 65
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,H,ENTITLED BASED ON HEALTH HAZARD
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,R,RESIDENCY REQUIREMENTS ARE INVOLVED
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,C,GOOD CAUSE
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,D,DISABILITY (UNDER AGE 65 ENTITLEMENT)  OR DEEMED DATE OF BIRTH
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,~,NO DESCRIPTION AVAILABLE
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,J,MQGE ENTITLEMENT
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,M,"TERMINATION BASED ON RENAL ENTITLEMENT, BUT DISABILITY BASED ENTITLEMENT CONTINUES"
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,B,EQUITABLE RELIEF
+https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,T,DISABLED WORKING INDIVIDUAL
