@@ -562,10 +562,19 @@ public class SamhsaUtil {
         throw new RuntimeException("Cannot retrieve list of SAMHSA codes.");
       }
     }
-    if (samhsaMap.containsKey(code.get())) {
-      return Optional.of(samhsaMap.get(code.get()));
+    String normalizedCode = normalizeCode(code.get());
+
+    if (samhsaMap.containsKey(normalizedCode)) {
+      return Optional.of(samhsaMap.get(normalizedCode));
     }
     return Optional.empty();
+  }
+
+  private static String normalizeCode(String code) {
+    code = code.trim();
+    code = code.replaceFirst("\\.", "");
+    code = code.toUpperCase();
+    return code;
   }
 
   /**
@@ -581,6 +590,11 @@ public class SamhsaUtil {
     List<SamhsaEntry> entries =
         mapper.readValue(
             stream, mapper.getTypeFactory().constructCollectionType(List.class, SamhsaEntry.class));
-    return entries.stream().collect(Collectors.toMap(SamhsaEntry::getCode, entry -> entry));
+
+    return entries.stream()
+        .collect(
+            Collectors.toMap(
+                entry -> normalizeCode(entry.getCode()), // Normalize code here
+                entry -> entry));
   }
 }
