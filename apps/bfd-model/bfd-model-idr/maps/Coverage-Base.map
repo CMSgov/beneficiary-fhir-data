@@ -138,7 +138,7 @@ group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
     } "Add ESRD Extension";
 
     src.coveragePart as coveragePart where coveragePart="A" -> tgt then AddPartACoverageElements(src, tgt) "Add Part A Elements";
-    src.coveragePart as coveragePart where coveragePart="B" -> tgt then AddPartACoverageElements(src, tgt) "Add Part B Elements";
+    src.coveragePart as coveragePart where coveragePart="B" -> tgt then AddPartBCoverageElements(src, tgt) "Add Part B Elements";
 
 }
 
