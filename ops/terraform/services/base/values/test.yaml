@@ -162,7 +162,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: UNDEFINED
 /bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
-/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server (${env})
@@ -186,6 +186,7 @@
 /bfd/${env}/server/nonsensitive/pac/enabled: "true"
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "true"
+/bfd/${env}/server/nonsensitive/sex_extension/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"
@@ -383,3 +384,6 @@
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-test-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/ok_topic: UNDEFINED
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 30
