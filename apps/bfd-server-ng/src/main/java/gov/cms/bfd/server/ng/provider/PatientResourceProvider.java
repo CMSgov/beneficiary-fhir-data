@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.hl7.fhir.r4.model.Bundle;
@@ -81,8 +82,8 @@ public class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByCoverageContract(
       @RequiredParam(name = "_has:Coverage.extension") final TokenParam coverageId,
       @OptionalParam(name = "_has:Coverage.rfrncyr") final TokenParam referenceYear,
-      @OptionalParam(name = "cursor") final String cursor,
-      @OptionalParam(name = Constants.PARAM_COUNT) final String count,
+      @OptionalParam(name = "cursor") final NumberParam cursor,
+      @OptionalParam(name = Constants.PARAM_COUNT) final NumberParam count,
       final RequestDetails requestDetails) {
     return new Bundle();
   }

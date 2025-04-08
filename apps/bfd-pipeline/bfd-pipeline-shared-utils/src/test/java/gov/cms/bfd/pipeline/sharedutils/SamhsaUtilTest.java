@@ -268,7 +268,7 @@ public class SamhsaUtilTest {
                 Set.of(
                     RdaMcsDiagnosisCode.builder()
                         .idrClmHdIcn("456ABC")
-                        .idrDiagCode("F10.26")
+                        .idrDiagCode("F1026")
                         .build()))
             .details(
                 Set.of(
@@ -380,7 +380,7 @@ public class SamhsaUtilTest {
         CarrierClaim.builder()
             .claimId(1234567890)
             .diagnosisPrincipalCode("F10.26")
-            .diagnosis1Code("F10.29")
+            .diagnosis1Code("F1029")
             .lines(
                 List.of(
                     CarrierClaimLine.builder()
@@ -431,16 +431,16 @@ public class SamhsaUtilTest {
     DMEClaim claim =
         DMEClaim.builder()
             .claimId(1234567890)
-            .diagnosisPrincipalCode("F10.26")
-            .diagnosis1Code("F10.29")
+            .diagnosisPrincipalCode("F1026")
+            .diagnosis1Code("F1029")
             .lines(
                 List.of(
                     DMEClaimLine.builder()
-                        .diagnosisCode("F10.27")
+                        .diagnosisCode("F1027")
                         .lineNumber((short) 1)
                         .hcpcsCode("H0006")
                         .build(),
-                    DMEClaimLine.builder().diagnosisCode("F10.27").lineNumber((short) 2).build()))
+                    DMEClaimLine.builder().diagnosisCode("F1027").lineNumber((short) 2).build()))
             .dateFrom(LocalDate.parse("1970-01-01"))
             .dateThrough(LocalDate.now())
             .build();
@@ -496,7 +496,7 @@ public class SamhsaUtilTest {
     HHAClaim claim = new HHAClaim();
     claim.setClaimId(1234567890);
     claim.setDiagnosisPrincipalCode(Optional.of("F10.26"));
-    claim.setDiagnosis1Code(Optional.of("F10.26"));
+    claim.setDiagnosis1Code(Optional.of("F1026"));
     claim.setDateFrom(LocalDate.parse("1970-01-01"));
     claim.setDateThrough(LocalDate.now());
 
@@ -512,7 +512,7 @@ public class SamhsaUtilTest {
     HospiceClaim claim = new HospiceClaim();
     claim.setClaimId(1234567890);
     claim.setDiagnosisPrincipalCode(Optional.of("F10.26"));
-    claim.setDiagnosis1Code(Optional.of("F10.26"));
+    claim.setDiagnosis1Code(Optional.of("F1026"));
     claim.setDateFrom(LocalDate.parse("1970-01-01"));
     claim.setDateThrough(LocalDate.now());
 
@@ -543,8 +543,8 @@ public class SamhsaUtilTest {
   public SNFClaim getSamhsaSNFClaim() {
     SNFClaim claim = new SNFClaim();
     claim.setClaimId(1234567890);
-    claim.setDiagnosisPrincipalCode(Optional.of("F10.26"));
-    claim.setDiagnosis1Code(Optional.of("F10.26"));
+    claim.setDiagnosisPrincipalCode(Optional.of("F1026"));
+    claim.setDiagnosis1Code(Optional.of("F1026"));
     claim.setDateFrom(LocalDate.parse("1970-01-01"));
     claim.setDateThrough(LocalDate.now());
 
@@ -575,8 +575,8 @@ public class SamhsaUtilTest {
   public OutpatientClaim getSamhsaOutpatientClaim() {
     OutpatientClaim claim = new OutpatientClaim();
     claim.setClaimId(1234567890);
-    claim.setDiagnosisPrincipalCode(Optional.of("F10.26"));
-    claim.setDiagnosis1Code(Optional.of("F10.26"));
+    claim.setDiagnosisPrincipalCode(Optional.of("F1026"));
+    claim.setDiagnosis1Code(Optional.of("F1026"));
     claim.setDateFrom(LocalDate.parse("1970-01-01"));
     claim.setDateThrough(LocalDate.now());
 
@@ -607,8 +607,8 @@ public class SamhsaUtilTest {
   public InpatientClaim getSamhsaInpatientlaim() {
     InpatientClaim claim = new InpatientClaim();
     claim.setClaimId(1234567890);
-    claim.setDiagnosisPrincipalCode(Optional.of("F10.26"));
-    claim.setDiagnosis1Code(Optional.of("F10.26"));
+    claim.setDiagnosisPrincipalCode(Optional.of("F1026"));
+    claim.setDiagnosis1Code(Optional.of("F1026"));
     claim.setDateFrom(LocalDate.parse("1970-01-01"));
     claim.setDateThrough(LocalDate.now());
 
