@@ -201,14 +201,31 @@ jobs:
           </settings>
           EOF
 
-      - name: "Prepare and Perform Release"
+      - name: "Prepare Release"
         if: github.event_name == 'workflow_dispatch'
         run: |-
-          mvn --batch-mode --activate-profiles release \
+          # We set preparationGoals to an empty string because we don't want to build during the
+          # release:prepare since we will need to build again during release:perform. We expect that the
+          # source code has been verified to compile and pass tests prior to merging to master, so building it
+          # unnecessarily during the prepare phase is redundant.
+          mvn --batch-mode --activate-profiles prepare-release \
               -Dtag="$BFD_RELEASE" \
               -DreleaseVersion="$BFD_RELEASE" \
               -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              release:prepare release:perform
+              -DpreparationGoals="" \
+              release:prepare
+        working-directory: ./apps
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+
+      - name: "Perform Release"
+        if: github.event_name == 'workflow_dispatch'
+        run: |-
+          mvn --batch-mode --activate-profiles perform-release \
+              -Dtag="$BFD_RELEASE" \
+              -DreleaseVersion="$BFD_RELEASE" \
+              -DdevelopmentVersion="$BFD_DEV_VERSION" \
+              release:perform
         working-directory: ./apps
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
