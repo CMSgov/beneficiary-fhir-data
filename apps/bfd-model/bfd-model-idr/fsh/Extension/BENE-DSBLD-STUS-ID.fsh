@@ -1,4 +1,4 @@
-// @Name: Bene disabed indicator status code
+// @Name: Bene disabled indicator status code
 // @Description: Beneficiary disabled status indicator code.
 
 Extension: BENE_DSBLD_STUS_ID //We can use _ in the name

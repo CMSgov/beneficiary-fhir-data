@@ -30,31 +30,6 @@ group createCoverageBase(source src: CoverageBase, target tgt: BFDCoverage){
     src.coveragePart as coveragePart where coveragePart = "A" or coveragePart = "B" -> tgt then createCoverageFFS(src,tgt) "Create Fee For Service Coverage";
     //We'll separate out each type of coverage. 
 
-/*
-    //DUAL status will be at the coverage level.
-    //(IDR) V2_MDCR_BENE_CMBND_DUAL_MDCR.DUAL_STUS_CD
-    //CME_DUAL_MDCR (CME069) + DUAL_STUS_CD refers to the code itself. 01 thru 12 derived via CLNDR_MO_FIL_SK (month + year). BENE_DUAL_STUS.DUAL_STUS_CD
-    //https://bluebutton.cms.gov/resources/variables/dual_01 is an example
-    //https://bluebutton.cms.gov/resources/variables/dual_stus_cd needs to be defined
-    src.DUAL_STUS_CD as dual_status_cd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/dual_stus_cd" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/dual_stus_cd" "add system";
-            src -> tgtCoding.code = dual_status_cd "Add code";
-        } "Add coding";
-    } "Add dual status code";
-    
-    //(IDR) V2_MDCR_BENE_CMBND_DUAL_MDCR.BENE_DUAL_TYPE_CD
-    //bene_dual_type_cd needs to be defined and hosted on bb2 variables.
-    src.BENE_DUAL_TYPE_CD as dual_type_cd -> tgt.extension = create('Extension') as tgtExtension then{
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/bene_dual_type_cd" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/bene_dual_type_cd" "add system";
-            src -> tgtCoding.code = dual_type_cd "Add code";
-        } "Add coding";
-    } "Add dual type code";
-*/
-
 }
 
 group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){

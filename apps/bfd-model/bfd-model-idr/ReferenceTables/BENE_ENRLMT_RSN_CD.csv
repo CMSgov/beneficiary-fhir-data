@@ -1,4 +1,4 @@
-SYSTEM,CODE,DISPLAY
+system,code,display
 https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,S,STATE BUY-IN
 https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,G,GENERAL ENROLLMENT PERIOD
 https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD,N,AGE 65 AND UNINSURED

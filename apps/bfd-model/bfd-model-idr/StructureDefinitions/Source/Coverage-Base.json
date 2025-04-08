@@ -180,7 +180,7 @@
                 "id": "Coverage-Base.BENE_MDCR_ENRLMT_RSN_CD",
                 "path": "Coverage-Base.BENE_MDCR_ENRLMT_RSN_CD",
                 "label": "Beneficiary Enrollment Reason Code",
-                "definition": "The reason for a beneficiary's enrollment in Part A/Part B benefits.                ",
+                "definition": "The reason for a beneficiary's enrollment in Part A/Part B benefits.",
                 "min": 0,
                 "max": "1",
                 "type": [
