@@ -593,7 +593,11 @@ public final class PipelineApplication {
               clock,
               npiFdaConfig.get().getBatchSize(),
               npiFdaConfig.get().getRunInterval());
-      jobs.add(npiFdaJob);
+      if (npiFdaJob != null) {
+        jobs.add(npiFdaJob);
+      } else {
+        LOGGER.error("There was a problem creating NpiFdaJob.");
+      }
       LOGGER.warn("Registered NpiFda job.");
     } else {
       LOGGER.info("NpiFdaLoadJob is disabled.");
@@ -609,14 +613,23 @@ public final class PipelineApplication {
       Clock clock,
       int batchSize,
       int runInterval) {
-    PipelineApplicationState appState =
-        new PipelineApplicationState(
-            appMeters,
-            appMetrics,
-            pooledDataSource,
-            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
-            clock);
-    return new NpiFdaLoadJob(appState, batchSize, runInterval);
+    List<PipelineApplicationState> appStates = new ArrayList<>();
+    for (int i = 0; i < 2; i++) {
+      PipelineApplicationState appState =
+          new PipelineApplicationState(
+              appMeters,
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+              clock);
+      appStates.add(appState);
+    }
+    try {
+      NpiFdaLoadJob npiFdaLoadJob = new NpiFdaLoadJob(appStates, batchSize, runInterval);
+      return npiFdaLoadJob;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   /**

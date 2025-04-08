@@ -8,8 +8,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import jakarta.persistence.EntityManager;
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +25,9 @@ public class NpiFdaLoadJob implements PipelineJob {
   private final Semaphore runningSemaphore;
 
   /** The ApplicationState. */
-  PipelineApplicationState appState;
+  PipelineApplicationState npiAppState;
+
+  PipelineApplicationState fdaAppState;
 
   /** The number of records to save before commiting the transaction. */
   int batchSize;
@@ -33,18 +35,27 @@ public class NpiFdaLoadJob implements PipelineJob {
   /** How often to run the job, in days. */
   int runInterval;
 
+  /** Column delimiter. */
+  static final String DELIMITER = ",";
+
   /** The logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(NpiFdaLoadJob.class);
 
   /**
    * Constructor.
    *
-   * @param appState The PipelineApplicationState.
+   * @param appStates The PipelineApplicationStates.
    * @param batchSize The number of records to save before committing a transaction.
    * @param runInterval How often to run the job, in days.
    */
-  public NpiFdaLoadJob(PipelineApplicationState appState, int batchSize, int runInterval) {
-    this.appState = appState;
+  public NpiFdaLoadJob(List<PipelineApplicationState> appStates, int batchSize, int runInterval)
+      throws Exception {
+    if (appStates != null && appStates.size() > 1) {
+      this.npiAppState = appStates.get(0);
+      this.fdaAppState = appStates.get(1);
+    } else {
+      throw new Exception("Not enough instances of PipelineApplicationState");
+    }
     runningSemaphore = new Semaphore(1);
     this.batchSize = batchSize;
     this.runInterval = runInterval;
@@ -75,29 +86,29 @@ public class NpiFdaLoadJob implements PipelineJob {
       return NOTHING_TO_DO;
     }
     LOGGER.info("Starting LoadNpiFdaDataJob.");
-    int total;
-    try (EntityManager entityManager = appState.getEntityManagerFactory().createEntityManager()) {
-      Instant start = Instant.now();
+    int npiTotal;
+    int fdaTotal;
+    try (EntityManager npiEntityManager =
+            npiAppState.getEntityManagerFactory().createEntityManager();
+        EntityManager fdaEntityManager =
+            fdaAppState.getEntityManagerFactory().createEntityManager()) {
       LoadNpiDataFiles loadNpiDataFiles =
-          new LoadNpiDataFiles(entityManager, batchSize, runInterval);
-      try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
-        Future<Integer> npiTotal = executor.submit(loadNpiDataFiles);
+          new LoadNpiDataFiles(npiEntityManager, batchSize, runInterval);
+      LoadFdaDataFiles loadFdaDataFiles =
+          new LoadFdaDataFiles(fdaEntityManager, batchSize, runInterval);
+      try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+        Future<Integer> npiTotalFuture = executor.submit(loadNpiDataFiles);
+        Future<Integer> fdaTotalFuture = executor.submit(loadFdaDataFiles);
         try {
-          total = npiTotal.get();
+          npiTotal = npiTotalFuture.get();
+          fdaTotal = fdaTotalFuture.get();
         } catch (InterruptedException | ExecutionException ex) {
-          npiTotal.cancel(true);
+          npiTotalFuture.cancel(true);
+          fdaTotalFuture.cancel(true);
           throw new Exception(ex);
         }
       }
-      Instant finish = Instant.now();
-      Long totalTime = ChronoUnit.SECONDS.between(start, finish);
-      if (total > -1) {
-        LOGGER.info(
-            "LoadNpiFdaDataJob finished in {} seconds. Loaded {} records.", totalTime, total);
-        return WORK_DONE;
-      } else {
-        return NOTHING_TO_DO;
-      }
+      return (npiTotal == -1 && fdaTotal == -1) ? NOTHING_TO_DO : WORK_DONE;
     } finally {
       runningSemaphore.release();
     }
