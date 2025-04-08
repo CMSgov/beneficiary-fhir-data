@@ -158,7 +158,7 @@ public class FissClaimTransformerV2Test {
 
     entity.setRevenueLines(Set.of(line));
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, true);
 
     Claim claim = fissClaimTransformerV2.transform(entity, true);
 

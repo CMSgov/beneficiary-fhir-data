@@ -96,7 +96,7 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
-
+    TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
     assertMatches(claim, eob);
   }
 
@@ -183,7 +183,7 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
-
+    TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -390,12 +390,6 @@ public final class PartDEventTransformerTest {
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
           claim.getNationalDrugCode(), RDATestUtils.FAKE_DRUG_CODE_DISPLAY);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    try {
-      TransformerTestUtils.assertNPICodeDisplayEquals(
-          claim.getPrescriberId(), "DR. ROBERT BISBEE MD");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

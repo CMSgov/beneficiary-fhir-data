@@ -6,7 +6,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
@@ -47,9 +46,6 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform");
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /**
    * Instantiates a new transformer.
    *
@@ -59,15 +55,11 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param metricRegistry the metric registry
    * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi display lookup
    */
   public PartDEventTransformerV2(
-      MetricRegistry metricRegistry,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = npiOrgLookup;
   }
 
   /**
@@ -331,7 +323,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
         C4BBPractitionerIdentifierType.NPI,
         C4BBClaimPharmacyTeamRole.PRESCRIBING,
         Optional.ofNullable(claimGroup.getPrescriberId()),
-        npiOrgLookup.retrieveNPIOrgDisplay(Optional.of(claimGroup.getPrescriberId())));
+        CommonTransformerUtils.buildReplaceTaxonomy(Optional.of(claimGroup.getPrescriberId())));
 
     // This can't use TransformerUtilsV2.addNationalDrugCode because it maps differently
     // PROD_SRVC_ID => ExplanationOfBenefit.item.productOrService

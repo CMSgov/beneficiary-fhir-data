@@ -301,6 +301,10 @@
     },
     "qualification" : {
       "coding" : [ {
+        "system" : "http://nucc.org/provider-taxonomy",
+        "code" : "390200000X",
+        "display" : "Health Care"
+      }, {
         "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
         "code" : "41",
         "display" : "Optometrist"
