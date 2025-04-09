@@ -70,7 +70,7 @@ public class AwsWrapperDataSourceFactory implements DataSourceFactory {
       Properties properties, MetricRegistry metricRegistry) {
     Preconditions.checkNotNull(
         databaseOptions.getAwsJdbcWrapperOptions(),
-        "AWS JDCB Wrapper options must not be null when creating an AwsWrapperDataSource");
+        "AWS JDBC Wrapper options must not be null when creating an AwsWrapperDataSource");
 
     final var dataSource = new AwsWrapperDataSource();
     dataSource.setJdbcUrl(databaseOptions.getDatabaseUrl());
