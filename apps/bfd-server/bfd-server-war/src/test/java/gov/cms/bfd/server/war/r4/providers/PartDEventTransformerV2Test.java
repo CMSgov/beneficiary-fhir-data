@@ -567,7 +567,7 @@ public final class PartDEventTransformerV2Test {
     assertTrue(compare.equalsDeep(sic));
   }
 
-  /** Tests that the transformer sets the expected brand generic code supporting info. */
+  /** Tests that the transformer sets the expected brand generic Indicator supporting info. */
   @Test
   public void shouldHaveBrndGnrcCdSupInfo() {
     SupportingInformationComponent sic =
@@ -583,7 +583,7 @@ public final class PartDEventTransformerV2Test {
                 new Coding(
                     "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
                     "brandgenericindicator",
-                    "Brand Generic Code")),
+                    "Brand Generic Indicator")),
             // Code
             new Coding(
                 "https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd",

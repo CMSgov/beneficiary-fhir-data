@@ -452,10 +452,10 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
         CcwCodebookVariable.RX_ORGN_CD,
         claimGroup.getPrescriptionOriginationCode());
 
-    // BRND_GNRC_CD => ExplanationOfBenefit.supportingInfo:brandgenericcode
+    // BRND_GNRC_CD => ExplanationOfBenefit.supportingInfo:brandgenericindicator
     TransformerUtilsV2.addInformationSliceWithCode(
         eob,
-        C4BBSupportingInfoType.BRAND_GENERIC_CODE,
+        C4BBSupportingInfoType.BRAND_GENERIC_INDICATOR,
         CcwCodebookVariable.BRND_GNRC_CD,
         CcwCodebookVariable.BRND_GNRC_CD,
         claimGroup.getBrandGenericCode());

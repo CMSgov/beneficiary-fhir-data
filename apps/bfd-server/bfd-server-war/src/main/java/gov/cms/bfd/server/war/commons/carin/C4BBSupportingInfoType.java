@@ -25,7 +25,7 @@ public enum C4BBSupportingInfoType {
    */
   RX_ORIGIN_CODE,
   /** NCPDP code indicating whether the plan adjudicated the claim as a brand or generic drug. */
-  BRAND_GENERIC_CODE,
+  BRAND_GENERIC_INDICATOR,
   /** Dates corresponding with the admission and discharge of the beneficiary to a facility. */
   ADMISSION_PERIOD,
   /** Date the claim was received by the payer. */
@@ -59,7 +59,7 @@ public enum C4BBSupportingInfoType {
         return "refillnum";
       case RX_ORIGIN_CODE:
         return "rxorigincode";
-      case BRAND_GENERIC_CODE:
+      case BRAND_GENERIC_INDICATOR:
         return "brandgenericindicator";
       case ADMISSION_PERIOD:
         return "admissionperiod";
@@ -89,8 +89,8 @@ public enum C4BBSupportingInfoType {
         return "Refill Number";
       case RX_ORIGIN_CODE:
         return "Rx Origin Code";
-      case BRAND_GENERIC_CODE:
-        return "Brand Generic Code";
+      case BRAND_GENERIC_INDICATOR:
+        return "Brand Generic Indicator";
       case ADMISSION_PERIOD:
         return "Admission Period";
       case RECEIVED_DATE:
@@ -119,7 +119,7 @@ public enum C4BBSupportingInfoType {
         return "NCPDP value indicating the number fill of the current dispensed supply (0, 1, 2, etc.)";
       case RX_ORIGIN_CODE:
         return "NCPDP code indicating whether the prescription was transmitted as an electronic prescription, by phone, by fax, or as a written paper copy.";
-      case BRAND_GENERIC_CODE:
+      case BRAND_GENERIC_INDICATOR:
         return "NCPDP code indicating whether the plan adjudicated the claim as a brand or generic drug.";
       case ADMISSION_PERIOD:
         return "Dates corresponding with the admission and discharge of the beneficiary to a facility";

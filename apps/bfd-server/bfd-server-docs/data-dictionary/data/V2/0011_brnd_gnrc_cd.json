@@ -1,6 +1,6 @@
 {
     "id": 11,
-    "name": "Brand Generic Code",
+    "name": "Brand Generic Indicator",
     "description": "Plan reported value indicating whether the plan adjudicated the claim as a brand or generic drug.",
     "appliesTo": [
         "PDE"
@@ -32,12 +32,12 @@
             "additional": [
                 "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
                 "eob.supportingInfo[N].category.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'",
-                "eob.supportingInfo[N].category.coding[N].code = 'brandgenericcode'",
+                "eob.supportingInfo[N].category.coding[N].code = 'brandgenericindicator'",
                 "eob.supportingInfo[N].category.coding[N].display = 'Brand Generic Code'"
             ],
             "derived": "",
             "note": "",
-            "example": "[\\n  {\\n    \"sequence\": 12,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"brandgenericcode\",\\n          \"display\": \"Brand Generic Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd\",\\n          \"code\": \"G\",\\n          \"display\": \"Generic Null/missing\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+            "example": "[\\n  {\\n    \"sequence\": 12,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"brandgenericindicator\",\\n          \"display\": \"Brand Generic Code\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd\",\\n          \"code\": \"G\",\\n          \"display\": \"Generic Null/missing\"\\n        }\\n      ]\\n    }\\n  }\\n]"
         }
     ]
 }
