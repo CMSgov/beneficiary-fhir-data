@@ -73,11 +73,6 @@
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>gov.cms.bfd.data.fda.utility</groupId>
-                <artifactId>bfd-data-fda</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
