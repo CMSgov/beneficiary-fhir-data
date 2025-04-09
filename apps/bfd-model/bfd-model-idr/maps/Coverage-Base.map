@@ -1,0 +1,211 @@
+//See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
+//Must appear in order map -> conceptmap -> uses -> imports -> groups
+map "https://bfd.cms.gov/MappingLanguage/maps/Coverage-Base" = "BFD-Coverage-Base-Map"
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Coverage-Base" alias CoverageBase as source
+//hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
+
+//The first specified target is what the default output will output as the ResourceType
+uses "http://hl7.org/fhir/StructureDefinition/Coverage" alias BFDCoverage as target
+uses "http://hl7.org/fhir/StructureDefinition/Organization" alias OrgCoverage as target
+
+imports "https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Helper" 
+
+group createCoverageBase(source src: CoverageBase, target tgt: BFDCoverage){
+    src.XREF_EFCTV_BENE_SK as xrefSk -> tgt then {
+        src.coveragePart as part -> tgt.id = append("part-",part,"-",xrefSk) "concatenate id";
+    } "Add ID key";
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0" "Set C4BB profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" "Set US Core profile";
+    } "add metadata";
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
+    src -> tgt.relationship = create('CodeableConcept') as relationshipCode,
+        relationshipCode.coding = create('Coding') as tempCode,
+        tempCode.system = "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+        tempCode.code = "self",
+        tempCode.display = "self" "set code";
+    src.coveragePart as coveragePart where coveragePart = "A" or coveragePart = "B" -> tgt then createCoverageFFS(src,tgt) "Create Fee For Service Coverage";
+    //We'll separate out each type of coverage. 
+
+}
+
+group createCoverageFFS(source src: CoverageBase, target tgt: BFDCoverage){
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+    src -> tgtID.type = create('CodeableConcept') as idCC,
+        idCC.coding = create('Coding') as tempCode,
+        tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+        tempCode.code = "MB",
+        tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+        src.BENE_MBI_ID as mbi -> tgtID.value = mbi "Set identifier Value";
+    } "Add MBI";
+    src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="#cms-org" "set reference";
+    } "create and set payor reference";
+    src -> tgt.contained = create('Organization') as tgtOrg then SetOrganizationEntryCMS(src, tgtOrg) "Add CMS reference";
+
+    //Medicare Status code - This variable indicates how a beneficiary currently qualifies for Medicare.
+    //https://bluebutton.cms.gov/resources/variables/ms_cd -> https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD
+    //V2_MDCR_BENE_MDCR_STUS.BENE_MDCR_STUS_CD
+    src.BENE_MDCR_STUS_CD as msCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD" "add system";
+            src -> tgtCoding.code = msCd "Add code";
+        } "Add coding";
+    } "Add status code type code";
+
+    //Entitlement buy-in indicator
+    //Note, this variable will need to be hosted by BB2. We also need the root reference table from IDR. 
+    //V2_MDCR_BENE_TP.BENE_BUYIN_CD where the BENE_TP_TYPE_CD = coveragePart
+    src.BENE_BUYIN_CD as buyinCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD" "add system";
+            src -> tgtCoding.code = buyinCd "Add code";
+        } "Add coding";
+    } "Add buyin type code";
+    //Part A/B Start date + End Date
+    //CME_PTA_ENTLMT.PTA_ENTLMT_STRT_DT/CME_PTB_ENTLMT.PTB_ENTLMT_STRT_DT
+    //Part A/B
+    src -> tgt.period = create('Period') as tgtPeriod then{
+        src.BENE_RNG_BGN_DT as begin -> tgtPeriod.start = begin "add start date";
+        src.BENE_RNG_END_DT as end where end < '9999-12-31' -> tgtPeriod.end = end "add end date";
+    } "Add period of coverage";
+
+    //Add status! If today > end date and today > start date, active
+    //Else, cancelled. 
+    src.currentDate as currentDate -> tgt then{
+        src.BENE_RNG_END_DT as endDate -> tgt then{
+            src.BENE_RNG_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
+            src.BENE_RNG_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
+        } "Add end date as variable";
+    } "Add status";
+
+    //BENE_MDCR_ENTLMT.BENE_MDCR_ENTLMT_STUS_CD
+    src.BENE_MDCR_ENTLMT_STUS_CD as entitlementCode -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD" "add system";
+            src -> tgtCoding.code = entitlementCode "Add code";
+        } "Add coding";
+    } "Add entitlement status code";
+    
+    //BENE_MDCR_ENRLMT_RSN_CD? If we want to add that.
+    //V2_BENE_MDCR_ENTLMT.BENE_MDCR_ENRLMT_RSN_CD
+    //reference table is BENE_ENRLMT_RSN_CD
+    src.BENE_MDCR_ENRLMT_RSN_CD as enrlmntRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD" "add system";
+            src -> tgtCoding.code = enrlmntRsnCd "Add code";
+        } "Add coding";
+    } "Add enrollment reason code";
+
+
+
+    //V2_BENE_MDCR_ENTLMT_RSN.BENE_MDCR_ENTLMT_RSN_CD 
+    //reference table is V2_MDCR_BENE_ENTLMT_RSN_CD -> same as orec + crec in v2.
+    src.BENE_MDCR_ENTLMT_RSN_CD as entlmtRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD" "add system";
+            src -> tgtCoding.code = entlmtRsnCd "Add code";
+        } "Add coding";
+    } "Add current entitlement reason code";
+
+    //ESRD indicator. We add this on Part A/B since it affects entitlement. We do not add it to Part D since part D requires enrollment in A/B.
+    //It is based upon the BENE_MDCR_STUS_CD.
+    src.BENE_MDCR_STUS_CD as msCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID" "Add system";
+            src -> tgtCoding.code = translate(msCd,"https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Helper#BENE_ESRD_STUS_ID", 'code') "Translate code";
+        } "Add coding";
+    } "Add ESRD Extension";
+
+    //Disability indicator. We add this on Part A/B since it affects entitlement. We do not add it to Part D since part D requires enrollment in A/B.
+    //It is based upon the BENE_MDCR_STUS_CD.
+    src.BENE_MDCR_STUS_CD as msCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID" "Add system";
+            src -> tgtCoding.code = translate(msCd,"https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Helper#BENE_DSBLD_STUS_ID", 'code') "Translate code";
+        } "Add coding";
+    } "Add ESRD Extension";
+
+    src.coveragePart as coveragePart where coveragePart="A" -> tgt then AddPartACoverageElements(src, tgt) "Add Part A Elements";
+    src.coveragePart as coveragePart where coveragePart="B" -> tgt then AddPartBCoverageElements(src, tgt) "Add Part B Elements";
+
+}
+
+group AddPartACoverageElements(source src: CoverageBase, target tgt: BFDCoverage){
+    src -> tgt.type = create('CodeableConcept') as tgtCC then{
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
+            src -> tgtCoding.system = "https://nahdo.org/sopt", 
+            tgtCoding.code = "1",
+            tgtCoding.display = "MEDICARE" "Add SOPT coding";
+        } "Add coding 1";
+    } "Add Type";
+
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
+            src -> tgtCC.coding = create('Coding') as tgtCoding then {
+                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
+                tgtCoding.code = "plan" "Add plan coding";
+            } "Add coding 2";
+        } "Add Type";
+        src -> tgtBBElement.value = "Part A" "Add value";
+    } "Add Class";
+    
+}
+
+group AddPartBCoverageElements(source src: CoverageBase, target tgt: BFDCoverage){
+    src -> tgt.type = create('CodeableConcept') as tgtCC then{
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
+            src -> tgtCoding.system = "https://nahdo.org/sopt", 
+            tgtCoding.code = "121",
+            tgtCoding.display = "MEDICARE FFS" "Add SOPT coding";
+        } "Add coding 1";
+    } "Add Type";
+
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
+            src -> tgtCC.coding = create('Coding') as tgtCoding then {
+                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
+                tgtCoding.code = "plan" "Add plan coding";
+            } "Add coding 2";
+        } "Add Type";
+        src -> tgtBBElement.value = "Part B" "Add value";
+    } "Add Class";
+}
+
+group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organization) {
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "set profile";
+    } "add metadata";
+    
+    src -> tgt.id = "cms-org" "set org id";
+    src -> tgt.active = true "set org as active";
+    src -> tgt.name = 'Centers for Medicare and Medicaid Services' "set org name";
+    src -> tgt.contact = create('BackboneElement') as tgtContact then{
+        src -> tgtContact.purpose = create('CodeableConcept') as purposeCC,
+            purposeCC.coding = create('Coding') as tempCode,
+            tempCode.system="http://terminology.hl7.org/CodeSystem/contactentity-type",
+            tempCode.code="PATINF",
+            tempCode.display="Patient" "set target contact purpose";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTele,
+            tgtTele.system="phone",
+            tgtTele.value="1-800-633-4227" "set main telephone";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTeleTTY,
+            tgtTeleTTY.system="phone",
+            tgtTeleTTY.value="TTY: 1-877-486-2048" "set TTY";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTeleURL,
+            tgtTeleURL.system="url",
+            tgtTeleURL.value="www.medicare.gov" "set url";
+    } "set organization contact info";
+
+}
