@@ -43,7 +43,6 @@ resource "aws_ecr_repository" "bfd" {
   }
 }
 
-#BFD-3965
 #Enforce a general policy for all repository in the registry
 resource "aws_ecr_registry_policy" "for_bfd" {
 
@@ -54,15 +53,15 @@ resource "aws_ecr_registry_policy" "for_bfd" {
       {
         Effect = "Deny",
         Principal = {
-          "AWS": "*"
+          "AWS" : "*"
         },
         Action = ["ecr:*"],
         Condition = {
           "StringNotLike" = {
             "aws:PrincipalType" = "AssumedRole"
           },
-          "StringNotEquals": {
-            "aws:SourceAccount": "${local.account_id}"
+          "StringNotEquals" : {
+            "aws:SourceAccount" : "${local.account_id}"
           }
         }
       },
@@ -71,7 +70,7 @@ resource "aws_ecr_registry_policy" "for_bfd" {
       {
         Effect = "Deny",
         Principal = {
-          "AWS": "*"
+          "AWS" : "*"
         },
         Action = [
           "ecr:BatchDeleteImage",
@@ -82,7 +81,7 @@ resource "aws_ecr_registry_policy" "for_bfd" {
         ],
         Condition = {
           "ArnNotEquals" = {
-            "aws:PrincipalArn" = local.admin_roles_arn 
+            "aws:PrincipalArn" = local.admin_roles_arn
           }
         }
       },
@@ -93,7 +92,7 @@ resource "aws_ecr_registry_policy" "for_bfd" {
         Action = "ecr:PutImage",
         Condition = {
           "StringLike" = {
-            "ecr:ImageTag": [""]
+            "ecr:ImageTag" : [""]
           }
         }
       }
@@ -101,37 +100,36 @@ resource "aws_ecr_registry_policy" "for_bfd" {
   })
 }
 
-#BFD-3965
 resource "aws_ecr_lifecycle_policy" "for_bfd_repositories" {
-    for_each = local.ecr_container_repositories
-    repository = each.value
-    policy = jsonencode({
-      rules = [
-        {
-          rulePriority = 1
-          description = "Expire images older than 90 days"
-          selection = {
-            tagStatus = "tagged"
-            countType = "sinceImagePushed"
-            countUnit = "days"
-            countNumber = 90
-          }
-          action = {
-            type = "expire"
-          }
-        },
-        {
-          rulePriority = 2
-          description = "Ensure at least one image is retained"
-          selection = {
-            tagStatus = "any"
-            countType = "imageCountMoreThan"
-            countNumber = 1
-          }
-          action = {
-            type = "expire"
-          }
+  for_each   = local.ecr_container_repositories
+  repository = each.value
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Expire images older than 90 days"
+        selection = {
+          tagStatus   = "tagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 90
         }
-      ]
-    })
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 2
+        description  = "Ensure at least one image is retained"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 1
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
 }
