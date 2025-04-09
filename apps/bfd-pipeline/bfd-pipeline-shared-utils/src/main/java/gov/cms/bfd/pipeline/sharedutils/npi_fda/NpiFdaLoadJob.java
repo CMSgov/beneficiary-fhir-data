@@ -35,9 +35,6 @@ public class NpiFdaLoadJob implements PipelineJob {
   /** How often to run the job, in days. */
   int runInterval;
 
-  /** Column delimiter. */
-  static final String DELIMITER = ",";
-
   /** The logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(NpiFdaLoadJob.class);
 
@@ -67,7 +64,7 @@ public class NpiFdaLoadJob implements PipelineJob {
     // Run the service to see if the data should be loaded once per day.
     // If we relied on this schedule by itself to check if the data should be loaded,
     // the data load would happen everytime the Pipeline restarted.
-    // instead, we will check a database last_updated value once inside of the service.
+    // instead, we will check a database last_updated value once inside the service.
 
     return Optional.of(new PipelineJobSchedule(1, ChronoUnit.DAYS));
   }

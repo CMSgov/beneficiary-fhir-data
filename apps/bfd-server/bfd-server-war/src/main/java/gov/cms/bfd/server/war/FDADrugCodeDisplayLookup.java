@@ -32,24 +32,24 @@ public class FDADrugCodeDisplayLookup {
   /** The entityManager. */
   @PersistenceContext EntityManager entityManager;
 
-  /** The query that will return the NPI Data for an NPI. */
+  /** The query that will return a list of FDAData. */
   private static final String FDA_DATA_QUERY =
       "select f from FDAData f where f.code in :drugCodeSet";
 
-  /** True if the data is from a file. */
+  /** True if the map data should be pulled from a file instead of the database. */
   private final boolean dataFromFile;
 
   /**
-   * Constructor. If orgFileName can be successfully loaded, we will use it as the datasource.
+   * Constructor. If drugCodeFilename can be successfully loaded, we will use it as the datasource.
    * Otherwise, we will query the database.
    *
-   * @param orgFileName File name to use for test purposes.
+   * @param drugCodeFilename File to use instead of the database.
    */
   public FDADrugCodeDisplayLookup(
-      @Value("${" + SpringConfiguration.PROP_DRUG_CODE_FILE_NAME + "}") String orgFileName) {
-    InputStream npiDataStream = getFileInputStream(orgFileName);
-    if (npiDataStream != null) {
-      initializeNpiMap(npiDataStream);
+      @Value("${" + SpringConfiguration.PROP_DRUG_CODE_FILE_NAME + "}") String drugCodeFilename) {
+    InputStream fdaDataStream = getFileInputStream(drugCodeFilename);
+    if (fdaDataStream != null) {
+      initializeNpiMap(fdaDataStream);
       dataFromFile = true;
     } else {
       dataFromFile = false;
@@ -92,7 +92,7 @@ public class FDADrugCodeDisplayLookup {
    * Retrieves a Map of drugCode strings from the database.
    *
    * @param drugCodeSet Set of drug codes to enrich.
-   * @return an NPIData entity.
+   * @return an FDAData entity.
    */
   @Transactional
   public Map<String, String> retrieveFDADrugCodeDisplay(Set<String> drugCodeSet) {
@@ -101,7 +101,6 @@ public class FDADrugCodeDisplayLookup {
     if (dataFromFile) {
       return drugCodeMap;
     }
-
     Query query = entityManager.createQuery(FDA_DATA_QUERY, FDAData.class);
     query.setParameter("drugCodeSet", drugCodeSet);
     List<FDAData> drugCodeData = query.getResultList();

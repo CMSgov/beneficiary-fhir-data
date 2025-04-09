@@ -63,16 +63,16 @@ public abstract class LoadDataFiles<TData> implements Callable<Integer> {
   abstract boolean resolveFileName(String name);
 
   /**
-   * Streams the zip file and calls a method to create the NPI records.
+   * Streams the zip file and calls a method to create the records.
    *
    * @param fileName the output file/resource to produce
    * @return Total number of records saved.
    * @throws IOException (any errors encountered will be bubbled up)
-   * @throws IllegalStateException if there is an issue with NPI File
+   * @throws IllegalStateException if there is an issue with the file
    */
   Integer downloadDataFile(String fileName) throws IOException, IllegalStateException {
     String version = getClass().getPackage().getImplementationVersion();
-    // download NPI file
+    // download the file
     URL ndctextZipUrl = new URL(fileName);
     HttpURLConnection connection = (HttpURLConnection) ndctextZipUrl.openConnection();
     connection.setRequestProperty(
@@ -174,7 +174,7 @@ public abstract class LoadDataFiles<TData> implements Callable<Integer> {
   }
 
   /**
-   * Converts the npi data file.
+   * Converts the data file and saves it to the database.
    *
    * @param is the file input stream.
    * @return Total number of records saved.
