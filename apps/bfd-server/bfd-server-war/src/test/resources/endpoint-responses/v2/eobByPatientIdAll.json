@@ -4628,7 +4628,7 @@
           "coding" : [ {
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
             "code" : "brandgenericindicator",
-            "display" : "Brand Generic Code"
+            "display" : "Brand Generic Indicator"
           } ]
         },
         "code" : {
