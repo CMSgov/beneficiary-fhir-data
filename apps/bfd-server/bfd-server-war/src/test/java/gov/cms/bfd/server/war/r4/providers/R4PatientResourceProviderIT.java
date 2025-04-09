@@ -102,7 +102,7 @@ public final class R4PatientResourceProviderIT {
   /** Sets the test resources up. */
   @BeforeEach
   public void setup() {
-    beneficiaryTransformer = new BeneficiaryTransformerV2(metricRegistry, false, true);
+    beneficiaryTransformer = new BeneficiaryTransformerV2(metricRegistry, false);
 
     patientProvider =
         new R4PatientResourceProvider(metricRegistry, loadedFilterManager, beneficiaryTransformer);

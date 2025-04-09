@@ -7,12 +7,6 @@
   "contained": [
     {
       "resourceType": "Patient",
-      "extension": [
-        {
-          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-          "valueCode": "248153007"
-        }
-      ],
       "id": "patient",
       "identifier": [
         {
@@ -39,6 +33,7 @@
           ]
         }
       ],
+      "gender": "male",
       "birthDate": "1975-03-01"
     }
   ],

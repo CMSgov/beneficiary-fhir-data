@@ -36,12 +36,6 @@
           {
             "resourceType": "Patient",
             "id": "patient",
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-                "valueCode": "248153007"
-              }
-            ],
             "identifier": [
               {
                 "type": {
@@ -66,7 +60,8 @@
                 ],
                 "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])"
               }
-            ]
+            ],
+            "gender": "male"
           },
           {
             "resourceType": "Organization",
