@@ -7,8 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -68,12 +66,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /** capture performance metrics. */
   private final MetricRegistry metricRegistry;
 
-  /** drug description lookup table. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
-  /** NPI lookup table. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The samhsa matcher. */
   private final Stu3EobSamhsaMatcher samhsaMatcher;
 
@@ -130,18 +122,11 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param metricRegistry the metric registry bean //* @param loadedFilterManager the loaded filter
    *     manager bean
    * @param samhsaMatcher the samhsa matcher bean
-   * @param drugCodeDisplayLookup the drug code display lookup bean
-   * @param npiOrgLookup the npi org lookup bean
    */
   public PatientClaimsEobTaskTransformer(
-      MetricRegistry metricRegistry,
-      Stu3EobSamhsaMatcher samhsaMatcher,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      MetricRegistry metricRegistry, Stu3EobSamhsaMatcher samhsaMatcher) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
   }
 
   /**

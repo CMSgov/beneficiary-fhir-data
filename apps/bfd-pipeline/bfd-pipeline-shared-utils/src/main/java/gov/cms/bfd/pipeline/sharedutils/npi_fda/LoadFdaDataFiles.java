@@ -44,8 +44,7 @@ public class LoadFdaDataFiles extends LoadDataFiles<FDAData> {
     String nationalDrugCodeManufacturer =
         StringUtils.leftPad(productNdc.substring(0, productNdc.indexOf("-")), 5, '0');
     String nationalDrugCodeIngredient =
-        StringUtils.leftPad(
-            productNdc.substring(productNdc.indexOf("-") + 1), 4, '0');
+        StringUtils.leftPad(productNdc.substring(productNdc.indexOf("-") + 1), 4, '0');
     return FDAData.builder()
         .code(String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient))
         .display(String.format("%s - %s", proprietaryName, substanceName))

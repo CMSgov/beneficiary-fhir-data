@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -66,9 +65,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
   /** capture performance metrics. */
   private final MetricRegistry metricRegistry;
 
-  /** drug description lookup table. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
   /** The samhsa matcher. */
   private final R4EobSamhsaMatcher samhsaMatcher;
 
@@ -125,15 +121,11 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * @param metricRegistry the metric registry bean //* @param loadedFilterManager the loaded filter
    *     manager bean
    * @param samhsaMatcher the samhsa matcher bean
-   * @param drugCodeDisplayLookup the drug code display lookup bean
    */
   public PatientClaimsEobTaskTransformerV2(
-      MetricRegistry metricRegistry,
-      R4EobSamhsaMatcher samhsaMatcher,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+      MetricRegistry metricRegistry, R4EobSamhsaMatcher samhsaMatcher) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
   }
 
   /**

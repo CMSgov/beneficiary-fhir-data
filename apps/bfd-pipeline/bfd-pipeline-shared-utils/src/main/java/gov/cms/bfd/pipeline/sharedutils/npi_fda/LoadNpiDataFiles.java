@@ -167,17 +167,16 @@ public class LoadNpiDataFiles extends LoadDataFiles<NPIData> {
                     classLoader.getResourceAsStream("nucc_taxonomy_240.csv"))))) {
       CSVParser csvParser =
           CSVParser.builder()
-                  .setReader(reader)
-                  .setFormat(
-                          CSVFormat.DEFAULT
-                                  .builder()
-                                  .setDelimiter(",")
-                                  .setHeader()
-                                  .setIgnoreHeaderCase(true)
-                                  .setTrim(true)
-                                  .get())
-                  .get();
-
+              .setReader(reader)
+              .setFormat(
+                  CSVFormat.DEFAULT
+                      .builder()
+                      .setDelimiter(",")
+                      .setHeader()
+                      .setIgnoreHeaderCase(true)
+                      .setTrim(true)
+                      .get())
+              .get();
 
       for (CSVRecord csvRecord : csvParser) {
         String code = csvRecord.get("code");
@@ -202,17 +201,17 @@ public class LoadNpiDataFiles extends LoadDataFiles<NPIData> {
     String providerSuffix = csvRecord.get(PROVIDER_SUFFIX_FIELD);
     String providerCredential = csvRecord.get(PROVIDER_CREDENTIAL_FIELD);
     return NPIData.builder()
-            .npi(npi)
-            .providerOrganizationName(orgName)
-            .entityTypeCode(entityTypeCode)
-            .taxonomyCode(taxonomyCode)
-            .taxonomyDisplay(taxonomyMap.get(taxonomyCode))
-            .providerFirstName(providerFirstName)
-            .providerMiddleName(providerMiddleName)
-            .providerLastName(providerLastName)
-            .providerNamePrefix(providerPrefix)
-            .providerNameSuffix(providerSuffix)
-            .providerCredential(providerCredential)
-            .build();
+        .npi(npi)
+        .providerOrganizationName(orgName)
+        .entityTypeCode(entityTypeCode)
+        .taxonomyCode(taxonomyCode)
+        .taxonomyDisplay(taxonomyMap.get(taxonomyCode))
+        .providerFirstName(providerFirstName)
+        .providerMiddleName(providerMiddleName)
+        .providerLastName(providerLastName)
+        .providerNamePrefix(providerPrefix)
+        .providerNameSuffix(providerSuffix)
+        .providerCredential(providerCredential)
+        .build();
   }
 }

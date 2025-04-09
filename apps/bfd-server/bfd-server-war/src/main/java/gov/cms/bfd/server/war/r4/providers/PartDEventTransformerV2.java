@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
@@ -39,9 +38,6 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform");
@@ -54,12 +50,9 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
    */
-  public PartDEventTransformerV2(
-      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  public PartDEventTransformerV2(MetricRegistry metricRegistry) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
   }
 
   /**
@@ -331,7 +324,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(
+            CommonTransformerUtils.buildReplaceDrugCode(
                 Optional.of(claimGroup.getNationalDrugCode())),
             claimGroup.getNationalDrugCode()));
 

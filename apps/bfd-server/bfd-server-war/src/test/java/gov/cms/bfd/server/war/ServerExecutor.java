@@ -147,7 +147,7 @@ public class ServerExecutor {
     final String samhsaEnabled = "false";
     final String pacOldMbiHashEnabled = "true";
     final String pacClaimSourceTypes = "fiss,mcs";
-    final String drugCodeFileName = "fakeDrugOrg.tsv";
+    final String drugCodeFileName = "fakeDrugOrg.json";
     final String orgFileName = "fakeOrgData.tsv";
 
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);

@@ -6,14 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
@@ -57,9 +55,6 @@ public final class CarrierClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
-  /** The FDA drug lookup to use for the test. */
-  @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
-
   /** The NPI org lookup to use for the test. */
   @Mock NPIOrgLookup npiOrgLookup;
 
@@ -85,11 +80,8 @@ public final class CarrierClaimTransformerTest {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
-        .thenReturn("UNKNOWN");
 
-    carrierClaimTransformer =
-        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager);
+    carrierClaimTransformer = new CarrierClaimTransformer(metricRegistry, securityTagManager);
   }
 
   /**
@@ -202,7 +194,10 @@ public final class CarrierClaimTransformerTest {
     }
 
     ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set

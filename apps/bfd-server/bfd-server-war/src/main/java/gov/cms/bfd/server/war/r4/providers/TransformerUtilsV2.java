@@ -35,6 +35,7 @@ import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.C4BBInstutionalClaimSubtypes;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
@@ -149,6 +150,9 @@ public final class TransformerUtilsV2 {
   /** String used to determine if a field should be enriched with provider data. */
   public static final String REPLACE_PROVIDER = "replaceProvider";
 
+  /** String used to determine if a field should be enriched with drug code data. */
+  public static final String REPLACE_DRUG_CODE = "replaceDrugCode";
+
   /** String used to determine if a field should be enriched with organization data. */
   public static final String REPLACE_ORGANIZATION = "replaceOrganization";
 
@@ -161,6 +165,9 @@ public final class TransformerUtilsV2 {
   /** REGEX used to get the NPI for provider enrichment. */
   public static final String REPLACE_PROVIDER_REGEX = "replaceProvider\\[(.*)\\]";
 
+  /** REGEX used to get the drug code for Item enrichment. */
+  public static final String REPLACE_DRUG_CODE_REGEX = "replaceDrugCode\\[(.*)\\]";
+
   /** REGEX used to get the NPI for taxonomy enrichment. */
   public static final String REPLACE_TAXONOMY_DISPLAY_REGEX = "replaceTaxonomyDisplay\\[(.*)\\]";
 
@@ -168,7 +175,8 @@ public final class TransformerUtilsV2 {
   enum EnrichmentDataType {
     ORGANIZATION,
     PROVIDER,
-    TAXONOMY
+    TAXONOMY,
+    DRUG
   }
 
   /**
@@ -3202,14 +3210,23 @@ public final class TransformerUtilsV2 {
    *
    * @param eob The ExplanationOfBenefit
    * @param npiOrgLookup Used to retrieve enrichment data
+   * @param drugCodeDisplayLookup Used to retrieve drug enrichment data.
    */
-  public static void enrichEob(ExplanationOfBenefit eob, NPIOrgLookup npiOrgLookup) {
+  public static void enrichEob(
+      ExplanationOfBenefit eob,
+      NPIOrgLookup npiOrgLookup,
+      FDADrugCodeDisplayLookup drugCodeDisplayLookup) {
     Map<String, Set<Base>> enrichmentMap = new HashMap<>();
     Map<String, Set<Base>> qualificationEnrich = new HashMap<>();
+    Map<String, Set<Base>> drugEnrichmentMap = new HashMap<>();
     Set<String> npiSet = new HashSet<>();
-    callCollectionMethods(eob, enrichmentMap, qualificationEnrich, npiSet);
+    Set<String> drugCodeSet = new HashSet<>();
+    callCollectionMethods(
+        eob, enrichmentMap, qualificationEnrich, drugEnrichmentMap, drugCodeSet, npiSet);
     Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
-    enrichResources(List.of(eob), enrichmentMap, qualificationEnrich, npiMap);
+    Map<String, String> drugCodeMap = drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(drugCodeSet);
+    enrichResources(
+        List.of(eob), enrichmentMap, qualificationEnrich, drugEnrichmentMap, npiMap, drugCodeMap);
   }
 
   /**
@@ -3218,17 +3235,22 @@ public final class TransformerUtilsV2 {
    * @param eob The EOB that will be enriched.
    * @param enrichmentMap A map of NPIs to the objects that will be enriched.
    * @param qualificationEnrich Map of NPIs to qualification entries to enrich.
+   * @param drugEnrichmentMap Map of Drug codes to objects to enrich.
+   * @param drugCodeSet Set of drugcodes to enrich.
    * @param npiSet The set of NPIs that will be queried from the database.
    */
   private static void callCollectionMethods(
       ExplanationOfBenefit eob,
       Map<String, Set<Base>> enrichmentMap,
       Map<String, Set<Base>> qualificationEnrich,
+      Map<String, Set<Base>> drugEnrichmentMap,
+      Set<String> drugCodeSet,
       Set<String> npiSet) {
     collectCareTeamEnrichments(eob, enrichmentMap, qualificationEnrich, npiSet);
     collectOrganizationEnrichments(eob, npiSet, enrichmentMap);
     collectFacilityEnrichments(eob, npiSet, enrichmentMap);
     collectReferralEnrichments(eob, npiSet, enrichmentMap);
+    collectDrugCodeEnrichments(eob, drugCodeSet, drugEnrichmentMap);
   }
 
   /**
@@ -3236,23 +3258,30 @@ public final class TransformerUtilsV2 {
    *
    * @param bundle The bundle of EOBs
    * @param npiOrgLookup Used to retrieve enrichment data.
+   * @param drugCodeDisplayLookup Used to retrieve drug code enrichment data.
    */
-  public static void enrichEobBundle(Bundle bundle, NPIOrgLookup npiOrgLookup) {
+  public static void enrichEobBundle(
+      Bundle bundle, NPIOrgLookup npiOrgLookup, FDADrugCodeDisplayLookup drugCodeDisplayLookup) {
     Map<String, Set<Base>> enrichmentMap = new HashMap<>();
     Map<String, Set<Base>> qualificationEnrich = new HashMap<>();
     Set<String> npiSet = new HashSet<>();
+    Map<String, Set<Base>> drugEnrichmentMap = new HashMap<>();
+    Set<String> drugCodeSet = new HashSet<>();
     for (BundleEntryComponent entry : bundle.getEntry()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) entry.getResource();
-      callCollectionMethods(eob, enrichmentMap, qualificationEnrich, npiSet);
+      callCollectionMethods(
+          eob, enrichmentMap, qualificationEnrich, drugEnrichmentMap, drugCodeSet, npiSet);
     }
     Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    Map<String, String> drugCodeMap = drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(drugCodeSet);
     // The list of EOB's is required here for the sole purpose of cleaning up a qualification if it
     // has no enrichment data.
     List<ExplanationOfBenefit> eobs =
         bundle.getEntry().stream()
             .map(entry -> (ExplanationOfBenefit) entry.getResource())
             .collect(Collectors.toList());
-    enrichResources(eobs, enrichmentMap, qualificationEnrich, npiMap);
+    enrichResources(
+        eobs, enrichmentMap, qualificationEnrich, drugEnrichmentMap, npiMap, drugCodeMap);
   }
 
   /**
@@ -3261,13 +3290,22 @@ public final class TransformerUtilsV2 {
    * @param eobs The ExplanationOfBenefits
    * @param enrichmentMap Map of objects to enrich.
    * @param qualificationEnrich Map of qualifications to enrich.
+   * @param drugEnrichmentMap Map of drug codes to objects to enrich.
    * @param npiMap Map of NPIs to NPIData
+   * @param drugCodeMap map of drug codes to displays.
    */
   private static void enrichResources(
       List<ExplanationOfBenefit> eobs,
       Map<String, Set<Base>> enrichmentMap,
       Map<String, Set<Base>> qualificationEnrich,
-      Map<String, NPIData> npiMap) {
+      Map<String, Set<Base>> drugEnrichmentMap,
+      Map<String, NPIData> npiMap,
+      Map<String, String> drugCodeMap) {
+    for (Map.Entry<String, Set<Base>> entries : drugEnrichmentMap.entrySet()) {
+      if (drugCodeMap.containsKey(entries.getKey())) {
+        parseEnrichmentEntries(entries, drugCodeMap, REPLACE_DRUG_CODE, EnrichmentDataType.DRUG);
+      }
+    }
     for (Map.Entry<String, Set<Base>> entries : enrichmentMap.entrySet()) {
       if (npiMap.containsKey(entries.getKey())) {
         parseEnrichmentEntries(entries, npiMap, REPLACE_PROVIDER, EnrichmentDataType.PROVIDER);
@@ -3313,9 +3351,9 @@ public final class TransformerUtilsV2 {
     }
   }
 
-  private static void parseEnrichmentEntries(
+  private static <TData> void parseEnrichmentEntries(
       Map.Entry<String, Set<Base>> entries,
-      Map<String, NPIData> npiMap,
+      Map<String, TData> dataMap,
       String displayString,
       EnrichmentDataType dataType) {
     entries.getValue().stream()
@@ -3333,24 +3371,31 @@ public final class TransformerUtilsV2 {
             })
         .forEach(
             (Base b) -> {
-              NPIData npiData = npiMap.get(entries.getKey());
-              if (b instanceof Reference reference) {
-                if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                  reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
-                } else {
-                  reference.setDisplay(npiData.getProviderOrganizationName());
+              TData data = dataMap.get(entries.getKey());
+              if (data instanceof NPIData npiData) {
+
+                if (b instanceof Reference reference) {
+                  if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+                    reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+                  } else {
+                    reference.setDisplay(((NPIData) data).getProviderOrganizationName());
+                  }
+                } else if (b instanceof Coding coding) {
+                  if (dataType.equals(EnrichmentDataType.TAXONOMY)) {
+                    coding.setDisplay(npiData.getTaxonomyDisplay());
+                    coding.setCode(npiData.getTaxonomyCode());
+                  } else if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+                    coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+                  } else {
+                    coding.setDisplay(npiData.getProviderOrganizationName());
+                  }
+                } else if (b instanceof Organization organization) {
+                  organization.setName(npiData.getProviderOrganizationName());
                 }
-              } else if (b instanceof Coding coding) {
-                if (dataType.equals(EnrichmentDataType.TAXONOMY)) {
-                  coding.setDisplay(npiData.getTaxonomyDisplay());
-                  coding.setCode(npiData.getTaxonomyCode());
-                } else if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                  coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
-                } else {
-                  coding.setDisplay(npiData.getProviderOrganizationName());
+              } else {
+                if (dataType.equals(EnrichmentDataType.DRUG) && b instanceof Coding coding) {
+                  coding.setDisplay((String) data);
                 }
-              } else if (b instanceof Organization organization) {
-                organization.setName(npiData.getProviderOrganizationName());
               }
             });
   }
@@ -3370,6 +3415,55 @@ public final class TransformerUtilsV2 {
       enrichReference(
           REPLACE_ORGANIZATION_REGEX, display, enrichmentMap, eob.getFacility(), npiSet);
       enrichReference(REPLACE_PROVIDER_REGEX, display, enrichmentMap, eob.getFacility(), npiSet);
+    }
+  }
+
+  /**
+   * Collects drugcode enrichments for future enrichment.
+   *
+   * @param eob The eob.
+   * @param drugCodeSet set of drug codes.
+   * @param drugEnrichmentMap map of drug codes to objects to be enriched.
+   */
+  public static void collectDrugCodeEnrichments(
+      ExplanationOfBenefit eob, Set<String> drugCodeSet, Map<String, Set<Base>> drugEnrichmentMap) {
+    if (eob.getItem() != null) {
+      eob.getItem()
+          .forEach(
+              item -> {
+                if (item.getProductOrService() != null
+                    && item.getProductOrService().getCoding() != null) {
+                  item.getProductOrService()
+                      .getCoding()
+                      .forEach(
+                          coding -> {
+                            String display = coding.getDisplay();
+                            enrichReference(
+                                REPLACE_DRUG_CODE_REGEX,
+                                display,
+                                drugEnrichmentMap,
+                                coding,
+                                drugCodeSet);
+                          });
+                  if (item.getProductOrService().getExtension() != null) {
+                    item.getProductOrService()
+                        .getExtension()
+                        .forEach(
+                            extension -> {
+                              if (extension.getValue() != null
+                                  && extension.getValue() instanceof Coding coding) {
+                                String display = coding.getDisplay();
+                                enrichReference(
+                                    REPLACE_DRUG_CODE_REGEX,
+                                    display,
+                                    drugEnrichmentMap,
+                                    coding,
+                                    drugCodeSet);
+                              }
+                            });
+                  }
+                }
+              });
     }
   }
 
@@ -3474,17 +3568,17 @@ public final class TransformerUtilsV2 {
       String display,
       Map<String, Set<Base>> enrichmentMap,
       Base reference,
-      Set<String> npiSet) {
+      Set<String> set) {
     if (display != null) {
       Pattern pattern = Pattern.compile(regex);
       Matcher matcher = pattern.matcher(display);
       if (matcher.matches()) {
-        String providerNpi = matcher.group(1);
-        if (!enrichmentMap.containsKey(providerNpi)) {
-          enrichmentMap.put(providerNpi, new HashSet<>());
+        String code = matcher.group(1);
+        if (!enrichmentMap.containsKey(code)) {
+          enrichmentMap.put(code, new HashSet<>());
         }
-        enrichmentMap.get(providerNpi).add(reference);
-        npiSet.add(providerNpi);
+        enrichmentMap.get(code).add(reference);
+        set.add(code);
       }
     }
   }

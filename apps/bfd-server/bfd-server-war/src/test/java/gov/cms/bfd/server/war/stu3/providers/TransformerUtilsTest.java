@@ -428,7 +428,10 @@ public final class TransformerUtilsTest {
     ClaimTransformerInterface claimTransformerInterface =
         new HHAClaimTransformer(new MetricRegistry(), securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -484,7 +487,10 @@ public final class TransformerUtilsTest {
     ClaimTransformerInterface claimTransformerInterface =
         new HHAClaimTransformer(metricRegistry, securityTagManager);
     ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -499,7 +505,10 @@ public final class TransformerUtilsTest {
     hospiceClaim.setLastUpdated(Instant.now());
     claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, securityTagManager);
     genEob = claimTransformerInterface.transform(hospiceClaim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -513,11 +522,12 @@ public final class TransformerUtilsTest {
             .get();
     dmeClaim.setLastUpdated(Instant.now());
 
-    claimTransformerInterface =
-        new DMEClaimTransformer(
-            metricRegistry, RDATestUtils.fdaDrugCodeDisplayLookup(), securityTagManager);
+    claimTransformerInterface = new DMEClaimTransformer(metricRegistry, securityTagManager);
     genEob = claimTransformerInterface.transform(dmeClaim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -532,7 +542,10 @@ public final class TransformerUtilsTest {
     inpatientClaim.setLastUpdated(Instant.now());
     claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, securityTagManager);
     genEob = claimTransformerInterface.transform(inpatientClaim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 

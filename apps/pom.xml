@@ -44,7 +44,6 @@
     </scm>
 
     <modules>
-        <module>bfd-data-fda</module>
         <module>bfd-shared-utils</module>
         <module>bfd-shared-test-utils</module>
         <module>bfd-model</module>
