@@ -43,7 +43,6 @@ resource "aws_ecr_repository" "bfd" {
   }
 }
 
-#Enforce a general policy for all repository in the registry
 resource "aws_ecr_registry_policy" "for_bfd" {
 
   policy = jsonencode({
