@@ -1,4 +1,9 @@
 locals {
+  #Defined Admin Roles with Access to perform destructive actions on the repository
+  admin_roles_arn = toset([
+    aws_iam_role.github_actions.arn
+  ])
+
   ecr_container_repositories = toset([
     # utility container image repositories
     "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
@@ -36,4 +41,94 @@ resource "aws_ecr_repository" "bfd" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "aws_ecr_registry_policy" "for_bfd" {
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      #Deny request if the Principal is not an Assumed Role with an IAM role in the account
+      {
+        Effect = "Deny",
+        Principal = {
+          "AWS" : "*"
+        },
+        Action = ["ecr:*"],
+        Condition = {
+          "StringNotLike" = {
+            "aws:PrincipalType" = "AssumedRole"
+          },
+          "StringNotEquals" : {
+            "aws:SourceAccount" : "${local.account_id}"
+          }
+        }
+      },
+
+      #Deny destructive actions on the repository if user does not have the administrative role to perform the action
+      {
+        Effect = "Deny",
+        Principal = {
+          "AWS" : "*"
+        },
+        Action = [
+          "ecr:BatchDeleteImage",
+          "ecr:DeleteRepository",
+          "ecr:DeleteRepositoryPolicy",
+          "ecr:PutImageTagMutability",
+          "ecr:DeleteLifecyclePolicy"
+        ],
+        Condition = {
+          "ArnNotEquals" = {
+            "aws:PrincipalArn" = local.admin_roles_arn
+          }
+        }
+      },
+
+      #untagged images are not allow
+      {
+        Effect = "Deny",
+        Action = "ecr:PutImage",
+        Condition = {
+          "StringLike" = {
+            "ecr:ImageTag" : [""]
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "for_bfd_repositories" {
+  for_each   = local.ecr_container_repositories
+  repository = each.value
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Expire images older than 90 days"
+        selection = {
+          tagStatus   = "tagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 90
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 2
+        description  = "Ensure at least one image is retained"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 1
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
 }
