@@ -117,17 +117,17 @@
     - Patient
   targetElement: BFDPatient.extension.extension.valueString
   expectedFHIRPath: Patient.extension.where(url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity' or url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')
-- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_ID
+- inputPath: Bene-MBI.BENE_MBI_ID
   appliesTo:
     - Patient
   targetElement: BFDPatient.identifier.value
   expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').value
-- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_EFCTV_DT
+- inputPath: Bene-MBI.BENE_MBI_EFCTV_DT
   appliesTo:
     - Patient
   targetElement: BFDPatient.identifier.period.start
   expectedFHIRPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').period.start
-- inputPath: BeneficiaryMBIIdentifier.BENE_MBI_OBSLT_DT
+- inputPath: Bene-MBI.BENE_MBI_OBSLT_DT
   appliesTo:
     - Patient
   targetElement: BFDPatient.identifier.period.end
