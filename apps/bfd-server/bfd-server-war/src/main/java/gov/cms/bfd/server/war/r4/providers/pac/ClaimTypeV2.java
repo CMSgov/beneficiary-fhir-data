@@ -22,7 +22,8 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaFissClaim.class,
           RdaFissClaim.Fields.mbiRecord,
           RdaFissClaim.Fields.claimId,
-          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate));
+          List.of(RdaFissClaim.Fields.stmtCovFromDate, RdaFissClaim.Fields.stmtCovToDate),
+          "FissTag");
 
   /** Instance for MCS claims. */
   public static final ClaimTypeV2<RdaMcsClaim> M =
@@ -32,7 +33,8 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
           RdaMcsClaim.class,
           RdaMcsClaim.Fields.mbiRecord,
           RdaMcsClaim.Fields.idrClmHdIcn,
-          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc));
+          List.of(RdaMcsClaim.Fields.idrHdrFromDateOfSvc, RdaMcsClaim.Fields.idrHdrToDateOfSvc),
+          "McsTag");
 
   /** Immutable list of all possible instances of this class. */
   private static final List<ClaimTypeV2<?>> VALUES = List.of(F, M);
@@ -45,6 +47,7 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
    * @param entityClass the entity class for the associated resource
    * @param entityMbiRecordAttribute the attribute name for the mbi value on the entity class
    * @param entityIdAttribute the attribute name for the ID of the entity class
+   * @param entityTagType the attribute name security Tag type
    * @param entityServiceDateAttributes the attribute name for the service end date on the entity
    *     class
    */
@@ -54,14 +57,16 @@ public final class ClaimTypeV2<TEntity> extends AbstractResourceTypeV2<Claim, TE
       Class<TEntity> entityClass,
       String entityMbiRecordAttribute,
       String entityIdAttribute,
-      List<String> entityServiceDateAttributes) {
+      List<String> entityServiceDateAttributes,
+      String entityTagType) {
     super(
         nameForParsing,
         typeLabel,
         entityClass,
         entityMbiRecordAttribute,
         entityIdAttribute,
-        entityServiceDateAttributes);
+        entityServiceDateAttributes,
+        entityTagType);
   }
 
   /**
