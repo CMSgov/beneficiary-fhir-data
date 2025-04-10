@@ -35,7 +35,8 @@ public class DiagnosisTest {
 
     Character versionIcdUnknown = 'U';
     String systemIcdUnknown =
-        String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", versionIcdUnknown);
+        String.format(
+            "http://hl7.org/fhir/sid/unknown-icd-version/%s", versionIcdUnknown.toString().trim());
     assertMatches(versionIcdUnknown, systemIcdUnknown);
 
     assertDiagnosisLabelsMatch();

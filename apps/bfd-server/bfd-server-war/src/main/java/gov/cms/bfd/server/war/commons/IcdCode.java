@@ -114,7 +114,10 @@ public abstract class IcdCode {
     String system;
     if (icdVersionCode == null || icdVersionCode.equals('9')) system = CODING_SYSTEM_ICD_9;
     else if (icdVersionCode.equals('0')) system = CODING_SYSTEM_ICD_10;
-    else system = String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", icdVersionCode);
+    else
+      system =
+          String.format(
+              "http://hl7.org/fhir/sid/unknown-icd-version/%s", icdVersionCode.toString().trim());
     return system;
   }
 }
