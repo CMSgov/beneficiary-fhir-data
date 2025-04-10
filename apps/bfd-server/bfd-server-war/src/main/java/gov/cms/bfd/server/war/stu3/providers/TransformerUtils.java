@@ -342,25 +342,47 @@ public final class TransformerUtils {
             (Type t) -> {
               TData data = dataMap.get(entries.getKey());
               if (data instanceof NPIData npiData) {
-                if (t instanceof Reference reference) {
-                  if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                    reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
-                  } else {
-                    reference.setDisplay(npiData.getProviderOrganizationName());
-                  }
-                } else if (t instanceof Coding coding) {
-                  if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                    coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
-                  } else {
-                    coding.setDisplay(npiData.getProviderOrganizationName());
-                  }
-                }
+                enrichNpi(dataType, t, npiData);
               } else {
-                if (dataType.equals(EnrichmentDataType.DRUG) && t instanceof Coding coding) {
-                  coding.setDisplay((String) data);
-                }
+                enrichFda(dataType, t, (String) data);
               }
             });
+  }
+
+  private static <TData> void enrichFda(EnrichmentDataType dataType, Type t, String data) {
+    if (dataType.equals(EnrichmentDataType.DRUG) && t instanceof Coding coding) {
+      coding.setDisplay(data);
+    }
+  }
+
+  private static void enrichNpi(EnrichmentDataType dataType, Type t, NPIData npiData) {
+    switch (t) {
+    case Reference reference -> {
+      enrichNpiReference(dataType, npiData, reference);
+    }
+    case Coding coding -> {
+      enrichNpiCoding(dataType, npiData, coding);
+    }
+    default -> {
+      // NOOP
+    }
+    }
+  }
+
+  private static void enrichNpiCoding(EnrichmentDataType dataType, NPIData npiData, Coding coding) {
+    if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+      coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+    } else {
+      coding.setDisplay(npiData.getProviderOrganizationName());
+    }
+  }
+
+  private static void enrichNpiReference(EnrichmentDataType dataType, NPIData npiData, Reference reference) {
+    if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+      reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+    } else {
+      reference.setDisplay(npiData.getProviderOrganizationName());
+    }
   }
 
   /**
