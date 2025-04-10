@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -26,7 +25,7 @@ public class V3Server extends RestfulServer {
   }
 
   @Override
-  public void initialize() throws ServletException {
+  public void initialize() {
     // HAPI FHIR, by default, does not trust the parameters (from both the query string and content
     // body, for POSTs) that are automatically extracted by the web framework in the request to be
     // properly encoded. Due to this, it attempts to extract parameters on its own, but fails to do
@@ -40,8 +39,8 @@ public class V3Server extends RestfulServer {
 
     this.setFhirContext(FhirContext.forR4());
     this.registerProviders(resourceProviders);
-    OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
 
+    OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
     this.registerInterceptor(openApiInterceptor);
   }
 }
