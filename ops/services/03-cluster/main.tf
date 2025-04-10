@@ -30,8 +30,9 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  name       = "/aws/ecs/${local.full_name}"
-  kms_key_id = local.kms_data_key_arn
+  name         = "/aws/ecs/${local.full_name}"
+  kms_key_id   = local.kms_data_key_arn
+  skip_destroy = true
 }
 
 resource "aws_ecs_cluster" "this" {

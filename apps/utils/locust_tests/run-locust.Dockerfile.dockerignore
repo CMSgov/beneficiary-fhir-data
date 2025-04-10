@@ -1,0 +1,12 @@
+*
+!common/*.py
+!common/stats/*.py
+!config/
+!v1/*.py
+!v2/*.py
+!lambda/run-locust/app.py
+!high_volume_suite.py
+!high_volume_suite_post.py
+!pyproject.toml
+!uv.lock
+!__init__.py

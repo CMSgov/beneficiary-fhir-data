@@ -17,56 +17,12 @@ locals {
   keystore_base64     = local.ssm_config["/bfd/server/server_keystore_base64"]
 }
 
-resource "aws_s3_bucket" "certstores" {
-  bucket_prefix = "bfd-${local.env}-${local.service}-certstores"
-  force_destroy = true
-}
+module "bucket_certstores" {
+  source = "../../terraform-modules/general/secure-bucket"
 
-data "aws_iam_policy_document" "certstores_bucket_policy_doc" {
-  statement {
-    sid       = "AllowSSLRequestsOnly"
-    effect    = "Deny"
-    actions   = ["s3:*"]
-    resources = ["${aws_s3_bucket.certstores.arn}/*"]
-
-    principals {
-      identifiers = ["*"]
-      type        = "*"
-    }
-
-    condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "certstores" {
-  bucket = aws_s3_bucket.certstores.bucket
-  policy = data.aws_iam_policy_document.certstores_bucket_policy_doc.json
-}
-
-resource "aws_s3_bucket_public_access_block" "certstores" {
-  bucket = aws_s3_bucket.certstores.bucket
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "certstores" {
-  bucket = aws_s3_bucket.certstores.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = data.aws_kms_alias.env_cmk.target_key_arn
-      sse_algorithm     = "aws:kms"
-    }
-
-    bucket_key_enabled = true
-  }
+  bucket_prefix      = "bfd-${local.env}-${local.service}-certstores"
+  bucket_kms_key_arn = local.env_key_arn
+  force_destroy      = true
 }
 
 # Necessary as the certstores may not exist on first run and Terraform's aws_s3_object data resource
@@ -78,7 +34,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "certstores" {
 data "external" "truststore_object_size" {
   program = ["${path.module}/scripts/get-s3-object-size.sh"]
   query = {
-    bucket = aws_s3_bucket.certstores.bucket
+    bucket = module.bucket_certstores.bucket.bucket
     s3_key = local.truststore_s3_key
   }
 }
@@ -86,7 +42,7 @@ data "external" "truststore_object_size" {
 data "external" "keystore_object_size" {
   program = ["${path.module}/scripts/get-s3-object-size.sh"]
   query = {
-    bucket = aws_s3_bucket.certstores.bucket
+    bucket = module.bucket_certstores.bucket.bucket
     s3_key = local.keystore_s3_key
   }
 }
@@ -118,7 +74,7 @@ resource "aws_s3_object" "truststore" {
   }
 
   key                = local.truststore_s3_key
-  bucket             = aws_s3_bucket.certstores.bucket
+  bucket             = module.bucket_certstores.bucket.bucket
   source             = local.truststore_local_path
   bucket_key_enabled = true
 }
@@ -133,7 +89,7 @@ resource "aws_s3_object" "keystore" {
   }
 
   key                = local.keystore_s3_key
-  bucket             = aws_s3_bucket.certstores.bucket
+  bucket             = module.bucket_certstores.bucket.bucket
   content_base64     = sensitive(local.keystore_base64)
   bucket_key_enabled = true
 }
