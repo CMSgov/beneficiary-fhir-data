@@ -613,21 +613,24 @@ public final class PipelineApplication {
       Clock clock,
       int batchSize,
       int runInterval) {
-    List<PipelineApplicationState> appStates = new ArrayList<>();
-    for (int i = 0; i < 2; i++) {
-      PipelineApplicationState appState =
-          new PipelineApplicationState(
-              appMeters,
-              appMetrics,
-              pooledDataSource,
-              PipelineApplicationState.PERSISTENCE_UNIT_NAME,
-              clock);
-      appStates.add(appState);
-    }
+    PipelineApplicationState npiAppState =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            clock);
+    PipelineApplicationState fdaAppState =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            clock);
     try {
-      NpiFdaLoadJob npiFdaLoadJob = new NpiFdaLoadJob(appStates, batchSize, runInterval);
-      return npiFdaLoadJob;
+      return new NpiFdaLoadJob(npiAppState, fdaAppState, batchSize, runInterval);
     } catch (Exception e) {
+      LOGGER.error("An exception was thrown while creating NpiFdaLoadJob: {}", e.getMessage());
       return null;
     }
   }

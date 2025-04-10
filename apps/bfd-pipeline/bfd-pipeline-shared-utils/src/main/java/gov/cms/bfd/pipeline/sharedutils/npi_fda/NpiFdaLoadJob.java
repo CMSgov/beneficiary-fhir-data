@@ -9,7 +9,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import jakarta.persistence.EntityManager;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,18 +40,19 @@ public class NpiFdaLoadJob implements PipelineJob {
   /**
    * Constructor.
    *
-   * @param appStates The PipelineApplicationStates.
+   * @param fdaAppState PipelineApplicationState to use for FDA Drug Enrichment.
+   * @param npiAppState PipelineApplicationState to use for NPI Enrichment.
    * @param batchSize The number of records to save before committing a transaction.
    * @param runInterval How often to run the job, in days.
    */
-  public NpiFdaLoadJob(List<PipelineApplicationState> appStates, int batchSize, int runInterval)
+  public NpiFdaLoadJob(
+      PipelineApplicationState npiAppState,
+      PipelineApplicationState fdaAppState,
+      int batchSize,
+      int runInterval)
       throws Exception {
-    if (appStates != null && appStates.size() > 1) {
-      this.npiAppState = appStates.get(0);
-      this.fdaAppState = appStates.get(1);
-    } else {
-      throw new Exception("Not enough instances of PipelineApplicationState");
-    }
+    this.npiAppState = npiAppState;
+    this.fdaAppState = fdaAppState;
     runningSemaphore = new Semaphore(1);
     this.batchSize = batchSize;
     this.runInterval = runInterval;

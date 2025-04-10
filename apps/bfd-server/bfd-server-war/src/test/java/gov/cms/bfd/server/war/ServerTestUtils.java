@@ -478,13 +478,14 @@ public final class ServerTestUtils {
         final BufferedReader reader =
             new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)))) {
       ObjectMapper objectMapper = new ObjectMapper();
+      entityManager.getTransaction().begin();
       while ((line = reader.readLine()) != null) {
         TData data = objectMapper.readValue(line, dataClass);
-        entityManager.getTransaction().begin();
         entityManager.merge(data);
-        entityManager.getTransaction().commit();
-        entityManager.clear();
       }
+      entityManager.getTransaction().commit();
+      entityManager.clear();
+
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

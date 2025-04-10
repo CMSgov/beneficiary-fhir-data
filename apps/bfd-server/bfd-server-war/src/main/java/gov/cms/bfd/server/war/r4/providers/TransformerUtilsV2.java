@@ -3358,46 +3358,66 @@ public final class TransformerUtilsV2 {
       EnrichmentDataType dataType) {
     entries.getValue().stream()
         .filter(
-            (Base b) -> {
-              if (b instanceof Reference reference) {
+            (Base base) -> {
+              if (base instanceof Reference reference) {
                 return reference.getDisplay() != null
                     && reference.getDisplay().contains(displayString);
-              } else if (b instanceof Coding coding) {
+              } else if (base instanceof Coding coding) {
                 return coding.getDisplay() != null && coding.getDisplay().contains(displayString);
-              } else if (b instanceof Organization organization) {
+              } else if (base instanceof Organization organization) {
                 return organization.getName().contains(displayString);
               }
               return false;
             })
         .forEach(
-            (Base b) -> {
+            (Base base) -> {
               TData data = dataMap.get(entries.getKey());
               if (data instanceof NPIData npiData) {
-
-                if (b instanceof Reference reference) {
-                  if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                    reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
-                  } else {
-                    reference.setDisplay(((NPIData) data).getProviderOrganizationName());
-                  }
-                } else if (b instanceof Coding coding) {
-                  if (dataType.equals(EnrichmentDataType.TAXONOMY)) {
-                    coding.setDisplay(npiData.getTaxonomyDisplay());
-                    coding.setCode(npiData.getTaxonomyCode());
-                  } else if (dataType.equals(EnrichmentDataType.PROVIDER)) {
-                    coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
-                  } else {
-                    coding.setDisplay(npiData.getProviderOrganizationName());
-                  }
-                } else if (b instanceof Organization organization) {
-                  organization.setName(npiData.getProviderOrganizationName());
-                }
+                enrichNpi(dataType, base, npiData);
               } else {
-                if (dataType.equals(EnrichmentDataType.DRUG) && b instanceof Coding coding) {
-                  coding.setDisplay((String) data);
-                }
+                enrichFda(dataType, base, (String) data);
               }
             });
+  }
+
+  private static void enrichFda(EnrichmentDataType dataType, Base base, String data) {
+    if (dataType.equals(EnrichmentDataType.DRUG) && base instanceof Coding coding) {
+      coding.setDisplay(data);
+    }
+  }
+
+  private static void enrichNpi(EnrichmentDataType dataType, Base base, NPIData npiData) {
+    switch (base) {
+      case Reference reference -> enrichNpiReference(dataType, npiData, reference);
+
+      case Coding coding -> enrichNpiCoding(dataType, npiData, coding);
+
+      case Organization organization -> organization.setName(npiData.getProviderOrganizationName());
+
+      default -> {
+        // NOOP
+      }
+    }
+  }
+
+  private static void enrichNpiCoding(EnrichmentDataType dataType, NPIData npiData, Coding coding) {
+    if (dataType.equals(EnrichmentDataType.TAXONOMY)) {
+      coding.setDisplay(npiData.getTaxonomyDisplay());
+      coding.setCode(npiData.getTaxonomyCode());
+    } else if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+      coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+    } else {
+      coding.setDisplay(npiData.getProviderOrganizationName());
+    }
+  }
+
+  private static void enrichNpiReference(
+      EnrichmentDataType dataType, NPIData npiData, Reference reference) {
+    if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+      reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+    } else {
+      reference.setDisplay(npiData.getProviderOrganizationName());
+    }
   }
 
   /**

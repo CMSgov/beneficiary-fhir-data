@@ -41,8 +41,16 @@ public class LoadFdaDataFiles extends LoadDataFiles<FDAData> {
     String productNdc = csvRecord.get(PRODUCT_NDC_COLUMN);
     String proprietaryName = csvRecord.get(PROPRIETARY_NAME_COLUMN);
     String substanceName = csvRecord.get(SUBSTANCE_NAME_COLUMN);
+    // We want to split the manufacturer and ingredient portions of the code out, so we can pad
+    // them.
+    // 0002-0152 Becomes 00002 and 0152. It appears that the ingredient portion is always 4
+    // characters,
+    // so may not necessarily need to be padded, but the operation is kept:q
+    // in out of an abundance of
+    // caution.
     String nationalDrugCodeManufacturer =
         StringUtils.leftPad(productNdc.substring(0, productNdc.indexOf("-")), 5, '0');
+    // Get the ingredient portion of the code, and pat it with zeros, E.G. 0152
     String nationalDrugCodeIngredient =
         StringUtils.leftPad(productNdc.substring(productNdc.indexOf("-") + 1), 4, '0');
     return FDAData.builder()
