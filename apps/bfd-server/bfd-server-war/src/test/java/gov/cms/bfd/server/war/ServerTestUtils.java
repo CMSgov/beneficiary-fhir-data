@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
@@ -30,6 +31,8 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
+import gov.cms.bfd.model.rif.npi_fda.FDAData;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.PipelineTestUtils;
@@ -48,8 +51,11 @@ import io.restassured.specification.RequestSpecification;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Table;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
@@ -71,6 +77,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -148,6 +155,12 @@ public final class ServerTestUtils {
   private ServerTestUtils() {
     this.serverBaseUrl = initServerBaseUrl();
   }
+
+  /** File name for NPI enrichment data. */
+  static final String FAKE_ORG_DATA = "npi_e2e_it.json";
+
+  /** File name for Drug enrichment data. */
+  static final String FAKE_DRUG_ORG_DATA = "fakeDrugOrg.json";
 
   /**
    * Get server test utils.
@@ -437,6 +450,44 @@ public final class ServerTestUtils {
    */
   public List<Object> loadSampleASamhsaData() {
     return loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
+  }
+
+  /** Loads enrichment data into the database. */
+  public void loadEnrichmentData() {
+    loadEnrichmentData(FAKE_DRUG_ORG_DATA, FDAData.class);
+    loadEnrichmentData(FAKE_ORG_DATA, NPIData.class);
+  }
+
+  /**
+   * Loads enrichment data into the database.
+   *
+   * @param filename File containing the enrichment data.
+   * @param dataClass The class of the data entity to be loaded.
+   * @param <TData> The type of the data entity to be loaded.
+   */
+  private static <TData> void loadEnrichmentData(String filename, Class<TData> dataClass) {
+    InputStream dataStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
+    String line;
+    try (final InputStream stream = dataStream;
+        EntityManager entityManager =
+            PipelineTestUtils.get()
+                .getPipelineApplicationState()
+                .getEntityManagerFactory()
+                .createEntityManager();
+        final BufferedReader reader =
+            new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)))) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      while ((line = reader.readLine()) != null) {
+        TData data = objectMapper.readValue(line, dataClass);
+        entityManager.getTransaction().begin();
+        entityManager.merge(data);
+        entityManager.getTransaction().commit();
+        entityManager.clear();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
