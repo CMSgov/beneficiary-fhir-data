@@ -26,11 +26,11 @@ public class NPIOrgLookup {
   /** The entityManager. */
   @PersistenceContext EntityManager entityManager;
 
-  /** The query that will return the NPI Data for an NPI. */
+  /** The query that will return a list of NPIData entities. */
   private static final String NPI_DATA_QUERY = "select n from NPIData n where n.npi in :npiSet";
 
   /**
-   * Retrieves an NPIData entity from the database for a given NPI.
+   * Retrieves a map of NPIs to NPIData entities from a set of npis.
    *
    * @param npiSet Set of NPIs to enrich.
    * @return an NPIData entity.

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * This class will query the fda_data table for drug codes, and return a Map of drugcodes to display
- * strings. if found.
+ * values, if found.
  */
 @Service
 public class FDADrugCodeDisplayLookup {
@@ -21,7 +21,7 @@ public class FDADrugCodeDisplayLookup {
   /** The entityManager. */
   @PersistenceContext EntityManager entityManager;
 
-  /** The query that will return a list of FDAData. */
+  /** The query that will return a list of FDAData entities. */
   private static final String FDA_DATA_QUERY =
       "select f from FDAData f where f.code in :drugCodeSet";
 
@@ -29,7 +29,7 @@ public class FDADrugCodeDisplayLookup {
    * Retrieves a Map of drugCode strings from the database.
    *
    * @param drugCodeSet Set of drug codes to enrich.
-   * @return an FDAData entity.
+   * @return a map of drug codes to display values.
    */
   @Transactional
   public Map<String, String> retrieveFDADrugCodeDisplay(Set<String> drugCodeSet) {

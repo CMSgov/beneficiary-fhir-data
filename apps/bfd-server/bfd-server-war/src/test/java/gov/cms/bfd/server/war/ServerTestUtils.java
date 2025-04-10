@@ -452,14 +452,14 @@ public final class ServerTestUtils {
     return loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A_SAMHSA.getResources()));
   }
 
-  /** Loads enrichment data into the database. */
+  /** Loads enrichment data into the database for testing. */
   public void loadEnrichmentData() {
     loadEnrichmentData(FAKE_DRUG_ORG_DATA, FDAData.class);
     loadEnrichmentData(FAKE_ORG_DATA, NPIData.class);
   }
 
   /**
-   * Loads enrichment data into the database.
+   * Loads enrichment data into the database for testing.
    *
    * @param filename File containing the enrichment data.
    * @param dataClass The class of the data entity to be loaded.
