@@ -349,7 +349,7 @@ public final class TransformerUtils {
             });
   }
 
-  private static <TData> void enrichFda(EnrichmentDataType dataType, Type t, String data) {
+  private static void enrichFda(EnrichmentDataType dataType, Type t, String data) {
     if (dataType.equals(EnrichmentDataType.DRUG) && t instanceof Coding coding) {
       coding.setDisplay(data);
     }
@@ -357,15 +357,15 @@ public final class TransformerUtils {
 
   private static void enrichNpi(EnrichmentDataType dataType, Type t, NPIData npiData) {
     switch (t) {
-    case Reference reference -> {
-      enrichNpiReference(dataType, npiData, reference);
-    }
-    case Coding coding -> {
-      enrichNpiCoding(dataType, npiData, coding);
-    }
-    default -> {
-      // NOOP
-    }
+      case Reference reference -> {
+        enrichNpiReference(dataType, npiData, reference);
+      }
+      case Coding coding -> {
+        enrichNpiCoding(dataType, npiData, coding);
+      }
+      default -> {
+        // NOOP
+      }
     }
   }
 
@@ -377,7 +377,8 @@ public final class TransformerUtils {
     }
   }
 
-  private static void enrichNpiReference(EnrichmentDataType dataType, NPIData npiData, Reference reference) {
+  private static void enrichNpiReference(
+      EnrichmentDataType dataType, NPIData npiData, Reference reference) {
     if (dataType.equals(EnrichmentDataType.PROVIDER)) {
       reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
     } else {
