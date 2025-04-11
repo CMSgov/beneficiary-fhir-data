@@ -36,6 +36,7 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import jakarta.persistence.EntityManager;
@@ -180,6 +181,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             Mockito.mock(OutpatientClaimTransformerV2.class),
             mockPdeTransformer,
             Mockito.mock(SNFClaimTransformerV2.class),
+            Mockito.mock(SecurityTagsDao.class),
             RDATestUtils.createTestNpiOrgLookup(),
             RDATestUtils.createFdaDrugCodeDisplayLookup());
 

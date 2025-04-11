@@ -35,6 +35,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.commons.StringUtils;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,6 +113,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
 
   /** The transformer for snf claims. */
   private final SNFClaimTransformer snfClaimTransformer;
+
+  Set<String> securityTags = new HashSet<>();
 
   NPIOrgLookup npiOrgLookup;
 
@@ -251,7 +255,9 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     }
 
     ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
-    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        transformer.transform(
+            new ClaimWithSecurityTags(claimEntity, securityTags), includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {

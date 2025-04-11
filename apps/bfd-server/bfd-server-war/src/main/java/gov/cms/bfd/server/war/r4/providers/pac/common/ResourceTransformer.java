@@ -18,5 +18,5 @@ public interface ResourceTransformer<T extends IBaseResource> {
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a new FHIR resource
    */
-  T transform(Object claim, boolean includeTaxNumbers);
+  T transform(ClaimWithSecurityTags<?> claim, boolean includeTaxNumbers);
 }

@@ -23,6 +23,7 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -30,8 +31,10 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -88,6 +91,8 @@ public final class DMEClaimTransformerV2Test {
   /** The SamhsaSecurityTag lookup. */
   @Mock SecurityTagManager securityTagManager;
 
+  Set<String> securityTags = new HashSet<>();
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -124,9 +129,10 @@ public final class DMEClaimTransformerV2Test {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, securityTagManager);
+    dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
-    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit genEob =
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -296,7 +302,10 @@ public final class DMEClaimTransformerV2Test {
       line.setProviderSpecialityCode(Optional.empty());
     }
 
-    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(loadedClaim, false);
+    ExplanationOfBenefit genEob =
+        dmeClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

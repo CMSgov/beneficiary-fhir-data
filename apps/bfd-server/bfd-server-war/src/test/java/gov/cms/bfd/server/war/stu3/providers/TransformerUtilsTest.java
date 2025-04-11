@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
@@ -37,9 +38,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -67,6 +70,8 @@ public final class TransformerUtilsTest {
 
   /** The securityTagManager. */
   @Mock private SecurityTagManager securityTagManager;
+
+  Set<String> securityTags = new HashSet<>();
 
   /** Verifies that {@link TransformerUtils#createExtensionCoding} works as expected. */
   @Test
@@ -426,8 +431,10 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(new MetricRegistry(), securityTagManager);
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
+        new HHAClaimTransformer(new MetricRegistry(), securityTagManager, false);
+    ExplanationOfBenefit genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -485,8 +492,10 @@ public final class TransformerUtilsTest {
     FhirContext fhirContext = FhirContext.forDstu3();
     MetricRegistry metricRegistry = new MetricRegistry();
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(metricRegistry, securityTagManager);
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
+        new HHAClaimTransformer(metricRegistry, securityTagManager, false);
+    ExplanationOfBenefit genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -503,8 +512,12 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
     hospiceClaim.setLastUpdated(Instant.now());
-    claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, securityTagManager);
-    genEob = claimTransformerInterface.transform(hospiceClaim, false);
+
+    claimTransformerInterface =
+        new HospiceClaimTransformer(metricRegistry, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(hospiceClaim, securityTags), false);
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -522,8 +535,10 @@ public final class TransformerUtilsTest {
             .get();
     dmeClaim.setLastUpdated(Instant.now());
 
-    claimTransformerInterface = new DMEClaimTransformer(metricRegistry, securityTagManager);
-    genEob = claimTransformerInterface.transform(dmeClaim, false);
+    claimTransformerInterface = new DMEClaimTransformer(metricRegistry, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(dmeClaim, securityTags), false);
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -540,8 +555,12 @@ public final class TransformerUtilsTest {
             .findFirst()
             .get();
     inpatientClaim.setLastUpdated(Instant.now());
-    claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, securityTagManager);
-    genEob = claimTransformerInterface.transform(inpatientClaim, false);
+
+    claimTransformerInterface =
+        new InpatientClaimTransformer(metricRegistry, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(inpatientClaim, securityTags), false);
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

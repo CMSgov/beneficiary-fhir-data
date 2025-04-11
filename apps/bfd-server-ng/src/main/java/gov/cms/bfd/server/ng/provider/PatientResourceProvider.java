@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 /** FHIR endpoints for the Patient resource. */
 @Component
 public class PatientResourceProvider implements IResourceProvider {
+
   @Override
   public Class<Patient> getResourceType() {
     return Patient.class;

@@ -42,6 +42,7 @@ import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
@@ -52,6 +53,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -2268,25 +2270,33 @@ final class TransformerTestUtils {
 
     ClaimTransformerInterface claimTransformerInterface = null;
     if (rifRecord instanceof CarrierClaim) {
-      claimTransformerInterface = new CarrierClaimTransformer(metricRegistry, securityTagManager);
+      claimTransformerInterface =
+          new CarrierClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof DMEClaim) {
-      claimTransformerInterface = new DMEClaimTransformer(metricRegistry, securityTagManager);
+      claimTransformerInterface =
+          new DMEClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof HHAClaim) {
-      claimTransformerInterface = new HHAClaimTransformer(metricRegistry, securityTagManager);
+      claimTransformerInterface =
+          new HHAClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof HospiceClaim) {
-      claimTransformerInterface = new HospiceClaimTransformer(metricRegistry, securityTagManager);
+      claimTransformerInterface =
+          new HospiceClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof InpatientClaim) {
-      claimTransformerInterface = new InpatientClaimTransformer(metricRegistry, securityTagManager);
+      claimTransformerInterface =
+          new InpatientClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof OutpatientClaim) {
       claimTransformerInterface =
-          new OutpatientClaimTransformer(metricRegistry, securityTagManager);
+          new OutpatientClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof PartDEvent) {
       claimTransformerInterface = new PartDEventTransformer(metricRegistry);
     } else if (rifRecord instanceof SNFClaim) {
-      claimTransformerInterface = new SNFClaimTransformer(metricRegistry, securityTagManager);
+      claimTransformerInterface =
+          new SNFClaimTransformer(metricRegistry, securityTagManager, false);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
-    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    Set<String> securityTags = new HashSet<>();
+    return claimTransformerInterface.transform(
+        new ClaimWithSecurityTags<>(rifRecord, securityTags), includeTaxNumbers);
   }
 }

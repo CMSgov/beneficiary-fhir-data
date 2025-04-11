@@ -1,2 +1,0 @@
-Unfortunately, this folder needs to exist in order for the Spring Boot Maven plugin to function properly.
-There appears to be some bug in the plugin that expects this folder to be present here even if it's not used.

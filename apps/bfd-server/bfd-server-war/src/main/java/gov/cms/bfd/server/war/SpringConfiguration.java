@@ -117,6 +117,9 @@ public class SpringConfiguration extends BaseConfiguration {
   /** The {@link String } Boolean property that is used to enable the samhsa 2.0 profile. */
   public static final String SSM_PATH_SAMHSA_V2_ENABLED = "samhsa_v2/enabled";
 
+  /** The {@link String } Boolean property that is used to enable the samhsa 2.0 profile. */
+  public static final String SSM_PATH_SAMHSA_V2_SHADOW = "samhsa_v2/shadow";
+
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
   public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";
 

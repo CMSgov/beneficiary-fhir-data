@@ -21,13 +21,16 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -86,6 +89,8 @@ public final class OutpatientClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  Set<String> securityTags = new HashSet<>();
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -117,9 +122,11 @@ public final class OutpatientClaimTransformerV2Test {
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
     outpatientClaimTransformer =
-        new OutpatientClaimTransformerV2(metricRegistry, securityTagManager);
+        new OutpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
-    ExplanationOfBenefit genEob = outpatientClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit genEob =
+        outpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
