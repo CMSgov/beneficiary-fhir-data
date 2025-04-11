@@ -2,7 +2,9 @@ package gov.cms.bfd.server.ng;
 
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.time.Duration;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import software.amazon.awssdk.services.rds.model.DescribeDbClustersRequest;
 @Data
 @ConfigurationProperties(prefix = "bfd")
 public class Configuration {
+  // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
   @Autowired private AwsCredentialsProvider credentialsProvider;
   @Autowired private AwsRegionProvider regionProvider;
 
@@ -33,9 +36,13 @@ public class Configuration {
    *
    * @return wrapper factory.
    */
-  public AwsWrapperDataSourceFactory getAwsWrapperDataSourceFactory() {
-    var awsConfig = getRdsClientConfig();
-    return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
+  public DataSourceFactory getDataSourceFactory() {
+    if (useRds()) {
+      var awsConfig = getRdsClientConfig();
+      return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
+    } else {
+      return new HikariDataSourceFactory(getDatabaseOptions());
+    }
   }
 
   private boolean useRds() {
@@ -74,17 +81,13 @@ public class Configuration {
   }
 
   private AwsClientConfig getRdsClientConfig() {
-    if (useRds()) {
-      var credentials = credentialsProvider.resolveCredentials();
-      var region = regionProvider.getRegion();
-      return AwsClientConfig.awsBuilder()
-          .accessKey(credentials.accessKeyId())
-          .secretKey(credentials.secretAccessKey())
-          .region(region)
-          .build();
-    } else {
-      return AwsClientConfig.awsBuilder().build();
-    }
+    var credentials = credentialsProvider.resolveCredentials();
+    var region = regionProvider.getRegion();
+    return AwsClientConfig.awsBuilder()
+        .accessKey(credentials.accessKeyId())
+        .secretKey(credentials.secretAccessKey())
+        .region(region)
+        .build();
   }
 
   private DatabaseOptions.HikariOptions getHikariOptions() {
@@ -177,7 +180,7 @@ public class Configuration {
         private long initFailTimeoutMs = 1;
         private long connectionTimeoutMs = Duration.ofSeconds(30).toMillis();
         private long keepaliveTimeoutMs = 0;
-        private long validationTimeoutMs = 0;
+        private long validationTimeoutMs = Duration.ofSeconds(5).toMillis();
         private long maxConnectionLifetimeMs = Duration.ofMinutes(30).toMillis();
       }
 

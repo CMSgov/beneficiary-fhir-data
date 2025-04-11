@@ -1,0 +1,34 @@
+package gov.cms.bfd.server.ng.beneficiary.model;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.TimeZone;
+import org.hl7.fhir.r4.model.DateTimeType;
+
+@Embeddable
+public class DeathDate {
+
+  @Column(name = "bene_death_dt", nullable = false)
+  private Optional<LocalDate> deathDate;
+
+  @Convert(converter = DefaultFalseBooleanConverter.class)
+  @Column(name = "bene_vrfy_death_day_sw", nullable = false)
+  private Boolean verifyDeathDate;
+
+  public Optional<DateTimeType> toFhir() {
+    if (verifyDeathDate) {
+      return deathDate.map(
+          d ->
+              new DateTimeType(
+                  DateUtil.toDate(d), TemporalPrecisionEnum.DAY, TimeZone.getTimeZone("UTC")));
+    } else {
+      return Optional.empty();
+    }
+  }
+}

@@ -11,6 +11,11 @@
     <artifactId>bfd-server-ng</artifactId>
     <packaging>jar</packaging>
 
+    <!-- The timezone MUST be set to UTC in order to avoid any inconsistencies in date conversion -->
+    <properties>
+        <spring-boot.run.jvmArguments>-Duser.timezone=UTC</spring-boot.run.jvmArguments>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
