@@ -8,8 +8,11 @@ import static org.mockito.Mockito.when;
 
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,8 +57,9 @@ public class R4ClaimSamhsaMatcherTest {
   public void testHasNoSamhsaDataWhenMcsClaimResponseWithNoDataExpectTrue() {
 
     RdaMcsClaim mcsClaim = mock(RdaMcsClaim.class);
-
-    boolean hasNoSamhsa = samhsaMatcher.hasNoSamhsaData(mcsClaim);
+    Set<String> tags = new HashSet<>();
+    ClaimWithSecurityTags<?> claim = new ClaimWithSecurityTags<>(mcsClaim, tags);
+    boolean hasNoSamhsa = samhsaMatcher.hasNoSamhsaData(claim);
 
     assertTrue(hasNoSamhsa);
   }
@@ -68,8 +72,9 @@ public class R4ClaimSamhsaMatcherTest {
   public void testHasNoSamhsaDataWhenFissClaimResponseWithNoDataExpectTrue() {
 
     RdaFissClaim fissClaim = mock(RdaFissClaim.class);
-
-    boolean hasNoSamhsa = samhsaMatcher.hasNoSamhsaData(fissClaim);
+    Set<String> tags = new HashSet<>();
+    ClaimWithSecurityTags<?> claim = new ClaimWithSecurityTags<>(fissClaim, tags);
+    boolean hasNoSamhsa = samhsaMatcher.hasNoSamhsaData(claim);
 
     assertTrue(hasNoSamhsa);
   }

@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +34,11 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -86,6 +89,8 @@ public final class PartDEventTransformerV2Test {
   /** The mock npi lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** ndcProductHashMap represents a map of PRODUCTNDC and SUBSTANCENAME for test. */
   Map<String, String> ndcProductHashMap = new HashMap<>();
 
@@ -135,7 +140,7 @@ public final class PartDEventTransformerV2Test {
 
     partdEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
     claim = generateClaim();
-    eob = partdEventTransformer.transform(claim, false);
+    eob = partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
   }
 
   /**

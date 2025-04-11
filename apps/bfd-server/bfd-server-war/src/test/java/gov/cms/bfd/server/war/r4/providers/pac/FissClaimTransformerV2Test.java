@@ -10,9 +10,11 @@ import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +37,8 @@ public class FissClaimTransformerV2Test {
 
   /** Test diagnosis code 3. */
   private static final String DIAG_CODE3 = "DIAG_CODE3";
+
+  Set<String> securityTags = new HashSet<>();
 
   /**
    * Test arguments.
@@ -158,9 +162,10 @@ public class FissClaimTransformerV2Test {
 
     entity.setRevenueLines(Set.of(line));
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, true);
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
 
-    Claim claim = fissClaimTransformerV2.transform(entity, true);
+    Claim claim =
+        fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
 
     assertEquals(numberOfRecords, claim.getDiagnosis().size());
 

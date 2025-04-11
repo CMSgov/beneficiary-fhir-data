@@ -21,12 +21,15 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,13 +60,16 @@ public final class InpatientClaimTransformerTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   public void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    inpatientClaimTransformer = new InpatientClaimTransformer(metricRegistry, securityTagManager);
+    inpatientClaimTransformer =
+        new InpatientClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**
@@ -83,7 +89,8 @@ public final class InpatientClaimTransformerTest {
             .orElseThrow();
 
     claim.setLastUpdated(Instant.now());
-    inpatientClaimTransformer.transform(claim, false);
+
+    inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = inpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -110,7 +117,10 @@ public final class InpatientClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit eob = inpatientClaimTransformer.transform(claim, false);
+
+    ExplanationOfBenefit eob =
+        inpatientClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 

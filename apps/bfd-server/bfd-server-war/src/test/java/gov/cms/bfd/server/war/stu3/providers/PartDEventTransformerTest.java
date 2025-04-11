@@ -19,14 +19,17 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.sql.Date;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
@@ -55,6 +58,8 @@ public final class PartDEventTransformerTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() throws IOException {
@@ -77,7 +82,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void testTransformRunsMetricTimer() {
     PartDEvent claim = getPartDEventClaim();
-    partdEventTransformer.transform(claim, false);
+    partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = partdEventTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -95,8 +100,10 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
-    ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
+    ExplanationOfBenefit eob =
+        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
+
     assertMatches(claim, eob);
   }
 
@@ -182,8 +189,10 @@ public final class PartDEventTransformerTest {
       throws IOException {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
-    ExplanationOfBenefit eob = partdEventTransformer.transform(claim, false);
+    ExplanationOfBenefit eob =
+        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
+
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
