@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -9,10 +10,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.PatientClaimsEobTaskTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -24,9 +29,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,6 +42,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -76,6 +85,9 @@ public class PatientClaimsEobTaskTransformer implements Callable {
 
   /** The samhsa matcher. */
   private final Stu3EobSamhsaMatcher samhsaMatcher;
+
+  /** v2SamhsaConsentSimulation. */
+  private final SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
 
   /** Database entity manager. */
   private EntityManager entityManager;
@@ -121,6 +133,11 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /** the list of EOBs that we'll return. */
   private final List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
 
+  /** Flag to control whether SAMHSA shadow filtering should be applied. */
+  private final boolean samhsaV2Shadow;
+
+  private final SecurityTagsDao securityTagsDao;
+
   /**
    * Constructor for TransformPatientClaimsToEobTask.
    *
@@ -132,16 +149,25 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @param samhsaMatcher the samhsa matcher bean
    * @param drugCodeDisplayLookup the drug code display lookup bean
    * @param npiOrgLookup the npi org lookup bean
+   * @param samhsaV2InterceptorShadow the v2SamhsaConsentSimulation
+   * @param securityTagsDao the security Tags Dao
+   * @param samhsaV2Shadow the samhsa V2 Shadow flag
    */
   public PatientClaimsEobTaskTransformer(
       MetricRegistry metricRegistry,
       Stu3EobSamhsaMatcher samhsaMatcher,
       FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      SecurityTagsDao securityTagsDao,
+      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") Boolean samhsaV2Shadow) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.samhsaMatcher = requireNonNull(samhsaMatcher);
     this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.npiOrgLookup = requireNonNull(npiOrgLookup);
+    this.samhsaV2InterceptorShadow = samhsaV2InterceptorShadow;
+    this.securityTagsDao = securityTagsDao;
+    this.samhsaV2Shadow = samhsaV2Shadow;
   }
 
   /**
@@ -197,7 +223,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   @Override
   public PatientClaimsEobTaskTransformer call() {
-    LOGGER.debug("TransformPatientClaimsToEobTaskpwd.call() started for {}", id);
+    LOGGER.debug("TransformPatientClaimsToEobTask.call() started for {}", id);
     try {
       eobs.addAll(transformToEobs(findClaimTypeByPatient()));
       if (excludeSamhsa) {
@@ -218,11 +244,23 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * Transform a list of claims to a list of {@link ExplanationOfBenefit} objects.
    *
    * @param claims the claims/events to transform
+   * @param <T> type of claim
    * @return the {@link ExplanationOfBenefit} instances, one per claim/event
    */
-  @Trace
-  private List<ExplanationOfBenefit> transformToEobs(List<?> claims) {
-    return claims.stream().map(c -> transformEobClaim(c)).collect(Collectors.toList());
+  private <T> List<ExplanationOfBenefit> transformToEobs(List<ClaimWithSecurityTags<T>> claims) {
+    return claims.stream()
+        .map(
+            c -> {
+              ExplanationOfBenefit eob = transformEobClaim(c);
+
+              if (samhsaV2Shadow) {
+                // Log the missing claim along with the EOB
+                samhsaV2InterceptorShadow.logMissingClaimV1(c, samhsaMatcher.test(eob));
+              }
+
+              return eob;
+            })
+        .collect(Collectors.toList());
   }
 
   /**
@@ -232,7 +270,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    * @return the {@link ExplanationOfBenefit} result
    */
   @VisibleForTesting
-  private ExplanationOfBenefit transformEobClaim(Object claimEntity) {
+  private ExplanationOfBenefit transformEobClaim(ClaimWithSecurityTags<?> claimEntity) {
     return claimTransformer.transform(claimEntity, includeTaxNumbers);
   }
 
@@ -304,7 +342,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
   @VisibleForTesting
-  private <T> List<T> findClaimTypeByPatient() {
+  private <T> List<ClaimWithSecurityTags<T>> findClaimTypeByPatient() {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
     Root root = criteria.from(claimType.getEntityClass());
@@ -338,6 +376,30 @@ public class PatientClaimsEobTaskTransformer implements Callable {
           claimEntities == null ? 0 : claimEntities.size());
       timerEobQuery.close();
     }
+    SecurityTagManager securityTagManager = new SecurityTagManager();
+
+    List<ClaimWithSecurityTags<T>> claimEntitiesWithTags = new ArrayList<>();
+
+    if (claimEntities != null && !claimEntities.isEmpty()) {
+      Set<String> claimIds = securityTagManager.collectClaimIds((List<Object>) claimEntities);
+
+      if (!claimIds.isEmpty()) {
+        Map<String, Set<String>> claimIdToTagsMap =
+            securityTagsDao.buildClaimIdToTagsMap(claimType.getEntityTagType(), claimIds);
+
+        claimEntitiesWithTags =
+            claimEntities.stream()
+                .map(
+                    claimEntity -> {
+                      String claimId = securityTagManager.extractClaimId(claimEntity);
+                      // Ensure claimId is valid (not null or empty) before attempting to fetch tags
+                      Set<String> claimSpecificTags =
+                          claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+                      return new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags);
+                    })
+                .collect(Collectors.toList());
+      }
+    }
 
     if (claimEntities != null && !serviceDate.isEmpty()) {
       final Instant lowerBound =
@@ -365,15 +427,18 @@ public class PatientClaimsEobTaskTransformer implements Callable {
                       upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.get().getUpperBound().getPrefix());
 
-      return claimEntities.stream()
+      return claimEntitiesWithTags.stream()
           .filter(
               entity ->
-                  lowerBoundCheck.test(claimType.getServiceEndAttributeFunction().apply(entity))
+                  lowerBoundCheck.test(
+                          claimType.getServiceEndAttributeFunction().apply(entity.getClaimEntity()))
                       && upperBoundCheck.test(
-                          claimType.getServiceEndAttributeFunction().apply(entity)))
+                          claimType
+                              .getServiceEndAttributeFunction()
+                              .apply(entity.getClaimEntity())))
           .collect(Collectors.toList());
     }
-    return claimEntities;
+    return claimEntitiesWithTags;
   }
 
   /**

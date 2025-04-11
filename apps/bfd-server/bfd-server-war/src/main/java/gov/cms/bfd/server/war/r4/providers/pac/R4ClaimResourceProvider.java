@@ -2,12 +2,15 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.PAC_OLD_MBI_HASH_ENABLED;
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_PAC_CLAIM_SOURCE_TYPES;
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_SHADOW;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
@@ -35,8 +38,10 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
    * @param fissClaimTransformerV2 is the fiss claim transformer
    * @param mcsClaimTransformerV2 is the mcs claim transformer
    * @param claimSourceTypeNames determines the type of claim sources to enable for constructing PAC
-   *     resources ({@link org.hl7.fhir.r4.model.Claim} / {@link
-   *     org.hl7.fhir.r4.model.ClaimResponse}
+   * @param securityTagsDao security Tags Dao
+   * @param samhsaV2Shadow the samhsa V2 Shadow flag
+   * @param samhsaV2InterceptorShadow v2SamhsaConsentSimulation resources ({@link
+   *     org.hl7.fhir.r4.model.Claim} / {@link org.hl7.fhir.r4.model.ClaimResponse}
    */
   public R4ClaimResourceProvider(
       MetricRegistry metricRegistry,
@@ -44,14 +49,20 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
       @Qualifier(PAC_OLD_MBI_HASH_ENABLED) Boolean oldMbiHashEnabled,
       FissClaimTransformerV2 fissClaimTransformerV2,
       McsClaimTransformerV2 mcsClaimTransformerV2,
-      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames) {
+      SamhsaV2InterceptorShadow samhsaV2InterceptorShadow,
+      SecurityTagsDao securityTagsDao,
+      @Value("${" + SSM_PATH_PAC_CLAIM_SOURCE_TYPES + ":}") String claimSourceTypeNames,
+      @Value("${" + SSM_PATH_SAMHSA_V2_SHADOW + ":false}") boolean samhsaV2Shadow) {
     super(
         metricRegistry,
         samhsaMatcher,
         oldMbiHashEnabled,
         fissClaimTransformerV2,
         mcsClaimTransformerV2,
-        claimSourceTypeNames);
+        claimSourceTypeNames,
+        samhsaV2InterceptorShadow,
+        securityTagsDao,
+        samhsaV2Shadow);
   }
 
   /** {@inheritDoc} */

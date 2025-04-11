@@ -29,9 +29,11 @@ import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
+import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.EntityManager;
@@ -88,6 +90,12 @@ class PatientClaimsEobTaskTransformerV2Test {
   /** The mock samhsa matcher. */
   @Mock R4EobSamhsaMatcher mockSamhsaMatcher;
 
+  /** v2SamhsaConsentSimulation. */
+  @Mock SamhsaV2InterceptorShadow samhsaV2InterceptorShadow;
+
+  /** The Security Tags Dao. */
+  @Mock SecurityTagsDao securityTagsDao;
+
   /** The carrier claim returned in tests. */
   CarrierClaim testCarrierClaim;
 
@@ -111,6 +119,8 @@ class PatientClaimsEobTaskTransformerV2Test {
 
   /** The SNF claim returned in tests. */
   SNFClaim testSnfClaim;
+
+  @Mock SingularAttribute mockAttr;
 
   /** The mock entity manager for mocking database calls. */
   @Mock EntityManager mockEntityManager;
@@ -216,10 +226,15 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new CarrierClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager);
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -250,10 +265,15 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new CarrierClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager);
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -283,10 +303,16 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup, securityTagManager);
+        new DMEClaimTransformerV2(
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -316,10 +342,16 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new DMEClaimTransformerV2(new MetricRegistry(), mockDrugDisplayLookup, securityTagManager);
+        new DMEClaimTransformerV2(
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
@@ -349,10 +381,15 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -383,10 +420,15 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new HospiceClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new HospiceClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -417,10 +459,15 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new InpatientClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new InpatientClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -452,10 +499,15 @@ class PatientClaimsEobTaskTransformerV2Test {
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
         new OutpatientClaimTransformerV2(
-            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager);
+            new MetricRegistry(), mockDrugDisplayLookup, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -489,7 +541,12 @@ class PatientClaimsEobTaskTransformerV2Test {
         new PartDEventTransformerV2(new MetricRegistry(), mockDrugDisplayLookup);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -520,10 +577,15 @@ class PatientClaimsEobTaskTransformerV2Test {
 
     // Ignore metrics registry calls on the claim transformer; its not under test here
     ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new SNFClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
@@ -556,15 +618,20 @@ class PatientClaimsEobTaskTransformerV2Test {
     setupClaimEntity(mockEntityManager, ClaimType.DME, clmMockCriteria, clmRoot);
 
     ClaimTransformerInterfaceV2 claimTransformer =
-        new SNFClaimTransformerV2(metricRegistry, securityTagManager);
+        new SNFClaimTransformerV2(metricRegistry, securityTagManager, false);
     PatientClaimsEobTaskTransformerV2 taskTransformer =
         new PatientClaimsEobTaskTransformerV2(
-            metricRegistry, mockSamhsaMatcher, mockDrugDisplayLookup);
+            metricRegistry,
+            mockSamhsaMatcher,
+            mockDrugDisplayLookup,
+            samhsaV2InterceptorShadow,
+            securityTagsDao,
+            false);
 
     // should ignore processing of NPI tax numbers even though it is set
     taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
-        claimTransformer, ClaimType.SNF, 1234L, Optional.empty(), Optional.empty(), true);
+        claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
 
     PatientClaimsEobTaskTransformerV2 rslt = taskTransformer.call();

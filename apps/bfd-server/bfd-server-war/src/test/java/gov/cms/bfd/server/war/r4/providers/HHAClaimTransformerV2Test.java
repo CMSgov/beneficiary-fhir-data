@@ -22,6 +22,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,8 +30,10 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -93,6 +96,8 @@ public class HHAClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  Set<String> securityTags = new HashSet<>();
+
   /**
    * Generates the sample A claim object to be used in multiple tests.
    *
@@ -123,9 +128,10 @@ public class HHAClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, securityTagManager);
+    hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit genEob =
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -226,7 +232,8 @@ public class HHAClaimTransformerV2Test {
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit genEob =
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
@@ -252,7 +259,8 @@ public class HHAClaimTransformerV2Test {
     claim.setClaimQueryCode(Optional.of('3'));
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = hhaClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit genEob =
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
