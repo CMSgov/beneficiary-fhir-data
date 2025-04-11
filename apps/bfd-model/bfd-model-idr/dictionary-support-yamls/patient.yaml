@@ -57,7 +57,7 @@
     - Patient
   targetElement: BFDPatient.
   expectedFHIRPath: Patient.address[0].state
-- inputPath: Beneficiary.BENE_ZIP_CD
+- inputPath: Beneficiary.GEO_ZIP5_CD
   appliesTo:
     - Patient
   targetElement: BFDPatient.address.postalCode
@@ -102,11 +102,6 @@
     - Patient
   targetElement: BFDPatient.communication.language.coding.code
   expectedFHIRPath: Patient.communication.language.coding.where(system='urn:ietf:bcp:47').code
-- inputPath: Beneficiary.BENE_PHNE_NUM
-  appliesTo:
-    - Patient
-  targetElement: BFDPatient.telecom.value
-  expectedFHIRPath: Patient.telecom.where(system='phone').value
 - inputPath: Beneficiary.BENE_SEX_CD
   appliesTo:
     - Patient

@@ -99,9 +99,10 @@ group createPatient(source src: Bene, target patient: BFDPatient){
         src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" "Set US Core profile";
     } "add metadata";
 
-    src -> patient.address = create('Address') as ptAddress then {
+    //we have the IF here to only populate if the address is actually available. 
+    src.GEO_USPS_STATE_CD as stateCode where stateCode.length() = 2 -> patient.address = create('Address') as ptAddress then {
         src.GEO_USPS_STATE_CD as stateCode -> ptAddress.state = stateCode "Set state code";
-        src.BENE_ZIP_CD as zipCode -> ptAddress.postalCode = zipCode "Set zip code";
+        src.GEO_ZIP5_CD as zipCode -> ptAddress.postalCode = zipCode "Set zip code";
         src.BENE_LINE_1_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 1";
         src.BENE_LINE_2_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 2";
         src.BENE_LINE_3_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 3";

@@ -178,10 +178,23 @@
                 ]
             },
             {
-                "id": "Beneficiary.BENE_ZIP_CD",
-                "path": "Beneficiary.BENE_ZIP_CD",
-                "label": "Beneficiary Zip Code",
-                "definition": "Beneficiary Zip Code",
+                "id": "Beneficiary.GEO_ZIP5_CD",
+                "path": "Beneficiary.GEO_ZIP5_CD",
+                "label": "Beneficiary Zip Code - First 5",
+                "definition": "First 5 digits of beneficiary Zip Code",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Beneficiary.GEO_ZIP4_CD",
+                "path": "Beneficiary.GEO_ZIP4_CD",
+                "label": "Beneficiary Zip Code - Last 4",
+                "definition": "Last 4 digits of beneficiary Zip Code",
                 "min": 1,
                 "max": "1",
                 "type": [

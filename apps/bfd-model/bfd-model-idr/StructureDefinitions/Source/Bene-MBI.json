@@ -1,28 +1,28 @@
 {
     "resourceType": "StructureDefinition",
-    "id": "BENE_MBI",
-    "url": "http://hl7.org/fhir/StructureDefinition/BeneficiaryMBIIdentifier",
-    "name": "BENE_MBI",
+    "id": "Bene-MBI",
+    "url": "http://hl7.org/fhir/StructureDefinition/Bene-MBI",
+    "name": "Bene-MBI",
     "status": "draft",
     "fhirVersion": "4.0.1",
     "kind": "logical",
     "abstract": true,
-    "type": "BeneficiaryMBIIdentifier",
+    "type": "Bene-MBI",
     "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
     "derivation": "specialization",
     "differential": {
         "element": [
             {
-                "id": "BeneficiaryMBIIdentifier",
-                "path": "BeneficiaryMBIIdentifier",
+                "id": "Bene-MBI",
+                "path": "Bene-MBI",
                 "label": "IDR MBI Base Resource. Ignore in DD Generation",
                 "definition": "BeneficiaryMBIIdentifier definition",
                 "min": 1,
                 "max": "1"
             },
             {
-                "id": "BeneficiaryMBIIdentifier.BENE_MBI_ID",
-                "path": "BeneficiaryMBIIdentifier.BENE_MBI_ID",
+                "id": "Bene-MBI.BENE_MBI_ID",
+                "path": "Bene-MBI.BENE_MBI_ID",
                 "label": "MBI ID",
                 "definition": "Medicare Beneficiary Identifier",
                 "min": 1,
@@ -34,8 +34,8 @@
                 ]
             },
             {
-                "id": "BeneficiaryMBIIdentifier.BENE_MBI_EFCTV_DT",
-                "path": "BeneficiaryMBIIdentifier.BENE_MBI_EFCTV_DT",
+                "id": "Bene-MBI.BENE_MBI_EFCTV_DT",
+                "path": "Bene-MBI.BENE_MBI_EFCTV_DT",
                 "label": "MBI Effective Date",
                 "definition": "Effective date of this MBI.",
                 "min": 1,
@@ -47,8 +47,8 @@
                 ]
             },
             {
-                "id": "BeneficiaryMBIIdentifier.BENE_MBI_OBSLT_DT",
-                "path": "BeneficiaryMBIIdentifier.BENE_MBI_OBSLT_DT",
+                "id": "Bene-MBI.BENE_MBI_OBSLT_DT",
+                "path": "Bene-MBI.BENE_MBI_OBSLT_DT",
                 "label": "MBI Obsolete Date",
                 "definition": "Date this MBI was marked obsolete.",
                 "min": 0,
