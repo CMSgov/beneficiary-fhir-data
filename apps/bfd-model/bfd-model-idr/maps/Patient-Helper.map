@@ -2,13 +2,23 @@ map "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper" = "patient-support
 
 //Eventually these should be sourced automagically from IDR on startup. But until then!
 
-conceptmap "AdministrativeGender" {
+//This concept map is used for representing "Sex"
+conceptmap "AdministrativeSex" {
   prefix s = "https://hl7.org/fhir/string"
-  prefix t = "http://hl7.org/fhir/4.0/administrative-gender"
+  prefix t = "https://hl7.org/fhir/string"
 
-  s:0 = t:unknown
   s:1 = t:male
   s:2 = t:female
+}
+
+//This concept map is used for representing "Sex" as defined by HHS. 
+//valueset 2.16.840.1.113762.1.4.1021.121
+conceptmap "FederalAdministrativeSex" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://snomed.info/sct"
+
+  s:1 = t:"248153007"
+  s:2 = t:"248152002"
 }
 
 conceptmap "PreferredContactLanguage" {

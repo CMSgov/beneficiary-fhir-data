@@ -3,8 +3,8 @@
 map "https://bfd.cms.gov/MappingLanguage/Resources/Patient" = "BFD-Patient-Map"
 
 
-uses "https://bfd.cms.gov/fhir/StructureDefinition/BENE" alias Bene as source
-uses "http://hl7.org/fhir/StructureDefinition/BeneficiaryMBIIdentifier" alias BeneMBI as source
+uses "https://bluebutton.cms.gov/fhir/StructureDefinition/Beneficiary" alias Bene as source
+uses "https://bluebutton.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as target
 
@@ -22,8 +22,12 @@ group createPatient(source src: Bene, target patient: BFDPatient){
     } "add name";
     src.BENE_DOB as dob -> patient.birthDate = dob "set dob";
     src.BENE_DEATH_DT as dod where (src.BENE_VRFY_DEATH_DAY_SW = "true")  -> patient.deceased = dod "Set death date";
-    src.BENE_SEX_CD as gender -> patient.gender = translate(gender, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#AdministrativeGender', 'code');
-    
+    src.BENE_SEX_CD as sex -> patient.gender = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#AdministrativeSex', 'code');
+    src.BENE_SEX_CD as sex -> patient.extension = create('Extension') as sexExtension then {
+        src -> sexExtension.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex" "Set sex extension url";
+        src -> sexExtension.value = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#FederalAdministrativeSex', 'code') "Add sex value";
+    } "add sex";
+
     //All except Unknown, Missing, or Hispanic
     src.BENE_RACE_CD as race where (race != "~" and race != "0" and race != "5") -> patient.extension = create('Extension') as raceExtension then {
         src -> raceExtension.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race" "Set race extension url";
@@ -91,13 +95,14 @@ group createPatient(source src: Bene, target patient: BFDPatient){
 
     src -> patient.meta = create('Meta') as tgtMeta then{
         src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.0.0" "Set C4BB profile";
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|3.1.1" "Set US Core profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0" "Set C4BB profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" "Set US Core profile";
     } "add metadata";
 
-    src -> patient.address = create('Address') as ptAddress then {
+    //we have the IF here to only populate if the address is actually available. 
+    src.GEO_USPS_STATE_CD as stateCode where stateCode.length() = 2 -> patient.address = create('Address') as ptAddress then {
         src.GEO_USPS_STATE_CD as stateCode -> ptAddress.state = stateCode "Set state code";
-        src.BENE_ZIP_CD as zipCode -> ptAddress.postalCode = zipCode "Set zip code";
+        src.GEO_ZIP5_CD as zipCode -> ptAddress.postalCode = zipCode "Set zip code";
         src.BENE_LINE_1_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 1";
         src.BENE_LINE_2_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 2";
         src.BENE_LINE_3_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 3";
@@ -107,16 +112,9 @@ group createPatient(source src: Bene, target patient: BFDPatient){
         src.GEO_ZIP_PLC_NAME as cityName -> ptAddress.city = cityName "Set city name";
     } "Set patient address";
 
-    src -> patient.telecom = create('ContactPoint') as ptTele then{
-        src.BENE_PHNE_NUM as phoneNumber -> ptTele.value = phoneNumber "Set phone number";
-        src -> ptTele.use = "home" "Set phone number use";
-        src -> ptTele.system = "phone" "Set phone as system";
-    } "Set beneficary contact info";
-
     src -> patient.communication = create('BackboneElement') as commsBackbone then{
         src -> commsBackbone.language = create('CodeableConcept') as langCC then{
             src.CNTCT_LANG_CD as langCode -> langCC.coding = translate(langCode,'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#PreferredContactLanguage','coding') "set coding";
-
         }"Create CodeableConcept for Language.";
         src -> commsBackbone.preferred=true "set preference as true";
     } "Create backbone element for communication";
