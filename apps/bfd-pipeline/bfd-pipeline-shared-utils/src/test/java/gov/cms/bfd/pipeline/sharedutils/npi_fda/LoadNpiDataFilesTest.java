@@ -58,13 +58,13 @@ public class LoadNpiDataFilesTest {
   @Test
   void shouldSaveNpiDataFile() throws IOException {
     LoadNpiDataFiles loadNpiDataFiles = new LoadNpiDataFiles(entityManager, 1, 30);
-    loadNpiDataFiles.saveNpiDataFile(
+    loadNpiDataFiles.saveDataFile(
         new InputStreamReader(new ByteArrayInputStream(TEST_CSV.getBytes())));
     Mockito.verify(entityManager, times(8)).merge(any());
   }
 
   @Test
-  void ShouldLoadData() {
+  void ShouldLoadData() throws IOException {
     LoadNpiDataFiles loadNpiDataFiles = new LoadNpiDataFiles(entityManager, 1, 30);
     assertTrue(loadNpiDataFiles.shouldLoadData());
   }

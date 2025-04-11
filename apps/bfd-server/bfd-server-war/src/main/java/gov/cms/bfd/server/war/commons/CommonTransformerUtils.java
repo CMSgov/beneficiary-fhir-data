@@ -802,6 +802,20 @@ public final class CommonTransformerUtils {
   }
 
   /**
+   * Builds the drug code for future enrichment.
+   *
+   * @param drugCode The drug code
+   * @return placeholder for the drug code.
+   */
+  public static String buildReplaceDrugCode(Optional<String> drugCode) {
+    if (drugCode.isPresent()) {
+      return String.format("replaceDrugCode[%s]", drugCode.get());
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Replaces organization for future enrichment.
    *
    * @param npi NPI

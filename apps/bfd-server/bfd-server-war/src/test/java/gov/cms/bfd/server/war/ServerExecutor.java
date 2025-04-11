@@ -83,7 +83,6 @@ public class ServerExecutor {
     appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
     appSettings.put(AppConfiguration.SSM_PATH_TRUSTSTORE, trustStore);
     appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
-    appSettings.put(SpringConfiguration.PROP_ORG_FILE_NAME, NPIOrgLookup.TEST_NPI_FILENAME);
     appSettings.put(SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED, "true");
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
     serverInfo = DataServerLauncherApp.createServer(appConfig);
@@ -148,7 +147,7 @@ public class ServerExecutor {
     final String samhsaV2Shadow = "true";
     final String pacOldMbiHashEnabled = "true";
     final String pacClaimSourceTypes = "fiss,mcs";
-    final String drugCodeFileName = "fakeDrugOrg.tsv";
+    final String drugCodeFileName = "fakeDrugOrg.json";
     final String orgFileName = "fakeOrgData.tsv";
 
     appSettings.put(SpringConfiguration.SSM_PATH_PAC_ENABLED, pacEnabled);

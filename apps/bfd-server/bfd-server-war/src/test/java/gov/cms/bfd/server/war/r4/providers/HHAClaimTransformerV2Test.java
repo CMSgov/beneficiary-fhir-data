@@ -132,7 +132,10 @@ public class HHAClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -234,7 +237,10 @@ public class HHAClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -261,7 +267,10 @@ public class HHAClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

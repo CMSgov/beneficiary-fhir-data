@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
@@ -57,7 +56,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -150,9 +148,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
 
-  /** The FDA drug display lookup. */
-  @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
-
   /** The re-used valid bene id value. */
   public static final String BENE_ID = "123456789";
 
@@ -164,10 +159,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     // metrics mocking
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-
-    // NPI and FDA drug mocking
-    // when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
-    when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
 
     when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
@@ -191,7 +182,8 @@ public class R4ExplanationOfBenefitResourceProviderTest {
             mockPdeTransformer,
             Mockito.mock(SNFClaimTransformerV2.class),
             Mockito.mock(SecurityTagsDao.class),
-            RDATestUtils.createTestNpiOrgLookup());
+            RDATestUtils.createTestNpiOrgLookup(),
+            RDATestUtils.createFdaDrugCodeDisplayLookup());
 
     // entity manager mocking
     mockEntityManager();

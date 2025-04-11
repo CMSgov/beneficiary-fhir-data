@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -127,6 +128,9 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   /** Loads the NPI data from the database. */
   NPIOrgLookup npiOrgLookup;
 
+  /** Loads the DrugCodes from the database. */
+  FDADrugCodeDisplayLookup drugCodeDisplayLookup;
+
   /**
    * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
    *
@@ -146,7 +150,8 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
    * @param securityTagsDao the security Tags Dao
-   * @param npiOrgLookup Instance of NPIOrgLookup
+   * @param npiOrgLookup NPIOrgLookup
+   * @param fdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup
    */
   public R4ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -162,7 +167,8 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
       PartDEventTransformerV2 partDEventTransformer,
       SNFClaimTransformerV2 snfClaimTransformer,
       SecurityTagsDao securityTagsDao,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -177,6 +183,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
     this.securityTagsDao = securityTagsDao;
     this.npiOrgLookup = npiOrgLookup;
+    this.drugCodeDisplayLookup = fdaDrugCodeDisplayLookup;
   }
 
   /**
@@ -286,7 +293,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
-    TransformerUtilsV2.enrichEob(eob, npiOrgLookup);
+    TransformerUtilsV2.enrichEob(eob, npiOrgLookup, drugCodeDisplayLookup);
     return eob;
   }
 
@@ -449,8 +456,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
           TransformerUtilsV2.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
-
-    TransformerUtilsV2.enrichEobBundle(bundle, npiOrgLookup);
+    TransformerUtilsV2.enrichEobBundle(bundle, npiOrgLookup, drugCodeDisplayLookup);
     return bundle;
   }
 

@@ -136,7 +136,11 @@ public class SNFClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
+
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -526,7 +530,10 @@ public class SNFClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit genEob =
         snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

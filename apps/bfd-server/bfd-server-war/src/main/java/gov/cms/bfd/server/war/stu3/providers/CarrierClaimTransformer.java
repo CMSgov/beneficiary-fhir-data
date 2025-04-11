@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
@@ -39,9 +38,6 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform");
@@ -59,17 +55,14 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public CarrierClaimTransformer(
       MetricRegistry metricRegistry,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       SecurityTagManager securityTagManager,
       @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
     this.samhsaV2Enabled = samhsaV2Enabled;
   }
@@ -307,7 +300,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
+          CommonTransformerUtils.buildReplaceDrugCode(claimLine.getNationalDrugCode()));
 
       if (claimLine.getProviderStateCode().isPresent()) {
         item.getLocation()

@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -1648,8 +1647,6 @@ public final class TransformerTestUtilsV2 {
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
    *          false</code> )
    * @param includeTaxNumbers if tax numbers should be included in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
@@ -1657,20 +1654,16 @@ public final class TransformerTestUtilsV2 {
       ClaimWithSecurityTags<?> rifRecord,
       MetricRegistry metricRegistry,
       boolean includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterfaceV2 claimTransformerInterface = null;
     Object entity = rifRecord.getClaimEntity();
     if (entity instanceof CarrierClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
+          new CarrierClaimTransformerV2(metricRegistry, securityTagManager, false);
     } else if (entity instanceof DMEClaim) {
       claimTransformerInterface =
-          new DMEClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
+          new DMEClaimTransformerV2(metricRegistry, securityTagManager, false);
     } else if (entity instanceof HHAClaim) {
       claimTransformerInterface =
           new HHAClaimTransformerV2(metricRegistry, securityTagManager, false);
@@ -1682,11 +1675,9 @@ public final class TransformerTestUtilsV2 {
           new InpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
     } else if (entity instanceof OutpatientClaim) {
       claimTransformerInterface =
-          new OutpatientClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
+          new OutpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
     } else if (entity instanceof PartDEvent) {
-      claimTransformerInterface =
-          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup);
+      claimTransformerInterface = new PartDEventTransformerV2(metricRegistry);
     } else if (entity instanceof SNFClaim) {
       claimTransformerInterface =
           new SNFClaimTransformerV2(metricRegistry, securityTagManager, false);
