@@ -36,3 +36,8 @@ Validate against C4BB:
 java -jar validator_cli.jar outputs/<output_json>.json \
   -ig hl7.fhir.us.carin-bb#2.1.0
 ```
+
+Generate sample data
+```sh
+python sample-data/generator/Patient-Generator.py
+```
