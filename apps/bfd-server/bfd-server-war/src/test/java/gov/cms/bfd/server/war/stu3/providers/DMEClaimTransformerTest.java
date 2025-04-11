@@ -25,12 +25,15 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -66,6 +69,8 @@ public final class DMEClaimTransformerTest {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   protected void setup() {
@@ -77,7 +82,7 @@ public final class DMEClaimTransformerTest {
         .thenReturn("UNKNOWN");
 
     dmeClaimTransformer =
-        new DMEClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager);
+        new DMEClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager, false);
   }
 
   /**
@@ -96,7 +101,7 @@ public final class DMEClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    dmeClaimTransformer.transform(claim, true);
+    dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     String expectedTimerName = dmeClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -122,7 +127,8 @@ public final class DMEClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = dmeClaimTransformer.transform(claim, true);
+    ExplanationOfBenefit eob =
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
     assertMatches(claim, eob, true);
   }
 
@@ -150,7 +156,9 @@ public final class DMEClaimTransformerTest {
       line.setProviderSpecialityCode(Optional.empty());
     }
 
-    ExplanationOfBenefit genEob = dmeClaimTransformer.transform(loadedClaim, false);
+    ExplanationOfBenefit genEob =
+        dmeClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
     TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added

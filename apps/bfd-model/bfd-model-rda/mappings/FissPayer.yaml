@@ -149,7 +149,7 @@ mappings:
     - name: insuredSex
       sqlType: varchar(1)
       dbName: insured_sex
-      comment: 'Insured Sex: This field identifies the gender of the beneficiary.'
+      comment: 'Insured Sex: This field identifies the sex of the beneficiary.'
     - name: insuredRelX12
       sqlType: varchar(2)
       dbName: insured_rel_x12

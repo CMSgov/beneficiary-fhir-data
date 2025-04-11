@@ -37,6 +37,9 @@ public abstract class AbstractResourceTypeV2<TResource extends IBaseResource, TE
   /** The attribute holding the end date for range queries in the entity class. */
   protected final List<String> entityServiceDateAttributes;
 
+  /** The attribute holding the entity security Tag Type. */
+  protected final String entityTagType;
+
   /**
    * Scans the provided instances to find the first one whose {@link
    * AbstractResourceTypeV2#nameForParsing}* is equal to the provided string.
