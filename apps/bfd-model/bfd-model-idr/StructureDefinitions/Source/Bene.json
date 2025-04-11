@@ -77,7 +77,7 @@
                 "path": "Beneficiary.BENE_DEATH_DT",
                 "label": "Date of Death",
                 "definition": "Date of death for beneficiary. Only populated if BENE_VRFY_DEATH_DAY_SW is true",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -90,7 +90,7 @@
                 "path": "Beneficiary.BENE_VRFY_DEATH_DAY_SW",
                 "label": "Date of Death Verification Switch",
                 "definition": "Don't trust the date of death unless this is 'true'.",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -169,7 +169,7 @@
                 "path": "Beneficiary.GEO_USPS_STATE_CD",
                 "label": "USPS State Code",
                 "definition": "USPS State Code",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -182,20 +182,7 @@
                 "path": "Beneficiary.GEO_ZIP5_CD",
                 "label": "Beneficiary Zip Code - First 5",
                 "definition": "First 5 digits of beneficiary Zip Code",
-                "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "Beneficiary.GEO_ZIP4_CD",
-                "path": "Beneficiary.GEO_ZIP4_CD",
-                "label": "Beneficiary Zip Code - Last 4",
-                "definition": "Last 4 digits of beneficiary Zip Code",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -208,7 +195,7 @@
                 "path": "Beneficiary.BENE_LINE_1_ADR",
                 "label": "Line 1 of address",
                 "definition": "Line 1 of address",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -221,7 +208,7 @@
                 "path": "Beneficiary.BENE_LINE_2_ADR",
                 "label": "Line 2 of address",
                 "definition": "Line 2 of address",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -234,7 +221,7 @@
                 "path": "Beneficiary.BENE_LINE_3_ADR",
                 "label": "Line 3 of address",
                 "definition": "Line 3 of address",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -247,7 +234,7 @@
                 "path": "Beneficiary.BENE_LINE_4_ADR",
                 "label": "Line 4 of address",
                 "definition": "Line 4 of address",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -260,7 +247,7 @@
                 "path": "Beneficiary.BENE_LINE_5_ADR",
                 "label": "Line 5 of address",
                 "definition": "Line 5 of address",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -273,7 +260,7 @@
                 "path": "Beneficiary.BENE_LINE_6_ADR",
                 "label": "Line 6 of Address",
                 "definition": "Line 6 of address",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -286,7 +273,7 @@
                 "path": "Beneficiary.GEO_ZIP_PLC_NAME",
                 "label": "City Name",
                 "definition": "City Name of Beneficiary.",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -299,7 +286,7 @@
                 "path": "Beneficiary.CNTCT_LANG_CD",
                 "label": "Contact Language Code",
                 "definition": "Contact Language Code for beneficiary. Either English or Spanish. Used for Medicare Handbook today.",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -312,7 +299,7 @@
                 "path": "Beneficiary.BENE_SEX_CD",
                 "label": "Beneficiary Sex Code",
                 "definition": "Beneficiary Sex Code, as recorded by CMS in IDR.",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -325,7 +312,7 @@
                 "path": "Beneficiary.BENE_RACE_CD",
                 "label": "Beneficiary Race Code",
                 "definition": "Beneficiary Race Code, as recorded by CMS in IDR.",
-                "min": 1,
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
