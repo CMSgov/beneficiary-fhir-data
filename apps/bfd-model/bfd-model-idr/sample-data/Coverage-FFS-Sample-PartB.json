@@ -1,0 +1,15 @@
+{
+    "resourceType": "CoverageBase",
+    "coveragePart": "B",
+    "BENE_MBI_ID":"ABB2BB0BB22",
+    "XREF_EFCTV_BENE_SK":"123456789",
+    "BENE_MDCR_STUS_CD":"31",
+    "BENE_BUYIN_CD":"A",
+    "lastUpdated": "2020-01-07T03:02:28.000000Z",
+    "BENE_RNG_BGN_DT":"2018-04-11",
+    "BENE_RNG_END_DT":"9999-12-31",
+    "currentDate":"2025-03-30",
+    "BENE_MDCR_ENTLMT_STUS_CD":"E",
+    "BENE_MDCR_ENRLMT_RSN_CD":"I",
+    "BENE_MDCR_ENTLMT_RSN_CD":"2"
+}
