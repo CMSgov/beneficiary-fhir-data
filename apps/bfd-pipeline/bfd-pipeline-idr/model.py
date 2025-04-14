@@ -37,7 +37,6 @@ class IdrBeneficiary(BaseModel):
     bene_race_cd: Annotated[str, BeforeValidator(transform_default_string)]
     geo_usps_state_cd: str
     geo_zip5_cd: str
-    geo_zip4_cd: str
     geo_zip_plc_name: str
     bene_line_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
     bene_line_2_adr: Annotated[str, BeforeValidator(transform_null_string)]

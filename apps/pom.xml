@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gov.cms.bfd</groupId>
@@ -100,6 +101,7 @@
 
         <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.12.0</junit.version>
+        <junit.platform.version>1.12.0</junit.platform.version>
         <javadoc.version>3.11.2</javadoc.version>
         <testcontainers.version>1.19.3</testcontainers.version>
 
@@ -244,7 +246,7 @@
         <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
-        <maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
         <maven-core.version>3.9.6</maven-core.version>
         <maven.jacoco.plugin.version>0.8.12</maven.jacoco.plugin.version>
@@ -371,6 +373,21 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
                 <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-engine</artifactId>
+                <version>${junit.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>${junit.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-commons</artifactId>
+                <version>${junit.platform.version}</version>
             </dependency>
             <dependency>
                 <!-- Provides a sane facade for the giant mess of incompatible logging

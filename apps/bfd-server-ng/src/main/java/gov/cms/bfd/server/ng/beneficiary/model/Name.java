@@ -18,7 +18,7 @@ public class Name {
   @Column(name = "bene_last_name", nullable = false)
   private String lastName;
 
-  public HumanName toFhir() {
+  HumanName toFhir() {
     var givens = new ArrayList<StringType>();
     givens.add(new StringType(firstName));
     middleName.ifPresent(n -> givens.add(new StringType(n)));
