@@ -45,7 +45,7 @@ public class LoadFdaDataFiles extends LoadDataFiles<FDAData> {
     // them.
     // 0002-0152 Becomes 00002 and 0152. It appears that the ingredient portion is always 4
     // characters,
-    // so may not necessarily need to be padded, but the operation is kept:q
+    // so may not necessarily need to be padded, but the operation is kept
     // in out of an abundance of
     // caution.
     String nationalDrugCodeManufacturer =
