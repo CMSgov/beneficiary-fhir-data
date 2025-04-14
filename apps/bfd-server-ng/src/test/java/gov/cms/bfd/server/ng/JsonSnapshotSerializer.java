@@ -4,7 +4,6 @@ import au.com.origin.snapshots.Snapshot;
 import au.com.origin.snapshots.SnapshotSerializerContext;
 import au.com.origin.snapshots.serializers.v1.ToStringSnapshotSerializer;
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
