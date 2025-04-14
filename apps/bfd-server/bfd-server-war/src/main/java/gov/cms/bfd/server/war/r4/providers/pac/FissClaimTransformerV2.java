@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
@@ -12,7 +13,6 @@ import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
 import gov.cms.bfd.model.rda.entities.RdaFissPayer;
 import gov.cms.bfd.model.rda.entities.RdaFissProcCode;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
-import gov.cms.bfd.model.rda.samhsa.FissTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -21,6 +21,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.FissTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -69,6 +70,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
 
+  private final boolean samhsaV2Enabled;
+
   private final boolean sexExtensionEnabled;
 
   /** The METRIC_NAME constant. */
@@ -84,14 +87,17 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    * @param sexExtensionEnabled whether to enable the sex extension
    */
   public FissClaimTransformerV2(
       MetricRegistry metricRegistry,
       SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled,
       @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
     this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
@@ -103,15 +109,18 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
-    if (!(claimEntity instanceof RdaFissClaim)) {
+  public Claim transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
+
+    if (!(claim instanceof RdaFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      RdaFissClaim rdaFissClaim = (RdaFissClaim) claimEntity;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(rdaFissClaim.getClaimId(), FissTag.class);
+      RdaFissClaim rdaFissClaim = (RdaFissClaim) claim;
       return transformClaim(rdaFissClaim, includeTaxNumbers, securityTags);
     }
   }
@@ -156,8 +165,12 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setInsurance(getInsurance(claimGroup));
     claim.setItem(getClaimItems(claimGroup));
 
-    Meta meta =
-        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    Meta meta = new Meta();
+    meta.setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    if (samhsaV2Enabled) {
+      meta.setSecurity(securityTags);
+    }
     claim.setMeta(meta);
     claim.setCreated(new Date());
 

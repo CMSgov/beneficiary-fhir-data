@@ -23,13 +23,16 @@ import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -112,42 +115,45 @@ public class SamhsaMatcherFromClaimTransformerTest {
     FdaDrugCodeDisplayLookup drugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
     // Load and transform the various claim types for testing
     ClaimTransformerInterface claimTransformerInterface =
-        new InpatientClaimTransformer(new MetricRegistry(), securityTagManager);
+        new InpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit inpatientEob =
         claimTransformerInterface.transform(getClaim(InpatientClaim.class), false);
     String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
 
     claimTransformerInterface =
-        new OutpatientClaimTransformer(new MetricRegistry(), securityTagManager);
+        new OutpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit outpatientEob =
         claimTransformerInterface.transform(getClaim(OutpatientClaim.class), false);
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
     claimTransformerInterface =
-        new DMEClaimTransformer(new MetricRegistry(), drugCodeDisplayLookup, securityTagManager);
+        new DMEClaimTransformer(
+            new MetricRegistry(), drugCodeDisplayLookup, securityTagManager, false);
     ExplanationOfBenefit dmeEob =
         claimTransformerInterface.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
-    claimTransformerInterface = new HHAClaimTransformer(new MetricRegistry(), securityTagManager);
+    claimTransformerInterface =
+        new HHAClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit hhaEob =
         claimTransformerInterface.transform(getClaim(HHAClaim.class), false);
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     claimTransformerInterface =
-        new HospiceClaimTransformer(new MetricRegistry(), securityTagManager);
+        new HospiceClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit hospiceEob =
         claimTransformerInterface.transform(getClaim(HospiceClaim.class), false);
     String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
-    claimTransformerInterface = new SNFClaimTransformer(new MetricRegistry(), securityTagManager);
+    claimTransformerInterface =
+        new SNFClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit snfEob =
         claimTransformerInterface.transform(getClaim(SNFClaim.class), false);
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     claimTransformerInterface =
         new CarrierClaimTransformer(
-            new MetricRegistry(), drugCodeDisplayLookup, securityTagManager);
+            new MetricRegistry(), drugCodeDisplayLookup, securityTagManager, false);
     ExplanationOfBenefit carrierEob =
         claimTransformerInterface.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
@@ -813,7 +819,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @param type the type
    * @return the claim to be used for the test, should match the input type
    */
-  public static RifRecordBase getClaim(Class<? extends RifRecordBase> type) {
+  public static ClaimWithSecurityTags getClaim(Class<? extends RifRecordBase> type) {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -826,7 +832,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
       throw new IllegalStateException(
           "Test setup issue, did not find expected InpatientClaim in sample record.");
     }
-
-    return claim;
+    Set<String> securityTags = new HashSet<>();
+    return new ClaimWithSecurityTags<>(claim, securityTags);
   }
 }

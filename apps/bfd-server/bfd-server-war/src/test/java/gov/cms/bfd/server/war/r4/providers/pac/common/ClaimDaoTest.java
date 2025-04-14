@@ -24,6 +24,8 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
+import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.r4.providers.pac.AbstractResourceTypeV2;
 import gov.cms.bfd.server.war.r4.providers.pac.ClaimTypeV2;
 import jakarta.persistence.EntityManager;
@@ -73,6 +75,8 @@ class ClaimDaoTest {
   /** Used when mocking query construction. */
   @Mock private CriteriaBuilder mockBuilder;
 
+  @Mock private SecurityTagsDao securityTagsDao;
+
   /** Initializes non-mock fields for each test. */
   @BeforeEach
   void setUp() {
@@ -83,10 +87,10 @@ class ClaimDaoTest {
   @Test
   void testCreateMetricNameForResourceQuery() {
     assertEquals(
-        "ClaimDao.query.claim_by_id.mockType",
+        "ClaimDao.query.claim_by_id.carrier",
         ClaimDao.createMetricNameForResourceQuery(claimType, ClaimDao.CLAIM_BY_ID_QUERY));
     assertEquals(
-        "ClaimDao.query.claim_by_mbi.mockType",
+        "ClaimDao.query.claim_by_mbi.carrier",
         ClaimDao.createMetricNameForResourceQuery(claimType, ClaimDao.CLAIM_BY_MBI_QUERY));
   }
 
@@ -98,9 +102,9 @@ class ClaimDaoTest {
   void shouldGetEntityById() {
     String claimId = "123";
 
-    Object expected = 5L;
+    Object expected = mock(CarrierClaim.class);
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
 
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
     // rawtypes - Due to mocking the object.
@@ -149,7 +153,8 @@ class ClaimDaoTest {
             sizeCaptor.capture());
 
     assertEquals(1, sizeCaptor.getValue());
-    assertEquals(expected, actual);
+    //    (ClaimWithSecurityTags<?>) claimEntity).getClaimEntity()
+    assertEquals(expected, ((ClaimWithSecurityTags<?>) actual).getClaimEntity());
   }
 
   /**
@@ -160,7 +165,7 @@ class ClaimDaoTest {
   void shouldGetEntityByIdWhenNull() {
     String claimId = "123";
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
 
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
     // rawtypes - Due to mocking the object.
@@ -222,7 +227,7 @@ class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -244,7 +249,15 @@ class ClaimDaoTest {
 
     doReturn(mockQuery).when(mockBuilder).createQuery(any());
 
-    List<Long> mockList = List.of(1L, 1L, 1L, 1L, 1L);
+    List<Object> mockList = new ArrayList<>();
+    CarrierClaim claim = mock(CarrierClaim.class);
+    mockList.add(claim);
+
+    CarrierClaim claim1 = mock(CarrierClaim.class);
+    mockList.add(claim1);
+
+    CarrierClaim claim2 = mock(CarrierClaim.class);
+    mockList.add(claim2);
 
     doReturn(mockList).when(mockTypedQuery).getResultList();
 
@@ -266,7 +279,7 @@ class ClaimDaoTest {
             timeCaptor.capture(),
             sizeCaptor.capture());
 
-    assertEquals(5, sizeCaptor.getValue());
+    assertEquals(3, sizeCaptor.getValue());
   }
 
   /**
@@ -278,7 +291,7 @@ class ClaimDaoTest {
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -328,7 +341,7 @@ class ClaimDaoTest {
   @Test
   @SuppressWarnings("unchecked") // untyped mock creation is harmless
   public void testCreateServiceDatePredicates() {
-    final var daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    final var daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
     final Root<RdaFissClaim> root = mock(Root.class);
     final var serviceDateParam = mock(DateRangeParam.class);
 
@@ -371,17 +384,26 @@ class ClaimDaoTest {
    * @return all test parameters
    */
   private static Stream<MbiLookupTestParameter<?, ?>> getMbiLookupParameters() {
+
+    RdaFissClaim fiss = new RdaFissClaim();
+    fiss.setClaimId("123");
+    Supplier<RdaFissClaim> fissSupplier = () -> fiss;
+
+    RdaMcsClaim mcs = new RdaMcsClaim();
+    mcs.setIdrClmHdIcn("456");
+    Supplier<RdaMcsClaim> mcsSupplier = () -> mcs;
+
     return Stream.of(
+        new MbiLookupTestParameter<>("FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, fissSupplier),
         new MbiLookupTestParameter<>(
-            "FISS", ClaimTypeV2.F, LastUpdated, ServiceDate, RdaFissClaim::new),
+            "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, mcsSupplier),
         new MbiLookupTestParameter<>(
-            "MCS - without serviceDate", ClaimTypeV2.M, LastUpdated, null, RdaMcsClaim::new),
-        new MbiLookupTestParameter<>(
-            "MCS - with serviceDate", ClaimTypeV2.M, LastUpdated, ServiceDate, RdaMcsClaim::new));
+            "MCS - with serviceDate", ClaimTypeV2.M, LastUpdated, ServiceDate, mcsSupplier));
   }
 
   /**
-   * Test the {@link ClaimDao#findAllByMbiAttribute} method.
+   * Test the {@link ClaimDao#findAllByMbiAttribute(ResourceTypeV2, String, boolean, DateRangeParam,
+   * DateRangeParam)} method.
    *
    * @param param defines the specific test case
    * @param <TResource> FHIR resource type
@@ -405,7 +427,8 @@ class ClaimDaoTest {
     final Root<TEntity> claim = mock(Root.class);
     doReturn(claim).when(claimsQuery).from(resourceType.getEntityClass());
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     final Predicate wherePredicate = mock(Predicate.class);
     doReturn(List.of(wherePredicate))
@@ -431,11 +454,16 @@ class ClaimDaoTest {
     final List<TEntity> queryResult =
         List.of(
             param.instanceFactory.get(), param.instanceFactory.get(), param.instanceFactory.get());
+
     doReturn(queryResult).when(query).getResultList();
 
-    final List<TEntity> result =
+    List<ClaimWithSecurityTags<TEntity>> claimsWithTags =
         dao.findAllByMbiAttribute(
             resourceType, mbiSearchValue, isMbiSearchValueHashed, lastUpdated, serviceDate);
+
+    final List<TEntity> result =
+        claimsWithTags.stream().map(ClaimWithSecurityTags::getClaimEntity).toList();
+
     assertEquals(queryResult, result);
 
     ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
@@ -488,7 +516,8 @@ class ClaimDaoTest {
     final Path<?> mbiRecord = mock(Path.class);
     doReturn(mbiRecord).when(claim).get(resourceType.getEntityMbiRecordAttribute());
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
 
     final List<Predicate> expectedPredicates = new ArrayList<>();
 
@@ -542,7 +571,8 @@ class ClaimDaoTest {
     doReturn(mbiPredicate).when(mockBuilder).equal(mbi, searchString);
     doReturn(mbi).when(root).get(Mbi.Fields.mbi);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
     assertSame(mbiPredicate, dao.createMbiPredicate(root, searchString, false, mockBuilder));
   }
 
@@ -560,7 +590,8 @@ class ClaimDaoTest {
     doReturn(hashPredicate).when(mockBuilder).equal(hash, searchString);
     doReturn(hash).when(root).get(Mbi.Fields.hash);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, false, securityTagsDao));
     assertSame(hashPredicate, dao.createMbiPredicate(root, searchString, true, mockBuilder));
   }
 
@@ -584,7 +615,8 @@ class ClaimDaoTest {
     doReturn(hash).when(root).get(Mbi.Fields.hash);
     doReturn(oldHash).when(root).get(Mbi.Fields.oldHash);
 
-    final ClaimDao dao = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
+    final ClaimDao dao =
+        spy(new ClaimDao(mockEntityManager, metricRegistry, true, securityTagsDao));
     assertSame(combinedPredicate, dao.createMbiPredicate(root, searchString, true, mockBuilder));
   }
 
@@ -593,12 +625,13 @@ class ClaimDaoTest {
     /** A mock claim type for testing. */
     public MockClaimType() {
       super(
-          "mock",
-          "mockType",
+          "CARRIER",
+          "carrier",
           Long.class,
           "mbiAttribute",
           "somePropertyName",
-          List.of("endDateAttribute"));
+          List.of("endDateAttribute"),
+          "");
     }
   }
 
