@@ -1,5 +1,5 @@
-map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" = "BFD-ExplanationOfBenefit-Item-Institutional-Helper-Map"
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+map "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" = "BFD-ExplanationOfBenefit-Item-Institutional-Helper-Map"
+imports "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper" 
 
 group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_NUM as seq_num -> tgt.sequence = seq_num "set sequence number";
@@ -38,7 +38,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
     
     src.GEO_FAC_SSA_STATE_CD as state_code -> tgt.location = create('Address') as tgtAddress then {
-        src -> tgtAddress.state = translate(state_code,"https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#SSAToUSPSState",'code') "Set state code";
+        src -> tgtAddress.state = translate(state_code,"https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#SSAToUSPSState",'code') "Set state code";
     } "Add state";
     
     src.REV_CNTR_DT as rev_ctr_date -> tgt.servicedDate = rev_ctr_date "add revenue center date";
@@ -306,13 +306,13 @@ group addAdjudicationRateAmt(source src: String, target tgt: BackboneElement){
 }
 
 group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
-    src.CLM_LINE_REV_CTR_CD as rev_ctr_code -> tgt.coding = create('Coding') as tgtCoding then {
+    src.CLM_LINE_REV_CTR_CD as revCtrCode -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/rev_cntr" "set system";
-        src -> tgtCoding.code=rev_ctr_code "set rev center code";
+        src -> tgtCoding.code=revCtrCode "set rev center code";
     } "Add revenue center coding";
-    src.CLM_LINE_REV_CTR_CD as rev_ctr_code -> tgt.coding = create('Coding') as tgtCoding then {
+    src.CLM_LINE_REV_CTR_CD as revCtrCode -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.nubc.org/CodeSystem/RevenueCodes" "set system";
-        src -> tgtCoding.code=rev_ctr_code "set rev center code";
+        src -> tgtCoding.code=revCtrCode "set rev center code";
     } "Add revenue center coding";
 
     //https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd
@@ -326,90 +326,90 @@ group addModifier(source src: LineItemComponent, target tgt: CodeableConcept){
     //for each of these, the sytem can be determined on the basis of how the code is formed.
     //If it is resolvable to an integer, it's a CPT modifier. Otherwise, it's an HCPCS modifier
 
-    src.HCPCS_1_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_1_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
+        src -> tgtCoding.code=modifierCode "set modifier code";
+    } "Add modifier coding";
+
+    src.HCPCS_1_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
+        src -> tgtCoding.code=modifierCode "set modifier code";
+    } "Add modifier coding";
+
+    src.HCPCS_2_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
         src -> tgtCoding.code=modifier_code "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_1_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_2_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_2_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_3_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_2_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_3_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_3_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_4_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_3_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_4_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_4_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_5_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
-    src.HCPCS_4_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.HCPCS_5_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
-    } "Add modifier coding";
-
-    src.HCPCS_5_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
-    } "Add modifier coding";
-
-    src.HCPCS_5_MDFR_CD as modifier_code where (modifier_code.length()=2 and modifier_code.substring(0,2).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
-        src -> tgtCoding.code=modifier_code "set modifier code";
+        src -> tgtCoding.code=modifierCode "set modifier code";
     } "Add modifier coding";
 
 }
 
 group addProductOrService(source src: LineItemComponent, target tgt: CodeableConcept){
-    src.CLM_LINE_HCPCS_CD as hcpcs_cd where(hcpcs_cd.length()=5 and hcpcs_cd.substring(0,1).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()=5 and hcpcsCd.substring(0,1).convertsToInteger()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://www.ama-assn.org/go/cpt" "set system";
-        src -> tgtCoding.code=hcpcs_cd "set code";
+        src -> tgtCoding.code=hcpcsCd "set code";
     } "Add codings";
-    src.CLM_LINE_HCPCS_CD as hcpcs_cd where(hcpcs_cd.length()=5 and hcpcs_cd.substring(0,1).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()=5 and hcpcsCd.substring(0,1).convertsToInteger().not()) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets" "set system";
-        src -> tgtCoding.code=hcpcs_cd "set code";
+        src -> tgtCoding.code=hcpcsCd "set code";
     } "Add codings";
-    src.CLM_LINE_HCPCS_CD as hcpcs_cd where(hcpcs_cd.length()!=5) -> tgt.coding = create('Coding') as tgtCoding then {
+    src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()!=5) -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="http://terminology.hl7.org/CodeSystem/data-absent-reason" "set system";
         src -> tgtCoding.code="not-applicable",
         tgtCoding.display="Not applicable" "set code";
     } "Add codings";
-    src.CLM_REV_APC_HIPPS_CD as hipps_cd where(hipps_cd.length()=5 and hipps_cd!="00000") -> tgt.coding = create('Coding') as tgtCoding then {
+    src.CLM_REV_APC_HIPPS_CD as hippsCd where(hippsCd.length()=5 and hippsCd!="00000") -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system="https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes" "set system";
-        src -> tgtCoding.code=hipps_cd "set code";
+        src -> tgtCoding.code=hippsCd "set code";
     } "Add codings";
 }
 
 group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.productOrService = create('CodeableConcept') as tgtProd then {
-        src.CLM_LINE_NDC_CD as ndc_cd -> tgtProd.coding = create('Coding') as tgtCoding then {
+        src.CLM_LINE_NDC_CD as ndcCd -> tgtProd.coding = create('Coding') as tgtCoding then {
             src -> tgtCoding.system="http://hl7.org/fhir/sid/ndc" "set system";
-            src -> tgtCoding.code=ndc_cd "set code";
+            src -> tgtCoding.code=ndcCd "set code";
         } "Add codings";
     } "Add product or service";
     src -> tgt.sequence = 1 "Add sequence";
     src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
-        src.CLM_LINE_NDC_QTY as ndc_qty -> tgtQuantity.value=cast(ndc_qty,"decimal") "set quantity";
-        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndc_unit where ndc_unit.length()>0 -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
-        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndc_unit where ndc_unit.length()>0 -> tgtQuantity.code = translate(ndc_unit,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#UnitTransform','code') "Set code";
-        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndc_unit where ndc_unit.length()>0 -> tgtQuantity.unit = ndc_unit "Set system";
+        src.CLM_LINE_NDC_QTY as ndcQty -> tgtQuantity.value=cast(ndcQty,"decimal") "set quantity";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#UnitTransform','code') "Set code";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.unit = ndcUnit "Set system";
     } "Set quantity of NDC utilized";
 }
