@@ -8,7 +8,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import jakarta.persistence.EntityManager;
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -25,7 +24,9 @@ public class NpiFdaLoadJob implements PipelineJob {
   private final Semaphore runningSemaphore;
 
   /** The ApplicationState. */
-  PipelineApplicationState appState;
+  PipelineApplicationState npiAppState;
+
+  PipelineApplicationState fdaAppState;
 
   /** The number of records to save before commiting the transaction. */
   int batchSize;
@@ -39,12 +40,19 @@ public class NpiFdaLoadJob implements PipelineJob {
   /**
    * Constructor.
    *
-   * @param appState The PipelineApplicationState.
+   * @param fdaAppState PipelineApplicationState to use for FDA Drug Enrichment.
+   * @param npiAppState PipelineApplicationState to use for NPI Enrichment.
    * @param batchSize The number of records to save before committing a transaction.
    * @param runInterval How often to run the job, in days.
    */
-  public NpiFdaLoadJob(PipelineApplicationState appState, int batchSize, int runInterval) {
-    this.appState = appState;
+  public NpiFdaLoadJob(
+      PipelineApplicationState npiAppState,
+      PipelineApplicationState fdaAppState,
+      int batchSize,
+      int runInterval)
+      throws Exception {
+    this.npiAppState = npiAppState;
+    this.fdaAppState = fdaAppState;
     runningSemaphore = new Semaphore(1);
     this.batchSize = batchSize;
     this.runInterval = runInterval;
@@ -56,7 +64,7 @@ public class NpiFdaLoadJob implements PipelineJob {
     // Run the service to see if the data should be loaded once per day.
     // If we relied on this schedule by itself to check if the data should be loaded,
     // the data load would happen everytime the Pipeline restarted.
-    // instead, we will check a database last_updated value once inside of the service.
+    // instead, we will check a database last_updated value once inside the service.
 
     return Optional.of(new PipelineJobSchedule(1, ChronoUnit.DAYS));
   }
@@ -75,29 +83,29 @@ public class NpiFdaLoadJob implements PipelineJob {
       return NOTHING_TO_DO;
     }
     LOGGER.info("Starting LoadNpiFdaDataJob.");
-    int total;
-    try (EntityManager entityManager = appState.getEntityManagerFactory().createEntityManager()) {
-      Instant start = Instant.now();
+    int npiTotal;
+    int fdaTotal;
+    try (EntityManager npiEntityManager =
+            npiAppState.getEntityManagerFactory().createEntityManager();
+        EntityManager fdaEntityManager =
+            fdaAppState.getEntityManagerFactory().createEntityManager()) {
       LoadNpiDataFiles loadNpiDataFiles =
-          new LoadNpiDataFiles(entityManager, batchSize, runInterval);
-      try (ExecutorService executor = Executors.newFixedThreadPool(1)) {
-        Future<Integer> npiTotal = executor.submit(loadNpiDataFiles);
+          new LoadNpiDataFiles(npiEntityManager, batchSize, runInterval);
+      LoadFdaDataFiles loadFdaDataFiles =
+          new LoadFdaDataFiles(fdaEntityManager, batchSize, runInterval);
+      try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+        Future<Integer> npiTotalFuture = executor.submit(loadNpiDataFiles);
+        Future<Integer> fdaTotalFuture = executor.submit(loadFdaDataFiles);
         try {
-          total = npiTotal.get();
+          npiTotal = npiTotalFuture.get();
+          fdaTotal = fdaTotalFuture.get();
         } catch (InterruptedException | ExecutionException ex) {
-          npiTotal.cancel(true);
+          npiTotalFuture.cancel(true);
+          fdaTotalFuture.cancel(true);
           throw new Exception(ex);
         }
       }
-      Instant finish = Instant.now();
-      Long totalTime = ChronoUnit.SECONDS.between(start, finish);
-      if (total > -1) {
-        LOGGER.info(
-            "LoadNpiFdaDataJob finished in {} seconds. Loaded {} records.", totalTime, total);
-        return WORK_DONE;
-      } else {
-        return NOTHING_TO_DO;
-      }
+      return (npiTotal == -1 && fdaTotal == -1) ? NOTHING_TO_DO : WORK_DONE;
     } finally {
       runningSemaphore.release();
     }

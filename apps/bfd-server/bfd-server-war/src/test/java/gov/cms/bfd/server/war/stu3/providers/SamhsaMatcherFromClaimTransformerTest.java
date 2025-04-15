@@ -5,8 +5,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -25,7 +23,6 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,11 +105,6 @@ public class SamhsaMatcherFromClaimTransformerTest {
   public static Stream<Arguments> data() throws IOException {
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
-    InputStream npiDataStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = new FdaDrugCodeDisplayLookup(npiDataStream);
     // Load and transform the various claim types for testing
     ClaimTransformerInterface claimTransformerInterface =
         new InpatientClaimTransformer(new MetricRegistry(), securityTagManager, false);
@@ -127,8 +119,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
     claimTransformerInterface =
-        new DMEClaimTransformer(
-            new MetricRegistry(), drugCodeDisplayLookup, securityTagManager, false);
+        new DMEClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit dmeEob =
         claimTransformerInterface.transform(getClaim(DMEClaim.class), false);
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
@@ -152,14 +143,12 @@ public class SamhsaMatcherFromClaimTransformerTest {
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     claimTransformerInterface =
-        new CarrierClaimTransformer(
-            new MetricRegistry(), drugCodeDisplayLookup, securityTagManager, false);
+        new CarrierClaimTransformer(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit carrierEob =
         claimTransformerInterface.transform(getClaim(CarrierClaim.class), false);
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
-    claimTransformerInterface =
-        new PartDEventTransformer(new MetricRegistry(), drugCodeDisplayLookup);
+    claimTransformerInterface = new PartDEventTransformer(new MetricRegistry());
     ExplanationOfBenefit pdeEob =
         claimTransformerInterface.transform(getClaim(PartDEvent.class), false);
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
