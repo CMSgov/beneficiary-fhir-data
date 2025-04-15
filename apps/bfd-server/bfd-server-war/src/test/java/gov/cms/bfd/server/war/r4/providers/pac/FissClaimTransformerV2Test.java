@@ -48,32 +48,28 @@ public class FissClaimTransformerV2Test {
   public static Stream<Arguments> diagnosisCodeTest() {
     return Stream.of(
         arguments(
-            "Different admit and principal diagnosis codes and both codes included in main"
-                + " diagnosis code list",
+            "Different admit and principal diagnosis codes and both codes included in main diagnosis code list",
             List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             DIAG_CODE1,
             DIAG_CODE2,
             List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             3),
         arguments(
-            "Same code for admit and principal diagnosis and both codes included in main diagnosis"
-                + " code list",
+            "Same code for admit and principal diagnosis and both codes included in main diagnosis code list",
             List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             DIAG_CODE1,
             DIAG_CODE1,
             List.of(DIAG_CODE1, DIAG_CODE2, DIAG_CODE3),
             3),
         arguments(
-            "Different admit and principal diagnosis codes and both codes NOT included in main"
-                + " diagnosis code list",
+            "Different admit and principal diagnosis codes and both codes NOT included in main diagnosis code list",
             List.of(DIAG_CODE3),
             DIAG_CODE1,
             DIAG_CODE2,
             List.of(DIAG_CODE3, DIAG_CODE2, DIAG_CODE1),
             3),
         arguments(
-            "Same code for admit and principal diagnosis and both codes NOT included in main"
-                + " diagnosis code list",
+            "Same code for admit and principal diagnosis and both codes NOT included in main diagnosis code list",
             List.of(DIAG_CODE2),
             DIAG_CODE1,
             DIAG_CODE1,
