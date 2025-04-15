@@ -1,14 +1,16 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
-import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -24,6 +26,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
@@ -40,6 +43,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean samhsaV2Enabled;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -89,11 +94,15 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager the security tag manager
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public McsClaimResponseTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = metricRegistry;
     this.securityTagManager = securityTagManager;
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -104,15 +113,18 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
-  public ClaimResponse transform(Object claimEntity, boolean includeTaxNumbers) {
-    if (!(claimEntity instanceof RdaMcsClaim)) {
+  public ClaimResponse transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
+
+    if (!(claim instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claimEntity;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(rdaMcsClaim.getIdrClmHdIcn(), McsTag.class);
+      RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claim;
       return transformClaim(rdaMcsClaim, securityTags);
     }
   }
@@ -141,8 +153,12 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/m-%s", claimGroup.getIdrClmHdIcn())));
 
-    Meta meta =
-        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    Meta meta = new Meta();
+    meta.setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    if (samhsaV2Enabled) {
+      meta.setSecurity(securityTags);
+    }
     claim.setMeta(meta);
     claim.setCreated(new Date());
 

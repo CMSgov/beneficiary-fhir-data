@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -32,6 +31,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -1647,42 +1647,40 @@ public final class TransformerTestUtilsV2 {
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
    *          false</code> )
    * @param includeTaxNumbers if tax numbers should be included in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      Object rifRecord,
+      ClaimWithSecurityTags<?> rifRecord,
       MetricRegistry metricRegistry,
       boolean includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterfaceV2 claimTransformerInterface = null;
-    if (rifRecord instanceof CarrierClaim) {
+    Object entity = rifRecord.getClaimEntity();
+    if (entity instanceof CarrierClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, securityTagManager);
-    } else if (rifRecord instanceof DMEClaim) {
+          new CarrierClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof DMEClaim) {
       claimTransformerInterface =
-          new DMEClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, securityTagManager);
-    } else if (rifRecord instanceof HHAClaim) {
-      claimTransformerInterface = new HHAClaimTransformerV2(metricRegistry, securityTagManager);
-    } else if (rifRecord instanceof HospiceClaim) {
-      claimTransformerInterface = new HospiceClaimTransformerV2(metricRegistry, securityTagManager);
-    } else if (rifRecord instanceof InpatientClaim) {
+          new DMEClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof HHAClaim) {
       claimTransformerInterface =
-          new InpatientClaimTransformerV2(metricRegistry, securityTagManager);
-    } else if (rifRecord instanceof OutpatientClaim) {
+          new HHAClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof HospiceClaim) {
       claimTransformerInterface =
-          new OutpatientClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, securityTagManager);
-    } else if (rifRecord instanceof PartDEvent) {
+          new HospiceClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof InpatientClaim) {
       claimTransformerInterface =
-          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup);
-    } else if (rifRecord instanceof SNFClaim) {
-      claimTransformerInterface = new SNFClaimTransformerV2(metricRegistry, securityTagManager);
+          new InpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof OutpatientClaim) {
+      claimTransformerInterface =
+          new OutpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof PartDEvent) {
+      claimTransformerInterface = new PartDEventTransformerV2(metricRegistry);
+    } else if (entity instanceof SNFClaim) {
+      claimTransformerInterface =
+          new SNFClaimTransformerV2(metricRegistry, securityTagManager, false);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }

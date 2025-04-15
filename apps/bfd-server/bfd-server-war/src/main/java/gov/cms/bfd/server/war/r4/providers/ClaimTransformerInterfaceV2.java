@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Interface defining a transform method for claim processing. */
@@ -13,5 +14,5 @@ public interface ClaimTransformerInterfaceV2 {
    * @param includeTaxNumbers {@link boolean} denoting inclusion of tax numbers.
    * @return {@link ExplanationOfBenefit}
    */
-  ExplanationOfBenefit transform(Object claimEntity, boolean includeTaxNumbers);
+  ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers);
 }

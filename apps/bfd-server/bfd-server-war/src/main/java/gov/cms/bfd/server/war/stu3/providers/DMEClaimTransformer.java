@@ -1,20 +1,21 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
-import gov.cms.bfd.model.rif.samhsa.DmeTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -35,15 +37,14 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform");
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean samhsaV2Enabled;
 
   /**
    * Instantiates a new transformer.
@@ -53,37 +54,40 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
    * @param securityTagManager SamhsaSecurityTag lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public DMEClaimTransformer(
       MetricRegistry metricRegistry,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link DMEClaim} to use
+   * @param claimEntity the {@link DMEClaim} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevelDstu3(claimEntity.getSecurityTags());
+
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       DMEClaim dmeClaim = (DMEClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
       eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
     }
     return eob;
@@ -291,7 +295,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
           claimLine.getNationalDrugCode(),
-          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(claimLine.getNationalDrugCode()));
+          CommonTransformerUtils.buildReplaceDrugCode(claimLine.getNationalDrugCode()));
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?
@@ -320,8 +324,9 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
       }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
-
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     return eob;
   }

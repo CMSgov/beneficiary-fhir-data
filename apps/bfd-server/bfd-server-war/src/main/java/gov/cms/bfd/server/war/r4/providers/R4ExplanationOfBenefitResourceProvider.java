@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -36,7 +37,11 @@ import gov.cms.bfd.server.war.commons.LoggingUtils;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.OpenAPIContentProvider;
 import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
+import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.commons.StringUtils;
+import gov.cms.bfd.server.war.r4.providers.pac.common.*;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -44,6 +49,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -117,8 +123,13 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
   /** The transformer for snf claims. */
   private final SNFClaimTransformerV2 snfClaimTransformer;
 
+  private final SecurityTagsDao securityTagsDao;
+
   /** Loads the NPI data from the database. */
   NPIOrgLookup npiOrgLookup;
+
+  /** Loads the DrugCodes from the database. */
+  FDADrugCodeDisplayLookup drugCodeDisplayLookup;
 
   /**
    * Instantiates a new {@link R4ExplanationOfBenefitResourceProvider}.
@@ -138,7 +149,9 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    * @param outpatientClaimTransformer the outpatient claim transformer
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
-   * @param npiOrgLookup Instance of NPIOrgLookup
+   * @param securityTagsDao the security Tags Dao
+   * @param npiOrgLookup NPIOrgLookup
+   * @param fdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup
    */
   public R4ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -153,7 +166,9 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
       OutpatientClaimTransformerV2 outpatientClaimTransformer,
       PartDEventTransformerV2 partDEventTransformer,
       SNFClaimTransformerV2 snfClaimTransformer,
-      NPIOrgLookup npiOrgLookup) {
+      SecurityTagsDao securityTagsDao,
+      NPIOrgLookup npiOrgLookup,
+      FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -166,7 +181,9 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     this.outpatientClaimTransformer = requireNonNull(outpatientClaimTransformer);
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
+    this.securityTagsDao = securityTagsDao;
     this.npiOrgLookup = npiOrgLookup;
+    this.drugCodeDisplayLookup = fdaDrugCodeDisplayLookup;
   }
 
   /**
@@ -247,8 +264,27 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
       }
     }
 
+    ClaimWithSecurityTags claimEntitiesWithTag = null;
+    String claimId;
+
+    SecurityTagManager securityTagManager = new SecurityTagManager();
+
+    if (claimEntity != null) {
+      claimId = securityTagManager.extractClaimId(claimEntity);
+
+      if (claimId != null && !claimId.isEmpty()) {
+        Map<String, Set<String>> claimIdToTagsMap =
+            securityTagsDao.buildClaimIdToTagsMap(
+                claimType.getEntityTagType(), Collections.singleton(claimId));
+        Set<String> claimSpecificTags =
+            claimIdToTagsMap.getOrDefault(claimId, Collections.emptySet());
+
+        claimEntitiesWithTag = new ClaimWithSecurityTags<>(claimEntity, claimSpecificTags);
+      }
+    }
+
     ClaimTransformerInterfaceV2 transformer = deriveTransformer(claimType);
-    ExplanationOfBenefit eob = transformer.transform(claimEntity, includeTaxNumbers);
+    ExplanationOfBenefit eob = transformer.transform(claimEntitiesWithTag, includeTaxNumbers);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -257,7 +293,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
-    TransformerUtilsV2.enrichEob(eob, npiOrgLookup);
+    TransformerUtilsV2.enrichEob(eob, npiOrgLookup, drugCodeDisplayLookup);
     return eob;
   }
 
@@ -420,7 +456,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
           TransformerUtilsV2.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
-    TransformerUtilsV2.enrichEobBundle(bundle, npiOrgLookup);
+    TransformerUtilsV2.enrichEobBundle(bundle, npiOrgLookup, drugCodeDisplayLookup);
     return bundle;
   }
 

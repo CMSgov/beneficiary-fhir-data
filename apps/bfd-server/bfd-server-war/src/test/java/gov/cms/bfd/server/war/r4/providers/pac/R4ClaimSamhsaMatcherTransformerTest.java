@@ -13,8 +13,10 @@ import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,6 +59,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
   /** A date to use for ICD10 testing. */
   private static final LocalDate ICD_10_DATE = LocalDate.of(2020, 1, 1);
+
+  Set<String> securityTags = new HashSet<>();
 
   /**
    * Data method for the fissTest. Used automatically via the MethodSource annotation.
@@ -401,11 +405,12 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     entity.setProcCodes(procedures);
     entity.setRevenueLines(Set.of(line));
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
 
-    Claim claim = fissClaimTransformerV2.transform(entity, true);
+    Claim claim =
+        fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
 
     R4ClaimSamhsaMatcher matcher =
         new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2, false);
@@ -540,11 +545,12 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     entity.setDetails(procedures);
 
     FissClaimTransformerV2 fissClaimTransformerV2 =
-        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
 
-    Claim claim = mcsClaimTransformerV2.transform(entity, true);
+    Claim claim =
+        mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
 
     R4ClaimSamhsaMatcher matcher =
         new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2, false);

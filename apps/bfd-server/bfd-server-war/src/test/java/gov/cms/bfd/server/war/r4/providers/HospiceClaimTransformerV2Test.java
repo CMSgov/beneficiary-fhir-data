@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,8 +33,10 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -93,6 +96,8 @@ public final class HospiceClaimTransformerV2Test {
   /** The metrics timer context. Used for determining the timer was stopped. */
   @Mock Timer.Context metricsTimerContext;
 
+  Set<String> securityTags = new HashSet<>();
+
   /**
    * Generates the Claim object to be used in multiple tests.
    *
@@ -103,7 +108,8 @@ public final class HospiceClaimTransformerV2Test {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    hospiceClaimTransformer = new HospiceClaimTransformerV2(metricRegistry, securityTagManager);
+    hospiceClaimTransformer =
+        new HospiceClaimTransformerV2(metricRegistry, securityTagManager, false);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -119,8 +125,12 @@ public final class HospiceClaimTransformerV2Test {
 
   /** Creates an eob for the test. */
   private void createEOB() {
-    ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -148,7 +158,9 @@ public final class HospiceClaimTransformerV2Test {
    */
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
-    assertMatches(claim, hospiceClaimTransformer.transform(claim, false));
+    assertMatches(
+        claim,
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false));
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -459,8 +471,12 @@ public final class HospiceClaimTransformerV2Test {
     claim.setClaimQueryCode(Optional.empty());
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = hospiceClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

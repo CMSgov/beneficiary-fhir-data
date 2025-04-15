@@ -152,7 +152,7 @@
 /bfd/${env}/pipeline/nonsensitive/rda/job/batch_size: "20"
 /bfd/${env}/pipeline/nonsensitive/rda/job/write_thread_count: "20"
 /bfd/${env}/pipeline/nonsensitive/rda/job/process_dlq: "true"
-/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
@@ -187,6 +187,7 @@
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
+/bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server prod
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"

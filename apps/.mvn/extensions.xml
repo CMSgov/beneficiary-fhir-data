@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Enables build caching for all projects within BFD to improve build efficiency-->
 <extensions>
-  <extension>
-    <groupId>org.apache.maven.extensions</groupId>
-    <artifactId>maven-build-cache-extension</artifactId>
-    <version>1.0.0</version>
-  </extension>
+    <extension>
+        <groupId>org.apache.maven.extensions</groupId>
+        <artifactId>maven-build-cache-extension</artifactId>
+        <version>1.2.0</version>
+    </extension>
 </extensions>

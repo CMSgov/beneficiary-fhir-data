@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
@@ -24,18 +22,20 @@ import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationStatus;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -86,6 +86,8 @@ public final class PartDEventTransformerV2Test {
   /** The mock npi lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
 
+  Set<String> securityTags = new HashSet<>();
+
   /** ndcProductHashMap represents a map of PRODUCTNDC and SUBSTANCENAME for test. */
   Map<String, String> ndcProductHashMap = new HashMap<>();
 
@@ -125,17 +127,12 @@ public final class PartDEventTransformerV2Test {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    InputStream npiDataStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
-    ndcProductHashMap.put(RDATestUtils.FAKE_DRUG_CODE, RDATestUtils.FAKE_DRUG_CODE_DISPLAY);
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
-        new FdaDrugCodeDisplayLookup(ndcProductHashMap);
 
-    partdEventTransformer = new PartDEventTransformerV2(metricRegistry, fdaDrugCodeDisplayLookup);
+    partdEventTransformer = new PartDEventTransformerV2(metricRegistry);
     claim = generateClaim();
-    eob = partdEventTransformer.transform(claim, false);
+    eob = partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        eob, RDATestUtils.createTestNpiOrgLookup(), RDATestUtils.createFdaDrugCodeDisplayLookup());
   }
 
   /**

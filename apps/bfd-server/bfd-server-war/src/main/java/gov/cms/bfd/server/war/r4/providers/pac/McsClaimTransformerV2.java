@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -8,12 +9,12 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
-import gov.cms.bfd.model.rda.samhsa.McsTag;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.r4.providers.pac.common.McsTransformerV2;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ResourceTransformer;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -40,6 +41,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
@@ -50,6 +52,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean samhsaV2Enabled;
 
   /** The metric name. */
   private static final String METRIC_NAME =
@@ -80,11 +84,15 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    *
    * @param metricRegistry the metric registry
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public McsClaimTransformerV2(
-      MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
+      MetricRegistry metricRegistry,
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = metricRegistry;
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
@@ -96,16 +104,18 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
-  public Claim transform(Object claimEntity, boolean includeTaxNumbers) {
-    if (!(claimEntity instanceof RdaMcsClaim)) {
+  public Claim transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
+
+    if (!(claim instanceof RdaMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
-
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      RdaMcsClaim claim = (RdaMcsClaim) claimEntity;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(claim.getIdrClmHdIcn(), McsTag.class);
-      return transformClaim(claim, includeTaxNumbers, securityTags);
+      RdaMcsClaim rdaMcsClaim = (RdaMcsClaim) claim;
+      return transformClaim(rdaMcsClaim, includeTaxNumbers, securityTags);
     }
   }
 
@@ -145,8 +155,12 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
     claim.setCreated(new Date());
 
-    Meta meta =
-        new Meta().setSecurity(securityTags).setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+    Meta meta = new Meta();
+    meta.setLastUpdated(Date.from(claimGroup.getLastUpdated()));
+
+    if (samhsaV2Enabled) {
+      meta.setSecurity(securityTags);
+    }
     claim.setMeta(meta);
     return claim;
   }

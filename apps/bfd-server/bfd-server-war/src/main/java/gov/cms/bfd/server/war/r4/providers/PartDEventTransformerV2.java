@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
@@ -20,6 +19,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -39,9 +39,6 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform");
@@ -54,25 +51,25 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
    */
-  public PartDEventTransformerV2(
-      MetricRegistry metricRegistry, FdaDrugCodeDisplayLookup drugCodeDisplayLookup) {
+  public PartDEventTransformerV2(MetricRegistry metricRegistry) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
   }
 
   /**
    * Transforms a {@link PartDEvent} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+    Object claim = claimEntity.getClaimEntity();
+
     if (!(claim instanceof PartDEvent)) {
       throw new BadCodeMonkeyException();
     }
@@ -331,7 +328,7 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
             null,
-            drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(
+            CommonTransformerUtils.buildReplaceDrugCode(
                 Optional.of(claimGroup.getNationalDrugCode())),
             claimGroup.getNationalDrugCode()));
 

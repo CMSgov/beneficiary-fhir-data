@@ -6,14 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
@@ -27,13 +25,16 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -57,9 +58,6 @@ public final class CarrierClaimTransformerTest {
   /** The Metric Registry to use for the test. */
   @Mock MetricRegistry metricRegistry;
 
-  /** The FDA drug lookup to use for the test. */
-  @Mock FdaDrugCodeDisplayLookup drugDisplayLookup;
-
   /** The NPI org lookup to use for the test. */
   @Mock NPIOrgLookup npiOrgLookup;
 
@@ -71,6 +69,8 @@ public final class CarrierClaimTransformerTest {
 
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context metricsTimerContext;
+
+  Set<String> securityTags = new HashSet<>();
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
@@ -85,11 +85,9 @@ public final class CarrierClaimTransformerTest {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    when(drugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(anyString())))
-        .thenReturn("UNKNOWN");
 
     carrierClaimTransformer =
-        new CarrierClaimTransformer(metricRegistry, drugDisplayLookup, securityTagManager);
+        new CarrierClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**
@@ -111,7 +109,7 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    carrierClaimTransformer.transform(claim, true);
+    carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     String expectedTimerName = carrierClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -139,12 +137,14 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     claim.setLastUpdated(Instant.now());
-    ExplanationOfBenefit eobWithLastUpdated = carrierClaimTransformer.transform(claim, true);
+    ExplanationOfBenefit eobWithLastUpdated =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     assertMatches(claim, eobWithLastUpdated, true);
 
     claim.setLastUpdated(Optional.empty());
-    ExplanationOfBenefit eobWithoutLastUpdated = carrierClaimTransformer.transform(claim, true);
+    ExplanationOfBenefit eobWithoutLastUpdated =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     assertMatches(claim, eobWithoutLastUpdated, true);
   }
@@ -171,7 +171,8 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit eob = carrierClaimTransformer.transform(claim, true);
+    ExplanationOfBenefit eob =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
 
     assertEquals(2, eob.getCareTeam().size());
   }
@@ -201,8 +202,13 @@ public final class CarrierClaimTransformerTest {
       line.setOrganizationNpi(Optional.empty());
     }
 
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
 
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
@@ -236,7 +242,8 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = carrierClaimTransformer.transform(claim, true);
+    ExplanationOfBenefit eob =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
     assertMatches(claim, eob, true);
   }
 

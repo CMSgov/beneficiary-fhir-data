@@ -14,7 +14,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
@@ -28,14 +27,17 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -59,7 +61,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -89,8 +90,7 @@ public class CarrierClaimTransformerV2Test {
   /** The mock metric timer context (used to stop the metric). */
   @Mock Timer.Context metricsTimerContext;
 
-  /** The mock FdaDrugCodeDisplayLookup. */
-  private MockedStatic<FdaDrugCodeDisplayLookup> fdaDrugCodeDisplayLookup;
+  Set<String> securityTags = new HashSet<>();
 
   /**
    * Generates the sample A claim object to be used in multiple tests.
@@ -122,15 +122,18 @@ public class CarrierClaimTransformerV2Test {
   public void before() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
     SecurityTagManager securityTagManager = mock(SecurityTagManager.class);
 
     carrierClaimTransformer =
-        new CarrierClaimTransformerV2(metricRegistry, drugCodeDisplayLookup, securityTagManager);
+        new CarrierClaimTransformerV2(metricRegistry, securityTagManager, false);
 
     claim = generateClaim();
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -161,7 +164,9 @@ public class CarrierClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException, IOException {
     CarrierClaim claim = generateClaim();
 
-    assertMatches(claim, carrierClaimTransformer.transform(claim, false));
+    assertMatches(
+        claim,
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false));
   }
 
   /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
@@ -188,8 +193,12 @@ public class CarrierClaimTransformerV2Test {
     // Remove CARR_CLM_BLG_NPI_NUM from the claim
     claim = generateClaim();
     claim.setCarrierClaimBlgNpiNumber(Optional.empty());
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -729,8 +738,14 @@ public class CarrierClaimTransformerV2Test {
             .get();
     loadedClaim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     // First member
     CareTeamComponent member1 =
         TransformerTestUtilsV2.findCareTeamBySequence(1, genEob.getCareTeam());
@@ -836,8 +851,14 @@ public class CarrierClaimTransformerV2Test {
       line.setProviderParticipatingIndCode(Optional.empty());
     }
 
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(loadedClaim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
     String prtIndCdUrl =
@@ -866,8 +887,12 @@ public class CarrierClaimTransformerV2Test {
             .get();
     claim.setLastUpdated(Instant.now());
 
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claim, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -1450,8 +1475,13 @@ public class CarrierClaimTransformerV2Test {
     claimWithoutNpi.setLastUpdated(Instant.now());
 
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
-    ExplanationOfBenefit genEob = carrierClaimTransformer.transform(claimWithoutNpi, false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    ExplanationOfBenefit genEob =
+        carrierClaimTransformer.transform(
+            new ClaimWithSecurityTags<>(claimWithoutNpi, securityTags), false);
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     ExplanationOfBenefit eobWithoutNpi = parser.parseResource(ExplanationOfBenefit.class, json);
