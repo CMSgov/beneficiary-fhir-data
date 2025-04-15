@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -33,6 +32,7 @@ import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -2195,9 +2195,11 @@ final class TransformerTestUtils {
    */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
+    FDADrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.createFdaDrugCodeDisplayLookup();
     String nationalDrugCodeDisplayValueActual =
-        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(nationalDrugCode));
+        drugCodeDisplayLookup
+            .retrieveFDADrugCodeDisplay(Set.of(nationalDrugCode))
+            .get(nationalDrugCode);
     assertEquals(
         nationalDrugCodeDisplayValue,
         nationalDrugCodeDisplayValueActual,
@@ -2257,8 +2259,6 @@ final class TransformerTestUtils {
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
    *          false</code> )
    * @param includeTaxNumbers if tax numbers should be included in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTag lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
@@ -2266,17 +2266,15 @@ final class TransformerTestUtils {
       Object rifRecord,
       MetricRegistry metricRegistry,
       Boolean includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterface claimTransformerInterface = null;
     if (rifRecord instanceof CarrierClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformer(
-              metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
+          new CarrierClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof DMEClaim) {
       claimTransformerInterface =
-          new DMEClaimTransformer(metricRegistry, drugCodeDisplayLookup, securityTagManager, false);
+          new DMEClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof HHAClaim) {
       claimTransformerInterface =
           new HHAClaimTransformer(metricRegistry, securityTagManager, false);
@@ -2290,7 +2288,7 @@ final class TransformerTestUtils {
       claimTransformerInterface =
           new OutpatientClaimTransformer(metricRegistry, securityTagManager, false);
     } else if (rifRecord instanceof PartDEvent) {
-      claimTransformerInterface = new PartDEventTransformer(metricRegistry, drugCodeDisplayLookup);
+      claimTransformerInterface = new PartDEventTransformer(metricRegistry);
     } else if (rifRecord instanceof SNFClaim) {
       claimTransformerInterface =
           new SNFClaimTransformer(metricRegistry, securityTagManager, false);

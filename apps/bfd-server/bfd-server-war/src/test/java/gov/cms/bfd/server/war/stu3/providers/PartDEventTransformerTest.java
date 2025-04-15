@@ -8,12 +8,11 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IdentifierType;
@@ -22,7 +21,6 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.sql.Date;
 import java.util.Arrays;
@@ -65,13 +63,8 @@ public final class PartDEventTransformerTest {
   protected void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    InputStream npiDataStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
 
-    partdEventTransformer = new PartDEventTransformer(metricRegistry, fdaDrugCodeDisplayLookup);
+    partdEventTransformer = new PartDEventTransformer(metricRegistry);
   }
 
   /**
@@ -102,8 +95,9 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
         partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
 
+    TransformerUtils.enrichEob(
+        eob, RDATestUtils.createTestNpiOrgLookup(), RDATestUtils.createFdaDrugCodeDisplayLookup());
     assertMatches(claim, eob);
   }
 
@@ -191,8 +185,9 @@ public final class PartDEventTransformerTest {
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
         partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtils.enrichEob(eob, RDATestUtils.createTestNpiOrgLookup());
 
+    TransformerUtils.enrichEob(
+        eob, RDATestUtils.createTestNpiOrgLookup(), RDATestUtils.createFdaDrugCodeDisplayLookup());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
@@ -253,11 +248,13 @@ public final class PartDEventTransformerTest {
     assertEquals("01", claim.getPrescriberIdQualifierCode());
 
     ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-    FdaDrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
+    FDADrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.createFdaDrugCodeDisplayLookup();
     TransformerTestUtils.assertHasCoding(
         TransformerConstants.CODING_NDC,
         null,
-        drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(Optional.of(claim.getNationalDrugCode())),
+        drugCodeDisplayLookup
+            .retrieveFDADrugCodeDisplay(Set.of(claim.getNationalDrugCode()))
+            .get(claim.getNationalDrugCode()),
         claim.getNationalDrugCode(),
         rxItem.getService().getCoding());
 
