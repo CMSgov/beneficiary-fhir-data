@@ -1,6 +1,6 @@
 locals {
   env = terraform.workspace
-  
+
   victor_ops_sns         = "bfd-${local.env}-cloudwatch-alarms"
   bfd_test_slack_sns     = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
   bfd_warnings_slack_sns = "bfd-${local.env}-cloudwatch-alarms-slack-bfd-warnings"
@@ -41,8 +41,8 @@ locals {
   # Use Terraform's "splat" operator to automatically return either an empty list, if no
   # SNS topic was retrieved (data.aws_sns_topic.sns.length == 0) or a list with 1 element that
   # is the ARN of the SNS topic. Functionally equivalent to [for o in data.aws_sns_topic.sns : o.arn]
-  alert_arn       = data.aws_sns_topic.alert_sns[*].arn
-  notify_arn      = data.aws_sns_topic.notify_sns[*].arn
+  alert_arn  = data.aws_sns_topic.alert_sns[*].arn
+  notify_arn = data.aws_sns_topic.notify_sns[*].arn
 
   server_log_availability = {
     period       = 1 * 60 * 60 # 1 hour 
@@ -111,22 +111,22 @@ resource "aws_cloudwatch_metric_alarm" "server-query-logging-listener-warning" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "samhsa-mismatch-error" {
-  alarm_name = "bfd-${local.env}-samhsa-mismatch-error"
-  namespace = "bfd-${local.env}/bfd-server"
-  metric_name = "bfd-${local.env}/bfd-server/samhsa-mismatch/count/error"
+  alarm_name          = "bfd-${local.env}-samhsa-mismatch-error"
+  namespace           = "bfd-${local.env}/bfd-server"
+  metric_name         = "bfd-${local.env}/bfd-server/samhsa-mismatch/count/error"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods = 1
-  period = 60
-  statistic = "Sum"
+  evaluation_periods  = 1
+  period              = 60
+  statistic           = "Sum"
 
   alarm_description = join("",
     [
       "BFD Server has encountered a SAMHSA 2.0 filter mismatch error ",
       "in APP-ENV: bfd-${local.env}"
-    ])
+  ])
 
   dimensions = {
-    LogGroupName = "/bfd/${local.env}/bfd-server/messages.json" 
+    LogGroupName = "/bfd/${local.env}/bfd-server/messages.json"
   }
 
   alarm_actions = local.notify_arn
