@@ -5,5 +5,5 @@ import java.time.LocalDate;
 public class IdrConstants {
   static final String YES = "Y";
   static final String NO = "N";
-  static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
+  public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
 }

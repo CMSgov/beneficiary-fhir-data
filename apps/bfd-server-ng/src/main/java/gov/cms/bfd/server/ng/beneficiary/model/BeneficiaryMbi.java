@@ -1,0 +1,22 @@
+package gov.cms.bfd.server.ng.beneficiary.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.util.Optional;
+
+@Entity
+@Table(name = "beneficiary_mbi", schema = "idr")
+public class BeneficiaryMbi {
+  @Id
+  @Column(name = "bene_mbi_id", nullable = false)
+  private String mbi;
+
+  @Column(name = "bene_mbi_efctv_dt")
+  private Optional<LocalDate> effectiveDate;
+
+  @Column(name = "bene_mbi_obslt_dt")
+  private Optional<LocalDate> obsoleteDate;
+}

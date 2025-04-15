@@ -58,6 +58,14 @@ class IdrBeneficiaryHistory(BaseModel):
     idr_trans_obslt_ts: datetime
 
 
+class IdrBeneficiaryMbi(BaseModel):
+    bene_mbi_id: str
+    bene_mbi_efctv_dt: date
+    bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date)]
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+
+
 class IdrElectionPeriodUsage(BaseModel):
     bene_sk: int
     cntrct_pbp_sk: int

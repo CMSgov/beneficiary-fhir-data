@@ -49,6 +49,17 @@ CREATE TABLE idr.beneficiary_history(
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
+CREATE TABLE idr.beneficiary_mbi (
+    bene_mbi_id VARCHAR(11) NOT NULL,
+    bene_mbi_efctv_dt DATE NOT NULL,
+    bene_mbi_obslt_dt DATE NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
+);
+
 CREATE TABLE idr.beneficiary_election_period_usage (
     bene_sk BIGINT NOT NULL,
     cntrct_pbp_sk BIGINT NOT NULL,
@@ -187,6 +198,25 @@ VALUES(
     1, -- bene_xref_efctv_sk,
     '1S000000000',-- bene_mbi_id,
     '000000000',-- bene_ssn_num,
+    NOW(),-- idr_trans_efctv_ts,
+    '9999-12-31',-- idr_trans_obslt_ts
+    '2024-01-01',-- bfd_created_ts
+    '2024-01-01'-- bfd_updated_ts
+);
+
+INSERT INTO idr.beneficiary_mbi (
+    bene_mbi_id,
+    bene_mbi_efctv_dt,
+    bene_mbi_obslt_dt,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    bfd_created_ts,
+    bfd_updated_ts
+)
+VALUES(
+    '1S000000000',-- bene_mbi_id,
+    '2024-01-01',-- bene_mbi_efctv_dt
+    '9999-12-31',-- bene_mbi_efctv_dt
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     '2024-01-01',-- bfd_created_ts

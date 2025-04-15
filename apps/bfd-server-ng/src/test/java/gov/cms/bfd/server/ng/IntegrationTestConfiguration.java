@@ -17,7 +17,7 @@ public class IntegrationTestConfiguration {
   public PostgreSQLContainer<?> postgres() {
     // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
     // context
-    return new PostgreSQLContainer<>("postgres:16")
+    return new PostgreSQLContainer<>("postgres:16.4-alpine")
         .withDatabaseName("testdb")
         .withUsername("bfdtest")
         .withPassword("bfdtest")

@@ -1,0 +1,43 @@
+gov.cms.bfd.server.ng.PatientIT.patientRead=[
+{
+  "resourceType": "Patient",
+  "id": "1",
+  "meta": {
+    "lastUpdated": "2024-01-01T00:00:00.000+00:00",
+    "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.0.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|3.1.1" ]
+  },
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+    "extension": [ {
+      "url": "ombCategory",
+      "valueCoding": {
+        "system": "urn:oid:2.16.840.1.113883.6.238",
+        "code": "2106-3",
+        "display": "White"
+      }
+    }, {
+      "url": "text",
+      "valueCode": "White"
+    } ]
+  } ],
+  "name": [ {
+    "family": "NORRIS",
+    "given": [ "CHUCK", "R" ]
+  } ],
+  "birthDate": "1960-01-01",
+  "address": [ {
+    "line": [ "100 MAIN ST" ],
+    "city": "RICHMOND",
+    "state": "VA",
+    "postalCode": "22473"
+  } ],
+  "communication": [ {
+    "language": {
+      "coding": [ {
+        "system": "urn:ietf:bcp:47",
+        "code": "en"
+      } ]
+    }
+  } ]
+}
+]

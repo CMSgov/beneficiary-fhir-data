@@ -38,8 +38,11 @@ class TestPipeline:
 
         cur = conn.execute("select * from idr.beneficiary_history order by bene_sk")
         assert cur.rowcount == 1
-
         assert rows[0]["bene_sk"] == 1
+        assert rows[0]["bene_mbi_id"] == "1S000000000"
+
+        cur = conn.execute("select * from idr.beneficiary_mbi order by bene_mbi_id")
+        assert cur.rowcount == 1
         assert rows[0]["bene_mbi_id"] == "1S000000000"
 
         # Wait for system time to advance enough to update the timestamp

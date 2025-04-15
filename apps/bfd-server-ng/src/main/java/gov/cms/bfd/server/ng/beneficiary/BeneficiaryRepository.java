@@ -12,17 +12,22 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
       value =
           """
               SELECT new HistoricalIdentity(
-                hstry.mbi,
-                hstry.beneSk,
-                hstry.mbi = bene.mbi AS isCurrentMbi
+                history.mbi,
+                history.beneSk,
+                mbi_history.effectiveDate,
+                mbi_history.obsoleteDate,
+                history.mbi = bene.mbi AS isCurrentMbi
               )
               FROM Beneficiary bene
-              JOIN BeneficiaryHistory hstry ON bene.xrefSk = hstry.xrefSk
+              LEFT JOIN BeneficiaryHistory history ON bene.xrefSk = history.xrefSk
+              LEFT JOIN BeneficiaryMbi mbi_history
+                ON history.mbi = mbi_history.mbi
+                AND mbi_history.obsoleteDate < gov.cms.bfd.server.ng.converter.IdrConstants.DEFAULT_DATE
               WHERE
                 bene.beneSk = :beneSk
-                AND (hstry.mbi IS NOT NULL OR hstry.beneSk != bene.beneSk)
-                AND NOT EXISTS (SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.mbi or om.mbi = hstry.mbi)
-              GROUP BY hstry.mbi, hstry.beneSk, bene.mbi
+                AND (history.mbi != "" OR history.beneSk != bene.beneSk)
+                AND NOT EXISTS (SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.mbi or om.mbi = history.mbi)
+              GROUP BY history.mbi, history.beneSk, bene.mbi, mbi_history.effectiveDate, mbi_history.obsoleteDate
           """)
   List<HistoricalIdentity> getHistoricalIdentities(@Param("beneSk") long beneSk);
 

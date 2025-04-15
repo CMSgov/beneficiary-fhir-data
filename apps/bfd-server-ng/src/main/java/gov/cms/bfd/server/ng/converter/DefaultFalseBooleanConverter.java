@@ -12,6 +12,6 @@ public class DefaultFalseBooleanConverter implements AttributeConverter<Boolean,
 
   @Override
   public Boolean convertToEntityAttribute(String value) {
-    return value.equals(IdrConstants.YES);
+    return IdrConstants.YES.equals(value);
   }
 }

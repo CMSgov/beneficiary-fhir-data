@@ -49,6 +49,17 @@ CREATE TABLE idr.beneficiary_history(
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
+CREATE TABLE idr.beneficiary_mbi (
+    bene_mbi_id VARCHAR(11) NOT NULL,
+    bene_mbi_efctv_dt DATE NOT NULL,
+    bene_mbi_obslt_dt DATE NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
+);
+
 CREATE TABLE idr.beneficiary_election_period_usage (
     bene_sk BIGINT NOT NULL,
     cntrct_pbp_sk BIGINT NOT NULL,
