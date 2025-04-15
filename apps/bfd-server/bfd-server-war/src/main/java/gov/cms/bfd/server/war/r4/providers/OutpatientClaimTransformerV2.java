@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
@@ -44,9 +43,6 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(OutpatientClaimTransformerV2.class.getSimpleName(), "transform");
@@ -64,17 +60,14 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public OutpatientClaimTransformerV2(
       MetricRegistry metricRegistry,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
       SecurityTagManager securityTagManager,
       @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
     this.samhsaV2Enabled = samhsaV2Enabled;
   }
@@ -438,7 +431,7 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
       TransformerUtilsV2.addNationalDrugCode(
           item,
           line.getNationalDrugCode(),
-          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          CommonTransformerUtils.buildReplaceDrugCode(line.getNationalDrugCode()));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
