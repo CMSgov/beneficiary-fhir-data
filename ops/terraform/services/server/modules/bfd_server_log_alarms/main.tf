@@ -110,7 +110,6 @@ resource "aws_cloudwatch_metric_alarm" "server-query-logging-listener-warning" {
   treat_missing_data  = "notBreaching"
 }
 
-#Alarm is triggered to notify on Slack, the occurrance of "SAMHSA 2.0 filter mismatch error"
 resource "aws_cloudwatch_metric_alarm" "samhsa-mismatch-error" {
   alarm_name = "bfd-${local.env}-samhsa-mismatch-error"
   namespace = "bfd-${local.env}/bfd-server"

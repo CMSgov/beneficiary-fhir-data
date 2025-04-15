@@ -431,7 +431,6 @@ resource "aws_cloudwatch_log_metric_filter" "query_logging_listener_count_warnin
   }
 }
 
-#Count number of occurance of the "SAMHSA 2.0 filter mismatch error" messages
 resource "aws_cloudwatch_log_metric_filter" "samhsa_mismatch_error_count" {
   name = "bfd-${local.env}/bfd-server/samhsa-mismatch/count/error"
   log_group_name = local.log_groups.messages 
