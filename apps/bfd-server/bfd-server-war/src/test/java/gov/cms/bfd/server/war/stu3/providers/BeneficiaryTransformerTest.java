@@ -428,10 +428,17 @@ public final class BeneficiaryTransformerTest {
 
     assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
-    if (beneficiary.getSex() == Sex.MALE.getCode())
+    if (beneficiary.getSex() == Sex.MALE.getCode()) {
       assertEquals(AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
-    else if (beneficiary.getSex() == Sex.FEMALE.getCode())
+      assertEquals(
+          TransformerConstants.US_CORE_SEX_MALE,
+          patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());
+    } else if (beneficiary.getSex() == Sex.FEMALE.getCode()) {
       assertEquals(AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
+      assertEquals(
+          TransformerConstants.US_CORE_SEX_FEMALE,
+          patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());
+    }
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
     assertEquals(beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());

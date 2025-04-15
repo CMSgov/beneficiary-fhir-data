@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -190,9 +191,18 @@ public class BeneficiaryTransformerV2 {
       char sex = beneficiary.getSex();
       if (sex == Sex.MALE.getCode()) {
         patient.setGender((AdministrativeGender.MALE));
+        patient.addExtension(
+            new Extension()
+                .setValue(new CodeType().setValue(TransformerConstants.US_CORE_SEX_MALE))
+                .setUrl(TransformerConstants.US_CORE_SEX_URL));
       } else if (sex == Sex.FEMALE.getCode()) {
         patient.setGender((AdministrativeGender.FEMALE));
+        patient.addExtension(
+            new Extension()
+                .setValue(new CodeType().setValue(TransformerConstants.US_CORE_SEX_FEMALE))
+                .setUrl(TransformerConstants.US_CORE_SEX_URL));
       } else {
+        // US Core sex extension doesn't support "unknown"
         patient.setGender((AdministrativeGender.UNKNOWN));
       }
 

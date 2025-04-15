@@ -25,6 +25,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.Profile;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -537,6 +538,9 @@ public final class BeneficiaryTransformerV2Test {
   @Test
   public void shouldMatchBeneficiarySex() {
     assertEquals(AdministrativeGender.MALE, patient.getGender());
+    assertEquals(
+        TransformerConstants.US_CORE_SEX_MALE,
+        patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());
   }
 
   /**
