@@ -12,8 +12,8 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
       value =
           """
               SELECT new HistoricalIdentity(
-                history.mbi,
                 history.beneSk,
+                history.mbi,
                 mbi_history.effectiveDate,
                 mbi_history.obsoleteDate,
                 history.mbi = bene.mbi AS isCurrentMbi

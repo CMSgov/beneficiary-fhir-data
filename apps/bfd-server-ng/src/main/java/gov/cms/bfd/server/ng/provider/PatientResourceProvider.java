@@ -39,10 +39,15 @@ public class PatientResourceProvider implements IResourceProvider {
    */
   @Read
   public Patient find(@IdParam final IdType fhirId, final RequestDetails requestDetails) {
-    var ids = beneficiaryRepository.getHistoricalIdentities(fhirId.getIdPartAsLong());
-    var patientEntity = beneficiaryRepository.getById(fhirId.getIdPartAsLong());
 
-    return patientEntity.toFhir();
+    var patient = beneficiaryRepository.getById(fhirId.getIdPartAsLong()).toFhir();
+    var ids = beneficiaryRepository.getHistoricalIdentities(fhirId.getIdPartAsLong());
+    for (var id : ids) {
+      var idFhir = id.toFhir(patient);
+      patient.addIdentifier(idFhir.getMbi());
+      idFhir.getLink().ifPresent(patient::addLink);
+    }
+    return patient;
   }
 
   /**

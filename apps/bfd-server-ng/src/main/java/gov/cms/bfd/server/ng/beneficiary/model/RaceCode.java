@@ -51,7 +51,7 @@ public enum RaceCode {
       "UNK",
       "Unknown", //
       SystemUrl.US_CORE_RACE,
-      SystemUrl.NULL_FLAVOR);
+      SystemUrl.HL7_NULL_FLAVOR);
 
   private final String idrCode;
   private final String uscdiCode;

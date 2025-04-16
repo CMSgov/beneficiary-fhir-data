@@ -41,13 +41,13 @@ public class Beneficiary {
   @Embedded private DeathDate deathDate;
 
   public Patient toFhir() {
-    var patient =
-        new Patient()
-            .setName(List.of(beneficiaryName.toFhir()))
-            .setBirthDate(DateUtil.toDate(birthDate))
-            .setAddress(List.of(address.toFhir()))
-            .setCommunication(List.of(languageCode.toFhir()));
+    var patient = new Patient();
+    patient.setId(String.valueOf(beneSk));
 
+    patient.setName(List.of(beneficiaryName.toFhir()));
+    patient.setBirthDate(DateUtil.toDate(birthDate));
+    patient.setAddress(List.of(address.toFhir()));
+    patient.setCommunication(List.of(languageCode.toFhir()));
     deathDate.toFhir().ifPresent(patient::setDeceased);
     patient.addExtension(raceCode.toFhir());
     patient.setMeta(meta.toFhir());

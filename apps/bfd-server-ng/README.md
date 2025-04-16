@@ -72,3 +72,13 @@ mvn spring-boot:run
 ## Swagger
 
 The Swagger UI is available at `/v3/fhir/swagger-ui`
+
+## Tests
+
+### Regenerating snapshots
+
+Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).
+
+```sh
+mvn clean verify -DupdateSnapshot=
+```
