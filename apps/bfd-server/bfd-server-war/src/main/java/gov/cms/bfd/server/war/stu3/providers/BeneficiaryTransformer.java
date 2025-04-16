@@ -199,7 +199,7 @@ final class BeneficiaryTransformer {
         patient.setGender((AdministrativeGender.FEMALE));
         patient.addExtension(
             new Extension()
-                .setValue(new CodeType().setValue(TransformerConstants.US_CORE_SEX_MALE))
+                .setValue(new CodeType().setValue(TransformerConstants.US_CORE_SEX_FEMALE))
                 .setUrl(TransformerConstants.US_CORE_SEX_URL));
       } else {
         // US Core sex extension doesn't support "unknown"
