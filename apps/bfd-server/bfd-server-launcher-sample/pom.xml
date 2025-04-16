@@ -16,12 +16,9 @@
 
     <dependencies>
         <dependency>
-            <!-- Needed for JEE/Servlet support -->
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
-
         <dependency>
             <!-- Provides a sane facade for the giant mess of incompatible logging
                 frameworks in Java. -->

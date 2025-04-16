@@ -109,7 +109,8 @@ public final class DataServerLauncherApp {
     // Modify the default HTTP config.
     HttpConfiguration httpConfig = new HttpConfiguration();
     httpConfig.setSecurePort(appConfig.getPort());
-
+    // Jetty 12 started sending the server version by default. This stops that.
+    httpConfig.setSendServerVersion(false);
     // Create the HTTPS config.
     HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
     SecureRequestCustomizer customizer = new SecureRequestCustomizer();
