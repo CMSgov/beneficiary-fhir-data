@@ -17,11 +17,20 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.ee10.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintMapping;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.ee10.webapp.Configuration;
+import org.eclipse.jetty.ee10.webapp.FragmentConfiguration;
+import org.eclipse.jetty.ee10.webapp.JettyWebXmlConfiguration;
+import org.eclipse.jetty.ee10.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.ee10.webapp.WebAppConfiguration;
+import org.eclipse.jetty.ee10.webapp.WebAppContext;
+import org.eclipse.jetty.ee10.webapp.WebInfConfiguration;
+import org.eclipse.jetty.ee10.webapp.WebXmlConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
+import org.eclipse.jetty.security.Constraint;
+import org.eclipse.jetty.security.authentication.SslClientCertAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -31,18 +40,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.util.resource.PathResourceFactory;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.FragmentConfiguration;
-import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
-import org.eclipse.jetty.webapp.MetaInfConfiguration;
-import org.eclipse.jetty.webapp.WebAppConfiguration;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
-import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -138,14 +139,16 @@ public final class DataServerLauncherApp {
     httpsConfig.addCustomizer(customizer);
 
     // Create the SslContextFactory to be used, along with the cert.
+    ResourceFactory pathResourceFactory = new PathResourceFactory();
     SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
     sslContextFactory.setNeedClientAuth(true);
-    sslContextFactory.setKeyStoreResource(Resource.newResource(appConfig.getKeystore()));
+    sslContextFactory.setKeyStoreResource(pathResourceFactory.newResource(appConfig.getKeystore()));
     sslContextFactory.setKeyStoreType("PKCS12");
     sslContextFactory.setKeyStorePassword("changeit");
     sslContextFactory.setCertAlias("server");
     sslContextFactory.setKeyManagerPassword("changeit");
-    sslContextFactory.setTrustStoreResource(Resource.newResource(appConfig.getTruststore()));
+    sslContextFactory.setTrustStoreResource(
+        pathResourceFactory.newResource(appConfig.getTruststore()));
     sslContextFactory.setTrustStorePassword("changeit");
     sslContextFactory.setTrustStoreType("PKCS12");
     sslContextFactory.setExcludeProtocols(
@@ -188,7 +191,7 @@ public final class DataServerLauncherApp {
           });
 
       // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
-      webapp.getSystemClassMatcher().add("org.slf4j.");
+      webapp.getProtectedClassMatcher().add("org.slf4j.");
 
       /*
        * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
@@ -215,20 +218,16 @@ public final class DataServerLauncherApp {
        * needed.
        */
       ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
-      securityHandler.setAuthenticator(new ClientCertAuthenticator());
+      securityHandler.setAuthenticator(new SslClientCertAuthenticator(sslContextFactory));
       securityHandler.setLoginService(new ClientCertLoginService());
-      Constraint constraint = new Constraint();
-      constraint.setName("auth");
-      constraint.setAuthenticate(true);
-      constraint.setRoles(new String[] {Constraint.ANY_AUTH});
       ConstraintMapping constraintMapping = new ConstraintMapping();
       constraintMapping.setPathSpec("/*");
-      constraintMapping.setConstraint(constraint);
+      constraintMapping.setConstraint(Constraint.SECURE_TRANSPORT);
       securityHandler.setConstraintMappings(new ConstraintMapping[] {constraintMapping});
       webapp.setSecurityHandler(securityHandler);
 
       // Wire up the WebAppContext to Jetty.
-      HandlerCollection handlers = new HandlerCollection(webapp);
+      ContextHandlerCollection handlers = new ContextHandlerCollection(webapp);
       server.setHandler(handlers);
       return new ServerInfo(server, webapp);
     }
