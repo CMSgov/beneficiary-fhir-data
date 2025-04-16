@@ -808,8 +808,11 @@ public final class CommonTransformerUtils {
    * @return placeholder for the drug code.
    */
   public static String buildReplaceDrugCode(Optional<String> drugCode) {
-    if (drugCode.isPresent() && drugCode.get().length() >= 9) {
-      return String.format("replaceDrugCode[%s]", normalizeDrugCode(drugCode.get()));
+    if (drugCode.isPresent()) {
+      String normalizedDrugCode = normalizeDrugCode(drugCode.get());
+      return normalizedDrugCode != null
+          ? String.format("replaceDrugCode[%s]", normalizedDrugCode)
+          : null;
     } else {
       return null;
     }
@@ -823,7 +826,9 @@ public final class CommonTransformerUtils {
    */
   public static String normalizeDrugCode(String drugCode) {
 
-    return drugCode.substring(0, 5) + "-" + drugCode.substring(5, 9);
+    return drugCode.length() >= 9
+        ? drugCode.substring(0, 5) + "-" + drugCode.substring(5, 9)
+        : null;
   }
 
   /**
