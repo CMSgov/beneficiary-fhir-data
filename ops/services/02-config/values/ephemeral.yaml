@@ -56,12 +56,8 @@ values:
   /bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
   /bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
   /bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
-  /bfd/${env}/migrator/nonsensitive/instance_type: m6a.large
-  /bfd/${env}/migrator/nonsensitive/volume_iops: 3000
-  /bfd/${env}/migrator/nonsensitive/volume_size: 100
-  /bfd/${env}/migrator/nonsensitive/volume_throughput: 125
-  /bfd/${env}/migrator/nonsensitive/volume_type: gp3
-  /bfd/${env}/migrator/nonsensitive/sqs_queue_name: bfd-${env}-migrator
+  /bfd/${env}/migrator/nonsensitive/ecs/resources/cpu: 2048
+  /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
   /bfd/${env}/ccw-pipeline/nonsensitive/ccw/idempotency_enabled: true
