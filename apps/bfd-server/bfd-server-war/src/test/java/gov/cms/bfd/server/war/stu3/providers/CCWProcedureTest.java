@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.commons.IcdCode.CODING_SYSTEM_ICD_UNKNOWN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,8 +33,7 @@ public class CCWProcedureTest {
 
     Character versionIcdUnknown = 'U';
     String systemIcdUnknown =
-        String.format(
-            "http://hl7.org/fhir/sid/unknown-icd-version/%s", versionIcdUnknown.toString().trim());
+        String.format(CODING_SYSTEM_ICD_UNKNOWN, versionIcdUnknown.toString().trim());
     assertMatches(versionIcdUnknown, systemIcdUnknown);
 
     assertDateNotPresent(versionIcdUnknown, systemIcdUnknown);

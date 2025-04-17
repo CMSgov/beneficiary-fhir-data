@@ -24,6 +24,10 @@ public abstract class IcdCode {
   public static final String CODING_SYSTEM_ICD_10_MEDICARE =
       "http://www.cms.gov/Medicare/Coding/ICD10";
 
+  /** Unknown Icd Version. */
+  public static final String CODING_SYSTEM_ICD_UNKNOWN =
+      "http://hl7.org/fhir/sid/unknown-icd-version/%s";
+
   /** The ICD code. */
   private final String icdCode;
 
@@ -114,10 +118,7 @@ public abstract class IcdCode {
     String system;
     if (icdVersionCode == null || icdVersionCode.equals('9')) system = CODING_SYSTEM_ICD_9;
     else if (icdVersionCode.equals('0')) system = CODING_SYSTEM_ICD_10;
-    else
-      system =
-          String.format(
-              "http://hl7.org/fhir/sid/unknown-icd-version/%s", icdVersionCode.toString().trim());
+    else system = String.format(CODING_SYSTEM_ICD_UNKNOWN, icdVersionCode.toString().trim());
     return system;
   }
 }
