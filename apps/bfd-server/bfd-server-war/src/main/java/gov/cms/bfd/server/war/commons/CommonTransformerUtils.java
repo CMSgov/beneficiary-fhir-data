@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
-import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_ORGANIZATION;
-import static gov.cms.bfd.data.npi.utility.DataUtilityCommons.ENTITY_TYPE_CODE_PROVIDER;
+import static gov.cms.bfd.server.war.NPIOrgLookup.ENTITY_TYPE_CODE_ORGANIZATION;
+import static gov.cms.bfd.server.war.NPIOrgLookup.ENTITY_TYPE_CODE_PROVIDER;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -11,15 +11,15 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -337,36 +337,41 @@ public final class CommonTransformerUtils {
   }
 
   /**
-   * Retrieves the NPI display value using the NPIOrgLookup class.
+   * Builds the provider name from NPIData.
+   *
+   * @param npiData the NPIData
+   * @return a String with the Provider name.
+   */
+  public static String buildProviderFromNpiData(NPIData npiData) {
+    String entityTypeCode = npiData.getEntityTypeCode();
+    if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
+      String[] name =
+          new String[] {
+            npiData.getProviderNamePrefix(),
+            npiData.getProviderFirstName(),
+            npiData.getProviderMiddleName(),
+            npiData.getProviderLastName(),
+            npiData.getProviderNameSuffix(),
+            npiData.getProviderCredential()
+          };
+      return Arrays.stream(name)
+          .map(Strings::trimToNull)
+          .filter(Objects::nonNull)
+          .collect(Collectors.joining(" "));
+    } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
+      return npiData.getProviderOrganizationName();
+    }
+    return null;
+  }
+
+  /**
+   * Sets a placeholder for NPICodeDisplay for future enrichment.
    *
    * @param npiCode NPI code
    * @return the npi code display
    */
   public static String retrieveNpiCodeDisplay(String npiCode) {
-    if (npiOrgLookup != null) {
-      Optional<NPIData> npiData = npiOrgLookup.retrieveNPIOrgDisplay(Optional.ofNullable(npiCode));
-      if (npiData.isPresent()) {
-        String entityTypeCode = npiData.get().getEntityTypeCode();
-        if (entityTypeCode.equals(ENTITY_TYPE_CODE_PROVIDER)) {
-          String[] name =
-              new String[] {
-                npiData.get().getProviderNamePrefix(),
-                npiData.get().getProviderFirstName(),
-                npiData.get().getProviderMiddleName(),
-                npiData.get().getProviderLastName(),
-                npiData.get().getProviderNameSuffix(),
-                npiData.get().getProviderCredential()
-              };
-          return Arrays.stream(name)
-              .map(Strings::trimToNull)
-              .filter(Objects::nonNull)
-              .collect(Collectors.joining(" "));
-        } else if (entityTypeCode.equals(ENTITY_TYPE_CODE_ORGANIZATION)) {
-          return npiData.get().getProviderOrganizationName();
-        }
-      }
-    }
-    return null;
+    return "replaceProvider[" + npiCode + "]";
   }
 
   /**
@@ -776,5 +781,70 @@ public final class CommonTransformerUtils {
       throw new BadCodeMonkeyException(SHOULD_FILTER_SAMHSA + " attribute missing from request");
     }
     return (boolean) shouldFilterSamhsa;
+  }
+
+  /**
+   * Builds taxonomy for future enrichment.
+   *
+   * @param npi NIP
+   * @return the NPIData
+   */
+  public static Optional<NPIData> buildReplaceTaxonomy(Optional<String> npi) {
+    if (npi.isPresent()) {
+      return Optional.of(
+          NPIData.builder()
+              .taxonomyCode(String.format("replaceTaxonomyCode[%s]", npi.get()))
+              .taxonomyDisplay(String.format("replaceTaxonomyDisplay[%s]", npi.get()))
+              .build());
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Builds the drug code for future enrichment.
+   *
+   * @param drugCode The drug code
+   * @return placeholder for the drug code.
+   */
+  public static String buildReplaceDrugCode(Optional<String> drugCode) {
+    if (drugCode.isPresent()) {
+      String normalizedDrugCode = normalizeDrugCode(drugCode.get());
+      return normalizedDrugCode != null
+          ? String.format("replaceDrugCode[%s]", normalizedDrugCode)
+          : null;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Normalizes the drug code to match the database values. *
+   *
+   * @param drugCode The drug code to normalize.
+   * @return The normalized drug code.
+   */
+  public static String normalizeDrugCode(String drugCode) {
+
+    return drugCode.length() >= 9
+        ? drugCode.substring(0, 5) + "-" + drugCode.substring(5, 9)
+        : null;
+  }
+
+  /**
+   * Replaces organization for future enrichment.
+   *
+   * @param npi NPI
+   * @return NPIData
+   */
+  public static Optional<NPIData> buildReplaceOrganization(Optional<String> npi) {
+    if (npi.isPresent()) {
+      return Optional.of(
+          NPIData.builder()
+              .providerOrganizationName(String.format("replaceOrganization[%s]", npi.get()))
+              .build());
+    } else {
+      return Optional.empty();
+    }
   }
 }

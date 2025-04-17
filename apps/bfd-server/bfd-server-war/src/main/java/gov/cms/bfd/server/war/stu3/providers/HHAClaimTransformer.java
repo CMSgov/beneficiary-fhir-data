@@ -1,20 +1,21 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
-import gov.cms.bfd.model.rif.samhsa.HhaTag;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link HHAClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -35,15 +37,14 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform");
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean samhsaV2Enabled;
 
   /**
    * Instantiates a new transformer.
@@ -53,37 +54,40 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   public HHAClaimTransformer(
       MetricRegistry metricRegistry,
-      NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.npiOrgLookup = requireNonNull(npiOrgLookup);
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
    * Transforms a {@link HHAClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link OutpatientClaim} to use
+   * @param claimEntity the {@link OutpatientClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevelDstu3(claimEntity.getSecurityTags());
+
     if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       HHAClaim hhaClaim = (HHAClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevelDstu3(
-              String.valueOf(hhaClaim.getClaimId()), HhaTag.class);
       eob = transformClaim(hhaClaim, securityTags);
     }
     return eob;
@@ -129,8 +133,7 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
-        npiOrgLookup
-            .retrieveNPIOrgDisplay(claimGroup.getOrganizationNpi())
+        CommonTransformerUtils.buildReplaceOrganization(claimGroup.getOrganizationNpi())
             .map(NPIData::getProviderOrganizationName),
         claimGroup.getClaimFacilityTypeCode(),
         claimGroup.getClaimFrequencyCode(),
@@ -218,7 +221,9 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
 
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
 
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
     return eob;
   }
 }

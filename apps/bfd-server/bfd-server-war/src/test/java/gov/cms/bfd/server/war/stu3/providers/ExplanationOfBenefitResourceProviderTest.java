@@ -26,13 +26,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -40,6 +39,7 @@ import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -153,9 +152,6 @@ public class ExplanationOfBenefitResourceProviderTest {
   /** The NPI Org lookup. */
   @Mock NPIOrgLookup mockNpiOrgLookup;
 
-  /** The FDA drug display lookup. */
-  @Mock FdaDrugCodeDisplayLookup mockDrugDisplayLookup;
-
   /** The re-used valid bene id value. */
   public static final String BENE_ID = "123456789";
 
@@ -167,11 +163,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     // metrics mocking
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-
-    // NPI and FDA drug mocking
-    //
-    // when(mockNpiOrgLookup.retrieveNPIOrgDisplay(Optional.empty())).thenReturn(Optional.of("JUNK"));
-    when(mockDrugDisplayLookup.retrieveFDADrugCodeDisplay(Optional.empty())).thenReturn("JUNK");
 
     when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
     when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
@@ -193,7 +184,9 @@ public class ExplanationOfBenefitResourceProviderTest {
             Mockito.mock(InpatientClaimTransformer.class),
             Mockito.mock(OutpatientClaimTransformer.class),
             mockPdeTransformer,
-            Mockito.mock(SNFClaimTransformer.class));
+            Mockito.mock(SNFClaimTransformer.class),
+            RDATestUtils.createTestNpiOrgLookup(),
+            RDATestUtils.createFdaDrugCodeDisplayLookup());
 
     // entity manager mocking
     mockEntityManager();

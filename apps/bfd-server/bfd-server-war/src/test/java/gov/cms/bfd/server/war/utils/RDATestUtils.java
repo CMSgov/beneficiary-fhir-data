@@ -1,10 +1,10 @@
 package gov.cms.bfd.server.war.utils;
 
+import static org.mockito.ArgumentMatchers.any;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.DatabaseTestUtils;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.fda.utility.App;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
@@ -14,6 +14,9 @@ import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -36,11 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-import org.jetbrains.annotations.NotNull;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 /** Supplies test data for the RDA based unit tests. */
 public class RDATestUtils {
@@ -57,6 +56,8 @@ public class RDATestUtils {
           RdaMcsDiagnosisCode.class,
           RdaMcsClaim.class,
           Mbi.class);
+
+  public static final String NPI_ORG_TEST_FILE = "npi_e2e_it.json";
 
   /** Path to use for persistence units. */
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
@@ -916,63 +917,38 @@ public class RDATestUtils {
    *
    * @return mocked FdaDrugCodeDisplayLookup
    */
-  public static @NotNull FdaDrugCodeDisplayLookup fdaFakeDrugCodeDisplayLookup() {
-
-    Map<String, String> ndcProductHashMap = new HashMap<>();
-    ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
-
-    return new FdaDrugCodeDisplayLookup(ndcProductHashMap);
+  public static FDADrugCodeDisplayLookup createFdaDrugCodeDisplayLookup() {
+    Map<String, String> fdaMap =
+        Map.of(
+            "00000-0000", "Fake Diluent - WATER",
+            "80425-0039", "Celecoxib - CELECOXIB");
+    FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+        Mockito.mock(FDADrugCodeDisplayLookup.class);
+    Mockito.when(fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(any())).thenReturn(fdaMap);
+    return fdaDrugCodeDisplayLookup;
   }
 
-  /**
-   * Mocks an FdaDrugCodeDisplayLookup object. FdaDrugCodeDisplayLookup
-   *
-   * @return mocked FdaDrugCodeDisplayLookup
-   */
-  public static @NotNull FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() throws IOException {
+  public static NPIOrgLookup createTestNpiOrgLookup() {
     InputStream npiDataStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(NPI_ORG_TEST_FILE);
 
-    return new FdaDrugCodeDisplayLookup(npiDataStream);
-  }
-
-  /**
-   * Mocks an NPIOrgLookup object.
-   *
-   * @return mocked NPIOrgLookup
-   */
-  public static @NotNull MockedStatic<NPIOrgLookup> mockNPIOrgLookup() {
-    MockedStatic<NPIOrgLookup> npiOrgLookup = Mockito.mockStatic(NPIOrgLookup.class);
-    Map<String, String> npiOrgHashMap = new HashMap<>();
-    ObjectMapper mapper = new ObjectMapper();
-    NPIData npiOrgData =
-        NPIData.builder()
-            .npi(FAKE_NPI_NUMBER)
-            .providerOrganizationName(FAKE_NPI_ORG_NAME)
-            .taxonomyDisplay(FAKE_TAXONOMY_DISPLAY)
-            .taxonomyCode(FAKE_TAXONOMY_CODE)
-            .build();
-    NPIData npiTaxonomyData =
-        NPIData.builder()
-            .npi(FAKE_PRACTITIONER_NPI)
-            .providerOrganizationName(FAKE_NPI_ORG_NAME)
-            .taxonomyCode(FAKE_TAXONOMY_CODE)
-            .taxonomyDisplay(FAKE_TAXONOMY_DISPLAY)
-            .build();
-    try {
-      npiOrgHashMap.put(FAKE_NPI_NUMBER, mapper.writeValueAsString(npiOrgData));
-      npiOrgHashMap.put(FAKE_PRACTITIONER_NPI, mapper.writeValueAsString(npiTaxonomyData));
-    } catch (JsonProcessingException ignored) {
+    Map<String, NPIData> npiMap = new HashMap<>();
+    String line;
+    try (final InputStream npiStream = npiDataStream;
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(npiStream))) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      while ((line = reader.readLine()) != null) {
+        JsonNode rootNode = objectMapper.readTree(line);
+        String npi = rootNode.path("npi").asText();
+        NPIData npiData = objectMapper.readValue(line, NPIData.class);
+        npiMap.put(npi, npiData);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    npiOrgLookup
-        .when(NPIOrgLookup::createTestNpiOrgLookup)
-        .thenAnswer(
-            i -> {
-              NPIOrgLookup mockInstance = new NPIOrgLookup(npiOrgHashMap);
-              return mockInstance;
-            });
+
+    NPIOrgLookup npiOrgLookup = Mockito.mock(NPIOrgLookup.class);
+    Mockito.when(npiOrgLookup.retrieveNPIOrgDisplay(any())).thenReturn(npiMap);
     return npiOrgLookup;
   }
 }

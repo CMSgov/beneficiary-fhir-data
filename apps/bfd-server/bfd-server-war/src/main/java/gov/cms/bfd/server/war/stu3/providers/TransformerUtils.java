@@ -35,7 +35,10 @@ import gov.cms.bfd.model.rif.entities.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimColumn;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
+import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -60,12 +63,16 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -91,6 +98,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -101,6 +109,7 @@ import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponen
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
@@ -108,19 +117,45 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Organization;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
  * resources (e.g. {@link Patient}).
  */
 public final class TransformerUtils {
+
+  /** String used to determine if a field should be enriched with provider data. */
+  public static final String REPLACE_PROVIDER = "replaceProvider";
+
+  /** String used to determine if a field should be enriched with organization data. */
+  public static final String REPLACE_ORGANIZATION = "replaceOrganization";
+
+  /** REGEX used to get the NPI for organization enrichment. */
+  public static final String REPLACE_ORGANIZATION_REGEX = "replaceOrganization\\[(.*)\\]";
+
+  /** REGEX used to get the NPI for provider enrichment. */
+  public static final String REPLACE_PROVIDER_REGEX = "replaceProvider\\[(.*)\\]";
+
+  /** String used to determine if a field should be enriched with drug code data. */
+  public static final String REPLACE_DRUG_CODE = "replaceDrugCode";
+
+  /** REGEX used to get the drug code for Item enrichment. */
+  public static final String REPLACE_DRUG_CODE_REGEX = "replaceDrugCode\\[(.*)\\]";
+
+  /** Data type of the enrichment. */
+  enum EnrichmentDataType {
+    ORGANIZATION,
+    PROVIDER,
+    TAXONOMY,
+    DRUG
+  }
+
   /**
    * Adds an adjudication total to the specified {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
    * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
-   *          category</code>
+   *                         category</code>
    * @param amountValue the {@link Money#getValue()} for the adjudication total
    */
   static void addAdjudicationTotal(
@@ -148,7 +183,7 @@ public final class TransformerUtils {
    *
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
    * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
-   *          category</code>
+   *                         category</code>
    * @param totalAmountValue the {@link Money#getValue()} for the adjudication total
    */
   static void addAdjudicationTotal(
@@ -176,6 +211,362 @@ public final class TransformerUtils {
       throw new BadCodeMonkeyException();
     }
     return money;
+  }
+
+  /**
+   * Enriches a single EOB with NPI data.
+   *
+   * @param eob The ExplanationOfBenefit
+   * @param npiOrgLookup Used to retrieve enrichment data
+   * @param fdaDrugCodeDisplayLookup Used to retrieve drug enrichment data.
+   */
+  public static void enrichEob(
+      ExplanationOfBenefit eob,
+      NPIOrgLookup npiOrgLookup,
+      FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup) {
+
+    Map<String, Set<Type>> enrichmentMap = new HashMap<>();
+    Set<String> npiSet = new HashSet<>();
+    Map<String, Set<Type>> drugEnrichmentMap = new HashMap<>();
+    Set<String> drugCodeSet = new HashSet<>();
+    callCollectionMethods(eob, enrichmentMap, drugEnrichmentMap, npiSet, drugCodeSet);
+    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    Map<String, String> drugCodeMap =
+        fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(drugCodeSet);
+
+    enrichResources(enrichmentMap, drugEnrichmentMap, npiMap, drugCodeMap);
+  }
+
+  /**
+   * Calls the methods to collect together all of the objects to be enriched.
+   *
+   * @param eob The EOB that will be enriched.
+   * @param enrichmentMap A map of NPIs to the objects that will be enriched.
+   * @param drugCodeEnrichmentMap a map of Drug Codes to the the objects to be enriched.
+   * @param npiSet The set of NPIs that will be queried from the database.
+   * @param drugCodeSet The set of Drug codes that will be queried from the database.
+   */
+  private static void callCollectionMethods(
+      ExplanationOfBenefit eob,
+      Map<String, Set<Type>> enrichmentMap,
+      Map<String, Set<Type>> drugCodeEnrichmentMap,
+      Set<String> npiSet,
+      Set<String> drugCodeSet) {
+    collectCareTeamEnrichments(eob, enrichmentMap, npiSet);
+    collectOrganizationEnrichments(eob, npiSet, enrichmentMap);
+    collectFacilityEnrichments(eob, npiSet, enrichmentMap);
+    collectReferralEnrichments(eob, npiSet, enrichmentMap);
+    collectDrugCodeEnrichments(eob, drugCodeSet, drugCodeEnrichmentMap);
+  }
+
+  /**
+   * Enrich the EOB Bundle with NPI Data.
+   *
+   * @param bundle The bundle of EOBs
+   * @param npiOrgLookup Used to retrieve enrichment data.
+   * @param fdaDrugCodeDisplayLookup Used to retrieve Drug enrichment data.
+   */
+  public static void enrichEobBundle(
+      Bundle bundle, NPIOrgLookup npiOrgLookup, FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup) {
+    Map<String, Set<Type>> enrichmentMap = new HashMap<>();
+    Set<String> npiSet = new HashSet<>();
+    Map<String, Set<Type>> drugEnrichmentMap = new HashMap<>();
+    Set<String> drugCodeSet = new HashSet<>();
+    for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+      ExplanationOfBenefit eob = (ExplanationOfBenefit) entry.getResource();
+      callCollectionMethods(eob, enrichmentMap, drugEnrichmentMap, npiSet, drugCodeSet);
+    }
+    Map<String, NPIData> npiMap = npiOrgLookup.retrieveNPIOrgDisplay(npiSet);
+    Map<String, String> drugCodeMap =
+        fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(drugCodeSet);
+    enrichResources(enrichmentMap, drugEnrichmentMap, npiMap, drugCodeMap);
+  }
+
+  /**
+   * Performs enrichment of the previously collected objects.
+   *
+   * @param npiMap Map of NPIs to NPIData
+   * @param enrichmentMap Map of objects to enrich.
+   * @param drugEnrichmentMap Map of drugcode objects to enrich.
+   * @param drugCodeMap Map of Drug codes to drug code display.
+   */
+  private static void enrichResources(
+      Map<String, Set<Type>> enrichmentMap,
+      Map<String, Set<Type>> drugEnrichmentMap,
+      Map<String, NPIData> npiMap,
+      Map<String, String> drugCodeMap) {
+
+    for (Map.Entry<String, Set<Type>> entries : drugEnrichmentMap.entrySet()) {
+      if (drugCodeMap.containsKey(entries.getKey())) {
+        parseEnrichmentEntries(entries, drugCodeMap, REPLACE_DRUG_CODE, EnrichmentDataType.DRUG);
+      } else {
+        entries.getValue().forEach(c -> ((Coding) c).setDisplay(null));
+      }
+    }
+
+    for (Map.Entry<String, Set<Type>> entries : enrichmentMap.entrySet()) {
+      if (npiMap.containsKey(entries.getKey())) {
+        parseEnrichmentEntries(entries, npiMap, REPLACE_PROVIDER, EnrichmentDataType.PROVIDER);
+        parseEnrichmentEntries(entries, npiMap, REPLACE_ORGANIZATION, EnrichmentDataType.PROVIDER);
+
+      } else {
+        entries
+            .getValue()
+            .forEach(
+                (Type t) -> {
+                  if (t instanceof Reference reference) {
+                    reference.setDisplay(null);
+                  } else if (t instanceof Coding coding) {
+                    coding.setDisplay(null);
+                  }
+                });
+      }
+    }
+  }
+
+  private static <TData> void parseEnrichmentEntries(
+      Map.Entry<String, Set<Type>> entries,
+      Map<String, TData> dataMap,
+      String displayString,
+      EnrichmentDataType dataType) {
+    entries.getValue().stream()
+        .filter(
+            (Type t) -> {
+              if (t instanceof Reference reference) {
+                return reference.getDisplay() != null
+                    && reference.getDisplay().contains(displayString);
+              } else if (t instanceof Coding coding) {
+                return coding.getDisplay() != null && coding.getDisplay().contains(displayString);
+              }
+              return false;
+            })
+        .forEach(
+            (Type t) -> {
+              TData data = dataMap.get(entries.getKey());
+              if (data instanceof NPIData npiData) {
+                enrichNpi(dataType, t, npiData);
+              } else {
+                enrichFda(dataType, t, (String) data);
+              }
+            });
+  }
+
+  private static void enrichFda(EnrichmentDataType dataType, Type t, String data) {
+    if (dataType.equals(EnrichmentDataType.DRUG) && t instanceof Coding coding) {
+      coding.setDisplay(data);
+    }
+  }
+
+  private static void enrichNpi(EnrichmentDataType dataType, Type t, NPIData npiData) {
+    switch (t) {
+      case Reference reference -> {
+        enrichNpiReference(dataType, npiData, reference);
+      }
+      case Coding coding -> {
+        enrichNpiCoding(dataType, npiData, coding);
+      }
+      default -> {
+        // NOOP
+      }
+    }
+  }
+
+  private static void enrichNpiCoding(EnrichmentDataType dataType, NPIData npiData, Coding coding) {
+    if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+      coding.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+    } else {
+      coding.setDisplay(npiData.getProviderOrganizationName());
+    }
+  }
+
+  private static void enrichNpiReference(
+      EnrichmentDataType dataType, NPIData npiData, Reference reference) {
+    if (dataType.equals(EnrichmentDataType.PROVIDER)) {
+      reference.setDisplay(CommonTransformerUtils.buildProviderFromNpiData(npiData));
+    } else {
+      reference.setDisplay(npiData.getProviderOrganizationName());
+    }
+  }
+
+  /**
+   * Collects objects to enrich from the EOB's Facility.
+   *
+   * @param eob the EOB
+   * @param npiSet Stores a list of NPIs that will be enriched.
+   * @param enrichmentMap Stores a list of facilties to enrich.
+   */
+  public static void collectFacilityEnrichments(
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Type>> enrichmentMap) {
+
+    if (eob.getFacility() != null && eob.getFacility().getDisplay() != null) {
+      String display = eob.getFacility().getDisplay();
+      addToEnrichmentMap(REPLACE_PROVIDER_REGEX, display, enrichmentMap, eob.getFacility(), npiSet);
+      addToEnrichmentMap(
+          REPLACE_ORGANIZATION_REGEX, display, enrichmentMap, eob.getFacility(), npiSet);
+    }
+  }
+
+  /**
+   * Collects drugcode enrichments.
+   *
+   * @param eob The EOB.
+   * @param drugCodeSet Set of drug codes that will be enriched.
+   * @param drugEnrichmentMap Map of drug codes to objects to enrich.
+   */
+  public static void collectDrugCodeEnrichments(
+      ExplanationOfBenefit eob, Set<String> drugCodeSet, Map<String, Set<Type>> drugEnrichmentMap) {
+    if (eob.getItem() != null) {
+      eob.getItem()
+          .forEach(
+              item -> {
+                if (item.getService() != null && item.getService().getCoding() != null) {
+                  item.getService()
+                      .getCoding()
+                      .forEach(
+                          coding -> {
+                            String display = coding.getDisplay();
+                            addToEnrichmentMap(
+                                REPLACE_DRUG_CODE_REGEX,
+                                display,
+                                drugEnrichmentMap,
+                                coding,
+                                drugCodeSet);
+                          });
+                  if (item.getExtension() != null) {
+                    item.getExtension()
+                        .forEach(
+                            extension -> {
+                              if (extension.getValue() != null
+                                  && extension.getValue() instanceof Coding coding) {
+                                String display = coding.getDisplay();
+                                addToEnrichmentMap(
+                                    REPLACE_DRUG_CODE_REGEX,
+                                    display,
+                                    drugEnrichmentMap,
+                                    coding,
+                                    drugCodeSet);
+                              }
+                            });
+                  }
+                }
+              });
+    }
+  }
+
+  /**
+   * Collects objects to enrich from the EOB's Organization.
+   *
+   * @param eob The eob to enrich.
+   * @param npiSet Stores a list of NPIs that will be enriched.
+   * @param enrichmentMap Stores a list of organizations to enrich.
+   */
+  public static void collectOrganizationEnrichments(
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Type>> enrichmentMap) {
+
+    if (eob.getOrganization() != null && eob.getOrganization().getDisplay() != null) {
+      String name = eob.getOrganization().getDisplay();
+      addToEnrichmentMap(
+          REPLACE_ORGANIZATION_REGEX, name, enrichmentMap, eob.getOrganization(), npiSet);
+      addToEnrichmentMap(
+          REPLACE_PROVIDER_REGEX, name, enrichmentMap, eob.getOrganization(), npiSet);
+    }
+  }
+
+  /**
+   * Collects objects to enrich from the EOB's referral.
+   *
+   * @param eob The eob to enrich.
+   * @param npiSet Stores a list of NPIs that will be enriched.
+   * @param enrichmentMap Stores a list of referrals to enrich.
+   */
+  private static void collectReferralEnrichments(
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Type>> enrichmentMap) {
+
+    if (eob.getReferral() != null) {
+      Reference referral = eob.getReferral();
+      Pattern pattern = Pattern.compile(REPLACE_PROVIDER_REGEX);
+      ReferralRequest referralRequest = (ReferralRequest) referral.getResource();
+      if (referralRequest != null) {
+        String agent = referralRequest.getRequester().getAgent().getDisplay();
+        addToEnrichmentMap(
+            REPLACE_PROVIDER_REGEX,
+            agent,
+            enrichmentMap,
+            referralRequest.getRequester().getAgent(),
+            npiSet);
+        Iterator<Reference> iter = referralRequest.getRecipient().iterator();
+        while (iter.hasNext()) {
+          Reference recipient = iter.next();
+          addToEnrichmentMap(
+              REPLACE_PROVIDER_REGEX, recipient.getDisplay(), enrichmentMap, recipient, npiSet);
+        }
+      }
+    }
+  }
+
+  /**
+   * Collects objects to enrich from the EOB's CareTeams.
+   *
+   * @param eob The eob to enrich.
+   * @param enrichmentMap Map of objects to enrich.
+   * @param npiSet Stores a list of NPIs that will be enriched.
+   */
+  private static void collectCareTeamEnrichments(
+      ExplanationOfBenefit eob, Map<String, Set<Type>> enrichmentMap, Set<String> npiSet) {
+    if (eob.getCareTeam() != null) {
+      eob.getCareTeam().stream()
+          .forEach(
+              careteam -> {
+                if (careteam.getProvider() != null) {
+                  String providerDisplay = careteam.getProvider().getDisplay();
+                  addToEnrichmentMap(
+                      REPLACE_PROVIDER_REGEX,
+                      providerDisplay,
+                      enrichmentMap,
+                      careteam.getProvider(),
+                      npiSet);
+                  addToEnrichmentMap(
+                      REPLACE_ORGANIZATION_REGEX,
+                      providerDisplay,
+                      enrichmentMap,
+                      careteam.getProvider(),
+                      npiSet);
+                }
+                if (careteam.getExtension() != null) {
+                  careteam
+                      .getExtension()
+                      .forEach(
+                          extension -> {
+                            addToEnrichmentMap(
+                                REPLACE_ORGANIZATION_REGEX,
+                                ((Coding) extension.getValue()).getDisplay(),
+                                enrichmentMap,
+                                extension.getValue(),
+                                npiSet);
+                          });
+                }
+              });
+    }
+  }
+
+  private static void addToEnrichmentMap(
+      String regex,
+      String display,
+      Map<String, Set<Type>> enrichmentMap,
+      Type reference,
+      Set<String> npiSet) {
+    if (display != null) {
+      Pattern pattern = Pattern.compile(regex);
+      Matcher matcher = pattern.matcher(display);
+      if (matcher.matches()) {
+        String providerNpi = matcher.group(1);
+        if (!enrichmentMap.containsKey(providerNpi)) {
+          enrichmentMap.put(providerNpi, new HashSet<>());
+        }
+        enrichmentMap.get(providerNpi).add(reference);
+        npiSet.add(providerNpi);
+      }
+    }
   }
 
   /**

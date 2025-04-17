@@ -16,6 +16,7 @@ class StatsStorageType(StrEnum):
     S3 = "s3"
     """Indicates that aggregated statistics will be stored to an S3 bucket"""
 
+
 class StatsComparisonType(StrEnum):
     """Enumeration for each possible type of stats comparison"""
 
@@ -38,6 +39,9 @@ class StatsConfiguration:
     stats_store_file_path: Optional[str]
     """The local parent directory where JSON files will be written to.
     Used only if type is file, ignored if type is s3"""
+    stats_store_s3_workgroup: Optional[str]
+    """The Athena workgroup to use when querying statistics.
+    Used only if type is s3, ignored if type is file"""
     stats_store_s3_bucket: Optional[str]
     """The AWS S3 Bucket that the JSON will be written to.
     Used only if type is s3, ignored if type is file"""
@@ -108,7 +112,7 @@ class StatsConfiguration:
             dest="stats_store_tags",
             env_var="LOCUST_STATS_STORE_TAG",
             action="append",
-            default=[]
+            default=[],
         )
         stats_group.add_argument(
             "--stats-store-file-path",
@@ -120,6 +124,17 @@ class StatsConfiguration:
             dest="stats_store_file_path",
             env_var="LOCUST_STATS_STORE_FILE_PATH",
             default="./",
+        )
+        stats_group.add_argument(
+            "--stats-store-s3-workgroup",
+            type=str,
+            help=(
+                "Specifies the Athena workgroup used during querying. Only used if --stats-store is"
+                ' "S3". Defaults to "bfd" if unspecified'
+            ),
+            dest="stats_store_s3_workgroup",
+            env_var="LOCUST_STATS_STORE_S3_WORKGROUP",
+            default="bfd",
         )
         stats_group.add_argument(
             "--stats-store-s3-bucket",

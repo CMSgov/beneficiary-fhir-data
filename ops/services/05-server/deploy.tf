@@ -66,38 +66,18 @@ resource "null_resource" "codedeploy_server" {
 
   provisioner "local-exec" {
     environment = {
+      SERVICE_NAME = local.service
+      CLUSTER_NAME = data.aws_ecs_cluster.main.cluster_name
       APPSPEC_YAML = templatefile("${path.module}/templates/server-appspec.yaml.tftpl", {
         application_name      = aws_codedeploy_app.server.name
         deployment_group_name = aws_codedeploy_deployment_group.server.deployment_group_name
         task_definition_arn   = aws_ecs_task_definition.server.arn
         container_name        = local.service
         container_port        = local.server_port
-        validation_lambda_arn = aws_lambda_function.regression_wrapper.arn
+        validation_lambda_arn = one(aws_lambda_function.regression_wrapper[*].arn)
       })
     }
-    interpreter = ["/bin/bash", "-c"]
-    command     = <<EOF
-      deploy_id="$(aws deploy create-deployment --cli-input-yaml "$APPSPEC_YAML" --query "[deploymentId]" --output text)"
-
-      while true; do
-        deployment_status="$(aws deploy get-deployment \
-            --deployment-id "$deploy_id" \
-            --query "[deploymentInfo.status]" \
-            --output text)"
-
-        if [[ $deployment_status == "Succeeded" ]]; then
-            echo "Deployment succeeded."
-            break
-        elif [[ $deployment_status == "Failed" || $deployment_status == "Stopped" ]]; then
-            echo "Deployment failed!"
-            exit 1
-        fi
-
-        echo "Status: $deployment_status..."
-        echo "Sleeping for 5 seconds..."
-        sleep 5
-      done
-    EOF
-    quiet       = true
+    interpreter = ["/bin/bash"]
+    command     = "${path.module}/scripts/deploy-server.sh"
   }
 }

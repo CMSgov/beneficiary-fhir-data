@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
@@ -31,6 +30,7 @@ import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.time.Instant;
@@ -38,9 +38,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -51,12 +53,9 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -68,23 +67,11 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public final class TransformerUtilsTest {
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
 
   /** The securityTagManager. */
   @Mock private SecurityTagManager securityTagManager;
 
-  /** One-time setup of objects that are normally injected. */
-  @BeforeEach
-  public void setup() {
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
-  }
-
-  /** Releases the static mock NPIOrgLookup and FdaDrugCodeDisplayLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
-  }
+  Set<String> securityTags = new HashSet<>();
 
   /** Verifies that {@link TransformerUtils#createExtensionCoding} works as expected. */
   @Test
@@ -444,9 +431,14 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(
-            new MetricRegistry(), NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(claim, false);
+        new HHAClaimTransformer(new MetricRegistry(), securityTagManager, false);
+    ExplanationOfBenefit genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(claim, securityTags), false);
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -477,7 +469,6 @@ public final class TransformerUtilsTest {
    */
   @Test
   public void createBundleWithPagingWithASizeOf2() throws IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
     RequestDetails requestDetails = mock(RequestDetails.class);
     Map<String, String[]> pagingParams = new HashMap<String, String[]>();
     pagingParams.put(Constants.PARAM_COUNT, new String[] {"2"});
@@ -500,11 +491,15 @@ public final class TransformerUtilsTest {
 
     FhirContext fhirContext = FhirContext.forDstu3();
     MetricRegistry metricRegistry = new MetricRegistry();
-
     ClaimTransformerInterface claimTransformerInterface =
-        new HHAClaimTransformer(metricRegistry, localNpiLookup, securityTagManager);
-    ExplanationOfBenefit genEob = claimTransformerInterface.transform(hhaClaim, false);
-
+        new HHAClaimTransformer(metricRegistry, securityTagManager, false);
+    ExplanationOfBenefit genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -519,8 +514,14 @@ public final class TransformerUtilsTest {
     hospiceClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new HospiceClaimTransformer(metricRegistry, localNpiLookup, securityTagManager);
-    genEob = claimTransformerInterface.transform(hospiceClaim, false);
+        new HospiceClaimTransformer(metricRegistry, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(hospiceClaim, securityTags), false);
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -534,10 +535,14 @@ public final class TransformerUtilsTest {
             .get();
     dmeClaim.setLastUpdated(Instant.now());
 
-    claimTransformerInterface =
-        new DMEClaimTransformer(
-            metricRegistry, RDATestUtils.fdaDrugCodeDisplayLookup(), securityTagManager);
-    genEob = claimTransformerInterface.transform(dmeClaim, false);
+    claimTransformerInterface = new DMEClaimTransformer(metricRegistry, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(dmeClaim, securityTags), false);
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -552,8 +557,14 @@ public final class TransformerUtilsTest {
     inpatientClaim.setLastUpdated(Instant.now());
 
     claimTransformerInterface =
-        new InpatientClaimTransformer(metricRegistry, localNpiLookup, securityTagManager);
-    genEob = claimTransformerInterface.transform(inpatientClaim, false);
+        new InpatientClaimTransformer(metricRegistry, securityTagManager, false);
+    genEob =
+        claimTransformerInterface.transform(
+            new ClaimWithSecurityTags<>(inpatientClaim, securityTags), false);
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 

@@ -1,8 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.data.fda.utility.App.FDA_PRODUCTS_RESOURCE;
-import static gov.cms.bfd.data.npi.utility.App.NPI_RESOURCE;
-
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -13,8 +10,6 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -38,7 +33,6 @@ import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -75,8 +69,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SpringConfiguration extends BaseConfiguration {
   /**
    * The {@link String } property that is used to hold drug code file name that is used for
-   * integration testing and production changes to the external drug code file in {@link
-   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}.
+   * integration testing.
    */
   public static final String PROP_DRUG_CODE_FILE_NAME = "bfdServer.drug.code.file.name";
 
@@ -118,8 +111,14 @@ public class SpringConfiguration extends BaseConfiguration {
   /** The {@link String } Boolean property that is used to enable the C4DIC profile. */
   public static final String SSM_PATH_C4DIC_ENABLED = "c4dic/enabled";
 
+  /** The {@link String} Boolean property that is used to enable the sex extension. */
+  public static final String SSM_PATH_SEX_EXTENSION_ENABLED = "sex_extension/enabled";
+
   /** The {@link String } Boolean property that is used to enable the samhsa 2.0 profile. */
   public static final String SSM_PATH_SAMHSA_V2_ENABLED = "samhsa_v2/enabled";
+
+  /** The {@link String } Boolean property that is used to enable the samhsa 2.0 profile. */
+  public static final String SSM_PATH_SAMHSA_V2_SHADOW = "samhsa_v2/shadow";
 
   /** Maximum number of threads to use for executing EOB claim transformers in parallel. */
   public static final String PROP_EXECUTOR_SERVICE_THREADS = "bfdServer.executorService.threads";
@@ -446,39 +445,6 @@ public class SpringConfiguration extends BaseConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
-  }
-
-  /**
-   * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
-   * drug codes.
-   *
-   * @param drugCodeFileName holds the file name for test or production
-   * @return the {@link FdaDrugCodeDisplayLookup} for the application.
-   */
-  @Bean
-  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
-      @Value("${" + PROP_DRUG_CODE_FILE_NAME + ":" + FDA_PRODUCTS_RESOURCE + "}")
-          String drugCodeFileName)
-      throws IOException {
-    InputStream npiDataStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(drugCodeFileName);
-    return new FdaDrugCodeDisplayLookup(npiDataStream);
-  }
-
-  /**
-   * This bean provides an {@link NPIOrgLookup} for use in the transformers to look up org name.
-   *
-   * @param orgFileName file name for fake org data. If not null, it will load the test data
-   * @return the {@link NPIOrgLookup} for the application.
-   * @throws IOException if there is an error accessing the resource
-   */
-  @Bean
-  public NPIOrgLookup npiOrgLookup(
-      @Value("${" + PROP_ORG_FILE_NAME + ":" + NPI_RESOURCE + "}") String orgFileName)
-      throws IOException {
-    InputStream npiDataStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(orgFileName);
-    return new NPIOrgLookup(npiDataStream);
   }
 
   /**

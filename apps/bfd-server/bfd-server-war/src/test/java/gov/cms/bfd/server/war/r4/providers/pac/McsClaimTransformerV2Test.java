@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -145,9 +146,11 @@ public class McsClaimTransformerV2Test {
     entity.setDetails(new HashSet<>(procedures));
 
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
+    Set<String> securityTags = new HashSet<>();
 
-    Claim claim = mcsClaimTransformerV2.transform(entity, true);
+    Claim claim =
+        mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
     assertEquals(numberOfRecords, claim.getDiagnosis().size());
 
     for (int i = 0; i < claim.getDiagnosis().size(); i++) {

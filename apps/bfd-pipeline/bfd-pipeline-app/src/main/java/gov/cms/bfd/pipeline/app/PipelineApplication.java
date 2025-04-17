@@ -30,6 +30,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineOutcome;
 import gov.cms.bfd.pipeline.sharedutils.ec2.AwsEc2Client;
+import gov.cms.bfd.pipeline.sharedutils.npi_fda.NpiFdaLoadJob;
+import gov.cms.bfd.pipeline.sharedutils.npi_fda.NpiFdaLoadJobConfig;
 import gov.cms.bfd.pipeline.sharedutils.s3.AwsS3ClientFactory;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.BackfillConfigOptions;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.SamhsaBackfillJob;
@@ -581,7 +583,56 @@ public final class PipelineApplication {
     } else {
       LOGGER.info("SAMHSA backfill job is disabled.");
     }
+    final Optional<NpiFdaLoadJobConfig> npiFdaConfig = appConfig.getNpiFdaLoadConfigOptions();
+    if (npiFdaConfig.isPresent()) {
+      final var npiFdaJob =
+          createNpiFdaJob(
+              appMeters,
+              appMetrics,
+              pooledDataSource,
+              clock,
+              npiFdaConfig.get().getBatchSize(),
+              npiFdaConfig.get().getRunInterval());
+      if (npiFdaJob != null) {
+        jobs.add(npiFdaJob);
+      } else {
+        LOGGER.error("There was a problem creating NpiFdaJob.");
+      }
+      LOGGER.warn("Registered NpiFda job.");
+    } else {
+      LOGGER.info("NpiFdaLoadJob is disabled.");
+    }
+
     return jobs;
+  }
+
+  private NpiFdaLoadJob createNpiFdaJob(
+      MeterRegistry appMeters,
+      MetricRegistry appMetrics,
+      HikariDataSource pooledDataSource,
+      Clock clock,
+      int batchSize,
+      int runInterval) {
+    PipelineApplicationState npiAppState =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            clock);
+    PipelineApplicationState fdaAppState =
+        new PipelineApplicationState(
+            appMeters,
+            appMetrics,
+            pooledDataSource,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            clock);
+    try {
+      return new NpiFdaLoadJob(npiAppState, fdaAppState, batchSize, runInterval);
+    } catch (Exception e) {
+      LOGGER.error("An exception was thrown while creating NpiFdaLoadJob: {}", e.getMessage());
+      return null;
+    }
   }
 
   /**

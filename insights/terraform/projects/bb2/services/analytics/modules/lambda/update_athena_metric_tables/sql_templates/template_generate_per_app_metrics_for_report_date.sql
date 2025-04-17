@@ -88,7 +88,8 @@ WITH report_params AS (
       'app_sdk_requests_python_count',
       'app_sdk_requests_node_count',
       'app_access_grant_enabled',
-      'app_access_grant_category'
+      'app_access_grant_category',
+      'app_internal_application_labels'
     ] as enabled_metrics_list 
 ),
 
@@ -306,6 +307,7 @@ SELECT
   t0.last_active app_last_active,
   t0.user_limit_data_access app_access_grant_enabled,
   t0.data_access_type app_access_grant_category,
+  t0.internal_application_labels app_internal_application_labels,
   t0.require_demographic_scopes app_require_demographic_scopes,
   t0.user_organization app_user_organization,
   t0.user_id app_user_id,

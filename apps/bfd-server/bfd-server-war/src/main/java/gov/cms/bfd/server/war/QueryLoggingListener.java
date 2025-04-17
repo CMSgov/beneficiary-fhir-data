@@ -208,6 +208,8 @@ public final class QueryLoggingListener implements QueryExecutionListener {
         (s -> s.contains(" from information_schema.sequences"))),
     /** Represents query that invokes the find_beneficiary function. */
     FIND_BENEFICIARY_FUNCTION("find_beneficiary", (s -> s.contains("find_beneficiary"))),
+    /** Represents a query from npi_data. */
+    NPI_DATA("npi_data", (s -> s.contains("from ccw.npi_data"))),
     /** Represents an unknown query (one not explicitly defined in this list). */
     UNKNOWN("unknown", null);
 

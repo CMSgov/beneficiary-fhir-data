@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
@@ -25,6 +23,7 @@ import gov.cms.bfd.model.rif.entities.InpatientClaim;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -32,10 +31,10 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -83,14 +82,8 @@ public final class TransformerTestUtilsV2 {
   private static final String ORG_FILE_NAME = "fakeOrgData.tsv";
 
   static {
-    try {
-      InputStream npiDataStream =
-          Thread.currentThread().getContextClassLoader().getResourceAsStream(ORG_FILE_NAME);
-      npiOrgLookup = new NPIOrgLookup(npiDataStream);
-      CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
-    } catch (IOException e) {
-      throw new RuntimeException("Error loading test data for NPIOrgLookup.");
-    }
+    npiOrgLookup = RDATestUtils.createTestNpiOrgLookup();
+    CommonTransformerUtils.setNpiOrgLookup(npiOrgLookup);
   }
 
   /**
@@ -1297,7 +1290,30 @@ public final class TransformerTestUtilsV2 {
    */
   static CareTeamComponent createNpiCareTeamMember(
       int sequence, String npi, String system, String code, String display) {
-    return new CareTeamComponent()
+    return createNpiCareTeamMember(sequence, npi, system, code, display, null, null);
+  }
+
+  /**
+   * Helper that creates a {@link CareTeamComponent} to be used in unit tests.
+   *
+   * @param sequence The sequence to set
+   * @param npi The NPI for the member
+   * @param system System defining the type of member
+   * @param code Code defining the type of member
+   * @param display Display for the type of member
+   * @param taxonomyCode The taxonomy code.
+   * @return {@link CareTeamComponent}
+   */
+  static CareTeamComponent createNpiCareTeamMember(
+      int sequence,
+      String npi,
+      String system,
+      String code,
+      String display,
+      String taxonomyCode,
+      String taxonomyDisplay) {
+    CareTeamComponent component = new CareTeamComponent();
+    component
         .setSequence(sequence)
         .setProvider(
             new Reference()
@@ -1309,6 +1325,15 @@ public final class TransformerTestUtilsV2 {
                         "npi",
                         "National Provider Identifier")))
         .setRole(new CodeableConcept().setCoding(Arrays.asList(new Coding(system, code, display))));
+    if (taxonomyCode != null) {
+      component.setQualification(
+          new CodeableConcept(
+              new Coding()
+                  .setCode(taxonomyCode)
+                  .setDisplay(taxonomyDisplay)
+                  .setSystem("http://nucc.org/provider-taxonomy")));
+    }
+    return component;
   }
 
   /**
@@ -1622,47 +1647,40 @@ public final class TransformerTestUtilsV2 {
    *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
    *          false</code> )
    * @param includeTaxNumbers if tax numbers should be included in the response
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi org lookup
    * @param securityTagManager SamhsaSecurityTags lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      Object rifRecord,
+      ClaimWithSecurityTags<?> rifRecord,
       MetricRegistry metricRegistry,
       boolean includeTaxNumbers,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
       SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterfaceV2 claimTransformerInterface = null;
-    if (rifRecord instanceof CarrierClaim) {
+    Object entity = rifRecord.getClaimEntity();
+    if (entity instanceof CarrierClaim) {
       claimTransformerInterface =
-          new CarrierClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
-    } else if (rifRecord instanceof DMEClaim) {
+          new CarrierClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof DMEClaim) {
       claimTransformerInterface =
-          new DMEClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
-    } else if (rifRecord instanceof HHAClaim) {
+          new DMEClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof HHAClaim) {
       claimTransformerInterface =
-          new HHAClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
-    } else if (rifRecord instanceof HospiceClaim) {
+          new HHAClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof HospiceClaim) {
       claimTransformerInterface =
-          new HospiceClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
-    } else if (rifRecord instanceof InpatientClaim) {
+          new HospiceClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof InpatientClaim) {
       claimTransformerInterface =
-          new InpatientClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
-    } else if (rifRecord instanceof OutpatientClaim) {
+          new InpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof OutpatientClaim) {
       claimTransformerInterface =
-          new OutpatientClaimTransformerV2(
-              metricRegistry, drugCodeDisplayLookup, npiOrgLookup, securityTagManager);
-    } else if (rifRecord instanceof PartDEvent) {
+          new OutpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
+    } else if (entity instanceof PartDEvent) {
+      claimTransformerInterface = new PartDEventTransformerV2(metricRegistry);
+    } else if (entity instanceof SNFClaim) {
       claimTransformerInterface =
-          new PartDEventTransformerV2(metricRegistry, drugCodeDisplayLookup, npiOrgLookup);
-    } else if (rifRecord instanceof SNFClaim) {
-      claimTransformerInterface =
-          new SNFClaimTransformerV2(metricRegistry, npiOrgLookup, securityTagManager);
+          new SNFClaimTransformerV2(metricRegistry, securityTagManager, false);
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }

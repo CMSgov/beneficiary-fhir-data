@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-server-parent</artifactId>
-        <version>2.192.0-SNAPSHOT</version>
+        <version>2.198.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-server-war</artifactId>
@@ -171,9 +171,9 @@
             <artifactId>metrics-jvm</artifactId>
             <version>${metrics.version}</version>
         </dependency>
-<!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
-<!--                for the number of active requests, and a timer for request duration. Enabled-->
-<!--                via `web.xml`. &ndash;&gt;-->
+        <!--            &lt;!&ndash; Provides a Servlet filter which has meters for status codes, a counter-->
+        <!--                for the number of active requests, and a timer for request duration. Enabled-->
+        <!--                via `web.xml`. &ndash;&gt;-->
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jakarta-servlets</artifactId>
@@ -282,9 +282,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-server-openapi</artifactId>
-            <version>${hapi-fhir.version}</version>
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-server-openapi</artifactId>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
@@ -367,11 +367,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd.data.fda.utility</groupId>
-            <artifactId>bfd-data-fda</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -393,22 +388,22 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>${maven.antrun.plugin.version}</version>
                 <executions>
-                  <execution>
-                    <phase> pre-integration-test </phase>
-                    <configuration>
-                      <target>
-                          <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
-                              <patternset>
-                                  <exclude name="**/lib/*" />
-                                  <exclude name="**/classes/**" />
-                              </patternset>
-                          </unzip>
-                      </target>
-                    </configuration>
-                    <goals>
-                      <goal>run</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <target>
+                                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.war" dest="${project.build.directory}/test-webapp-directory">
+                                    <patternset>
+                                        <exclude name="**/lib/*" />
+                                        <exclude name="**/classes/**" />
+                                    </patternset>
+                                </unzip>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

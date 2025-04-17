@@ -1,17 +1,16 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
-import gov.cms.bfd.model.rif.samhsa.DmeTag;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -20,6 +19,7 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Quantity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link DMEClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -40,18 +41,14 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  /** The {@link FdaDrugCodeDisplayLookup} is to provide what drugCodeDisplay to return. */
-  private final FdaDrugCodeDisplayLookup drugCodeDisplayLookup;
-
-  /** The {@link NPIOrgLookup} is to provide what npi Org Name to Lookup to return. */
-  private final NPIOrgLookup npiOrgLookup;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform");
 
   /** The securityTagManager. */
   private final SecurityTagManager securityTagManager;
+
+  private final boolean samhsaV2Enabled;
 
   /**
    * Instantiates a new transformer.
@@ -61,41 +58,41 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param drugCodeDisplayLookup the drug code display lookup
-   * @param npiOrgLookup the npi display lookup
    * @param securityTagManager SamhsaSecurityTags lookup
+   * @param samhsaV2Enabled samhsaV2Enabled flag
    */
   DMEClaimTransformerV2(
       MetricRegistry metricRegistry,
-      FdaDrugCodeDisplayLookup drugCodeDisplayLookup,
-      NPIOrgLookup npiOrgLookup,
-      SecurityTagManager securityTagManager) {
+      SecurityTagManager securityTagManager,
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.drugCodeDisplayLookup = requireNonNull(drugCodeDisplayLookup);
-    this.npiOrgLookup = npiOrgLookup;
     this.securityTagManager = requireNonNull(securityTagManager);
+    this.samhsaV2Enabled = samhsaV2Enabled;
   }
 
   /**
    * Transforms a {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param claim the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
    *     response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Trace
   @Override
-  public ExplanationOfBenefit transform(Object claim, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(
+      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+
+    Object claim = claimEntity.getClaimEntity();
+    List<Coding> securityTags =
+        securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
+
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       DMEClaim dmeClaim = (DMEClaim) claim;
-      List<Coding> securityTags =
-          securityTagManager.getClaimSecurityLevel(
-              String.valueOf(dmeClaim.getClaimId()), DmeTag.class);
       eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
     }
     return eob;
@@ -117,7 +114,9 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(Profile.C4BB.getVersionedEobInpatientUrl());
 
-    eob.getMeta().setSecurity(securityTags);
+    if (samhsaV2Enabled) {
+      eob.getMeta().setSecurity(securityTags);
+    }
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id
@@ -193,7 +192,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         claimGroup.getBeneficiaryPartBDeductAmount(),
         claimGroup.getPaymentDenialCode(),
         claimGroup.getReferringPhysicianNpi(),
-        npiOrgLookup.retrieveNPIOrgDisplay(claimGroup.getReferringPhysicianNpi()),
+        CommonTransformerUtils.buildReplaceTaxonomy(claimGroup.getReferringPhysicianNpi()),
         claimGroup.getReferringPhysicianUpin(),
         Optional.of(claimGroup.getProviderAssignmentIndicator()),
         claimGroup.getProviderPaymentAmount(),
@@ -255,7 +254,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               C4BBPractitionerIdentifierType.NPI,
               C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
               line.getProviderNPI(),
-              npiOrgLookup.retrieveNPIOrgDisplay(line.getProviderNPI()));
+              CommonTransformerUtils.buildReplaceTaxonomy(line.getProviderNPI()));
 
       // Update the responsible flag
       if (performing.isPresent()) {
@@ -424,7 +423,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode(),
-          drugCodeDisplayLookup.retrieveFDADrugCodeDisplay(line.getNationalDrugCode()));
+          CommonTransformerUtils.buildReplaceDrugCode(line.getNationalDrugCode()));
 
       // LINE_ICD_DGNS_CD => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

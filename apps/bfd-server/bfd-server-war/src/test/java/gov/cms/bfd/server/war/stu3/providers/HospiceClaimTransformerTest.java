@@ -8,32 +8,32 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.npi.dto.NPIData;
-import gov.cms.bfd.data.npi.lookup.NPIOrgLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
+import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -57,25 +57,16 @@ public final class HospiceClaimTransformerTest {
   /** The securityTagManager. */
   @Mock SecurityTagManager securityTagManager;
 
-  /** The NPI org lookup to use for the test. */
-  private MockedStatic<NPIOrgLookup> npiOrgLookup;
+  Set<String> securityTags = new HashSet<>();
 
   /** One-time setup of objects that are normally injected. */
   @BeforeEach
   public void setup() throws IOException {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    npiOrgLookup = RDATestUtils.mockNPIOrgLookup();
 
     hospiceClaimTransformer =
-        new HospiceClaimTransformer(
-            metricRegistry, NPIOrgLookup.createTestNpiOrgLookup(), securityTagManager);
-  }
-
-  /** Releases the static mock NPIOrgLookup. */
-  @AfterEach
-  public void after() {
-    npiOrgLookup.close();
+        new HospiceClaimTransformer(metricRegistry, securityTagManager, false);
   }
 
   /**
@@ -94,7 +85,7 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    hospiceClaimTransformer.transform(claim, false);
+    hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
 
     String expectedTimerName = hospiceClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -120,7 +111,8 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = hospiceClaimTransformer.transform(claim, false);
+    ExplanationOfBenefit eob =
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
     assertMatches(claim, eob);
   }
 
@@ -135,7 +127,7 @@ public final class HospiceClaimTransformerTest {
    */
   static void assertMatches(HospiceClaim claim, ExplanationOfBenefit eob)
       throws FHIRException, IOException {
-    NPIOrgLookup localNpiLookup = NPIOrgLookup.createTestNpiOrgLookup();
+    NPIOrgLookup localNpiLookup = RDATestUtils.createTestNpiOrgLookup();
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -168,9 +160,7 @@ public final class HospiceClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
         eob,
         claim.getOrganizationNpi(),
-        localNpiLookup
-            .retrieveNPIOrgDisplay(claim.getOrganizationNpi())
-            .map(NPIData::getProviderOrganizationName),
+        Optional.empty(),
         claim.getClaimFacilityTypeCode(),
         claim.getClaimFrequencyCode(),
         claim.getClaimNonPaymentReasonCode(),
