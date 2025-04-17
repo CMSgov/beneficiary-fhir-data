@@ -2196,14 +2196,15 @@ final class TransformerTestUtils {
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
     FDADrugCodeDisplayLookup drugCodeDisplayLookup = RDATestUtils.createFdaDrugCodeDisplayLookup();
+    String normalizedDrugCode = CommonTransformerUtils.normalizeDrugCode(nationalDrugCode);
     String nationalDrugCodeDisplayValueActual =
         drugCodeDisplayLookup
-            .retrieveFDADrugCodeDisplay(Set.of(nationalDrugCode))
-            .get(nationalDrugCode);
+            .retrieveFDADrugCodeDisplay(Set.of(normalizedDrugCode))
+            .get(normalizedDrugCode);
     assertEquals(
         nationalDrugCodeDisplayValue,
         nationalDrugCodeDisplayValueActual,
-        String.format("NDC code '%s' display value mismatch: ", nationalDrugCode));
+        String.format("NDC code '%s' display value mismatch: ", normalizedDrugCode));
   }
 
   /**
