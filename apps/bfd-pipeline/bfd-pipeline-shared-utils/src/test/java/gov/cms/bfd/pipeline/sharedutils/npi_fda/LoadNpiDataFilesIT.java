@@ -56,7 +56,7 @@ public class LoadNpiDataFilesIT {
   @Test
   void shouldSaveDataFiles() throws IOException {
     LoadNpiDataFiles loadNpiDataFiles = new LoadNpiDataFiles(entityManager, 1, 30);
-    loadNpiDataFiles.saveNpiDataFile(
+    loadNpiDataFiles.saveDataFile(
         new InputStreamReader(new ByteArrayInputStream(TEST_CSV.getBytes())));
     Long recordCount = (Long) entityManager.createNativeQuery(NPI_COUNT_QUERY).getSingleResult();
     assertEquals(8L, recordCount);
@@ -72,5 +72,7 @@ public class LoadNpiDataFilesIT {
             npiData.getProviderMiddleName(),
             npiData.getProviderLastName(),
             npiData.getProviderCredential()));
+    assertEquals("207RC0000X", npiData.getTaxonomyCode());
+    assertEquals("Cardiovascular Disease Physician", npiData.getTaxonomyDisplay());
   }
 }

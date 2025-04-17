@@ -228,22 +228,24 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
   }
 
   /**
-   * Gets the first sample A beneficiary.
+   * Gets the first sample A beneficiary, and loads enrichment data.
    *
    * @return the first sample A beneficiary
    */
   protected static Beneficiary getSampleABene() {
     List<Object> loadedRecords = ServerTestUtils.get().loadSampleAData();
+    ServerTestUtils.get().loadEnrichmentData();
     return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
   }
 
   /**
-   * Gets the first sample A beneficiary.
+   * Gets the first sample A beneficiary, and loads enrichment data.
    *
    * @return the first sample A beneficiary
    */
   protected static Beneficiary getSampleABeneSamhsa() {
     List<Object> loadedRecords = ServerTestUtils.get().loadSampleASamhsaData();
+    ServerTestUtils.get().loadEnrichmentData();
     return ServerTestUtils.get().getFirstBeneficiary(loadedRecords);
   }
 

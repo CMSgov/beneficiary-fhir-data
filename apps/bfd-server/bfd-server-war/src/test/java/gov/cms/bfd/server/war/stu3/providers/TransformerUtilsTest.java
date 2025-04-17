@@ -435,7 +435,10 @@ public final class TransformerUtilsTest {
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -493,8 +496,10 @@ public final class TransformerUtilsTest {
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
-
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -513,7 +518,10 @@ public final class TransformerUtilsTest {
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hospiceClaim, securityTags), false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -527,13 +535,14 @@ public final class TransformerUtilsTest {
             .get();
     dmeClaim.setLastUpdated(Instant.now());
 
-    claimTransformerInterface =
-        new DMEClaimTransformer(
-            metricRegistry, RDATestUtils.fdaDrugCodeDisplayLookup(), securityTagManager, false);
+    claimTransformerInterface = new DMEClaimTransformer(metricRegistry, securityTagManager, false);
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(dmeClaim, securityTags), false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 
@@ -552,7 +561,10 @@ public final class TransformerUtilsTest {
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(inpatientClaim, securityTags), false);
-    TransformerUtils.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtils.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
 

@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import gov.cms.bfd.server.war.commons.AbstractResourceProvider;
 import gov.cms.bfd.server.war.commons.ClaimType;
@@ -117,6 +118,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
 
   NPIOrgLookup npiOrgLookup;
 
+  FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup;
+
   /**
    * Instantiates a new {@link ExplanationOfBenefitResourceProvider}.
    *
@@ -136,6 +139,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    * @param partDEventTransformer the part d event transformer
    * @param snfClaimTransformer the snf claim transformer
    * @param npiOrgLookup Instance of NPIOrgLookup
+   * @param fdaDrugCodeDisplayLookup Instance of FDADrugCodeDisplayLookup
    */
   public ExplanationOfBenefitResourceProvider(
       ApplicationContext appContext,
@@ -150,7 +154,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
       OutpatientClaimTransformer outpatientClaimTransformer,
       PartDEventTransformer partDEventTransformer,
       SNFClaimTransformer snfClaimTransformer,
-      NPIOrgLookup npiOrgLookup) {
+      NPIOrgLookup npiOrgLookup,
+      FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup) {
     this.appContext = requireNonNull(appContext);
     this.metricRegistry = requireNonNull(metricRegistry);
     this.loadedFilterManager = requireNonNull(loadedFilterManager);
@@ -164,6 +169,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     this.partDEventTransformer = requireNonNull(partDEventTransformer);
     this.snfClaimTransformer = requireNonNull(snfClaimTransformer);
     this.npiOrgLookup = npiOrgLookup;
+    this.fdaDrugCodeDisplayLookup = fdaDrugCodeDisplayLookup;
   }
 
   /**
@@ -260,7 +266,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
         LoggingUtils.logBeneIdToMdc(beneficiaryId);
       }
     }
-    TransformerUtils.enrichEob(eob, npiOrgLookup);
+    TransformerUtils.enrichEob(eob, npiOrgLookup, fdaDrugCodeDisplayLookup);
     return eob;
   }
 
@@ -405,7 +411,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
           TransformerUtils.createBundle(
               paging, new ArrayList<>(), loadedFilterManager.getTransactionTime());
     }
-    TransformerUtils.enrichEobBundle(bundle, npiOrgLookup);
+    TransformerUtils.enrichEobBundle(bundle, npiOrgLookup, fdaDrugCodeDisplayLookup);
     return bundle;
   }
 
