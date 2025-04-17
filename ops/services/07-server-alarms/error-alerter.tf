@@ -45,8 +45,9 @@ resource "aws_scheduler_schedule" "alerter" {
 }
 
 resource "aws_cloudwatch_log_group" "alerter" {
-  name       = "/aws/lambda/${local.alerter_lambda_full_name}"
-  kms_key_id = local.env_key_arn
+  name         = "/aws/lambda/${local.alerter_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_lambda_function" "alerter" {

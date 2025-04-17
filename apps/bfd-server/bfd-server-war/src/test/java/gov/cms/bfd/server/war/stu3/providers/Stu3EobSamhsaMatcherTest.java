@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -20,7 +19,6 @@ import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -157,8 +155,6 @@ public final class Stu3EobSamhsaMatcherTest {
     @Test
     public void nonSamhsaRelatedClaims() throws IOException {
       Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher(false);
-      FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
-          RDATestUtils.fdaFakeDrugCodeDisplayLookup();
       // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
       List<Object> sampleRifRecords =
           ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -170,11 +166,7 @@ public final class Stu3EobSamhsaMatcherTest {
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
                     return TransformerTestUtils.transformRifRecordToEob(
-                        r,
-                        new MetricRegistry(),
-                        false,
-                        fdaDrugCodeDisplayLookup,
-                        securityTagManager);
+                        r, new MetricRegistry(), false, securityTagManager);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -851,11 +843,7 @@ public final class Stu3EobSamhsaMatcherTest {
               .get();
       ExplanationOfBenefit sampleEobForClaimType =
           TransformerTestUtils.transformRifRecordToEob(
-              sampleRifRecordForClaimType,
-              new MetricRegistry(),
-              false,
-              RDATestUtils.fdaDrugCodeDisplayLookup(),
-              securityTagManager);
+              sampleRifRecordForClaimType, new MetricRegistry(), false, securityTagManager);
 
       return sampleEobForClaimType;
     }

@@ -80,7 +80,12 @@ output "env_key_arn" {
 output "env_config_key_arns" {
   description = "ARNs of the current environment's configuration-specific, multi-region CMK."
   sensitive   = false
-  value       = concat(local.kms_config_key_primary, local.kms_config_key_replicas)
+  value = flatten(
+    [
+      for v in coalesce(local.kms_config_key_mrk_config, []) :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 }
 
 output "default_iam_path" {
@@ -93,4 +98,19 @@ output "default_permissions_boundary_arn" {
   description = "ARN of the default permissions boundary for IAM Roles."
   sensitive   = false
   value       = data.aws_iam_policy.permissions_boundary.arn
+}
+
+output "vpc" {
+  description = "The current environment's VPC (data.aws_vpc)."
+  sensitive   = false
+  value       = data.aws_vpc.main
+}
+
+output "subnets_map" {
+  description = "Map of subnet layers to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
+  sensitive   = false
+  value = {
+    for layer in var.subnet_layers
+    : layer => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["Layer"] == layer]
+  }
 }

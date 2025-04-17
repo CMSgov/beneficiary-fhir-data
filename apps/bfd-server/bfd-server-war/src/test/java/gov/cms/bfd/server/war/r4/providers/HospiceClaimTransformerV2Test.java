@@ -127,7 +127,10 @@ public final class HospiceClaimTransformerV2Test {
   private void createEOB() {
     ExplanationOfBenefit genEob =
         hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -470,7 +473,10 @@ public final class HospiceClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);

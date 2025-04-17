@@ -89,7 +89,7 @@ WITH report_params AS (
       'app_sdk_requests_node_count',
       'app_access_grant_enabled',
       'app_access_grant_category',
-      'app_internal_application_labels',
+      'app_internal_application_labels'
     ] as enabled_metrics_list 
 ),
 

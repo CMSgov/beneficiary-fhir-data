@@ -213,19 +213,7 @@ class StatsAthenaLoader(StatsLoader):
         return self.client.start_query_execution(
             QueryString=query,
             QueryExecutionContext={"Database": self.stats_config.stats_store_s3_database},
-            # This method requires an OutputLocation, so we're using the "adhoc"
-            # path defined in the BFD Insights data organization standards to
-            # store query results
-            ResultConfiguration={
-                "OutputLocation": (
-                    f"s3://{self.stats_config.stats_store_s3_bucket}/adhoc/query_results/"
-                    f"{self.stats_config.stats_store_s3_database}/"
-                    f"{self.stats_config.stats_store_s3_table}"
-                )
-            },
-            # The workgroup should always be "bfd" if we're targeting BFD Insights
-            # databases
-            WorkGroup="bfd",
+            WorkGroup=self.stats_config.stats_store_s3_workgroup,
         )
 
     def __get_athena_query_status(self, query_execution_id: str) -> str:
