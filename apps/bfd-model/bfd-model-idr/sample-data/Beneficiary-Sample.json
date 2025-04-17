@@ -14,8 +14,8 @@
     "ALL_BENE_SKs": ["123456789","234567891"],
     "lastUpdated": "2020-01-07T03:02:28.000000Z",
     "GEO_USPS_STATE_CD": "TX",
-    "BENE_ZIP_CD": "77843",
-    "BENE_LINE_1_ADR": "600 John Kimbrough Blvd",
+    "GEO_ZIP5_CD": "77840",
+    "BENE_LINE_1_ADR": "505 University Dr",
     "BENE_LINE_2_ADR": "TEST for line 2",
     "BENE_LINE_3_ADR": "",
     "BENE_LINE_4_ADR": "",
@@ -23,7 +23,6 @@
     "BENE_LINE_6_ADR": "",
     "GEO_ZIP_PLC_NAME": "College Station",
     "CNTCT_LANG_CD": "ENG",
-    "BENE_PHNE_NUM": "1-800-MEDICARE",
     "BENE_SEX_CD": "2",
     "BENE_RACE_CD": "5"
 }
