@@ -8,19 +8,19 @@ To compile the StructureMap:
 ```sh
 java -jar validator_cli.jar -ig maps/patient.map \
   -compile https://bfd.cms.gov/MappingLanguage/Resources/Patient \
-  -version 4.0.1 -output StructureMaps/bfd_patient_structuremap.json 
+  -version 4.0.1 -output StructureMaps/BFD-Patient-StructureMap.json 
 ```
 
 To execute:
 ```sh
-java -jar validator_cli.jar sample-data/BeneficiarySample.json \
+java -jar validator_cli.jar sample-data/Beneficiary-Sample.json \
   -output outputs/Patient.json \
   -transform https://bfd.cms.gov/MappingLanguage/Resources/Patient \
   -version 4.0.1 \
-  -ig StructureMaps/bfd_patient_structuremap.json \
+  -ig StructureMaps/BFD-Patient-StructureMap.json \
   -ig StructureDefinitions/Source/Bene-MBI.json \
   -ig StructureDefinitions/Source/Bene.json \
-  -ig hl7.fhir.us.carin-bb#2.0.0 \
+  -ig hl7.fhir.us.carin-bb#2.1.0 \
   -ig maps/Patient-Helper.map
 ```
 
@@ -34,5 +34,10 @@ java -jar validator_cli.jar sample-data/<input>.json \
 Validate against C4BB:
 ```sh
 java -jar validator_cli.jar outputs/<output_json>.json \
-  -ig hl7.fhir.us.carin-bb#2.0.0
+  -ig hl7.fhir.us.carin-bb#2.1.0
+```
+
+Generate sample data
+```sh
+python sample-data/generator/Patient-Generator.py
 ```
