@@ -809,10 +809,26 @@ public final class CommonTransformerUtils {
    */
   public static String buildReplaceDrugCode(Optional<String> drugCode) {
     if (drugCode.isPresent()) {
-      return String.format("replaceDrugCode[%s]", drugCode.get());
+      String normalizedDrugCode = normalizeDrugCode(drugCode.get());
+      return normalizedDrugCode != null
+          ? String.format("replaceDrugCode[%s]", normalizedDrugCode)
+          : null;
     } else {
       return null;
     }
+  }
+
+  /**
+   * Normalizes the drug code to match the database values. *
+   *
+   * @param drugCode The drug code to normalize.
+   * @return The normalized drug code.
+   */
+  public static String normalizeDrugCode(String drugCode) {
+
+    return drugCode.length() >= 9
+        ? drugCode.substring(0, 5) + "-" + drugCode.substring(5, 9)
+        : null;
   }
 
   /**

@@ -14,7 +14,7 @@ public class FDADrugCodeDisplayLookupIT {
     FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         RDATestUtils.createFdaDrugCodeDisplayLookup();
     String fdaCodeDisplay =
-        fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(null).get("804250039");
+        fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(null).get("80425-0039");
     assertEquals("Celecoxib - CELECOXIB", fdaCodeDisplay);
   }
 }

@@ -2,12 +2,15 @@
 
 This Terraservice defines the resources that implement the BFD Server's metrics (mostly in the form of Metric Filters) and dashboards.
 
-## Strict Terraservice Dependencies
+## Direct Terraservice Dependencies
 
-The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
 
-- `base`
-- `server`
+| Terraservice | Required for Established? | Required for Ephemeral? | Details |
+|---|---|---|---|
+| `base` | Yes | Yes | N/A |
+| `config` | Yes | Yes | N/A |
+| `server` | Yes | Yes | N/A |
 
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.

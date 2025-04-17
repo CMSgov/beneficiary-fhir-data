@@ -299,6 +299,8 @@ public final class TransformerUtils {
     for (Map.Entry<String, Set<Type>> entries : drugEnrichmentMap.entrySet()) {
       if (drugCodeMap.containsKey(entries.getKey())) {
         parseEnrichmentEntries(entries, drugCodeMap, REPLACE_DRUG_CODE, EnrichmentDataType.DRUG);
+      } else {
+        entries.getValue().forEach(c -> ((Coding) c).setDisplay(null));
       }
     }
 
