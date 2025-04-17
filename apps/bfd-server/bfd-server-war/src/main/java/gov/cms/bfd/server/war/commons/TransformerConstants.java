@@ -725,9 +725,6 @@ public final class TransformerConstants {
   /** US Core Sex extension code for female. */
   public static final String US_CORE_SEX_FEMALE = "248152002";
 
-  /** US Core Sex extension code for unknown. */
-  public static final String US_CORE_SEX_UNKNOWN = "184115007";
-
   /** US Core Sex extension URL. */
   public static final String US_CORE_SEX_URL =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex";
