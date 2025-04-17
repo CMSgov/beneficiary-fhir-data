@@ -83,7 +83,6 @@ public class ServerExecutor {
     appSettings.put(AppConfiguration.SSM_PATH_KEYSTORE, keyStore);
     appSettings.put(AppConfiguration.SSM_PATH_TRUSTSTORE, trustStore);
     appSettings.put(AppConfiguration.SSM_PATH_WAR, warArtifactLocation);
-    appSettings.put(SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED, "true");
     AppConfiguration appConfig = AppConfiguration.loadConfig(configLoader);
     serverInfo = DataServerLauncherApp.createServer(appConfig);
 

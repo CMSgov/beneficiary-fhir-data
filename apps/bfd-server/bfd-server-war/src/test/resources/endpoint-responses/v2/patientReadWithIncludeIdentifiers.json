@@ -2,7 +2,8 @@
   "resourceType" : "Patient",
   "id" : "567834",
   "meta" : {
-    "lastUpdated" : "IGNORED_FIELD"
+    "lastUpdated" : "IGNORED_FIELD",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient" ]
   },
   "extension" : [ {
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
@@ -206,6 +207,7 @@
     "family" : "Doe",
     "given" : [ "John", "A" ]
   } ],
+  "gender" : "male",
   "birthDate" : "1981-03-17",
   "deceasedDateTime" : "1981-03-17",
   "address" : [ {
