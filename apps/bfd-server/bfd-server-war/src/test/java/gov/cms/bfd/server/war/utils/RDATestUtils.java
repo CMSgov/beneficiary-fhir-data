@@ -5,8 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.DatabaseTestUtils;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissDiagnosisCode;
@@ -17,6 +15,7 @@ import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
+import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Persistence;
@@ -40,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 
 /** Supplies test data for the RDA based unit tests. */
@@ -919,26 +917,15 @@ public class RDATestUtils {
    *
    * @return mocked FdaDrugCodeDisplayLookup
    */
-  public static @NotNull FdaDrugCodeDisplayLookup fdaFakeDrugCodeDisplayLookup() {
-
-    Map<String, String> ndcProductHashMap = new HashMap<>();
-    ndcProductHashMap.put(FAKE_DRUG_CODE, FAKE_DRUG_CODE_DISPLAY);
-
-    return new FdaDrugCodeDisplayLookup(ndcProductHashMap);
-  }
-
-  /**
-   * Mocks an FdaDrugCodeDisplayLookup object. FdaDrugCodeDisplayLookup
-   *
-   * @return mocked FdaDrugCodeDisplayLookup
-   */
-  public static @NotNull FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup() throws IOException {
-    InputStream npiDataStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
-
-    return new FdaDrugCodeDisplayLookup(npiDataStream);
+  public static FDADrugCodeDisplayLookup createFdaDrugCodeDisplayLookup() {
+    Map<String, String> fdaMap =
+        Map.of(
+            "00000-0000", "Fake Diluent - WATER",
+            "80425-0039", "Celecoxib - CELECOXIB");
+    FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
+        Mockito.mock(FDADrugCodeDisplayLookup.class);
+    Mockito.when(fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(any())).thenReturn(fdaMap);
+    return fdaDrugCodeDisplayLookup;
   }
 
   public static NPIOrgLookup createTestNpiOrgLookup() {

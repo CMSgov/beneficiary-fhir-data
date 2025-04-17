@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import static gov.cms.bfd.data.fda.utility.App.FDA_PRODUCTS_RESOURCE;
-
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -12,7 +10,6 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -36,7 +33,6 @@ import jakarta.persistence.PersistenceUnit;
 import jakarta.servlet.ServletContext;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -73,8 +69,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SpringConfiguration extends BaseConfiguration {
   /**
    * The {@link String } property that is used to hold drug code file name that is used for
-   * integration testing and production changes to the external drug code file in {@link
-   * FdaDrugCodeDisplayLookup#retrieveFDADrugCodeDisplay}.
+   * integration testing.
    */
   public static final String PROP_DRUG_CODE_FILE_NAME = "bfdServer.drug.code.file.name";
 
@@ -450,23 +445,6 @@ public class SpringConfiguration extends BaseConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
-  }
-
-  /**
-   * This bean provides an {@link FdaDrugCodeDisplayLookup} for use in the transformers to look up
-   * drug codes.
-   *
-   * @param drugCodeFileName holds the file name for test or production
-   * @return the {@link FdaDrugCodeDisplayLookup} for the application.
-   */
-  @Bean
-  public FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup(
-      @Value("${" + PROP_DRUG_CODE_FILE_NAME + ":" + FDA_PRODUCTS_RESOURCE + "}")
-          String drugCodeFileName)
-      throws IOException {
-    InputStream npiDataStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(drugCodeFileName);
-    return new FdaDrugCodeDisplayLookup(npiDataStream);
   }
 
   /**
