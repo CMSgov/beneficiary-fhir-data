@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #######################################
 # RDS Writer Identifier Script
 #######################################
@@ -14,7 +15,8 @@
 # Arguments:
 #   $1 maps to the CLUSTER_IDENTIFIER
 #######################################
-set -euo pipefail
+
+set -Eeuo pipefail
 
 CLUSTER_IDENTIFIER="$1"
 
