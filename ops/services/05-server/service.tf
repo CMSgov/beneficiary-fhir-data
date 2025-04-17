@@ -16,10 +16,11 @@ locals {
   server_max_capacity    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
   server_cpu             = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
   server_memory          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  # TODO: Remove "/ng/" prefix when config is switched to
   server_ssm_hierarchies = [
-    "/bfd/${local.env}/${local.service}/sensitive/",
-    "/bfd/${local.env}/${local.service}/nonsensitive/",
-    "/bfd/${local.env}/common/nonsensitive/",
+    "/ng/bfd/${local.env}/${local.service}/sensitive/",
+    "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
+    "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
   server_protocol             = "tcp"
   server_healthcheck_pem_path = "/data/healthcheck.pem"
@@ -51,23 +52,27 @@ data "aws_ecr_image" "server" {
 }
 
 resource "aws_cloudwatch_log_group" "certstores_messages" {
-  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/certstores/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
-  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "server_messages" {
-  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "server_access" {
-  name       = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id = data.aws_kms_alias.env_cmk.target_key_arn
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_ecs_task_definition" "server" {
@@ -104,7 +109,7 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             name  = "BUCKET"
-            value = aws_s3_bucket.certstores.bucket
+            value = module.bucket_certstores.bucket.bucket
           },
           {
             name  = "TRUSTSTORE_KEY"
