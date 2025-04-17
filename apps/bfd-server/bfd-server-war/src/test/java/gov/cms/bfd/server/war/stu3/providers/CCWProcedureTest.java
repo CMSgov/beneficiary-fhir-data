@@ -32,8 +32,7 @@ public class CCWProcedureTest {
     assertMatches(versionIcd10, systemIcd10);
 
     Character versionIcdUnknown = 'U';
-    String systemIcdUnknown =
-        String.format(CODING_SYSTEM_ICD_UNKNOWN, versionIcdUnknown.toString().trim());
+    String systemIcdUnknown = CODING_SYSTEM_ICD_UNKNOWN + "/" + versionIcdUnknown;
     assertMatches(versionIcdUnknown, systemIcdUnknown);
 
     assertDateNotPresent(versionIcdUnknown, systemIcdUnknown);
