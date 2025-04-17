@@ -113,8 +113,9 @@ resource "aws_cloudwatch_metric_alarm" "server-query-logging-listener-warning" {
 resource "aws_cloudwatch_metric_alarm" "samhsa-mismatch-error" {
   alarm_name          = "bfd-${local.env}-samhsa-mismatch-error"
   namespace           = "bfd-${local.env}/bfd-server"
-  metric_name         = "bfd-${local.env}/bfd-server/samhsa-mismatch/count/error"
+  metric_name         = "samhsa-mismatch/count/error"
   comparison_operator = "GreaterThanOrEqualToThreshold"
+  threshold = 1
   evaluation_periods  = 1
   period              = 60
   statistic           = "Sum"
