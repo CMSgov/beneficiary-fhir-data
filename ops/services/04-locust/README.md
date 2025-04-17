@@ -2,14 +2,16 @@
 
 This Terraservice defines the resources for a Lambda,`bfd-${env}-locust-run-locust`, allowing an operator or automation to run any of the Locust test suites within the `apps/utils/locust_tests` subdirectory. Additionally, this Terraservice creates an Athena Workgroup, corresponding S3 Bucket, and Glue Crawler and Trigger Lambda to allow for querying of test result statistics from running said Lambda.
 
-## Strict Terraservice Dependencies
+## Direct Terraservice Dependencies
 
-The resources created by the following Terraservices _must_ exist in the current environment in order for this Terraservice to be `apply`able:
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
 
-- `base`
-- `config`
-- `cluster`
-- `database`
+| Terraservice | Required for Established? | Required for Ephemeral? | Details |
+|---|---|---|---|
+| `base` | Yes | Yes | N/A |
+| `config` | Yes | Yes | N/A |
+| `cluster` | Yes | Yes | N/A |
+| `database` | Yes | Yes | N/A |
 
 ## `run-locust` Lambda
 
