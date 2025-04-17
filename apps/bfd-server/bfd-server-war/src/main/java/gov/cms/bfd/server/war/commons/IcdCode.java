@@ -26,7 +26,7 @@ public abstract class IcdCode {
 
   /** Unknown Icd Version. */
   public static final String CODING_SYSTEM_ICD_UNKNOWN =
-      "http://hl7.org/fhir/sid/unknown-icd-version/%s";
+      "http://hl7.org/fhir/sid/unknown-icd-version";
 
   /** The ICD code. */
   private final String icdCode;
@@ -116,9 +116,17 @@ public abstract class IcdCode {
    */
   public String getFhirSystem() {
     String system;
-    if (icdVersionCode == null || icdVersionCode.equals('9')) system = CODING_SYSTEM_ICD_9;
-    else if (icdVersionCode.equals('0')) system = CODING_SYSTEM_ICD_10;
-    else system = String.format(CODING_SYSTEM_ICD_UNKNOWN, icdVersionCode.toString().trim());
+
+    if (icdVersionCode == null || Character.isWhitespace(icdVersionCode)) {
+      system = CODING_SYSTEM_ICD_UNKNOWN;
+    } else if (icdVersionCode.toString().equals("9")) {
+      system = CODING_SYSTEM_ICD_9;
+    } else if (icdVersionCode.toString().equals("0")) {
+      system = CODING_SYSTEM_ICD_10;
+    } else {
+      system = CODING_SYSTEM_ICD_UNKNOWN + "/" + icdVersionCode;
+    }
+
     return system;
   }
 }
