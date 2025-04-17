@@ -14,8 +14,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
-import gov.cms.bfd.data.fda.utility.App;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
@@ -43,7 +41,6 @@ import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -913,7 +910,10 @@ public class TransformerUtilsV2Test {
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -932,7 +932,10 @@ public class TransformerUtilsV2Test {
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hospiceClaim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -944,20 +947,15 @@ public class TransformerUtilsV2Test {
             .findFirst()
             .get();
     dmeClaim.setLastUpdated(Instant.now());
-    InputStream npiDataStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(App.FDA_PRODUCTS_RESOURCE);
     claimTransformerInterface =
-        new DMEClaimTransformerV2(
-            new MetricRegistry(),
-            new FdaDrugCodeDisplayLookup(npiDataStream),
-            securityTagManager,
-            false);
+        new DMEClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(dmeClaim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -975,7 +973,10 @@ public class TransformerUtilsV2Test {
     genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(inpatientClaim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     parser = fhirContext.newJsonParser();
     json = parser.encodeResourceToString(genEob);
     eobs.add(parser.parseResource(ExplanationOfBenefit.class, json));
@@ -1105,7 +1106,10 @@ public class TransformerUtilsV2Test {
     ExplanationOfBenefit genEob =
         claimTransformerInterface.transform(
             new ClaimWithSecurityTags<>(hhaClaim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();

@@ -13,7 +13,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.bfd.data.fda.lookup.FdaDrugCodeDisplayLookup;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
@@ -130,14 +129,14 @@ public final class DMEClaimTransformerV2Test {
 
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    FdaDrugCodeDisplayLookup fdaDrugCodeDisplayLookup = RDATestUtils.fdaFakeDrugCodeDisplayLookup();
-    dmeClaimTransformer =
-        new DMEClaimTransformerV2(
-            metricRegistry, fdaDrugCodeDisplayLookup, securityTagManager, false);
+    dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     IParser parser = fhirContext.newJsonParser();
     String json = parser.encodeResourceToString(genEob);
     eob = parser.parseResource(ExplanationOfBenefit.class, json);
@@ -307,7 +306,10 @@ public final class DMEClaimTransformerV2Test {
         dmeClaimTransformer.transform(
             new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
 
-    TransformerUtilsV2.enrichEob(genEob, RDATestUtils.createTestNpiOrgLookup());
+    TransformerUtilsV2.enrichEob(
+        genEob,
+        RDATestUtils.createTestNpiOrgLookup(),
+        RDATestUtils.createFdaDrugCodeDisplayLookup());
     // Ensure the extension for PRTCPTNG_IND_CD wasnt added
     // Also the qualification coding should be empty if specialty code is not set
     String prtIndCdUrl =

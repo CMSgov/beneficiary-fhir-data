@@ -802,6 +802,36 @@ public final class CommonTransformerUtils {
   }
 
   /**
+   * Builds the drug code for future enrichment.
+   *
+   * @param drugCode The drug code
+   * @return placeholder for the drug code.
+   */
+  public static String buildReplaceDrugCode(Optional<String> drugCode) {
+    if (drugCode.isPresent()) {
+      String normalizedDrugCode = normalizeDrugCode(drugCode.get());
+      return normalizedDrugCode != null
+          ? String.format("replaceDrugCode[%s]", normalizedDrugCode)
+          : null;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Normalizes the drug code to match the database values. *
+   *
+   * @param drugCode The drug code to normalize.
+   * @return The normalized drug code.
+   */
+  public static String normalizeDrugCode(String drugCode) {
+
+    return drugCode.length() >= 9
+        ? drugCode.substring(0, 5) + "-" + drugCode.substring(5, 9)
+        : null;
+  }
+
+  /**
    * Replaces organization for future enrichment.
    *
    * @param npi NPI
