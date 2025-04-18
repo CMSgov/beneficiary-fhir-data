@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static gov.cms.bfd.server.war.commons.IcdCode.CODING_SYSTEM_ICD_UNKNOWN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,7 +24,7 @@ public class DiagnosisTest {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void testdiagnosis() throws FHIRException {
+  public void testDiagnosis() throws FHIRException {
 
     Character versionIcd9 = '9';
     String systemIcd9 = "http://hl7.org/fhir/sid/icd-9-cm";
@@ -34,8 +35,7 @@ public class DiagnosisTest {
     assertMatches(versionIcd10, systemIcd10);
 
     Character versionIcdUnknown = 'U';
-    String systemIcdUnknown =
-        String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", versionIcdUnknown);
+    String systemIcdUnknown = CODING_SYSTEM_ICD_UNKNOWN + "/" + versionIcdUnknown;
     assertMatches(versionIcdUnknown, systemIcdUnknown);
 
     assertDiagnosisLabelsMatch();
