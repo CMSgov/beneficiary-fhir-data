@@ -920,8 +920,8 @@ public class RDATestUtils {
   public static FDADrugCodeDisplayLookup createFdaDrugCodeDisplayLookup() {
     Map<String, String> fdaMap =
         Map.of(
-            "000000000", "Fake Diluent - WATER",
-            "804250039", "Celecoxib - CELECOXIB");
+            "00000-0000", "Fake Diluent - WATER",
+            "80425-0039", "Celecoxib - CELECOXIB");
     FDADrugCodeDisplayLookup fdaDrugCodeDisplayLookup =
         Mockito.mock(FDADrugCodeDisplayLookup.class);
     Mockito.when(fdaDrugCodeDisplayLookup.retrieveFDADrugCodeDisplay(any())).thenReturn(fdaMap);

@@ -23,13 +23,13 @@
         "contained": [
           {
             "resourceType": "Patient",
-            "id": "patient",
             "extension": [
               {
                 "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
                 "valueCode": "248153007"
               }
             ],
+            "id": "patient",
             "identifier": [
               {
                 "type": {
@@ -55,6 +55,7 @@
                 ]
               }
             ],
+            "gender": "male",
             "birthDate": "1975-03-01"
           },
           {
@@ -515,13 +516,13 @@
         "contained": [
           {
             "resourceType": "Patient",
-            "id": "patient",
             "extension": [
               {
                 "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
                 "valueCode": "248153007"
               }
             ],
+            "id": "patient",
             "identifier": [
               {
                 "type": {
@@ -546,7 +547,8 @@
                   "D."
                 ]
               }
-            ]
+            ],
+            "gender": "male"
           },
           {
             "resourceType": "Organization",

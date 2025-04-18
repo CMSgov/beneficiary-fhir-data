@@ -146,7 +146,7 @@ public class McsClaimTransformerV2Test {
     entity.setDetails(new HashSet<>(procedures));
 
     McsClaimTransformerV2 mcsClaimTransformerV2 =
-        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false, true);
+        new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     Set<String> securityTags = new HashSet<>();
 
     Claim claim =

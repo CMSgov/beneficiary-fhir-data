@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -56,8 +55,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
 
   private final boolean samhsaV2Enabled;
 
-  private final boolean sexExtensionEnabled;
-
   /** The metric name. */
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
@@ -88,17 +85,14 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * @param metricRegistry the metric registry
    * @param securityTagManager SamhsaSecurityTags lookup
    * @param samhsaV2Enabled samhsaV2Enabled flag
-   * @param sexExtensionEnabled sex extension enabled
    */
   public McsClaimTransformerV2(
       MetricRegistry metricRegistry,
       SecurityTagManager securityTagManager,
-      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled,
-      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = metricRegistry;
     this.securityTagManager = requireNonNull(securityTagManager);
     this.samhsaV2Enabled = samhsaV2Enabled;
-    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -140,7 +134,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
     claim.setContained(
         List.of(
-            McsTransformerV2.getContainedPatient(claimGroup, sexExtensionEnabled),
+            McsTransformerV2.getContainedPatient(claimGroup),
             getContainedProvider(claimGroup, includeTaxNumbers)));
     claim
         .getIdentifier()
