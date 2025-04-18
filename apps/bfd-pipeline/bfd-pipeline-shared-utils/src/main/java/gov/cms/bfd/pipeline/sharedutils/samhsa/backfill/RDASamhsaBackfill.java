@@ -13,17 +13,21 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   static final Logger LOGGER = LoggerFactory.getLogger(RDASamhsaBackfill.class);
 
   /** The column name for the fiss claim id. */
-  private static String FISS_CLAIM_ID_FIELD = "claim_id";
+  private static final String FISS_CLAIM_ID_FIELD = "claim_id";
+
+  private static final String RDA_POSITION = "rda_position";
+  private static final String IDR_DTL_NUM = "idr_dtl_number";
 
   /** The column name for the mcs claim id. */
-  private static String MCS_CLAIM_ID_FIELD = "idr_clm_hd_icn";
+  private static final String MCS_CLAIM_ID_FIELD = "idr_clm_hd_icn";
 
   /** Columns for mcs_diagnosis. */
-  private static String[] MCS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {"idr_diag_code"};
+  private static String[] MCS_DIAGNOSIS_SAMHSA_COLUMNS =
+      new String[] {"rda_posistion", "idr_diag_code"};
 
   /** Columns for mcs_details. */
   private static String[] MCS_DETAILS_SAMHSA_COLUMNS =
-      new String[] {"idr_dtl_primary_diag_code", "idr_proc_code"};
+      new String[] {"idr_dtl_number", "idr_dtl_primary_diag_code", "idr_proc_code"};
 
   /** Columns for fiss. */
   private static String[] FISS_SAMHSA_COLUMNS =
@@ -31,50 +35,70 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
         "stmt_cov_from_date", "stmt_cov_to_date", "admit_diag_code", "drg_cd", "principle_diag"
       };
 
+  private static final String FISS_FROM_DATE = "stmt_cov_from_date";
+  private static final String FISS_TO_DATE = "stmt_cov_to_date";
+
   /** Columns for fiss revenue lines. */
-  private static String[] FISS_REVENUE_LINES_SAMHSA_COLUMNS =
-      new String[] {"apc_hcpcs_apc", "hcpc_cd"};
+  private String[] FISS_REVENUE_LINES_SAMHSA_COLUMNS =
+      new String[] {"rda_position", "apc_hcpcs_apc", "hcpc_cd"};
 
   /** Columns for fiss_diagnosis_codes. */
-  private static String[] FISS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {"diag_cd2"};
+  private String[] FISS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {"rda_position", "diag_cd2"};
 
   /** Columns for fiss_proc_codes. */
-  private static String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {"proc_code"};
+  private String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {"rda_position", "proc_code"};
 
   /** mcs_diagnosis_codes query. */
-  private static String MCS_DIAGNOSIS_QUERY =
+  private String MCS_DIAGNOSIS_QUERY =
       buildQueryStringTemplate(
           "rda.mcs_diagnosis_codes", MCS_CLAIM_ID_FIELD, MCS_DIAGNOSIS_SAMHSA_COLUMNS);
 
   /** mcs_details query. */
-  private static String MCS_DETAILS_QUERY =
+  private String MCS_DETAILS_QUERY =
       buildQueryStringTemplate("rda.mcs_details", MCS_CLAIM_ID_FIELD, MCS_DETAILS_SAMHSA_COLUMNS);
 
   /** fiss_claims query. */
-  private static String FISS_QUERY =
+  private String FISS_QUERY =
       buildQueryStringTemplate("rda.fiss_claims", FISS_CLAIM_ID_FIELD, FISS_SAMHSA_COLUMNS);
 
   /** fiss_revenue_lines query. */
-  private static String FISS_REVENUE_QUERY =
+  private String FISS_REVENUE_QUERY =
       buildQueryStringTemplate(
           "rda.fiss_revenue_lines", FISS_CLAIM_ID_FIELD, FISS_REVENUE_LINES_SAMHSA_COLUMNS);
 
   /** fiss_diagnosis_codes query. */
-  private static String FISS_DIAGNOSIS_QUERY =
+  private String FISS_DIAGNOSIS_QUERY =
       buildQueryStringTemplate(
           "rda.fiss_diagnosis_codes", FISS_CLAIM_ID_FIELD, FISS_DIAGNOSIS_SAMHSA_COLUMNS);
 
   /** fiss_proc_codes query. */
-  private static String FISS_PROC_QUERY =
+  private String FISS_PROC_QUERY =
       buildQueryStringTemplate(
           "rda.fiss_proc_codes", FISS_CLAIM_ID_FIELD, FISS_PROC_SAMHSA_COLUMNS);
+
+  @Override
+  COLUMN_TYPE getEntryType(String entry) {
+    switch (entry) {
+      case RDA_POSITION:
+      case IDR_DTL_NUM:
+        return COLUMN_TYPE.LINE_NUM;
+      case FISS_FROM_DATE:
+        return COLUMN_TYPE.DATE_FROM;
+      case FISS_TO_DATE:
+        return COLUMN_TYPE.DATE_TO;
+      case FISS_CLAIM_ID_FIELD:
+      case MCS_CLAIM_ID_FIELD:
+        return COLUMN_TYPE.CLAIM_ID;
+      default:
+        return COLUMN_TYPE.SAMHSA_CODE;
+    }
+  }
 
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {
     /** Fiss Claims. */
     FISS_CLAIMS(
         new TableEntry(
-            FISS_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -85,7 +109,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** Fiss proc codes. */
     FISS_PROC_CODES(
         new TableEntry(
-            FISS_PROC_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -95,7 +118,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** Fiss diagnosis codes. */
     FISS_DIAGNOSIS_CODES(
         new TableEntry(
-            FISS_DIAGNOSIS_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -105,7 +127,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** Fiss revenue lines. */
     FISS_REVENUE_LINES(
         new TableEntry(
-            FISS_REVENUE_QUERY,
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
@@ -116,7 +137,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** MCS diagnosis codes. */
     MCS_DIAGNOSIS_CODES(
         new TableEntry(
-            MCS_DIAGNOSIS_QUERY,
             GET_CLAIM_DATES_MCS,
             "rda.mcs_tags",
             MCS_CLAIM_ID_FIELD,
@@ -126,7 +146,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
     /** MCS details. */
     MCS_DETAILS(
         new TableEntry(
-            MCS_DETAILS_QUERY,
             GET_CLAIM_DATES_MCS,
             "rda.mcs_tags",
             MCS_CLAIM_ID_FIELD,
@@ -170,6 +189,7 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
       Long logInterval,
       RDA_TABLES tableEntry) {
     super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
+    query = getQueryByTableEntry(tableEntry);
   }
 
   /** {@inheritDoc} */
@@ -177,5 +197,24 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   protected String convertClaimId(String claimId) {
     // Already a string, do nothing.
     return claimId;
+  }
+
+  private String getQueryByTableEntry(RDA_TABLES tableEntry) {
+    switch (tableEntry) {
+      case MCS_DETAILS:
+        return MCS_DETAILS_QUERY;
+      case MCS_DIAGNOSIS_CODES:
+        return MCS_DIAGNOSIS_QUERY;
+      case FISS_CLAIMS:
+        return FISS_QUERY;
+      case FISS_DIAGNOSIS_CODES:
+        return FISS_DIAGNOSIS_QUERY;
+      case FISS_PROC_CODES:
+        return FISS_PROC_QUERY;
+      case FISS_REVENUE_LINES:
+        return FISS_REVENUE_QUERY;
+      default:
+        throw new IllegalArgumentException("Unknown RDA_TABLES type.");
+    }
   }
 }

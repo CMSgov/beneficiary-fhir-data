@@ -12,6 +12,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The claim id field. */
   private static final String CLAIM_FIELD = "clm_id";
 
+  private static final String CARRIER_DME_LINE_NUM_FIELD = "line_num";
+  private static final String LINE_NUM_FIELD = "clm_line_num";
+
   /** prncpal_dgns_cd column. */
   private static final String PRINCIPAL_DIAGNOSIS_CODE_COLUMN = "prncpal_dgns_cd";
 
@@ -52,7 +55,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   private static final String CLAIM_THRU_DATE = "clm_thru_dt";
 
   /** carrier_claims query. */
-  private static final String CARRIER_CLAIMS_QUERY =
+  private final String CARRIER_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.carrier_claims",
           CLAIM_FIELD,
@@ -62,15 +65,16 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 12));
 
   /** carrier_claim_lines query. */
-  private static final String CARRIER_CLAIM_LINES_QUERY =
+  private final String CARRIER_CLAIM_LINES_QUERY =
       buildQueryStringTemplate(
           "ccw.carrier_claim_lines",
           CLAIM_FIELD,
+          CARRIER_DME_LINE_NUM_FIELD,
           LINE_ICD_DIAGNOSIS_CODE_COLUMN,
           HCPCS_CODE_COLUMN);
 
   /** dme_claims query. */
-  private static final String DME_CLAIMS_QUERY =
+  private final String DME_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.dme_claims",
           CLAIM_FIELD,
@@ -80,12 +84,16 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 12));
 
   /** dme_claim_lines query. */
-  private static final String DME_CLAIM_LINES_QUERY =
+  private final String DME_CLAIM_LINES_QUERY =
       buildQueryStringTemplate(
-          "ccw.dme_claim_lines", CLAIM_FIELD, LINE_ICD_DIAGNOSIS_CODE_COLUMN, HCPCS_CODE_COLUMN);
+          "ccw.dme_claim_lines",
+          CLAIM_FIELD,
+          CARRIER_DME_LINE_NUM_FIELD,
+          LINE_ICD_DIAGNOSIS_CODE_COLUMN,
+          HCPCS_CODE_COLUMN);
 
   /** hospice_claims query. */
-  private static final String HOSPICE_CLAIMS_QUERY =
+  private final String HOSPICE_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.hospice_claims",
           CLAIM_FIELD,
@@ -97,11 +105,12 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           FST_DIAGNOSIS_E_CODE_COLUMN);
 
   /** hospice_claim_lines query. */
-  private static final String HOSPICE_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate("ccw.hospice_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
+  private final String HOSPICE_CLAIM_LINES_QUERY =
+      buildQueryStringTemplate(
+          "ccw.hospice_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
 
   /** hha_claims query. */
-  private static final String HHA_CLAIMS_QUERY =
+  private final String HHA_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.hha_claims",
           CLAIM_FIELD,
@@ -113,12 +122,16 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           FST_DIAGNOSIS_E_CODE_COLUMN);
 
   /** hha_claim_lines query. */
-  private static final String HHA_CLAIM_LINES_QUERY =
+  private final String HHA_CLAIM_LINES_QUERY =
       buildQueryStringTemplate(
-          "ccw.hha_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN, REV_CENTER_APC_HIPPS_CODE_COLUMN);
+          "ccw.hha_claim_lines",
+          CLAIM_FIELD,
+          HCPCS_CODE_COLUMN,
+          LINE_NUM_FIELD,
+          REV_CENTER_APC_HIPPS_CODE_COLUMN);
 
   /** snf_claims query. */
-  private static final String SNF_CLAIMS_QUERY =
+  private final String SNF_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.snf_claims",
           CLAIM_FIELD,
@@ -133,11 +146,12 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           PRINCIPAL_DIAGNOSIS_CODE_COLUMN);
 
   /** snf_claim_lines query. */
-  private static final String SNF_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate("ccw.snf_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
+  private final String SNF_CLAIM_LINES_QUERY =
+      buildQueryStringTemplate(
+          "ccw.snf_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
 
   /** inpatient_claims query. */
-  private static final String INPATIENT_CLAIMS_QUERY =
+  private final String INPATIENT_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.inpatient_claims",
           CLAIM_FIELD,
@@ -152,11 +166,12 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25));
 
   /** inpatient_claim_lines query. */
-  private static final String INPATIENT_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate("ccw.inpatient_claim_lines", CLAIM_FIELD, HCPCS_CODE_COLUMN);
+  private final String INPATIENT_CLAIM_LINES_QUERY =
+      buildQueryStringTemplate(
+          "ccw.inpatient_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
 
   /** outpatient_claims query. */
-  private static final String OUTPATIENT_CLAIMS_QUERY =
+  private final String OUTPATIENT_CLAIMS_QUERY =
       buildQueryStringTemplate(
           "ccw.outpatient_claims",
           CLAIM_FIELD,
@@ -170,10 +185,11 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
           enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25));
 
   /** outpatient_claim_lines query. */
-  private static final String OUTPATIENT_CLAIM_LINES_QUERY =
+  private final String OUTPATIENT_CLAIM_LINES_QUERY =
       buildQueryStringTemplate(
           "ccw.outpatient_claim_lines",
           CLAIM_FIELD,
+          LINE_NUM_FIELD,
           HCPCS_CODE_COLUMN,
           REV_CENTER_APC_HIPPS_CODE_COLUMN);
 
@@ -196,6 +212,22 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The Logger. */
   static final Logger LOGGER = LoggerFactory.getLogger(CCWSamhsaBackfill.class);
 
+  COLUMN_TYPE getEntryType(String entry) {
+    switch (entry) {
+      case LINE_NUM_FIELD:
+      case CARRIER_DME_LINE_NUM_FIELD:
+        return COLUMN_TYPE.LINE_NUM;
+      case CLAIM_FROM_DATE:
+        return COLUMN_TYPE.DATE_FROM;
+      case CLAIM_THRU_DATE:
+        return COLUMN_TYPE.DATE_TO;
+      case CLAIM_FIELD:
+        return COLUMN_TYPE.CLAIM_ID;
+      default:
+        return COLUMN_TYPE.SAMHSA_CODE;
+    }
+  }
+
   /**
    * The list of table entries for CCW claims. This is mostly used in building the queries for the
    * tables.
@@ -204,7 +236,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Carrier Claim. */
     CARRIER_CLAIMS(
         new TableEntry(
-            CARRIER_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.carrier_tags",
             CLAIM_FIELD,
@@ -215,7 +246,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Carrier Claim Lines. */
     CARRIER_CLAIM_LINES(
         new TableEntry(
-            CARRIER_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.carrier_tags",
             CLAIM_FIELD,
@@ -226,7 +256,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** DME Claim. */
     DME_CLAIMS(
         new TableEntry(
-            DME_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.dme_tags",
             CLAIM_FIELD,
@@ -237,7 +266,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** DME Claim Lines. */
     DME_CLAIM_LINES(
         new TableEntry(
-            DME_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.dme_tags",
             CLAIM_FIELD,
@@ -247,7 +275,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** HHA Claim. */
     HHA_CLAIMS(
         new TableEntry(
-            HHA_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.hha_tags",
             CLAIM_FIELD,
@@ -258,7 +285,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** HHA Claim Lines. */
     HHA_CLAIM_LINES(
         new TableEntry(
-            HHA_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.hha_tags",
             CLAIM_FIELD,
@@ -268,7 +294,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Hospice Claim. */
     HOSPICE_CLAIMS(
         new TableEntry(
-            HOSPICE_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.hospice_tags",
             CLAIM_FIELD,
@@ -279,7 +304,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Hospice Claim Lines. */
     HOSPICE_CLAIM_LINES(
         new TableEntry(
-            HOSPICE_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.hospice_tags",
             CLAIM_FIELD,
@@ -289,7 +313,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Inpatient Claim. */
     INPATIENT_CLAIMS(
         new TableEntry(
-            INPATIENT_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.inpatient_tags",
             CLAIM_FIELD,
@@ -300,7 +323,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Inpatient Claim Lines. */
     INPATIENT_CLAIM_LINES(
         new TableEntry(
-            INPATIENT_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.inpatient_tags",
             CLAIM_FIELD,
@@ -310,7 +332,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Outpatient Claim. */
     OUTPATIENT_CLAIMS(
         new TableEntry(
-            OUTPATIENT_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.outpatient_tags",
             CLAIM_FIELD,
@@ -321,7 +342,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** Outpatient Claim Lines. */
     OUTPATIENT_CLAIM_LINES(
         new TableEntry(
-            OUTPATIENT_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.outpatient_tags",
             CLAIM_FIELD,
@@ -331,7 +351,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** SNF Claim. */
     SNF_CLAIMS(
         new TableEntry(
-            SNF_CLAIMS_QUERY,
             GET_CLAIM_DATES,
             "ccw.snf_tags",
             CLAIM_FIELD,
@@ -342,7 +361,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     /** SNF Claim Lines. */
     SNF_CLAIM_LINES(
         new TableEntry(
-            SNF_CLAIM_LINES_QUERY,
             GET_CLAIM_DATES,
             "ccw.snf_tags",
             CLAIM_FIELD,
@@ -386,6 +404,42 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
       Long logInterval,
       CCW_TABLES tableEntry) {
     super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
+    query = getQueryByTableEntry(tableEntry);
+  }
+
+  public String getQueryByTableEntry(CCW_TABLES tableEntry) {
+    switch (tableEntry) {
+      case CARRIER_CLAIM_LINES:
+        return CARRIER_CLAIMS_QUERY;
+      case CARRIER_CLAIMS:
+        return CARRIER_CLAIM_LINES_QUERY;
+      case DME_CLAIM_LINES:
+        return DME_CLAIM_LINES_QUERY;
+      case DME_CLAIMS:
+        return DME_CLAIMS_QUERY;
+      case HHA_CLAIM_LINES:
+        return HHA_CLAIM_LINES_QUERY;
+      case HHA_CLAIMS:
+        return HHA_CLAIMS_QUERY;
+      case HOSPICE_CLAIM_LINES:
+        return HOSPICE_CLAIM_LINES_QUERY;
+      case HOSPICE_CLAIMS:
+        return HOSPICE_CLAIMS_QUERY;
+      case SNF_CLAIM_LINES:
+        return SNF_CLAIM_LINES_QUERY;
+      case SNF_CLAIMS:
+        return SNF_CLAIMS_QUERY;
+      case INPATIENT_CLAIM_LINES:
+        return INPATIENT_CLAIM_LINES_QUERY;
+      case INPATIENT_CLAIMS:
+        return INPATIENT_CLAIMS_QUERY;
+      case OUTPATIENT_CLAIM_LINES:
+        return OUTPATIENT_CLAIM_LINES_QUERY;
+      case OUTPATIENT_CLAIMS:
+        return OUTPATIENT_CLAIMS_QUERY;
+      default:
+        throw new IllegalArgumentException("Unknown tableEntry enum.");
+    }
   }
 
   /** {@inheritDoc} */

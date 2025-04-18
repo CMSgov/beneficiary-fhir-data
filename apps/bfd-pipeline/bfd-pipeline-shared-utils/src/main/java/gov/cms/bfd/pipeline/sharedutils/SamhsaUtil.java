@@ -29,6 +29,7 @@ import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaSnfAdapter;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
+import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -179,7 +180,8 @@ public class SamhsaUtil {
   /**
    * Process a list of codes. Does not use Entities.
    *
-   * @param codes The list of codes.
+   * @param claim The results list.
+   * @param queryColumns The map of column names to their type.
    * @param tableEntry The tableEntry object for this table.
    * @param claimId The claim id for this claim.
    * @param dates If present, contains the active dates for this claim.
@@ -188,14 +190,21 @@ public class SamhsaUtil {
    * @param entityManager The entity manager.
    * @return true if a SAMHSA tag should be created.
    */
-  public boolean processCodeList(
-      List<String> codes,
+  public List<TagDetails> processCodeList(
+      Object[] claim,
+      Map<String, AbstractSamhsaBackfill.COLUMN_TYPE> queryColumns,
       TableEntry tableEntry,
       Object claimId,
       Optional<Object[]> dates,
+      Optional<Integer> lineNum,
       Map<String, Object[]> datesMap,
       EntityManager entityManager) {
-    for (String code : codes) {
+    List<TagDetails> tagDetailsList = new ArrayList<>();
+    List<Integer> samhsaList =
+        AbstractSamhsaBackfill.getColumnPositionMultiple(
+            AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE, queryColumns);
+    for (Integer pos : samhsaList) {
+      String code = (String) claim[pos];
       // Found a samhsa code
       if (samhsaMap.containsKey(code)) {
         Object[] datesObject;
@@ -227,11 +236,22 @@ public class SamhsaUtil {
             && isDateOutsideOfRange(startDate, endDate, coverageStartDate)) {
           continue;
         }
-        // This is a valid code, we can stop here.
-        return true;
+        String type =
+            Arrays.stream(entry.getSystem().split("/"))
+                .reduce((first, second) -> second)
+                .orElse(Strings.EMPTY);
+        TagDetails tagDetails =
+            TagDetails.builder()
+                .table(tableEntry.getClaimTable())
+                .type(type)
+                .column(AbstractSamhsaBackfill.getColumnNameAtPosition(pos, queryColumns))
+                .clmLineNum(lineNum.orElse(null))
+                .build();
+        tagDetailsList.add(tagDetails);
       }
     }
-    return false;
+
+    return tagDetailsList;
   }
 
   /**
