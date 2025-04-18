@@ -3,10 +3,12 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 import gov.cms.bfd.server.ng.SystemUrl;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+@Getter
 @AllArgsConstructor
 public enum RaceCode {
   // Empty comments here are used to force consistent formatting

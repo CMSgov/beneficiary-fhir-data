@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.converter;
 
+import gov.cms.bfd.server.ng.IdrConstants;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -7,6 +8,7 @@ import jakarta.persistence.Converter;
 public class DefaultFalseBooleanConverter implements AttributeConverter<Boolean, String> {
   @Override
   public String convertToDatabaseColumn(Boolean value) {
+    // This is a read-only API so this method will never actually persist anything to the database.
     return String.valueOf(value);
   }
 

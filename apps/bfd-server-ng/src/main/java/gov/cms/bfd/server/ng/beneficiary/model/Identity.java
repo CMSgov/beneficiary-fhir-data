@@ -15,14 +15,16 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 
 @Entity
-public class HistoricalIdentity {
+public class Identity {
+  // The id field is not actually used here, but JPA requires some unique ID for every entity, even
+  // if it's just used for joins
   @Id Long id;
   Long beneSk;
   Optional<String> mbi;
   Optional<LocalDate> effectiveDate;
   Optional<LocalDate> obsoleteDate;
 
-  public HistoricalIdentity(
+  public Identity(
       Long id,
       Long beneSk,
       String mbi,
@@ -39,20 +41,22 @@ public class HistoricalIdentity {
     if (mbi.isEmpty()) {
       return Optional.empty();
     }
-    var mbiId = new Identifier().setSystem(SystemUrl.CMS_MBI).setValue(mbi.get());
+    var identifier = new Identifier().setSystem(SystemUrl.CMS_MBI).setValue(mbi.get());
     effectiveDate.ifPresent(
         e -> {
           var period = new Period().setStart(DateUtil.toDate(e));
           obsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(e)));
-          mbiId.setPeriod(period);
+          identifier.setPeriod(period);
         });
 
+    final var memberNumber = "MB";
     var mbiCoding =
         new CodeableConcept()
-            .setCoding(List.of(new Coding().setSystem(SystemUrl.HL7_IDENTIFIER).setCode("MB")));
-    mbiId.setType(mbiCoding);
+            .setCoding(
+                List.of(new Coding().setSystem(SystemUrl.HL7_IDENTIFIER).setCode(memberNumber)));
+    identifier.setType(mbiCoding);
 
-    return Optional.of(mbiId);
+    return Optional.of(identifier);
   }
 
   public Optional<Patient.PatientLinkComponent> toFhirLink(Patient currentPatient) {

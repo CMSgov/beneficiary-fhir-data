@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Patient;
 
+/** Beneficiary table representation. */
 @Entity
 @Table(name = "beneficiary", schema = "idr")
 public class Beneficiary {
@@ -37,20 +38,22 @@ public class Beneficiary {
   private LanguageCode languageCode;
 
   @Embedded private Name beneficiaryName;
-
   @Embedded private Address address;
-
   @Embedded private Meta meta;
-
   @Embedded private DeathDate deathDate;
 
+  /**
+   * Transforms the beneficiary record to its FHIR representation.
+   *
+   * @return patient record
+   */
   public Patient toFhir() {
     var patient = new Patient();
     patient.setId(String.valueOf(beneSk));
 
     patient.setName(List.of(beneficiaryName.toFhir()));
     patient.setBirthDate(DateUtil.toDate(birthDate));
-    patient.setAddress(List.of(address.toFhir()));
+    address.toFhir().ifPresent(a -> patient.setAddress(List.of(a)));
     sexCode.ifPresent(
         s -> {
           patient.setGender(s.toFhirAdministrativeGender());

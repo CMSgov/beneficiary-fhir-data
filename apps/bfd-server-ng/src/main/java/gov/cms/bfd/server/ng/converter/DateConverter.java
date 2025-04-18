@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.converter;
 
+import gov.cms.bfd.server.ng.IdrConstants;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ public class DateConverter implements AttributeConverter<Optional<LocalDate>, Lo
 
   @Override
   public LocalDate convertToDatabaseColumn(Optional<LocalDate> maybeDate) {
+    // This is a read-only API so this method will never actually persist anything to the database.
     return maybeDate.orElse(IdrConstants.DEFAULT_DATE);
   }
 

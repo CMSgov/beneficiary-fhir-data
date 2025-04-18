@@ -4,10 +4,12 @@ import gov.cms.bfd.server.ng.SystemUrl;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 
+@Getter
 @AllArgsConstructor
 public enum SexCode {
   MALE("1", Enumerations.AdministrativeGender.MALE, "248153007"),

@@ -8,6 +8,7 @@ import java.util.Optional;
 public class StringConverter implements AttributeConverter<Optional<String>, String> {
   @Override
   public String convertToDatabaseColumn(Optional<String> maybeString) {
+    // This is a read-only API so this method will never actually persist anything to the database.
     return maybeString.orElse("");
   }
 

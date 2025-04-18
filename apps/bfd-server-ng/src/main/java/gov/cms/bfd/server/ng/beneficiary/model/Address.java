@@ -4,10 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
 
+/** Beneficiary address information. */
 @Embeddable
 public class Address {
   @Column(name = "geo_usps_state_cd")
-  private String stateCode;
+  private Optional<String> stateCode;
 
   @Column(name = "geo_zip5_cd")
   private String zipCode;
@@ -33,10 +34,18 @@ public class Address {
   @Column(name = "bene_line_6_adr")
   private Optional<String> addressLine6;
 
-  org.hl7.fhir.r4.model.Address toFhir() {
+  /**
+   * Transform the address to its FHIR representation.
+   *
+   * @return FHIR address
+   */
+  public Optional<org.hl7.fhir.r4.model.Address> toFhir() {
+    if (stateCode.isEmpty()) {
+      return Optional.empty();
+    }
     var address =
         new org.hl7.fhir.r4.model.Address()
-            .setState(stateCode)
+            .setState(stateCode.get())
             .setPostalCode(zipCode)
             .setCity(city);
     addressLine1.ifPresent(address::addLine);
@@ -46,6 +55,6 @@ public class Address {
     addressLine5.ifPresent(address::addLine);
     addressLine6.ifPresent(address::addLine);
 
-    return address;
+    return Optional.of(address);
   }
 }
