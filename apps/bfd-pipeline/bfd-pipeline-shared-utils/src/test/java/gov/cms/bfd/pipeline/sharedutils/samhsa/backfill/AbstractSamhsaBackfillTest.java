@@ -91,8 +91,7 @@ public class AbstractSamhsaBackfillTest {
         new RDASamhsaBackfill(
             transactionManagerMock, 100000, 900l, RDASamhsaBackfill.RDA_TABLES.FISS_CLAIMS);
 
-    Assertions.assertEquals(
-        FISS_TEST_QUERY, RDASamhsaBackfill.RDA_TABLES.FISS_CLAIMS.getEntry().getQuery());
+    Assertions.assertEquals(FISS_TEST_QUERY, backfill.getQuery());
   }
 
   @Test
@@ -106,6 +105,7 @@ public class AbstractSamhsaBackfillTest {
     backfill.setSamhsaUtil(mockSamhsaUtil);
     backfill.executeQueryLoop(manager);
     verify(mockQuery, times(1)).getResultList();
-    verify(mockSamhsaUtil, times(1)).processCodeList(any(), any(), any(), any(), any(), any());
+    verify(mockSamhsaUtil, times(1))
+        .processCodeList(any(), any(), any(), any(), any(), any(), any(), any());
   }
 }
