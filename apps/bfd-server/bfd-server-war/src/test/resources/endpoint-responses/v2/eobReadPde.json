@@ -319,8 +319,8 @@
     "category" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        "code" : "brandgenericcode",
-        "display" : "Brand Generic Code"
+        "code" : "brandgenericindicator",
+        "display" : "Brand Generic Indicator"
       } ]
     },
     "code" : {
