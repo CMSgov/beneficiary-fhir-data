@@ -32,7 +32,6 @@
 				<exclude>com.fasterxml:classmate:jar:*</exclude>
 				<exclude>io.dropwizard:dropwizard-jackson:jar:*</exclude>
 				<exclude>io.dropwizard:dropwizard-lifecycle:jar:*</exclude>
-				<exclude>jakarta.servlet:jakarta.servlet-api:jar:*</exclude>
 				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:*</exclude>
 				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-guava:jar:*</exclude>
 				<exclude>com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:*</exclude>
