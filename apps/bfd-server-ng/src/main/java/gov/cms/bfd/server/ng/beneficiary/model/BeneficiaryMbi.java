@@ -11,7 +11,7 @@ import java.util.Optional;
 @Table(name = "beneficiary_mbi", schema = "idr")
 public class BeneficiaryMbi {
   @Id
-  @Column(name = "bene_mbi_id", nullable = false)
+  @Column(name = "bene_mbi_id")
   private String mbi;
 
   @Column(name = "bene_mbi_efctv_dt")

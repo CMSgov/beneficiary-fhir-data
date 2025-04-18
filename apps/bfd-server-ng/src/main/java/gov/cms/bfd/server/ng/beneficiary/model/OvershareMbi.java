@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "overshare_mbis", schema = "idr")
 public class OvershareMbi {
-  @Column(name = "bene_mbi_id", nullable = false)
+  @Column(name = "bene_mbi_id")
   @Id
   private String mbi;
 }

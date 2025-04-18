@@ -59,14 +59,14 @@ public enum RaceCode {
   private final String extensionSystem;
   private final String ombSystem;
 
-  public static RaceCode fromIdrCode(String code) {
+  public static RaceCode fromIdrCode(String idrCode) {
     return Arrays.stream(values())
-        .filter(v -> v.idrCode.equals(code))
+        .filter(v -> v.idrCode.equals(idrCode))
         .findFirst()
         .orElse(RaceCode.UNKNOWN);
   }
 
-  public Extension toFhir() {
+  Extension toFhir() {
     var ombExtension =
         new Extension()
             .setUrl("ombCategory")

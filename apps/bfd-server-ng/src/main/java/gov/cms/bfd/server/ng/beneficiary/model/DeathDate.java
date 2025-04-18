@@ -14,14 +14,14 @@ import org.hl7.fhir.r4.model.DateTimeType;
 @Embeddable
 public class DeathDate {
 
-  @Column(name = "bene_death_dt", nullable = false)
+  @Column(name = "bene_death_dt")
   private Optional<LocalDate> deathDate;
 
   @Convert(converter = DefaultFalseBooleanConverter.class)
-  @Column(name = "bene_vrfy_death_day_sw", nullable = false)
+  @Column(name = "bene_vrfy_death_day_sw")
   private Boolean verifyDeathDate;
 
-  public Optional<DateTimeType> toFhir() {
+  Optional<DateTimeType> toFhir() {
     if (verifyDeathDate) {
       return deathDate.map(
           d ->

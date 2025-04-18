@@ -4,9 +4,12 @@ gov.cms.bfd.server.ng.PatientIT.patientRead=[
   "id": "1",
   "meta": {
     "lastUpdated": "2024-01-01T00:00:00.000+00:00",
-    "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.0.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|3.1.1" ]
+    "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
   },
   "extension": [ {
+    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+    "valueCode": "248152002"
+  }, {
     "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
     "extension": [ {
       "url": "ombCategory",
@@ -27,12 +30,14 @@ gov.cms.bfd.server.ng.PatientIT.patientRead=[
         "code": "MB"
       } ]
     },
-    "system": "http://hl7.org/fhir/sid/us-mbi"
+    "system": "http://hl7.org/fhir/sid/us-mbi",
+    "value": "1S000000000"
   } ],
   "name": [ {
     "family": "NORRIS",
     "given": [ "CHUCK", "R" ]
   } ],
+  "gender": "female",
   "birthDate": "1960-01-01",
   "address": [ {
     "line": [ "100 MAIN ST" ],

@@ -13,7 +13,7 @@ public class StringConverter implements AttributeConverter<Optional<String>, Str
 
   @Override
   public Optional<String> convertToEntityAttribute(String value) {
-    if (value.isBlank()) {
+    if (value == null || value.isBlank()) {
       return Optional.empty();
     } else {
       return Optional.of(value);

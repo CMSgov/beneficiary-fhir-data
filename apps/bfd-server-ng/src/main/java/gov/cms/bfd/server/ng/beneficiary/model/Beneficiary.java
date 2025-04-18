@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Patient;
 
 @Entity
@@ -29,6 +30,9 @@ public class Beneficiary {
   @Column(name = "bene_race_cd", nullable = false)
   private RaceCode raceCode;
 
+  @Column(name = "bene_sex_cd")
+  private Optional<SexCode> sexCode;
+
   @Column(name = "cntct_lang_cd", nullable = false)
   private LanguageCode languageCode;
 
@@ -47,6 +51,12 @@ public class Beneficiary {
     patient.setName(List.of(beneficiaryName.toFhir()));
     patient.setBirthDate(DateUtil.toDate(birthDate));
     patient.setAddress(List.of(address.toFhir()));
+    sexCode.ifPresent(
+        s -> {
+          patient.setGender(s.toFhirAdministrativeGender());
+          patient.addExtension(s.toFhirSexExtension());
+        });
+
     patient.setCommunication(List.of(languageCode.toFhir()));
     deathDate.toFhir().ifPresent(patient::setDeceased);
     patient.addExtension(raceCode.toFhir());
