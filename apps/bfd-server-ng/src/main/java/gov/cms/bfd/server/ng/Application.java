@@ -2,13 +2,13 @@ package gov.cms.bfd.server.ng;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 import jakarta.servlet.Servlet;
+import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import software.amazon.jdbc.ds.AwsWrapperDataSource;
 
 /** BFD Server startup class. */
 @ServletComponentScan(basePackageClasses = {RestfulServer.class})
@@ -31,8 +31,8 @@ public class Application {
    * @return datasource
    */
   @Bean
-  public AwsWrapperDataSource awsWrapperDataSource(Configuration configuration) {
-    return configuration.getAwsWrapperDataSourceFactory().createDataSource();
+  public DataSource dataSource(Configuration configuration) {
+    return configuration.getDataSourceFactory().createDataSource();
   }
 
   /**
