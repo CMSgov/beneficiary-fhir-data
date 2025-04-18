@@ -1,6 +1,5 @@
 locals {
-  #Defined Admin Roles with Access to perform destructive actions on the repository
-  admin_roles_arn = toset([
+  admin_role_arns = toset([
     aws_iam_role.github_actions.arn
   ])
 
@@ -29,7 +28,7 @@ locals {
   ])
 }
 
-resource "aws_ecr_repository" "bfd" {
+resource "aws_ecr_repository" "this" {
   for_each = local.ecr_container_repositories
 
   name                 = each.value
@@ -45,7 +44,7 @@ resource "aws_ecr_repository" "bfd" {
   }
 }
 
-resource "aws_ecr_registry_policy" "for_bfd" {
+resource "aws_ecr_registry_policy" "this" {
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -82,7 +81,7 @@ resource "aws_ecr_registry_policy" "for_bfd" {
         ],
         Condition = {
           "ArnNotEquals" = {
-            "aws:PrincipalArn" = local.admin_roles_arn
+            "aws:PrincipalArn" = local.admin_role_arns
           }
         }
       },
@@ -101,7 +100,7 @@ resource "aws_ecr_registry_policy" "for_bfd" {
   })
 }
 
-resource "aws_ecr_lifecycle_policy" "for_bfd_repositories" {
+resource "aws_ecr_lifecycle_policy" "this" {
   for_each   = local.ecr_container_repositories
   repository = each.value
   policy = jsonencode({
