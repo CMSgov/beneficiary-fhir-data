@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.DateTimeType;
 
+/** Beneficiary death date. */
 @Embeddable
 public class DeathDate {
 

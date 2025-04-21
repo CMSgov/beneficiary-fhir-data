@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Patient;
 
-/** Beneficiary table representation. */
+/** Main entity representing the beneficiary table. */
 @Entity
 @Table(name = "beneficiary", schema = "idr")
 public class Beneficiary {

@@ -4,6 +4,10 @@ import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DescribeDbClustersRequest;
 
+/**
+ * {@link JdbcConnectionDetails} implementation for connecting to a live database. This
+ * implementation is meant to be replaced in tests that connect to an ephemeral database container.
+ */
 public class JdbcConfiguration implements JdbcConnectionDetails {
   private final Configuration.Nonsensitive.Db nonsensitiveDb;
   private final Configuration.Sensitive.Db sensitiveDb;
@@ -11,7 +15,7 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
   private final String env;
   private final boolean useRds;
 
-  public JdbcConfiguration(Configuration configuration) {
+  JdbcConfiguration(Configuration configuration) {
     nonsensitiveDb = configuration.getNonsensitive().getDb();
     sensitiveDb = configuration.getSensitive().getDb();
     localDbHost = configuration.getLocal().getDbHost();

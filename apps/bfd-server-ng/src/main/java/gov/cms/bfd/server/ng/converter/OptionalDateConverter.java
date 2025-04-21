@@ -6,8 +6,9 @@ import jakarta.persistence.Converter;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/** Converts any missing or default dates to an optional value. */
 @Converter(autoApply = true)
-public class DateConverter implements AttributeConverter<Optional<LocalDate>, LocalDate> {
+public class OptionalDateConverter implements AttributeConverter<Optional<LocalDate>, LocalDate> {
 
   @Override
   public LocalDate convertToDatabaseColumn(Optional<LocalDate> maybeDate) {

@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Optional;
 
+/** Entity representing the beneficiary history table. */
 @Entity
 @Table(name = "beneficiary_history", schema = "idr")
 public class BeneficiaryHistory {

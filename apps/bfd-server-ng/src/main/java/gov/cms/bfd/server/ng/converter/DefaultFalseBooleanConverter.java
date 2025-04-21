@@ -4,6 +4,10 @@ import gov.cms.bfd.server.ng.IdrConstants;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+/**
+ * Converts any IDR boolean strings ("Y"/"N") into Java booleans, defaulting to false if not
+ * explicitly set to true.
+ */
 @Converter
 public class DefaultFalseBooleanConverter implements AttributeConverter<Boolean, String> {
   @Override

@@ -7,9 +7,10 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/** Entity representing the beneficiary MBI history table. */
 @Entity
-@Table(name = "beneficiary_mbi", schema = "idr")
-public class BeneficiaryMbi {
+@Table(name = "beneficiary_mbi_history", schema = "idr")
+public class BeneficiaryMbiHistory {
   @Id
   @Column(name = "bene_mbi_id")
   private String mbi;

@@ -49,7 +49,7 @@ CREATE TABLE idr.beneficiary_history(
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
-CREATE TABLE idr.beneficiary_mbi (
+CREATE TABLE idr.beneficiary_mbi_history (
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_mbi_efctv_dt DATE NOT NULL,
     bene_mbi_obslt_dt DATE NOT NULL,
@@ -204,7 +204,7 @@ VALUES(
     '2024-01-01'-- bfd_updated_ts
 );
 
-INSERT INTO idr.beneficiary_mbi (
+INSERT INTO idr.beneficiary_mbi_history (
     bene_mbi_id,
     bene_mbi_efctv_dt,
     bene_mbi_obslt_dt,

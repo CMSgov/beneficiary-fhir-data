@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import gov.cms.bfd.server.ng.SystemUrl;
+import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,52 +8,61 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+/** Beneficiary race code. */
 @Getter
 @AllArgsConstructor
 public enum RaceCode {
   // Empty comments here are used to force consistent formatting
+
+  /** White race code. */
   WHITE(
       "1",
       "2106-3",
       "White", //
-      SystemUrl.US_CORE_RACE,
-      SystemUrl.CDC_RACE_ETHNICITY),
+      SystemUrls.US_CORE_RACE,
+      SystemUrls.CDC_RACE_ETHNICITY),
+  /** Black race code. */
   BLACK(
       "2",
       "2054-5",
       "Black or African American",
-      SystemUrl.US_CORE_RACE,
-      SystemUrl.CDC_RACE_ETHNICITY),
+      SystemUrls.US_CORE_RACE,
+      SystemUrls.CDC_RACE_ETHNICITY),
+  /** Other race code. */
   OTHER(
       "3",
       "2131-1",
       "Other Race", //
-      SystemUrl.US_CORE_RACE,
-      SystemUrl.CDC_RACE_ETHNICITY),
+      SystemUrls.US_CORE_RACE,
+      SystemUrls.CDC_RACE_ETHNICITY),
+  /** Asian race code. */
   ASIAN(
       "4",
       "2028-9",
       "Asian", //
-      SystemUrl.US_CORE_RACE,
-      SystemUrl.CDC_RACE_ETHNICITY),
+      SystemUrls.US_CORE_RACE,
+      SystemUrls.CDC_RACE_ETHNICITY),
+  /** Hispanic race code. */
   HISPANIC(
       "5",
       "2135-2",
       "Hispanic or Latino",
-      SystemUrl.US_CORE_ETHNICITY,
-      SystemUrl.CDC_RACE_ETHNICITY),
-  NORTH_AMERICAN(
+      SystemUrls.US_CORE_ETHNICITY,
+      SystemUrls.CDC_RACE_ETHNICITY),
+  /** Native American race code. */
+  NATIVE_AMERICAN(
       "6",
       "1002-5",
       "American Indian or Alaska Native", //
-      SystemUrl.US_CORE_RACE,
-      SystemUrl.CDC_RACE_ETHNICITY),
+      SystemUrls.US_CORE_RACE,
+      SystemUrls.CDC_RACE_ETHNICITY),
+  /** Unknown race code. */
   UNKNOWN(
       "",
       "UNK",
       "Unknown", //
-      SystemUrl.US_CORE_RACE,
-      SystemUrl.HL7_NULL_FLAVOR);
+      SystemUrls.US_CORE_RACE,
+      SystemUrls.HL7_NULL_FLAVOR);
 
   private final String idrCode;
   private final String uscdiCode;
@@ -61,6 +70,12 @@ public enum RaceCode {
   private final String extensionSystem;
   private final String ombSystem;
 
+  /**
+   * Converts the IDR race code to its corresponding {@link RaceCode} representation.
+   *
+   * @param idrCode IDR race code
+   * @return {@link RaceCode} representation
+   */
   public static RaceCode fromIdrCode(String idrCode) {
     return Arrays.stream(values())
         .filter(v -> v.idrCode.equals(idrCode))
@@ -71,7 +86,7 @@ public enum RaceCode {
   Extension toFhir() {
     var ombExtension =
         new Extension()
-            .setUrl("ombCategory")
+            .setUrl(SystemUrls.OMB_CATEGORY)
             .setValue(
                 new Coding().setSystem(ombSystem).setCode(uscdiCode).setDisplay(uscdiDisplay));
     var displayExtension =

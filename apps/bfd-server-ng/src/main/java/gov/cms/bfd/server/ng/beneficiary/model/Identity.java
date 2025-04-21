@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.SystemUrl;
+import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.time.LocalDate;
@@ -14,38 +14,61 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 
+/**
+ * A projection type created by joining the beneficiary, beneficiary_history, and
+ * beneficiary_mbi_history tables.
+ *
+ * <p>This does not actually represent a table in the database, but we use the {@link Entity}
+ * attribute here so it can be used in JPA queries and have converters applied to its fields.
+ */
 @Entity
 public class Identity {
   // The id field is not actually used here, but JPA requires some unique ID for every entity, even
-  // if it's just used for joins
-  @Id Long id;
+  // if it's just used for joins.
+  // Ideally, we could use beneSk + mbi, but this becomes tricky because MBI may not always be
+  // present.
+  @Id Long rowId;
   Long beneSk;
   Optional<String> mbi;
-  Optional<LocalDate> effectiveDate;
-  Optional<LocalDate> obsoleteDate;
+  Optional<LocalDate> mbiEffectiveDate;
+  Optional<LocalDate> mbiObsoleteDate;
 
+  /**
+   * Creates a new Identity record.
+   *
+   * @param rowId row ID from the query that created this object
+   * @param beneSk bene_sk from the database
+   * @param mbi MBI from the database
+   * @param mbiEffectiveDate MBI effective date
+   * @param mbiObsoleteDate MBI obsolete date
+   */
   public Identity(
-      Long id,
+      Long rowId,
       Long beneSk,
       String mbi,
-      Optional<LocalDate> effectiveDate,
-      Optional<LocalDate> obsoleteDate) {
-    this.id = id;
+      Optional<LocalDate> mbiEffectiveDate,
+      Optional<LocalDate> mbiObsoleteDate) {
+    this.rowId = rowId;
     this.beneSk = beneSk;
     this.mbi = Optional.ofNullable(mbi);
-    this.effectiveDate = effectiveDate;
-    this.obsoleteDate = obsoleteDate;
+    this.mbiEffectiveDate = mbiEffectiveDate;
+    this.mbiObsoleteDate = mbiObsoleteDate;
   }
 
+  /**
+   * Transforms the identity record to a FHIR {@link Identifier} if a valid MBI is present.
+   *
+   * @return identifier
+   */
   public Optional<Identifier> toFhirIdentifier() {
     if (mbi.isEmpty()) {
       return Optional.empty();
     }
-    var identifier = new Identifier().setSystem(SystemUrl.CMS_MBI).setValue(mbi.get());
-    effectiveDate.ifPresent(
+    var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(mbi.get());
+    mbiEffectiveDate.ifPresent(
         e -> {
           var period = new Period().setStart(DateUtil.toDate(e));
-          obsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(e)));
+          mbiObsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(e)));
           identifier.setPeriod(period);
         });
 
@@ -53,12 +76,19 @@ public class Identity {
     var mbiCoding =
         new CodeableConcept()
             .setCoding(
-                List.of(new Coding().setSystem(SystemUrl.HL7_IDENTIFIER).setCode(memberNumber)));
+                List.of(new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode(memberNumber)));
     identifier.setType(mbiCoding);
 
     return Optional.of(identifier);
   }
 
+  /**
+   * Transforms the identity record to a {@link Patient.PatientLinkComponent} if the bene_sk is
+   * different from the current beneficiary's bene_sk.
+   *
+   * @param currentPatient current version of the beneficiary
+   * @return patient link
+   */
   public Optional<Patient.PatientLinkComponent> toFhirLink(Patient currentPatient) {
     var currentSk = currentPatient.getId();
     if (!beneSk.toString().equals(currentSk)) {
