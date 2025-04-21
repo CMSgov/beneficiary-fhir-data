@@ -48,34 +48,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   /** Columns for fiss_proc_codes. */
   private String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {"rda_position", "proc_code"};
 
-  /** mcs_diagnosis_codes query. */
-  private String MCS_DIAGNOSIS_QUERY =
-      buildQueryStringTemplate(
-          "rda.mcs_diagnosis_codes", MCS_CLAIM_ID_FIELD, MCS_DIAGNOSIS_SAMHSA_COLUMNS);
-
-  /** mcs_details query. */
-  private String MCS_DETAILS_QUERY =
-      buildQueryStringTemplate("rda.mcs_details", MCS_CLAIM_ID_FIELD, MCS_DETAILS_SAMHSA_COLUMNS);
-
-  /** fiss_claims query. */
-  private String FISS_QUERY =
-      buildQueryStringTemplate("rda.fiss_claims", FISS_CLAIM_ID_FIELD, FISS_SAMHSA_COLUMNS);
-
-  /** fiss_revenue_lines query. */
-  private String FISS_REVENUE_QUERY =
-      buildQueryStringTemplate(
-          "rda.fiss_revenue_lines", FISS_CLAIM_ID_FIELD, FISS_REVENUE_LINES_SAMHSA_COLUMNS);
-
-  /** fiss_diagnosis_codes query. */
-  private String FISS_DIAGNOSIS_QUERY =
-      buildQueryStringTemplate(
-          "rda.fiss_diagnosis_codes", FISS_CLAIM_ID_FIELD, FISS_DIAGNOSIS_SAMHSA_COLUMNS);
-
-  /** fiss_proc_codes query. */
-  private String FISS_PROC_QUERY =
-      buildQueryStringTemplate(
-          "rda.fiss_proc_codes", FISS_CLAIM_ID_FIELD, FISS_PROC_SAMHSA_COLUMNS);
-
   @Override
   COLUMN_TYPE getEntryType(String entry) {
     switch (entry) {
@@ -202,17 +174,23 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   private String getQueryByTableEntry(RDA_TABLES tableEntry) {
     switch (tableEntry) {
       case MCS_DETAILS:
-        return MCS_DETAILS_QUERY;
+        return buildQueryStringTemplate(
+            "rda.mcs_details", MCS_CLAIM_ID_FIELD, MCS_DETAILS_SAMHSA_COLUMNS);
       case MCS_DIAGNOSIS_CODES:
-        return MCS_DIAGNOSIS_QUERY;
+        return buildQueryStringTemplate(
+            "rda.mcs_diagnosis_codes", MCS_CLAIM_ID_FIELD, MCS_DIAGNOSIS_SAMHSA_COLUMNS);
       case FISS_CLAIMS:
-        return FISS_QUERY;
+        return buildQueryStringTemplate(
+            "rda.fiss_claims", FISS_CLAIM_ID_FIELD, FISS_SAMHSA_COLUMNS);
       case FISS_DIAGNOSIS_CODES:
-        return FISS_DIAGNOSIS_QUERY;
+        return buildQueryStringTemplate(
+            "rda.fiss_diagnosis_codes", FISS_CLAIM_ID_FIELD, FISS_DIAGNOSIS_SAMHSA_COLUMNS);
       case FISS_PROC_CODES:
-        return FISS_PROC_QUERY;
+        return buildQueryStringTemplate(
+            "rda.fiss_proc_codes", FISS_CLAIM_ID_FIELD, FISS_PROC_SAMHSA_COLUMNS);
       case FISS_REVENUE_LINES:
-        return FISS_REVENUE_QUERY;
+        return buildQueryStringTemplate(
+            "rda.fiss_revenue_lines", FISS_CLAIM_ID_FIELD, FISS_REVENUE_LINES_SAMHSA_COLUMNS);
       default:
         throw new IllegalArgumentException("Unknown RDA_TABLES type.");
     }

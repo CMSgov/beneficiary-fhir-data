@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.text.StringSubstitutor;
@@ -80,14 +81,20 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   @Getter @Setter Map<String, COLUMN_TYPE> queryColumns;
 
-  /** The query to use */
+  /** The query to use. */
   @Getter @Setter String query;
 
+  /** The column type for a column. */
   public enum COLUMN_TYPE {
+    /** From date column type. */
     DATE_FROM,
+    /** To date column type. */
     DATE_TO,
+    /** Line num column type. */
     LINE_NUM,
+    /** Claim ID column type. */
     CLAIM_ID,
+    /** SAMHSA code column type. */
     SAMHSA_CODE
   }
 
@@ -180,6 +187,13 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return total;
   }
 
+  /**
+   * Returns the position of a column type.
+   *
+   * @param columnType The column type.
+   * @param queryColumns The Map of columns.
+   * @return The position of the column.
+   */
   public static int getColumnPositionSingle(
       COLUMN_TYPE columnType, Map<String, COLUMN_TYPE> queryColumns) {
     int i = 0;
@@ -192,10 +206,24 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return -1;
   }
 
+  /**
+   * Gets a column at a position.
+   *
+   * @param pos The position.
+   * @param queryColumns Map of columns.
+   * @return The column name at this position.
+   */
   public static String getColumnNameAtPosition(int pos, Map<String, COLUMN_TYPE> queryColumns) {
     return (String) queryColumns.entrySet().stream().map(Map.Entry::getKey).toArray()[pos];
   }
 
+  /**
+   * Gets a list of positions for this column type.
+   *
+   * @param columnType The column type.
+   * @param queryColumns Map of columns.
+   * @return The List of column positions.
+   */
   public static List<Integer> getColumnPositionMultiple(
       COLUMN_TYPE columnType, Map<String, COLUMN_TYPE> queryColumns) {
     List<Integer> results = new ArrayList<>();
@@ -232,10 +260,10 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     int toPos = getColumnPositionSingle(COLUMN_TYPE.DATE_TO, queryColumns);
     int lineNumPos = getColumnPositionSingle(COLUMN_TYPE.LINE_NUM, queryColumns);
 
-    Optional<Integer> lineNum = Optional.empty();
+    Optional<Short> lineNum = Optional.empty();
 
     if (lineNumPos >= 0) {
-      lineNum = Optional.of((int) claim[lineNumPos]);
+      lineNum = Optional.of((short) claim[lineNumPos]);
     }
     if (fromPos >= 0 && toPos >= 0) {
       dates = Optional.of(new Object[] {claim[fromPos], claim[toPos]});
@@ -275,7 +303,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected String buildQueryStringTemplate(String table, String claimField, String... columns) {
     String concatColumns = String.join(", ", columns);
-    List<String> samhsaColumnOrder = Arrays.stream(columns).toList();
+    List<String> samhsaColumnOrder = new ArrayList<>();
+    samhsaColumnOrder.add(claimField);
+    samhsaColumnOrder.addAll(splitColumnCsvToList(columns));
     queryColumns = markSamhsaColumns(samhsaColumnOrder);
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
@@ -291,6 +321,16 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     builder.append(claimField);
     builder.append(" limit :limit"); // limit will be the batch size set in the configuration.
     return builder.toString();
+  }
+
+  private List<String> splitColumnCsvToList(String[] columns) {
+    List columnsList = new ArrayList();
+    for (String column : columns) {
+      List newColumns =
+          Arrays.stream(column.split(",")).map(String::trim).collect(Collectors.toList());
+      columnsList.addAll(newColumns);
+    }
+    return columnsList;
   }
 
   /**
@@ -432,6 +472,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    *
    * @param claimId claim id -- Could be a Long or a String.
    * @param table tag table to use.
+   * @param detailsList List containing TagDetails for this claim.
    * @param entityManager The entity manager.
    * @return the total number of records saved.
    */

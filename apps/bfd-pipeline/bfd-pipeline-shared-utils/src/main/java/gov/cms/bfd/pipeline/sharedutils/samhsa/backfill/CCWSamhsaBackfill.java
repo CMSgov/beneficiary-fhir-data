@@ -54,145 +54,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** Thru date of the claim. */
   private static final String CLAIM_THRU_DATE = "clm_thru_dt";
 
-  /** carrier_claims query. */
-  private final String CARRIER_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.carrier_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 12));
-
-  /** carrier_claim_lines query. */
-  private final String CARRIER_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.carrier_claim_lines",
-          CLAIM_FIELD,
-          CARRIER_DME_LINE_NUM_FIELD,
-          LINE_ICD_DIAGNOSIS_CODE_COLUMN,
-          HCPCS_CODE_COLUMN);
-
-  /** dme_claims query. */
-  private final String DME_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.dme_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 12));
-
-  /** dme_claim_lines query. */
-  private final String DME_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.dme_claim_lines",
-          CLAIM_FIELD,
-          CARRIER_DME_LINE_NUM_FIELD,
-          LINE_ICD_DIAGNOSIS_CODE_COLUMN,
-          HCPCS_CODE_COLUMN);
-
-  /** hospice_claims query. */
-  private final String HOSPICE_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.hospice_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
-          enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
-          FST_DIAGNOSIS_E_CODE_COLUMN);
-
-  /** hospice_claim_lines query. */
-  private final String HOSPICE_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.hospice_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
-
-  /** hha_claims query. */
-  private final String HHA_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.hha_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
-          enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
-          FST_DIAGNOSIS_E_CODE_COLUMN);
-
-  /** hha_claim_lines query. */
-  private final String HHA_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.hha_claim_lines",
-          CLAIM_FIELD,
-          HCPCS_CODE_COLUMN,
-          LINE_NUM_FIELD,
-          REV_CENTER_APC_HIPPS_CODE_COLUMN);
-
-  /** snf_claims query. */
-  private final String SNF_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.snf_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          DRG_CODE_COLUMN,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
-          enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
-          enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25),
-          FST_DIAGNOSIS_E_CODE_COLUMN,
-          ADMITTING_DIAGNOSIS_CODE_COLUMN,
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN);
-
-  /** snf_claim_lines query. */
-  private final String SNF_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.snf_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
-
-  /** inpatient_claims query. */
-  private final String INPATIENT_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.inpatient_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          DRG_CODE_COLUMN,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
-          enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
-          ADMITTING_DIAGNOSIS_CODE_COLUMN,
-          FST_DIAGNOSIS_E_CODE_COLUMN,
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
-          enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25));
-
-  /** inpatient_claim_lines query. */
-  private final String INPATIENT_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.inpatient_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
-
-  /** outpatient_claims query. */
-  private final String OUTPATIENT_CLAIMS_QUERY =
-      buildQueryStringTemplate(
-          "ccw.outpatient_claims",
-          CLAIM_FIELD,
-          CLAIM_FROM_DATE,
-          CLAIM_THRU_DATE,
-          enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
-          enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
-          PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
-          FST_DIAGNOSIS_E_CODE_COLUMN,
-          enumerateColumns(REASON_VISIT_CODE_ENUMERATED_COLUMN, 3),
-          enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25));
-
-  /** outpatient_claim_lines query. */
-  private final String OUTPATIENT_CLAIM_LINES_QUERY =
-      buildQueryStringTemplate(
-          "ccw.outpatient_claim_lines",
-          CLAIM_FIELD,
-          LINE_NUM_FIELD,
-          HCPCS_CODE_COLUMN,
-          REV_CENTER_APC_HIPPS_CODE_COLUMN);
-
   /**
    * Creates a concatenated string of an enumerated column (i.e. "icd_prcdr_cd1, icd_prcdr_cd2, ...
    * icd_prcdr_cd25").
@@ -407,36 +268,129 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
     query = getQueryByTableEntry(tableEntry);
   }
 
+  /**
+   * Returns the query for a table.
+   *
+   * @param tableEntry The tableEntry pojo for the table.
+   * @return the query for the table.
+   */
   public String getQueryByTableEntry(CCW_TABLES tableEntry) {
     switch (tableEntry) {
-      case CARRIER_CLAIM_LINES:
-        return CARRIER_CLAIMS_QUERY;
       case CARRIER_CLAIMS:
-        return CARRIER_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.carrier_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 12));
+      case CARRIER_CLAIM_LINES:
+        return buildQueryStringTemplate(
+            "ccw.carrier_claim_lines",
+            CLAIM_FIELD,
+            CARRIER_DME_LINE_NUM_FIELD,
+            LINE_ICD_DIAGNOSIS_CODE_COLUMN,
+            HCPCS_CODE_COLUMN);
+
       case DME_CLAIM_LINES:
-        return DME_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.dme_claim_lines",
+            CLAIM_FIELD,
+            CARRIER_DME_LINE_NUM_FIELD,
+            LINE_ICD_DIAGNOSIS_CODE_COLUMN,
+            HCPCS_CODE_COLUMN);
+
       case DME_CLAIMS:
-        return DME_CLAIMS_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.dme_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 12));
+
       case HHA_CLAIM_LINES:
-        return HHA_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.hha_claim_lines",
+            CLAIM_FIELD,
+            HCPCS_CODE_COLUMN,
+            LINE_NUM_FIELD,
+            REV_CENTER_APC_HIPPS_CODE_COLUMN);
       case HHA_CLAIMS:
-        return HHA_CLAIMS_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.hha_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
+            enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
+            FST_DIAGNOSIS_E_CODE_COLUMN);
       case HOSPICE_CLAIM_LINES:
-        return HOSPICE_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.hospice_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
       case HOSPICE_CLAIMS:
-        return HOSPICE_CLAIMS_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.hospice_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
+            enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
+            FST_DIAGNOSIS_E_CODE_COLUMN);
+
       case SNF_CLAIM_LINES:
-        return SNF_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.snf_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
       case SNF_CLAIMS:
-        return SNF_CLAIMS_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.snf_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            DRG_CODE_COLUMN,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
+            enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
+            enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25),
+            FST_DIAGNOSIS_E_CODE_COLUMN,
+            ADMITTING_DIAGNOSIS_CODE_COLUMN,
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN);
       case INPATIENT_CLAIM_LINES:
-        return INPATIENT_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.inpatient_claim_lines", CLAIM_FIELD, LINE_NUM_FIELD, HCPCS_CODE_COLUMN);
       case INPATIENT_CLAIMS:
-        return INPATIENT_CLAIMS_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.inpatient_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            DRG_CODE_COLUMN,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
+            enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
+            ADMITTING_DIAGNOSIS_CODE_COLUMN,
+            FST_DIAGNOSIS_E_CODE_COLUMN,
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
+            enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25));
       case OUTPATIENT_CLAIM_LINES:
-        return OUTPATIENT_CLAIM_LINES_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.outpatient_claim_lines",
+            CLAIM_FIELD,
+            LINE_NUM_FIELD,
+            HCPCS_CODE_COLUMN,
+            REV_CENTER_APC_HIPPS_CODE_COLUMN);
       case OUTPATIENT_CLAIMS:
-        return OUTPATIENT_CLAIMS_QUERY;
+        return buildQueryStringTemplate(
+            "ccw.outpatient_claims",
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            enumerateColumns(ICD_DIAGNOSIS_CODE_ENUMERATED_COLUMN, 25),
+            enumerateColumns(ICD_DIAGNOSIS_E_CODE_ENUMERATED_COLUMN, 12),
+            PRINCIPAL_DIAGNOSIS_CODE_COLUMN,
+            FST_DIAGNOSIS_E_CODE_COLUMN,
+            enumerateColumns(REASON_VISIT_CODE_ENUMERATED_COLUMN, 3),
+            enumerateColumns(ICD_PROCEDURE_CODE_ENUMERATED_COLUMN, 25));
       default:
         throw new IllegalArgumentException("Unknown tableEntry enum.");
     }

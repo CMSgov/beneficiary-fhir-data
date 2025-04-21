@@ -32,8 +32,8 @@ public class AbstractSamhsaBackfillTest {
       "SELECT claim_id, stmt_cov_from_date, stmt_cov_to_date, admit_diag_code, drg_cd, principle_diag FROM rda.fiss_claims ${gtClaimLine} ORDER BY claim_id limit :limit";
   private static final String WRITE_ENTRY_QUERY =
       """
-          INSERT INTO test_table (code, clm_id)
-          VALUES (:code, :claimId)
+          INSERT INTO test_table (code, clm_id, details)
+          VALUES (:code, :claimId, :details)
           ON CONFLICT (code, clm_id) DO NOTHING;
           """;
 
@@ -82,16 +82,12 @@ public class AbstractSamhsaBackfillTest {
         new CCWSamhsaBackfill(
             transactionManagerMock, 100000, 900l, CCWSamhsaBackfill.CCW_TABLES.CARRIER_CLAIMS);
     backfill.writeEntry(
-            "12345",
-            "test_table",
-            List.of(TagDetails.builder()
-                    .type("test_system")
-                    .table("test_table")
-                    .clmLineNum(1)
-                    .build()),
-            manager);
+        "12345",
+        "test_table",
+        List.of(TagDetails.builder().type("test_system").table("test_table").clmLineNum(1).build()),
+        manager);
     verify(manager).createNativeQuery(eq(WRITE_ENTRY_QUERY));
-    verify(mockQuery, times(3)).setParameter(anyString(), anyString());
+    verify(mockQuery, times(4)).setParameter(anyString(), anyString());
   }
 
   @Test
