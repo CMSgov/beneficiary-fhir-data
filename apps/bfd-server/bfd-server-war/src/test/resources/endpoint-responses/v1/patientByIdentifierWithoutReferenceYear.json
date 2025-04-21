@@ -43,6 +43,7 @@
         "family" : "Doe",
         "given" : [ "John", "A" ]
       } ],
+      "gender" : "male",
       "birthDate" : "1981-03-17",
       "deceasedDateTime" : "1981-03-17",
       "address" : [ {

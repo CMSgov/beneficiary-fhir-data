@@ -7,7 +7,8 @@ locals {
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
-    ["/${root}/${local.env}/common", "/${root}/${local.env}/${local.service}"]
+    # TODO: Remove "/ng/" prefix when Greenfield/"next-gen" services are migrated to completely
+    ["/ng/${root}/${local.env}/common", "/ng/${root}/${local.env}/${local.service}"]
   ])
   ssm_flattened_data = {
     names = flatten(
@@ -20,17 +21,17 @@ locals {
   ssm_config = zipmap(
     [
       for name in local.ssm_flattened_data.names :
-      replace(name, "/((non)*sensitive|${local.env})//", "")
+      # TODO: Remove trimprefix when Greenfield/"next-gen" services are migrated to completely
+      "/${trimprefix(replace(name, "/((non)*sensitive|${local.env})//", ""), "/ng/")}"
     ],
     local.ssm_flattened_data.values
   )
 
   # Using lookup to ensure that this module can be used in Terraservices that may not have SSM
   # configuration, or could be applied before SSM configuration exists at all
-  kms_key_alias           = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
-  kms_config_key_alias    = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
-  kms_config_key_primary  = try([one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration).primary_key.arn], [])
-  kms_config_key_replicas = try(one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration).replica_keys[*].arn, [])
+  kms_key_alias             = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
+  kms_config_key_alias      = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
+  kms_config_key_mrk_config = one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration)
 }
 
 data "aws_region" "current" {}
@@ -69,4 +70,30 @@ data "aws_kms_key" "env_config_cmk" {
 
 data "aws_iam_policy" "permissions_boundary" {
   name = "ct-ado-poweruser-permissions-boundary-policy"
+}
+
+data "aws_vpc" "main" {
+  filter {
+    name   = "tag:stack"
+    values = [local.env]
+  }
+}
+
+data "aws_subnets" "main" {
+  for_each = toset(var.subnet_layers)
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
+  }
+
+  tags = {
+    Layer = each.key
+  }
+}
+
+data "aws_subnet" "main" {
+  for_each = toset(flatten([for _, obj in data.aws_subnets.main : obj.ids]))
+
+  id = each.key
 }

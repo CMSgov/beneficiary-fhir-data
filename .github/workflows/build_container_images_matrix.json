@@ -18,8 +18,20 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-mgmt-server-fluent-bit",
+    "dockerfile": "ops/images/bfd-mgmt-server-fluent-bit/Dockerfile",
+    "contextDir": "ops/images/bfd-mgmt-server-fluent-bit",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-mgmt-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
+    "contextDir": "apps/utils/locust_tests",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-run-locust",
+    "dockerfile": "apps/utils/locust_tests/run-locust.Dockerfile",
     "contextDir": "apps/utils/locust_tests",
     "platform": "linux/arm64"
   },
@@ -33,6 +45,12 @@
     "name": "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
     "dockerfile": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
     "contextDir": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-mgmt-pipeline-ccw-runner",
+    "dockerfile": "ops/services/05-pipeline/lambda-src/ccw-runner/Dockerfile",
+    "contextDir": "ops/services/05-pipeline/lambda-src/ccw-runner",
     "platform": "linux/arm64"
   }
 ]

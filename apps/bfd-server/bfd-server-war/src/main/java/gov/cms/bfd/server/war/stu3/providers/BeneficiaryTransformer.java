@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -28,7 +27,6 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
@@ -38,8 +36,6 @@ final class BeneficiaryTransformer {
   /** The Metric registry. */
   private final MetricRegistry metricRegistry;
 
-  private final boolean sexExtensionEnabled;
-
   /**
    * Instantiates a new transformer.
    *
@@ -48,13 +44,9 @@ final class BeneficiaryTransformer {
    * called by tests.
    *
    * @param metricRegistry the metric registry
-   * @param sexExtensionEnabled whether to enable the sex extension
    */
-  public BeneficiaryTransformer(
-      MetricRegistry metricRegistry,
-      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
+  public BeneficiaryTransformer(MetricRegistry metricRegistry) {
     this.metricRegistry = requireNonNull(metricRegistry);
-    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -197,27 +189,21 @@ final class BeneficiaryTransformer {
       }
 
       char sex = beneficiary.getSex();
-      if (sexExtensionEnabled) {
-        String sexExtensionCode;
-        if (sex == Sex.MALE.getCode()) {
-          sexExtensionCode = TransformerConstants.US_CORE_SEX_MALE;
-        } else if (sex == Sex.FEMALE.getCode()) {
-          sexExtensionCode = TransformerConstants.US_CORE_SEX_FEMALE;
-        } else {
-          sexExtensionCode = TransformerConstants.US_CORE_SEX_UNKNOWN;
-        }
+      if (sex == Sex.MALE.getCode()) {
+        patient.setGender((AdministrativeGender.MALE));
         patient.addExtension(
             new Extension()
-                .setValue(new CodeType().setValue(sexExtensionCode))
+                .setValue(new CodeType().setValue(TransformerConstants.US_CORE_SEX_MALE))
+                .setUrl(TransformerConstants.US_CORE_SEX_URL));
+      } else if (sex == Sex.FEMALE.getCode()) {
+        patient.setGender((AdministrativeGender.FEMALE));
+        patient.addExtension(
+            new Extension()
+                .setValue(new CodeType().setValue(TransformerConstants.US_CORE_SEX_FEMALE))
                 .setUrl(TransformerConstants.US_CORE_SEX_URL));
       } else {
-        if (sex == Sex.MALE.getCode()) {
-          patient.setGender((AdministrativeGender.MALE));
-        } else if (sex == Sex.FEMALE.getCode()) {
-          patient.setGender((AdministrativeGender.FEMALE));
-        } else {
-          patient.setGender((AdministrativeGender.UNKNOWN));
-        }
+        // US Core sex extension doesn't support "unknown"
+        patient.setGender((AdministrativeGender.UNKNOWN));
       }
 
       if (beneficiary.getRace().isPresent()) {
