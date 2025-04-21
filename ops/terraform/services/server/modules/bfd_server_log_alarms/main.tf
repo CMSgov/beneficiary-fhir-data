@@ -126,10 +126,6 @@ resource "aws_cloudwatch_metric_alarm" "samhsa-mismatch-error" {
       "in APP-ENV: bfd-${local.env}"
   ])
 
-  dimensions = {
-    LogGroupName = "/bfd/${local.env}/bfd-server/messages.json"
-  }
-
   alarm_actions = local.notify_arn
 
   ok_actions = []
