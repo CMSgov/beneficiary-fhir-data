@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +44,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -93,7 +93,7 @@ public final class BeneficiaryTransformerV2Test {
   public void setup() {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
-    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, false, true);
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, false);
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -165,10 +165,10 @@ public final class BeneficiaryTransformerV2Test {
   @Test
   public void shouldSetCorrectProfile() {
     List<CanonicalType> profile = patient.getMeta().getProfile();
-    assertEquals(0, profile.size());
+    assertEquals(1, profile.size());
     // The base CanonicalType doesn't seem to compare correctly so lets convert it
     // to a string
-    assertFalse(
+    assertTrue(
         profile.stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
@@ -177,11 +177,11 @@ public final class BeneficiaryTransformerV2Test {
   /** Tests that the transformer sets the expected profile when C4DIC is enabled. */
   @Test
   public void shouldSetCorrectProfilesWithC4DicEnabled() {
-    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, true, true);
+    beneficiaryTransformerV2 = new BeneficiaryTransformerV2(metricRegistry, true);
     createPatient(RequestHeaders.getHeaderWrapper());
     List<CanonicalType> profile = patient.getMeta().getProfile();
-    assertEquals(1, profile.size());
-    assertFalse(
+    assertEquals(2, profile.size());
+    assertTrue(
         profile.stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_PATIENT_URL)));
@@ -537,6 +537,7 @@ public final class BeneficiaryTransformerV2Test {
    */
   @Test
   public void shouldMatchBeneficiarySex() {
+    assertEquals(AdministrativeGender.MALE, patient.getGender());
     assertEquals(
         TransformerConstants.US_CORE_SEX_MALE,
         patient.getExtensionByUrl(TransformerConstants.US_CORE_SEX_URL).getValue().toString());

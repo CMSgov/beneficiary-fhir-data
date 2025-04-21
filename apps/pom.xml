@@ -145,7 +145,7 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.2.5</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <jetty.version>11.0.20</jetty.version>
+        <jetty.version>12.0.19</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
@@ -270,7 +270,6 @@
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
                 <version>${jakarta.servlet.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -1008,6 +1007,9 @@
                             <image>${jib.from}</image>
                         </from>
                         <containerizingMode>packaged</containerizingMode>
+                        <container>
+                            <jvmFlags>-Dorg.jboss.logging.provider=slf4j</jvmFlags>
+                        </container>
                     </configuration>
                 </plugin>
             </plugins>

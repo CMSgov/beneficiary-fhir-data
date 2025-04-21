@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import org.apache.logging.log4j.util.Strings;
@@ -90,24 +91,14 @@ public class AbstractTransformerV2 {
         .setValue(id);
   }
 
-  private static String getSexExtensionCode(String sexCode) {
-    return switch (sexCode.toLowerCase()) {
-      case "m" -> TransformerConstants.US_CORE_SEX_MALE;
-      case "f" -> TransformerConstants.US_CORE_SEX_FEMALE;
-      default -> TransformerConstants.US_CORE_SEX_UNKNOWN;
-    };
-  }
-
   /**
    * Builds a {@link Patient} object from the given MBI and {@link PatientInfo}.
    *
    * @param mbi The MBI to use to build the {@link Patient} object.
    * @param patientInfo The {@link PatientInfo} to use to build the {@link Patient} object.
-   * @param sexExtensionEnabled whether to enable the sex extension.
    * @return The constructed {@link Patient} object.
    */
-  protected static Patient getContainedPatient(
-      String mbi, PatientInfo patientInfo, boolean sexExtensionEnabled) {
+  protected static Patient getContainedPatient(String mbi, PatientInfo patientInfo) {
     Patient patient =
         new Patient()
             .setIdentifier(
@@ -125,25 +116,35 @@ public class AbstractTransformerV2 {
     patient.setId("patient");
 
     if (patientInfo != null) {
+
       patient
           .setName(createHumanNameFrom(patientInfo))
-          .setBirthDate(localDateToDate(patientInfo.getDob()));
-      if (sexExtensionEnabled) {
-        if (patientInfo.getSex() != null) {
-          patient.addExtension(
-              new Extension()
-                  .setValue(new CodeType().setValue(getSexExtensionCode(patientInfo.getSex())))
-                  .setUrl(TransformerConstants.US_CORE_SEX_URL));
-        }
-      } else {
-        patient.setGender(
-            patientInfo.getSex() == null
-                ? null
-                : patientInfo.getSexMap().get(patientInfo.getSex().toLowerCase()));
-      }
+          .setBirthDate(localDateToDate(patientInfo.getDob()))
+          .setGender(
+              patientInfo.getSex() == null
+                  ? null
+                  : patientInfo.getSexMap().get(patientInfo.getSex().toLowerCase()));
+      getSexExtensionCode(patientInfo.getSex())
+          .ifPresent(
+              c ->
+                  patient.addExtension(
+                      new Extension()
+                          .setValue(new CodeType().setValue(c))
+                          .setUrl(TransformerConstants.US_CORE_SEX_URL)));
     }
 
     return patient;
+  }
+
+  private static Optional<String> getSexExtensionCode(String sexCode) {
+    if (sexCode == null) {
+      return Optional.empty();
+    }
+    return switch (sexCode.toLowerCase()) {
+      case "m" -> Optional.of(TransformerConstants.US_CORE_SEX_MALE);
+      case "f" -> Optional.of(TransformerConstants.US_CORE_SEX_FEMALE);
+      default -> Optional.empty();
+    };
   }
 
   /**

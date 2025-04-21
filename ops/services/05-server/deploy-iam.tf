@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "codedeploy_ecs" {
 
 resource "aws_iam_policy" "codedeploy_ecs" {
   name   = "${local.name_prefix}-codedeploy-ecs-policy"
-  path   = local.cloudtamer_iam_path
+  path   = local.iam_path
   policy = data.aws_iam_policy_document.codedeploy_ecs.json
 }
 
@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "codedeploy_elbv2" {
 
 resource "aws_iam_policy" "codedeploy_elbv2" {
   name   = "${local.name_prefix}-codedeploy-elbv2-policy"
-  path   = local.cloudtamer_iam_path
+  path   = local.iam_path
   policy = data.aws_iam_policy_document.codedeploy_elbv2.json
 }
 
@@ -70,39 +70,42 @@ data "aws_iam_policy_document" "codedeploy_iam" {
 
 resource "aws_iam_policy" "codedeploy_iam" {
   name   = "${local.name_prefix}-codedeploy-iam-policy"
-  path   = local.cloudtamer_iam_path
+  path   = local.iam_path
   policy = data.aws_iam_policy_document.codedeploy_iam.json
 }
 
 data "aws_iam_policy_document" "codedeploy_lambda" {
+  count = local.regression_wrapper_enabled ? 1 : 0
+
   statement {
     sid       = "AllowUsageOfRegressionWrapperLambda"
     actions   = ["lambda:InvokeFunction", "lambda:GetFunction"]
-    resources = [aws_lambda_function.regression_wrapper.arn]
+    resources = aws_lambda_function.regression_wrapper[*].arn
   }
 }
 
 resource "aws_iam_policy" "codedeploy_lambda" {
+  count = local.regression_wrapper_enabled ? 1 : 0
+
   name   = "${local.name_prefix}-codedeploy-lambda-policy"
-  path   = local.cloudtamer_iam_path
-  policy = data.aws_iam_policy_document.codedeploy_lambda.json
+  path   = local.iam_path
+  policy = one(data.aws_iam_policy_document.codedeploy_lambda[*].json)
 }
 
 resource "aws_iam_role" "codedeploy" {
   name                  = "${local.name_prefix}-codedeploy"
-  path                  = local.cloudtamer_iam_path
-  permissions_boundary  = data.aws_iam_policy.permissions_boundary.arn
+  path                  = local.iam_path
+  permissions_boundary  = local.permissions_boundary_arn
   assume_role_policy    = data.aws_iam_policy_document.codedeploy_assume.json
   force_detach_policies = true
 }
 
 resource "aws_iam_role_policy_attachment" "codedeploy" {
-  for_each = {
-    ecs    = aws_iam_policy.codedeploy_ecs.arn
-    elbv2  = aws_iam_policy.codedeploy_elbv2.arn
-    iam    = aws_iam_policy.codedeploy_iam.arn
-    lambda = aws_iam_policy.codedeploy_lambda.arn
-  }
+  for_each = merge({
+    ecs   = aws_iam_policy.codedeploy_ecs.arn
+    elbv2 = aws_iam_policy.codedeploy_elbv2.arn
+    iam   = aws_iam_policy.codedeploy_iam.arn
+  }, local.regression_wrapper_enabled ? { lambda = one(aws_iam_policy.codedeploy_lambda[*].arn) } : {})
 
   role       = aws_iam_role.codedeploy.name
   policy_arn = each.value

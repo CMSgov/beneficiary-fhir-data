@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
-import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SEX_EXTENSION_ENABLED;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -46,8 +45,6 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
   private final SecurityTagManager securityTagManager;
 
   private final boolean samhsaV2Enabled;
-
-  private final boolean sexExtensionEnabled;
 
   /**
    * There are only 2 statuses currently being used, and only the ones listed below are mapped to
@@ -98,17 +95,14 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * @param metricRegistry the metric registry
    * @param securityTagManager the security tag manager
    * @param samhsaV2Enabled samhsaV2Enabled flag
-   * @param sexExtensionEnabled whether to enable the sex extension
    */
   public McsClaimResponseTransformerV2(
       MetricRegistry metricRegistry,
       SecurityTagManager securityTagManager,
-      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled,
-      @Value("${" + SSM_PATH_SEX_EXTENSION_ENABLED + ":false}") boolean sexExtensionEnabled) {
+      @Value("${" + SSM_PATH_SAMHSA_V2_ENABLED + ":false}") Boolean samhsaV2Enabled) {
     this.metricRegistry = metricRegistry;
     this.securityTagManager = securityTagManager;
     this.samhsaV2Enabled = samhsaV2Enabled;
-    this.sexExtensionEnabled = sexExtensionEnabled;
   }
 
   /**
@@ -146,8 +140,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
-    claim.setContained(
-        List.of(McsTransformerV2.getContainedPatient(claimGroup, sexExtensionEnabled)));
+    claim.setContained(List.of(McsTransformerV2.getContainedPatient(claimGroup)));
     claim
         .getIdentifier()
         .add(createClaimIdentifier(BBCodingSystems.MCS.ICN, claimGroup.getIdrClmHdIcn()));
