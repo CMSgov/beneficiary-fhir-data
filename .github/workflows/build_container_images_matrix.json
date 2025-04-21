@@ -49,8 +49,8 @@
   },
   {
     "name": "bfd-mgmt-pipeline-ccw-runner",
-    "dockerfile": "ops/services/05-pipeline/lambda-src/ccw-runner/Dockerfile",
-    "contextDir": "ops/services/05-pipeline/lambda-src/ccw-runner",
+    "dockerfile": "ops/services/05-ccw-pipeline/lambda-src/ccw-runner/Dockerfile",
+    "contextDir": "ops/services/05-ccw-pipeline/lambda-src/ccw-runner",
     "platform": "linux/arm64"
   }
 ]
