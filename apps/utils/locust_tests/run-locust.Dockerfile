@@ -28,7 +28,7 @@ RUN mv "${LAMBDA_TASK_ROOT}/app/lambda/run-locust/app.py" "${LAMBDA_TASK_ROOT}/a
 RUN rm -rf "${LAMBDA_TASK_ROOT}/app/lambda"
 # Ensure that all packages installed are available on the Python path (necessary to invoke locust
 # CLI)
-ENV PYTHONPATH="${LAMBDA_TASK_ROOT}:${LAMBDA_TASK_ROOT}/app:${PYTHONPATH}"
+ENV PYTHONPATH="${LAMBDA_TASK_ROOT}:${LAMBDA_TASK_ROOT}/app"
 # Ensure that binaries (such as locust) are in the PATH
 ENV PATH="${LAMBDA_TASK_ROOT}/bin:${PATH}"
 CMD [ "app.app.handler" ]
