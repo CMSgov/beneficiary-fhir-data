@@ -207,6 +207,7 @@ public class SamhsaUtil {
       String code = (String) claim[pos];
       // Found a samhsa code
       if (samhsaMap.containsKey(code)) {
+
         Object[] datesObject;
         if (dates.isPresent()) {
           datesObject = dates.get();

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
+import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.time.Instant;
@@ -80,7 +81,15 @@ public class AbstractSamhsaBackfillTest {
     AbstractSamhsaBackfill backfill =
         new CCWSamhsaBackfill(
             transactionManagerMock, 100000, 900l, CCWSamhsaBackfill.CCW_TABLES.CARRIER_CLAIMS);
-    backfill.writeEntry("12345", "test_table", manager);
+    backfill.writeEntry(
+            "12345",
+            "test_table",
+            List.of(TagDetails.builder()
+                    .type("test_system")
+                    .table("test_table")
+                    .clmLineNum(1)
+                    .build()),
+            manager);
     verify(manager).createNativeQuery(eq(WRITE_ENTRY_QUERY));
     verify(mockQuery, times(3)).setParameter(anyString(), anyString());
   }
