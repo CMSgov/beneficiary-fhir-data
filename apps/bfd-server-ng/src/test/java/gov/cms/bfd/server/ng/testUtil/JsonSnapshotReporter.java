@@ -51,16 +51,22 @@ public class JsonSnapshotReporter implements SnapshotReporter {
 
     // Generates a GitHub style diff with a few extra lines below and above the diff marker to add
     // context
-    final var diffLines = diffStr.split("\n");
-    StringBuilder result = new StringBuilder("\n");
+    final var extraLines = 5;
+    final var newline = "\n";
+    final var diffMarkerAdd = "+";
+    final var diffMarkerSubtract = "-";
+    final var diffLines = diffStr.split(newline);
+    StringBuilder result = new StringBuilder(newline);
     for (var i = 0; i < diffLines.length; i++) {
-      for (var j = Math.max(0, i - 5); j < Math.min(diffLines.length, i + 5); j++) {
-        if (diffLines[j].startsWith("-") || diffLines[j].startsWith("+")) {
-          result.append(diffLines[i]).append("\n");
+      for (var j = Math.max(0, i - extraLines);
+          j < Math.min(diffLines.length, i + extraLines);
+          j++) {
+        if (diffLines[j].startsWith(diffMarkerSubtract) || diffLines[j].startsWith(diffMarkerAdd)) {
+          result.append(diffLines[i]).append(newline);
           break;
         }
       }
     }
-    throw new AssertionFailedError(result + "\n" + errorsView);
+    throw new AssertionFailedError(result + newline + errorsView);
   }
 }
