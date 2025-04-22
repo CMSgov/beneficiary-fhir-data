@@ -259,16 +259,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true, false).stream()
             .findFirst()
             .orElse(-1);
-    int lineNumPos =
-        getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true, false).stream()
-            .findFirst()
-            .orElse(-1);
-
-    Optional<Short> lineNum = Optional.empty();
-
-    if (lineNumPos >= 0) {
-      lineNum = Optional.of((short) claim[lineNumPos]);
-    }
     if (fromPos >= 0 && toPos >= 0) {
       dates = Optional.of(new Object[] {claim[fromPos], claim[toPos]});
     } else if (datesMap.containsKey(claimId.toString())) {
@@ -279,7 +269,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Create an array that contains only the SAMHSA codes for this record.
     List<TagDetails> tagDetailsList =
         samhsaUtil.processCodeList(
-            claim, queryColumns, tableEntry, claimId, dates, lineNum, datesMap, entityManager);
+            claim, queryColumns, tableEntry, claimId, dates, datesMap, entityManager);
     if (!tagDetailsList.isEmpty()) {
       return writeEntry(claimId, tableEntry.getTagTable(), tagDetailsList, entityManager);
     }

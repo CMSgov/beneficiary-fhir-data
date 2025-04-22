@@ -201,7 +201,6 @@ public class SamhsaUtil {
    * @param tableEntry The tableEntry object for this table.
    * @param claimId The claim id for this claim.
    * @param dates If present, contains the active dates for this claim.
-   * @param lineNum The claim lines line num of this entry, if any.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
    *     claim has more than one lineitem.
    * @param entityManager The entity manager.
@@ -213,39 +212,52 @@ public class SamhsaUtil {
       TableEntry tableEntry,
       Object claimId,
       Optional<Object[]> dates,
-      Optional<Short> lineNum,
       Map<String, Object[]> datesMap,
       EntityManager entityManager) {
     List<TagDetails> tagDetailsList = new ArrayList<>();
-    List<Integer> samhsaList = getColumnPositions(SAMHSA_CODE, queryColumns, false, true);
-    for (Integer pos : samhsaList) {
+    List<Integer> samhsaColumnPositions =
+        getColumnPositions(SAMHSA_CODE, queryColumns, false, true);
+
+    for (Integer pos : samhsaColumnPositions) {
       String code = (String) claim[pos];
-      if (code != null) {
-        String columnName = getColumnNameAtPosition(pos, queryColumns);
-        Optional<SamhsaEntry> samhsaEntry =
-            getSamhsaCode(Optional.of(code), Optional.of(columnName));
-        if (samhsaEntry.isPresent()) {
-          Object[] datesObject =
-              getDatesObjectsForClaim(tableEntry, claimId, dates, datesMap, entityManager);
-          if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
-            continue;
-          }
-          String type =
-              Arrays.stream(samhsaEntry.get().getSystem().split("/"))
-                  .reduce((first, second) -> second)
-                  .orElse(Strings.EMPTY);
-          TagDetails tagDetails =
-              TagDetails.builder()
-                  .table(tableEntry.getClaimTable())
-                  .type(type)
-                  .column(columnName)
-                  .clmLineNum((lineNum.isPresent() ? lineNum.get().intValue() : null))
-                  .build();
-          tagDetailsList.add(tagDetails);
+      // having a continue here instead of a nested block reduces cognitive complexity.
+      if (code == null) {
+        continue;
+      }
+      String columnName = getColumnNameAtPosition(pos, queryColumns);
+
+      Optional<SamhsaEntry> samhsaEntry = getSamhsaCode(Optional.of(code), Optional.of(columnName));
+      if (samhsaEntry.isPresent()) {
+        Object[] datesObject =
+            getDatesObjectsForClaim(tableEntry, claimId, dates, datesMap, entityManager);
+        if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
+          continue;
         }
+        String type =
+            Arrays.stream(samhsaEntry.get().getSystem().split("/"))
+                .reduce((first, second) -> second)
+                .orElse(Strings.EMPTY);
+
+        int lineNumPos =
+            getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true, false).stream()
+                .findFirst()
+                .orElse(-1);
+
+        Optional<Short> lineNum = Optional.empty();
+        if (lineNumPos >= 0) {
+          lineNum = Optional.of((short) claim[lineNumPos]);
+        }
+
+        TagDetails tagDetails =
+            TagDetails.builder()
+                .table(tableEntry.getClaimTable())
+                .type(type)
+                .column(columnName)
+                .clmLineNum((lineNum.isPresent() ? lineNum.get().intValue() : null))
+                .build();
+        tagDetailsList.add(tagDetails);
       }
     }
-
     return tagDetailsList;
   }
 
