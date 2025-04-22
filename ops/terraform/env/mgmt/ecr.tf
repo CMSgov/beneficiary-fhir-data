@@ -24,7 +24,7 @@ locals {
   ])
 }
 
-resource "aws_ecr_repository" "bfd" {
+resource "aws_ecr_repository" "this" {
   for_each = local.ecr_container_repositories
 
   name                 = each.value
@@ -38,4 +38,39 @@ resource "aws_ecr_repository" "bfd" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "aws_ecr_lifecycle_policy" "this" {
+  for_each   = local.ecr_container_repositories
+  repository = each.value
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Expire images older than 90 days"
+        selection = {
+          tagStatus      = "tagged"
+          countType      = "sinceImagePushed"
+          countUnit      = "days"
+          countNumber    = 90
+          tagPatternList = ["*"]
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 2
+        description  = "Ensure at least one image is retained"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 1
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
 }
