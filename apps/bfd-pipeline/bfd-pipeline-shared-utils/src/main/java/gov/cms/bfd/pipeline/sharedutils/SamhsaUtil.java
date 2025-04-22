@@ -219,7 +219,7 @@ public class SamhsaUtil {
       Map<String, Object[]> datesMap,
       EntityManager entityManager) {
     List<TagDetails> tagDetailsList = new ArrayList<>();
-    List<Integer> samhsaList = getColumnPositions(SAMHSA_CODE, queryColumns, false);
+    List<Integer> samhsaList = getColumnPositions(SAMHSA_CODE, queryColumns, false, true);
     for (Integer pos : samhsaList) {
       String code = (String) claim[pos];
       if (code != null) {

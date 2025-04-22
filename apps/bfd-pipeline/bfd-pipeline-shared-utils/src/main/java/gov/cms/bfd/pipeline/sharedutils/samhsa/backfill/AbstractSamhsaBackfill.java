@@ -200,14 +200,19 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Gets a list of positions of columns for this column type.
+   * Gets the positions of all columns of the specified type.
    *
    * @param columnType The column type.
-   * @param queryColumns Map of columns.
+   * @param queryColumns Map of columns to their types.
+   * @param uniqueColumnType True if there should only be one column of this type.
+   * @param required True if there is required to be at least one column of this type.
    * @return The List of column positions.
    */
   public static List<Integer> getColumnPositions(
-      COLUMN_TYPE columnType, Map<String, COLUMN_TYPE> queryColumns, boolean uniqueColumnType) {
+      COLUMN_TYPE columnType,
+      Map<String, COLUMN_TYPE> queryColumns,
+      boolean uniqueColumnType,
+      boolean required) {
     List<Integer> results = new ArrayList<>();
     int i = 0;
     for (Map.Entry<String, COLUMN_TYPE> entry : queryColumns.entrySet()) {
@@ -220,7 +225,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
       throw new BadCodeMonkeyException(
           String.format(
               "Query should have a single column for %s, but it has multiple.", columnType.name()));
-    } else if (results.isEmpty()) {
+    } else if (required && results.isEmpty()) {
       throw new BadCodeMonkeyException(
           String.format("Query should have a column for %s, but does not.", columnType.name()));
     }
@@ -241,14 +246,23 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected int processClaim(
       Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
-    int claimIdPos = getColumnPositions(COLUMN_TYPE.CLAIM_ID, queryColumns, true).getFirst();
+    int claimIdPos = getColumnPositions(COLUMN_TYPE.CLAIM_ID, queryColumns, true, true).getFirst();
     Object claimId = claim[claimIdPos];
     Optional<Object[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
-    int fromPos = getColumnPositions(COLUMN_TYPE.DATE_FROM, queryColumns, true).getFirst();
-    int toPos = getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true).getFirst();
-    int lineNumPos = getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true).getFirst();
+    int fromPos =
+        getColumnPositions(COLUMN_TYPE.DATE_FROM, queryColumns, true, false).stream()
+            .findFirst()
+            .orElse(-1);
+    int toPos =
+        getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true, false).stream()
+            .findFirst()
+            .orElse(-1);
+    int lineNumPos =
+        getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true, false).stream()
+            .findFirst()
+            .orElse(-1);
 
     Optional<Short> lineNum = Optional.empty();
 
