@@ -117,9 +117,7 @@ public class SamhsaUtil {
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
 
   private static final String[] PRCDR_SYSTEMS = {
-    "http://www.cms.gov/Medicare/Coding/ICD10",
-    "http://www.cms.gov/Medicare/Coding/ICD9",
-    "http://www.ama-assn.org/go/cpt"
+    "http://www.cms.gov/Medicare/Coding/ICD10", "http://www.cms.gov/Medicare/Coding/ICD9"
   };
   private static final String[] DGNS_SYSTEMS = {
     "http://hl7.org/fhir/sid/icd-10-cm", "http://hl7.org/fhir/sid/icd-9-cm"
@@ -128,7 +126,7 @@ public class SamhsaUtil {
     "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
   };
   private static final String[] HCPCS_SYSTEMS = {
-    "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
+    "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", "http://www.ama-assn.org/go/cpt"
   };
 
   /**
