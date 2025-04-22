@@ -1,8 +1,7 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.*;
 import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE;
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.getColumnNameAtPosition;
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.getColumnPositionMultiple;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -220,7 +219,7 @@ public class SamhsaUtil {
       Map<String, Object[]> datesMap,
       EntityManager entityManager) {
     List<TagDetails> tagDetailsList = new ArrayList<>();
-    List<Integer> samhsaList = getColumnPositionMultiple(SAMHSA_CODE, queryColumns);
+    List<Integer> samhsaList = getColumnPositions(SAMHSA_CODE, queryColumns, false);
     for (Integer pos : samhsaList) {
       String code = (String) claim[pos];
       if (code != null) {

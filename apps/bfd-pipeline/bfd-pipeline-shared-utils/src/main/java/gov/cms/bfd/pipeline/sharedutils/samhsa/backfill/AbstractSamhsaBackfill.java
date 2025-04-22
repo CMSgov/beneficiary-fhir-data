@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.sharedutils.model.BackfillProgress;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import gov.cms.bfd.sharedutils.TagCode;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
@@ -214,18 +215,18 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return The column name at this position.
    */
   public static String getColumnNameAtPosition(int pos, Map<String, COLUMN_TYPE> queryColumns) {
-    return (String) queryColumns.entrySet().stream().map(Map.Entry::getKey).toArray()[pos];
+    return (String) queryColumns.keySet().toArray()[pos];
   }
 
   /**
-   * Gets a list of positions for this column type.
+   * Gets a list of positions of columns for this column type.
    *
    * @param columnType The column type.
    * @param queryColumns Map of columns.
    * @return The List of column positions.
    */
-  public static List<Integer> getColumnPositionMultiple(
-      COLUMN_TYPE columnType, Map<String, COLUMN_TYPE> queryColumns) {
+  public static List<Integer> getColumnPositions(
+      COLUMN_TYPE columnType, Map<String, COLUMN_TYPE> queryColumns, boolean uniqueColumnType) {
     List<Integer> results = new ArrayList<>();
     int i = 0;
     for (Map.Entry<String, COLUMN_TYPE> entry : queryColumns.entrySet()) {
@@ -233,6 +234,14 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         results.add(i);
       }
       i++;
+    }
+    if (uniqueColumnType && results.size() > 1) {
+      throw new BadCodeMonkeyException(
+          String.format(
+              "Query should have a single column for %s, but it has multiple.", columnType.name()));
+    } else if (results.isEmpty()) {
+      throw new BadCodeMonkeyException(
+          String.format("Query should have a column for %s, but does not.", columnType.name()));
     }
     return results;
   }
@@ -256,9 +265,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     Optional<Object[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
-    int fromPos = getColumnPositionSingle(COLUMN_TYPE.DATE_FROM, queryColumns);
-    int toPos = getColumnPositionSingle(COLUMN_TYPE.DATE_TO, queryColumns);
-    int lineNumPos = getColumnPositionSingle(COLUMN_TYPE.LINE_NUM, queryColumns);
+    int fromPos = getColumnPositions(COLUMN_TYPE.DATE_FROM, queryColumns, true).getFirst();
+    int toPos = getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true).getFirst();
+    int lineNumPos = getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true).getFirst();
 
     Optional<Short> lineNum = Optional.empty();
 
