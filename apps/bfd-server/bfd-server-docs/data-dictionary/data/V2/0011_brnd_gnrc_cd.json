@@ -25,9 +25,9 @@
             "version": "R4",
             "resource": "ExplanationOfBenefit",
             "element": "supportingInfo[N].code.coding[N].code",
-            "fhirPath": "supportingInfo.where(code.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType').code.coding.code",
+            "fhirPath": "supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='brandgenericindicator').code.coding.code",
             "discriminator": [
-                "supportingInfo[N].code.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'"
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd'"
             ],
             "additional": [
                 "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
@@ -37,7 +37,7 @@
             ],
             "derived": "",
             "note": "",
-            "example": "[\\n  {\\n    \"sequence\": 12,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"brandgenericindicator\",\\n          \"display\": \"Brand Generic Indicator\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"G\",\\n          \"display\": \"Generic Null/missing\"\\n        }\\n      ]\\n    }\\n  }\\n]"
+            "example": "[\\n  {\\n    \"sequence\": 12,\\n    \"category\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType\",\\n          \"code\": \"brandgenericindicator\",\\n          \"display\": \"Brand Generic Indicator\"\\n        }\\n      ]\\n    },\\n    \"code\": {\\n      \"coding\": [\\n        {\\n          \"system\": \"https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd\",\\n          \"code\": \"G\",\\n          \"display\": \"Generic Null/missing\"\\n        }\\n      ]\\n    }\\n  }\\n]"
         }
     ]
 }
