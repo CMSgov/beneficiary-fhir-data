@@ -109,10 +109,11 @@ resource "aws_ecr_lifecycle_policy" "this" {
         rulePriority = 1
         description  = "Expire images older than 90 days"
         selection = {
-          tagStatus   = "tagged"
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          countNumber = 90
+          tagStatus      = "tagged"
+          countType      = "sinceImagePushed"
+          countUnit      = "days"
+          countNumber    = 90
+          tagPatternList = ["*"]
         }
         action = {
           type = "expire"
