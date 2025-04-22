@@ -77,7 +77,7 @@ resource "aws_iam_policy" "github_actions_ecr" {
             "ecr:UploadLayerPart",
           ]
           Effect   = "Allow"
-          Resource = [for repo in aws_ecr_repository.bfd : repo.arn]
+          Resource = [for repo in aws_ecr_repository.this : repo.arn]
           Sid      = "AllowPushPull"
         },
         {
