@@ -27,7 +27,7 @@
             "element": "supportingInfo[N].code.coding[N].code",
             "fhirPath": "supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='brandgenericindicator').code.coding.code",
             "discriminator": [
-                "supportingInfo[N].code.coding[N].system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType'"
+                "supportingInfo[N].code.coding[N].system = 'https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd'"
             ],
             "additional": [
                 "eob.supportingInfo[N].code.coding[N].display = {corresponding description from valueset specified in .system}",
