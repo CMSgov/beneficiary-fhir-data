@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.util.Strings;
 
@@ -226,15 +227,8 @@ public class SamhsaUtil {
         String columnName = getColumnNameAtPosition(pos, queryColumns);
         SamhsaEntry entry = getEntryForCode(columnName, code);
         if (entry != null) {
-          Object[] datesObject;
-          if (dates.isPresent()) {
-            datesObject = dates.get();
-          } else {
-            datesObject = getClaimDates(claimId, tableEntry, entityManager);
-            // Put the dates in a map, in case any other line items with the same id have samhsa
-            // codes.
-            datesMap.put(claimId.toString(), datesObject);
-          }
+          Object[] datesObject =
+              getDatesObjectsForClaim(tableEntry, claimId, dates, datesMap, entityManager);
           if (isInvalidClaimDate(datesObject, entry)) {
             continue;
           }
@@ -246,7 +240,7 @@ public class SamhsaUtil {
               TagDetails.builder()
                   .table(tableEntry.getClaimTable())
                   .type(type)
-                  .column(getColumnNameAtPosition(pos, queryColumns))
+                  .column(columnName)
                   .clmLineNum((lineNum.isPresent() ? lineNum.get().intValue() : null))
                   .build();
           tagDetailsList.add(tagDetails);
@@ -255,6 +249,24 @@ public class SamhsaUtil {
     }
 
     return tagDetailsList;
+  }
+
+  private Object[] getDatesObjectsForClaim(
+      TableEntry tableEntry,
+      Object claimId,
+      Optional<Object[]> dates,
+      Map<String, Object[]> datesMap,
+      EntityManager entityManager) {
+    Object[] datesObject;
+    if (dates.isPresent()) {
+      datesObject = dates.get();
+    } else {
+      datesObject = getClaimDates(claimId, tableEntry, entityManager);
+      // Put the dates in a map, in case any other line items with the same id have samhsa
+      // codes.
+      datesMap.put(claimId.toString(), datesObject);
+    }
+    return datesObject;
   }
 
   private static boolean isInvalidClaimDate(Object[] datesObject, SamhsaEntry entry) {
@@ -674,11 +686,12 @@ public class SamhsaUtil {
         mapper.readValue(
             stream, mapper.getTypeFactory().constructCollectionType(List.class, SamhsaEntry.class));
     entries.forEach(entry -> entry.setCode(normalizeCode(entry.getCode())));
-    List<String> systems = new ArrayList<>();
-    systems.addAll(Arrays.stream(DGNS_SYSTEMS).toList());
-    systems.addAll(Arrays.stream(PRCDR_SYSTEMS).toList());
-    systems.addAll(Arrays.stream(DRG_SYSTEMS).toList());
-    systems.addAll(Arrays.stream(HCPCS_SYSTEMS).toList());
+
+    // Add all the systems together into a list
+    List<String> systems =
+        Stream.of(DGNS_SYSTEMS, PRCDR_SYSTEMS, DRG_SYSTEMS, HCPCS_SYSTEMS)
+            .flatMap(Stream::of)
+            .toList();
 
     Map<String, List<SamhsaEntry>> entryMap = new HashMap<>();
     // iterate over each system
