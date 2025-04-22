@@ -1,8 +1,4 @@
 locals {
-  admin_role_arns = toset([
-    aws_iam_role.github_actions.arn
-  ])
-
   ecr_container_repositories = toset([
     # utility container image repositories
     "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
@@ -42,62 +38,6 @@ resource "aws_ecr_repository" "this" {
   image_scanning_configuration {
     scan_on_push = true
   }
-}
-
-resource "aws_ecr_registry_policy" "this" {
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      #Deny request if the Principal is not an Assumed Role with an IAM role in the account
-      {
-        Effect = "Deny",
-        Principal = {
-          "AWS" : "*"
-        },
-        Action = ["ecr:*"],
-        Condition = {
-          "StringNotLike" = {
-            "aws:PrincipalType" = "AssumedRole"
-          },
-          "StringNotEquals" : {
-            "aws:SourceAccount" : "${local.account_id}"
-          }
-        }
-      },
-
-      #Deny destructive actions on the repository if user does not have the administrative role to perform the action
-      {
-        Effect = "Deny",
-        Principal = {
-          "AWS" : "*"
-        },
-        Action = [
-          "ecr:BatchDeleteImage",
-          "ecr:DeleteRepository",
-          "ecr:DeleteRepositoryPolicy",
-          "ecr:PutImageTagMutability",
-          "ecr:DeleteLifecyclePolicy"
-        ],
-        Condition = {
-          "ArnNotEquals" = {
-            "aws:PrincipalArn" = local.admin_role_arns
-          }
-        }
-      },
-
-      #untagged images are not allow
-      {
-        Effect = "Deny",
-        Action = "ecr:PutImage",
-        Condition = {
-          "StringLike" = {
-            "ecr:ImageTag" : [""]
-          }
-        }
-      }
-    ]
-  })
 }
 
 resource "aws_ecr_lifecycle_policy" "this" {
