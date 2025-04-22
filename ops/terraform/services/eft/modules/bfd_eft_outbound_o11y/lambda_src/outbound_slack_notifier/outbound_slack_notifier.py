@@ -108,7 +108,9 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
 
             logger.append_keys(notification_type=status_notification.type.value)
          
-            if (status_notification.type == NotificationType.TRANSFER_SUCCESS):
+            if (status_notification.type in [
+                        NotificationType.TRANSFER_SUCCESS,
+                        NotificationType.FILE_DISCOVERED ]):
                continue 
 
             _slack_status_notif(status_notification=status_notification)
