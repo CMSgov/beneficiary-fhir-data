@@ -116,24 +116,19 @@
         <dependency>
             <groupId>io.github.origin-energy</groupId>
             <artifactId>java-snapshot-testing-junit5</artifactId>
-            <version>4.0.6</version>
+            <version>${java-snapshot-testing.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.origin-energy</groupId>
             <artifactId>java-snapshot-testing-plugin-jackson</artifactId>
-            <version>4.0.6</version>
+            <version>${java-snapshot-testing.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.gravity9</groupId>
-            <artifactId>json-patch-path</artifactId>
-            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>io.github.deblockt</groupId>
             <artifactId>json-diff</artifactId>
-            <version>1.1.0</version>
+            <version>${json-diff.version}</version>
         </dependency>
 
         <!-- Spring Cloud -->

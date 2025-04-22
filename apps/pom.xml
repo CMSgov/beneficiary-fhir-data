@@ -180,12 +180,14 @@
         <protobuf.version>4.29.3</protobuf.version>
         <jacoco.version>0.8.12</jacoco.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
+        <java-snapshot-testing.version>4.0.6</java-snapshot-testing.version>
+        <json-diff.version>1.1.0</json-diff.version>
         <!-- The default DB that will be used in integration tests. -->
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -225,7 +227,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
