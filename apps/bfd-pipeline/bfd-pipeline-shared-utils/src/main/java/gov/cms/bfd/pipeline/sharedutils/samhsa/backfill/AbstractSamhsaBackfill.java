@@ -284,7 +284,14 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   abstract COLUMN_TYPE getEntryType(String entry);
 
+  /**
+   * Puts the columns in a map, along with an enum describing their purpose.
+   *
+   * @param columns The list of columns, in order.
+   * @return a map containing the columns mapped to their purpose.
+   */
   Map<String, COLUMN_TYPE> markSamhsaColumns(List<String> columns) {
+    // Must be a LinkedHashMap here, to preserve the order.
     HashMap<String, COLUMN_TYPE> map = new LinkedHashMap<>();
 
     for (String column : columns) {
@@ -294,7 +301,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Builds the SAMHSA query string template.
+   * Builds the SAMHSA query string template, and also builds the queryColumns object, which will
+   * keep track of the column positions and their purpose.
    *
    * @param table The table.
    * @param claimField The claim id field.
@@ -323,6 +331,13 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return builder.toString();
   }
 
+  /**
+   * The columns come in as a list of strings, some of which may be a comma separated list of
+   * columns. This is due to the way the enumerateColumns method builds the list of columns.
+   *
+   * @param columns An array containing the columns.
+   * @return a list of the columns.
+   */
   private List<String> splitColumnCsvToList(String[] columns) {
     List columnsList = new ArrayList();
     for (String column : columns) {

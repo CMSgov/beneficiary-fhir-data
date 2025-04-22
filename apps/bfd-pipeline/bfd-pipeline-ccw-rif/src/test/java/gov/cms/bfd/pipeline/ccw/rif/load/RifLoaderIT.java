@@ -128,13 +128,13 @@ public final class RifLoaderIT {
         CcwRifLoadTestUtils.getLoadOptions(),
         rifFilesEvent);
 
-    validateSamhsaTagsInDatabase(1194, CarrierTag.class);
-    validateSamhsaTagsInDatabase(1194, DmeTag.class);
-    validateSamhsaTagsInDatabase(1194, HhaTag.class);
-    validateSamhsaTagsInDatabase(1194, HospiceTag.class);
-    validateSamhsaTagsInDatabase(1342, InpatientTag.class);
+    validateSamhsaTagsInDatabase(1186, CarrierTag.class);
+    validateSamhsaTagsInDatabase(1186, DmeTag.class);
+    validateSamhsaTagsInDatabase(1186, HhaTag.class);
+    validateSamhsaTagsInDatabase(1186, HospiceTag.class);
+    validateSamhsaTagsInDatabase(1334, InpatientTag.class);
     validateSamhsaTagsInDatabase(1354, OutpatientTag.class);
-    validateSamhsaTagsInDatabase(1342, SnfTag.class);
+    validateSamhsaTagsInDatabase(1334, SnfTag.class);
   }
 
   /** Tests that SAMHSA tags are properly created by the backfill service for SAMHSA test claims. */
@@ -167,13 +167,13 @@ public final class RifLoaderIT {
             PipelineTestUtils.get().getPipelineApplicationState(), null, 100, 60L);
     backfill.startBackFill(true, false);
 
-    validateSamhsaTagsInDatabase(1194, CarrierTag.class);
-    validateSamhsaTagsInDatabase(1194, DmeTag.class);
-    validateSamhsaTagsInDatabase(1194, HhaTag.class);
-    validateSamhsaTagsInDatabase(1194, HospiceTag.class);
-    validateSamhsaTagsInDatabase(1342, InpatientTag.class);
+    validateSamhsaTagsInDatabase(1186, CarrierTag.class);
+    validateSamhsaTagsInDatabase(1186, DmeTag.class);
+    validateSamhsaTagsInDatabase(1186, HhaTag.class);
+    validateSamhsaTagsInDatabase(1186, HospiceTag.class);
+    validateSamhsaTagsInDatabase(1334, InpatientTag.class);
     validateSamhsaTagsInDatabase(1354, OutpatientTag.class);
-    validateSamhsaTagsInDatabase(1342, SnfTag.class);
+    validateSamhsaTagsInDatabase(1334, SnfTag.class);
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
@@ -1184,7 +1184,6 @@ public final class RifLoaderIT {
       tagCountQuery.select(root);
       List<T> tags = entityManager.createQuery(tagCountQuery).getResultList();
       assertEquals(expectedCount, tags.size(), "Unexpected number of Tag records.");
-
       long _42CFRPart2CodesCount = getTagCodeCount(TagCode._42CFRPart2, entityClass, tags);
       long rCodesCount = getTagCodeCount(TagCode.R, entityClass, tags);
 

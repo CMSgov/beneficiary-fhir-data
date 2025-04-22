@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE;
 import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.getColumnNameAtPosition;
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.getColumnPositionMultiple;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -47,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.util.Strings;
 
@@ -115,10 +116,12 @@ public class SamhsaUtil {
   /** The file from which SAMHSA entries are pulled. Must be in the resources folder. */
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
 
-  private static final String[] DGNS_SYSTEMS = {
-    "http://www.cms.gov/Medicare/Coding/ICD10", "http://www.cms.gov/Medicare/Coding/ICD9"
-  };
   private static final String[] PRCDR_SYSTEMS = {
+    "http://www.cms.gov/Medicare/Coding/ICD10",
+    "http://www.cms.gov/Medicare/Coding/ICD9",
+    "http://www.ama-assn.org/go/cpt"
+  };
+  private static final String[] DGNS_SYSTEMS = {
     "http://hl7.org/fhir/sid/icd-10-cm", "http://hl7.org/fhir/sid/icd-9-cm"
   };
   private static final String[] DRG_SYSTEMS = {
@@ -216,13 +219,10 @@ public class SamhsaUtil {
       Map<String, Object[]> datesMap,
       EntityManager entityManager) {
     List<TagDetails> tagDetailsList = new ArrayList<>();
-    List<Integer> samhsaList =
-        AbstractSamhsaBackfill.getColumnPositionMultiple(
-            AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE, queryColumns);
+    List<Integer> samhsaList = getColumnPositionMultiple(SAMHSA_CODE, queryColumns);
     for (Integer pos : samhsaList) {
       String code = (String) claim[pos];
-      // Found a samhsa code
-      if (samhsaMap.containsKey(code)) {
+      if (code != null) {
         String columnName = getColumnNameAtPosition(pos, queryColumns);
         SamhsaEntry entry = getEntryForCode(columnName, code);
         if (entry != null) {
@@ -235,23 +235,7 @@ public class SamhsaUtil {
             // codes.
             datesMap.put(claimId.toString(), datesObject);
           }
-          LocalDate coverageStartDate =
-              datesObject[0] == null
-                  ? LocalDate.parse("1970-01-01")
-                  : ((Date) datesObject[0]).toLocalDate();
-          LocalDate coverageEndDate =
-              datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
-          LocalDate startDate = LocalDate.parse(entry.getStartDate());
-          LocalDate endDate =
-              entry.getEndDate().equalsIgnoreCase("Active")
-                  ? LocalDate.MAX
-                  : LocalDate.parse(entry.getEndDate());
-
-          // if the throughDate is not between the start and end date,
-          // and the serviceDate is not between the start and end date,
-          // then the claim falls outside the date range of the SAMHSA code.
-          if (isDateOutsideOfRange(startDate, endDate, coverageEndDate)
-              && isDateOutsideOfRange(startDate, endDate, coverageStartDate)) {
+          if (isInvalidClaimDate(datesObject, entry)) {
             continue;
           }
           String type =
@@ -271,6 +255,26 @@ public class SamhsaUtil {
     }
 
     return tagDetailsList;
+  }
+
+  private static boolean isInvalidClaimDate(Object[] datesObject, SamhsaEntry entry) {
+    LocalDate coverageStartDate =
+        datesObject[0] == null
+            ? LocalDate.parse("1970-01-01")
+            : ((Date) datesObject[0]).toLocalDate();
+    LocalDate coverageEndDate =
+        datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
+    LocalDate startDate = LocalDate.parse(entry.getStartDate());
+    LocalDate endDate =
+        entry.getEndDate().equalsIgnoreCase("Active")
+            ? LocalDate.MAX
+            : LocalDate.parse(entry.getEndDate());
+
+    // if the throughDate is not between the start and end date,
+    // and the serviceDate is not between the start and end date,
+    // then the claim falls outside the date range of the SAMHSA code.
+    return isDateOutsideOfRange(startDate, endDate, coverageEndDate)
+        && isDateOutsideOfRange(startDate, endDate, coverageStartDate);
   }
 
   private static SamhsaEntry getEntryForCode(String columnName, String code) {
@@ -628,6 +632,7 @@ public class SamhsaUtil {
    * Check if a given code is a SAMHSA code.
    *
    * @param code the code to check.
+   * @param columnName The column of the code.
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
   public static Optional<SamhsaEntry> getSamhsaCode(
@@ -669,13 +674,21 @@ public class SamhsaUtil {
         mapper.readValue(
             stream, mapper.getTypeFactory().constructCollectionType(List.class, SamhsaEntry.class));
     entries.forEach(entry -> entry.setCode(normalizeCode(entry.getCode())));
-    return entries.stream()
-        .collect(
-            Collectors.toMap(
-                SamhsaEntry::getSystem, // Normalize code here
-                entry ->
-                    entries.stream()
-                        .filter(e -> e.getSystem().equals(entry.getSystem()))
-                        .collect(Collectors.toList())));
+    List<String> systems = new ArrayList<>();
+    systems.addAll(Arrays.stream(DGNS_SYSTEMS).toList());
+    systems.addAll(Arrays.stream(PRCDR_SYSTEMS).toList());
+    systems.addAll(Arrays.stream(DRG_SYSTEMS).toList());
+    systems.addAll(Arrays.stream(HCPCS_SYSTEMS).toList());
+
+    Map<String, List<SamhsaEntry>> entryMap = new HashMap<>();
+    // iterate over each system
+    systems.forEach(
+        sys ->
+            entryMap.put(
+                sys,
+                // Filter the entries by system, and add the resultant list to the map under this
+                // system.
+                entries.stream().filter(entry -> entry.getSystem().equals(sys)).toList()));
+    return entryMap;
   }
 }

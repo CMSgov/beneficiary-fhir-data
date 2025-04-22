@@ -56,7 +56,7 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
 
   /**
    * Creates a concatenated string of an enumerated column (i.e. "icd_prcdr_cd1, icd_prcdr_cd2, ...
-   * icd_prcdr_cd25").
+   * icd_prcdr_cd25"). This will allow it to be inserted into the query without modification.
    *
    * @param column The String for the column.
    * @param count The number of iterations of the column.
