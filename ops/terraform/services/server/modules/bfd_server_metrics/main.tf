@@ -434,7 +434,7 @@ resource "aws_cloudwatch_log_metric_filter" "query_logging_listener_count_warnin
 resource "aws_cloudwatch_log_metric_filter" "samhsa_mismatch_error_count" {
   name           = "bfd-${local.env}/bfd-server/samhsa-mismatch/count/error"
   log_group_name = local.log_groups.messages
-  pattern        = "{$.message = \"Samhsa: Claim ID mismatch between old SAMHSA filter (hasSamhsaData) and new SAMHSA 2.0 (hasSamhsaDataV2)\"}"
+  pattern        = "{ $.message = %Samhsa: Claim ID mismatch between old SAMHSA filter% }"
 
   metric_transformation {
     name      = "samhsa-mismatch/count/error"
