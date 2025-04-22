@@ -189,25 +189,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Returns the position of a column type.
-   *
-   * @param columnType The column type.
-   * @param queryColumns The Map of columns.
-   * @return The position of the column.
-   */
-  public static int getColumnPositionSingle(
-      COLUMN_TYPE columnType, Map<String, COLUMN_TYPE> queryColumns) {
-    int i = 0;
-    for (Map.Entry<String, COLUMN_TYPE> entry : queryColumns.entrySet()) {
-      if (entry.getValue().equals(columnType)) {
-        return i;
-      }
-      i++;
-    }
-    return -1;
-  }
-
-  /**
    * Gets a column at a position.
    *
    * @param pos The position.
@@ -260,7 +241,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected int processClaim(
       Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
-    int claimIdPos = getColumnPositionSingle(COLUMN_TYPE.CLAIM_ID, queryColumns);
+    int claimIdPos = getColumnPositions(COLUMN_TYPE.CLAIM_ID, queryColumns, true).getFirst();
     Object claimId = claim[claimIdPos];
     Optional<Object[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
