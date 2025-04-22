@@ -222,15 +222,16 @@ public class SamhsaUtil {
       String code = (String) claim[pos];
       if (code != null) {
         String columnName = getColumnNameAtPosition(pos, queryColumns);
-        SamhsaEntry entry = getEntryForCode(columnName, code);
-        if (entry != null) {
+        Optional<SamhsaEntry> samhsaEntry =
+            getSamhsaCode(Optional.of(code), Optional.of(columnName));
+        if (samhsaEntry.isPresent()) {
           Object[] datesObject =
               getDatesObjectsForClaim(tableEntry, claimId, dates, datesMap, entityManager);
-          if (isInvalidClaimDate(datesObject, entry)) {
+          if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
             continue;
           }
           String type =
-              Arrays.stream(entry.getSystem().split("/"))
+              Arrays.stream(samhsaEntry.get().getSystem().split("/"))
                   .reduce((first, second) -> second)
                   .orElse(Strings.EMPTY);
           TagDetails tagDetails =
