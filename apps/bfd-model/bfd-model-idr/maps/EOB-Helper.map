@@ -140,16 +140,16 @@ conceptmap "C4BB_DIAGTYPE" {
   s:"E" = t:"externalcauseofinjury"
 }
 
-conceptmap "C4BB_SupportingInfo_Categories" {
+conceptmap "C4BB-SupportingInfo-Categories" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
 
-  s:"ACTIVE_CARE_PERIOD" = t:"admissionperiod"
-  s:"ADM_TYPE_CD" = t:"admtype"
-  s:"CLM_RECV_DATE" = t:"clmrecvddate"
-  s:"DISCHARGE_STATUS_CODE" = t:"discharge-status"
-  s:"DRG_CODE" = t:"drg"
-  s:"POINT_OF_ORIGIN" = t:"pointoforigin"
+  s:"CLM_ACTV_CARE_FROM_DT" = t:"admissionperiod"
+  s:"CLM_ADMSN_TYPE_CD" = t:"admtype"
+  s:"CLM_SUBMSN_DT" = t:"clmrecvddate"
+  s:"BENE_PTNT_STUS_CD" = t:"discharge-status"
+  s:"DGNS_DRG_CD" = t:"drg"
+  s:"CLM_ADMSN_SRC_CD" = t:"pointoforigin"
   s:"TYPE_OF_BILL_CD" = t:"typeofbill"
 
 }

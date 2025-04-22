@@ -2,7 +2,6 @@
 //Must appear in order map -> conceptmap -> uses -> imports -> groups
 map "https://bluebutton.cms.gov/MappingLanguage/maps/ExplanationOfBenefit-Base" = "BFD-ExplanationOfBenefit-Base-Map"
 
-
 uses "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Base" alias ExplanationOfBenefitBase as source
 //hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
 uses "http://hl7.org/fhir/StructureDefinition/ProcedureComponent" alias ProcedureComponent as source
@@ -11,10 +10,8 @@ uses "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent" alias Sup
 uses "http://hl7.org/fhir/StructureDefinition/LineItemComponent" alias LineItemComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/CareTeamComponent" alias CareTeamComponent as source
 
-
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
-
 
 imports "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper" 
 imports "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-SupportingInfo-Helper" 
@@ -25,6 +22,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
+      //CodeSystem -> CLM_TYPE_CD
       src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#ClM_TYPE_CD','coding') "translate code";
     } "Create type";
     src -> tgt.subType = create('CodeableConcept') as tgtCC then {
@@ -32,12 +30,13 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     } "Create type";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
-      src.CLM_BENE_XREF_EFCTV_SK as pt_id -> tgtReference.reference = append("Patient/",pt_id) "Concatenate patient id";
+      src.CLM_BENE_XREF_EFCTV_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
     } "Add patient reference to EOB";
 
     src -> tgt.meta = create('Meta') as tgtMeta then {
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
       src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#profile_metadata','code') "set profile";
+      //CodeSystem -> CLM_SRC_ID
       src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_SRC_ID','code') "set source";
     } "Create metadata";
 
@@ -47,12 +46,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
               idCC.coding = create('Coding') as tempCode,
               tempCode.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
               tempCode.code = "uc" "set coding";
-          src.CLM_UNIQ_ID as claimid -> tgtIdentifier.value = claimid "Set identifier Value";
+          src.CLM_UNIQ_ID as claimId -> tgtIdentifier.value = claimId "Set identifier Value";
     } "Add CLM_UNIQ_ID as unique identifier";
 
-    //https://bluebutton.cms.gov/resources/variables/CLM_CNTL_NUM to be added to bb.cms.gov?
+    //CLM_CNTL_NUM CodeSystem 
     src -> tgt.identifier = create('Identifier') as tgtIdentifier then {
-      src -> tgtIdentifier.system = "https://bluebutton.cms.gov/resources/variables/CLM_CNTL_NUM" "set system";
+      src -> tgtIdentifier.system = "https://bluebutton.cms.gov/fhir/NamingSystem/CLM-CNTL-NUM" "set system";
       src.CLM_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
     } "Add CLM_CNTL_NUM as identifier";
 
@@ -60,9 +59,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
       src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
       src.CLM_QUERY_CD as clmQueryCd -> billablePeriod.extension = create('Extension') as billableExtension then {
-        src -> billableExtension.url="https://bluebutton.cms.gov/resources/variables/claim_query_cd" "Set extension url";
+        //FSH Extension -> CLM_QUERY_CD
+        src -> billableExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD" "Set extension url";
         src -> billableExtension.value = create('Coding') as tgtCoding then {
-          src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+          //CodeSystem -> CLM_QUERY_CD
+          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD",
           tgtCoding.code=clmQueryCd "set claim query code";
         } "Set coding";
       } "Add claim query code";
@@ -73,29 +74,31 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     //Set insurer for part A + B claims
     src.CLM_TYPE_CD as typeCd where (typeCd > 4 and typeCd < 90) -> tgt.contained = create('Organization') as tgtOrg then createInsurerOrgPartAB(src,tgtOrg) "Create insurer org.";
     src.CLM_TYPE_CD as typeCd where (typeCd > 4 and typeCd < 90) -> tgt.insurer = create('Reference') as tgtOrgRef, 
-    tgtOrgRef.reference="#insurer-org" "Set reference to contained insurer org";
+    tgtOrgRef.reference = "#insurer-org" "Set reference to contained insurer org";
 
-
+    //FSH Extension + CodeSystem -> CLM_CNTRCTR_NUM
     src.CLM_CNTRCTR_NUM as fiNum -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/fi_num" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then {
-          src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/fi_num" "Set system";
-          fiNum -> tgtCoding.code=fiNum "set code";
+          src -> tgtCoding.system = "https://bluebutton.cms.gov/CodeSystem/CLM-CNTRCTR-NUM" "Set system";
+          fiNum -> tgtCoding.code = fiNum "set code";
         } "Set value";
       } "CLM_CNTRCTR_NUM";
 
+    //This field can be used to set the Coverage type. 
+    //When adding a claim type that can be covered under part B (or PDE, whichever comes first), add the insurance logic here.
     src.CLM_NRLN_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
         src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then {
-          src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd" "Set system";
-          ricCd -> tgtCoding.code=ricCd "set code";
+          src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd" "Set system";
+          ricCd -> tgtCoding.code = ricCd "set code";
         } "Set value";
       } "CLM_NRLN_RIC_CD";
 
     src.CLM_OPRTNL_DSPRTNT_AMT as amt -> tgt.extension = create('Extension') as tgtExtension then {
       src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/dsh_op_clm_val_amt" "Add url";
       src -> tgtExtension.value = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amt -> tgtMoney.value = cast(amt,"decimal") "Set amount";
       } "Set value";
     } "CLM_OPRTNL_DSPRTNT_AMT";
@@ -103,14 +106,14 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_OPRTNL_IME_AMT as amt -> tgt.extension = create('Extension') as tgtExtension then {
       src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt" "Add url";
       src -> tgtExtension.value = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amt -> tgtMoney.value = cast(amt,"decimal") "Set amount";
       } "Set value";
     } "CLM_OPRTNL_IME_AMT";
 
     src.CLM_PMT_AMT as amt -> tgt.payment = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.amount = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amt -> tgtMoney.value = cast(amt,"decimal") "Set amount";
       } "Set value";
     } "CLM_PMT_AMT";
@@ -127,7 +130,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     //For institutional claims, the provider will be an institution. For others, it will generally be a practitioner.
     src.CLM_TYPE_CD as typeCd where(typeCd > 4 and typeCd < 70) -> tgt.contained = create('Organization') as tgtOrg then createProviderOrg(src,tgtOrg) "Create contained org."; 
     src.CLM_TYPE_CD as typeCd where(typeCd > 4 and typeCd < 70) -> tgt.provider = create('Reference') as tgtRef, 
-    tgtRef.reference="#provider-org" "Set reference to contained provider org";
+    tgtRef.reference = "#provider-org" "Set reference to contained provider org";
    
    // src.CLM_TYPE_CD as type_cd where(type_cd > 4 and type_cd < 70) -> tgt.
     //OUTCOME. This should be revisited when considering the addition of PAC data. 
@@ -157,34 +160,30 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_ATNDG_PRVDR_NPI_NUM as prvdrNPI -> tgt then addAttendingCareTeamMember(src,tgt) "Add attending";
     src.CLM_OPRTG_PRVDR_NPI_NUM as prvdrNPI -> tgt then addOperatingCareTeamMember(src,tgt) "Add operating";
     src.CLM_OTHR_PRVDR_NPI_NUM as prvdrNPI -> tgt then addOtherCareTeamMember(src,tgt) "Add other";
-    //The below is commented out pending feedback on constraint validity in C4BB for the Inpatient Institutional Profile.
+    //The below is deliberate. Rendering Providers are Type 1 NPIs in CMS data.
     src.CLM_RNDRG_PRVDR_NPI_NUM as prvdrNPI -> tgt then addRenderingCareTeamMember(src,tgt) "Add rendering";
 
     //Add header level adjudication.
-    //NOTE: removed to comply with C4BB Profile.
-    
     src -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then {
       src -> tgtAdjudication.reason = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
-            tgtCoding.code="other" "Set adjudication status";
+            src -> tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+            tgtCoding.code = "other" "Set adjudication status";
         } "Add coding";
       } "Set reason";
 
       src -> tgtAdjudication.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
-            tgtCoding.code="benefitpaymentstatus" "Set adjudication status";
+            src -> tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+            tgtCoding.code = "benefitpaymentstatus" "Set adjudication status";
         } "Add coding";
       } "Set category";
-
     } "Add header-level adjudication";
-
 
     src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalItems(src, instlTgt) "add institutional components";
 
     src.CLM_TYPE_CD as claimType where claimType = 60 -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
-      src -> tgtBBElement.focal=true "Add focal";
+      src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
         src -> tgtReference.display = "Part A" "Add temp coverage placeholder";
       } "Add reference for coverage";
@@ -202,53 +201,47 @@ group addInstitutionalItems (source src: ExplanationOfBenefitBase, target tgt: B
   //This is a bit obtuse, but this allows us to cite the institutional + overall information from the same context.
   src.institutionalComponents as institutionalComponents -> tgt then {
     institutionalComponents.CLM_MDCR_NPMT_RSN_CD as nonPmtCode -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then {
-          src -> tgtCoding.code = nonPmtCode,
-          tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd" "set system";
-        } "Add target coding";
-      } "Add non payment reason";
-
-
-      //CLM_HIPPS_UNCOMPD_CARE_AMT - Claim Uncompensated Care Payment Amount
-      institutionalComponents.CLM_HIPPS_UNCOMPD_CARE_AMT as uncompdCareAmt -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt" "Add url";
-        src -> tgtExtension.value = create('Money') as tgtMoney then {
-            src -> tgtMoney.currency="USD" "Set currency";
-            uncompdCareAmt -> tgtMoney.value = cast(uncompdCareAmt,"decimal") "Set amount";
-        } "Set value";
-      } "Add non payment reason";
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd" "Add url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.code = nonPmtCode,
+        tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd" "set system";
+      } "Add target coding";
+    } "Add non payment reason";
+    //CLM_HIPPS_UNCOMPD_CARE_AMT - Claim Uncompensated Care Payment Amount
+    institutionalComponents.CLM_HIPPS_UNCOMPD_CARE_AMT as uncompdCareAmt -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt" "Add url";
+      src -> tgtExtension.value = create('Money') as tgtMoney then {
+        src -> tgtMoney.currency = "USD" "Set currency";
+        uncompdCareAmt -> tgtMoney.value = cast(uncompdCareAmt,"decimal") "Set amount";
+      } "Set value";
+    } "Add non payment reason";
 
     institutionalComponents.CLM_FI_ACTN_CD as actnCd -> tgt.extension = create('Extension') as tgtExtension then {
-          src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd" "Add url";
-          src -> tgtExtension.value = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system="https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd" "Set system";
-            actnCd -> tgtCoding.code=actnCd "set code";
-          } "Set value";
-      } "CLM_FI_ACTN_CD";
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd" "Add url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/fi_clm_actn_cd" "Set system";
+        actnCd -> tgtCoding.code=actnCd "set code";
+      } "Set value";
+    } "CLM_FI_ACTN_CD";
 
     //CLM_MDCR_INSTNL_TOT_CHRG_AMT 
       institutionalComponents.CLM_MDCR_INSTNL_TOT_CHRG_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
         src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
           src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system="http://terminology.hl7.org/CodeSystem/adjudication", 
-            tgtCoding.code="submitted" "Set coding #1";
+            src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/adjudication", 
+            tgtCoding.code = "submitted" "Set coding #1";
           } "Add first coding";
           src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system="https://bluebutton.cms.gov/resources/codesystem/adjudication", 
-            tgtCoding.code="https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt" "Set coding #1";
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/codesystem/adjudication", 
+            tgtCoding.code = "https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt" "Set coding #1";
           } "Add second coding";
        } "Add codeable concept";
         src -> tgtBBElement.amount = create('Money') as tgtMoney then {
-            src -> tgtMoney.currency="USD" "Set currency";
+            src -> tgtMoney.currency = "USD" "Set currency";
             totChargeAmt -> tgtMoney.value = cast(totChargeAmt,"decimal") "Set amount";
         } "Set value";
       } "Add total charge amount";
-
-
-
-  } "Add wrapper for institutional components";
-
+    } "Add wrapper for institutional components";
   src -> tgt.benefitBalance = create('BackboneElement') as tgtBB then addInstitutionalBenefitBalance(src,tgtBB) "Add benefit balance";
 }
 
@@ -256,8 +249,8 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
   src.institutionalComponents as institutionalComponents -> tgt then {
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
       src -> tgtCC.coding = create('Coding') as tgtCoding,
-      tgtCoding.system="http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
-      tgtCoding.code="1",
+      tgtCoding.system = "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+      tgtCoding.code = "1",
       tgtCoding.display = "Medical Care" "Set category";
     } "Create base CC";
 
@@ -302,7 +295,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_INSTNL_PER_DIEM_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_INSTNL_PER_DIEM_AMT";
@@ -312,7 +305,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_MDCR_IP_PPS_DSPRPRTNT_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_MDCR_IP_PPS_DSPRPRTNT_AMT";
@@ -322,7 +315,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_MDCR_IP_PPS_EXCPTN_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_MDCR_IP_PPS_EXCPTN_AMT";
@@ -332,7 +325,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_PPS_CPTL_FSP_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_PPS_CPTL_FSP_AMT";
@@ -342,7 +335,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_PPS_CPTL_IME_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_PPS_CPTL_IME_AMT";
@@ -352,7 +345,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_PPS_CPTL_OUTLIER_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_PPS_CPTL_OUTLIER_AMT";
@@ -362,7 +355,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT";
@@ -372,7 +365,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_MDCR_IP_PPS_CPTL_TOT_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_MDCR_IP_PPS_CPTL_TOT_AMT";
@@ -382,7 +375,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_MDCR_INSTNL_PRMRY_PYR_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_MDCR_INSTNL_PRMRY_PYR_AMT";
@@ -392,7 +385,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_INSTNL_PRFNL_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_INSTNL_PRFNL_AMT";
@@ -402,7 +395,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_INSTNL_DRG_OUTLIER_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_INSTNL_DRG_OUTLIER_AMT";
@@ -412,7 +405,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
       src -> tgtCC.coding = translate('CLM_MDCR_IP_BENE_DDCTBL_AMT','https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#BENEFITBALANCE','coding') "add benefit balance";
     } "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then {
-        src -> tgtMoney.currency="USD" "Set currency";
+        src -> tgtMoney.currency = "USD" "Set currency";
         amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
     } "Set value";
   } "Add CLM_MDCR_IP_BENE_DDCTBL_AMT";
@@ -421,7 +414,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
   //From CLM
   //These are institutional-inpatient mappings. For others, ensure that the mappings are correct. 
   
-  src.CLM_TYPE_CD as clmTypCd where (clmTypCd >= 60 and clmTypCd <=64) -> tgt then {
+  src.CLM_TYPE_CD as clmTypCd where (clmTypCd >= 60 and clmTypCd <= 64) -> tgt then {
     //CLM_MDCR_COINSRNC_AMT
     src.CLM_MDCR_COINSRNC_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then {
@@ -431,7 +424,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
         } "Add coding";
       } "Add codeable concept";
       src -> tgtBBElement.used = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
       } "Set value";
     } "Add CLM_MDCR_COINSRNC_AMT";
@@ -445,7 +438,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
         } "Add coding";
       } "Add codeable concept";
       src -> tgtBBElement.used = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
       } "Set value";
     } "Add CLM_BLOOD_LBLTY_AMT";
@@ -459,7 +452,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
         } "Add coding";
       } "Add codeable concept";
       src -> tgtBBElement.used = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
       } "Set value";
     } "Add CLM_NCVRD_CHRG_AMT";
@@ -473,7 +466,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
         } "Add coding";
       } "Add codeable concept";
       src -> tgtBBElement.used = create('Money') as tgtMoney then {
-          src -> tgtMoney.currency="USD" "Set currency";
+          src -> tgtMoney.currency = "USD" "Set currency";
           amtUsed -> tgtMoney.value = cast(amtUsed,"decimal") "Set amount";
       } "Set value";
     } "Add CLM_MDCR_DDCTBL_AMT";
@@ -489,26 +482,20 @@ group addFinancialElement(source src: String, target tgt: BackboneElement){
   } "Add codeable concept";
 }
 
-group addDiagnoses(source src: ProcedureComponents, target tgt: BackboneElement){
+group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
 
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode="A" or dTypeCode="P") -> tgt.type = create('CodeableConcept') as tgtCC then {
+  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
     src -> tgtCC.coding = translate(dTypeCode,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#HL7_DIAGTYPE','coding') "set coding";
   } "Set type";
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode="1" or dTypeCode="D" or dTypeCode="E") -> tgt.type = create('CodeableConcept') as tgtCC then {
+  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E") -> tgt.type = create('CodeableConcept') as tgtCC then {
     src -> tgtCC.coding = translate(dTypeCode,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_DIAGTYPE','coding') "set coding";
   } "Set type";
 
   src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
     tgtPOA.coding = create('Coding') as tgtCoding,
-    tgtCoding.system="https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding",
-    tgtCoding.code=poaInd "Set POA indicator";
-
-  //need to support this on BB2 website.
-  src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
-    tgtPOA.coding = create('Coding') as tgtCoding,
-    tgtCoding.system="https://bluebutton.cms.gov/resources/variables/clm_poa_ind",
-    tgtCoding.code=poaInd "Set POA indicator";
+    tgtCoding.system = "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding",
+    tgtCoding.code = poaInd "Set POA indicator";
 
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
@@ -524,23 +511,23 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
   src.CLM_VAL_SQNC_NUM as sequenceNum where sequenceNum = 1 -> tgt.type = create('CodeableConcept') as tgtCC,
     tgtCC.text = "The Principal Procedure is based on the relation of the procedure to the Principal Diagnosis",
     tgtCC.coding = create('Coding') as tgtCoding,
-    tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType",
-    tgtCoding.code="principal",
-    tgtCoding.display="Principal" "Set type for principal";
+    tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType",
+    tgtCoding.code = "principal",
+    tgtCoding.display = "Principal" "Set type for principal";
 
   src.CLM_VAL_SQNC_NUM as sequenceNum where sequenceNum != 1 -> tgt.type = create('CodeableConcept') as tgtCC,
     tgtCC.text = "Other procedures performed during the inpatient institutional admission",
     tgtCC.coding = create('Coding') as tgtCoding,
-    tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType",
-    tgtCoding.code="other",
-    tgtCoding.display="Other" "Set type for non principal";
+    tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType",
+    tgtCoding.code = "other",
+    tgtCoding.display = "Other" "Set type for non principal";
   src.CLM_PRCDR_PRFRM_DT as procedureDate -> tgt.date = procedureDate "set procedure date";
 
   src -> tgt.procedure = create('CodeableConcept') as tgtProcedure then {
     src -> tgtProcedure.coding = create('Coding') as tgtCoding then {
       src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_DGNS_PRCDR_ICD_IND_PROCEDURE','code') "set system";
       src.CLM_PRCDR_CD as procedureCode -> tgtCoding.code = procedureCode "set procedure code";
-    } "set coding";    
+    } "set coding";
   } "Set procedure, including code";
 
 }
@@ -559,7 +546,7 @@ group addAttendingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
         tgtCoding.code = "NPI" "Set code and system for CodeableConcept";
         src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
         src.CLM_ATNDG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
-    } "Create NPI identifier";  
+    } "Create NPI identifier";
     src.family_name_atndg as family_name -> tgtPract.name = create('HumanName') as tgtName then {
       family_name -> tgtName.family = family_name "set family name";
     } "add family name";
@@ -567,8 +554,8 @@ group addAttendingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
     src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then {
       src -> tgtCC.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        tgtCoding.code="attending" "Add role";
+        src -> tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        tgtCoding.code = "attending" "Add role";
       } "Add coding";
     } "Add codeableConcept for role";
     src -> tgtBBElement.sequence = "1" "Set sequence";
@@ -587,11 +574,11 @@ group addOperatingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
     src -> tgtPract.identifier = create('Identifier') as tgtId then {
       src -> tgtId.type = create('CodeableConcept') as tgtCC, 
         tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://terminology.hl7.org/CodeSystem/v2-0203", 
-        tgtCoding.code="NPI" "Set code and system for CodeableConcept";
+        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/v2-0203", 
+        tgtCoding.code = "NPI" "Set code and system for CodeableConcept";
         src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
         src.CLM_OPRTG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
-    } "Create NPI identifier";  
+    } "Create NPI identifier";
     src.family_name_oprtg as familyName -> tgtPract.name = create('HumanName') as tgtName then {
       familyName -> tgtName.family = familyName "set family name";
     } "add family name";
@@ -619,11 +606,11 @@ group addOtherCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: B
     src -> tgtPract.identifier = create('Identifier') as tgtId then {
       src -> tgtId.type = create('CodeableConcept') as tgtCC, 
         tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://terminology.hl7.org/CodeSystem/v2-0203", 
-        tgtCoding.code="NPI" "Set code and system for CodeableConcept";
+        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/v2-0203", 
+        tgtCoding.code = "NPI" "Set code and system for CodeableConcept";
         src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
         src.CLM_OTHR_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
-    } "Create NPI identifier";  
+    } "Create NPI identifier";
     src.family_name_othr as familyName -> tgtPract.name = create('HumanName') as tgtName then {
       familyName -> tgtName.family = familyName "set family name";
     } "add family name";
@@ -631,8 +618,8 @@ group addOtherCareTeamMember(source src: ExplanationOfBenefitBase, target tgt: B
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
     src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then {
       src -> tgtCC.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        tgtCoding.code="otheroperating" "Add role";
+        src -> tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        tgtCoding.code = "otheroperating" "Add role";
       } "Add coding";
     } "Add codeableConcept for role";
     src -> tgtBBElement.sequence = "3" "Set sequence";
@@ -652,20 +639,20 @@ group addRenderingCareTeamMember(source src: ExplanationOfBenefitBase, target tg
     src -> tgtPract.identifier = create('Identifier') as tgtId then {
       src -> tgtId.type = create('CodeableConcept') as tgtCC, 
         tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system="http://terminology.hl7.org/CodeSystem/v2-0203", 
-        tgtCoding.code="NPI" "Set code and system for CodeableConcept";
+        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/v2-0203", 
+        tgtCoding.code = "NPI" "Set code and system for CodeableConcept";
         src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
         src.CLM_RNDRG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
-    } "Create NPI identifier";  
+    } "Create NPI identifier";
     src.family_name_rndrg as familyName -> tgtPract.name = create('HumanName') as tgtName then {
       familyName -> tgtName.family = familyName "set family name";
     } "add family name";
   } "Add attending practitioner";
   src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
-    src ->  tgtBBElement.role = create('CodeableConcept') as tgtCC then {
+    src -> tgtBBElement.role = create('CodeableConcept') as tgtCC then {
       src -> tgtCC.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        tgtCoding.code="rendering" "Add role";
+        src -> tgtCoding.system = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        tgtCoding.code = "rendering" "Add role";
       } "Add coding";
     } "Add codeableConcept for role";
     src -> tgtBBElement.sequence = "4" "Set sequence";
@@ -695,10 +682,10 @@ group createProviderOrg(source src: ExplanationOfBenefitBase, target tgt: Organi
         src -> tgt.identifier = create('Identifier') as tgtId then {
           src -> tgtId.type = create('CodeableConcept') as tgtCC, 
           tgtCC.coding = create('Coding') as tgtCoding,
-          tgtCoding.system="http://terminology.hl7.org/CodeSystem/v2-0203", 
-          tgtCoding.code="NPI" "Set code and system for CodeableConcept";
+          tgtCoding.system = "http://terminology.hl7.org/CodeSystem/v2-0203", 
+          tgtCoding.code = "NPI" "Set code and system for CodeableConcept";
           src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
           src.PRVDR_BLG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
-  } "Create NPI identifier";  
+  } "Create NPI identifier";
   src -> tgt.name = "PROVIDER ORG SOURCED FROM NPPES" "Add provider org";
 }
