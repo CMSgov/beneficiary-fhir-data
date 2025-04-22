@@ -79,6 +79,8 @@ The Swagger UI is available at `/v3/fhir/swagger-ui`
 
 Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).
 
+If snapshot tests fail, they will generate a `.patch` file with the difference that can be viewed using your diff tool of choice.
+
 ```sh
 mvn clean verify -DupdateSnapshot=
 ```

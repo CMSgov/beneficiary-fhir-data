@@ -1,57 +1,57 @@
 gov.cms.bfd.server.ng.PatientIT.patientRead=[
 {
-  "resourceType": "Patient",
-  "id": "1",
-  "meta": {
-    "lastUpdated": "2024-01-01T00:00:00.000+00:00",
-    "profile": [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
-  },
-  "extension": [ {
-    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-    "valueCode": "248152002"
-  }, {
-    "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-    "extension": [ {
-      "url": "ombCategory",
-      "valueCoding": {
-        "system": "urn:oid:2.16.840.1.113883.6.238",
-        "code": "2106-3",
-        "display": "White"
-      }
-    }, {
-      "url": "text",
-      "valueCode": "White"
-    } ]
+  "address" : [ {
+    "city" : "RICHMOND",
+    "line" : [ "100 MAIN ST" ],
+    "postalCode" : "22473",
+    "state" : "VA"
   } ],
-  "identifier": [ {
-    "type": {
-      "coding": [ {
-        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-        "code": "MB"
-      } ]
-    },
-    "system": "http://hl7.org/fhir/sid/us-mbi",
-    "value": "1S000000000"
-  } ],
-  "name": [ {
-    "family": "NORRIS",
-    "given": [ "CHUCK", "R" ]
-  } ],
-  "gender": "female",
-  "birthDate": "1960-01-01",
-  "address": [ {
-    "line": [ "100 MAIN ST" ],
-    "city": "RICHMOND",
-    "state": "VA",
-    "postalCode": "22473"
-  } ],
-  "communication": [ {
-    "language": {
-      "coding": [ {
-        "system": "urn:ietf:bcp:47",
-        "code": "en"
+  "birthDate" : "1960-01-01",
+  "communication" : [ {
+    "language" : {
+      "coding" : [ {
+        "code" : "en",
+        "system" : "urn:ietf:bcp:47"
       } ]
     }
-  } ]
+  } ],
+  "extension" : [ {
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+    "valueCode" : "248152002"
+  }, {
+    "extension" : [ {
+      "url" : "ombCategory",
+      "valueCoding" : {
+        "code" : "2106-3",
+        "display" : "White",
+        "system" : "urn:oid:2.16.840.1.113883.6.238"
+      }
+    }, {
+      "url" : "text",
+      "valueCode" : "White"
+    } ],
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+  } ],
+  "gender" : "female",
+  "id" : "1",
+  "identifier" : [ {
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "type" : {
+      "coding" : [ {
+        "code" : "MB",
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      } ]
+    },
+    "value" : "1S000000000"
+  } ],
+  "meta" : {
+    "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+  },
+  "name" : [ {
+    "family" : "NORRIS",
+    "given" : [ "CHUCK", "R" ]
+  } ],
+  "resourceType" : "Patient"
 }
 ]

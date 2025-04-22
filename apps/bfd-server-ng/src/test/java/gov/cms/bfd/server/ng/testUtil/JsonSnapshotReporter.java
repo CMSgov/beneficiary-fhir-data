@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.testUtil;
 
 import au.com.origin.snapshots.Snapshot;
 import au.com.origin.snapshots.reporters.SnapshotReporter;
@@ -9,11 +9,8 @@ import com.deblock.jsondiff.matcher.StrictJsonObjectPartialMatcher;
 import com.deblock.jsondiff.matcher.StrictPrimitivePartialMatcher;
 import com.deblock.jsondiff.viewer.OnlyErrorDiffViewer;
 import com.deblock.jsondiff.viewer.PatchDiffViewer;
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.Properties;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.opentest4j.AssertionFailedError;
 
@@ -23,41 +20,37 @@ public class JsonSnapshotReporter implements SnapshotReporter {
     return outputFormat.equals("json") || outputFormat.equals("fhir+json");
   }
 
+  @SneakyThrows
   @Override
   public void report(Snapshot previous, Snapshot current) {
+    // Our custom JSON serializer should already normalize everything appropriately, so we can use
+    // strict matching here.
     final var jsonMatcher =
         new CompositeJsonMatcher(
             new StrictJsonArrayPartialMatcher(),
             new StrictJsonObjectPartialMatcher(),
             new StrictPrimitivePartialMatcher());
+
     if (previous.getBody().isEmpty()) {
       return;
     }
+
     final var jsondiff = DiffGenerator.diff(previous.getBody(), current.getBody(), jsonMatcher);
 
+    // Adds a helpful bit of text at the end that spits out the specific JSON paths that have diffs
     final var errorsView = OnlyErrorDiffViewer.from(jsondiff).toString();
     final var diff = PatchDiffViewer.from(jsondiff);
 
     final var diffStr = diff.toString();
-    try {
-      Properties prop = new Properties();
-      prop.load(this.getClass().getClassLoader().getResourceAsStream("snapshot.properties"));
-      var snapshotDir = prop.getProperty("snapshot-dir");
-      FileUtils.writeStringToFile(
-          new File(
-              Paths.get(
-                      "src/test/java",
-                      getClass().getPackageName().replace(".", "/"),
-                      snapshotDir,
-                      current.getName() + ".patch")
-                  .toString()),
-          diffStr,
-          StandardCharsets.UTF_8);
 
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    // Save the diff to a patch file, so it can be viewed using a diff tool if desired
+    FileUtils.writeStringToFile(
+        SnapshotHelper.getPatchfile(getClass(), current.getName()),
+        diffStr,
+        StandardCharsets.UTF_8);
 
+    // Generates a GitHub style diff with a few extra lines below and above the diff marker to add
+    // context
     final var diffLines = diffStr.split("\n");
     StringBuilder result = new StringBuilder("\n");
     for (var i = 0; i < diffLines.length; i++) {
