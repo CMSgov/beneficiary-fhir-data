@@ -15,4 +15,21 @@ jobs:
     runs-on:
       - codebuild-bfd-mgmt-ci-small-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - run: echo "Hello World"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: codebuild-poc
+          aws-region: us-east-1
+
+      - name: Mask sensitive AWS data
+        run: |
+          #is jq available by default?
+          caller_id="$(aws sts get-caller-identity)"
+          account_num="$(jq -r '.Account' <<<$caller_id)"
+          role_arn="$(jq -r '.Arn' <<<$caller_id)"
+          user_id="$(jq -r '.UserId' <<<$caller_id)"
+
+          echo "::add-mask::$account_num"
+          echo "::add-mask::$role_arn"
+          echo "::add-mask::$user_id"
