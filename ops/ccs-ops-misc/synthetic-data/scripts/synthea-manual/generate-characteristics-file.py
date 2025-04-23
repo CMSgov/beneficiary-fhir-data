@@ -46,7 +46,7 @@ def generate_characteristics_file(args):
         print("Returning with exit code 1")
         sys.exit(1)
     
-    header = ['Beneficiary Id','MBI Unhashed','Part D Contract Number','Carrier Claims Total','DME Claims Total','HHA Claims Total','Hospice Claims Total','Inpatient Claims Total','Outpatient Claims Total','SNF Claims Total','Part D Events Total']
+    header = ['Beneficiary Id','MBI Unhashed','Part D Contract Number','Carrier Claims Total','DME Claims Total','HHA Claims Total','Hospice Claims Total','Inpatient Claims Total','Outpatient Claims Total','SNF Claims Total','Part D Events Total','FISS','MCS']
     
     ## get data for csv from db
     bene_data = {}
@@ -70,13 +70,14 @@ def generate_characteristics_file(args):
         outpatient_data = get_table_count("outpatient_claims", bene_id_start, bene_id_end, db_string)
         snf_data = get_table_count("snf_claims", bene_id_start, bene_id_end, db_string)
         pde_data = get_table_count("partd_events", bene_id_start, bene_id_end, db_string)
+        fiss_mbis, mcs_mbis = get_rda_claim_flags(db_string)
     except BaseException as err:
         print(f"Unexpected error while running queries: {err}")
         print("Returning with exit code 1")
         sys.exit(1)
     
     ## synthesize data into final rows
-    final_data_rows = put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data)
+    final_data_rows = put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data, fiss_mbis, mcs_mbis )
     
     ## Write csv to filesystem + header
     filePath = output_path + 'characteristics.csv'
@@ -109,7 +110,7 @@ def get_bene_data(bene_id_start, bene_id_end, db_string):
     
     query = f"SELECT bene_id, mbi_num, concat_ws(',', ptd_cntrct_jan_id, ptd_cntrct_feb_id,ptd_cntrct_mar_id,ptd_cntrct_apr_id,ptd_cntrct_may_id,ptd_cntrct_jun_id,"\
         f" ptd_cntrct_jul_id, ptd_cntrct_aug_id, ptd_cntrct_sept_id, ptd_cntrct_oct_id, ptd_cntrct_nov_id, ptd_cntrct_dec_id) as \"Part D Contract Number\""\
-        f" FROM public.beneficiaries WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end} order by bene_id desc"
+        f" FROM ccw.beneficiaries WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end} order by bene_id desc"
         
     print(f"Starting query for bene data...");
     raw_query_response = _execute_query(db_string, query)
@@ -125,7 +126,7 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
     """
     
     query = "SELECT bene_id, count(*)"\
-            f" FROM public.{table_name}"\
+            f" FROM ccw.{table_name}"\
             f" WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end}"\
             " GROUP BY bene_id"\
             " ORDER BY bene_id desc;"\
@@ -141,7 +142,7 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
     
     return dict_response
 
-def put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data):
+def put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data, fiss_mbis, mcs_mbis):
     """
     Takes the bene data and table counts and creates a list of rows that will
     be used in the final csv characteristics file.
@@ -161,7 +162,9 @@ def put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospic
         outpatient_count = outpatient_data[bene_id] if bene_id in outpatient_data else 0
         snf_count = snf_data[bene_id] if bene_id in snf_data else 0
         pde_count = pde_data[bene_id] if bene_id in pde_data else 0
-        final_rows.append([bene_id, mbi, contracts, carrier_count, dme_count, hha_count, hospice_count, inpatient_count, outpatient_count, snf_count, pde_count])
+        fiss_flag = 1 if mbi in fiss_mbis else 0
+        mcs_flag = 1 if mbi in mcs_mbis else 0
+        final_rows.append([bene_id, mbi, contracts, carrier_count, dme_count, hha_count, hospice_count, inpatient_count, outpatient_count, snf_count, pde_count, fiss_flag, mcs_flag])
         
     return final_rows
 
@@ -180,6 +183,22 @@ def _execute_query(uri: str, query: str):
         conn.close()
 
     return finalResults
+
+def get_rda_claim_flags(db_string):
+    query_fiss = """
+        SELECT DISTINCT mca.mbi
+        FROM rda.fiss_claims fc
+        JOIN rda.mbi_cache mca ON fc.mbi_id = mca.mbi_id
+    """
+    query_mcs = """
+        SELECT DISTINCT mca.mbi
+        FROM rda.mcs_claims mc
+        JOIN rda.mbi_cache mca ON mc.mbi_id = mca.mbi_id
+    """
+    fiss_mbis = {row[0] for row in _execute_query(db_string, query_fiss)}
+    mcs_mbis = {row[0] for row in _execute_query(db_string, query_mcs)}
+    return fiss_mbis, mcs_mbis
+
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":
