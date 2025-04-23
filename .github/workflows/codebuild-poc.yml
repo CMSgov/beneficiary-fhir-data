@@ -16,7 +16,8 @@ jobs:
       - codebuild-bfd-mgmt-ci-medium-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - run: echo "Hello World"
-
+      - run: uname -a
+      - run: nproc
 
   Hello-World-Small:
     runs-on:
@@ -47,3 +48,6 @@ jobs:
           else
             echo 'Unreachable :(';
           fi
+      - run: echo "Hello World"
+      - run: uname -a
+      - run: nproc
