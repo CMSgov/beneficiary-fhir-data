@@ -31,6 +31,14 @@ locals {
 
   metrics_namespace = "bfd-${local.env}/${local.target_service}"
   alarms_prefix     = "bfd-${local.env}-${local.target_service}"
+
+  dashboard_url              = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=bfd-${local.env}-${local.target_service}"
+  dashboard_message_fragment = <<-EOF
+View the relevant CloudWatch dashboard below for more information:
+
+* <${local.dashboard_url}|bfd-${local.env}-${local.target_service}>
+    * This dashboard visualizes SLOs and other important CCW Pipeline metrics
+  EOF
 }
 
 data "aws_ecs_cluster" "main" {
