@@ -66,7 +66,7 @@ resource "aws_lambda_function" "verifier" {
   ])
 
   kms_key_arn      = local.env_key_arn
-  image_uri        = data.aws_ecr_image.verifier.id
+  image_uri        = data.aws_ecr_image.verifier.image_uri
   source_code_hash = trimprefix(data.aws_ecr_image.verifier.id, "sha256:")
   architectures    = ["arm64"]
   package_type     = "Image"
