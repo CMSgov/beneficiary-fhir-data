@@ -1,5 +1,6 @@
 name: 'CI - Java'
 on:
+  push: #FIXME: Remove
   pull_request:
   merge_group:
 
@@ -60,7 +61,20 @@ jobs:
           cache: 'maven'
 
       - name: 'Run Maven Build'
-        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false -DbfdOps.skip=false verify
+        run: |
+          mvn install \
+          --threads 1C \
+          --no-transfer-progress \
+          -Dmaven.javadoc.skip=true \
+          -Dcheckstyle.skip \
+          -Dmaven.build.cache.enabled=false \
+          -Dmaven.jacoco.skip=false
         working-directory: ./apps
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: '**/target/coverage-reports/jacoco-[iu]t/jacoco.xml'
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
