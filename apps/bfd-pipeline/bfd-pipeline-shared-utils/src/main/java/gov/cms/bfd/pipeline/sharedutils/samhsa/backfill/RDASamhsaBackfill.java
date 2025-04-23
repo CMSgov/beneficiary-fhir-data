@@ -23,11 +23,11 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** Columns for mcs_diagnosis. */
   private static String[] MCS_DIAGNOSIS_SAMHSA_COLUMNS =
-      new String[] {"rda_posistion", "idr_diag_code"};
+      new String[] {RDA_POSITION, "idr_diag_code"};
 
   /** Columns for mcs_details. */
   private static String[] MCS_DETAILS_SAMHSA_COLUMNS =
-      new String[] {"idr_dtl_number", "idr_dtl_primary_diag_code", "idr_proc_code"};
+      new String[] {IDR_DTL_NUM, "idr_dtl_primary_diag_code", "idr_proc_code"};
 
   /** Columns for fiss. */
   private static String[] FISS_SAMHSA_COLUMNS =
@@ -40,13 +40,13 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
 
   /** Columns for fiss revenue lines. */
   private String[] FISS_REVENUE_LINES_SAMHSA_COLUMNS =
-      new String[] {"rda_position", "apc_hcpcs_apc", "hcpc_cd"};
+      new String[] {RDA_POSITION, "apc_hcpcs_apc", "hcpc_cd"};
 
   /** Columns for fiss_diagnosis_codes. */
-  private String[] FISS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {"rda_position", "diag_cd2"};
+  private String[] FISS_DIAGNOSIS_SAMHSA_COLUMNS = new String[] {RDA_POSITION, "diag_cd2"};
 
   /** Columns for fiss_proc_codes. */
-  private String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {"rda_position", "proc_code"};
+  private String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {RDA_POSITION, "proc_code"};
 
   @Override
   COLUMN_TYPE getEntryType(String entry) {
