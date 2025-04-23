@@ -180,7 +180,7 @@ group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
 
     //https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd
     src.CLM_DDCTBL_COINSRNC_CD as ddctblCd -> tgt.coding = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd" "set system";
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD" "set system";
         src -> tgtCoding.code = ddctblCd "set deductible/coinsurance code";
     } "Add deductible code";
 }
