@@ -39,7 +39,6 @@ data "aws_cloudwatch_log_group" "messages" {
 }
 
 resource "aws_cloudwatch_log_metric_filter" "error_count" {
-  count          = local.is_ephemeral_env ? 0 : 1
   name           = "${local.metrics_namespace}/messages/count/error"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message]"
   log_group_name = data.aws_cloudwatch_log_group.messages.name
@@ -53,7 +52,6 @@ resource "aws_cloudwatch_log_metric_filter" "error_count" {
 }
 
 resource "aws_cloudwatch_log_metric_filter" "dataset_failed_count" {
-  count          = local.is_ephemeral_env ? 0 : 1
   name           = "${local.metrics_namespace}/messages/count/datasetfailed"
   pattern        = "[datetime, env, java_thread, level = \"ERROR\", java_class, message = \"*Data set failed with an unhandled error*\"]"
   log_group_name = data.aws_cloudwatch_log_group.messages.name
