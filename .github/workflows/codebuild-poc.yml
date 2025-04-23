@@ -33,3 +33,10 @@ jobs:
           echo "::add-mask::$account_num"
           echo "::add-mask::$role_arn"
           echo "::add-mask::$user_id"
+      - name: Internal properties available on this subnet?
+        run: |
+          if curl -s -o /dev/null https://sonarqube.cloud.cms.gov/; then
+            echo 'Reachable :)';
+          else
+            echo 'Unreachable :(';
+          fi
