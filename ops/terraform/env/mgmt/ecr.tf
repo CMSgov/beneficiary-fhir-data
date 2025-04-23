@@ -12,7 +12,7 @@ locals {
     "bfd-mgmt-synthea-generation",
     # base container image repositories
     "bfd-mgmt-base-python",
-    "bfd-mgmt-base-jdk",
+    "bfd-mgmt-base-java",
     "bfd-mgmt-pipeline-idr",
     # sidecar container image repositories
     "bfd-mgmt-mount-certstores",
