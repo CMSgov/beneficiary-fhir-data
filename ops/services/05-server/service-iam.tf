@@ -81,10 +81,14 @@ data "aws_iam_policy_document" "ssm_params" {
       "ssm:GetParameters",
       "ssm:GetParameter"
     ]
-    resources = [
+    resources = flatten([
       for hierarchy in local.server_ssm_hierarchies
-      : "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*"
-    ]
+      : [
+        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*",
+        # TODO: Remove this, and flatten, when "/ng/" prefix is removed from new config
+        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(replace(hierarchy, "/ng/", ""), "/")}/*",
+      ]
+    ])
   }
 
   statement {

@@ -213,7 +213,7 @@
         <!-- May not work properly with Podman due to
         https://github.com/GoogleContainerTools/jib/issues/4134; use suggested override above in
         that case -->
-        <jib.from>docker://bfd-mgmt-base-jdk:${project.version}</jib.from>
+        <jib.from>docker://bfd-mgmt-base-java:${project.version}</jib.from>
         <!--
           The goal to use with the jib plugin.   Override on command line to change behavior:
           dockerBuild: build on local docker only
@@ -1368,7 +1368,7 @@
                 <jib.goal>build</jib.goal>
                 <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
                 <!-- Ensure that the base image is pulled from ECR on release -->
-                <jib.from>${jib.namespace}bfd-mgmt-base-jdk:${project.version}</jib.from>
+                <jib.from>${jib.namespace}bfd-mgmt-base-java:${project.version}</jib.from>
                 <maven.build.cache.enabled>true</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
