@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
 import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.*;
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -32,7 +31,6 @@ import gov.cms.bfd.pipeline.sharedutils.adapters.SamhsaSnfAdapter;
 import gov.cms.bfd.pipeline.sharedutils.model.SamhsaEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
-import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -197,26 +195,28 @@ public class SamhsaUtil {
    * Process a list of codes. Does not use Entities.
    *
    * @param claim The results list.
-   * @param queryColumns The map of column names to their type.
    * @param tableEntry The tableEntry object for this table.
    * @param claimId The claim id for this claim.
    * @param dates If present, contains the active dates for this claim.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
    *     claim has more than one lineitem.
    * @param entityManager The entity manager.
+   * @param columnNames Array with the names of the columns, in order.
+   * @param lineNumPos Line number of the record, if any.
+   * @param samhsaColumnPositions Positions of all of the SAMHSA code columns in the query.
    * @return true if a SAMHSA tag should be created.
    */
   public List<TagDetails> processCodeList(
       Object[] claim,
-      Map<String, AbstractSamhsaBackfill.COLUMN_TYPE> queryColumns,
       TableEntry tableEntry,
       Object claimId,
       Optional<Object[]> dates,
       Map<String, Object[]> datesMap,
-      EntityManager entityManager) {
+      EntityManager entityManager,
+      List<Integer> samhsaColumnPositions,
+      String[] columnNames,
+      int lineNumPos) {
     List<TagDetails> tagDetailsList = new ArrayList<>();
-    List<Integer> samhsaColumnPositions =
-        getColumnPositions(SAMHSA_CODE, queryColumns, false, true);
 
     for (Integer pos : samhsaColumnPositions) {
       String code = (String) claim[pos];
@@ -224,9 +224,9 @@ public class SamhsaUtil {
       if (code == null) {
         continue;
       }
-      String columnName = getColumnNameAtPosition(pos, queryColumns);
 
-      Optional<SamhsaEntry> samhsaEntry = getSamhsaCode(Optional.of(code), Optional.of(columnName));
+      Optional<SamhsaEntry> samhsaEntry =
+          getSamhsaCode(Optional.of(code), Optional.of(columnNames[pos]));
       if (samhsaEntry.isPresent()) {
         Object[] datesObject =
             getDatesObjectsForClaim(tableEntry, claimId, dates, datesMap, entityManager);
@@ -238,11 +238,6 @@ public class SamhsaUtil {
                 .reduce((first, second) -> second)
                 .orElse(Strings.EMPTY);
 
-        int lineNumPos =
-            getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true, false).stream()
-                .findFirst()
-                .orElse(-1);
-
         Optional<Short> lineNum = Optional.empty();
         if (lineNumPos >= 0) {
           lineNum = Optional.of((short) claim[lineNumPos]);
@@ -252,7 +247,7 @@ public class SamhsaUtil {
             TagDetails.builder()
                 .table(tableEntry.getClaimTable())
                 .type(type)
-                .column(columnName)
+                .column(columnNames[pos])
                 .clmLineNum((lineNum.isPresent() ? lineNum.get().intValue() : null))
                 .build();
         tagDetailsList.add(tagDetails);

@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
+import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE;
 import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -80,10 +81,15 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /** Total claims processed in a particular logging interval. */
   @Getter @Setter Long totalProcessedInInterval;
 
-  @Getter @Setter Map<String, COLUMN_TYPE> queryColumns;
-
   /** The query to use. */
   @Getter @Setter String query;
+
+  @Getter @Setter int fromDatePosition;
+  @Getter @Setter int toDatePosition;
+  @Getter @Setter int claimIdPosition;
+  @Getter @Setter List<Integer> samhsaColumnPositions;
+  @Getter @Setter int lineNumPosition;
+  @Getter @Setter String[] columnNames;
 
   /** The column type for a column. */
   public enum COLUMN_TYPE {
@@ -189,17 +195,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Gets a column at a position.
-   *
-   * @param pos The position.
-   * @param queryColumns Map of columns.
-   * @return The column name at this position.
-   */
-  public static String getColumnNameAtPosition(int pos, Map<String, COLUMN_TYPE> queryColumns) {
-    return (String) queryColumns.keySet().toArray()[pos];
-  }
-
-  /**
    * Gets the positions of all columns of the specified type.
    *
    * @param columnType The column type.
@@ -246,21 +241,12 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected int processClaim(
       Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
-    int claimIdPos = getColumnPositions(COLUMN_TYPE.CLAIM_ID, queryColumns, true, true).getFirst();
-    Object claimId = claim[claimIdPos];
+    Object claimId = claim[claimIdPosition];
     Optional<Object[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
-    int fromPos =
-        getColumnPositions(COLUMN_TYPE.DATE_FROM, queryColumns, true, false).stream()
-            .findFirst()
-            .orElse(-1);
-    int toPos =
-        getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true, false).stream()
-            .findFirst()
-            .orElse(-1);
-    if (fromPos >= 0 && toPos >= 0) {
-      dates = Optional.of(new Object[] {claim[fromPos], claim[toPos]});
+    if (fromDatePosition >= 0 && toDatePosition >= 0) {
+      dates = Optional.of(new Object[] {claim[fromDatePosition], claim[toDatePosition]});
     } else if (datesMap.containsKey(claimId.toString())) {
       // The active dates for this claim were previously saved for a different record with the same
       // claim id.
@@ -269,7 +255,15 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Create an array that contains only the SAMHSA codes for this record.
     List<TagDetails> tagDetailsList =
         samhsaUtil.processCodeList(
-            claim, queryColumns, tableEntry, claimId, dates, datesMap, entityManager);
+            claim,
+            tableEntry,
+            claimId,
+            dates,
+            datesMap,
+            entityManager,
+            samhsaColumnPositions,
+            columnNames,
+            lineNumPosition);
     if (!tagDetailsList.isEmpty()) {
       return writeEntry(claimId, tableEntry.getTagTable(), tagDetailsList, entityManager);
     }
@@ -308,7 +302,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     List<String> samhsaColumnOrder = new ArrayList<>();
     samhsaColumnOrder.add(claimField);
     samhsaColumnOrder.addAll(splitColumnCsvToList(columns));
-    queryColumns = markSamhsaColumns(samhsaColumnOrder);
+    Map<String, COLUMN_TYPE> queryColumns = markSamhsaColumns(samhsaColumnOrder);
+    setColumnPositions(queryColumns);
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -323,6 +318,24 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     builder.append(claimField);
     builder.append(" limit :limit"); // limit will be the batch size set in the configuration.
     return builder.toString();
+  }
+
+  private void setColumnPositions(Map<String, AbstractSamhsaBackfill.COLUMN_TYPE> queryColumns) {
+    claimIdPosition = getColumnPositions(COLUMN_TYPE.CLAIM_ID, queryColumns, true, true).getFirst();
+    fromDatePosition =
+        getColumnPositions(COLUMN_TYPE.DATE_FROM, queryColumns, true, false).stream()
+            .findFirst()
+            .orElse(-1);
+    toDatePosition =
+        getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true, false).stream()
+            .findFirst()
+            .orElse(-1);
+    samhsaColumnPositions = getColumnPositions(SAMHSA_CODE, queryColumns, false, true);
+    lineNumPosition =
+        getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true, false).stream()
+            .findFirst()
+            .orElse(-1);
+    columnNames = queryColumns.keySet().toArray(new String[0]);
   }
 
   /**
