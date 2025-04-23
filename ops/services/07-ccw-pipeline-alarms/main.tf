@@ -4,6 +4,7 @@ module "terraservice" {
   environment_name     = terraform.workspace
   service              = "ccw-pipeline-alarms"
   relative_module_root = "ops/services/07-ccw-pipeline-alarms"
+  subnet_layers        = ["app"]
 }
 
 locals {
@@ -23,6 +24,7 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
+  app_subnets              = module.terraservice.subnets_map["app"]
 
   target_service = "ccw-pipeline"
   name_prefix    = "bfd-${local.env}-${local.service}"
