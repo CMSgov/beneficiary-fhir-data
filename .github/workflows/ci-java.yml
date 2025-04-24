@@ -14,6 +14,9 @@ env:
   workflow_files_re: "^apps/(?!bfd-pipeline/bfd-pipeline-idr|bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
   SONAR_PROJECT_KEY: 'bfd-parent'
   SONAR_HOST_URL: 'https://sonarqube.cloud.cms.gov'
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
 
 jobs:
   workflow:
