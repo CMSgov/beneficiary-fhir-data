@@ -2,7 +2,7 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   environment_name     = terraform.workspace
-  relative_module_root = "ops/services/cluster"
+  relative_module_root = "ops/services/03-cluster"
   service              = local.service
 
   additional_tags = {
