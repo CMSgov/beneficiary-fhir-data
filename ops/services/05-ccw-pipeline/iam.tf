@@ -83,26 +83,6 @@ resource "aws_iam_policy" "ccw_ssm_params" {
   policy      = data.aws_iam_policy_document.ccw_ssm_params.json
 }
 
-data "aws_iam_policy_document" "ccw_ecs_exec" {
-  statement {
-    sid = "AllowECSExec"
-    actions = [
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:CreateControlChannel"
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "ccw_ecs_exec" {
-  name        = "${local.name_prefix}-ecs-exec-policy"
-  path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.service} ECS task containers to use ECS Exec"
-  policy      = data.aws_iam_policy_document.ccw_ecs_exec.json
-}
-
 data "aws_iam_policy_document" "ccw_metrics" {
   statement {
     sid       = "AllowCloudWatchPutMetricsInPipelineNamespace"
@@ -138,7 +118,6 @@ resource "aws_iam_role_policy_attachment" "ccw_task" {
     s3         = aws_iam_policy.ccw_s3.arn
     kms        = aws_iam_policy.ccw_kms.arn
     ssm_params = aws_iam_policy.ccw_ssm_params.arn
-    ecs_exec   = aws_iam_policy.ccw_ecs_exec.arn
     metrics    = aws_iam_policy.ccw_metrics.arn
   }
 
