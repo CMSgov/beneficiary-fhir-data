@@ -14,9 +14,7 @@ env:
   workflow_files_re: "^apps/(?!bfd-pipeline/bfd-pipeline-idr|bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
   SONAR_PROJECT_KEY: 'bfd-parent'
   SONAR_HOST_URL: 'https://sonarqube.cloud.cms.gov'
-permissions:
-  id-token: write # This is required for requesting the AWS IAM OIDC JWT
-  contents: write # This is required for actions/checkout
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   workflow:
@@ -100,32 +98,6 @@ jobs:
           java-version: '21'
           distribution: 'corretto'
           cache: 'maven'
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: ci-java-upload-sonarqube-artifacts
-          aws-region: us-east-1 #FIXME
-
-      - name: Mask sensitive AWS data
-        run: |
-          caller_id="$(aws sts get-caller-identity)"
-          account_num="$(jq -r '.Account' <<<$caller_id)"
-          role_arn="$(jq -r '.Arn' <<<$caller_id)"
-          user_id="$(jq -r '.UserId' <<<$caller_id)"
-
-          echo "::add-mask::$account_num"
-          echo "::add-mask::$role_arn"
-          echo "::add-mask::$user_id"
-
-      - name: Fetch SonarQube Access Key
-        run: |
-          SONAR_TOKEN="$(aws ssm get-parameter \
-          --name '/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key' \
-          --with-decryption --query Parameter.Value --output text)"
-          echo "$SONAR_TOKEN" >> $GITHUB_ENV
-          echo "::add-mask::$SONAR_TOKEN"
 
       - name: Upload SonarQube Coverage Reports
         # This will expand into ./apps
