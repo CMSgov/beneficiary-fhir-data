@@ -98,6 +98,13 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
+          role-session-name: ci-java-upload-sonarqube-artifacts
+          aws-region: ${{ inputs.awsRegion }}
+
       - name: Fetch SonarQube Access Key
         run: |
           SONAR_TOKEN="$(aws ssm get-parameter \
