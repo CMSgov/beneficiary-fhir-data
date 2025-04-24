@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
 import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.BackfillProgress;
@@ -16,15 +15,12 @@ import jakarta.persistence.Tuple;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.text.StringSubstitutor;
@@ -87,8 +83,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   @Getter @Setter List<String> nonCodeFields;
 
-  ObjectMapper objectMapper;
-
   /**
    * Constructor.
    *
@@ -111,7 +105,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     this.batchSize = batchSize;
     this.tableEntry = tableEntry;
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
-    objectMapper = new ObjectMapper();
   }
 
   /**
@@ -234,9 +227,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected String buildQueryStringTemplate(String table, String claimField, String... columns) {
     String concatColumns = String.join(", ", columns);
-    List<String> samhsaColumnOrder = new ArrayList<>();
-    samhsaColumnOrder.add(claimField);
-    samhsaColumnOrder.addAll(splitColumnCsvToList(columns));
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -251,23 +241,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     builder.append(claimField);
     builder.append(" limit :limit"); // limit will be the batch size set in the configuration.
     return builder.toString();
-  }
-
-  /**
-   * The columns come in as a list of strings, some of which may be a comma separated list of
-   * columns. This is due to the way the enumerateColumns method builds the list of columns.
-   *
-   * @param columns An array containing the columns.
-   * @return a list of the columns.
-   */
-  private List<String> splitColumnCsvToList(String[] columns) {
-    List columnsList = new ArrayList();
-    for (String column : columns) {
-      List newColumns =
-          Arrays.stream(column.split(",")).map(String::trim).collect(Collectors.toList());
-      columnsList.addAll(newColumns);
-    }
-    return columnsList;
   }
 
   /**
