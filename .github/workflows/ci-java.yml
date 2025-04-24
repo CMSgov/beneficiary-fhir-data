@@ -124,8 +124,8 @@ jobs:
           SONAR_TOKEN="$(aws ssm get-parameter \
           --name '/bfd/mgmt/common/sensitive/service_accounts/sonar/service_account_access_key' \
           --with-decryption --query Parameter.Value --output text)"
+          echo "$SONAR_TOKEN" >> $GITHUB_ENV
           echo "::add-mask::$SONAR_TOKEN"
-          echo $SONAR_TOKEN >> $GITHUB_ENV
 
       - name: Upload SonarQube Coverage Reports
         # This will expand into ./apps
