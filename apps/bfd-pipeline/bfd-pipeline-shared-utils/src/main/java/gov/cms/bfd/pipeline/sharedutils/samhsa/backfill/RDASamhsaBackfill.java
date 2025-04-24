@@ -4,6 +4,8 @@ import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import java.util.List;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,24 +50,6 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
   /** Columns for fiss_proc_codes. */
   private String[] FISS_PROC_SAMHSA_COLUMNS = new String[] {RDA_POSITION, "proc_code"};
 
-  @Override
-  COLUMN_TYPE getEntryType(String entry) {
-    switch (entry) {
-      case RDA_POSITION:
-      case IDR_DTL_NUM:
-        return COLUMN_TYPE.LINE_NUM;
-      case FISS_FROM_DATE:
-        return COLUMN_TYPE.DATE_FROM;
-      case FISS_TO_DATE:
-        return COLUMN_TYPE.DATE_TO;
-      case FISS_CLAIM_ID_FIELD:
-      case MCS_CLAIM_ID_FIELD:
-        return COLUMN_TYPE.CLAIM_ID;
-      default:
-        return COLUMN_TYPE.SAMHSA_CODE;
-    }
-  }
-
   /** The list of table entries for RDA claims. */
   public enum RDA_TABLES {
     /** Fiss Claims. */
@@ -74,6 +58,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
+            FISS_FROM_DATE,
+            FISS_TO_DATE,
+            Strings.EMPTY,
             "rda.fiss_claims",
             "rda.fiss_claims", // Should not be used, since is already a parent table. Included out
             // of an abundance of caution.
@@ -84,6 +71,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            RDA_POSITION,
             "rda.fiss_proc_codes",
             "rda.fiss_claims",
             true)),
@@ -93,6 +83,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            RDA_POSITION,
             "rda.fiss_diagnosis_codes",
             "rda.fiss_claims",
             true)),
@@ -102,6 +95,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES_FISS,
             "rda.fiss_tags",
             FISS_CLAIM_ID_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            RDA_POSITION,
             "rda.fiss_revenue_lines",
             "rda.fiss_claims",
             true)),
@@ -112,6 +108,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES_MCS,
             "rda.mcs_tags",
             MCS_CLAIM_ID_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            RDA_POSITION,
             "rda.mcs_diagnosis_codes",
             "rda.mcs_claims",
             true)),
@@ -121,6 +120,9 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES_MCS,
             "rda.mcs_tags",
             MCS_CLAIM_ID_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            IDR_DTL_NUM,
             "rda.mcs_details",
             "rda.mcs_claims",
             true));
@@ -162,6 +164,14 @@ public class RDASamhsaBackfill extends AbstractSamhsaBackfill {
       RDA_TABLES tableEntry) {
     super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
     query = getQueryByTableEntry(tableEntry);
+    nonCodeFields =
+        List.of(
+            RDA_POSITION,
+            IDR_DTL_NUM,
+            MCS_CLAIM_ID_FIELD,
+            FISS_CLAIM_ID_FIELD,
+            FISS_FROM_DATE,
+            FISS_TO_DATE);
   }
 
   /** {@inheritDoc} */

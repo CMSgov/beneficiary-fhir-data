@@ -5,8 +5,8 @@ public class QueryConstants {
   /** Upsert query for tags. */
   public static final String TAG_UPSERT_QUERY =
       """
-      INSERT INTO ${tagTable} (code, clm_id, details)
-      VALUES (:code, :claimId, :details)
+      INSERT INTO ${tagTable} (code, clm_id)
+      VALUES (:code, :claimId)
       ON CONFLICT (code, clm_id) DO NOTHING;
       """;
 

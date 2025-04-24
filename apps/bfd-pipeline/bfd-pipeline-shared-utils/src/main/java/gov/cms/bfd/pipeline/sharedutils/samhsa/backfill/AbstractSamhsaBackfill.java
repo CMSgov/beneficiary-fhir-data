@@ -1,27 +1,24 @@
 package gov.cms.bfd.pipeline.sharedutils.samhsa.backfill;
 
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.COLUMN_TYPE.SAMHSA_CODE;
 import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.BackfillProgress;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
-import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import gov.cms.bfd.sharedutils.TagCode;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,26 +81,13 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   /** The query to use. */
   @Getter @Setter String query;
 
-  @Getter @Setter int fromDatePosition;
-  @Getter @Setter int toDatePosition;
-  @Getter @Setter int claimIdPosition;
-  @Getter @Setter List<Integer> samhsaColumnPositions;
-  @Getter @Setter int lineNumPosition;
-  @Getter @Setter String[] columnNames;
+  /**
+   * Contains a list of all the non-SAMHSA code fields. This will allow them to be skipped when
+   * checking the result set for SAMHSA codes.
+   */
+  @Getter @Setter List<String> nonCodeFields;
 
-  /** The column type for a column. */
-  public enum COLUMN_TYPE {
-    /** From date column type. */
-    DATE_FROM,
-    /** To date column type. */
-    DATE_TO,
-    /** Line num column type. */
-    LINE_NUM,
-    /** Claim ID column type. */
-    CLAIM_ID,
-    /** SAMHSA code column type. */
-    SAMHSA_CODE
-  }
+  ObjectMapper objectMapper;
 
   /**
    * Constructor.
@@ -127,6 +111,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     this.batchSize = batchSize;
     this.tableEntry = tableEntry;
     samhsaUtil = SamhsaUtil.getSamhsaUtil();
+    objectMapper = new ObjectMapper();
   }
 
   /**
@@ -135,7 +120,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param query The query to execute.
    * @return a list of claims.
    */
-  private List<Object[]> executeQuery(Query query) {
+  private List<Tuple> executeQuery(Query query) {
     return query.getResultList();
   }
 
@@ -165,10 +150,10 @@ public abstract class AbstractSamhsaBackfill implements Callable {
             tableEntry.getClaimField());
     strSub = new StringSubstitutor(params);
     String queryStr = strSub.replace(getQuery());
-    Query query = entityManager.createNativeQuery(queryStr);
-    startingClaim.ifPresent(s -> query.setParameter("startingClaim", convertClaimId(s)));
-    query.setParameter("limit", limit);
-    return query;
+    Query claimQuery = entityManager.createNativeQuery(queryStr, Tuple.class);
+    startingClaim.ifPresent(s -> claimQuery.setParameter("startingClaim", convertClaimId(s)));
+    claimQuery.setParameter("limit", limit);
+    return claimQuery;
   }
 
   /**
@@ -195,39 +180,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   /**
-   * Gets the positions of all columns of the specified type.
-   *
-   * @param columnType The column type.
-   * @param queryColumns Map of columns to their types.
-   * @param uniqueColumnType True if there should only be one column of this type.
-   * @param required True if there is required to be at least one column of this type.
-   * @return The List of column positions.
-   */
-  public static List<Integer> getColumnPositions(
-      COLUMN_TYPE columnType,
-      Map<String, COLUMN_TYPE> queryColumns,
-      boolean uniqueColumnType,
-      boolean required) {
-    List<Integer> results = new ArrayList<>();
-    int i = 0;
-    for (Map.Entry<String, COLUMN_TYPE> entry : queryColumns.entrySet()) {
-      if (entry.getValue().equals(columnType)) {
-        results.add(i);
-      }
-      i++;
-    }
-    if (uniqueColumnType && results.size() > 1) {
-      throw new BadCodeMonkeyException(
-          String.format(
-              "Query should have a single column for %s, but it has multiple.", columnType.name()));
-    } else if (required && results.isEmpty()) {
-      throw new BadCodeMonkeyException(
-          String.format("Query should have a column for %s, but does not.", columnType.name()));
-    }
-    return results;
-  }
-
-  /**
    * Processes a claim with SamhsaUtil to check for SAMHSA codes. Does not use Entities, instead
    * using the positions in the array to determine the column type. This obviously relies on the
    * queries being constructed in a particular way, so it's not ideal -- but, since it does not have
@@ -240,52 +192,35 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return The total number of tags saved.
    */
   protected int processClaim(
-      Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
-    Object claimId = claim[claimIdPosition];
+      Tuple claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
+    Object claimId = claim.get(tableEntry.getClaimField());
     Optional<Object[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
-    if (fromDatePosition >= 0 && toDatePosition >= 0) {
-      dates = Optional.of(new Object[] {claim[fromDatePosition], claim[toDatePosition]});
+    if (!tableEntry.getLineItem()) {
+      try {
+        dates =
+            Optional.of(
+                new Object[] {
+                  claim.get(tableEntry.getFromDateField()), claim.get(tableEntry.getToDateField())
+                });
+      } catch (Exception e) {
+        throw new BadCodeMonkeyException(
+            "Query should have a column for from date and to date, but does not.");
+      }
     } else if (datesMap.containsKey(claimId.toString())) {
       // The active dates for this claim were previously saved for a different record with the same
       // claim id.
       dates = Optional.of(datesMap.get(claimId.toString()));
     }
-    // Create an array that contains only the SAMHSA codes for this record.
-    List<TagDetails> tagDetailsList =
+    // Check for valid SAMHSA codes in this claim.
+    boolean hasSamhsaCode =
         samhsaUtil.processCodeList(
-            claim,
-            tableEntry,
-            claimId,
-            dates,
-            datesMap,
-            entityManager,
-            samhsaColumnPositions,
-            columnNames,
-            lineNumPosition);
-    if (!tagDetailsList.isEmpty()) {
-      return writeEntry(claimId, tableEntry.getTagTable(), tagDetailsList, entityManager);
+            claim, tableEntry, dates, datesMap, nonCodeFields, entityManager);
+    if (hasSamhsaCode) {
+      return writeEntry(claimId, tableEntry.getTagTable(), entityManager);
     }
     return 0;
-  }
-
-  abstract COLUMN_TYPE getEntryType(String entry);
-
-  /**
-   * Puts the columns in a map, along with an enum describing their purpose.
-   *
-   * @param columns The list of columns, in order.
-   * @return a map containing the columns mapped to their purpose.
-   */
-  Map<String, COLUMN_TYPE> markSamhsaColumns(List<String> columns) {
-    // Must be a LinkedHashMap here, to preserve the order.
-    HashMap<String, COLUMN_TYPE> map = new LinkedHashMap<>();
-
-    for (String column : columns) {
-      map.put(column, getEntryType(column));
-    }
-    return map;
   }
 
   /**
@@ -302,8 +237,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     List<String> samhsaColumnOrder = new ArrayList<>();
     samhsaColumnOrder.add(claimField);
     samhsaColumnOrder.addAll(splitColumnCsvToList(columns));
-    Map<String, COLUMN_TYPE> queryColumns = markSamhsaColumns(samhsaColumnOrder);
-    setColumnPositions(queryColumns);
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -318,24 +251,6 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     builder.append(claimField);
     builder.append(" limit :limit"); // limit will be the batch size set in the configuration.
     return builder.toString();
-  }
-
-  private void setColumnPositions(Map<String, AbstractSamhsaBackfill.COLUMN_TYPE> queryColumns) {
-    claimIdPosition = getColumnPositions(COLUMN_TYPE.CLAIM_ID, queryColumns, true, true).getFirst();
-    fromDatePosition =
-        getColumnPositions(COLUMN_TYPE.DATE_FROM, queryColumns, true, false).stream()
-            .findFirst()
-            .orElse(-1);
-    toDatePosition =
-        getColumnPositions(COLUMN_TYPE.DATE_TO, queryColumns, true, false).stream()
-            .findFirst()
-            .orElse(-1);
-    samhsaColumnPositions = getColumnPositions(SAMHSA_CODE, queryColumns, false, true);
-    lineNumPosition =
-        getColumnPositions(COLUMN_TYPE.LINE_NUM, queryColumns, true, false).stream()
-            .findFirst()
-            .orElse(-1);
-    columnNames = queryColumns.keySet().toArray(new String[0]);
   }
 
   /**
@@ -362,14 +277,14 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   void executeQueryLoop(EntityManager entityManager) {
     Query query = buildQuery(getLastClaimId(), getTableEntry(), getBatchSize(), entityManager);
-    List<Object[]> claims = executeQuery(query);
+    List<Tuple> claims = executeQuery(query);
     int savedInBatch = 0;
     // This Map will allow us to save the active dates for a claim to be used in multiple
     // records with the same claim id.
     HashMap<String, Object[]> datesMap = new HashMap<>();
     // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
     // codes. */
-    for (Object[] claim : claims) {
+    for (Tuple claim : claims) {
       savedInBatch += processClaim(claim, datesMap, entityManager);
     }
     incrementTotalSaved(savedInBatch);
@@ -378,7 +293,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Checks if a progress message should be logged.
     checkTimeIntervalForLogging();
     setLastClaimId(
-        !claims.isEmpty() ? Optional.of(String.valueOf(claims.getLast()[0])) : Optional.empty());
+        !claims.isEmpty()
+            ? Optional.of(String.valueOf(claims.getLast().get(tableEntry.getClaimField())))
+            : Optional.empty());
     // Write progress to the progress table, so that we can restart at the last processed
     // claim id if interrupted.
     saveProgress(
@@ -494,26 +411,16 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    *
    * @param claimId claim id -- Could be a Long or a String.
    * @param table tag table to use.
-   * @param detailsList List containing TagDetails for this claim.
    * @param entityManager The entity manager.
    * @return the total number of records saved.
    */
-  protected int writeEntry(
-      Object claimId, String table, List<TagDetails> detailsList, EntityManager entityManager) {
-    ObjectMapper mapper = new ObjectMapper();
-    String detailsJson;
-    try {
-      detailsJson = mapper.writeValueAsString(detailsList);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+  protected int writeEntry(Object claimId, String table, EntityManager entityManager) {
     Map<String, String> params = Map.of("tagTable", table);
     StringSubstitutor strSub = new StringSubstitutor(params);
     String queryStr = strSub.replace(TAG_UPSERT_QUERY);
     Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("code", TagCode.R.toString());
     query.setParameter("claimId", claimId);
-    query.setParameter("details", detailsJson);
     int total = query.executeUpdate();
     query.setParameter("code", TagCode._42CFRPart2.toString());
     total += query.executeUpdate();

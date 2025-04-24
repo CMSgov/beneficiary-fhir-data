@@ -4,6 +4,8 @@ import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.QueryConstants.*;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
+import java.util.List;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,22 +75,6 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
   /** The Logger. */
   static final Logger LOGGER = LoggerFactory.getLogger(CCWSamhsaBackfill.class);
 
-  COLUMN_TYPE getEntryType(String entry) {
-    switch (entry) {
-      case LINE_NUM_FIELD:
-      case CARRIER_DME_LINE_NUM_FIELD:
-        return COLUMN_TYPE.LINE_NUM;
-      case CLAIM_FROM_DATE:
-        return COLUMN_TYPE.DATE_FROM;
-      case CLAIM_THRU_DATE:
-        return COLUMN_TYPE.DATE_TO;
-      case CLAIM_FIELD:
-        return COLUMN_TYPE.CLAIM_ID;
-      default:
-        return COLUMN_TYPE.SAMHSA_CODE;
-    }
-  }
-
   /**
    * The list of table entries for CCW claims. This is mostly used in building the queries for the
    * tables.
@@ -100,6 +86,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.carrier_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.carrier_claims",
             "ccw.carrier_claims", // Should not be used, since is already a parent table. Included
             // out of an abundance of caution.
@@ -110,6 +99,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.carrier_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            CARRIER_DME_LINE_NUM_FIELD,
             "ccw.carrier_claim_lines",
             "ccw.carrier_claims",
             true)),
@@ -120,6 +112,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.dme_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.dme_claims",
             "ccw.dme_claims", // Should not be used, since is already a parent table. Included out
             // of an abundance of caution.
@@ -130,6 +125,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.dme_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            CARRIER_DME_LINE_NUM_FIELD,
             "ccw.dme_claim_lines",
             "ccw.dme_claims",
             true)),
@@ -139,6 +137,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.hha_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.hha_claims",
             "ccw.hha_claims", // Should not be used, since is already a parent table. Included out
             // of an abundance of caution.
@@ -149,6 +150,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.hha_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            LINE_NUM_FIELD,
             "ccw.hha_claim_lines",
             "ccw.hha_claims",
             true)),
@@ -158,6 +162,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.hospice_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.hospice_claims",
             "ccw.hospice_claims", // Should not be used, since is already a parent table. Included
             // out of an abundance of caution.
@@ -168,6 +175,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.hospice_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            LINE_NUM_FIELD,
             "ccw.hospice_claim_lines",
             "ccw.hospice_claims",
             true)),
@@ -177,6 +187,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.inpatient_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.inpatient_claims",
             "ccw.inpatient_claims", // Should not be used, since is already a parent table. Included
             // out of an abundance of caution.
@@ -187,6 +200,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.inpatient_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            LINE_NUM_FIELD,
             "ccw.inpatient_claim_lines",
             "ccw.inpatient_claims",
             true)),
@@ -196,6 +212,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.outpatient_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.outpatient_claims",
             "ccw.outpatient_claims", // Should not be used, since is already a parent table.
             // Included out of an abundance of caution.
@@ -206,6 +225,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.outpatient_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            LINE_NUM_FIELD,
             "ccw.outpatient_claim_lines",
             "ccw.outpatient_claims",
             true)),
@@ -215,6 +237,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.snf_tags",
             CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE,
+            Strings.EMPTY,
             "ccw.snf_claims",
             "ccw.snf_claims", // Should not be used, since is already a parent table. Included out
             // of an abundance of caution.
@@ -225,6 +250,9 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
             GET_CLAIM_DATES,
             "ccw.snf_tags",
             CLAIM_FIELD,
+            Strings.EMPTY,
+            Strings.EMPTY,
+            LINE_NUM_FIELD,
             "ccw.snf_claim_lines",
             "ccw.snf_claims",
             true));
@@ -266,6 +294,13 @@ public class CCWSamhsaBackfill extends AbstractSamhsaBackfill {
       CCW_TABLES tableEntry) {
     super(transactionManager, batchSize, LOGGER, logInterval, tableEntry.getEntry());
     query = getQueryByTableEntry(tableEntry);
+    nonCodeFields =
+        List.of(
+            LINE_NUM_FIELD,
+            CARRIER_DME_LINE_NUM_FIELD,
+            CLAIM_FIELD,
+            CLAIM_FROM_DATE,
+            CLAIM_THRU_DATE);
   }
 
   /**
