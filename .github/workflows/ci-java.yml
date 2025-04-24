@@ -103,7 +103,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
           role-session-name: ci-java-upload-sonarqube-artifacts
-          aws-region: ${{ inputs.awsRegion }}
+          aws-region: us-east-1 #FIXME
 
       - name: Mask sensitive AWS data
         run: |
