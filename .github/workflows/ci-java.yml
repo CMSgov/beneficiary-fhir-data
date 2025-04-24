@@ -108,6 +108,7 @@ jobs:
             -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
             -Dsonar.host.url="$SONAR_HOST_URL" \
             -Dsonar.login="$SONAR_TOKEN" \
+            -Dsonar.ci.autoconfig.disabled=true \
             -Dmaven.build.cache.enabled=true \
             -DskipITs \
             -DskipTests \
