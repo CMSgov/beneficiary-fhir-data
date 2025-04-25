@@ -52,7 +52,6 @@
         <module>bfd-server-openapi</module>
         <module>bfd-server-ng</module>
         <module>bfd-db-migrator</module>
-        <module>bfd-ops</module>
     </modules>
 
     <properties>
@@ -229,9 +228,6 @@
 
         <!-- Skip by default.  Override to let open api documents be generated. -->
         <apidocgen.skip>true</apidocgen.skip>
-
-        <!-- Skip by default.  Override to let bfd-ops be generated. -->
-        <bfdOps.skip>true</bfdOps.skip>
 
         <!-- maven plugin versions -->
         <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
@@ -1358,7 +1354,6 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <apidocgen.skip>false</apidocgen.skip>
-                <bfdOps.skip>true</bfdOps.skip>
             </properties>
         </profile>
         <profile>
@@ -1375,7 +1370,6 @@
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <apidocgen.skip>false</apidocgen.skip>
-                <bfdOps.skip>false</bfdOps.skip>
             </properties>
             <distributionManagement>
                 <repository>
