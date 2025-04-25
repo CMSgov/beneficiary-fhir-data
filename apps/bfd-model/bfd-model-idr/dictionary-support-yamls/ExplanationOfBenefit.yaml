@@ -1,68 +1,68 @@
-- inputPath: ExplanationOfBenefitBase.CLM_UNIQ_ID
+- inputPath: ExplanationOfBenefit-Base.CLM_UNIQ_ID
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_FINL_ACTN_IND
+- inputPath: ExplanationOfBenefit-Base.CLM_FINL_ACTN_IND
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_TYPE_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_TYPE_CD
-- inputPath: ExplanationOfBenefitBase.CLM_CNTL_NUM
+- inputPath: ExplanationOfBenefit-Base.CLM_CNTL_NUM
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_BENE_XREF_EFCTV_SK
+- inputPath: ExplanationOfBenefit-Base.CLM_BENE_XREF_EFCTV_SK
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_FROM_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_FROM_DT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_THRU_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_THRU_DT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_EFCTV_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_EFCTV_DT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_SRC_ID
+- inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
   referenceTable: CLM_SRC_ID
-- inputPath: ExplanationOfBenefitBase.PRVDR_BLG_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.PRVDR_BLG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_QUERY_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_QUERY_CD
-- inputPath: ExplanationOfBenefitBase.CLM_NCVRD_CHRG_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_MDCR_DDCTBL_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_MDCR_DDCTBL_AMT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_NRLN_RIC_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_NRLN_RIC_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_NRLN_RIC_CD
-- inputPath: ExplanationOfBenefitBase.CLM_OPRTNL_DSPRTNT_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_CMS_PROC_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_PMT_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_PMT_AMT
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.family_name_atndg
+- inputPath: ExplanationOfBenefit-Base.family_name_atndg
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_ATNDG_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.CLM_ATNDG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.family_name_oprtg
+- inputPath: ExplanationOfBenefit-Base.family_name_oprtg
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefitBase.CLM_OPRTG_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.CLM_OPRTG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
 - inputPath: DiagnosisComponent.CLM_VAL_SQNC_NUM
