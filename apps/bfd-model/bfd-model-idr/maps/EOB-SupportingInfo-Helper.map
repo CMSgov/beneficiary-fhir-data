@@ -44,17 +44,9 @@ group addPointOfOrigin(source src: SupportingInfoComponent, target tgt: Backbone
     } "set category";
 
     //https://www.nubc.org/CodeSystem/PointOfOrigin
-    src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.CLM_ADMSN_SRC_CD as val -> tgtCoding.code = val, 
-            tgtCoding.system = "https://www.nubc.org/CodeSystem/PointOfOrigin" "Set coding";
-        } "Add coding #1";
-    } "Add CC";
-    src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.CLM_ADMSN_SRC_CD as val -> tgtCoding.code = val, 
-            tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD" "Set coding";
-        } "Add coding #2";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_ADMSN_SRC_CD as val -> tgtCC.coding = c("https://www.nubc.org/CodeSystem/PointOfOrigin", val) "Add coding";
+        src.CLM_ADMSN_SRC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD", val) "Add coding";
     } "Add CC";
 }
 //code
@@ -63,10 +55,7 @@ group addMSDRG(source src: SupportingInfoComponent, target tgt: BackboneElement)
         src -> tgtCC.coding = translate("DGNS_DRG_CD",'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.DGNS_DRG_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software" "Set coding";
-        } "Add coding ";
+        src.DGNS_DRG_CD as val -> tgtCC.coding = c("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software", val) "Add coding";
     } "Add CC";
 }
 //code
@@ -75,18 +64,8 @@ group addDischargeStatus(source src: SupportingInfoComponent, target tgt: Backbo
         src -> tgtCC.coding = translate("BENE_PTNT_STUS_CD",'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.BENE_PTNT_STUS_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://www.nubc.org/CodeSystem/PatDischargeStatus" "Set coding";
-        } "Add coding #1";
-    } "Add CC";
-
-    //Note, we need to host this one. From table BENE_PTNT_STUS_CD. 
-    src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.BENE_PTNT_STUS_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD" "Set coding";
-        } "Add coding #2";
+        src.BENE_PTNT_STUS_CD as val -> tgtCC.coding = c("https://www.nubc.org/CodeSystem/PatDischargeStatus",val) "Add coding";
+        src.BENE_PTNT_STUS_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD",val) "Add coding";
     } "Add CC";
 }
 //code
@@ -96,32 +75,16 @@ group addAdmitType(source src: SupportingInfoComponent, target tgt: BackboneElem
     } "set category";
 
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.CLM_ADMSN_TYPE_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit" "Set coding";
-        } "Add coding #1";
-    } "Add CC";
-
-    src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.CLM_ADMSN_TYPE_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD" "Set coding";
-        } "Add coding #2";
+        src.CLM_ADMSN_TYPE_CD as val -> tgtCC.coding = c("https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit",val) "Add coding";
+        src.CLM_ADMSN_TYPE_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD",val) "Add coding";
     } "Add CC";
 }
 //value
 group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_BLOOD_PT_FRNSH_QTY" "set target coding"; 
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BLOOD_PT_FRNSH_QTY") "Add Coding";
+    } "Add category";
     src -> tgt.value = create('SimpleQuantity') as tgtQuantity then {
         src.CLM_BLOOD_PT_FRNSH_QTY as val -> tgtQuantity.value = cast(val,"decimal") "Set value";
         src -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
@@ -132,133 +95,74 @@ group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: Ba
 //code
 group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_MDCR_INSTNL_MCO_PD_SW" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_MDCR_INSTNL_MCO_PD_SW") "Add Coding";
+    } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.CLM_MDCR_INSTNL_MCO_PD_SW as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW" "Set coding";
-        } "Add coding";
+        src.CLM_MDCR_INSTNL_MCO_PD_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW",val) "Add coding";
     } "Add CC";
 }
 //code
 group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_MDCR_NCH_PTNT_STUS_IND_CD" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_MDCR_NCH_PTNT_STUS_IND_CD") "Add Coding";
+    } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.CLM_MDCR_NCH_PTNT_STUS_IND_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD" "Set coding";
-        } "Add coding";
+        src.CLM_MDCR_NCH_PTNT_STUS_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD", val) "Add coding";
     } "Add CC";
 }
 group addProcessingDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_NCH_WKLY_PROC_DT" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NCH_WKLY_PROC_DT") "Add Coding";
+    } "Add category";
     src.CLM_NCH_WKLY_PROC_DT as val -> tgt.timing = cast(val, 'date') "Add value";
 
 }
 //timingDate
 group addNCHThroughDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_ACTV_CARE_THRU_DT" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_ACTV_CARE_THRU_DT") "Add Coding";
+    } "Add category";
     src.CLM_ACTV_CARE_THRU_DT as val -> tgt.timing = cast(val, 'date') "Add value";
 
 }
 //timingDate
 group addNCStayFromDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_NCVRD_FROM_DT" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NCVRD_FROM_DT") "Add Coding";
+    } "Add category";
     src.CLM_NCVRD_FROM_DT as val -> tgt.timing = cast(val, 'date') "Add value";
 }
 //timingDate
 group addNCStayToDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_NCVRD_THRU_DT" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NCVRD_THRU_DT") "Add Coding";
+    } "Add category";
     src.CLM_NCVRD_THRU_DT as val -> tgt.timing = cast(val, 'date') "add value";
 }
 //timingDate
 group addBenefitsExhaustedDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        tgtCoding.code = "info",
-        tgtCoding.display = "Information" "Set target coding";
-    } "set category";
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        tgtCoding.code = "CLM_MDCR_EXHSTD_DT" "set target coding";
-    } "set category";
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_MDCR_EXHSTD_DT") "Add Coding";
+    } "Add category";
     src.CLM_MDCR_EXHSTD_DT as val -> tgt.timing = cast(val, 'date') "add date";
 }
-//code
+//code. It will be interesting to see the response here on how these are represented. We may eschew 
 group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = translate("TYPE_OF_BILL_CD",'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
-    
-    src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src.TYPE_OF_BILL_CD as val -> tgtCoding.code=val, 
-            tgtCoding.system = "https://www.nubc.org/CodeSystem/TypeOfBill" "Set coding";
-        } "Add coding #1";
-    } "Add CC";
+
+    src.TYPE_OF_BILL_CD as val -> tgt.code = cc("https://www.nubc.org/CodeSystem/TypeOfBill",val) "Add CC";
 
     //This field is actually a combination of multiple fields, so we need to isolate those.
+    //cc macro won't work with %evaluate
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
             src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,1)), 
@@ -266,6 +170,7 @@ group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneEle
             tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD" "Set coding";
         } "Add coding #2";
     } "Add CC";
+    
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
             //This must be a concatenation to work. The meaning of the classification type code is dependent upon the facility type code. So we concatenate them.

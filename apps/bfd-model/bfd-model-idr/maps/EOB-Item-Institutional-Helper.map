@@ -41,7 +41,6 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Add state";
     
     src.REV_CNTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
-
 }
 
 group addMoney(source src: String, target tgt: Money){
@@ -178,7 +177,6 @@ group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
         src -> tgtCoding.code = revCtrCode "set rev center code";
     } "Add revenue center coding";
 
-    //https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd
     src.CLM_DDCTBL_COINSRNC_CD as ddctblCd -> tgt.coding = create('Coding') as tgtCoding then {
         src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD" "set system";
         src -> tgtCoding.code = ddctblCd "set deductible/coinsurance code";
