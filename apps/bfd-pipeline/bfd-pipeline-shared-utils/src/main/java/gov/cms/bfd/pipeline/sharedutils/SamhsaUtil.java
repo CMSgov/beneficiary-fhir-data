@@ -285,11 +285,12 @@ public class SamhsaUtil {
 
   private static SamhsaEntry getEntryForCode(String columnName, String code) {
     List<String> columnSystems = getSystemsForColumn(columnName);
-    List<SamhsaEntry> entryList = new ArrayList<>();
-    // Get all the entries for the systems that this code may belong to
-    columnSystems.forEach(system -> entryList.addAll(samhsaMap.get(system)));
     // Get the entry that this code belongs to by filtering
-    return entryList.stream().filter(e -> e.getCode().equals(code)).findFirst().orElse(null);
+    return columnSystems.stream()
+        .flatMap(c -> samhsaMap.get(c).stream())
+        .filter(e -> e.getCode().equals(code))
+        .findFirst()
+        .orElse(null);
   }
 
   /**
