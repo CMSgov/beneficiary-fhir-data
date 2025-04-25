@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
-import static gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.AbstractSamhsaBackfill.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
@@ -266,7 +264,7 @@ public class SamhsaUtil {
             : ((Date) datesObject[0]).toLocalDate();
     LocalDate coverageEndDate =
         datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
-    getStartEndDateForCode result = getGetStartEndDateForCode(entry);
+    CodeDateRange result = getGetStartEndDateForCode(entry);
 
     // if the throughDate is not between the start and end date,
     // and the serviceDate is not between the start and end date,
@@ -275,17 +273,17 @@ public class SamhsaUtil {
         && isDateOutsideOfRange(result.startDate(), result.endDate(), coverageStartDate);
   }
 
-  private static getStartEndDateForCode getGetStartEndDateForCode(SamhsaEntry entry) {
+  private static CodeDateRange getGetStartEndDateForCode(SamhsaEntry entry) {
     LocalDate startDate = LocalDate.parse(entry.getStartDate());
     LocalDate endDate =
         entry.getEndDate().equalsIgnoreCase("Active")
             ? LocalDate.MAX
             : LocalDate.parse(entry.getEndDate());
-    getStartEndDateForCode result = new getStartEndDateForCode(startDate, endDate);
+    CodeDateRange result = new CodeDateRange(startDate, endDate);
     return result;
   }
 
-  private record getStartEndDateForCode(LocalDate startDate, LocalDate endDate) {}
+  private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
 
   private static SamhsaEntry getEntryForCode(String columnName, String code) {
     List<String> columnSystems = getSystemsForColumn(columnName);
@@ -526,7 +524,7 @@ public class SamhsaUtil {
       LocalDate throughDate) {
     if (entry.isPresent()) {
       try {
-        getStartEndDateForCode result = getGetStartEndDateForCode(entry.get());
+        CodeDateRange result = getGetStartEndDateForCode(entry.get());
         // if the throughDate is not between the start and end date,
         // and the serviceDate is not between the start and end date,
         // then the claim falls outside the date range of the SAMHSA code.
