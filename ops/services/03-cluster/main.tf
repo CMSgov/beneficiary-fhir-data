@@ -13,25 +13,22 @@ module "terraservice" {
 }
 
 locals {
-  # Local module definitions
-  service   = "cluster"
-  layer     = "data"
-  full_name = "bfd-${local.env}-${local.service}"
-
   # Derived Values
   ## Module Lookups
+  service          = module.terraservice.service
   default_tags     = module.terraservice.default_tags
   env              = module.terraservice.env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
-  kms_key_alias    = nonsensitive(module.terraservice.ssm_config["/bfd/common/kms_key_alias"])
+  env_key_arn      = module.terraservice.env_key_arn
 
-  ## Data Source Lookups
-  kms_data_key_arn = data.aws_kms_key.cmk.arn
+  # Local module definitions
+  layer     = "data"
+  full_name = "bfd-${local.env}-${local.service}"
 }
 
 resource "aws_cloudwatch_log_group" "this" {
   name         = "/aws/ecs/${local.full_name}"
-  kms_key_id   = local.kms_data_key_arn
+  kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
 
@@ -48,13 +45,14 @@ resource "aws_ecs_cluster" "this" {
     value = !local.is_ephemeral_env || var.container_insights_enabled_ephemeral_override ? "enhanced" : "disabled"
   }
 
-  # TODO: Introduce a `managed_storage_configuration` block for cluster-level encryption
-  #       Without this block, encryption on storage defaults to an AWS-managed key.
-  #       This requires adjustments to the `mgmt` module
-  #       Address in BFD-3945
   configuration {
+    managed_storage_configuration {
+      fargate_ephemeral_storage_kms_key_id = local.env_key_arn
+      kms_key_id                           = local.env_key_arn
+    }
+
     execute_command_configuration {
-      kms_key_id = local.kms_data_key_arn
+      kms_key_id = local.env_key_arn
       logging    = "OVERRIDE"
 
       log_configuration {
