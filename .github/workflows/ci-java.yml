@@ -102,7 +102,6 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
       - name: Upload SonarQube Coverage Reports
-        # This will expand into ./apps
         run: |
           mvn sonar:sonar \
             -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
