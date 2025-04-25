@@ -35,7 +35,9 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_ecs_cluster" "this" {
   name = local.full_name
 
-  # TODO: More fully address security concerns such as this in BFD-3945
+  # This may or may not be necessary, but it does not hurt to include. We do not manage GuardDuty
+  # Runtime Monitoring configuration, but we can at least tag this cluster as opting into Runtime
+  # Monitoring.
   tags = {
     GuardDutyManaged = true
   }
