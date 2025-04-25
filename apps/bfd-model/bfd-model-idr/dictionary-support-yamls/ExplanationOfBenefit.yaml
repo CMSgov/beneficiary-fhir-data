@@ -7,6 +7,7 @@
 - inputPath: ExplanationOfBenefitBase.CLM_TYPE_CD
   appliesTo:
     - Inpatient
+  referenceTable: CLM_TYPE_CD
 - inputPath: ExplanationOfBenefitBase.CLM_CNTL_NUM
   appliesTo:
     - Inpatient
@@ -25,12 +26,14 @@
 - inputPath: ExplanationOfBenefitBase.CLM_SRC_ID
   appliesTo:
     - Inpatient
+  referenceTable: CLM_SRC_ID
 - inputPath: ExplanationOfBenefitBase.PRVDR_BLG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
 - inputPath: ExplanationOfBenefitBase.CLM_QUERY_CD
   appliesTo:
     - Inpatient
+  referenceTable: CLM_QUERY_CD
 - inputPath: ExplanationOfBenefitBase.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -40,6 +43,7 @@
 - inputPath: ExplanationOfBenefitBase.CLM_NRLN_RIC_CD
   appliesTo:
     - Inpatient
+  referenceTable: CLM_NRLN_RIC_CD
 - inputPath: ExplanationOfBenefitBase.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
@@ -138,12 +142,14 @@
     - HHA
     - Hospice
     - SNF
+  referenceTable: CLM_LINE_REV_CTR_CD
 - inputPath: LineItemComponent.CLM_DDCTBL_COINSRNC_CD
   appliesTo:
     - Inpatient
     - HHA
     - Hospice
     - SNF
+  referenceTable: CLM_DDCTBL_COINSRNC_CD
 - inputPath: LineItemComponent.HCPCS_1_MDFR_CD
   appliesTo:
     - Inpatient
@@ -254,3 +260,57 @@
     - Outpatient
     - Hospice
     - HHA
+- inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_DSCHRG_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_ADMSN_TYPE_CD
+  appliesTo:
+    - Inpatient
+  referenceTable: CLM_ADMSN_TYPE_CD
+- inputPath: SupportingInfoComponent.CLM_SUBMSN_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.BENE_PTNT_STUS_CD
+  appliesTo:
+    - Inpatient
+  referenceTable: BENE_PTNT_STUS_CD
+- inputPath: SupportingInfoComponent.DGNS_DRG_CD
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_BLOOD_PT_FRNSH_QTY
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_MDCR_INSTNL_MCO_PD_SW
+  appliesTo:
+    - Inpatient
+  referenceTable: CLM_MDCR_INSTNL_MCO_PD_SW
+- inputPath: SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD
+  appliesTo:
+    - Inpatient
+  referenceTable: CLM_MDCR_NCH_PTNT_STUS_IND_CD
+- inputPath: SupportingInfoComponent.CLM_ADMSN_SRC_CD
+  appliesTo:
+    - Inpatient
+  referenceTable: CLM_ADMSN_SRC_CD
+- inputPath: SupportingInfoComponent.TYPE_OF_BILL_CD
+  appliesTo:
+    - Inpatient
+  referenceTable: CLM_REV_CNTR_CD
+- inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_NCVRD_FROM_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_NCVRD_THRU_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT
+  appliesTo:
+    - Inpatient
+- inputPath: SupportingInfoComponent.CLM_MDCR_EXHSTD_DT
+  appliesTo:
+    - Inpatient
