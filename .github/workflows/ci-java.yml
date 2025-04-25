@@ -79,7 +79,8 @@ jobs:
         with:
           name: code-coverage-reports
           path: |
-            **/target/*
+            **/target/classes/*
+            **/target/coverage-reports/jacoco-[iu]t/jacoco.xml
             **/pom.xml
 
   Upload-SonarQube-Artifacts:
