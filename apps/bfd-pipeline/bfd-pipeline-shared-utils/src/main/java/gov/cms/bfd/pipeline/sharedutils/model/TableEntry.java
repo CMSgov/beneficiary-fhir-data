@@ -18,10 +18,10 @@ public class TableEntry {
   /** The column that contains the claim id. */
   String claimField;
 
-  /** The line item field. */
+  /** The column holding the begin date of the claim. */
   String fromDateField;
 
-  /** The to date field. */
+  /** The column holding the end date of the claim. */
   String toDateField;
 
   /** The line item field. */

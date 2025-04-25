@@ -105,7 +105,7 @@ public class SamhsaUtil {
   /** idr_proc_code constant. */
   public static final String IDR_PROC_CODE = "idr_proc_code";
 
-  /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
+  /** Map of the SAMHSA code entries, with the entry's system as the key. */
   private static Map<String, List<SamhsaEntry>> samhsaMap = new HashMap<>();
 
   /** Instance of this class. Will be a singleton. */
@@ -180,15 +180,15 @@ public class SamhsaUtil {
    * @param entityManager The entity manager.
    * @return the date ranges.
    */
-  private Object[] getClaimDates(
-      Object claimId, TableEntry tableEntry, EntityManager entityManager) {
+  private Date[] getClaimDates(Object claimId, TableEntry tableEntry, EntityManager entityManager) {
     Map<String, String> params =
         Map.of("claimTable", tableEntry.getParentTable(), "claimField", tableEntry.getClaimField());
     StringSubstitutor strSub = new StringSubstitutor(params);
     String queryStr = strSub.replace(tableEntry.getDatesQuery());
-    Query query = entityManager.createNativeQuery(queryStr);
+    Query query = entityManager.createNativeQuery(queryStr, Tuple.class);
     query.setParameter("claimId", claimId);
-    return (Object[]) query.getSingleResult();
+    Tuple result = (Tuple) query.getSingleResult();
+    return new Date[] {(Date) result.get(0), (Date) result.get(1)};
   }
 
   /**
@@ -206,8 +206,8 @@ public class SamhsaUtil {
   public boolean processCodeList(
       Tuple claim,
       TableEntry tableEntry,
-      Optional<Object[]> dates,
-      Map<String, Object[]> datesMap,
+      Optional<Date[]> dates,
+      Map<String, Date[]> datesMap,
       List<String> nonCodeFields,
       EntityManager entityManager) {
 
@@ -224,7 +224,7 @@ public class SamhsaUtil {
       Optional<SamhsaEntry> samhsaEntry =
           getSamhsaCode(Optional.of(code), Optional.of(element.getAlias()));
       if (samhsaEntry.isPresent()) {
-        Object[] datesObject =
+        Date[] datesObject =
             getDatesObjectsForClaim(
                 tableEntry, claim.get(tableEntry.getClaimField()), dates, datesMap, entityManager);
         if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
@@ -239,13 +239,13 @@ public class SamhsaUtil {
     return false;
   }
 
-  private Object[] getDatesObjectsForClaim(
+  private Date[] getDatesObjectsForClaim(
       TableEntry tableEntry,
       Object claimId,
-      Optional<Object[]> dates,
-      Map<String, Object[]> datesMap,
+      Optional<Date[]> dates,
+      Map<String, Date[]> datesMap,
       EntityManager entityManager) {
-    Object[] datesObject;
+    Date[] datesObject;
     if (dates.isPresent()) {
       datesObject = dates.get();
     } else {
@@ -257,13 +257,11 @@ public class SamhsaUtil {
     return datesObject;
   }
 
-  private static boolean isInvalidClaimDate(Object[] datesObject, SamhsaEntry entry) {
+  private static boolean isInvalidClaimDate(Date[] datesObject, SamhsaEntry entry) {
     LocalDate coverageStartDate =
-        datesObject[0] == null
-            ? LocalDate.parse("1970-01-01")
-            : ((Date) datesObject[0]).toLocalDate();
+        datesObject[0] == null ? LocalDate.parse("1970-01-01") : (datesObject[0]).toLocalDate();
     LocalDate coverageEndDate =
-        datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
+        datesObject[1] == null ? LocalDate.now() : (datesObject[1]).toLocalDate();
     CodeDateRange result = getGetStartEndDateForCode(entry);
 
     // if the throughDate is not between the start and end date,
