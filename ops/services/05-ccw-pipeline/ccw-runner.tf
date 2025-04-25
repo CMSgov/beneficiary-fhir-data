@@ -59,6 +59,12 @@ resource "aws_lambda_function" "ccw_runner" {
 
   memory_size = 128
   timeout     = 60
+
+  logging_config {
+    log_format = "Text"
+    log_group  = aws_cloudwatch_log_group.ccw_runner.name
+  }
+
   environment {
     variables = {
       BFD_ENVIRONMENT            = local.env
