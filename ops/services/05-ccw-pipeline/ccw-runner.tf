@@ -69,6 +69,7 @@ resource "aws_lambda_function" "ccw_runner" {
       CCW_TASK_GROUP             = local.service
       CCW_TASK_SUBNETS           = join(",", local.writer_adjacent_subnets)
       CCW_TASK_SECURITY_GROUP_ID = aws_security_group.ccw_runner.id
+      CCW_TASK_TAGS_JSON         = jsonencode(local.default_tags)
     }
   }
 

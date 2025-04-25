@@ -33,6 +33,9 @@ CCW_TASK_SUBNETS = [
     subnet.strip() for subnet in os.environ.get("CCW_TASK_SUBNETS", default="").split(",")
 ]
 CCW_TASK_SECURITY_GROUP_ID = os.environ.get("CCW_TASK_SECURITY_GROUP_ID", default="")
+CCW_TASK_TAGS = TypeAdapter(dict[str, Any]).validate_json(
+    os.environ.get("CCW_TASK_TAGS_JSON", default="")
+)
 BOTO_CONFIG = Config(
     region_name=REGION,
     # Instructs boto3 to retry upto 10 times using an exponential backoff
@@ -215,6 +218,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
                     "assignPublicIp": "DISABLED",
                 }
             },
+            tags=[{"key": k, "value": str(v)} for k, v in CCW_TASK_TAGS.items()],
         )
         logger.info("New CCW Pipeline Task launched successfully.")
     except Exception:
