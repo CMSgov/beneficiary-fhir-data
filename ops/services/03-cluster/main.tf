@@ -62,13 +62,10 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
-# TODO: Consider a dynamic selection based on prod/non-prod with FARGATE and FARGATE_SPOT
-# TODO: Formalize `default_capacity_provider_strategy`
-#       Address in BFD-3945
 resource "aws_ecs_cluster_capacity_providers" "this" {
   cluster_name = aws_ecs_cluster.this.name
 
-  capacity_providers = ["FARGATE_SPOT"]
+  capacity_providers = ["FARGATE_SPOT", "FARGATE"]
 
   default_capacity_provider_strategy {
     base              = 1
