@@ -2,7 +2,9 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.Identity;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -71,5 +73,25 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
    * @return beneficiary record
    */
   @Query(value = "SELECT b FROM Beneficiary b WHERE beneSk = :beneSk")
-  Beneficiary getById(@Param("beneSk") long beneSk);
+  Optional<Beneficiary> findById(@Param("beneSk") long beneSk);
+
+  /**
+   * Retrieve a {@link Beneficiary} record by its ID and last updated timestamp.
+   *
+   * @param beneSk bene surrogate key
+   * @return beneficiary record
+   */
+  @Query(
+      value =
+          """
+          SELECT b
+          FROM Beneficiary b
+          WHERE b.beneSk = :beneSk
+          AND (b.meta.updatedTimestamp >= :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
+          AND (b.meta.updatedTimestamp < :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
+          """)
+  Optional<Beneficiary> findById(
+      @Param("beneSk") long beneSk,
+      @Param("lowerBound") Optional<LocalDateTime> lowerBound,
+      @Param("upperBound") Optional<LocalDateTime> upperBound);
 }

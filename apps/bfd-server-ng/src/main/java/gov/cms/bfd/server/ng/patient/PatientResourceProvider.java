@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.provider;
+package gov.cms.bfd.server.ng.patient;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -11,14 +11,17 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.types.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 /** FHIR endpoints for the Patient resource. */
+@Validated
 @RequiredArgsConstructor
 @Component
 public class PatientResourceProvider implements IResourceProvider {
@@ -28,25 +31,21 @@ public class PatientResourceProvider implements IResourceProvider {
     return Patient.class;
   }
 
-  private final BeneficiaryRepository beneficiaryRepository;
+  private final PatientHandler patientHandler;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
    *
    * @param fhirId FHIR ID
-   * @param requestDetails requestDetails
    * @return patient
    */
   @Read
-  public Patient find(@IdParam final IdType fhirId, final RequestDetails requestDetails) {
-
-    var patient = beneficiaryRepository.getById(fhirId.getIdPartAsLong()).toFhir();
-    var ids = beneficiaryRepository.getPatientIdentities(fhirId.getIdPartAsLong());
-    for (var id : ids) {
-      id.toFhirIdentifier().ifPresent(patient::addIdentifier);
-      id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
+  public Patient find(@IdParam final IdType fhirId) {
+    var patient = patientHandler.find(FhirInputConverter.toLong(fhirId));
+    if (patient.isEmpty()) {
+      throw new ResourceNotFoundException(fhirId);
     }
-    return patient;
+    return patient.get();
   }
 
   /**
@@ -54,15 +53,19 @@ public class PatientResourceProvider implements IResourceProvider {
    *
    * @param fhirId FHIR ID
    * @param lastUpdated last updated datetime
-   * @param requestDetails request details
    * @return bundle
    */
   @Search
   public Bundle searchByLogicalId(
-      @RequiredParam(name = Patient.SP_RES_ID) final TokenParam fhirId,
-      @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated,
-      final RequestDetails requestDetails) {
-    return new Bundle();
+      @RequiredParam(name = Patient.SP_RES_ID) final IdType fhirId,
+      @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
+
+    var patient =
+        patientHandler.searchByLogicalId(
+            FhirInputConverter.toLong(fhirId), FhirInputConverter.toDateTimeRange(lastUpdated));
+    var bundle = new Bundle();
+    patient.ifPresent(p -> bundle.addEntry(new Bundle.BundleEntryComponent().setResource(p)));
+    return bundle;
   }
 
   /**

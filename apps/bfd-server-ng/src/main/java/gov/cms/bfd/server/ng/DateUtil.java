@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -17,5 +19,13 @@ public class DateUtil {
    */
   public static Date toDate(LocalDate localDate) {
     return Date.from(localDate.atStartOfDay(TIME_ZONE_UTC.toZoneId()).toInstant());
+  }
+
+  public static Date toDate(LocalDateTime localDate) {
+    return Date.from(localDate.toInstant(ZoneOffset.UTC));
+  }
+
+  public static LocalDateTime toLocalDateTime(Date date) {
+    return date.toInstant().atZone(TIME_ZONE_UTC.toZoneId()).toLocalDateTime();
   }
 }
