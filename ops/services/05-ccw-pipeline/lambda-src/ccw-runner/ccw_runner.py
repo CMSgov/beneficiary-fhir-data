@@ -121,10 +121,10 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
         logger.info("Retrieving manifest status of discovered S3 manifests from the database...")
         # TODO: Remove "/ng/" prefix from param name
         db_username = parameters.get_parameter(  # type: ignore
-            f"/ng/bfd/{BFD_ENVIRONMENT}/pipeline/sensitive/db/username", decrypt=True
+            f"/ng/bfd/{BFD_ENVIRONMENT}/ccw-pipeline/sensitive/db/username", decrypt=True
         )
         db_password = parameters.get_parameter(  # type: ignore
-            f"/ng/bfd/{BFD_ENVIRONMENT}/pipeline/sensitive/db/password", decrypt=True
+            f"/ng/bfd/{BFD_ENVIRONMENT}/ccw-pipeline/sensitive/db/password", decrypt=True
         )
 
         logger.info(
