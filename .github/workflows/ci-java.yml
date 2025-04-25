@@ -79,8 +79,7 @@ jobs:
         with:
           name: code-coverage-artifact
           path: |
-            **/target/classes/*
-            **/target/coverage-reports/jacoco-[iu]t/jacoco.xml
+            **/target*
 
   Upload-SonarQube-Artifacts:
     needs: mvn-verify
