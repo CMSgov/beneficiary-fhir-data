@@ -103,6 +103,7 @@ jobs:
       - name: Upload SonarQube Coverage Reports
         run: |
           mvn sonar:sonar \
+            --threads 1C \
             --no-transfer-progress \
             -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
             -Dsonar.host.url="$SONAR_HOST_URL" \
