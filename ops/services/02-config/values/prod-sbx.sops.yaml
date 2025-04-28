@@ -81,7 +81,7 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50
 /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(30 minutes)
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
-/bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-prod-sbx-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
@@ -752,8 +752,8 @@ sops:
       created_at: "2025-03-31T22:39:00Z"
       enc: AQICAHjP/Aj2Cj3mc/evGqWprczmF5nsbcARIepeXMoZGoJjRgHHMxB3kegUw/6fiO3cdCVZAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJQnqvuN34USrb+OHAgEQgDvtFKzb7rjtFOxzEXKjNz/qXq6fCm/+aP9mc2YdaLXDpAtXStvrMPu57z0WIaq1FHdIIc1tpnPZ5OsteQ==
       aws_profile: ""
-  lastmodified: "2025-04-23T17:21:44Z"
-  mac: ENC[AES256_GCM,data:KnyiLQk4Gb7Wu5bUQgXp0EN5358Rwqt4kdPCn4aMfsyq8tCol+dZnxDRDOYs+H2ZD82jmj6VodP2iTaiGfQ//Lhs7UHnu1dARP3Rz6yXjTTTOozmJERFcWwkFVL3cCQ5vixT0wO5jEOWPg4TQ2T9v8niNB6GkAh5+eYAJf+1XlA=,iv:XlSl8hckUK4Lk9icBgEqkrrmPqK8jXjhQjlSpyJKhZE=,tag:dD4+Y7yItNkMMRoa6nevJg==,type:str]
+  lastmodified: "2025-04-28T18:45:37Z"
+  mac: ENC[AES256_GCM,data:SZk3QsSbaclHufyCbJ0xVUoAfUYcxfSCUPaxHx0eLlbaM22v6/XSlG0Sqc+0rJJ0PBb+DQHMjWTeA61HdGRhYUm0oukzLywv20V1/yDTmaIFWsZvkyDZ2BL48zFLsHbap6f94JX2JOIt8tK24W1qj5Bsv4jm8TANg3o1FfAqy50=,iv:VLKBfi5CtoVjheD/Otl7736yCisJRnQHHTUUyudDghE=,tag:ElQ64ZBvNyhnA1soLtwd9w==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
