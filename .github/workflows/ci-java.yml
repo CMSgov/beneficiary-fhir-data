@@ -80,6 +80,7 @@ jobs:
           name: code-coverage-artifact
           path: |
             **/target*
+            /root/.m2/repository/gov/cms/bfd/**
 
   Upload-SonarQube-Artifacts:
     needs: mvn-install
