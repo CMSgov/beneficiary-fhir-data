@@ -115,6 +115,21 @@ resource "aws_ecs_task_definition" "rda" {
             name  = "BFD_RDA_JOB_ENABLED"
             value = "true"
           },
+          # CCW Pipeline Job defaults to enabled, so we need to explicitly disable it.
+          {
+            name  = "BFD_CCW_JOB_ENABLED"
+            value = "false"
+          },
+          # Unfortunately, because the "RDA Pipeline" is just a job implemented within the greater
+          # BFD Pipeline applcation, it is subject to some now-defunct assumptions about the
+          # Pipeline itself. One of these is that all Jobs are configured under a common "pipeline"
+          # hierarchy, and so regardless of which Jobs are enabled the Pipeline expects some
+          # Job-specific configuration to exist. This is one of those configuration values
+          # TODO: Remove this when/if Pipeline application configuration loading is fixed
+          {
+            name  = "BFD_CCW_IDEMPOTENCY_ENABLED"
+            value = "true"
+          },
           {
             name  = "BFD_DB_URL"
             value = "jdbc:postgresql://${module.data_db_writer_instance.writer.endpoint}/fhirdb?logServerErrorDetail=false"
