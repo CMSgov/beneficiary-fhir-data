@@ -140,14 +140,14 @@ for i in range(patients_to_generate):
 
     bene_table.append(patient)
 df = pd.json_normalize(bene_table)
-csv_file_path = 'BENE.csv'
+csv_file_path = 'SYNTHETIC_BENE.csv'
 df.to_csv(csv_file_path, index=False)
 df = pd.json_normalize(bene_hstry_table)
-csv_file_path = 'BENE_HSTRY.csv'
+csv_file_path = 'SYNTHETIC_BENE_HSTRY.csv'
 df.to_csv(csv_file_path, index=False)
 arr = []
 for i in mbi_table.keys():
     arr.append(mbi_table[i])
 df = pd.json_normalize(arr)
-csv_file_path = 'BENE_MBI_ID.csv'
+csv_file_path = 'SYNTHETIC_BENE_MBI_ID.csv'
 df.to_csv(csv_file_path, index=False)
