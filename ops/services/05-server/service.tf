@@ -357,7 +357,6 @@ resource "aws_ecs_service" "server" {
   deployment_minimum_healthy_percent = 100
   desired_count                      = local.server_min_capacity
   enable_ecs_managed_tags            = true
-  enable_execute_command             = true
   health_check_grace_period_seconds  = 0
   name                               = local.service
   propagate_tags                     = "NONE"
