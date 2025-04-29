@@ -9,15 +9,13 @@ from dateutil.parser import parse
 from faker import Faker
 fake = Faker()
 
-patients_to_generate = 80000
 used_bene_sk = [] #We have this + used_mbi in case we want to expand this and ensure no collisions (just populate w/ existing list)
 used_mbi = []
 bene_table = []
 bene_hstry_table = []
 mbi_table = {}
 address_options = []
-available_given_names = ['Alex','Frankie','Joey','Caroline','Kartoffel','Elmo','Abby','Snuffleupagus','Bandit','Bluey','Bingo','Chilli','Le Petit Prince']
-available_family_names = ['Erdapfel','Heeler','Coffee','Jones','Smith','Sheep']
+bb_accounts = []
 with open('beneficiary-components/addresses.csv', 'r') as file:
     csvreader = csv.reader(file)
     header = next(csvreader)
@@ -27,13 +25,22 @@ with open('beneficiary-components/addresses.csv', 'r') as file:
             cur_row[header[col]] = row[col]
         address_options.append(cur_row)
 
+with open('Benes-Sandbox.csv', 'r') as file:
+    csvreader = csv.reader(file)
+    header = next(csvreader)
+    for row in csvreader:
+        cur_row = {}
+        for col in range(len(row)):
+            cur_row[header[col]] = row[col]
+        bb_accounts.append(cur_row)
+
 #this will deliberately generate invalid (but close!) MBIs. 
 def gen_mbi():
     mbi = []
     set_1 = set(string.ascii_uppercase) - set(['S','L','O','I','B','Z'])
     set_2 = set(list(set_1) + list(string.digits))
     mbi.append(random.choice(['1','2','3','4','5','6','7','8','9']))
-    #To ensure we never collide with BB2 accounts, we've removed S here. 
+    #by removing S as an option here, we ensure that any MBIs for merged patients do not overlap.
     mbi.append(random.choice(['L','O','I','B','Z']))
     mbi.append(random.choice(list(set_2)))
     mbi.append(random.choice(string.digits))
@@ -55,41 +62,25 @@ def gen_bene_sk():
         return gen_bene_sk()
     return bene_sk
 
-for i in range(patients_to_generate):
-    if i>0 and i % 10000 == 0:
-        print("10000 done")
+for bb2_account in bb_accounts:
     patient = {}
-    patient['BENE_1ST_NAME'] = random.choice(available_given_names)
-    if(random.randint(0, 1)):
-        patient['BENE_MIDL_NAME'] = random.choice(available_given_names)
-    patient['BENE_LAST_NAME'] = random.choice(available_family_names)
-    dob = fake.date_of_birth(minimum_age=45)
-    patient['BENE_DOB'] = str(dob)
-    if(random.randint(0,10)<2):
-        #death!
-        death_date = fake.date_between_dates(datetime.date(year=2020, month=1, day=1),datetime.date.today())
-        patient['BENE_DEATH_DT']=str(death_date)
-        if(random.randint(0,1)==1):
-            patient['BENE_VRFY_DEATH_DAY_SW'] = 'Y'
-        else:
-            patient['BENE_VRFY_DEATH_DAY_SW'] = 'N'
-
-    patient['BENE_SEX_CD'] = str(random.randint(1,2))
-    patient['BENE_RACE_CD'] = random.choice(['~','0','1','2','3','4','5','6','7','8'])
+    patient['BENE_1ST_NAME'] = bb2_account['given_name']
+    if(len(bb2_account['middle_name'])>0):
+        patient['BENE_MIDL_NAME'] = bb2_account['middle_name']
+    patient['BENE_LAST_NAME'] = bb2_account['family_name']
+    patient['BENE_DOB'] = bb2_account['bene_dob']
+    if(len(bb2_account['bene_death_date'])>0):
+        patient['BENE_DEATH_DT'] = bb2_account['bene_death_date']
+        patient['BENE_VRFY_DEATH_DAY_SW'] = 'Y'
+    patient['BENE_SEX_CD'] = bb2_account['bene_sex_cd']
+    patient['BENE_RACE_CD'] = bb2_account['bene_race_cd']
     address = address_options[random.randint(0,len(address_options)-1)]
     for component in address:
         patient[component] = address[component]
     patient['CNTCT_LANG_CD'] = random.choice(['~','ENG','SPA'])
     
-    '''
-    We should make sure that we always generate at least one instance where there's an edge case, per run. 
-    
-    generating the merges. 
-    #400000/90000000  ~.4% have duplicates. 
-    Let's guarantee at least one difficult patient per run, and then the rest with some probability.
-    '''
     #In BENE, IDR_TRANS_OBSLT_TS < 9999-12-31 if BENE_XREF_EFCTV_SK != BENE_SK
-
+    
     pt_bene_sk = gen_bene_sk()
     patient['BENE_SK'] = str(pt_bene_sk)
     patient['XREF_EFCTV_BENE_SK'] = str(pt_bene_sk)
@@ -98,11 +89,12 @@ for i in range(patients_to_generate):
     patient['IDR_UPDT_TS']  = str(datetime.datetime.now()-datetime.timedelta(days=1))
     patient['IDR_TRANS_OBSLT_TS'] = '9999-12-31 00:00:00.000000'
 
-
     #Create a history, sometimes!
     #If they have a prior MBI on this, then let's create a bene_history
     num_mbis = random.choices([1,2,3,4],weights=[.8,.14,.05,.01])[0]
-
+    if(bb2_account['bene_id']=='-88888888888888'):
+        num_mbis = 2
+    
     for mbi_idx in range(0,num_mbis):
         mbi_obj = {}
         mbi = gen_mbi()
@@ -110,7 +102,7 @@ for i in range(patients_to_generate):
         #fun fact, an MBI can be assigned after death
         if(mbi_idx == 0):
             efctv_dt = fake.date_between_dates(datetime.date(year=2017, month=5, day=20),datetime.date(year=2021, month=1, day=1))
-            patient['BENE_MBI_ID'] = mbi
+            patient['BENE_MBI_ID'] = bb2_account['mbi_num']
         else:
             efctv_dt = fake.date_between_dates(datetime.date(year=2021, month=1, day=2),datetime.date(year=2025-num_mbis+mbi_idx, month=1, day=1))
 
@@ -126,29 +118,35 @@ for i in range(patients_to_generate):
         mbi_obj['IDR_TRANS_OBSLT_TS'] = '9999-12-31 00:00:00.000000'
         mbi_table[mbi] = mbi_obj
     
-    for idx in range(0,random.randint(0,2)):
+    bene_sk_num = random.randint(0,2)
+    if(bb2_account['bene_id']=='-88888888888888'):
+        bene_sk_num=2
+
+    for idx in range(0,bene_sk_num):
+
         if(idx == 0):
             continue
-
         patient_3 = copy.deepcopy(patient)
         #The key things here are that the different BENE_SK will be obsolete. 
         pt_bene_sk = gen_bene_sk()
         patient_3['BENE_SK'] = str(pt_bene_sk)
         used_bene_sk.append(pt_bene_sk)
-        patient_3['IDR_TRANS_OBSLT_TS'] = '2021-01-02 00:00:00.000000'
+        patient_3['IDR_TRANS_OBSLT_TS'] = '2021-01-02 23:59:59.999999'
+        patient['IDR_TRANS_EFCTV_TS'] = '2021-01-03 00:00:00.000000'
         patient_3['IDR_UPDT_TS'] = str(datetime.datetime.now()-datetime.timedelta(days=1))
         bene_table.append(patient_3)
-
+    
     bene_table.append(patient)
+
 df = pd.json_normalize(bene_table)
-csv_file_path = 'BENE.csv'
+csv_file_path = 'SYNTHETIC_BENE.csv'
 df.to_csv(csv_file_path, index=False)
 df = pd.json_normalize(bene_hstry_table)
-csv_file_path = 'BENE_HSTRY.csv'
+csv_file_path = 'SYNTHETIC_BENE_HSTRY.csv'
 df.to_csv(csv_file_path, index=False)
 arr = []
 for i in mbi_table.keys():
     arr.append(mbi_table[i])
 df = pd.json_normalize(arr)
-csv_file_path = 'BENE_MBI_ID.csv'
+csv_file_path = 'SYNTHETIC_BENE_MBI_ID.csv'
 df.to_csv(csv_file_path, index=False)
