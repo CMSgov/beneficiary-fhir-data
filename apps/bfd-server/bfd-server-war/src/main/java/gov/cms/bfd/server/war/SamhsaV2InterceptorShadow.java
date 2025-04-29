@@ -138,7 +138,7 @@ public class SamhsaV2InterceptorShadow {
    *
    * @param claimEntity the claim Entity
    * @param claimId the claimId
-   * @return boolean if it is a Valid MBI
+   * @return boolean if it is a synthetic claim
    */
   public static boolean isSynthetic(Object claimEntity, String claimId) {
     if (claimEntity instanceof RdaFissClaim fissClaim) {
