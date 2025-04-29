@@ -203,6 +203,6 @@ resource "aws_ecs_service" "rda" {
   network_configuration {
     assign_public_ip = false
     security_groups  = [aws_security_group.rda.id]
-    subnets          = local.writer_adjacent_subnets[*].id
+    subnets          = local.writer_adjacent_subnets
   }
 }
