@@ -11,7 +11,9 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.types.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -60,12 +62,8 @@ public class PatientResourceProvider implements IResourceProvider {
       @RequiredParam(name = Patient.SP_RES_ID) final IdType fhirId,
       @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
 
-    var patient =
-        patientHandler.searchByLogicalId(
-            FhirInputConverter.toLong(fhirId), FhirInputConverter.toDateTimeRange(lastUpdated));
-    var bundle = new Bundle();
-    patient.ifPresent(p -> bundle.addEntry(new Bundle.BundleEntryComponent().setResource(p)));
-    return bundle;
+    return patientHandler.searchByLogicalId(
+        FhirInputConverter.toLong(fhirId), FhirInputConverter.toDateTimeRange(lastUpdated));
   }
 
   /**
@@ -73,15 +71,17 @@ public class PatientResourceProvider implements IResourceProvider {
    *
    * @param identifier identifier
    * @param lastUpdated last updated datetime
-   * @param requestDetails request details
    * @return bundle
    */
   @Search
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER) final TokenParam identifier,
-      @OptionalParam(name = Constants.PARAM_LASTUPDATED) final DateRangeParam lastUpdated,
-      final RequestDetails requestDetails) {
-    return new Bundle();
+      @OptionalParam(name = Constants.PARAM_LASTUPDATED) final DateRangeParam lastUpdated) {
+    if (!SystemUrls.CMS_MBI.equals(identifier.getSystem())) {
+      throw new InvalidRequestException("Invalid or missing system");
+    }
+    return patientHandler.searchByIdentifier(
+        FhirInputConverter.toString(identifier), FhirInputConverter.toDateTimeRange(lastUpdated));
   }
 
   /**

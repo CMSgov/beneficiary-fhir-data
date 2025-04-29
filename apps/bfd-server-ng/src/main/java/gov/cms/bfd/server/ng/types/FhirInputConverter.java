@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.types;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.DateUtil;
 import java.time.LocalDateTime;
@@ -29,6 +30,13 @@ public class FhirInputConverter {
     } catch (NumberFormatException ex) {
       throw new InvalidRequestException("ID is not a valid number");
     }
+  }
+
+  public static String toString(TokenParam tokenParam) {
+    if (tokenParam.getValueNotNull().isBlank()) {
+      throw new InvalidRequestException("Value is missing");
+    }
+    return tokenParam.getValue();
   }
 
   private static Optional<LocalDateTime> toDateTime(@Nullable DateParam dateParam) {

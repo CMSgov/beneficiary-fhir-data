@@ -1,4 +1,4 @@
-gov.cms.bfd.server.ng.PatientIT.patientReadValidLong=[
+gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 {
   "address" : [ {
     "city" : "RICHMOND",
@@ -57,7 +57,7 @@ gov.cms.bfd.server.ng.PatientIT.patientReadValidLong=[
 ]
 
 
-gov.cms.bfd.server.ng.PatientIT.patientReadValidString=[
+gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
 {
   "address" : [ {
     "city" : "RICHMOND",
