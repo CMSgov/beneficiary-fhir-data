@@ -14,6 +14,7 @@ import jakarta.persistence.Query;
 import java.sql.Date;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -190,18 +191,20 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return The total number of tags saved.
    */
   protected int processClaim(
-      Map<String, Object> claim, HashMap<String, Date[]> datesMap, EntityManager entityManager) {
+      Map<String, Object> claim,
+      HashMap<String, LocalDate[]> datesMap,
+      EntityManager entityManager) {
     Object claimId = claim.get(tableEntry.getClaimField());
-    Optional<Date[]> dates = Optional.empty();
+    Optional<LocalDate[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
     if (!tableEntry.getLineItem()) {
       try {
         dates =
             Optional.of(
-                new Date[] {
-                  (Date) claim.get(tableEntry.getFromDateField()),
-                  (Date) claim.get(tableEntry.getToDateField())
+                new LocalDate[] {
+                  ((Date) claim.get(tableEntry.getFromDateField())).toLocalDate(),
+                  ((Date) claim.get(tableEntry.getToDateField())).toLocalDate()
                 });
       } catch (Exception e) {
         throw new BadCodeMonkeyException(
@@ -276,7 +279,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     int savedInBatch = 0;
     // This Map will allow us to save the active dates for a claim to be used in multiple
     // records with the same claim id.
-    HashMap<String, Date[]> datesMap = new HashMap<>();
+    HashMap<String, LocalDate[]> datesMap = new HashMap<>();
     // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
     // codes. */
     Map<String, Object> columnMap = null;
@@ -295,7 +298,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
                 String.valueOf(
                     Objects.requireNonNull(
                             columnMap) // Should never be null if there's at least one claim in the
-                                       // list.
+                        // list.
                         .get(tableEntry.getClaimField())))
             : Optional.empty());
     // Write progress to the progress table, so that we can restart at the last processed

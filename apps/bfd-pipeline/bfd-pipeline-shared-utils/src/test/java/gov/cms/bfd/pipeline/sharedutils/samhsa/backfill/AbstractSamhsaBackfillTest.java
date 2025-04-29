@@ -8,9 +8,10 @@ import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import jakarta.persistence.Tuple;
+import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +25,6 @@ public class AbstractSamhsaBackfillTest {
   TransactionManager transactionManagerMock;
   Query mockQuery;
   SamhsaUtil mockSamhsaUtil;
-  Tuple mockTuple;
   private static final String CARRIER_TEST_QUERY =
       "SELECT clm_id, clm_from_dt, clm_thru_dt, prncpal_dgns_cd, icd_dgns_cd1, icd_dgns_cd2, icd_dgns_cd3, icd_dgns_cd4, icd_dgns_cd5, icd_dgns_cd6, icd_dgns_cd7, icd_dgns_cd8, icd_dgns_cd9, icd_dgns_cd10, icd_dgns_cd11, icd_dgns_cd12 FROM ccw.carrier_claims WHERE clm_id >= :startingClaim ORDER BY clm_id limit :limit";
   private static final String FISS_TEST_QUERY =
@@ -42,12 +42,15 @@ public class AbstractSamhsaBackfillTest {
     transactionManagerMock = Mockito.mock(TransactionManager.class);
     mockQuery = Mockito.mock(Query.class);
     mockSamhsaUtil = Mockito.mock(SamhsaUtil.class);
-    mockTuple = Mockito.mock(Tuple.class);
-    Mockito.when(manager.createNativeQuery(anyString(), eq(Tuple.class))).thenReturn(mockQuery);
     Mockito.when(manager.createNativeQuery(anyString())).thenReturn(mockQuery);
     Mockito.when(mockQuery.setParameter(anyString(), anyInt())).thenReturn(mockQuery);
-
-    Mockito.when(mockQuery.getResultList()).thenReturn(List.of(mockTuple));
+    Object[] objects =
+        new Object[] {
+          "12345", Date.valueOf("1970-1-1"), Date.valueOf("1970-1-1"), "code1", "code2", "code3"
+        };
+    List<Object[]> objectList = new ArrayList<>();
+    objectList.add(objects);
+    Mockito.when(mockQuery.getResultList()).thenReturn(objectList);
   }
 
   @Test
@@ -60,7 +63,7 @@ public class AbstractSamhsaBackfillTest {
             transactionManagerMock, 100000, 900l, CCWSamhsaBackfill.CCW_TABLES.CARRIER_CLAIMS);
     backfill.buildQuery(
         startingClaim, CCWSamhsaBackfill.CCW_TABLES.CARRIER_CLAIMS.getEntry(), 100000, manager);
-    verify(manager).createNativeQuery(argumentCaptor.capture(), eq(Tuple.class));
+    verify(manager).createNativeQuery(argumentCaptor.capture());
     Assertions.assertEquals(CARRIER_TEST_QUERY, argumentCaptor.getValue());
   }
 
@@ -105,5 +108,6 @@ public class AbstractSamhsaBackfillTest {
     backfill.setSamhsaUtil(mockSamhsaUtil);
     backfill.executeQueryLoop(manager);
     verify(mockQuery, times(1)).getResultList();
+    verify(mockSamhsaUtil, times(1)).processCodeList(any(), any(), any(), any(), any(), any());
   }
 }

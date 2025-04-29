@@ -179,7 +179,8 @@ public class SamhsaUtil {
    * @param entityManager The entity manager.
    * @return the date ranges.
    */
-  private Date[] getClaimDates(Object claimId, TableEntry tableEntry, EntityManager entityManager) {
+  private LocalDate[] getClaimDates(
+      Object claimId, TableEntry tableEntry, EntityManager entityManager) {
     Map<String, String> params =
         Map.of("claimTable", tableEntry.getParentTable(), "claimField", tableEntry.getClaimField());
     StringSubstitutor strSub = new StringSubstitutor(params);
@@ -187,7 +188,9 @@ public class SamhsaUtil {
     Query query = entityManager.createNativeQuery(queryStr, Tuple.class);
     query.setParameter("claimId", claimId);
     Tuple result = (Tuple) query.getSingleResult();
-    return new Date[] {(Date) result.get(0), (Date) result.get(1)};
+    return new LocalDate[] {
+      ((Date) result.get(0)).toLocalDate(), ((Date) result.get(1)).toLocalDate()
+    };
   }
 
   /**
@@ -205,8 +208,8 @@ public class SamhsaUtil {
   public boolean processCodeList(
       Map<String, Object> claim,
       TableEntry tableEntry,
-      Optional<Date[]> dates,
-      Map<String, Date[]> datesMap,
+      Optional<LocalDate[]> dates,
+      Map<String, LocalDate[]> datesMap,
       List<String> nonCodeFields,
       EntityManager entityManager) {
 
@@ -223,7 +226,7 @@ public class SamhsaUtil {
       Optional<SamhsaEntry> samhsaEntry =
           getSamhsaCode(Optional.of(code), Optional.of(entry.getKey()));
       if (samhsaEntry.isPresent()) {
-        Date[] datesObject =
+        LocalDate[] datesObject =
             getDatesObjectsForClaim(
                 tableEntry, claim.get(tableEntry.getClaimField()), dates, datesMap, entityManager);
         if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
@@ -238,13 +241,13 @@ public class SamhsaUtil {
     return false;
   }
 
-  private Date[] getDatesObjectsForClaim(
+  private LocalDate[] getDatesObjectsForClaim(
       TableEntry tableEntry,
       Object claimId,
-      Optional<Date[]> dates,
-      Map<String, Date[]> datesMap,
+      Optional<LocalDate[]> dates,
+      Map<String, LocalDate[]> datesMap,
       EntityManager entityManager) {
-    Date[] datesObject;
+    LocalDate[] datesObject;
     if (dates.isPresent()) {
       datesObject = dates.get();
     } else {
@@ -256,11 +259,10 @@ public class SamhsaUtil {
     return datesObject;
   }
 
-  private static boolean isInvalidClaimDate(Date[] datesObject, SamhsaEntry entry) {
+  private static boolean isInvalidClaimDate(LocalDate[] datesObject, SamhsaEntry entry) {
     LocalDate coverageStartDate =
-        datesObject[0] == null ? LocalDate.parse("1970-01-01") : (datesObject[0]).toLocalDate();
-    LocalDate coverageEndDate =
-        datesObject[1] == null ? LocalDate.now() : (datesObject[1]).toLocalDate();
+        datesObject[0] == null ? LocalDate.parse("1970-01-01") : (datesObject[0]);
+    LocalDate coverageEndDate = datesObject[1] == null ? LocalDate.now() : (datesObject[1]);
     CodeDateRange result = getGetStartEndDateForCode(entry);
 
     // if the throughDate is not between the start and end date,
