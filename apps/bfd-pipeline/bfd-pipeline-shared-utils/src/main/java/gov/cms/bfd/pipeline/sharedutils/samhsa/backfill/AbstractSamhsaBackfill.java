@@ -11,12 +11,14 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
-import jakarta.persistence.Tuple;
 import java.sql.Date;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,6 +86,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   @Getter @Setter List<String> nonCodeFields;
 
+  @Getter @Setter List<String> queryColumnsList = new ArrayList<>();
+
   /**
    * Constructor.
    *
@@ -114,7 +118,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @param query The query to execute.
    * @return a list of claims.
    */
-  private List<Tuple> executeQuery(Query query) {
+  private List<Object[]> executeQuery(Query query) {
     return query.getResultList();
   }
 
@@ -144,7 +148,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
             tableEntry.getClaimField());
     strSub = new StringSubstitutor(params);
     String queryStr = strSub.replace(getQuery());
-    Query claimQuery = entityManager.createNativeQuery(queryStr, Tuple.class);
+    Query claimQuery = entityManager.createNativeQuery(queryStr);
     startingClaim.ifPresent(s -> claimQuery.setParameter("startingClaim", convertClaimId(s)));
     claimQuery.setParameter("limit", limit);
     return claimQuery;
@@ -186,7 +190,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return The total number of tags saved.
    */
   protected int processClaim(
-      Tuple claim, HashMap<String, Date[]> datesMap, EntityManager entityManager) {
+      Map<String, Object> claim, HashMap<String, Date[]> datesMap, EntityManager entityManager) {
     Object claimId = claim.get(tableEntry.getClaimField());
     Optional<Date[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
@@ -229,6 +233,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   protected String buildQueryStringTemplate(String table, String claimField, String... columns) {
     String concatColumns = String.join(", ", columns);
+    queryColumnsList.add(claimField);
+    queryColumnsList.addAll(splitColumnCsvToList(columns));
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -245,6 +251,20 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return builder.toString();
   }
 
+  private List<String> splitColumnCsvToList(String[] columns) {
+    return Arrays.stream(columns)
+        .flatMap(column -> Arrays.stream(column.split(",")).map(String::trim))
+        .toList();
+  }
+
+  private Map<String, Object> mapClaimObjects(Object[] claim) {
+    Map<String, Object> map = new LinkedHashMap<>();
+    for (int i = 0; i < queryColumnsList.size(); i++) {
+      map.put(queryColumnsList.get(i), claim[i]);
+    }
+    return map;
+  }
+
   /**
    * Contents of the main loop to process the table.
    *
@@ -252,15 +272,17 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    */
   void executeQueryLoop(EntityManager entityManager) {
     Query query = buildQuery(getLastClaimId(), getTableEntry(), getBatchSize(), entityManager);
-    List<Tuple> claims = executeQuery(query);
+    List<Object[]> claims = executeQuery(query);
     int savedInBatch = 0;
     // This Map will allow us to save the active dates for a claim to be used in multiple
     // records with the same claim id.
     HashMap<String, Date[]> datesMap = new HashMap<>();
     // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
     // codes. */
-    for (Tuple claim : claims) {
-      savedInBatch += processClaim(claim, datesMap, entityManager);
+    Map<String, Object> columnMap = null;
+    for (Object[] claim : claims) {
+      columnMap = mapClaimObjects(claim);
+      savedInBatch += processClaim(columnMap, datesMap, entityManager);
     }
     incrementTotalSaved(savedInBatch);
     incrementTotalProcessedInInterval(claims.size());
@@ -269,7 +291,12 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     checkTimeIntervalForLogging();
     setLastClaimId(
         !claims.isEmpty()
-            ? Optional.of(String.valueOf(claims.getLast().get(tableEntry.getClaimField())))
+            ? Optional.of(
+                String.valueOf(
+                    Objects.requireNonNull(
+                            columnMap) // Should never be null if there's at least one claim in the
+                                       // list.
+                        .get(tableEntry.getClaimField())))
             : Optional.empty());
     // Write progress to the progress table, so that we can restart at the last processed
     // claim id if interrupted.

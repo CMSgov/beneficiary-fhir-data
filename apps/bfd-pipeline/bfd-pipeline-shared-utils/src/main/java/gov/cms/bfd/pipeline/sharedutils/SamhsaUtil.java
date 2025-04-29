@@ -33,7 +33,6 @@ import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
-import jakarta.persistence.TupleElement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
@@ -204,25 +203,25 @@ public class SamhsaUtil {
    * @return true if a SAMHSA tag should be created.
    */
   public boolean processCodeList(
-      Tuple claim,
+      Map<String, Object> claim,
       TableEntry tableEntry,
       Optional<Date[]> dates,
       Map<String, Date[]> datesMap,
       List<String> nonCodeFields,
       EntityManager entityManager) {
 
-    for (TupleElement element : claim.getElements()) {
-      if (nonCodeFields.contains(element.getAlias())) {
+    for (Map.Entry<String, Object> entry : claim.entrySet()) {
+      if (nonCodeFields.contains(entry.getKey())) {
         continue;
       }
-      String code = (String) claim.get(element);
+      String code = (String) entry.getValue();
       // having a continue here instead of a nested block reduces cognitive complexity.
       if (code == null) {
         continue;
       }
 
       Optional<SamhsaEntry> samhsaEntry =
-          getSamhsaCode(Optional.of(code), Optional.of(element.getAlias()));
+          getSamhsaCode(Optional.of(code), Optional.of(entry.getKey()));
       if (samhsaEntry.isPresent()) {
         Date[] datesObject =
             getDatesObjectsForClaim(
