@@ -90,7 +90,8 @@ CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
     last_id TEXT NOT NULL,
-    last_timestamp TIMESTAMPTZ NOT NULL
+    last_ts TIMESTAMPTZ NOT NULL,
+    batch_completion_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
@@ -151,7 +152,7 @@ VALUES(
     '',-- bene_line_5_adr,
     '',-- bene_line_6_adr,
     'ENG',-- cntct_lang_cd,
-    NOW(),-- idr_trans_efctv_ts,
+    '2024-01-01',-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     '9999-12-31',-- idr_updt_ts
     '2024-01-01',-- bfd_created_ts
@@ -179,7 +180,7 @@ VALUES(
     '',-- bene_line_5_adr,
     '',-- bene_line_6_adr,
     'ENG',-- cntct_lang_cd,
-    NOW(),-- idr_trans_efctv_ts,
+    '2024-01-01',-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     '9999-12-31',-- idr_updt_ts
     '2024-01-01',-- bfd_created_ts
@@ -200,7 +201,7 @@ VALUES(
     1, -- bene_sk,
     1, -- bene_xref_efctv_sk,
     '1S000000000',-- bene_mbi_id,
-    NOW(),-- idr_trans_efctv_ts,
+    '2024-01-01',-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     '9999-12-31', -- idr_updt_ts
     '2024-01-01',-- bfd_created_ts
@@ -221,9 +222,34 @@ VALUES(
     '1S000000000',-- bene_mbi_id,
     '2024-01-01',-- bene_mbi_efctv_dt
     '9999-12-31',-- bene_mbi_efctv_dt
-    NOW(),-- idr_trans_efctv_ts,
+    '2024-01-01',-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     '9999-12-31', -- idr_updt_ts
     '2024-01-01',-- bfd_created_ts
     '2024-01-01'-- bfd_updated_ts
+);
+
+INSERT INTO idr.load_progress (
+    table_name,
+    last_id,
+    last_ts,
+    batch_completion_ts
+)
+VALUES(
+    'idr.beneficiary_history',
+    '1',
+    '2024-01-01',
+    '2024-01-01 07:00:00'
+),
+(
+    'idr.beneficiary_mbi_history',
+    '1',
+    '2024-01-01',
+    '2024-01-01 07:00:00'
+),
+(
+    'idr.beneficiary',
+    '1',
+    '2024-01-01',
+    '2024-01-01 07:00:00'
 );

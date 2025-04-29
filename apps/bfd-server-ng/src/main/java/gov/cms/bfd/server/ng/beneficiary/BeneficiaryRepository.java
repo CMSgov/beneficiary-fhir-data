@@ -29,6 +29,9 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
   // 3. Use GROUP BY to filter out duplicates. There's additional info in these tables besides just
   // historical identity information, so there could be any number of duplicates relative to the
   // small amount of information we're pulling.
+  //
+  // NOTE - it would be simpler to do the WHERE NOT EXISTS on OvershareMBI after the UNION, but
+  // that doesn't appear to be supported by the JQL parser.
   @Query(
       value =
           """
@@ -45,6 +48,7 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
                     ON bene.mbi = mbiId.mbi
                     AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
+                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.mbi)
                 UNION
                 SELECT
                   beneHistory.beneSk beneSk,
@@ -59,6 +63,7 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
                   ON mbiId.mbi = beneHistory.mbi
                   AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
+                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.mbi)
               )
               SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
               FROM allBeneInfo abi
@@ -89,9 +94,34 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
           WHERE b.beneSk = :beneSk
           AND (b.meta.updatedTimestamp >= :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
           AND (b.meta.updatedTimestamp < :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
+          AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
           """)
   Optional<Beneficiary> findById(
       @Param("beneSk") long beneSk,
       @Param("lowerBound") Optional<LocalDateTime> lowerBound,
       @Param("upperBound") Optional<LocalDateTime> upperBound);
+
+  @Query(
+      value =
+          """
+          SELECT b
+          FROM Beneficiary b
+          WHERE b.mbi = :mbi
+          AND (b.meta.updatedTimestamp >= :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
+          AND (b.meta.updatedTimestamp < :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
+          AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+          """)
+  Optional<Beneficiary> findByIdentifier(
+      @Param("mbi") String mbi,
+      @Param("lowerBound") Optional<LocalDateTime> lowerBound,
+      @Param("upperBound") Optional<LocalDateTime> upperBound);
+
+  @Query(
+      value =
+          """
+          SELECT MAX(p.batchCompletionTimestamp)
+          FROM LoadProgress p
+          WHERE p.tableName IN ("idr.beneficiary", "idr.beneficiary_history", "idr.beneficiary_mbi_history")
+""")
+  LocalDateTime beneficiaryLastUpdated();
 }

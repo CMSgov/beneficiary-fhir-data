@@ -106,17 +106,25 @@ class PostgresLoader:
                         last_timestamp = last["idr_trans_efctv_ts"]
                         cur.execute(
                             f"""
-                            INSERT INTO idr.load_progress(table_name, last_id, last_timestamp)
-                            VALUES(%(table)s, %(last_id)s, %(last_timestamp)s)
-                            ON CONFLICT (table_name) DO UPDATE SET last_id = EXCLUDED.last_id, last_timestamp = EXCLUDED.last_timestamp
+                            INSERT INTO idr.load_progress(table_name, last_id, last_ts, batch_completion_ts)
+                            VALUES(%(table)s, %(last_id)s, %(last_ts)s, '9999-12-31')
+                            ON CONFLICT (table_name) DO UPDATE SET last_id = EXCLUDED.last_id, last_ts = EXCLUDED.last_ts
                             """,
                             {
                                 "table": self.table,
                                 "last_id": last_id,
-                                "last_timestamp": last_timestamp,
+                                "last_ts": last_timestamp,
                             },
                         )
-
+                # Mark the batch as completed
+                cur.execute(
+                    """
+                    UPDATE idr.load_progress
+                    SET batch_completion_ts = NOW()
+                    WHERE table_name = %(table)s
+                    """,
+                    {"table": self.table},
+                )
                 commit_timer.start()
                 self.conn.commit()
                 commit_timer.stop()
