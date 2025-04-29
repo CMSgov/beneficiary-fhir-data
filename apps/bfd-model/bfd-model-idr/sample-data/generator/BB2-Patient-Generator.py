@@ -108,7 +108,6 @@ for bb2_account in bb_accounts:
 
         mbi_obj['BENE_MBI_EFCTV_DT'] = str(efctv_dt)
         if(mbi_idx!=num_mbis-1):
-            #print("ha")
             mbi_obj['BENE_MBI_OBSLT_DT'] = fake.date_between_dates(parse(mbi_obj['BENE_MBI_EFCTV_DT']),datetime.date(year=2025-num_mbis+mbi_idx, month=1, day=1)).strftime("%Y-%m-%d")
             patient_2 = copy.deepcopy(patient)
             patient_2['BENE_MBI_ID'] = mbi
