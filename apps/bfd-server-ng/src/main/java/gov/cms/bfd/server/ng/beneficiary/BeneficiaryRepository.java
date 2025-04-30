@@ -33,6 +33,7 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
               WITH allBeneInfo AS (
                 SELECT
                   bene.beneSk beneSk,
+                  bene.xrefSk xrefSk,
                   bene.mbi mbi,
                   mbiHistory.effectiveDate effectiveDate,
                   mbiHistory.obsoleteDate obsoleteDate
@@ -45,6 +46,7 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
                 UNION
                 SELECT
                   beneHistory.beneSk beneSk,
+                  beneHistory.xrefSk xrefSk,
                   beneHistory.mbi mbi,
                   mbiHistory.effectiveDate effectiveDate,
                   mbiHistory.obsoleteDate obsoleteDate
@@ -56,9 +58,9 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
                   AND mbiHistory.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
               )
-              SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
+              SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
               FROM allBeneInfo abi
-              GROUP BY abi.beneSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate
+              GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
           """)
   List<Identity> getPatientIdentities(@Param("beneSk") long beneSk);
 

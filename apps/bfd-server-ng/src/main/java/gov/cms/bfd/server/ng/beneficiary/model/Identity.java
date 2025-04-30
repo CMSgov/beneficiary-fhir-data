@@ -29,6 +29,7 @@ public class Identity {
   // present.
   @Id Long rowId;
   Long beneSk;
+  Long xrefSk;
   Optional<String> mbi;
   Optional<LocalDate> mbiEffectiveDate;
   Optional<LocalDate> mbiObsoleteDate;
@@ -38,6 +39,7 @@ public class Identity {
    *
    * @param rowId row ID from the query that created this object
    * @param beneSk bene_sk from the database
+   * @param xrefSk bene_xref_sk from the database
    * @param mbi MBI from the database
    * @param mbiEffectiveDate MBI effective date
    * @param mbiObsoleteDate MBI obsolete date
@@ -45,11 +47,13 @@ public class Identity {
   public Identity(
       Long rowId,
       Long beneSk,
+      Long xrefSk,
       String mbi,
       Optional<LocalDate> mbiEffectiveDate,
       Optional<LocalDate> mbiObsoleteDate) {
     this.rowId = rowId;
     this.beneSk = beneSk;
+    this.xrefSk = xrefSk;
     this.mbi = Optional.ofNullable(mbi);
     this.mbiEffectiveDate = mbiEffectiveDate;
     this.mbiObsoleteDate = mbiObsoleteDate;
@@ -86,18 +90,32 @@ public class Identity {
    * Transforms the identity record to a {@link Patient.PatientLinkComponent} if the bene_sk is
    * different from the current beneficiary's bene_sk.
    *
-   * @param currentPatient current version of the beneficiary
+   * @param patientToCompare current version of the beneficiary
    * @return patient link
    */
-  public Optional<Patient.PatientLinkComponent> toFhirLink(Patient currentPatient) {
-    var currentSk = currentPatient.getId();
-    if (!beneSk.toString().equals(currentSk)) {
-      var link = new Patient.PatientLinkComponent();
-      link.setType(Patient.LinkType.REPLACES);
-      link.setOther(new Reference(currentPatient));
-      return Optional.of(link);
-    } else {
-      return Optional.empty();
+  public Optional<Patient.PatientLinkComponent> toFhirLink(Patient patientToCompare) {
+    var compareSk = patientToCompare.getId();
+    var beneSkStr = beneSk.toString();
+    var xrefSkStr = xrefSk.toString();
+    var beneSkMatches = beneSkStr.equals(compareSk);
+    var currentIsXref = xrefSkStr.equals(beneSkStr);
+    var compareIsXref = xrefSkStr.equals(compareSk);
+
+    if (currentIsXref && !beneSkMatches) {
+      return Optional.of(createLink(Patient.LinkType.REPLACEDBY));
     }
+
+    if (compareIsXref && !beneSkMatches) {
+      return Optional.of(createLink(Patient.LinkType.REPLACES));
+    }
+
+    return Optional.empty();
+  }
+
+  private Patient.PatientLinkComponent createLink(Patient.LinkType linkType) {
+    var link = new Patient.PatientLinkComponent();
+    link.setType(linkType);
+    link.setOther(new Reference(beneSk.toString()));
+    return link;
   }
 }
