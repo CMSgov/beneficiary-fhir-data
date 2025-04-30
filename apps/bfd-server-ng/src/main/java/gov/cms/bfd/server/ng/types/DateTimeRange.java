@@ -25,15 +25,15 @@ public record DateTimeRange(
     return upperBound.map(DateTimeBound::bound);
   }
 
-  public String lowerBoundOperator() {
-    return getOperator(lowerBound, ">", ">=");
+  public String getLowerBoundSqlOperator() {
+    return getSqlOperator(lowerBound, ">", ">=");
   }
 
-  public String upperBoundOperator() {
-    return getOperator(upperBound, "<", "<=");
+  public String getUpperBoundSqlOperator() {
+    return getSqlOperator(upperBound, "<", "<=");
   }
 
-  private String getOperator(
+  private String getSqlOperator(
       Optional<DateTimeBound> bound, String exclusiveOperator, String inclusiveOperator) {
     return bound
         .map(
@@ -42,6 +42,8 @@ public record DateTimeRange(
                   case DateTimeBoundType.EXLCUSIVE -> exclusiveOperator;
                   case DateTimeBoundType.INCLUSIVE -> inclusiveOperator;
                 })
+        // If this case as hit, the boundary condition is null, so the value here has no effect
+        // We need to return something to make the SQL query valid though.
         .orElse("!=");
   }
 }
