@@ -26,23 +26,21 @@ public record DateTimeRange(
   }
 
   public String lowerBoundOperator() {
-    return lowerBound
-        .map(
-            b ->
-                switch (b.boundType()) {
-                  case DateTimeBoundType.EXLCUSIVE -> ">";
-                  case DateTimeBoundType.INCLUSIVE -> ">=";
-                })
-        .orElse("!=");
+    return getOperator(lowerBound, ">", ">=");
   }
 
   public String upperBoundOperator() {
-    return lowerBound
+    return getOperator(upperBound, "<", "<=");
+  }
+
+  private String getOperator(
+      Optional<DateTimeBound> bound, String exclusiveOperator, String inclusiveOperator) {
+    return bound
         .map(
             b ->
                 switch (b.boundType()) {
-                  case DateTimeBoundType.EXLCUSIVE -> "<";
-                  case DateTimeBoundType.INCLUSIVE -> "<=";
+                  case DateTimeBoundType.EXLCUSIVE -> exclusiveOperator;
+                  case DateTimeBoundType.INCLUSIVE -> inclusiveOperator;
                 })
         .orElse("!=");
   }
