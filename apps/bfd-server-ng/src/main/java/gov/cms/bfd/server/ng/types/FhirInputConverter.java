@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.jetbrains.annotations.Nullable;
 
 public class FhirInputConverter {
-  public static DateTimeRange toDateTimeRange(DateRangeParam dateRangeParam) {
+  public static DateTimeRange toDateTimeRange(@Nullable DateRangeParam dateRangeParam) {
     if (dateRangeParam == null) {
       return new DateTimeRange();
     }
@@ -19,7 +19,7 @@ public class FhirInputConverter {
     return new DateTimeRange(dateRangeParam);
   }
 
-  public static Long toLong(IdType id) {
+  public static Long toLong(@Nullable IdType id) {
     if (id == null) {
       throw new InvalidRequestException("ID is missing");
     }
@@ -30,9 +30,12 @@ public class FhirInputConverter {
     }
   }
 
-  public static String toString(TokenParam tokenParam) {
-    if (tokenParam.getValueNotNull().isBlank()) {
+  public static String toString(@Nullable TokenParam tokenParam, String expectedSystem) {
+    if (tokenParam == null || tokenParam.getValueNotNull().isBlank()) {
       throw new InvalidRequestException("Value is missing");
+    }
+    if (!expectedSystem.equals(tokenParam.getSystem())) {
+      throw new InvalidRequestException("Invalid or missing system");
     }
     return tokenParam.getValue();
   }
