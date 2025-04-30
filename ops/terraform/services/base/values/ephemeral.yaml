@@ -47,7 +47,7 @@
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
-/bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
+/bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "false"
 /bfd/${env}/server/nonsensitive/lb_is_public: false
 /bfd/${env}/server/nonsensitive/launch_template_volume_iops: 3000
 /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 60
@@ -79,3 +79,6 @@
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
