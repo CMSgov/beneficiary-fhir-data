@@ -1,3 +1,66 @@
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByDateExact=[
+{
+  "entry" : [ {
+    "resource" : {
+      "address" : [ {
+        "city" : "RICHMOND",
+        "line" : [ "100 MAIN ST" ],
+        "postalCode" : "22473",
+        "state" : "VA"
+      } ],
+      "birthDate" : "1960-01-01",
+      "communication" : [ {
+        "language" : {
+          "coding" : [ {
+            "code" : "en",
+            "system" : "urn:ietf:bcp:47"
+          } ]
+        }
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode" : "248152002"
+      }, {
+        "extension" : [ {
+          "url" : "ombCategory",
+          "valueCoding" : {
+            "code" : "2106-3",
+            "display" : "White",
+            "system" : "urn:oid:2.16.840.1.113883.6.238"
+          }
+        }, {
+          "url" : "text",
+          "valueCode" : "White"
+        } ],
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ],
+      "gender" : "female",
+      "id" : "1",
+      "meta" : {
+        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+      },
+      "name" : [ {
+        "family" : "NORRIS",
+        "given" : [ "CHUCK", "R" ]
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient?_id=1&_lastUpdated=2024-01-01"
+  } ],
+  "meta" : {
+    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById=[
 {
   "entry" : [ {
