@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.types.FhirInputConverter;
@@ -77,11 +76,9 @@ public class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER) final TokenParam identifier,
       @OptionalParam(name = Constants.PARAM_LASTUPDATED) final DateRangeParam lastUpdated) {
-    if (!SystemUrls.CMS_MBI.equals(identifier.getSystem())) {
-      throw new InvalidRequestException("Invalid or missing system");
-    }
     return patientHandler.searchByIdentifier(
-        FhirInputConverter.toString(identifier), FhirInputConverter.toDateTimeRange(lastUpdated));
+        FhirInputConverter.toString(identifier, SystemUrls.CMS_MBI),
+        FhirInputConverter.toDateTimeRange(lastUpdated));
   }
 
   /**

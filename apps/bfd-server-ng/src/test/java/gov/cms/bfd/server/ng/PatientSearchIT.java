@@ -11,12 +11,12 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class PatientSearchIT extends IntegrationTestBase {
@@ -144,5 +144,43 @@ public class PatientSearchIT extends IntegrationTestBase {
                     .day(DateUtil.toDate(LocalDateTime.parse("2024-01-01T00:00:00"))))
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
+  }
+
+  @ParameterizedTest
+  @EmptySource
+  void patientSearchEmptyIdBadRequest(String id) {
+    assertThrows(
+        InvalidRequestException.class,
+        () ->
+            searchBundle()
+                .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier(id))
+                .execute());
+  }
+
+  @ParameterizedTest
+  @EmptySource
+  void patientSearchEmptyIdentifierBadRequest(String id) {
+    assertThrows(
+        InvalidRequestException.class,
+        () ->
+            searchBundle()
+                .where(
+                    new TokenClientParam(Patient.SP_IDENTIFIER)
+                        .exactly()
+                        .systemAndIdentifier(Patient.SP_IDENTIFIER, id))
+                .execute());
+  }
+
+  @Test
+  void patientSearchDateOnlyBadRequest() {
+    assertThrows(
+        InvalidRequestException.class,
+        () ->
+            searchBundle()
+                .where(
+                    new DateClientParam(Constants.PARAM_LASTUPDATED)
+                        .afterOrEquals()
+                        .day(DateUtil.toDate(LocalDateTime.parse("2024-01-01T00:00:00"))))
+                .execute());
   }
 }
