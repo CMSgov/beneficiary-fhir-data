@@ -3,7 +3,7 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   service              = "server-metrics"
-  relative_module_root = "ops/services/server-metrics"
+  relative_module_root = "ops/services/06-server-metrics"
 }
 
 locals {
