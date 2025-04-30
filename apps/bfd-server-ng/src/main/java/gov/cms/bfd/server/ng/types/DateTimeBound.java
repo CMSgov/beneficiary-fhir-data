@@ -11,6 +11,11 @@ import java.time.LocalDateTime;
  * @param boundType Denotes if the bound is inclusive or exclusive
  */
 public record DateTimeBound(LocalDateTime bound, DateTimeBoundType boundType) {
+  /**
+   * Creates a new {@link DateTimeBound} from a {@link DateParam}.
+   *
+   * @param dateParam FHIR date param
+   */
   public DateTimeBound(DateParam dateParam) {
     this(
         DateUtil.toLocalDateTime(dateParam.getValue()),

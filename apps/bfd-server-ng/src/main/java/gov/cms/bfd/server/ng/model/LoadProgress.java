@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+/** Table that tracks the IDR load progress for each table. */
 @Entity
 @Table(name = "load_progress", schema = "idr")
 public class LoadProgress {

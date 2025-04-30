@@ -7,26 +7,51 @@ import gov.cms.bfd.server.ng.types.DateTimeRange;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
+/**
+ * Handler methods for the Patient resource. This is called after the FHIR inputs from the resource
+ * provider are converted into input types that are easier to work with.
+ */
 @Component
 @RequiredArgsConstructor
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
 
+  /**
+   * Returns a {@link Patient} by their {@link IdType}.
+   *
+   * @param fhirId FHIR ID
+   * @return patient
+   */
   public Optional<Patient> find(final Long fhirId) {
     var beneficiary = beneficiaryRepository.findById(fhirId, new DateTimeRange());
     return beneficiary.map(this::toFhir);
   }
 
+  /**
+   * Searches for a Patient by ID.
+   *
+   * @param fhirId FHIR ID
+   * @param lastUpdated last updated datetime
+   * @return bundle
+   */
   public Bundle searchByLogicalId(final Long fhirId, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
     return singleOrDefaultBundle(beneficiary);
   }
 
+  /**
+   * Searches for a Patient by identifier.
+   *
+   * @param identifier identifier
+   * @param lastUpdated last updated datetime
+   * @return bundle
+   */
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
 

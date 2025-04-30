@@ -21,10 +21,23 @@ public class DateUtil {
     return Date.from(localDate.atStartOfDay(TIME_ZONE_UTC.toZoneId()).toInstant());
   }
 
-  public static Date toDate(LocalDateTime localDate) {
-    return Date.from(localDate.toInstant(ZoneOffset.UTC));
+  /**
+   * Converts the {@link LocalDateTime} to a {@link Date} object with the same date and time info.
+   *
+   * @param localDateTime local datetime instance
+   * @return date instance
+   */
+  public static Date toDate(LocalDateTime localDateTime) {
+    return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
   }
 
+  /**
+   * Converts the {@link Date} instance to a {@link LocalDateTime} instance with the same date and
+   * time info.
+   *
+   * @param date date
+   * @return local datetime
+   */
   public static LocalDateTime toLocalDateTime(Date date) {
     return date.toInstant().atZone(TIME_ZONE_UTC.toZoneId()).toLocalDateTime();
   }
