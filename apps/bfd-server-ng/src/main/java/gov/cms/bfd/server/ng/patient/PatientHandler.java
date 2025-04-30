@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
 
-  public Optional<Patient> find(Long fhirId) {
-    var beneficiary = beneficiaryRepository.findById(fhirId);
+  public Optional<Patient> find(final Long fhirId) {
+    var beneficiary = beneficiaryRepository.findById(fhirId, new DateTimeRange());
     return beneficiary.map(this::toFhir);
   }
 
