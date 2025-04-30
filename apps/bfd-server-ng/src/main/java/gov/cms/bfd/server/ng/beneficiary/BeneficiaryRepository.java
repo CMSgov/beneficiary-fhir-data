@@ -74,35 +74,20 @@ public class BeneficiaryRepository {
               SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
               FROM allBeneInfo abi
               GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
-          """,
+            """,
             Identity.class)
         .setParameter("beneSk", beneSk)
         .getResultList();
   }
 
   /**
-   * Retrieve a {@link Beneficiary} record by its ID.
-   *
-   * @param beneSk bene surrogate key
-   * @return beneficiary record
-   */
-  public Optional<Beneficiary> findById(long beneSk) {
-    return entityManager
-        .createQuery("SELECT b FROM Beneficiary b WHERE beneSk = :beneSk", Beneficiary.class)
-        .setParameter("beneSk", beneSk)
-        .getResultList()
-        .stream()
-        .findFirst();
-  }
-
-  /**
    * Retrieve a {@link Beneficiary} record by its ID and last updated timestamp.
    *
    * @param beneSk bene surrogate key
+   * @param lastUpdatedRange last updated search range
    * @return beneficiary record
    */
-  public Optional<Beneficiary> findById(long beneSk, DateTimeRange dateTimeRange) {
-
+  public Optional<Beneficiary> findById(long beneSk, DateTimeRange lastUpdatedRange) {
     return entityManager
         .createQuery(
             String.format(
@@ -110,50 +95,62 @@ public class BeneficiaryRepository {
           SELECT b
           FROM Beneficiary b
           WHERE b.beneSk = :beneSk
-            AND (b.meta.updatedTimestamp %s :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
-            AND (b.meta.updatedTimestamp %s :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
+            AND ((cast(:lowerBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+            AND ((cast(:upperBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
             AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
           """,
-                dateTimeRange.lowerBoundOperator(), dateTimeRange.upperBoundOperator()),
+                lastUpdatedRange.lowerBoundOperator(), lastUpdatedRange.upperBoundOperator()),
             Beneficiary.class)
         .setParameter("beneSk", beneSk)
-        .setParameter("lowerBound", dateTimeRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", dateTimeRange.getUpperBoundDateTime().orElse(null))
+        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()
         .stream()
         .findFirst();
   }
 
-  public Optional<Beneficiary> findByIdentifier(String mbi, DateTimeRange dateTimeRange) {
+  /**
+   * Retrieve a {@link Beneficiary} record by its MBI and last updated timestamp.
+   *
+   * @param mbi bene MBI
+   * @param lastUpdatedRange last updated search range
+   * @return beneficiary record
+   */
+  public Optional<Beneficiary> findByIdentifier(String mbi, DateTimeRange lastUpdatedRange) {
     return entityManager
         .createQuery(
             String.format(
                 """
-                  SELECT b
-                  FROM Beneficiary b
-                  WHERE b.mbi = :mbi
-                    AND (b.meta.updatedTimestamp %s :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
-                    AND (b.meta.updatedTimestamp %s :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
-                    AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
-                  """,
-                dateTimeRange.lowerBoundOperator(), dateTimeRange.upperBoundOperator()),
+                SELECT b
+                FROM Beneficiary b
+                WHERE b.mbi = :mbi
+                  AND (b.meta.updatedTimestamp %s :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
+                  AND (b.meta.updatedTimestamp %s :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+                """,
+                lastUpdatedRange.lowerBoundOperator(), lastUpdatedRange.upperBoundOperator()),
             Beneficiary.class)
         .setParameter("mbi", mbi)
-        .setParameter("lowerBound", dateTimeRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", dateTimeRange.getUpperBoundDateTime().orElse(null))
+        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()
         .stream()
         .findFirst();
   }
 
+  /**
+   * Returns the last updated timestamp for the beneficiary data ingestion process.
+   *
+   * @return last updated timestamp
+   */
   public LocalDateTime beneficiaryLastUpdated() {
     return entityManager
         .createQuery(
             """
-          SELECT MAX(p.batchCompletionTimestamp)
-          FROM LoadProgress p
-          WHERE p.tableName IN ("idr.beneficiary", "idr.beneficiary_history", "idr.beneficiary_mbi_history")
-""",
+              SELECT MAX(p.batchCompletionTimestamp)
+              FROM LoadProgress p
+              WHERE p.tableName IN ("idr.beneficiary", "idr.beneficiary_history", "idr.beneficiary_mbi_history")
+              """,
             LocalDateTime.class)
         .getResultList()
         .stream()
