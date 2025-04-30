@@ -81,10 +81,14 @@ data "aws_iam_policy_document" "ssm_params" {
       "ssm:GetParameters",
       "ssm:GetParameter"
     ]
-    resources = [
+    resources = flatten([
       for hierarchy in local.server_ssm_hierarchies
-      : "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*"
-    ]
+      : [
+        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(hierarchy, "/")}/*",
+        # TODO: Remove this, and flatten, when "/ng/" prefix is removed from new config
+        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(replace(hierarchy, "/ng/", ""), "/")}/*",
+      ]
+    ])
   }
 
   statement {
@@ -99,26 +103,6 @@ resource "aws_iam_policy" "ssm_params" {
   path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS service containers to get required SSM parameeters"
   policy      = data.aws_iam_policy_document.ssm_params.json
-}
-
-data "aws_iam_policy_document" "ecs_exec" {
-  statement {
-    sid = "AllowECSExec"
-    actions = [
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:CreateControlChannel"
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "ecs_exec" {
-  name        = "${local.name_prefix}-ecs-exec-policy"
-  path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.service} ECS service containers to use ECS Exec"
-  policy      = data.aws_iam_policy_document.ecs_exec.json
 }
 
 data "aws_iam_policy_document" "ecs_service_role_assume" {
@@ -147,7 +131,6 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     rds           = aws_iam_policy.rds.arn
     logs          = aws_iam_policy.logs.arn
     ssm_params    = aws_iam_policy.ssm_params.arn
-    ecs_exec      = aws_iam_policy.ecs_exec.arn
   }
 
   role       = aws_iam_role.service_role.name

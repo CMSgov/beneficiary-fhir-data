@@ -36,26 +36,6 @@ resource "aws_iam_policy" "ssm_params" {
   policy      = data.aws_iam_policy_document.ssm_params.json
 }
 
-data "aws_iam_policy_document" "ecs_exec" {
-  statement {
-    sid = "AllowECSExec"
-    actions = [
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:CreateControlChannel"
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "ecs_exec" {
-  name        = "${local.name_prefix}-ecs-exec-policy"
-  path        = local.iam_path
-  description = "Permissions for the ${local.env} ${local.service} ECS task containers to use ECS Exec"
-  policy      = data.aws_iam_policy_document.ecs_exec.json
-}
-
 resource "aws_iam_role" "task" {
   name                  = "${local.name_prefix}-task-role"
   path                  = local.iam_path
@@ -68,7 +48,6 @@ resource "aws_iam_role" "task" {
 resource "aws_iam_role_policy_attachment" "task" {
   for_each = {
     ssm_params = aws_iam_policy.ssm_params.arn
-    ecs_exec   = aws_iam_policy.ecs_exec.arn
   }
 
   role       = aws_iam_role.task.name
