@@ -1,8 +1,8 @@
 [
   {
-    "name": "bfd-mgmt-base-jdk",
-    "dockerfile": "ops/images/bfd-mgmt-base-jdk/Dockerfile",
-    "contextDir": "ops/images/bfd-mgmt-base-jdk",
+    "name": "bfd-mgmt-base-java",
+    "dockerfile": "ops/images/bfd-mgmt-base-java/Dockerfile",
+    "contextDir": "ops/images/bfd-mgmt-base-java",
     "platform": "linux/arm64"
   },
   {

@@ -107,7 +107,7 @@ jobs:
       awsRegion: ${{ inputs.awsRegion }}
       # Build the base images prior to building the application images with jib in "run-mvn-release"
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
-      imagesCsv: "bfd-mgmt-base-jdk, bfd-mgmt-base-python"
+      imagesCsv: "bfd-mgmt-base-java, bfd-mgmt-base-python"
     secrets: inherit
 
   run-mvn-release:
