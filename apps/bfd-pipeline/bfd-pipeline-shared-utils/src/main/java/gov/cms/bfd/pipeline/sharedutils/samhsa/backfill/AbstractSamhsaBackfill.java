@@ -89,6 +89,13 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   @Getter @Setter List<String> queryColumnsList = new ArrayList<>();
 
+  // Map of columns to column values. Reused to save clock cycles for creation.
+  Map<String, Object> columnMap = new LinkedHashMap<>();
+
+  // This Map will allow us to save the active dates for a claim to be used in multiple
+  // records with the same claim id. Reused to save clock cycles for creation.
+  HashMap<String, LocalDate[]> datesMap = new HashMap<>();
+
   /**
    * Constructor.
    *
@@ -261,11 +268,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
   }
 
   private Map<String, Object> mapClaimObjects(Object[] claim) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    columnMap.clear();
     for (int i = 0; i < queryColumnsList.size(); i++) {
-      map.put(queryColumnsList.get(i), claim[i]);
+      columnMap.put(queryColumnsList.get(i), claim[i]);
     }
-    return map;
+    return columnMap;
   }
 
   /**
@@ -277,12 +284,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     Query query = buildQuery(getLastClaimId(), getTableEntry(), getBatchSize(), entityManager);
     List<Object[]> claims = executeQuery(query);
     int savedInBatch = 0;
-    // This Map will allow us to save the active dates for a claim to be used in multiple
-    // records with the same claim id.
-    HashMap<String, LocalDate[]> datesMap = new HashMap<>();
+    // Clear the dates from the previous claim. Try and save some clock cycles by reusing the dates
+    // HashMap.
+    datesMap.clear();
     // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
     // codes. */
-    Map<String, Object> columnMap = null;
     for (Object[] claim : claims) {
       columnMap = mapClaimObjects(claim);
       savedInBatch += processClaim(columnMap, datesMap, entityManager);
@@ -295,11 +301,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     setLastClaimId(
         !claims.isEmpty()
             ? Optional.of(
-                String.valueOf(
-                    Objects.requireNonNull(
-                            columnMap) // Should never be null if there's at least one claim in the
-                        // list.
-                        .get(tableEntry.getClaimField())))
+                String.valueOf(Objects.requireNonNull(columnMap).get(tableEntry.getClaimField())))
             : Optional.empty());
     // Write progress to the progress table, so that we can restart at the last processed
     // claim id if interrupted.

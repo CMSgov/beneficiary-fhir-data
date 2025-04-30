@@ -32,7 +32,6 @@ import gov.cms.bfd.pipeline.sharedutils.model.TagDetails;
 import gov.cms.bfd.sharedutils.TagCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import jakarta.persistence.Tuple;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
@@ -103,6 +102,22 @@ public class SamhsaUtil {
 
   /** idr_proc_code constant. */
   public static final String IDR_PROC_CODE = "idr_proc_code";
+
+  /**
+   * Diagnosis column portions. All diagnosis columns will contain one of these values in the name.
+   */
+  public static final String DIAG_COLUMN_PORTION[] = {"diag", "dgns", "rsn_visit"};
+
+  /**
+   * Procedure column portions. All procedure columns will contain one of these values in the name.
+   */
+  public static final String PROC_COLUMN_PORTION[] = {"prcdr", "proc"};
+
+  /** HCPCS column portions. All HCPCS columns will contain one of these values in the name. */
+  public static final String HCPCS_COLUMN_PORTION[] = {"hcpc", "hcpcs", "hipps"};
+
+  /** DRG column portions. All DRG columns will contain one of these values in the name. */
+  public static final String DRG_COLUMN_PORTION[] = {"drg"};
 
   /** Map of the SAMHSA code entries, with the entry's system as the key. */
   private static Map<String, List<SamhsaEntry>> samhsaMap = new HashMap<>();
@@ -185,12 +200,10 @@ public class SamhsaUtil {
         Map.of("claimTable", tableEntry.getParentTable(), "claimField", tableEntry.getClaimField());
     StringSubstitutor strSub = new StringSubstitutor(params);
     String queryStr = strSub.replace(tableEntry.getDatesQuery());
-    Query query = entityManager.createNativeQuery(queryStr, Tuple.class);
+    Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("claimId", claimId);
-    Tuple result = (Tuple) query.getSingleResult();
-    return new LocalDate[] {
-      ((Date) result.get(0)).toLocalDate(), ((Date) result.get(1)).toLocalDate()
-    };
+    Object[] result = (Object[]) query.getSingleResult();
+    return new LocalDate[] {((Date) result[0]).toLocalDate(), ((Date) result[1]).toLocalDate()};
   }
 
   /**
@@ -285,9 +298,9 @@ public class SamhsaUtil {
   private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
 
   private static SamhsaEntry getEntryForCode(String columnName, String code) {
-    List<String> columnSystems = getSystemsForColumn(columnName);
+    String[] columnSystems = getSystemsForColumn(columnName);
     // Get the entry that this code belongs to by filtering
-    return columnSystems.stream()
+    return Arrays.stream(columnSystems)
         .flatMap(c -> samhsaMap.get(c).stream())
         .filter(e -> e.getCode().equals(code))
         .findFirst()
@@ -300,24 +313,33 @@ public class SamhsaUtil {
    * @param columnName The column name.
    * @return A list of systems that the column may belong to.
    */
-  public static List<String> getSystemsForColumn(String columnName) {
-    String DIAG_REGEX = ".*(diag|dgns|rsn_visit).*";
-    String PROC_REGEX = ".*(prcdr|proc).*";
-    String HCPCS_REGEX = ".*(hcpc|hcpcs|hipps).*";
-    String DRG_REGEX = ".*(drg).*";
-    if (columnName.matches(DIAG_REGEX)) {
-      return List.of(DGNS_SYSTEMS);
+  public static String[] getSystemsForColumn(String columnName) {
+    if (columnMatchesCodeType(columnName, DIAG_COLUMN_PORTION)) {
+      return DGNS_SYSTEMS;
     }
-    if (columnName.matches(PROC_REGEX)) {
-      return List.of(PRCDR_SYSTEMS);
+    if (columnMatchesCodeType(columnName, PROC_COLUMN_PORTION)) {
+      return PRCDR_SYSTEMS;
     }
-    if (columnName.matches(HCPCS_REGEX)) {
-      return List.of(HCPCS_SYSTEMS);
+    if (columnMatchesCodeType(columnName, HCPCS_COLUMN_PORTION)) {
+      return HCPCS_SYSTEMS;
     }
-    if (columnName.matches(DRG_REGEX)) {
-      return List.of(DRG_SYSTEMS);
+    if (columnMatchesCodeType(columnName, DRG_COLUMN_PORTION)) {
+      return DRG_SYSTEMS;
     }
-    return Collections.emptyList();
+    return new String[] {};
+  }
+
+  /**
+   * Checks if a column contains the String in a name portion. This allows us to generalize the
+   * column names to diagnosis, procedure, DRG, or HCPCS without needing to know the full name of
+   * all the columns.
+   *
+   * @param columnName The column to check.
+   * @param columnPortion The column name portion.
+   * @return True if the column contains the name portion.
+   */
+  private static boolean columnMatchesCodeType(String columnName, String[] columnPortion) {
+    return Arrays.stream(columnPortion).anyMatch(columnName::contains);
   }
 
   /**
