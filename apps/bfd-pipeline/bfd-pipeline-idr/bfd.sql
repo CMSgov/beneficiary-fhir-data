@@ -10,7 +10,6 @@ CREATE TABLE idr.beneficiary(
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
         AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
-    bene_ssn_num VARCHAR(9) NOT NULL,
     bene_1st_name VARCHAR(30) NOT NULL,
     bene_midl_name VARCHAR(15) NOT NULL,
     bene_last_name VARCHAR(40) NOT NULL,
@@ -31,6 +30,7 @@ CREATE TABLE idr.beneficiary(
     cntct_lang_cd VARCHAR(3) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
@@ -41,20 +41,21 @@ CREATE TABLE idr.beneficiary_history(
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS
         AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
-    bene_ssn_num VARCHAR(9) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
-CREATE TABLE idr.beneficiary_mbi_history (
+CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_mbi_efctv_dt DATE NOT NULL,
     bene_mbi_obslt_dt DATE NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)

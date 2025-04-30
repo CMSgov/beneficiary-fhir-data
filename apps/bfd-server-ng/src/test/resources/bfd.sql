@@ -10,7 +10,6 @@ CREATE TABLE idr.beneficiary(
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
         AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
-    bene_ssn_num VARCHAR(9) NOT NULL,
     bene_1st_name VARCHAR(30) NOT NULL,
     bene_midl_name VARCHAR(15) NOT NULL,
     bene_last_name VARCHAR(40) NOT NULL,
@@ -31,6 +30,7 @@ CREATE TABLE idr.beneficiary(
     cntct_lang_cd VARCHAR(3) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
@@ -41,20 +41,21 @@ CREATE TABLE idr.beneficiary_history(
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS
         AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
-    bene_ssn_num VARCHAR(9) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
 
-CREATE TABLE idr.beneficiary_mbi_history (
+CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_mbi_efctv_dt DATE NOT NULL,
     bene_mbi_obslt_dt DATE NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
@@ -70,6 +71,7 @@ CREATE TABLE idr.beneficiary_election_period_usage (
     bene_enrlmt_efctv_dt DATE,
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt)
@@ -79,6 +81,7 @@ CREATE TABLE idr.contract_pbp_number (
     cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
     cntrct_drug_plan_ind_cd VARCHAR(1),
     cntrct_pbp_type_cd VARCHAR(2),
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
@@ -103,7 +106,6 @@ INSERT INTO idr.beneficiary(
     bene_sk,
     bene_xref_efctv_sk,
     bene_mbi_id,
-    bene_ssn_num,
     bene_1st_name,
     bene_midl_name,
     bene_last_name,
@@ -124,13 +126,13 @@ INSERT INTO idr.beneficiary(
     cntct_lang_cd,
     idr_trans_efctv_ts,
     idr_trans_obslt_ts,
+    idr_updt_ts,
     bfd_created_ts,
     bfd_updated_ts)
 VALUES(
     1, -- bene_sk,
     1, -- bene_xref_efctv_sk,
     '1S000000000',-- bene_mbi_id,
-    '000000000',-- bene_ssn_num,
     'CHUCK',-- bene_1st_name,
     'R',-- bene_midl_name,
     'NORRIS',-- bene_last_name,
@@ -151,14 +153,14 @@ VALUES(
     'ENG',-- cntct_lang_cd,
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
-    '2024-01-01',-- idr_created_ts
-    '2024-01-01'-- idr_updated_ts
+    '9999-12-31',-- idr_updt_ts
+    '2024-01-01',-- bfd_created_ts
+    '2024-01-01'-- bfd_updated_ts
 ),
 (
     2, -- bene_sk,
     2, -- bene_xref_efctv_sk,
     '1S000000001',-- bene_mbi_id,
-    '000000001',-- bene_ssn_num,
     'BOB',-- bene_1st_name,
     'J',-- bene_midl_name,
     'SAGET',-- bene_last_name,
@@ -179,17 +181,18 @@ VALUES(
     'ENG',-- cntct_lang_cd,
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
-    '2024-01-01',-- idr_created_ts
-    '2024-01-01'-- idr_updated_ts
+    '9999-12-31',-- idr_updt_ts
+    '2024-01-01',-- bfd_created_ts
+    '2024-01-01'-- bfd_updated_ts
 );
 
 INSERT INTO idr.beneficiary_history(
     bene_sk,
     bene_xref_efctv_sk,
     bene_mbi_id,
-    bene_ssn_num,
     idr_trans_efctv_ts,
     idr_trans_obslt_ts,
+    idr_updt_ts,
     bfd_created_ts,
     bfd_updated_ts
 )
@@ -197,19 +200,20 @@ VALUES(
     1, -- bene_sk,
     1, -- bene_xref_efctv_sk,
     '1S000000000',-- bene_mbi_id,
-    '000000000',-- bene_ssn_num,
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
+    '9999-12-31', -- idr_updt_ts
     '2024-01-01',-- bfd_created_ts
     '2024-01-01'-- bfd_updated_ts
 );
 
-INSERT INTO idr.beneficiary_mbi_history (
+INSERT INTO idr.beneficiary_mbi_id (
     bene_mbi_id,
     bene_mbi_efctv_dt,
     bene_mbi_obslt_dt,
     idr_trans_efctv_ts,
     idr_trans_obslt_ts,
+    idr_updt_ts,
     bfd_created_ts,
     bfd_updated_ts
 )
@@ -219,6 +223,7 @@ VALUES(
     '9999-12-31',-- bene_mbi_efctv_dt
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
+    '9999-12-31', -- idr_updt_ts
     '2024-01-01',-- bfd_created_ts
     '2024-01-01'-- bfd_updated_ts
 );

@@ -41,9 +41,7 @@ class TestPipeline:
         assert rows[0]["bene_sk"] == 1
         assert rows[0]["bene_mbi_id"] == "1S000000000"
 
-        cur = conn.execute(
-            "select * from idr.beneficiary_mbi_history order by bene_mbi_id"
-        )
+        cur = conn.execute("select * from idr.beneficiary_mbi_id order by bene_mbi_id")
         assert cur.rowcount == 1
         assert rows[0]["bene_mbi_id"] == "1S000000000"
 

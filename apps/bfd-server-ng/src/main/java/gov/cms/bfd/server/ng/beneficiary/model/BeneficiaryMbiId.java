@@ -9,8 +9,8 @@ import java.util.Optional;
 
 /** Entity representing the beneficiary MBI history table. */
 @Entity
-@Table(name = "beneficiary_mbi_history", schema = "idr")
-public class BeneficiaryMbiHistory {
+@Table(name = "beneficiary_mbi_id", schema = "idr")
+public class BeneficiaryMbiId {
   @Id
   @Column(name = "bene_mbi_id")
   private String mbi;

@@ -35,27 +35,27 @@ public interface BeneficiaryRepository extends Repository<Beneficiary, Long> {
                   bene.beneSk beneSk,
                   bene.xrefSk xrefSk,
                   bene.mbi mbi,
-                  mbiHistory.effectiveDate effectiveDate,
-                  mbiHistory.obsoleteDate obsoleteDate
+                  mbiId.effectiveDate effectiveDate,
+                  mbiId.obsoleteDate obsoleteDate
                 FROM
                   Beneficiary bene
-                  LEFT JOIN BeneficiaryMbiHistory mbiHistory
-                    ON bene.mbi = mbiHistory.mbi
-                    AND mbiHistory.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                  LEFT JOIN BeneficiaryMbiId mbiId
+                    ON bene.mbi = mbiId.mbi
+                    AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
                 UNION
                 SELECT
                   beneHistory.beneSk beneSk,
                   beneHistory.xrefSk xrefSk,
                   beneHistory.mbi mbi,
-                  mbiHistory.effectiveDate effectiveDate,
-                  mbiHistory.obsoleteDate obsoleteDate
+                  mbiId.effectiveDate effectiveDate,
+                  mbiId.obsoleteDate obsoleteDate
                 FROM Beneficiary bene
                 JOIN BeneficiaryHistory beneHistory
                   ON beneHistory.xrefSk = bene.xrefSk
-                LEFT JOIN BeneficiaryMbiHistory mbiHistory
-                  ON mbiHistory.mbi = beneHistory.mbi
-                  AND mbiHistory.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                LEFT JOIN BeneficiaryMbiId mbiId
+                  ON mbiId.mbi = beneHistory.mbi
+                  AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
               )
               SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)

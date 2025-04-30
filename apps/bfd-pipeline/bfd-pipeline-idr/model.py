@@ -26,7 +26,6 @@ class IdrBeneficiary(BaseModel):
     bene_sk: int
     bene_xref_efctv_sk: int
     bene_mbi_id: str
-    bene_ssn_num: str
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_null_string)]
     bene_last_name: str
@@ -47,15 +46,16 @@ class IdrBeneficiary(BaseModel):
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
 
 
 class IdrBeneficiaryHistory(BaseModel):
     bene_sk: int
     bene_xref_efctv_sk: int
     bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
-    bene_ssn_num: Annotated[str, BeforeValidator(transform_null_string)]
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
 
 
 class IdrBeneficiaryMbi(BaseModel):
@@ -64,6 +64,7 @@ class IdrBeneficiaryMbi(BaseModel):
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date)]
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
 
 
 class IdrElectionPeriodUsage(BaseModel):
