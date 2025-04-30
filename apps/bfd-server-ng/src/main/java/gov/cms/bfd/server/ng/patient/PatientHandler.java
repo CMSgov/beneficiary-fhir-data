@@ -22,16 +22,13 @@ public class PatientHandler {
   }
 
   public Bundle searchByLogicalId(final Long fhirId, final DateTimeRange lastUpdated) {
-    var beneficiary =
-        beneficiaryRepository.findById(fhirId, lastUpdated.lowerBound(), lastUpdated.upperBound());
+    var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
     return singleOrDefaultBundle(beneficiary);
   }
 
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
-    var beneficiary =
-        beneficiaryRepository.findByIdentifier(
-            identifier, lastUpdated.lowerBound(), lastUpdated.upperBound());
+    var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
 
     return singleOrDefaultBundle(beneficiary);
   }

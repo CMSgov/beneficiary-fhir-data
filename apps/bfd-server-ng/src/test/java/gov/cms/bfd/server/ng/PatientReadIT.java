@@ -1,40 +1,44 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import io.restassured.RestAssured;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 
 public class PatientReadIT extends IntegrationTestBase {
+  private IReadTyped<Patient> patientRead() {
+    return getFhirClient().read().resource(Patient.class);
+  }
 
   @Test
   void patientReadValidLong() {
-    var patient = getFhirClient().read().resource("Patient").withId(1L).execute();
+    var patient = patientRead().withId(1L).execute();
+    assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadValidString() {
-    var patientFromId = getFhirClient().read().resource("Patient").withId("1").execute();
-    expect.serializer("fhir+json").toMatchSnapshot(patientFromId);
+    var patient = patientRead().withId("1").execute();
+    assertFalse(patient.isEmpty());
+    expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadIdNotFound() {
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> getFhirClient().read().resource("Patient").withId("999").execute());
+    assertThrows(ResourceNotFoundException.class, () -> patientRead().withId("999").execute());
   }
 
   @Test
   void patientReadInvalidIdBadRequest() {
-    assertThrows(
-        InvalidRequestException.class,
-        () -> getFhirClient().read().resource("Patient").withId("abc").execute());
+    assertThrows(InvalidRequestException.class, () -> patientRead().withId("abc").execute());
   }
 
   @ParameterizedTest

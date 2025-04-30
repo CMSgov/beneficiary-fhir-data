@@ -15,10 +15,8 @@ public class FhirInputConverter {
     if (dateRangeParam == null) {
       return new DateTimeRange();
     }
-    var lower = dateRangeParam.getLowerBound();
-    var upper = dateRangeParam.getUpperBound();
 
-    return new DateTimeRange(toDateTime(lower), toDateTime(upper));
+    return new DateTimeRange(dateRangeParam);
   }
 
   public static Long toLong(IdType id) {
