@@ -186,6 +186,27 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     LOADED_BATCH("loaded_batch", (s -> s.contains(" from ccw.loaded_batches "))),
     /** Represents the query for loaded files. */
     LOADED_FILE("loaded_file", (s -> s.contains(" from ccw.loaded_files "))),
+    /** Represents a query from ccw.fda_data. */
+    FDA_DATA("fda_data", s -> s.contains(" from ccw.fda_data ")),
+    /** Represents a query from rda.mcs_tags. */
+    RDA_MCS_TAGS("rda_mcs_tags", s -> s.contains(" from rda.mcs_tags ")),
+    /** Represents a query from rda.fiss_tags. */
+    RDA_FISS_TAGS("rda_fiss_tags", s -> s.contains(" from rda.fiss_tags ")),
+    /** Represents a query from ccw.dme_tags. */
+    DME_TAGS("dme_tags", s -> s.contains(" from ccw.dme_tags ")),
+    /** Represents a query from ccw.hha_tags. */
+    HHA_TAGS("hha_tags", s -> s.contains(" from ccw.hha_tags ")),
+    /** Represents a query from ccw.carrier_tags. */
+    CARRIER_TAGS("carrier_tags", s -> s.contains(" from ccw.carrier_tags ")),
+    /** Represents a query from ccw.hospice_tags. */
+    HOSPICE_TAGS("hospice_tags", s -> s.contains(" from ccw.hospice_tags ")),
+    /** Represents a query from ccw.inpatient_tags. */
+    INPATIENT_TAGS("inpatient_tags", s -> s.contains(" from ccw.inpatient_tags ")),
+    /** Represents a query from ccw.outpatient_tags. */
+    OUTPATIENT_TAGS("outpatient_tags", s -> s.contains(" from ccw.outpatient_tags ")),
+    /** Represents a query from ccw.npi_fda_meta. */
+    NPI_FDA_META("npi_fda_meta", s -> s.contains(" from ccw.npi_fda_meta ")),
+
     /**
      * Represents the query for checking if a beneficiary exists given the partD contract id and
      * year month.
