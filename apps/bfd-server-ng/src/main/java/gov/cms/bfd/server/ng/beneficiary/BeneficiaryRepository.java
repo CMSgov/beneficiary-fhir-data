@@ -88,25 +88,7 @@ public class BeneficiaryRepository {
    * @return beneficiary record
    */
   public Optional<Beneficiary> findById(long beneSk, DateTimeRange lastUpdatedRange) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
-          SELECT b
-          FROM Beneficiary b
-          WHERE b.beneSk = :beneSk
-            AND ((cast(:lowerBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-            AND ((cast(:upperBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-            AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
-          """,
-                lastUpdatedRange.lowerBoundOperator(), lastUpdatedRange.upperBoundOperator()),
-            Beneficiary.class)
-        .setParameter("beneSk", beneSk)
-        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-        .getResultList()
-        .stream()
-        .findFirst();
+    return searchBeneficiary("beneSk", String.valueOf(beneSk), lastUpdatedRange);
   }
 
   /**
@@ -117,25 +99,7 @@ public class BeneficiaryRepository {
    * @return beneficiary record
    */
   public Optional<Beneficiary> findByIdentifier(String mbi, DateTimeRange lastUpdatedRange) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
-                SELECT b
-                FROM Beneficiary b
-                WHERE b.mbi = :mbi
-                  AND (b.meta.updatedTimestamp %s :lowerBound OR (cast(:lowerBound AS LocalDateTime)) IS NULL)
-                  AND (b.meta.updatedTimestamp %s :upperBound OR (cast(:upperBound AS LocalDateTime)) IS NULL)
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
-                """,
-                lastUpdatedRange.lowerBoundOperator(), lastUpdatedRange.upperBoundOperator()),
-            Beneficiary.class)
-        .setParameter("mbi", mbi)
-        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-        .getResultList()
-        .stream()
-        .findFirst();
+    return searchBeneficiary("mbi", mbi, lastUpdatedRange);
   }
 
   /**
@@ -149,12 +113,42 @@ public class BeneficiaryRepository {
             """
               SELECT MAX(p.batchCompletionTimestamp)
               FROM LoadProgress p
-              WHERE p.tableName IN ("idr.beneficiary", "idr.beneficiary_history", "idr.beneficiary_mbi_history")
+              WHERE p.tableName IN (
+                "idr.beneficiary",
+                "idr.beneficiary_history",
+                "idr.beneficiary_mbi_id"
+              )
               """,
             LocalDateTime.class)
         .getResultList()
         .stream()
         .findFirst()
-        .get();
+        .orElse(LocalDateTime.MIN);
+  }
+
+  private Optional<Beneficiary> searchBeneficiary(
+      String idColumnName, String idColumnValue, DateTimeRange lastUpdatedRange) {
+    return entityManager
+        .createQuery(
+            String.format(
+                """
+                SELECT b
+                FROM Beneficiary b
+                WHERE b.%s = :%s
+                  AND ((cast(:lowerBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+                  AND ((cast(:upperBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+                """,
+                idColumnName,
+                idColumnName,
+                lastUpdatedRange.getLowerBoundSqlOperator(),
+                lastUpdatedRange.getUpperBoundSqlOperator()),
+            Beneficiary.class)
+        .setParameter(idColumnName, idColumnValue)
+        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+        .getResultList()
+        .stream()
+        .findFirst();
   }
 }

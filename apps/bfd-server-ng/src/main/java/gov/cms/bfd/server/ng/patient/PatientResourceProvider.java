@@ -60,7 +60,6 @@ public class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID) final IdType fhirId,
       @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
-
     return patientHandler.searchByLogicalId(
         FhirInputConverter.toLong(fhirId), FhirInputConverter.toDateTimeRange(lastUpdated));
   }
@@ -75,7 +74,7 @@ public class PatientResourceProvider implements IResourceProvider {
   @Search
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER) final TokenParam identifier,
-      @OptionalParam(name = Constants.PARAM_LASTUPDATED) final DateRangeParam lastUpdated) {
+      @OptionalParam(name = Patient.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
     return patientHandler.searchByIdentifier(
         FhirInputConverter.toString(identifier, SystemUrls.CMS_MBI),
         FhirInputConverter.toDateTimeRange(lastUpdated));
