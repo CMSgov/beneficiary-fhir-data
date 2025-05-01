@@ -3,7 +3,7 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   service              = "server-alarms"
-  relative_module_root = "ops/services/server-alarms"
+  relative_module_root = "ops/services/07-server-alarms"
 }
 
 locals {

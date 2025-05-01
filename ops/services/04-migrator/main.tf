@@ -3,7 +3,7 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   service              = "migrator"
-  relative_module_root = "ops/services/migrator"
+  relative_module_root = "ops/services/04-migrator"
   subnet_layers        = ["data"]
 }
 
