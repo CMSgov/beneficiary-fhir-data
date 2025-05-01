@@ -100,7 +100,7 @@ public class Identity {
     var requestedIsXref = xrefSk.equals(requestedBeneSk);
 
     // This identity record is the current xref record and it has a different bene_sk, so the
-    // reference bene_sk is replaced by this one
+    // requested bene_sk is replaced by this one
     if (currentIsXref && !beneSkMatches) {
       return Optional.of(createLink(Patient.LinkType.REPLACEDBY));
     }
