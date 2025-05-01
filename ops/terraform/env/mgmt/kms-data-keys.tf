@@ -241,6 +241,42 @@ data "aws_iam_policy_document" "data_keys" {
     ]
     resources = ["*"]
   }
+
+  # Allow ECS Fargate to generate a data key and describe the key
+  statement {
+    sid    = "AllowECSFargateKeyUsage"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "fargate.amazonaws.com"
+      ]
+    }
+    actions = [
+      "kms:GenerateDataKeyWithoutPlaintext",
+      "kms:DescribeKey",
+    ]
+    resources = ["*"]
+  }
+
+  # Allow ECS Fargate to create grants for a given key
+  statement {
+    sid    = "AllowECSFargateKeyGrants"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "fargate.amazonaws.com"
+      ]
+    }
+    condition {
+      test     = "ForAllValues:StringEquals"
+      variable = "kms:GrantOperations"
+      values   = ["Decrypt"]
+    }
+    actions   = ["kms:CreateGrant"]
+    resources = ["*"]
+  }
 }
 
 # Key policy statements specific to the alt region data keys. Specifically, these statements allow the CPM service to
