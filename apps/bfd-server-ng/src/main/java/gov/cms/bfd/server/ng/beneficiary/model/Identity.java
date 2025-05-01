@@ -90,14 +90,14 @@ public class Identity {
    * Transforms the identity record to a {@link Patient.PatientLinkComponent} if the bene_sk is
    * different from the current beneficiary's bene_sk.
    *
-   * @param referenceBeneSk bene_sk value for the beneficiary that will receive the links
+   * @param requestedBeneSk bene_sk value for the beneficiary that was requested
    * @return patient link
    */
-  public Optional<Patient.PatientLinkComponent> toFhirLink(String referenceBeneSk) {
+  public Optional<Patient.PatientLinkComponent> toFhirLink(String requestedBeneSk) {
 
-    var beneSkMatches = beneSk.equals(referenceBeneSk);
+    var beneSkMatches = beneSk.equals(requestedBeneSk);
     var currentIsXref = xrefSk.equals(beneSk);
-    var referenceIsXref = xrefSk.equals(referenceBeneSk);
+    var requestedIsXref = xrefSk.equals(requestedBeneSk);
 
     // This identity record is the current xref record and it has a different bene_sk, so the
     // reference bene_sk is replaced by this one
@@ -105,9 +105,9 @@ public class Identity {
       return Optional.of(createLink(Patient.LinkType.REPLACEDBY));
     }
 
-    // The reference bene_sk is the current xref record and it has a different bene_sk, so the
-    // reference bene_sk replaces this one
-    if (referenceIsXref && !beneSkMatches) {
+    // The requested bene_sk is the current xref record and it has a different bene_sk, so the
+    // requested bene_sk replaces this one
+    if (requestedIsXref && !beneSkMatches) {
       return Optional.of(createLink(Patient.LinkType.REPLACES));
     }
 
