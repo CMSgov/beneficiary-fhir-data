@@ -44,7 +44,7 @@ public class PatientResourceProvider implements IResourceProvider {
     var ids = beneficiaryRepository.getPatientIdentities(fhirId.getIdPartAsLong());
     for (var id : ids) {
       id.toFhirIdentifier().ifPresent(patient::addIdentifier);
-      id.toFhirLink(patient).ifPresent(patient::addLink);
+      id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
     }
     return patient;
   }

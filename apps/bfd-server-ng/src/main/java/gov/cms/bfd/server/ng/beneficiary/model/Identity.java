@@ -28,8 +28,8 @@ public class Identity {
   // Ideally, we could use beneSk + mbi, but this becomes tricky because MBI may not always be
   // present.
   @Id Long rowId;
-  Long beneSk;
-  Long xrefSk;
+  String beneSk;
+  String xrefSk;
   Optional<String> mbi;
   Optional<LocalDate> mbiEffectiveDate;
   Optional<LocalDate> mbiObsoleteDate;
@@ -52,8 +52,8 @@ public class Identity {
       Optional<LocalDate> mbiEffectiveDate,
       Optional<LocalDate> mbiObsoleteDate) {
     this.rowId = rowId;
-    this.beneSk = beneSk;
-    this.xrefSk = xrefSk;
+    this.beneSk = beneSk.toString();
+    this.xrefSk = xrefSk.toString();
     this.mbi = Optional.ofNullable(mbi);
     this.mbiEffectiveDate = mbiEffectiveDate;
     this.mbiObsoleteDate = mbiObsoleteDate;
@@ -90,22 +90,24 @@ public class Identity {
    * Transforms the identity record to a {@link Patient.PatientLinkComponent} if the bene_sk is
    * different from the current beneficiary's bene_sk.
    *
-   * @param patientToCompare current version of the beneficiary
+   * @param referenceBeneSk bene_sk value for the beneficiary that will receive the links
    * @return patient link
    */
-  public Optional<Patient.PatientLinkComponent> toFhirLink(Patient patientToCompare) {
-    var compareSk = patientToCompare.getId();
-    var beneSkStr = beneSk.toString();
-    var xrefSkStr = xrefSk.toString();
-    var beneSkMatches = beneSkStr.equals(compareSk);
-    var currentIsXref = xrefSkStr.equals(beneSkStr);
-    var compareIsXref = xrefSkStr.equals(compareSk);
+  public Optional<Patient.PatientLinkComponent> toFhirLink(String referenceBeneSk) {
 
+    var beneSkMatches = beneSk.equals(referenceBeneSk);
+    var currentIsXref = xrefSk.equals(beneSk);
+    var referenceIsXref = xrefSk.equals(referenceBeneSk);
+
+    // This identity record is the current xref record and it has a different bene_sk, so the
+    // reference bene_sk is replaced by this one
     if (currentIsXref && !beneSkMatches) {
       return Optional.of(createLink(Patient.LinkType.REPLACEDBY));
     }
 
-    if (compareIsXref && !beneSkMatches) {
+    // The reference bene_sk is the current xref record and it has a different bene_sk, so the
+    // reference bene_sk replaces this one
+    if (referenceIsXref && !beneSkMatches) {
       return Optional.of(createLink(Patient.LinkType.REPLACES));
     }
 
@@ -115,7 +117,9 @@ public class Identity {
   private Patient.PatientLinkComponent createLink(Patient.LinkType linkType) {
     var link = new Patient.PatientLinkComponent();
     link.setType(linkType);
-    link.setOther(new Reference(beneSk.toString()));
+    var reference = new Reference();
+    reference.setId(beneSk);
+    link.setOther(reference);
     return link;
   }
 }
