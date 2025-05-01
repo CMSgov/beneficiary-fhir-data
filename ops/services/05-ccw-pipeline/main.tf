@@ -3,7 +3,7 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   service              = "ccw-pipeline"
-  relative_module_root = "ops/services/ccw-pipeline"
+  relative_module_root = "ops/services/05-ccw-pipeline"
   subnet_layers        = ["app", "data"]
 }
 

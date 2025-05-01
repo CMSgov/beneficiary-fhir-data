@@ -157,6 +157,8 @@ jobs:
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ secrets.AWS_ACCOUNT_ID }}
 
       - name: Login to Amazon ECR Public
         id: login-ecr-public

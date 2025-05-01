@@ -3,7 +3,7 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   service              = "locust"
-  relative_module_root = "ops/services/locust"
+  relative_module_root = "ops/services/04-locust"
 }
 
 locals {
