@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.SystemUrls;
-import gov.cms.bfd.server.ng.types.FhirInputConverter;
+import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;

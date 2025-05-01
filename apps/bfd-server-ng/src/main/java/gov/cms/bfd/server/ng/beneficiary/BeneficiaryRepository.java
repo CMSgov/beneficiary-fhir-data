@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.Identity;
-import gov.cms.bfd.server.ng.types.DateTimeRange;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;

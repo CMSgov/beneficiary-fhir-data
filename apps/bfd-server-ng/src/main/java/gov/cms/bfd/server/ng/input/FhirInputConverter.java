@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.types;
+package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
