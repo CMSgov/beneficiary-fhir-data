@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.patient;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.types.DateTimeRange;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -64,7 +64,7 @@ public class PatientHandler {
 
     for (var id : identities) {
       id.toFhirIdentifier().ifPresent(patient::addIdentifier);
-      id.toFhirLink(patient).ifPresent(patient::addLink);
+      id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
     }
 
     return patient;
