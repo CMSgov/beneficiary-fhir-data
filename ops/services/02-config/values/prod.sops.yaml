@@ -106,7 +106,7 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/ccw-pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
 /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/enabled: "true"
-/bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/namespace: bfd-prod/ccw-pipeline
+/bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/namespace: bfd-${env}/ccw-pipeline
 /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/interval: PT1M
 /bfd/${env}/ccw-pipeline/nonsensitive/new_relic/metrics/period: UNDEFINED
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/job/allowed_data_set_type: UNDEFINED
@@ -126,7 +126,7 @@
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/enabled: "false"
-/bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/namespace: bfd-prod/rda-pipeline
+/bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/namespace: bfd-${env}/rda-pipeline
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/interval: PT1M
 /bfd/${env}/rda-pipeline/nonsensitive/rda/grpc/max_idle_seconds: "600"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/grpc/server_type: Remote
