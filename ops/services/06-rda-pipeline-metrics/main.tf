@@ -50,3 +50,16 @@ resource "aws_cloudwatch_log_metric_filter" "error_count" {
     default_value = "0"
   }
 }
+
+resource "aws_cloudwatch_log_metric_filter" "smoketest_failure_count" {
+  name           = "${local.metrics_namespace}/messages/count/smoketest-failure"
+  pattern        = "Pipeline terminating due to smoke test failure"
+  log_group_name = data.aws_cloudwatch_log_group.messages.name
+
+  metric_transformation {
+    name          = "messages/count/smoketest-failure"
+    namespace     = local.metrics_namespace
+    value         = "1"
+    default_value = "0"
+  }
+}
