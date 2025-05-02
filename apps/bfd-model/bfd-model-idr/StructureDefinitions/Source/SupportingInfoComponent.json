@@ -34,11 +34,63 @@
                 ]
             },
             {
-                "id": "SupportingInfoComponent.COL_NAME",
-                "path": "SupportingInfoComponent.COL_NAME",
-                "label": "The originating column for the supporting info component.",
-                "definition": "This is a non-overlapping number that should be used as the sequence number for a diagnosis on a given claim.",
-                "min": 1,
+                "id": "SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT",
+                "path": "SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT",
+                "label": "Claim Admission Date",
+                "definition": "On an institutional claim, the date the beneficiary was admitted to the hospital, skilled nursing facility, or religious non-medical health care institution. When this variable appears in the HHA claims (Short Name = HHSTRTDT), it is the date the care began for the HHA services reported on the claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_DSCHRG_DT",
+                "path": "SupportingInfoComponent.CLM_DSCHRG_DT",
+                "label": "Beneficiary Discharge Date",
+                "definition": "On an inpatient or Home Health claim, the date the beneficiary was discharged from the facility, or died.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_SUBMSN_DT",
+                "path": "SupportingInfoComponent.CLM_SUBMSN_DT",
+                "label": "Claim Submission Date",
+                "definition": "The date the claim was received by the MAC.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_MDCR_EXHSTD_DT",
+                "path": "SupportingInfoComponent.CLM_MDCR_EXHSTD_DT",
+                "label": "Medicare Benefits Exhausted Date",
+                "definition": "The last date for which the beneficiary has Medicare coverage.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_ADMSN_SRC_CD",
+                "path": "SupportingInfoComponent.CLM_ADMSN_SRC_CD",
+                "label": "Source Admission Code",
+                "definition": "The code indicating the source of the referral for the admission or visit.",
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
@@ -47,15 +99,145 @@
                 ]
             },
             {
-                "id": "SupportingInfoComponent.VALUE",
-                "path": "SupportingInfoComponent.VALUE",
-                "label": "Supporting info component value",
-                "definition": "The value for a given component in the SupportingInfo key.",
-                "min": 1,
+                "id": "SupportingInfoComponent.DGNS_DRG_CD",
+                "path": "SupportingInfoComponent.DGNS_DRG_CD",
+                "label": "Related Diagnosis Group Code",
+                "definition": "The diagnostic related group to which a hospital claim belongs for prospective payment purposes.",
+                "min": 0,
                 "max": "1",
                 "type": [
                     {
                         "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.BENE_PTNT_STUS_CD",
+                "path": "SupportingInfoComponent.BENE_PTNT_STUS_CD",
+                "label": "Patient Discharge Status Code",
+                "definition": "The code used to identify the status of the patient as of the Claim Through Date.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_ADMSN_TYPE_CD",
+                "path": "SupportingInfoComponent.CLM_ADMSN_TYPE_CD",
+                "label": "",
+                "definition": "The code indicating the type and priority of an inpatient admission associated with the service on an intermediary submitted claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_BLOOD_PT_FRNSH_QTY",
+                "path": "SupportingInfoComponent.CLM_BLOOD_PT_FRNSH_QTY",
+                "label": "Blood Pints Furnished Quantity",
+                "definition": "Number of whole pints of blood furnished to the beneficiary, as reported on the carrier claim (non-DMERC).",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_MDCR_INSTNL_MCO_PD_SW",
+                "path": "SupportingInfoComponent.CLM_MDCR_INSTNL_MCO_PD_SW",
+                "label": "MCO Paid Switch",
+                "definition": "A switch indicating whether or not a Managed Care Organization (MCO) has paid the provider for an institutional claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD",
+                "path": "SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD",
+                "label": "Patient Status Code",
+                "definition": "This variable is a recoded version of the discharge status code.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.TYPE_OF_BILL_CD",
+                "path": "SupportingInfoComponent.TYPE_OF_BILL_CD",
+                "label": "Type of Bill Code",
+                "definition": "The Type of Bill Code. Composed of a 0, followed by the Claim Facility Type Code, then the Claim Service Classification Type Code, and finally the Claim Frequency Code.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT",
+                "path": "SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT",
+                "label": "Weekly Process Date",
+                "definition": "The date the weekly NCH database load process cycle begins, during which the claim records are loaded into the Nearline file. This date will always be a Friday, although the claims will actually be appended to the database subsequent to the date.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT",
+                "path": "SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT",
+                "label": "Covered Care Through Date",
+                "definition": "The date on a claim for which the covered level of care ended in a general hospital or the active care ended in a psychiatric/tuberculosis hospital.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_NCVRD_FROM_DT",
+                "path": "SupportingInfoComponent.CLM_NCVRD_FROM_DT",
+                "label": "Noncovered Stay From Date",
+                "definition": "The beginning date of the beneficiary's non-covered stay.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_NCVRD_THRU_DT",
+                "path": "SupportingInfoComponent.CLM_NCVRD_THRU_DT",
+                "label": "Noncovered Stay Through Date",
+                "definition": "The ending date of the beneficiary's non-covered stay.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
                     }
                 ]
             }
