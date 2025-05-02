@@ -7,16 +7,16 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
     bene_sk BIGINT NOT NULL PRIMARY KEY, 
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_mbi_id VARCHAR(11),
-    bene_ssn_num VARCHAR(9),
     bene_1st_name VARCHAR(30),
     bene_midl_name VARCHAR(15),
     bene_last_name VARCHAR(40),
     bene_brth_dt DATE,
+    bene_death_dt DATE,
+    bene_vrfy_death_day_sw VARCHAR(1),
     bene_sex_cd VARCHAR(1),
     bene_race_cd VARCHAR(2),
     geo_usps_state_cd VARCHAR(2),
     geo_zip5_cd VARCHAR(5),
-    geo_zip4_cd VARCHAR(4),
     geo_zip_plc_name VARCHAR(100),
     bene_line_1_adr VARCHAR(45),
     bene_line_2_adr VARCHAR(45),
@@ -34,11 +34,20 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_sk BIGINT NOT NULL,
     bene_xref_efctv_sk BIGINT NOT NULL,
     bene_mbi_id VARCHAR(11),
-    bene_ssn_num VARCHAR(9),
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id (
+    bene_mbi_id VARCHAR(11) NOT NULL,
+    bene_mbi_efctv_dt DATE,
+    bene_mbi_obslt_dt DATE,
+    idr_trans_efctv_ts TIMESTAMPTZ,
+    idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
@@ -65,16 +74,16 @@ INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene(
     bene_sk, 
     bene_xref_efctv_sk, 
     bene_mbi_id,
-    bene_ssn_num,
     bene_1st_name,
     bene_midl_name,
     bene_last_name,
     bene_brth_dt,
+    bene_death_dt,
+    bene_vrfy_death_day_sw,
     bene_sex_cd,
     bene_race_cd,
     geo_usps_state_cd,
     geo_zip5_cd,
-    geo_zip4_cd,
     geo_zip_plc_name,
     bene_line_1_adr,
     bene_line_2_adr,
@@ -90,16 +99,16 @@ VALUES(
     1, -- bene_sk, 
     1, -- bene_xref_efctv_sk, 
     '1S000000000',-- bene_mbi_id,
-    '000000000',-- bene_ssn_num,
     'CHUCK',-- bene_1st_name,
     'R',-- bene_midl_name,
     'NORRIS',-- bene_last_name,
     '1960-01-01',-- bene_brth_dt,
+    null,--bene_death_dt,
+    '~',--bene_vrfy_death_day_sw,
     2,-- bene_sex_cd,
     1,-- bene_race_cd,
     'VA',-- geo_usps_state_cd,
     '22473',-- geo_zip5_cd,
-    '0000',-- geo_zip4_cd,
     'RICHMOND',-- geo_zip_plc_name,
     '100 MAIN ST',-- bene_line_1_adr,
     '',-- bene_line_2_adr,
@@ -116,16 +125,16 @@ VALUES(
     2, -- bene_sk, 
     2, -- bene_xref_efctv_sk, 
     '1S000000001',-- bene_mbi_id,
-    '000000001',-- bene_ssn_num,
     'BOB',-- bene_1st_name,
     'J',-- bene_midl_name,
     'SAGET',-- bene_last_name,
     '1960-01-01',-- bene_brth_dt,
+    '1990-01-01',-- bene_death_dt,
+    'Y',-- bene_vrfy_death_day_sw,
     2,-- bene_sex_cd,
     1,-- bene_race_cd,
     'WA',-- geo_usps_state_cd,
     '98119',-- geo_zip5_cd,
-    '0000',-- geo_zip4_cd,
     'SEATTLE',-- geo_zip_plc_name,
     '200 LANE ST',-- bene_line_1_adr,
     '',-- bene_line_2_adr,
@@ -143,7 +152,6 @@ INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_sk,
     bene_xref_efctv_sk,
     bene_mbi_id,
-    bene_ssn_num,
     idr_trans_efctv_ts,
     idr_trans_obslt_ts,
     idr_updt_ts
@@ -152,7 +160,23 @@ VALUES(
     1, -- bene_sk, 
     1, -- bene_xref_efctv_sk, 
     '1S000000000',-- bene_mbi_id,
-    '000000000',-- bene_ssn_num,
+    NOW(),-- idr_trans_efctv_ts,
+    '9999-12-31',-- idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id (
+    bene_mbi_id,
+    bene_mbi_efctv_dt,
+    bene_mbi_obslt_dt,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    '1S000000000',-- bene_mbi_id,
+    '2024-01-01',-- bene_mbi_efctv_dt
+    '9999-12-31',-- bene_mbi_efctv_dt
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
