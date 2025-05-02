@@ -1,4 +1,4 @@
-map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" = "eob-support-map"
+map "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper" = "eob-support-map"
 
 conceptmap "FinalActionIndicator" {
   prefix s = "https://hl7.org/fhir/string"
@@ -140,16 +140,16 @@ conceptmap "C4BB_DIAGTYPE" {
   s:"E" = t:"externalcauseofinjury"
 }
 
-conceptmap "C4BB_SupportingInfo_Categories" {
+conceptmap "C4BB-SupportingInfo-Categories" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
 
-  s:"ACTIVE_CARE_PERIOD" = t:"admissionperiod"
-  s:"ADM_TYPE_CD" = t:"admtype"
-  s:"CLM_RECV_DATE" = t:"clmrecvddate"
-  s:"DISCHARGE_STATUS_CODE" = t:"discharge-status"
-  s:"DRG_CODE" = t:"drg"
-  s:"POINT_OF_ORIGIN" = t:"pointoforigin"
+  s:"CLM_ACTV_CARE_FROM_DT" = t:"admissionperiod"
+  s:"CLM_ADMSN_TYPE_CD" = t:"admtype"
+  s:"CLM_SUBMSN_DT" = t:"clmrecvddate"
+  s:"BENE_PTNT_STUS_CD" = t:"discharge-status"
+  s:"DGNS_DRG_CD" = t:"drg"
+  s:"CLM_ADMSN_SRC_CD" = t:"pointoforigin"
   s:"TYPE_OF_BILL_CD" = t:"typeofbill"
 
 }
@@ -179,27 +179,4 @@ conceptmap "SSAToUSPSState" {
   s:"05" = t:"CA"
   s:"06" = t:"CO"
 
-}
-
-conceptmap "BENEFITBALANCE" {
-  prefix s = "https://hl7.org/fhir/string"
-  prefix t = "https://bluebutton.cms.gov/resources/codesystem/benefit-balance"
-
-  s:"CLM_MDCR_IP_LRD_USE_CNT" = t:"https://bluebutton.cms.gov/resources/variables/bene_lrd_used_cnt"
-  s:"CLM_INSTNL_MDCR_COINS_DAY_CNT" = t:"https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt"
-  s:"CLM_INSTNL_NCVRD_DAY_CNT" = t:"https://bluebutton.cms.gov/resources/variables/clm_non_utlztn_days_cnt"
-  s:"CLM_INSTNL_PER_DIEM_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pass_thru_per_diem_amt"
-  s:"CLM_INSTNL_CVRD_DAY_CNT" = t:"https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt"
-  s:"CLM_MDCR_IP_PPS_DRG_WT_NUM" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_drg_wt_num"
-  s:"CLM_MDCR_IP_PPS_DSPRPRTNT_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt"
-  s:"CLM_MDCR_IP_PPS_EXCPTN_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_excptn_amt"
-  s:"CLM_PPS_CPTL_FSP_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_fsp_amt"
-  s:"CLM_PPS_CPTL_IME_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_ime_amt"
-  s:"CLM_PPS_CPTL_OUTLIER_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_outlier_amt"
-  s:"CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_pps_old_cptl_hld_hrmls_amt"
-  s:"CLM_MDCR_IP_PPS_CPTL_TOT_AMT" = t:"https://bluebutton.cms.gov/resources/variables/clm_tot_pps_cptl_amt"
-  s:"CLM_MDCR_INSTNL_PRMRY_PYR_AMT" = t:"https://bluebutton.cms.gov/resources/variables/prpayamt"
-  s:"CLM_INSTNL_PRFNL_AMT" = t:"https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt"
-  s:"CLM_INSTNL_DRG_OUTLIER_AMT" = t:"https://bluebutton.cms.gov/resources/variables/nch_drg_outlier_aprvd_pmt_amt"
-  s:"CLM_MDCR_IP_BENE_DDCTBL_AMT" = t:"https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt"
 }

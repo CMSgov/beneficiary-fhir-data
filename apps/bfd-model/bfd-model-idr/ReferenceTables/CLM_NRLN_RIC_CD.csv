@@ -1,0 +1,6 @@
+SYSTEM,CODE,DISPLAY
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD,M,"Part B DMEPOS claim record (processed by DME Regional Carrier)"
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD,O,"Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD,U,"Both Part A and B institutional home health agency (HHA) claim records"
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD,V,"Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD,W,"Part B institutional claim record (outpatient [HOP], HHA)"
