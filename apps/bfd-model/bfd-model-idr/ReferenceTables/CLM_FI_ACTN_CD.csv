@@ -1,0 +1,4 @@
+SYSTEM,CODE,DISPLAY
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD,1,Original debit action (always a 1 for all regular bills)
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD,5,Force action code 3 (secondary debit adjustment)
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD,8,Benefits refused

@@ -8,20 +8,20 @@ To compile the StructureMap:
 ```sh
 java -jar validator_cli.jar \
   -ig maps/EOB-Base.map \
-  -compile https://bfd.cms.gov/MappingLanguage/maps/ExplanationOfBenefitBase \
+  -compile https://bluebutton.cms.gov/MappingLanguage/maps/ExplanationOfBenefit-Base \
   -version 4.0.1 \
-  -output StructureMaps/bfd_eob_base_structuremap.json
+  -output StructureMaps/ExplanationOfBenefit-Base-StructureMap.json
   ```
 
 To execute:
 ```sh
-java -jar validator_cli.jar sample-data/EOBBaseSample.json \
+java -jar validator_cli.jar sample-data/EOB-Base-Sample.json \
   -output outputs/ExplanationOfBenefit.json \
-  -transform https://bfd.cms.gov/MappingLanguage/maps/ExplanationOfBenefitBase \
+  -transform https://bluebutton.cms.gov/MappingLanguage/maps/ExplanationOfBenefit-Base \
   -version 4.0.1 \
-  -ig StructureMaps/bfd_eob_base_structuremap.json \
-  -ig StructureDefinitions/Source/ExplanationOfBenefitInstitutionalBase.json \
-  -ig StructureDefinitions/Source/ExplanationOfBenefit_Base.json \
+  -ig StructureMaps/ExplanationOfBenefit-Base-StructureMap.json \
+  -ig StructureDefinitions/Source/ExplanationOfBenefit-Institutional-Base.json \
+  -ig StructureDefinitions/Source/ExplanationOfBenefit-Base.json \
   -ig StructureDefinitions/Source/ProcedureComponent.json \
   -ig StructureDefinitions/Source/DiagnosisComponent.json \
   -ig StructureDefinitions/Source/SupportingInfoComponent.json \

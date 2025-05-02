@@ -1,0 +1,4 @@
+SYSTEM,CODE,DISPLAY
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW,,No managed care organization (MCO) payment
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW,0,No managed care organization (MCO) payment
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW,1,MCO paid provider for the claim

@@ -1184,7 +1184,6 @@ public final class RifLoaderIT {
       tagCountQuery.select(root);
       List<T> tags = entityManager.createQuery(tagCountQuery).getResultList();
       assertEquals(expectedCount, tags.size(), "Unexpected number of Tag records.");
-
       long _42CFRPart2CodesCount = getTagCodeCount(TagCode._42CFRPart2, entityClass, tags);
       long rCodesCount = getTagCodeCount(TagCode.R, entityClass, tags);
 

@@ -9,9 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class TableEntry {
-  /** The query for the table. */
-  String query;
-
   /** The query to get the dates from the parent table. */
   String datesQuery;
 
@@ -20,6 +17,15 @@ public class TableEntry {
 
   /** The column that contains the claim id. */
   String claimField;
+
+  /** The column holding the begin date of the claim. */
+  String fromDateField;
+
+  /** The column holding the end date of the claim. */
+  String toDateField;
+
+  /** The line item field. */
+  String lineItemField;
 
   /** Claim table. */
   String claimTable;

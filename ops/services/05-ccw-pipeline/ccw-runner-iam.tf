@@ -21,8 +21,8 @@ data "aws_iam_policy_document" "ccw_runner_ssm" {
     actions = ["ssm:GetParameter"]
     resources = [
       # TODO: Remove "/ng/" prefix
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/pipeline/sensitive/db/username",
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/pipeline/sensitive/db/password"
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.service}/sensitive/db/username",
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.service}/sensitive/db/password"
     ]
   }
 }
@@ -93,8 +93,8 @@ data "aws_iam_policy_document" "ccw_runner_ecs" {
   }
 
   statement {
-    sid       = "AllowDescribeTasksIn${title(replace(local.env, "-", ""))}Cluster"
-    actions   = ["ecs:DescribeTasks"]
+    sid       = "AllowDescribeAndTagTasksIn${title(replace(local.env, "-", ""))}Cluster"
+    actions   = ["ecs:DescribeTasks", "ecs:TagResource"]
     resources = ["${replace(data.aws_ecs_cluster.main.arn, ":cluster", ":task")}/*"]
 
     condition {
@@ -120,7 +120,7 @@ data "aws_iam_policy_document" "ccw_runner_ecs" {
 resource "aws_iam_policy" "ccw_runner_ecs" {
   name        = "${local.ccw_runner_lambda_full_name}-ecs"
   path        = local.iam_path
-  description = "Grants permission for the ${local.ccw_runner_lambda_full_name} Lambda to list ECS and run ${local.service} ECS tasks"
+  description = "Grants permission for the ${local.ccw_runner_lambda_full_name} Lambda to list and tag ECS tasks and run ${local.service} ECS tasks"
   policy      = data.aws_iam_policy_document.ccw_runner_ecs.json
 }
 

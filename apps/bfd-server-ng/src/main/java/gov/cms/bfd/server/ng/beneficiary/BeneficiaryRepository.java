@@ -40,7 +40,7 @@ public class BeneficiaryRepository {
   public List<Identity> getPatientIdentities(long beneSk) {
     return entityManager
         .createQuery(
-            """
+"""
               WITH allBeneInfo AS (
                 SELECT
                   bene.beneSk beneSk,
@@ -74,7 +74,7 @@ public class BeneficiaryRepository {
               SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
               FROM allBeneInfo abi
               GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
-            """,
+""",
             Identity.class)
         .setParameter("beneSk", beneSk)
         .getResultList();
@@ -111,14 +111,14 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT MAX(p.batchCompletionTimestamp)
-              FROM LoadProgress p
-              WHERE p.tableName IN (
-                "idr.beneficiary",
-                "idr.beneficiary_history",
-                "idr.beneficiary_mbi_id"
-              )
-              """,
+            SELECT MAX(p.batchCompletionTimestamp)
+            FROM LoadProgress p
+            WHERE p.tableName IN (
+              "idr.beneficiary",
+              "idr.beneficiary_history",
+              "idr.beneficiary_mbi_id"
+            )
+            """,
             LocalDateTime.class)
         .getResultList()
         .stream()

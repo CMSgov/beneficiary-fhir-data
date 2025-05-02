@@ -1,0 +1,10 @@
+SYSTEM,CODE,DISPLAY
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,0,CREDIT ADJUSTMENT
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,1,INTERIM BILL
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,2,HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,3,FINAL BILL
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,4,DISCHARGE NOTICE (OBSOLETE 7/98)
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,5,DEBIT ADJUSTMENT
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,C,CREDIT
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,D,DEBIT
+https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD,~,NO DESCRIPTION AVAILABLE

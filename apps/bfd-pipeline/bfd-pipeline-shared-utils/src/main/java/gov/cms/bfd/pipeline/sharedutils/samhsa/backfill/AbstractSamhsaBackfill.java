@@ -7,20 +7,24 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.model.BackfillProgress;
 import gov.cms.bfd.pipeline.sharedutils.model.TableEntry;
 import gov.cms.bfd.sharedutils.TagCode;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
+import java.sql.Date;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.text.StringSubstitutor;
@@ -73,6 +77,24 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   /** Total claims processed in a particular logging interval. */
   @Getter @Setter Long totalProcessedInInterval;
+
+  /** The query to use. */
+  @Getter @Setter String query;
+
+  /**
+   * Contains a list of all the non-SAMHSA code fields. This will allow them to be skipped when
+   * checking the result set for SAMHSA codes.
+   */
+  @Getter @Setter List<String> nonCodeFields;
+
+  @Getter @Setter List<String> queryColumnsList = new ArrayList<>();
+
+  // Map of columns to column values. Reused to save clock cycles for creation.
+  Map<String, Object> columnMap = new LinkedHashMap<>();
+
+  // This Map will allow us to save the active dates for a claim to be used in multiple
+  // records with the same claim id. Reused to save clock cycles for creation.
+  HashMap<String, LocalDate[]> datesMap = new HashMap<>();
 
   /**
    * Constructor.
@@ -133,11 +155,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
             "claimField",
             tableEntry.getClaimField());
     strSub = new StringSubstitutor(params);
-    String queryStr = strSub.replace(tableEntry.getQuery());
-    Query query = entityManager.createNativeQuery(queryStr);
-    startingClaim.ifPresent(s -> query.setParameter("startingClaim", convertClaimId(s)));
-    query.setParameter("limit", limit);
-    return query;
+    String queryStr = strSub.replace(getQuery());
+    Query claimQuery = entityManager.createNativeQuery(queryStr);
+    startingClaim.ifPresent(s -> claimQuery.setParameter("startingClaim", convertClaimId(s)));
+    claimQuery.setParameter("limit", limit);
+    return claimQuery;
   }
 
   /**
@@ -176,46 +198,53 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return The total number of tags saved.
    */
   protected int processClaim(
-      Object[] claim, HashMap<String, Object[]> datesMap, EntityManager entityManager) {
-    Object claimId = claim[0];
-    int codesOffset = 1;
-    Optional<Object[]> dates = Optional.empty();
+      Map<String, Object> claim,
+      HashMap<String, LocalDate[]> datesMap,
+      EntityManager entityManager) {
+    Object claimId = claim.get(tableEntry.getClaimField());
+    Optional<LocalDate[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
     if (!tableEntry.getLineItem()) {
-      dates = Optional.of(new Object[] {claim[1], claim[2]});
-      codesOffset = 3;
+      try {
+        dates =
+            Optional.of(
+                new LocalDate[] {
+                  ((Date) claim.get(tableEntry.getFromDateField())).toLocalDate(),
+                  ((Date) claim.get(tableEntry.getToDateField())).toLocalDate()
+                });
+      } catch (Exception e) {
+        throw new BadCodeMonkeyException(
+            "Query should have a column for from date and to date, but does not.");
+      }
     } else if (datesMap.containsKey(claimId.toString())) {
       // The active dates for this claim were previously saved for a different record with the same
       // claim id.
       dates = Optional.of(datesMap.get(claimId.toString()));
     }
-
-    // Create an array that contains only the SAMHSA codes for this record.
-    List<String> codes =
-        Arrays.asList(claim).subList(codesOffset, claim.length).stream()
-            .filter(Objects::nonNull)
-            .map(code -> (String) code)
-            .collect(Collectors.toList());
-    boolean persist =
-        samhsaUtil.processCodeList(codes, tableEntry, claimId, dates, datesMap, entityManager);
-    if (persist) {
+    // Check for valid SAMHSA codes in this claim.
+    boolean hasSamhsaCode =
+        samhsaUtil.processCodeList(
+            claim, tableEntry, dates, datesMap, nonCodeFields, entityManager);
+    if (hasSamhsaCode) {
       return writeEntry(claimId, tableEntry.getTagTable(), entityManager);
     }
     return 0;
   }
 
   /**
-   * Builds the SAMHSA query string template.
+   * Builds the SAMHSA query string template, and also builds the queryColumns object, which will
+   * keep track of the column positions and their purpose.
    *
    * @param table The table.
    * @param claimField The claim id field.
    * @param columns The columns to check.
    * @return The query string for a particular table.
    */
-  protected static String buildQueryStringTemplate(
-      String table, String claimField, String... columns) {
+  protected String buildQueryStringTemplate(String table, String claimField, String... columns) {
     String concatColumns = String.join(", ", columns);
+    queryColumnsList.add(claimField);
+    queryColumnsList.addAll(splitColumnCsvToList(columns));
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -232,6 +261,20 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return builder.toString();
   }
 
+  private List<String> splitColumnCsvToList(String[] columns) {
+    return Arrays.stream(columns)
+        .flatMap(column -> Arrays.stream(column.split(",")).map(String::trim))
+        .toList();
+  }
+
+  private Map<String, Object> mapClaimObjects(Object[] claim) {
+    columnMap.clear();
+    for (int i = 0; i < queryColumnsList.size(); i++) {
+      columnMap.put(queryColumnsList.get(i), claim[i]);
+    }
+    return columnMap;
+  }
+
   /**
    * Contents of the main loop to process the table.
    *
@@ -241,13 +284,14 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     Query query = buildQuery(getLastClaimId(), getTableEntry(), getBatchSize(), entityManager);
     List<Object[]> claims = executeQuery(query);
     int savedInBatch = 0;
-    // This Map will allow us to save the active dates for a claim to be used in multiple
-    // records with the same claim id.
-    HashMap<String, Object[]> datesMap = new HashMap<>();
+    // Clear the dates from the previous claim. Try and save some clock cycles by reusing the dates
+    // HashMap.
+    datesMap.clear();
     // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
     // codes. */
     for (Object[] claim : claims) {
-      savedInBatch += processClaim(claim, datesMap, entityManager);
+      columnMap = mapClaimObjects(claim);
+      savedInBatch += processClaim(columnMap, datesMap, entityManager);
     }
     incrementTotalSaved(savedInBatch);
     incrementTotalProcessedInInterval(claims.size());
@@ -255,7 +299,10 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Checks if a progress message should be logged.
     checkTimeIntervalForLogging();
     setLastClaimId(
-        !claims.isEmpty() ? Optional.of(String.valueOf(claims.getLast()[0])) : Optional.empty());
+        !claims.isEmpty()
+            ? Optional.of(
+                String.valueOf(Objects.requireNonNull(columnMap).get(tableEntry.getClaimField())))
+            : Optional.empty());
     // Write progress to the progress table, so that we can restart at the last processed
     // claim id if interrupted.
     saveProgress(
