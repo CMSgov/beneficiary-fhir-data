@@ -1,4 +1,4 @@
-# `rda-pipeline-alarms` Service
+# `rda-pipeline-metrics` Service
 
 This subfolder contains the Terraform configuration for CloudWatch Metrics and Dashboards related to the RDA Pipeline.
 
