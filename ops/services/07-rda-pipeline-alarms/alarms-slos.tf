@@ -61,6 +61,6 @@ resource "aws_cloudwatch_metric_alarm" "latency" {
 
   alarm_actions = local.slos_warning_arn
 
-  datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
+  datapoints_to_alarm = local.rda_pipeline_latency_alert.datapoints
   treat_missing_data  = "notBreaching"
 }
