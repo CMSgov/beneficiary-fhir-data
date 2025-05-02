@@ -51,6 +51,9 @@ public class SamhsaUtilTest {
   /** A SAMHSA code to use in the tests. */
   private static final String TEST_SAMHSA_CODE = "H0005";
 
+  /** Column to use in the tests. */
+  private static final String TEST_SAMHSA_COLUMN = "hcpcs_code";
+
   /** Test setup. */
   @BeforeEach
   void setup() {
@@ -61,7 +64,8 @@ public class SamhsaUtilTest {
   /** This test should return a SAMHSA code entry for the given code. */
   @Test
   public void shouldReturnSamhsaEntry() {
-    Optional<SamhsaEntry> entry = samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_CODE));
+    Optional<SamhsaEntry> entry =
+        samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_CODE), Optional.of(TEST_SAMHSA_COLUMN));
     assertTrue(entry.isPresent());
   }
 
