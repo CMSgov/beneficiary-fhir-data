@@ -65,7 +65,7 @@ resource "aws_cloudwatch_metric_alarm" "log_availability_1hr" {
   namespace   = "AWS/Logs"
 
   dimensions = {
-    LogGroupName = "/bfd/${local.env}/bfd-pipeline-rda/messages.txt"
+    LogGroupName = data.aws_cloudwatch_log_group.messages.name
   }
 
   alarm_actions = local.msgs_alert_arn
