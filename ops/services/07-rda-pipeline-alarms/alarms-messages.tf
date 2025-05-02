@@ -40,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "errors" {
   metric_name = "messages/count/error"
   namespace   = local.metrics_namespace
 
-  alarm_actions = local.msgs_warning_arn
+  alarm_actions = local.msgs_alert_arn
 
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
@@ -68,7 +68,7 @@ resource "aws_cloudwatch_metric_alarm" "log_availability_1hr" {
     LogGroupName = "/bfd/${local.env}/bfd-pipeline-rda/messages.txt"
   }
 
-  alarm_actions = local.msgs_warning_arn
+  alarm_actions = local.msgs_alert_arn
 
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
