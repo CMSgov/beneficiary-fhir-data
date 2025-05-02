@@ -35,6 +35,21 @@ awslocal ssm put-parameter --name "/bfd/local/server/nonsensitive/some_key" --va
 
 Run the application using the default profile (`local`)
 
+### From Intellij
+
+You can start the API from the run menu. Just make sure the option to include "provided" dependencies is checked.
+
+On the entrypoint:
+
+- Edit run configuration
+- Click "modify options"
+- Check "Add dependencies with 'provided' scope to classpath"
+
+Note that Intellij's support for Spring Boot features requires the licensed version, 
+but the community edition can still run it without all the bells and whistles.
+
+### From the CLI
+
 ```sh
 mvn spring-boot:run
 ```
@@ -57,3 +72,15 @@ mvn spring-boot:run
 ## Swagger
 
 The Swagger UI is available at `/v3/fhir/swagger-ui`
+
+## Tests
+
+### Regenerating snapshots
+
+Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).
+
+If snapshot tests fail, they will generate a `.patch` file with the difference that can be viewed using your diff tool of choice.
+
+```sh
+mvn clean verify -DupdateSnapshot=
+```

@@ -6,6 +6,7 @@ import loader
 from model import (
     IdrBeneficiary,
     IdrBeneficiaryHistory,
+    IdrBeneficiaryMbi,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
@@ -68,6 +69,29 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         exclude_keys=["bene_xref_efctv_sk_computed"],
     )
     history_loader.load(history_iter, IdrBeneficiaryHistory)
+
+    mbi_fetch_query = """
+    SELECT {COLUMNS}
+    FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
+    {WHERE_CLAUSE}
+    ORDER BY idr_trans_efctv_ts, bene_mbi_id
+    """
+    mbi_iter = data_extractor.extract_idr_data(
+        IdrBeneficiaryMbi,
+        connection_string=connection_string,
+        fetch_query=mbi_fetch_query,
+        progress_col="bene_mbi_id",
+        table="idr.beneficiary_mbi_id",
+    )
+
+    mbi_loader = PostgresLoader(
+        connection_string=connection_string,
+        table="idr.beneficiary_mbi_id",
+        unique_key=["bene_mbi_id", "idr_trans_efctv_ts"],
+        sort_key="bene_mbi_id",
+        exclude_keys=[],
+    )
+    mbi_loader.load(mbi_iter, IdrBeneficiaryMbi)
 
     bene_fetch_query = """
     SELECT {COLUMNS}
