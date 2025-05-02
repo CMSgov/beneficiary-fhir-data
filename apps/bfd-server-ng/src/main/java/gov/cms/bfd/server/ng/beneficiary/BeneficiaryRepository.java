@@ -40,7 +40,7 @@ public class BeneficiaryRepository {
   public List<Identity> getPatientIdentities(long beneSk) {
     return entityManager
         .createQuery(
-"""
+            """
               WITH allBeneInfo AS (
                 SELECT
                   bene.beneSk beneSk,
