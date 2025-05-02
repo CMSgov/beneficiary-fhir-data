@@ -19,10 +19,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 /** FHIR endpoints for the Patient resource. */
-@Validated
 @RequiredArgsConstructor
 @Component
 public class PatientResourceProvider implements IResourceProvider {
@@ -43,10 +41,7 @@ public class PatientResourceProvider implements IResourceProvider {
   @Read
   public Patient find(@IdParam final IdType fhirId) {
     var patient = patientHandler.find(FhirInputConverter.toLong(fhirId));
-    if (patient.isEmpty()) {
-      throw new ResourceNotFoundException(fhirId);
-    }
-    return patient.get();
+    return patient.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
   /**
