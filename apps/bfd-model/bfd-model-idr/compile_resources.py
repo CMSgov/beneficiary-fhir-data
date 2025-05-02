@@ -19,6 +19,8 @@ def run_command(cmd, cwd=None):
         print("Error running command:",cmd)
         if(e.stderr):
             print("Error output:",e.stderr)
+        else:
+            print("Error info (not necessarily stderr):",e)
         sys.exit(1) #kill process and debug.
 
 def get_referenced_maps(compiled_map_path):

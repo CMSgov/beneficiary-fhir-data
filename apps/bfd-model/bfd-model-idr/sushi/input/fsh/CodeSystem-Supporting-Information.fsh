@@ -1,5 +1,5 @@
-CodeSystem: Supporting-Information
-Title: Supporting-Information
+CodeSystem: Supporting_Information
+Title: "Supporting Information"
 Id: Supporting-Information
 Description: "A selection of codes that provide supporting information about the claim."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
