@@ -83,3 +83,42 @@ resource "aws_quicksight_group_membership" "quicksight_group_membership" {
   member_name = sensitive(each.value["member_name"])
   depends_on  = [aws_quicksight_group.quicksight_group, aws_quicksight_user.quicksight_user]
 }
+
+## IAM AUTH resources
+resource "aws_quicksight_user" "iam_quicksight_user" {
+  for_each = { for idx, user in local.quicksight_users : sha256("${user.email}-${user.identity_type}") => user }
+
+  email         = sensitive(each.value["email"])
+  identity_type = "IAM"
+  iam_arn       = each.value["user_role"] == "ADMIN" ? sensitive("arn:aws:iam::${local.account_id}:role/ct-ado-bfd-application-admin") : sensitive("arn:aws:iam::${local.account_id}:role/ct-ado-bfd-quicksight-user")
+  user_role     = upper(each.value["user_role"])
+  session_name  = each.value["identity_type"] == "IAM" ? sensitive("${each.value["iam"]}") : null
+}
+
+resource "aws_quicksight_group_membership" "iam_quicksight_group_membership" {
+  for_each = { for idx, group_membership in local.quicksight_group_memberships : sha256("${group_membership.group_name}-${group_membership.member_name}") => group_membership }
+
+  group_name  = each.value["group_name"]
+  member_name = sensitive(each.value["member_name"])
+  depends_on  = [aws_quicksight_group.quicksight_group, aws_quicksight_user.iam_quicksight_user]
+}
+
+resource "null_resource" "destroy_iam_quicksight_user" {
+  for_each = aws_quicksight_user.iam_quicksight_user
+  triggers = {
+    account_id          = local.account_id
+    sole_owner_arn      = sensitive(each.value.arn)
+    principal_admin_arn = local.quicksight_principal_admin_arn
+    command             = local.transfer_quicksight_permissions_command
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = self.triggers.command
+    environment = {
+      AWS_ACCOUNT_ID      = self.triggers.account_id
+      PRINCIPAL_ADMIN_ARN = self.triggers.principal_admin_arn
+      SOLE_OWNER_ARN      = self.triggers.sole_owner_arn
+    }
+  }
+}
