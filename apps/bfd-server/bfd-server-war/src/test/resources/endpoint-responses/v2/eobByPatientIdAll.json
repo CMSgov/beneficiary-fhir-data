@@ -1012,6 +1012,14 @@
           "value" : "CMS"
         }
       },
+      "provider" : {
+        "type" : "Practitioner",
+        "identifier" : {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "1244444444"
+        },
+        "display" : "DR. DAVID SMITH MD"
+      },
       "referral" : {
         "identifier" : {
           "type" : {

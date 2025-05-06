@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
+import static gov.cms.bfd.server.war.commons.TransformerConstants.CODING_NPI_US;
 import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
@@ -30,7 +31,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -117,6 +120,19 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     if (samhsaV2Enabled) {
       eob.getMeta().setSecurity(securityTags);
     }
+
+    Optional<String> providerNpi = Optional.empty();
+    if (claimGroup.getLines() != null && !claimGroup.getLines().isEmpty()) {
+      providerNpi = claimGroup.getLines().getFirst().getProviderNPI();
+    }
+    Reference providerReference =
+        new Reference()
+            .setIdentifier(
+                new Identifier().setSystem(CODING_NPI_US).setValue(providerNpi.orElse("UNKNOWN")))
+            .setDisplay(
+                providerNpi.map(CommonTransformerUtils::retrieveNpiCodeDisplay).orElse("UNKNOWN"))
+            .setType("Practitioner");
+    eob.setProvider(providerReference);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID => ExplanationOfBenefit.id
