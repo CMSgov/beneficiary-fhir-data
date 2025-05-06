@@ -1,4 +1,4 @@
-CodeSystem: Benefit-Balance
+CodeSystem: Benefit_Balance
 Title: "Benefit Balance"
 Id: Benefit-Balance
 Description: "This code system includes a selection of codes which convey information about the claim balance by benefit category."

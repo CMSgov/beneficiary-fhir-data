@@ -1,5 +1,5 @@
 CodeSystem: Adjudication
-Title: Supporting
+Title: "Adjudication Information"
 Id: Adjudication
 Description: "This code system includes a selection of Adjudication Value Codes which convey the payers assessment of the item provided in the claim under the terms of the patient’s insurance coverage."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"

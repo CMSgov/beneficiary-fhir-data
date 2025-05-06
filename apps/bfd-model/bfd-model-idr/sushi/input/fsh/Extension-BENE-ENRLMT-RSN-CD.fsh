@@ -1,5 +1,6 @@
 Extension: BENE_ENRLMT_RSN_CD 
-Description: "Beneficiary Enrollment Reason Code"
+Title: "Beneficiary Enrollment Reason Code"
+Description: "The reason for a beneficiary's enrollment in Part A/Part B benefits."
 Id: BENE-ENRLMT-RSN-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD"
 * ^context[+].type = #element

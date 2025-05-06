@@ -1,10 +1,10 @@
 //See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
 //Must appear in order map -> conceptmap -> uses -> imports -> groups
-map "https://bfd.cms.gov/MappingLanguage/Resources/Patient" = "BFD-Patient-Map"
+map "https://bfd.cms.gov/MappingLanguage/Maps/Patient" = "BFD-Patient-Map"
 
 
-uses "https://bluebutton.cms.gov/fhir/StructureDefinition/Beneficiary" alias Bene as source
-uses "https://bluebutton.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Beneficiary" alias Bene as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as target
 

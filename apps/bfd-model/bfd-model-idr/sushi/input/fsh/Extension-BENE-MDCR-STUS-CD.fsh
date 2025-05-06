@@ -1,9 +1,7 @@
-// @Name: Medicare Status Code FSH
-// @Description: Example of beneficiary medicare status code.
-
-Extension: BENE_MDCR_STUS_CD //We can use _ in the name
-Description: "Medicare Beneficiary Status Code"
-Id: BENE-MDCR-STUS-CD //FHIR ids do not allow _ in them
+Extension: BENE_MDCR_STUS_CD 
+Title: "Medicare Beneficiary Status Code"
+Description: "A code identifying the reason for a beneficiary's entitlement to Medicare benefits."
+Id: BENE-MDCR-STUS-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD" //see above
 * ^context[+].type = #element
 * ^context[=].expression = "Coverage"

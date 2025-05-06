@@ -32,7 +32,7 @@
         {"ROW_NUM":"4","BENE_PTNT_STUS_CD":"06"},
         {"ROW_NUM":"5","DGNS_DRG_CD":"460"},
         {"ROW_NUM":"6","CLM_BLOOD_PT_FRNSH_QTY":"15"},
-        {"ROW_NUM":"7","CLM_MDCR_INSTNL_MCO_PD_SW":"N"},
+        {"ROW_NUM":"7","CLM_MDCR_INSTNL_MCO_PD_SW":"1"},
         {"ROW_NUM":"8","CLM_MDCR_NCH_PTNT_STUS_IND_CD":"A"},
         {"ROW_NUM":"9","CLM_ADMSN_SRC_CD":"2"}, 
         {"ROW_NUM":"10","TYPE_OF_BILL_CD":"0123"},
