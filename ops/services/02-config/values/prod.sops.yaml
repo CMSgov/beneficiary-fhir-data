@@ -116,8 +116,11 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 200
 /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(10 minutes)
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-prod-cloudwatch-alarms,bfd-prod-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-${env}-cloudwatch-alarms,bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/max_idle_seconds: "600"
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/server_type: Remote
 /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/mode: UNDEFINED
@@ -483,8 +486,8 @@ sops:
       created_at: "2025-03-31T22:41:25Z"
       enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwGGkV8aeZvx5fp21oXhkSN9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNQ+5RQmcn6PsRqTjAgEQgDsboKccFePd1cbzxpBkMb/rhL9lNTCfSOBvG27HpXfZ6Ml18anFsRGNw8ZbLr/7E1NBC9vdZxAn2XqNSQ==
       aws_profile: ""
-  lastmodified: "2025-04-28T17:16:13Z"
-  mac: ENC[AES256_GCM,data:nARc0T/atIvKyRpJSqnF0uIWVYLLeEKekzd0b2I6gS3gZZmRcELVkWeDeuON+l6MfIMmismXAFxPSlyfUWRm3I1aytaeYnCe8LoKXSRZ/bS0kkS+66+gZnaObZmVsTZUpafsIHy9Fux2iUCLzajVjNdv99Z/5h7Wk5KPAEarUBM=,iv:Dn6WjANmOaXMokr+zKIBD0tq+TEI0i4eItZlSRAAV8E=,tag:U082YMCM0XcLNPwmaOUnAA==,type:str]
+  lastmodified: "2025-04-30T16:28:18Z"
+  mac: ENC[AES256_GCM,data:+oefzfPQyA+BfTVw1uCK41r1WkuvONFm/hV6mZ1JJ3MDLIuyV0abiun7AxzJug6mwZ32NmV5xXMZhPXnADBvJMzgiRJP8TxYxWeUHlP1hstRXGEoOr3f83l+m+2CbdRIz1jCkx7aTK9Y1eiBW2ztWWc1MezVFmRjTcdEEZDyKBE=,iv:qEMBtDtWS0arEmfodl1QkLxrQN7K2snyyctnLT8fyMA=,tag:f0ykA/2bzV2syKRQoHptFQ==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
