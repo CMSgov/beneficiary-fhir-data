@@ -1,0 +1,64 @@
+{
+  "name": "beneficiary-fhir-data",
+  "description": "",
+  "longDescription": "",
+  "status": "",
+  "permissions": {
+    "license": [
+      {
+        "name": "",
+        "URL": ""
+      }
+    ],
+    "usageType": "",
+    "exemptionText": ""
+  },
+  "organization": "",
+  "repositoryURL": "https://github.com/DSACMS/beneficiary-fhir-data",
+  "vcs": "git",
+  "laborHours": 34495,
+  "platforms": [],
+  "categories": [],
+  "softwareType": "",
+  "languages": [
+    "Java",
+    "HCL",
+    "Python",
+    "Shell",
+    "PLpgSQL",
+    "Groovy",
+    "Rust",
+    "GLSL",
+    "Kotlin",
+    "Jinja",
+    "Dockerfile",
+    "Liquid",
+    "HTML",
+    "Go",
+    "Ruby",
+    "CSS",
+    "Smarty",
+    "JavaScript",
+    "SCSS"
+  ],
+  "maintenance": "",
+  "date": {
+    "created": "2025-05-06T14:44:18Z",
+    "lastModified": "2025-05-06T17:27:56Z",
+    "metaDataLastUpdated": "2025-05-06T17:28:54.252Z"
+  },
+  "tags": [],
+  "contact": {
+    "email": "",
+    "name": ""
+  },
+  "localisation": false,
+  "repositoryType": "",
+  "userInput": false,
+  "fismaLevel": "",
+  "group": "",
+  "subsetInHealthcare": [],
+  "userType": [],
+  "repositoryHost": "github",
+  "maturityModelTier": 0
+}
