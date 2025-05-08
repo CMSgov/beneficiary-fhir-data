@@ -108,6 +108,7 @@ public class AbstractSamhsaBackfillTest {
     backfill.setSamhsaUtil(mockSamhsaUtil);
     backfill.executeQueryLoop(manager);
     verify(mockQuery, times(1)).getResultList();
-    verify(mockSamhsaUtil, times(1)).processCodeList(any(), any(), any(), any(), any(), any());
+    verify(mockSamhsaUtil, times(1))
+        .processCodeList(any(), any(), any(), any(), any(), any(), any());
   }
 }

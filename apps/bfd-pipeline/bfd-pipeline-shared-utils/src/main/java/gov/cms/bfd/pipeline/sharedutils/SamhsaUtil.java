@@ -210,6 +210,7 @@ public class SamhsaUtil {
    * Process a list of codes. Does not use Entities.
    *
    * @param claim The results list.
+   * @param columnSystems A map of columns to their systems.
    * @param tableEntry The tableEntry object for this table.
    * @param dates If present, contains the active dates for this claim.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
@@ -220,6 +221,7 @@ public class SamhsaUtil {
    */
   public boolean processCodeList(
       Map<String, Object> claim,
+      Map<String, String[]> columnSystems,
       TableEntry tableEntry,
       Optional<LocalDate[]> dates,
       Map<String, LocalDate[]> datesMap,
@@ -237,7 +239,10 @@ public class SamhsaUtil {
       }
 
       Optional<SamhsaEntry> samhsaEntry =
-          getSamhsaCode(Optional.of(code), Optional.of(entry.getKey()));
+          getSamhsaCode(
+              Optional.of(code),
+              Optional.of(entry.getKey()),
+              Optional.of(columnSystems.get(entry.getKey())));
       if (samhsaEntry.isPresent()) {
         LocalDate[] datesObject =
             getDatesObjectsForClaim(
@@ -297,11 +302,17 @@ public class SamhsaUtil {
 
   private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
 
-  private static SamhsaEntry getEntryForCode(String columnName, String code) {
-    String[] columnSystems = getSystemsForColumn(columnName);
-    // Get the entry that this code belongs to by filtering
+  private static SamhsaEntry getEntryForCode(String columnName, String code, String[] systems) {
+    String[] columnSystems;
+    if (systems != null) {
+      columnSystems = systems;
+    } else {
+      columnSystems = getSystemsForColumn(columnName);
+    }
+    // Get the entry that this code belongs to by filtering.
+    // mapMulti is a bit less cpu intensive than flatMap.
     return Arrays.stream(columnSystems)
-        .flatMap(c -> samhsaMap.get(c).stream())
+        .<SamhsaEntry>mapMulti((s, consumer) -> samhsaMap.get(s).forEach(consumer))
         .filter(e -> e.getCode().equals(code))
         .findFirst()
         .orElse(null);
@@ -662,6 +673,19 @@ public class SamhsaUtil {
    */
   public static Optional<SamhsaEntry> getSamhsaCode(
       Optional<String> code, Optional<String> columnName) {
+    return getSamhsaCode(code, columnName, Optional.empty());
+  }
+
+  /**
+   * Check if a given code is a SAMHSA code.
+   *
+   * @param code the code to check.
+   * @param columnName The column of the code.
+   * @param systems The possible systems for this column.
+   * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
+   */
+  public static Optional<SamhsaEntry> getSamhsaCode(
+      Optional<String> code, Optional<String> columnName, Optional<String[]> systems) {
     if (code.isEmpty() || columnName.isEmpty()) {
       return Optional.empty();
     }
@@ -674,7 +698,7 @@ public class SamhsaUtil {
     }
     String normalizedCode = normalizeCode(code.get());
 
-    SamhsaEntry entry = getEntryForCode(columnName.get(), normalizedCode);
+    SamhsaEntry entry = getEntryForCode(columnName.get(), normalizedCode, systems.orElse(null));
     return Optional.ofNullable(entry);
   }
 

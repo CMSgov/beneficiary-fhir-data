@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.text.StringSubstitutor;
@@ -91,10 +92,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   // Map of columns to column values. Reused to save clock cycles for creation.
   Map<String, Object> columnMap = new LinkedHashMap<>();
-
+  // Maps a column name to a list of possible systems.
+  Map<String, String[]> columnSystems;
   // This Map will allow us to save the active dates for a claim to be used in multiple
   // records with the same claim id. Reused to save clock cycles for creation.
-  HashMap<String, LocalDate[]> datesMap = new HashMap<>();
+  Map<String, LocalDate[]> datesMap = new HashMap<>();
 
   /**
    * Constructor.
@@ -198,9 +200,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * @return The total number of tags saved.
    */
   protected int processClaim(
-      Map<String, Object> claim,
-      HashMap<String, LocalDate[]> datesMap,
-      EntityManager entityManager) {
+      Map<String, Object> claim, Map<String, LocalDate[]> datesMap, EntityManager entityManager) {
     Object claimId = claim.get(tableEntry.getClaimField());
     Optional<LocalDate[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
@@ -225,7 +225,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Check for valid SAMHSA codes in this claim.
     boolean hasSamhsaCode =
         samhsaUtil.processCodeList(
-            claim, tableEntry, dates, datesMap, nonCodeFields, entityManager);
+            claim, columnSystems, tableEntry, dates, datesMap, nonCodeFields, entityManager);
     if (hasSamhsaCode) {
       return writeEntry(claimId, tableEntry.getTagTable(), entityManager);
     }
@@ -245,6 +245,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     String concatColumns = String.join(", ", columns);
     queryColumnsList.add(claimField);
     queryColumnsList.addAll(splitColumnCsvToList(columns));
+    findColumnSystems(queryColumnsList);
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -261,6 +262,23 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return builder.toString();
   }
 
+  /**
+   * Maps a list of columns to their respective systems. The idea is to prebuild this at the
+   * beginning of the run, to save clock cycles during the run.
+   *
+   * @param columnList The list of columns.
+   */
+  private void findColumnSystems(List<String> columnList) {
+    columnSystems =
+        columnList.stream().collect(Collectors.toMap(c -> c, SamhsaUtil::getSystemsForColumn));
+  }
+
+  /**
+   * Splits an array of comma-separated columns into a single list.
+   *
+   * @param columns The list of comma-separated columns.
+   * @return The new list of columns.
+   */
   private List<String> splitColumnCsvToList(String[] columns) {
     return Arrays.stream(columns)
         .flatMap(column -> Arrays.stream(column.split(",")).map(String::trim))
