@@ -210,6 +210,7 @@ public class SamhsaUtil {
    * Process a list of codes. Does not use Entities.
    *
    * @param claim The results list.
+   * @param columnIndexMap Map of columns to their index in the claim[] object array.
    * @param columnSystems A map of columns to their systems.
    * @param tableEntry The tableEntry object for this table.
    * @param dates If present, contains the active dates for this claim.
@@ -220,7 +221,8 @@ public class SamhsaUtil {
    * @return true if a SAMHSA tag should be created.
    */
   public boolean processCodeList(
-      Map<String, Object> claim,
+      Object[] claim,
+      Map<String, Integer> columnIndexMap,
       Map<String, String[]> columnSystems,
       TableEntry tableEntry,
       Optional<LocalDate[]> dates,
@@ -228,11 +230,11 @@ public class SamhsaUtil {
       List<String> nonCodeFields,
       EntityManager entityManager) {
 
-    for (Map.Entry<String, Object> entry : claim.entrySet()) {
+    for (Map.Entry<String, Integer> entry : columnIndexMap.entrySet()) {
       if (nonCodeFields.contains(entry.getKey())) {
         continue;
       }
-      String code = (String) entry.getValue();
+      String code = (String) claim[entry.getValue()];
       // having a continue here instead of a nested block reduces cognitive complexity.
       if (code == null) {
         continue;
@@ -246,7 +248,11 @@ public class SamhsaUtil {
       if (samhsaEntry.isPresent()) {
         LocalDate[] datesObject =
             getDatesObjectsForClaim(
-                tableEntry, claim.get(tableEntry.getClaimField()), dates, datesMap, entityManager);
+                tableEntry,
+                claim[columnIndexMap.get(tableEntry.getClaimField())],
+                dates,
+                datesMap,
+                entityManager);
         if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
           continue;
         }
