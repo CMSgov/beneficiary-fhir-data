@@ -409,6 +409,11 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         transactionManager.executeProcedure(this::executeQueryLoop);
 
       } catch (Exception ex) {
+        getLogger()
+            .error(
+                "There was an error processing table {}: {}",
+                tableEntry.getClaimTable(),
+                ex.getMessage());
         throw new RuntimeException(ex);
       }
       // If the number of returned claims is not equal to the requested batch size, then the
