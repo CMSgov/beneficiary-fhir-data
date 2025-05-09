@@ -203,7 +203,9 @@ public class SamhsaUtil {
     Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("claimId", claimId);
     Object[] result = (Object[]) query.getSingleResult();
-    return new LocalDate[] {((Date) result[0]).toLocalDate(), ((Date) result[1]).toLocalDate()};
+    LocalDate fromDate = result[0] != null ? ((Date) result[0]).toLocalDate() : null;
+    LocalDate toDate = result[1] != null ? ((Date) result[1]).toLocalDate() : null;
+    return new LocalDate[] {fromDate, toDate};
   }
 
   /**

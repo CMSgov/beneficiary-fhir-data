@@ -220,12 +220,15 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // original query.
     if (!tableEntry.getLineItem()) {
       try {
-        dates =
-            Optional.of(
-                new LocalDate[] {
-                  ((Date) claim[columnIndexMap.get(tableEntry.getFromDateField())]).toLocalDate(),
-                  ((Date) claim[columnIndexMap.get(tableEntry.getToDateField())]).toLocalDate()
-                });
+        LocalDate fromDate =
+            claim[columnIndexMap.get(tableEntry.getFromDateField())] != null
+                ? ((Date) claim[columnIndexMap.get(tableEntry.getFromDateField())]).toLocalDate()
+                : null;
+        LocalDate toDate =
+            claim[columnIndexMap.get(tableEntry.getToDateField())] != null
+                ? ((Date) claim[columnIndexMap.get(tableEntry.getToDateField())]).toLocalDate()
+                : null;
+        dates = Optional.of(new LocalDate[] {fromDate, toDate});
       } catch (Exception e) {
         throw new BadCodeMonkeyException(
             "Query should have a column for from date and to date, but does not.");
@@ -415,6 +418,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
                 tableEntry.getClaimTable(),
                 ex.getMessage());
         throw new RuntimeException(ex);
+      }
+      if (Thread.currentThread().isInterrupted()) {
+        break;
       }
       // If the number of returned claims is not equal to the requested batch size, then the
       // table
