@@ -7,7 +7,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
@@ -19,10 +18,10 @@ public class SamhsaBackfillJob implements PipelineJob {
   private final Semaphore runningSemaphore;
 
   /** The CCW PipelineApplicationState. */
-  List<PipelineApplicationState> appStateCcw;
+  PipelineApplicationState appStateCcw;
 
   /** The RDA PipelineApplicationState. */
-  List<PipelineApplicationState> appStateRda;
+  PipelineApplicationState appStateRda;
 
   /** The log reporting interval. */
   Long logInterval;
@@ -42,8 +41,8 @@ public class SamhsaBackfillJob implements PipelineJob {
    * @param logInterval The Log reporting interval.
    */
   public SamhsaBackfillJob(
-      List<PipelineApplicationState> appStateCcw,
-      List<PipelineApplicationState> appStateRda,
+      PipelineApplicationState appStateCcw,
+      PipelineApplicationState appStateRda,
       int batchSize,
       Long logInterval) {
     this.appStateCcw = appStateCcw;
