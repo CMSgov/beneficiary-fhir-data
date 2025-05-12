@@ -1,6 +1,7 @@
 import csv
 import psycopg
 import os
+import typing
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE.csv", "table": "v2_mdcr_bene"},
@@ -18,7 +19,8 @@ for table in tables:
         "r",
     ) as f:
         reader = csv.DictReader(f)
-        cols = list(reader.fieldnames)
+
+        cols = list(typing.cast(typing.Iterable, reader.fieldnames))
         cols_str = ",".join(cols)
         with conn.cursor() as cur:
             with cur.copy(
