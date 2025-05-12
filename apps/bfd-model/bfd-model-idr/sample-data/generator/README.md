@@ -1,4 +1,6 @@
-# Setup
+# Synthetic Data Generator
+
+## Setup
 
 Install packages
 
@@ -6,7 +8,7 @@ Install packages
 uv sync
 ```
 
-# Run
+## Run
 
 ```sh
 uv run patient_generator.py
