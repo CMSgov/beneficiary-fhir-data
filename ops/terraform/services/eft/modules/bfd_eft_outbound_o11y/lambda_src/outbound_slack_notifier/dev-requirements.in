@@ -1,4 +1,5 @@
 black==24.3.0
 isort
 pylint
-setuptools>=70.0.0
+setuptools>=78.1.1
+
