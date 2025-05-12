@@ -19,12 +19,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.text.StringSubstitutor;
@@ -89,12 +89,23 @@ public abstract class AbstractSamhsaBackfill implements Callable {
 
   @Getter @Setter List<String> queryColumnsList = new ArrayList<>();
 
-  // Map of columns to column values. Reused to save clock cycles for creation.
-  Map<String, Object> columnMap = new LinkedHashMap<>();
+  /** Maps a column name to a list of possible systems. */
+  Map<String, String[]> columnSystems;
 
-  // This Map will allow us to save the active dates for a claim to be used in multiple
-  // records with the same claim id. Reused to save clock cycles for creation.
-  HashMap<String, LocalDate[]> datesMap = new HashMap<>();
+  /**
+   * This Map will allow us to save the active dates for a claim to be used in multiple records with
+   * the same claim id. Reused to save clock cycles for creation.
+   */
+  Map<String, LocalDate[]> datesMap = new HashMap<>();
+
+  /**
+   * Maps column names to their index. This gives us a quick way to lookup the index of a column,
+   * without having to iterate through the list. This is used in conjunction with the claim[] array
+   * to get the value of a column in O(1) time without needing to create a new map for every claim
+   * (as the column positions will never change). usage example:
+   * claim[columnIndexMap.get(tableEntry.getFromDateField)].
+   */
+  Map<String, Integer> columnIndexMap;
 
   /**
    * Constructor.
@@ -192,27 +203,32 @@ public abstract class AbstractSamhsaBackfill implements Callable {
    * to construct an entity, it is the fastest way to query.
    *
    * @param claim the claim to process
+   * @param columnIndexMap Map of columns to their index in the claim[] object array.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
    *     claim has more than one lineitem.
    * @param entityManager The entity manager.
    * @return The total number of tags saved.
    */
   protected int processClaim(
-      Map<String, Object> claim,
-      HashMap<String, LocalDate[]> datesMap,
+      Object[] claim,
+      Map<String, Integer> columnIndexMap,
+      Map<String, LocalDate[]> datesMap,
       EntityManager entityManager) {
-    Object claimId = claim.get(tableEntry.getClaimField());
+    Object claimId = claim[columnIndexMap.get(tableEntry.getClaimField())];
     Optional<LocalDate[]> dates = Optional.empty();
     // Line item tables pull the active dates with a separate query, while parent tables use the
     // original query.
     if (!tableEntry.getLineItem()) {
       try {
-        dates =
-            Optional.of(
-                new LocalDate[] {
-                  ((Date) claim.get(tableEntry.getFromDateField())).toLocalDate(),
-                  ((Date) claim.get(tableEntry.getToDateField())).toLocalDate()
-                });
+        LocalDate fromDate =
+            claim[columnIndexMap.get(tableEntry.getFromDateField())] != null
+                ? ((Date) claim[columnIndexMap.get(tableEntry.getFromDateField())]).toLocalDate()
+                : null;
+        LocalDate toDate =
+            claim[columnIndexMap.get(tableEntry.getToDateField())] != null
+                ? ((Date) claim[columnIndexMap.get(tableEntry.getToDateField())]).toLocalDate()
+                : null;
+        dates = Optional.of(new LocalDate[] {fromDate, toDate});
       } catch (Exception e) {
         throw new BadCodeMonkeyException(
             "Query should have a column for from date and to date, but does not.");
@@ -225,11 +241,25 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Check for valid SAMHSA codes in this claim.
     boolean hasSamhsaCode =
         samhsaUtil.processCodeList(
-            claim, tableEntry, dates, datesMap, nonCodeFields, entityManager);
+            claim,
+            columnIndexMap,
+            columnSystems,
+            tableEntry,
+            dates,
+            datesMap,
+            nonCodeFields,
+            entityManager);
     if (hasSamhsaCode) {
       return writeEntry(claimId, tableEntry.getTagTable(), entityManager);
     }
     return 0;
+  }
+
+  private void mapColumnToIndex(List<String> columns) {
+    columnIndexMap = new HashMap<>();
+    for (int i = 0; i < columns.size(); i++) {
+      columnIndexMap.put(columns.get(i), i);
+    }
   }
 
   /**
@@ -245,6 +275,8 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     String concatColumns = String.join(", ", columns);
     queryColumnsList.add(claimField);
     queryColumnsList.addAll(splitColumnCsvToList(columns));
+    mapColumnToIndex(queryColumnsList);
+    findColumnSystems(queryColumnsList);
     StringBuilder builder = new StringBuilder();
     builder.append("SELECT ");
     builder.append(claimField);
@@ -261,18 +293,27 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     return builder.toString();
   }
 
+  /**
+   * Maps a list of columns to their respective systems. The idea is to prebuild this at the
+   * beginning of the run, to save clock cycles during the run.
+   *
+   * @param columnList The list of columns.
+   */
+  private void findColumnSystems(List<String> columnList) {
+    columnSystems =
+        columnList.stream().collect(Collectors.toMap(c -> c, SamhsaUtil::getSystemsForColumn));
+  }
+
+  /**
+   * Splits an array of comma-separated columns into a single list.
+   *
+   * @param columns The list of comma-separated columns.
+   * @return The new list of columns.
+   */
   private List<String> splitColumnCsvToList(String[] columns) {
     return Arrays.stream(columns)
         .flatMap(column -> Arrays.stream(column.split(",")).map(String::trim))
         .toList();
-  }
-
-  private Map<String, Object> mapClaimObjects(Object[] claim) {
-    columnMap.clear();
-    for (int i = 0; i < queryColumnsList.size(); i++) {
-      columnMap.put(queryColumnsList.get(i), claim[i]);
-    }
-    return columnMap;
   }
 
   /**
@@ -290,8 +331,7 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     // Iterate over the batch of claims that were just pulled, and process them for SAMHSA
     // codes. */
     for (Object[] claim : claims) {
-      columnMap = mapClaimObjects(claim);
-      savedInBatch += processClaim(columnMap, datesMap, entityManager);
+      savedInBatch += processClaim(claim, columnIndexMap, datesMap, entityManager);
     }
     incrementTotalSaved(savedInBatch);
     incrementTotalProcessedInInterval(claims.size());
@@ -301,7 +341,9 @@ public abstract class AbstractSamhsaBackfill implements Callable {
     setLastClaimId(
         !claims.isEmpty()
             ? Optional.of(
-                String.valueOf(Objects.requireNonNull(columnMap).get(tableEntry.getClaimField())))
+                Objects.requireNonNull(
+                    String.valueOf(
+                        claims.getLast()[columnIndexMap.get(tableEntry.getClaimField())])))
             : Optional.empty());
     // Write progress to the progress table, so that we can restart at the last processed
     // claim id if interrupted.
@@ -370,7 +412,15 @@ public abstract class AbstractSamhsaBackfill implements Callable {
         transactionManager.executeProcedure(this::executeQueryLoop);
 
       } catch (Exception ex) {
+        getLogger()
+            .error(
+                "There was an error processing table {}: {}",
+                tableEntry.getClaimTable(),
+                ex.getMessage());
         throw new RuntimeException(ex);
+      }
+      if (Thread.currentThread().isInterrupted()) {
+        break;
       }
       // If the number of returned claims is not equal to the requested batch size, then the
       // table
