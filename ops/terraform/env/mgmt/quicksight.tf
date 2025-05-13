@@ -5,7 +5,13 @@ locals {
     [for value in nonsensitive(data.aws_ssm_parameters_by_path.sensitive_quicksight_config.values) : value]
   )
 
-  quicksight_users  = jsondecode(local.quicksight_config["users"])
+  quicksight_users    = jsondecode(local.quicksight_config["users"])
+  ct_quicksight_users = jsondecode(local.quicksight_config["ct_users"])
+  ct_quicksight_group_memberships = flatten([
+    for user in local.ct_quicksight_users : [
+      for group_name in user["groups"] : { "member_name" : lookup(user, "iam", user["email"]), "group_name" : group_name, "user_role" : lookup(user, "user_role", null) }
+    ]
+  ])
   quicksight_groups = [for group in jsondecode(local.quicksight_config["groups"]) : group["group_name"]]
   quicksight_group_memberships = flatten([
     for user in local.quicksight_users : [
@@ -85,8 +91,8 @@ resource "aws_quicksight_group_membership" "quicksight_group_membership" {
 }
 
 ## IAM AUTH resources
-resource "aws_quicksight_user" "iam_quicksight_user" {
-  for_each = { for idx, user in local.quicksight_users : sha256("${user.email}-${user.identity_type}") => user }
+resource "aws_quicksight_user" "ct_quicksight_user" {
+  for_each = { for idx, user in local.ct_quicksight_users : sha256("${user.email}-${user.identity_type}") => user }
 
   email         = sensitive(each.value["email"])
   identity_type = "IAM"
@@ -95,16 +101,16 @@ resource "aws_quicksight_user" "iam_quicksight_user" {
   session_name  = each.value["identity_type"] == "IAM" ? sensitive("${each.value["iam"]}") : null
 }
 
-resource "aws_quicksight_group_membership" "iam_quicksight_group_membership" {
-  for_each = { for idx, group_membership in local.quicksight_group_memberships : sha256("${group_membership.group_name}-${group_membership.member_name}") => group_membership }
+resource "aws_quicksight_group_membership" "ct_quicksight_group_membership" {
+  for_each = { for idx, group_membership in local.ct_quicksight_group_memberships : sha256("${group_membership.group_name}-${group_membership.member_name}") => group_membership }
 
   group_name  = each.value["group_name"]
-  member_name = sensitive(each.value["member_name"])
-  depends_on  = [aws_quicksight_group.quicksight_group, aws_quicksight_user.iam_quicksight_user]
+  member_name = each.value["user_role"] == "ADMIN" ? sensitive("ct-ado-bfd-application-admin/${each.value["member_name"]}") : sensitive("ct-ado-bfd-quicksight-user/${each.value["member_name"]}")
+  depends_on  = [aws_quicksight_group.quicksight_group, aws_quicksight_user.ct_quicksight_user]
 }
 
-resource "null_resource" "destroy_iam_quicksight_user" {
-  for_each = aws_quicksight_user.iam_quicksight_user
+resource "null_resource" "destroy_ct_quicksight_user" {
+  for_each = aws_quicksight_user.ct_quicksight_user
   triggers = {
     account_id          = local.account_id
     sole_owner_arn      = sensitive(each.value.arn)
