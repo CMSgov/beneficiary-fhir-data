@@ -4,6 +4,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.CCWSamhsaBackfill.CCW_TABLES;
 import gov.cms.bfd.pipeline.sharedutils.samhsa.backfill.RDASamhsaBackfill.RDA_TABLES;
+import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -71,39 +72,19 @@ public class SamhsaBackfillService {
    * @return the service singleton.
    */
   public static SamhsaBackfillService createBackfillService(
-      List<PipelineApplicationState> appStateCcw,
-      List<PipelineApplicationState> appStateRda,
-      int batchSize,
-      Long logInterval) {
-    if (service == null) {
-      service = new SamhsaBackfillService(appStateCcw, appStateRda, batchSize, logInterval);
-    }
-    return service;
-  }
-
-  /**
-   * Creates the Singleton for this service.
-   *
-   * @param appStateCcw The CCW PipelineApplicationState.
-   * @param appStateRda The RDA PipelineApplicationState.
-   * @param batchSize The query batch size.
-   * @param logInterval The log interval.
-   * @return the service singleton.
-   */
-  public static SamhsaBackfillService createBackfillService(
       PipelineApplicationState appStateCcw,
       PipelineApplicationState appStateRda,
       int batchSize,
       Long logInterval) {
-    List<PipelineApplicationState> ccwStates = new ArrayList<>();
-    for (int i = 0; i < ccwTables.size(); i++) {
-      ccwStates.add(appStateCcw);
+    if (service == null) {
+      service =
+          new SamhsaBackfillService(
+              appStateCcw != null ? appStateCcw.getEntityManagerFactory() : null,
+              appStateRda != null ? appStateRda.getEntityManagerFactory() : null,
+              batchSize,
+              logInterval);
     }
-    List<PipelineApplicationState> rdaStates = new ArrayList<>();
-    for (int i = 0; i < rdaTables.size(); i++) {
-      rdaStates.add(appStateRda);
-    }
-    return createBackfillService(ccwStates, rdaStates, batchSize, logInterval);
+    return service;
   }
 
   /**
@@ -145,29 +126,29 @@ public class SamhsaBackfillService {
   /**
    * Constructor.
    *
-   * @param appStateCcw The CCW PipelineApplicationState.
-   * @param appStateRda The RDA PipelineApplicationState.
+   * @param ccwFactory The CCW EntityManagerFactory.
+   * @param rdaFactory The RDA EntityManagerFactory.
    * @param batchSize The query batch size.
    * @param logInterval The log interval.
    */
   private SamhsaBackfillService(
-      List<PipelineApplicationState> appStateCcw,
-      List<PipelineApplicationState> appStateRda,
+      EntityManagerFactory ccwFactory,
+      EntityManagerFactory rdaFactory,
       int batchSize,
       Long logInterval) {
     this.batchSize = batchSize;
     this.logInterval = logInterval;
-    if (appStateCcw != null) {
+    if (ccwFactory != null) {
       List<TransactionManager> transactionManagerCcw = new ArrayList<>();
-      for (PipelineApplicationState appState : appStateCcw) {
-        transactionManagerCcw.add(new TransactionManager(appState.getEntityManagerFactory()));
+      for (int i = 0; i < ccwTables.size(); i++) {
+        transactionManagerCcw.add(new TransactionManager(ccwFactory));
       }
       ccwCallables = createCcwCallables(ccwTables, transactionManagerCcw);
     }
-    if (appStateRda != null) {
+    if (rdaFactory != null) {
       List<TransactionManager> transactionManagerRda = new ArrayList<>();
-      for (PipelineApplicationState appState : appStateCcw) {
-        transactionManagerRda.add(new TransactionManager(appState.getEntityManagerFactory()));
+      for (int i = 0; i < rdaTables.size(); i++) {
+        transactionManagerRda.add(new TransactionManager(rdaFactory));
       }
 
       rdaCallables = createRdaCallables(rdaTables, transactionManagerRda);

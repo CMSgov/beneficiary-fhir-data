@@ -372,7 +372,9 @@ public abstract class SamhsaAdapterBase<TClaim, TClaimLine> {
 
     List<SamhsaFields> fields = getFields();
     for (SamhsaFields field : fields) {
-      entry = SamhsaUtil.getSamhsaCode(Optional.ofNullable(field.getCode()));
+      entry =
+          SamhsaUtil.getSamhsaCode(
+              Optional.ofNullable(field.getCode()), Optional.ofNullable(field.getColumn()));
       if (entry.isPresent()) {
         try {
           LocalDate startDate = LocalDate.parse(entry.get().getStartDate());

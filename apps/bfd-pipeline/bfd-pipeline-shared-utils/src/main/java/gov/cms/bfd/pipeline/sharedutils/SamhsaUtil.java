@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.util.Strings;
 
@@ -103,14 +103,43 @@ public class SamhsaUtil {
   /** idr_proc_code constant. */
   public static final String IDR_PROC_CODE = "idr_proc_code";
 
-  /** Map of the SAMHSA code entries, with the SAMHSA code as the key. */
-  private static Map<String, SamhsaEntry> samhsaMap = new HashMap<>();
+  /**
+   * Diagnosis column portions. All diagnosis columns will contain one of these values in the name.
+   */
+  public static final String DIAG_COLUMN_PORTION[] = {"diag", "dgns", "rsn_visit"};
+
+  /**
+   * Procedure column portions. All procedure columns will contain one of these values in the name.
+   */
+  public static final String PROC_COLUMN_PORTION[] = {"prcdr", "proc"};
+
+  /** HCPCS column portions. All HCPCS columns will contain one of these values in the name. */
+  public static final String HCPCS_COLUMN_PORTION[] = {"hcpc", "hcpcs", "hipps"};
+
+  /** DRG column portions. All DRG columns will contain one of these values in the name. */
+  public static final String DRG_COLUMN_PORTION[] = {"drg"};
+
+  /** Map of the SAMHSA code entries, with the entry's system as the key. */
+  private static Map<String, List<SamhsaEntry>> samhsaMap = new HashMap<>();
 
   /** Instance of this class. Will be a singleton. */
   private static SamhsaUtil samhsaUtil;
 
   /** The file from which SAMHSA entries are pulled. Must be in the resources folder. */
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
+
+  private static final String[] PRCDR_SYSTEMS = {
+    "http://www.cms.gov/Medicare/Coding/ICD10", "http://www.cms.gov/Medicare/Coding/ICD9"
+  };
+  private static final String[] DGNS_SYSTEMS = {
+    "http://hl7.org/fhir/sid/icd-10-cm", "http://hl7.org/fhir/sid/icd-9-cm"
+  };
+  private static final String[] DRG_SYSTEMS = {
+    "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+  };
+  private static final String[] HCPCS_SYSTEMS = {
+    "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", "http://www.ama-assn.org/go/cpt"
+  };
 
   /**
    * Creates a stream from a file.
@@ -165,7 +194,7 @@ public class SamhsaUtil {
    * @param entityManager The entity manager.
    * @return the date ranges.
    */
-  private Object[] getClaimDates(
+  private LocalDate[] getClaimDates(
       Object claimId, TableEntry tableEntry, EntityManager entityManager) {
     Map<String, String> params =
         Map.of("claimTable", tableEntry.getParentTable(), "claimField", tableEntry.getClaimField());
@@ -173,65 +202,163 @@ public class SamhsaUtil {
     String queryStr = strSub.replace(tableEntry.getDatesQuery());
     Query query = entityManager.createNativeQuery(queryStr);
     query.setParameter("claimId", claimId);
-    return (Object[]) query.getSingleResult();
+    Object[] result = (Object[]) query.getSingleResult();
+    LocalDate fromDate = result[0] != null ? ((Date) result[0]).toLocalDate() : null;
+    LocalDate toDate = result[1] != null ? ((Date) result[1]).toLocalDate() : null;
+    return new LocalDate[] {fromDate, toDate};
   }
 
   /**
    * Process a list of codes. Does not use Entities.
    *
-   * @param codes The list of codes.
+   * @param claim The results list.
+   * @param columnIndexMap Map of columns to their index in the claim[] object array.
+   * @param columnSystems A map of columns to their systems.
    * @param tableEntry The tableEntry object for this table.
-   * @param claimId The claim id for this claim.
    * @param dates If present, contains the active dates for this claim.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
    *     claim has more than one lineitem.
+   * @param nonCodeFields Fields that are not Samhsa codes. This will be skipped during iteration.
    * @param entityManager The entity manager.
    * @return true if a SAMHSA tag should be created.
    */
   public boolean processCodeList(
-      List<String> codes,
+      Object[] claim,
+      Map<String, Integer> columnIndexMap,
+      Map<String, String[]> columnSystems,
       TableEntry tableEntry,
-      Object claimId,
-      Optional<Object[]> dates,
-      Map<String, Object[]> datesMap,
+      Optional<LocalDate[]> dates,
+      Map<String, LocalDate[]> datesMap,
+      List<String> nonCodeFields,
       EntityManager entityManager) {
-    for (String code : codes) {
-      // Found a samhsa code
-      if (samhsaMap.containsKey(code)) {
-        Object[] datesObject;
-        if (dates.isPresent()) {
-          datesObject = dates.get();
-        } else {
-          datesObject = getClaimDates(claimId, tableEntry, entityManager);
-          // Put the dates in a map, in case any other line items with the same id have samhsa
-          // codes.
-          datesMap.put(claimId.toString(), datesObject);
-        }
-        LocalDate coverageStartDate =
-            datesObject[0] == null
-                ? LocalDate.parse("1970-01-01")
-                : ((Date) datesObject[0]).toLocalDate();
-        LocalDate coverageEndDate =
-            datesObject[1] == null ? LocalDate.now() : ((Date) datesObject[1]).toLocalDate();
-        SamhsaEntry entry = samhsaMap.get(code);
-        LocalDate startDate = LocalDate.parse(entry.getStartDate());
-        LocalDate endDate =
-            entry.getEndDate().equalsIgnoreCase("Active")
-                ? LocalDate.MAX
-                : LocalDate.parse(entry.getEndDate());
 
-        // if the throughDate is not between the start and end date,
-        // and the serviceDate is not between the start and end date,
-        // then the claim falls outside the date range of the SAMHSA code.
-        if (isDateOutsideOfRange(startDate, endDate, coverageEndDate)
-            && isDateOutsideOfRange(startDate, endDate, coverageStartDate)) {
+    for (Map.Entry<String, Integer> entry : columnIndexMap.entrySet()) {
+      if (nonCodeFields.contains(entry.getKey())) {
+        continue;
+      }
+      String code = (String) claim[entry.getValue()];
+      // having a continue here instead of a nested block reduces cognitive complexity.
+      if (code == null) {
+        continue;
+      }
+
+      Optional<SamhsaEntry> samhsaEntry =
+          getSamhsaCode(
+              Optional.of(code),
+              Optional.of(entry.getKey()),
+              Optional.of(columnSystems.get(entry.getKey())));
+      if (samhsaEntry.isPresent()) {
+        LocalDate[] datesObject =
+            getDatesObjectsForClaim(
+                tableEntry,
+                claim[columnIndexMap.get(tableEntry.getClaimField())],
+                dates,
+                datesMap,
+                entityManager);
+        if (isInvalidClaimDate(datesObject, samhsaEntry.get())) {
           continue;
         }
-        // This is a valid code, we can stop here.
+        // This is a valid SAMHSA code, that belongs to the correct system, and the date is in
+        // range.
+        // Since we're not creating a details object for this claim, we can stop here.
         return true;
       }
     }
     return false;
+  }
+
+  private LocalDate[] getDatesObjectsForClaim(
+      TableEntry tableEntry,
+      Object claimId,
+      Optional<LocalDate[]> dates,
+      Map<String, LocalDate[]> datesMap,
+      EntityManager entityManager) {
+    LocalDate[] datesObject;
+    if (dates.isPresent()) {
+      datesObject = dates.get();
+    } else {
+      datesObject = getClaimDates(claimId, tableEntry, entityManager);
+      // Put the dates in a map, in case any other line items with the same id have samhsa
+      // codes.
+      datesMap.put(claimId.toString(), datesObject);
+    }
+    return datesObject;
+  }
+
+  private static boolean isInvalidClaimDate(LocalDate[] datesObject, SamhsaEntry entry) {
+    LocalDate coverageStartDate =
+        datesObject[0] == null ? LocalDate.parse("1970-01-01") : (datesObject[0]);
+    LocalDate coverageEndDate = datesObject[1] == null ? LocalDate.now() : (datesObject[1]);
+    CodeDateRange result = getGetStartEndDateForCode(entry);
+
+    // if the throughDate is not between the start and end date,
+    // and the serviceDate is not between the start and end date,
+    // then the claim falls outside the date range of the SAMHSA code.
+    return isDateOutsideOfRange(result.startDate(), result.endDate(), coverageEndDate)
+        && isDateOutsideOfRange(result.startDate(), result.endDate(), coverageStartDate);
+  }
+
+  private static CodeDateRange getGetStartEndDateForCode(SamhsaEntry entry) {
+    LocalDate startDate = LocalDate.parse(entry.getStartDate());
+    LocalDate endDate =
+        entry.getEndDate().equalsIgnoreCase("Active")
+            ? LocalDate.MAX
+            : LocalDate.parse(entry.getEndDate());
+    CodeDateRange result = new CodeDateRange(startDate, endDate);
+    return result;
+  }
+
+  private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
+
+  private static SamhsaEntry getEntryForCode(String columnName, String code, String[] systems) {
+    String[] columnSystems;
+    if (systems != null) {
+      columnSystems = systems;
+    } else {
+      columnSystems = getSystemsForColumn(columnName);
+    }
+    // Get the entry that this code belongs to by filtering.
+    // mapMulti is a bit less cpu intensive than flatMap.
+    return Arrays.stream(columnSystems)
+        .<SamhsaEntry>mapMulti((s, consumer) -> samhsaMap.get(s).forEach(consumer))
+        .filter(e -> e.getCode().equals(code))
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Gets a list of systems that this column may belong to.
+   *
+   * @param columnName The column name.
+   * @return A list of systems that the column may belong to.
+   */
+  public static String[] getSystemsForColumn(String columnName) {
+    if (columnMatchesCodeType(columnName, DIAG_COLUMN_PORTION)) {
+      return DGNS_SYSTEMS;
+    }
+    if (columnMatchesCodeType(columnName, PROC_COLUMN_PORTION)) {
+      return PRCDR_SYSTEMS;
+    }
+    if (columnMatchesCodeType(columnName, HCPCS_COLUMN_PORTION)) {
+      return HCPCS_SYSTEMS;
+    }
+    if (columnMatchesCodeType(columnName, DRG_COLUMN_PORTION)) {
+      return DRG_SYSTEMS;
+    }
+    return new String[] {};
+  }
+
+  /**
+   * Checks if a column contains the String in a name portion. This allows us to generalize the
+   * column names to diagnosis, procedure, DRG, or HCPCS without needing to know the full name of
+   * all the columns.
+   *
+   * @param columnName The column to check.
+   * @param columnPortion The column name portion.
+   * @return True if the column contains the name portion.
+   */
+  private static boolean columnMatchesCodeType(String columnName, String[] columnPortion) {
+    return Arrays.stream(columnPortion).anyMatch(columnName::contains);
   }
 
   /**
@@ -372,7 +499,7 @@ public class SamhsaUtil {
         mcsClaim.getIdrHdrToDateOfSvc() == null ? LocalDate.now() : mcsClaim.getIdrHdrToDateOfSvc();
     for (RdaMcsDiagnosisCode diagCode : mcsClaim.getDiagCodes()) {
       buildDetails(
-          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode())),
+          getSamhsaCode(Optional.ofNullable(diagCode.getIdrDiagCode()), Optional.of(IDR_DIAG_CODE)),
           MCS_DIAGNOSIS_CODES,
           IDR_DIAG_CODE,
           (int) diagCode.getRdaPosition(),
@@ -382,7 +509,9 @@ public class SamhsaUtil {
     }
     for (RdaMcsDetail detail : mcsClaim.getDetails()) {
       buildDetails(
-          getSamhsaCode(Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())),
+          getSamhsaCode(
+              Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode()),
+              Optional.of(IDR_DTL_PRIMARY_DIAG_CODE)),
           MCS_DETAILS,
           IDR_DTL_PRIMARY_DIAG_CODE,
           (int) detail.getIdrDtlNumber(),
@@ -391,7 +520,7 @@ public class SamhsaUtil {
           throughDate);
 
       buildDetails(
-          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode())),
+          getSamhsaCode(Optional.ofNullable(detail.getIdrProcCode()), Optional.of(IDR_PROC_CODE)),
           MCS_DETAILS,
           IDR_PROC_CODE,
           (int) detail.getIdrDtlNumber(),
@@ -436,17 +565,12 @@ public class SamhsaUtil {
       LocalDate throughDate) {
     if (entry.isPresent()) {
       try {
-        LocalDate startDate = LocalDate.parse(entry.get().getStartDate());
-        LocalDate endDate =
-            entry.get().getEndDate().equalsIgnoreCase("Active")
-                ? LocalDate.MAX
-                : LocalDate.parse(entry.get().getEndDate());
-
+        CodeDateRange result = getGetStartEndDateForCode(entry.get());
         // if the throughDate is not between the start and end date,
         // and the serviceDate is not between the start and end date,
         // then the claim falls outside the date range of the SAMHSA code.
-        if (isDateOutsideOfRange(startDate, endDate, throughDate)
-            && isDateOutsideOfRange(startDate, endDate, serviceDate)) {
+        if (isDateOutsideOfRange(result.startDate, result.endDate, throughDate)
+            && isDateOutsideOfRange(result.startDate, result.endDate, serviceDate)) {
           return;
         }
       } catch (DateTimeParseException ignore) {
@@ -479,7 +603,8 @@ public class SamhsaUtil {
         fissClaim.getStmtCovToDate() == null ? LocalDate.now() : fissClaim.getStmtCovToDate();
 
     buildDetails(
-        getSamhsaCode(Optional.ofNullable(fissClaim.getAdmitDiagCode())),
+        getSamhsaCode(
+            Optional.ofNullable(fissClaim.getAdmitDiagCode()), Optional.of(ADMIT_DIAG_CODE)),
         FISS_CLAIMS,
         ADMIT_DIAG_CODE,
         null,
@@ -490,7 +615,8 @@ public class SamhsaUtil {
       buildDetails(
           // Ideally, this column should never contain SAMHSA data, but it is
           // possible that SAMHSA data could end up here due to user error.
-          getSamhsaCode(Optional.ofNullable(revenueLine.getApcHcpcsApc())),
+          getSamhsaCode(
+              Optional.ofNullable(revenueLine.getApcHcpcsApc()), Optional.of(APC_HCPCS_APC)),
           FISS_REVENUE_LINES,
           APC_HCPCS_APC,
           (int) revenueLine.getRdaPosition(),
@@ -498,7 +624,7 @@ public class SamhsaUtil {
           serviceDate,
           throughDate);
       buildDetails(
-          getSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd())),
+          getSamhsaCode(Optional.ofNullable(revenueLine.getHcpcCd()), Optional.of(HCPCS_CD)),
           FISS_REVENUE_LINES,
           HCPCS_CD,
           (int) revenueLine.getRdaPosition(),
@@ -507,7 +633,7 @@ public class SamhsaUtil {
           throughDate);
     }
     buildDetails(
-        getSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd())),
+        getSamhsaCode(Optional.ofNullable(fissClaim.getDrgCd()), Optional.of(DRG_CD)),
         FISS_CLAIMS,
         DRG_CD,
         null,
@@ -515,7 +641,8 @@ public class SamhsaUtil {
         serviceDate,
         throughDate);
     buildDetails(
-        getSamhsaCode(Optional.ofNullable(fissClaim.getPrincipleDiag())),
+        getSamhsaCode(
+            Optional.ofNullable(fissClaim.getPrincipleDiag()), Optional.of(PRINCIPLE_DIAG)),
         FISS_CLAIMS,
         PRINCIPLE_DIAG,
         null,
@@ -524,7 +651,7 @@ public class SamhsaUtil {
         throughDate);
     for (RdaFissDiagnosisCode diagCode : fissClaim.getDiagCodes()) {
       buildDetails(
-          getSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2())),
+          getSamhsaCode(Optional.ofNullable(diagCode.getDiagCd2()), Optional.of(DIAG_CD_2)),
           FISS_DIAGNOSIS_CODES,
           DIAG_CD_2,
           (int) diagCode.getRdaPosition(),
@@ -534,7 +661,7 @@ public class SamhsaUtil {
     }
     for (RdaFissProcCode procCode : fissClaim.getProcCodes()) {
       buildDetails(
-          getSamhsaCode(Optional.ofNullable(procCode.getProcCode())),
+          getSamhsaCode(Optional.ofNullable(procCode.getProcCode()), Optional.of(PROC_CODE)),
           FISS_PROC_CODES,
           PROC_CODE,
           (int) procCode.getRdaPosition(),
@@ -549,10 +676,25 @@ public class SamhsaUtil {
    * Check if a given code is a SAMHSA code.
    *
    * @param code the code to check.
+   * @param columnName The column of the code.
    * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
    */
-  public static Optional<SamhsaEntry> getSamhsaCode(Optional<String> code) {
-    if (code.isEmpty()) {
+  public static Optional<SamhsaEntry> getSamhsaCode(
+      Optional<String> code, Optional<String> columnName) {
+    return getSamhsaCode(code, columnName, Optional.empty());
+  }
+
+  /**
+   * Check if a given code is a SAMHSA code.
+   *
+   * @param code the code to check.
+   * @param columnName The column of the code.
+   * @param systems The possible systems for this column.
+   * @return If the code is SAMHSA, returns the SAMHSA entry. Otherwise, an empty optional.
+   */
+  public static Optional<SamhsaEntry> getSamhsaCode(
+      Optional<String> code, Optional<String> columnName, Optional<String[]> systems) {
+    if (code.isEmpty() || columnName.isEmpty()) {
       return Optional.empty();
     }
     if (samhsaMap.isEmpty()) {
@@ -564,10 +706,8 @@ public class SamhsaUtil {
     }
     String normalizedCode = normalizeCode(code.get());
 
-    if (samhsaMap.containsKey(normalizedCode)) {
-      return Optional.of(samhsaMap.get(normalizedCode));
-    }
-    return Optional.empty();
+    SamhsaEntry entry = getEntryForCode(columnName.get(), normalizedCode, systems.orElse(null));
+    return Optional.ofNullable(entry);
   }
 
   private static String normalizeCode(String code) {
@@ -584,17 +724,29 @@ public class SamhsaUtil {
    * @return a Map of SAMHSA entries.
    * @throws IOException IOException if the stream cannot be read.
    */
-  private static Map<String, SamhsaEntry> initializeSamhsaMap(InputStream stream)
+  private static Map<String, List<SamhsaEntry>> initializeSamhsaMap(InputStream stream)
       throws IOException {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     List<SamhsaEntry> entries =
         mapper.readValue(
             stream, mapper.getTypeFactory().constructCollectionType(List.class, SamhsaEntry.class));
+    entries.forEach(entry -> entry.setCode(normalizeCode(entry.getCode())));
 
-    return entries.stream()
-        .collect(
-            Collectors.toMap(
-                entry -> normalizeCode(entry.getCode()), // Normalize code here
-                entry -> entry));
+    // Add all the systems together into a list
+    List<String> systems =
+        Stream.of(DGNS_SYSTEMS, PRCDR_SYSTEMS, DRG_SYSTEMS, HCPCS_SYSTEMS)
+            .flatMap(Stream::of)
+            .toList();
+
+    Map<String, List<SamhsaEntry>> entryMap = new HashMap<>();
+    // iterate over each system
+    systems.forEach(
+        sys ->
+            entryMap.put(
+                sys,
+                // Filter the entries by system, and add the resultant list to the map under this
+                // system.
+                entries.stream().filter(entry -> entry.getSystem().equals(sys)).toList()));
+    return entryMap;
   }
 }

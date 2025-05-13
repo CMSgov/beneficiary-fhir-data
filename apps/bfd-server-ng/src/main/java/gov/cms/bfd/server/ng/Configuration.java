@@ -2,22 +2,40 @@ package gov.cms.bfd.server.ng;
 
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
+import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
+import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.time.Duration;
+import java.util.Objects;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
-import software.amazon.awssdk.services.rds.RdsClient;
-import software.amazon.awssdk.services.rds.model.DescribeDbClustersRequest;
 
 /** Root configuration class. */
 @Data
 @ConfigurationProperties(prefix = "bfd")
 public class Configuration {
-  @Autowired private AwsCredentialsProvider credentialsProvider;
-  @Autowired private AwsRegionProvider regionProvider;
+  // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
+
+  // Getters should only be generated for configuration properties, not dependencies
+  @Getter(value = AccessLevel.NONE)
+  @Autowired
+  private AwsCredentialsProvider credentialsProvider;
+
+  @Getter(value = AccessLevel.NONE)
+  @Autowired
+  private AwsRegionProvider regionProvider;
+
+  // This can be injected by tests (using TestContainers, most likely) to override the database
+  // connection info
+  @Getter(value = AccessLevel.NONE)
+  @Autowired(required = false)
+  private JdbcConnectionDetails jdbcConnectionDetails;
 
   private static final String BFD_ENV_LOCAL = "local";
 
@@ -33,32 +51,21 @@ public class Configuration {
    *
    * @return wrapper factory.
    */
-  public AwsWrapperDataSourceFactory getAwsWrapperDataSourceFactory() {
-    var awsConfig = getRdsClientConfig();
-    return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
+  public DataSourceFactory getDataSourceFactory() {
+    if (useRds()) {
+      var awsConfig = getRdsClientConfig();
+      return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
+    } else {
+      return new HikariDataSourceFactory(getDatabaseOptions());
+    }
   }
 
-  private boolean useRds() {
+  boolean useRds() {
     return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
   }
 
-  private String getConnectionString(String dbHost) {
-    var db = nonsensitive.db;
-    return String.format(db.connectionStringTemplate, dbHost, db.port, db.name);
-  }
-
-  private String resolveDatabaseReaderEndpoint() {
-    if (useRds()) {
-      try (var rdsClient = RdsClient.create()) {
-        var clusterIdentifier = String.format(nonsensitive.db.clusterIdentifierTemplate, env);
-        var clusters =
-            rdsClient.describeDBClusters(
-                DescribeDbClustersRequest.builder().dbClusterIdentifier(clusterIdentifier).build());
-        return getConnectionString(clusters.dbClusters().getFirst().readerEndpoint());
-      }
-    } else {
-      return getConnectionString(local.dbHost);
-    }
+  private JdbcConnectionDetails getJdbcConfiguration() {
+    return Objects.requireNonNullElseGet(jdbcConnectionDetails, () -> new JdbcConfiguration(this));
   }
 
   private DatabaseOptions.AuthenticationType getAuthenticationType() {
@@ -74,17 +81,13 @@ public class Configuration {
   }
 
   private AwsClientConfig getRdsClientConfig() {
-    if (useRds()) {
-      var credentials = credentialsProvider.resolveCredentials();
-      var region = regionProvider.getRegion();
-      return AwsClientConfig.awsBuilder()
-          .accessKey(credentials.accessKeyId())
-          .secretKey(credentials.secretAccessKey())
-          .region(region)
-          .build();
-    } else {
-      return AwsClientConfig.awsBuilder().build();
-    }
+    var credentials = credentialsProvider.resolveCredentials();
+    var region = regionProvider.getRegion();
+    return AwsClientConfig.awsBuilder()
+        .accessKey(credentials.accessKeyId())
+        .secretKey(credentials.secretAccessKey())
+        .region(region)
+        .build();
   }
 
   private DatabaseOptions.HikariOptions getHikariOptions() {
@@ -113,15 +116,15 @@ public class Configuration {
 
   private DatabaseOptions getDatabaseOptions() {
     final var hikariOptions = getHikariOptions();
-    final var jdbcOptions = getJdbcWrapperOptions();
-
+    final var jdbcWrapperOptions = getJdbcWrapperOptions();
+    var jdbcOptions = getJdbcConfiguration();
     return DatabaseOptions.builder()
-        .databaseUrl(resolveDatabaseReaderEndpoint())
-        .databaseUsername(sensitive.db.username)
-        .databasePassword(sensitive.db.password)
+        .databaseUrl(jdbcOptions.getJdbcUrl())
+        .databaseUsername(jdbcOptions.getUsername())
+        .databasePassword(jdbcOptions.getPassword())
         .authenticationType(getAuthenticationType())
         .dataSourceType(getDataSourceType())
-        .awsJdbcWrapperOptions(jdbcOptions)
+        .awsJdbcWrapperOptions(jdbcWrapperOptions)
         .hikariOptions(hikariOptions)
         .build();
   }
@@ -177,7 +180,7 @@ public class Configuration {
         private long initFailTimeoutMs = 1;
         private long connectionTimeoutMs = Duration.ofSeconds(30).toMillis();
         private long keepaliveTimeoutMs = 0;
-        private long validationTimeoutMs = 0;
+        private long validationTimeoutMs = Duration.ofSeconds(5).toMillis();
         private long maxConnectionLifetimeMs = Duration.ofMinutes(30).toMillis();
       }
 

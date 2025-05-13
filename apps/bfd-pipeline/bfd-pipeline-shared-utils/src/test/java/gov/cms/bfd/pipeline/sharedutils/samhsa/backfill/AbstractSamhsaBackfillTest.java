@@ -8,8 +8,8 @@ import gov.cms.bfd.pipeline.sharedutils.SamhsaUtil;
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import java.sql.Date;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,10 @@ public class AbstractSamhsaBackfillTest {
     mockSamhsaUtil = Mockito.mock(SamhsaUtil.class);
     Mockito.when(manager.createNativeQuery(anyString())).thenReturn(mockQuery);
     Mockito.when(mockQuery.setParameter(anyString(), anyInt())).thenReturn(mockQuery);
-    Object[] objects = new Object[] {"12345", LocalDate.of(1970, 1, 1), LocalDate.of(1970, 1, 1)};
+    Object[] objects =
+        new Object[] {
+          "12345", Date.valueOf("1970-1-1"), Date.valueOf("1970-1-1"), "code1", "code2", "code3"
+        };
     List<Object[]> objectList = new ArrayList<>();
     objectList.add(objects);
     Mockito.when(mockQuery.getResultList()).thenReturn(objectList);
@@ -91,8 +94,7 @@ public class AbstractSamhsaBackfillTest {
         new RDASamhsaBackfill(
             transactionManagerMock, 100000, 900l, RDASamhsaBackfill.RDA_TABLES.FISS_CLAIMS);
 
-    Assertions.assertEquals(
-        FISS_TEST_QUERY, RDASamhsaBackfill.RDA_TABLES.FISS_CLAIMS.getEntry().getQuery());
+    Assertions.assertEquals(FISS_TEST_QUERY, backfill.getQuery());
   }
 
   @Test
@@ -106,6 +108,7 @@ public class AbstractSamhsaBackfillTest {
     backfill.setSamhsaUtil(mockSamhsaUtil);
     backfill.executeQueryLoop(manager);
     verify(mockQuery, times(1)).getResultList();
-    verify(mockSamhsaUtil, times(1)).processCodeList(any(), any(), any(), any(), any(), any());
+    verify(mockSamhsaUtil, times(1))
+        .processCodeList(any(), any(), any(), any(), any(), any(), any(), any());
   }
 }

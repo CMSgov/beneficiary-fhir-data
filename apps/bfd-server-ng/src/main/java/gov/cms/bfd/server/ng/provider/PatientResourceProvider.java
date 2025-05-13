@@ -11,12 +11,15 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
 /** FHIR endpoints for the Patient resource. */
+@RequiredArgsConstructor
 @Component
 public class PatientResourceProvider implements IResourceProvider {
 
@@ -24,6 +27,8 @@ public class PatientResourceProvider implements IResourceProvider {
   public Class<Patient> getResourceType() {
     return Patient.class;
   }
+
+  private final BeneficiaryRepository beneficiaryRepository;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -34,7 +39,14 @@ public class PatientResourceProvider implements IResourceProvider {
    */
   @Read
   public Patient find(@IdParam final IdType fhirId, final RequestDetails requestDetails) {
-    return new Patient();
+
+    var patient = beneficiaryRepository.getById(fhirId.getIdPartAsLong()).toFhir();
+    var ids = beneficiaryRepository.getPatientIdentities(fhirId.getIdPartAsLong());
+    for (var id : ids) {
+      id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+      id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
+    }
+    return patient;
   }
 
   /**

@@ -3250,6 +3250,7 @@ public final class TransformerUtilsV2 {
     collectOrganizationEnrichments(eob, npiSet, enrichmentMap);
     collectFacilityEnrichments(eob, npiSet, enrichmentMap);
     collectReferralEnrichments(eob, npiSet, enrichmentMap);
+    collectProviderEnrichments(eob, npiSet, enrichmentMap);
     collectDrugCodeEnrichments(eob, drugCodeSet, drugEnrichmentMap);
   }
 
@@ -3530,6 +3531,23 @@ public final class TransformerUtilsV2 {
       String providerDisplay = eob.getReferral().getDisplay();
       enrichReference(
           REPLACE_PROVIDER_REGEX, providerDisplay, enrichmentMap, eob.getReferral(), npiSet);
+    }
+  }
+
+  /**
+   * Collects objects to enrich from the EOB's Provider.
+   *
+   * @param eob The eob to enrich.
+   * @param npiSet Stores a list of NPIs that will be enriched.
+   * @param enrichmentMap Map of objects to enrich
+   */
+  private static void collectProviderEnrichments(
+      ExplanationOfBenefit eob, Set<String> npiSet, Map<String, Set<Base>> enrichmentMap) {
+
+    if (eob.getProvider() != null && eob.getProvider().getDisplay() != null) {
+      String providerDisplay = eob.getProvider().getDisplay();
+      enrichReference(
+          REPLACE_PROVIDER_REGEX, providerDisplay, enrichmentMap, eob.getProvider(), npiSet);
     }
   }
 

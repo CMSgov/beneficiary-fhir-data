@@ -121,8 +121,11 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50
 /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(30 minutes)
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: true
-/bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topics: bfd-test-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
@@ -374,8 +377,8 @@ sops:
       created_at: "2025-03-28T19:06:58Z"
       enc: AQICAHiPbrjkmNx+EYhjapAcRZIMA3ZR2GNT7wyj5sHbBNyOGAFTvWJzywk/N64BhcArx7FEAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMnmX8KKqxENi7eqRDAgEQgDv17T1SvltzOnC2zuQAp5IgI5STa6AP0A3T3yZOo8HRdZfa2JghqYUl7/Pvrb7/kWdUgdUVarRgLHNv5w==
       aws_profile: ""
-  lastmodified: "2025-05-01T20:19:05Z"
-  mac: ENC[AES256_GCM,data:WmMLOlUECSNiTBHAYgxtpZc9ILw18rIeQ6GehzRPDXzDP9NobSHzsO1TqeagHtXfsj16KqLXgIxgl1zTQB9I5iBrNjQAcviDSSG5sOWKn+k4HgsFZW7sSiTZ3JEgmEQot8qzS2wdAxNX/7sGe7fh3HqzDv6kB5JBw9+kTsjaWc8=,iv:N0sBliNNZGaAEJWlJfWboL490/c1X9L+unvzNEOXYaQ=,tag:uszCNw2ToZJSi1TnGj2xsg==,type:str]
+  lastmodified: "2025-05-13T13:09:02Z"
+  mac: ENC[AES256_GCM,data:YhD6XjaS3fuXrLtjgE6mTRNsDVfQy+c15yXEI2zgZSyknp8FpqTJe1uXckXyq3hThBxsTiD6gxM3/AGf1TnDvIjSMiGm0XVZMdqXclWjE+nUsLuopXcjQjt9v09MaftCXaZ4uPtHvaf+WDS+8xx3/n2gH+oqncVbKFH/tglJ5MU=,iv:7Sw5OgbkATRMrpld1TuclC66WMhjoVvAP6iGxRsJ0kg=,tag:CT3/FfJGqC83bV+kUMImXg==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
