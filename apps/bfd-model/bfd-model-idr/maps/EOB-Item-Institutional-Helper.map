@@ -7,7 +7,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.productOrService = create('CodeableConcept') as prodCC then addProductOrService(src,prodCC) "Add productOrService";
     //We know we CAN get HCPCS + HIPPS code, and potentially NDC, we'll want to add it.
     src.CLM_LINE_NDC_CD as ndcCd where(ndcCd.length()=11) -> tgt.detail = create('BackboneElement') as tgtDetail then addNDCToInstitutional(src, tgtDetail) "Add ndc info";
-        src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
+    src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
         src.CLM_LINE_SRVC_UNIT_QTY as unitQty -> tgtQuantity.value=cast(unitQty,"decimal") "set quantity";
     } "Set quantity of service provided";
     src -> tgt.revenue = create('CodeableConcept') as tgtRevenue then addRevenue(src,tgtRevenue) "add revenue";
@@ -35,10 +35,6 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_MSP1_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP1(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_MSP2_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP2(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
-    
-    src.GEO_FAC_SSA_STATE_CD as stateCd -> tgt.location = create('Address') as tgtAddress then {
-        src -> tgtAddress.state = translate(stateCd, "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#SSAToUSPSState",'code') "Set state code";
-    } "Add state";
     
     src.REV_CNTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
 }
