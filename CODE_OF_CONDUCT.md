@@ -55,13 +55,12 @@ The [GSA Policy](https://www.gsa.gov/portal/directive/d0/content/512516) Stateme
   - race,
   - religion,
   - color,
-  - sex (with or without sexual conduct and including pregnancy and sexual orientation involving transgender status/gender identity, and sex-stereotyping)
+  - sex (with or without sexual conduct, including pregnancy, and stereotyping),
   - national origin,
   - age,
   - disability,
   - genetic information,
   - sexual orientation,
-  - gender identity,
   - parental status,
   - marital status,
   - or political affiliation.
@@ -78,7 +77,7 @@ In addition, the following behaviors violate applicable laws and policies, or ot
 - Sustained disruption of meetings, talks, or discussions, including chat rooms.
 - Mocking someone&#39;s real or perceived accent or first language.
 - Repeatedly interrupting or talking over other people in meetings and discussions.
-- Negative or offensive remarks based on gender expression, mental illness, socioeconomic status or background, neuro(a)typicality, physical appearance, or body size.
+- Negative or offensive remarks based on sex, mental illness, socioeconomic status or background, neuro(a)typicality, physical appearance, or body size.
 
 ## Reporting violations
 

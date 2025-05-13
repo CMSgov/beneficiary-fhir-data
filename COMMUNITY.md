@@ -1,129 +1,47 @@
 # BFD Community
 
 ## Project Members
-
-The Beneficiary FHIR Data (BFD) project is supported by a dedicated team of individuals fulfilling various roles to ensure its success, security, and alignment with government standards and agency goals.
+Roles to include, but not limited to: Project Owner, Technical Lead, Developers/Contributors, Community Manager, Security Team, Policy Advisor, Contracting Officer's Representative, Compliance Officer, Procurement Officer -->
 
 | Role | Name | Affiliation |
 | :----- | :------ | :------------- |
-| Project Owner | BFD Core Team | CMS |
-| Technical Lead | BFD Core Team | CMS |
-| Developers/Contributors | CMS-approved contributors | CMS and Partner Organizations |
-| Community Manager | BFD Core Team | CMS |
-| Security Team | CMS Security | CMS |
-| Policy Advisor | CMS Policy | CMS |
-| Contracting Officer's Representative | CMS Contracting | CMS |
-| Compliance Officer | CMS Compliance | CMS |
-| Procurement Officer | CMS Procurement | CMS |
+| {role} | {names} | {affiliations} |
 
-## Roles & Responsibilities
+### Maintainers 
 
-The BFD project is maintained by the BFD core team at CMS. Core team members are responsible for:
+### Approvers
 
-- Reviewing and accepting/rejecting RFCs
-- Reviewing and merging pull requests
-- Maintaining the overall architecture and quality of the codebase
-- Ensuring compliance with CMS standards and policies
-- Providing guidance to contributors
-- Managing the project roadmap
+### Reviewers 
 
-For specific questions or assistance, please reach out on the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) Slack channel.
+### Principles
+These principles guide our data, product, and process decisions, architecture, and approach.
 
-## Maintainers List
+- Open means transparent and participatory.
+- We take a modular and modern approach to software development.
+- We build open-source software and open-source process.
+- We value ease of implementation.
+- Fostering community includes building capacity and making our software and processes accessible to participants with diverse backgrounds and skillsets.
+- Data (and data science) is as important as software and process. We build open data sets where possible.
+- We strive for transparency for algorithms and places we might be introducing bias.
 
-The BFD codebase is maintained by domain specialists within the core team:
+### Community Guidelines
 
-- **API/FHIR Endpoints**: BFD Server Team
-- **ETL Process**: BFD Pipeline Team
-- **Database**: BFD DB Team
-- **Infrastructure**: BFD Ops Team
-- **Documentation**: BFD Documentation Team
+All community members are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Approvers List
+Information on contributing to this repository is available in our [Contributing file](CONTRIBUTING.md).
 
-Pull request approvals require at least two reviewers from the core team with at least one being an owner of the affected codebase section (as defined in CODEOWNERS).
+When participating in benefiiciary-fhir-data open source community conversations and spaces, we ask individuals to follow the following guidelines:
 
-Final merge approval comes from a designated code owner from the core team after all automated checks have passed.
+- When joining a conversation for the first time, please introduce yourself by providing a brief intro that includes:
+ - your related organization (if applicable)
+ - your pronouns
+ - your superpower, and how you hope to use it for Beneficiary FHIR Data
+- Embrace a culture of learning, and educate each other. We are all entering this conversation from different starting points and with different backgrounds. There are no dumb questions.
+- Take space and give space. We strive to create an equitable environment in which all are welcome and able to participate. We hope individuals feel comfortable voicing their opinions and providing contributions and will do our best to recognize and make space for individuals who may be struggling to find space here. Likewise, we expect individuals to recognize when they are taking up significant space and take a step back to allow room for others.
+<!-- TODO: Add if your repo has a community chat - Be present when joining synchronous conversations such as our community chat. Why be here if you're not going to _be here_? -->
+- Be respectful.
+- Default to positive. Assume others' contributions are legitimate and valuable and that they are made with good intention.
 
-## Reviewers List
+### Acknowledgements
 
-Reviews may be conducted by any member of the core team. For specific components, domain specialists from the maintainers list will be automatically requested for review.
-
-## Contributors
-
-The BFD project welcomes contributions from CMS-approved contributors. The project is not open to outside contributors.
-
-Current active contributors include members of:
-- CMS DASG team
-- CMS FHIR API team
-- CMS Enterprise Data teams
-
-## Alumni
-
-Former contributors who have made significant contributions to the project but are no longer actively involved are recognized for their contributions to establishing the foundation of the BFD system.
-
-## Principles
-
-The BFD community operates according to these core principles:
-
-1. **Trustworthiness**: We build systems that handle sensitive beneficiary data with the highest standards of security and reliability.
-
-2. **Performance**: We strive for optimal system performance to ensure data is accessible when and where it's needed.
-
-3. **Comprehensiveness**: We aim to provide complete and accurate healthcare data to support informed decision-making.
-
-4. **Standards-based**: We adhere to FHIR and other healthcare standards to ensure interoperability.
-
-5. **Collaboration**: We believe in collaborative development that leverages the expertise of the CMS enterprise.
-
-6. **Open Source**: We develop in the open to promote transparency and reuse within government.
-
-7. **User-focused**: We prioritize the needs of beneficiaries and their healthcare partners.
-
-## Community Guidelines
-
-To participate effectively in the BFD community:
-
-1. **Follow the Code of Conduct**: Adhere to the [18F Code of Conduct](https://github.com/18F/code-of-conduct/blob/master/code-of-conduct.md) in all interactions.
-
-2. **Use Appropriate Channels**: 
-   - For general questions and discussions, use the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) Slack channel
-   - For substantive changes, follow the RFC process
-   - For bug fixes and small changes, submit PRs directly
-   - For security issues, follow the vulnerability disclosure process
-
-3. **Respect the Process**: 
-   - Follow the contribution guidelines in CONTRIBUTING.md
-   - Use the RFC process for substantive changes
-   - Adhere to code style guidelines
-   - Write tests for your changes
-
-4. **Be Responsive**: 
-   - Respond to feedback on PRs and RFCs in a timely manner
-   - Address all review comments before requesting re-review
-
-5. **Document Your Work**:
-   - Add comments to code
-   - Update documentation as needed
-   - Provide clear PR descriptions
-
-6. **Protect Sensitive Information**:
-   - Never commit PHI or PII to the repository
-   - Follow security best practices
-
-7. **Participate in Community Forums**:
-   - Attend Scrum of Scrums meetings when possible
-   - Provide feedback on proposals and changes
-
-## Acknowledgements
-
-The BFD project builds upon the work and best practices established by other members of the federal open source community, including:
-
-- USDS (United States Digital Service)
-- GSA (General Services Administration)
-- 18F
-- Other CMS open source projects
-
-We acknowledge and appreciate the guidance provided by these organizations in establishing effective open source development practices within the federal government.
-
-The project also acknowledges the contributions of the FHIR community and HL7 in developing the standards that make this project possible.
+The Community Guidelines sections were originally forked from the [United States Digital Service](https://usds.gov) [Justice40](https://thejustice40.com) open source [repository](https://github.com/usds/justice40-tool), and we would like to acknowledge and thank the community for their contributions.
