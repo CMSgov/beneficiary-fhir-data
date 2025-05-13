@@ -4,7 +4,6 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import gov.cms.bfd.server.war.EndpointJsonComparatorBase;
-import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.nio.file.Files;
@@ -12,16 +11,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * This set of tests compare the application's current responses to a set of previously-recorded
@@ -44,25 +39,12 @@ import org.junit.jupiter.params.provider.MethodSource;
  * <p>To re-generate the recorded responses, build the application with -DgenerateTestData=true
  * which will run the test that creates the endpoint responses.
  */
-public class EndpointJsonResponseComparatorV2ClaimE2E extends EndpointJsonComparatorBase {
+public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparatorBase {
   /** Test utils. */
   private static final RDATestUtils rdaTestUtils = new RDATestUtils();
 
   /** The base claim endpoint. */
   private static String claimEndpoint;
-
-  /** A base ignore pattern for testing the read endpoint responses against an expected file. */
-  private static final Set<String> READ_IGNORE_PATTERNS =
-      Set.of("/link/[0-9]+/url", "/created", "/meta/lastUpdated");
-
-  /** A base ignore pattern for testing the search by mbi responses against an expected file. */
-  private static final Set<String> MBI_IGNORE_PATTERNS =
-      Set.of(
-          "/link/[0-9]+/url",
-          "/created",
-          "/meta/lastUpdated",
-          "/id",
-          "/entry/[0-9]+/resource/created");
 
   /** Sets up the test resources. */
   @BeforeEach
@@ -93,65 +75,39 @@ public class EndpointJsonResponseComparatorV2ClaimE2E extends EndpointJsonCompar
         arguments(
             "claimFissRead",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E::shouldGetCorrectFissClaimResourceById),
+                EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectFissClaimResourceById),
         arguments(
             "claimFissReadWithTaxNumbers",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E
+                EndpointJsonResponseComparatorClaimE2E
                     ::shouldGetCorrectFissClaimResourceByIdWithTaxNumbers),
         arguments(
             "claimMcsRead",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E::shouldGetCorrectMcsClaimResourceById),
+                EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectMcsClaimResourceById),
         arguments(
             "claimMcsReadWithTaxNumbers",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E
+                EndpointJsonResponseComparatorClaimE2E
                     ::shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers),
         arguments(
             "claimSearch",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E::shouldGetCorrectClaimResourcesByMbiHash),
+                EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectClaimResourcesByMbiHash),
         arguments(
             "claimSearchWithTaxNumbers",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E
+                EndpointJsonResponseComparatorClaimE2E
                     ::shouldGetCorrectClaimResourcesByMbiHashWithTaxNumbers),
         arguments(
             "claimSearchPaginated",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E
+                EndpointJsonResponseComparatorClaimE2E
                     ::shouldGetCorrectClaimResourcesByMbiHashWithPagination),
         arguments(
             "claimSearchPost",
             (Supplier<String>)
-                EndpointJsonResponseComparatorV2ClaimE2E::shouldGetCorrectClaimResourcesByMbiPost));
-  }
-
-  /**
-   * Generates the "golden" files, i.e. the approved responses to compare to. Purpose of this
-   * testing is to perform regression testing against the "Golden Beneficiary Data" at a specific
-   * point in time. It is important to note that this testing focuses on checking for regressions
-   * against the data at that particular moment, and not necessarily against data artifacts. To run
-   * this test, execute the following Maven Command: mvn clean install -DgenerateTestData=true.
-   *
-   * @param endpointId the endpoint id
-   * @param endpointOperation the endpoint operation
-   */
-  @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
-  @ParameterizedTest(name = "endpointId = {0}")
-  @MethodSource("data")
-  public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
-    Path approvedResponseDir = getExpectedJsonResponseDir();
-
-    // Call the server endpoint and save its result out to a file corresponding to
-    // the endpoint Id.
-    String endpointResponse = endpointOperation.get();
-    String jsonResponse = replaceIgnoredFieldsWithFillerText(endpointId, endpointResponse);
-
-    ServerTestUtils.writeFile(
-        jsonResponse,
-        ServerTestUtils.generatePathForEndpointJsonFile(approvedResponseDir, endpointId));
+                EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectClaimResourcesByMbiPost));
   }
 
   /**
