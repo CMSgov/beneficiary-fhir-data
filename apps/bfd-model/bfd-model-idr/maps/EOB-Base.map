@@ -63,6 +63,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     } "Add CLM_CNTL_NUM as identifier";
 
     src.clmCntlArray as otherClaimNumber -> tgt.related = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.relationship = cc("http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship","prior") "Add relationshipp";
       src -> tgtBBElement.reference = create('Identifier') as tgtId then{
         src -> tgtId.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "Add system";
         src -> tgtId.value = otherClaimNumber "Add value";
@@ -185,6 +186,16 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       } "Add reference for coverage";
     } "Add insurance coverage";
 
+    //CLM_MDCR_INSTNL_TOT_CHRG_AMT -> CLM_SBMT_CHRG_AMT
+    src.CLM_SBMT_CHRG_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add first coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_SBMT_CHRG_AMT") "Add second coding";
+     } "Add codeable concept";
+     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
+    } "Add total charge amount";
+  
+
 
    /* src.CLM_TYPE_CD as claim_type where claim_type = 60 -> tgt.coverage = create('Reference') as tgtReference then {
       src -> tgtReference.display = "Part A" "Add temp coverage placeholder";
@@ -220,16 +231,7 @@ group addInstitutionalItems (source src: ExplanationOfBenefitBase, target tgt: B
         actnCd -> tgtCoding.code=actnCd "set code";
       } "Set value";
     } "CLM_FI_ACTN_CD";
-
-    //CLM_MDCR_INSTNL_TOT_CHRG_AMT 
-    institutionalComponents.CLM_MDCR_INSTNL_TOT_CHRG_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
-        src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
-          src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add first coding";
-          src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_SBMT_CHRG_AMT") "Add second coding";
-       } "Add codeable concept";
-       src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
-      } "Add total charge amount";
-    } "Add wrapper for institutional components";
+  } "Add wrapper for institutional components";
   src -> tgt.benefitBalance = create('BackboneElement') as tgtBB then addInstitutionalBenefitBalance(src,tgtBB) "Add benefit balance";
 }
 

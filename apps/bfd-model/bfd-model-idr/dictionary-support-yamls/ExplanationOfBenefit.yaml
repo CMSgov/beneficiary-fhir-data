@@ -553,4 +553,11 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_DISP_CD
   referenceTable: CLM_DISP_CD
-
+- inputPath: ExplanationOfBenefit-Base.CLM_SBMT_CHRG_AMT
+  claimTypes:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_SBMT_CHRG_AMT

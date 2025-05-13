@@ -279,19 +279,6 @@
                         "code": "string"
                     }
                 ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_TOT_CHRG_AMT",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_TOT_CHRG_AMT",
-                "label": "Total Charge Amount",
-                "definition": "The total charges for all services included on the institutional claim.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
             }
             
         ]

@@ -104,6 +104,10 @@ conceptmap "subtype" {
   s:61 = t:"inpatient"
   s:62 = t:"inpatient"
   s:63 = t:"inpatient"
+  s:1011 = t:"inpatient"
+  s:1041 = t:"inpatient"
+  s:2011 = t:"inpatient"
+  s:2041 = t:"inpatient"
 }
 
 conceptmap "CLM_SRC_ID" {
