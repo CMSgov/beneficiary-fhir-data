@@ -2,6 +2,17 @@ Welcome to the README!
 
 This file will be extended, but for this step, we're consolidating multiple steps into a single script. 
 
+Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
+
+To download the FHIR Validator:
+https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+
+Install sushi
+```sh
+npm install -g fsh-sushi
+```
+
+
 EOB Institutional Inpatient:
 ```sh
 python compile_resources.py \

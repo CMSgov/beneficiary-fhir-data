@@ -149,7 +149,7 @@ def main():
     
     #If we've passed --test then we'll run the output against C4BB. 
     if args.test:
-        success = run_conformance_test(args.output, "Validator-Output.json")
+        success = run_conformance_test(args.output, "outputs/Validator-Output.json")
         if not success:
             sys.exit(1)
 

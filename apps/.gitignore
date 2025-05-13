@@ -13,3 +13,4 @@
 bfd-model/bfd-model-idr/StructureMaps/*
 bfd-model/bfd-model-idr/outputs/*
 bfd-model/bfd-model-idr/sushi/fsh-generated/*
+bfd-model/bfd-model-idr/validator_cli.jar
