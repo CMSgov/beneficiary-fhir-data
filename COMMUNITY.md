@@ -3,45 +3,20 @@
 ## Project Members
 Roles to include, but not limited to: Project Owner, Technical Lead, Developers/Contributors, Community Manager, Security Team, Policy Advisor, Contracting Officer's Representative, Compliance Officer, Procurement Officer -->
 
-| Role | Name | Affiliation |
+| Role | Github Handle | Affiliation |
 | :----- | :------ | :------------- |
-| {role} | {names} | {affiliations} |
-
-### Maintainers 
-
-### Approvers
-
-### Reviewers 
+| Maintaner | sb-benohe | CMS/DASG |
 
 ### Principles
 These principles guide our data, product, and process decisions, architecture, and approach.
 
-- Open means transparent and participatory.
-- We take a modular and modern approach to software development.
-- We build open-source software and open-source process.
-- We value ease of implementation.
-- Fostering community includes building capacity and making our software and processes accessible to participants with diverse backgrounds and skillsets.
-- Data (and data science) is as important as software and process. We build open data sets where possible.
-- We strive for transparency for algorithms and places we might be introducing bias.
+- Practice empathy and humility.
+- Assume competence in your colleagues, clients and the public.
+- Assume that everyone we work with is doing their best work for the public.
+- Listen carefully and actively.
+- Ask questions, and seek to understand your partners&#39; context.
+- Encourage other people to listen as much as they speak.
+- Treat other people&#39;s identities and cultures with respect. Make an effort to say people&#39;s names correctly and refer to them by their chosen pronouns.
 
-### Community Guidelines
-
-All community members are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
-
-Information on contributing to this repository is available in our [Contributing file](CONTRIBUTING.md).
-
-When participating in benefiiciary-fhir-data open source community conversations and spaces, we ask individuals to follow the following guidelines:
-
-- When joining a conversation for the first time, please introduce yourself by providing a brief intro that includes:
- - your related organization (if applicable)
- - your pronouns
- - your superpower, and how you hope to use it for Beneficiary FHIR Data
-- Embrace a culture of learning, and educate each other. We are all entering this conversation from different starting points and with different backgrounds. There are no dumb questions.
-- Take space and give space. We strive to create an equitable environment in which all are welcome and able to participate. We hope individuals feel comfortable voicing their opinions and providing contributions and will do our best to recognize and make space for individuals who may be struggling to find space here. Likewise, we expect individuals to recognize when they are taking up significant space and take a step back to allow room for others.
-<!-- TODO: Add if your repo has a community chat - Be present when joining synchronous conversations such as our community chat. Why be here if you're not going to _be here_? -->
-- Be respectful.
-- Default to positive. Assume others' contributions are legitimate and valuable and that they are made with good intention.
-
-### Acknowledgements
-
-The Community Guidelines sections were originally forked from the [United States Digital Service](https://usds.gov) [Justice40](https://thejustice40.com) open source [repository](https://github.com/usds/justice40-tool), and we would like to acknowledge and thank the community for their contributions.
+## Community Guidelines
+We want to ensure a welcoming environment for all of our projects. Our staff follow the [18F Code of Conduct](https://github.com/18F/code-of-conduct/blob/master/code-of-conduct.md) and all contributors should do the same.
