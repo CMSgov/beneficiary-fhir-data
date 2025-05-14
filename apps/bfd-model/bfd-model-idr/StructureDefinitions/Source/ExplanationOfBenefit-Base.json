@@ -1,7 +1,7 @@
 {
     "resourceType": "StructureDefinition",
     "id": "ExplanationOfBenefit-Base",
-    "url": "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Base",
+    "url": "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Base",
     "name": "ExplanationOfBenefit-Base",
     "status": "draft",
     "fhirVersion": "4.0.1",
@@ -277,7 +277,7 @@
                     {
                         "code": "ExplanationOfBenefit-Institutional-Base",
                         "targetProfile": [
-                            "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Institutional-Base"
+                            "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Institutional-Base"
                         ]
                     }
                 ]

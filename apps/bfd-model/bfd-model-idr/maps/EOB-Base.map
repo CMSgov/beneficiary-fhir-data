@@ -1,8 +1,9 @@
 //See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
 //Must appear in order map -> conceptmap -> uses -> imports -> groups
-map "https://bluebutton.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base" = "BFD-ExplanationOfBenefit-Base-Map"
 
-uses "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Base" alias ExplanationOfBenefitBase as source
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base" = "BFD-ExplanationOfBenefit-Base-Map"
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Base" alias ExplanationOfBenefitBase as source
 //hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
 uses "http://hl7.org/fhir/StructureDefinition/ProcedureComponent" alias ProcedureComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/DiagnosisComponent" alias DiagnosisComponent as source
@@ -13,19 +14,18 @@ uses "http://hl7.org/fhir/StructureDefinition/CareTeamComponent" alias CareTeamC
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
 
-imports "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper" 
-imports "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-SupportingInfo-Helper" 
-imports "https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-SupportingInfo-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" 
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
     src -> tgt.status = "active" "Set status";
-    //For PAC data, 
-
     //CLM_LTST_CLM_IND = latest claim indicator
     //CLM_FINL_ACTN_IND = claim is done processing
     //CLM_CNTL_NUM = claim control number
     //ORIG_CLM_CNTL_NUM = original claim control number. subsumes previous ones. 
+
 
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
@@ -35,7 +35,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     } "Create type";
 
     src -> tgt.subType = create('CodeableConcept') as tgtCC then {
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#subtype','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#subtype','coding') "translate code";
     } "Create type";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
@@ -44,7 +44,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src -> tgt.meta = create('Meta') as tgtMeta then {
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
-      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#profile_metadata','code') "set profile";
+      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#profile_metadata','code') "set profile";
       //CodeSystem -> CLM_SRC_ID
       src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_SRC_ID','code') "set source";
       src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#ADJUDICATION-STATUS','coding') "set source";
@@ -362,10 +362,10 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
 
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#HL7_DIAGTYPE','coding') "set coding";
+    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#HL7_DIAGTYPE','coding') "set coding";
   } "Set type";
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_DIAGTYPE','coding') "set coding";
+    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_DIAGTYPE','coding') "set coding";
   } "Set type";
 
   src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
@@ -391,7 +391,7 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
 
   src -> tgt.procedure = create('CodeableConcept') as tgtProcedure then {
     src -> tgtProcedure.coding = create('Coding') as tgtCoding then {
-      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bluebutton.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_DGNS_PRCDR_ICD_IND_PROCEDURE','code') "set system";
+      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_DGNS_PRCDR_ICD_IND_PROCEDURE','code') "set system";
       src.CLM_PRCDR_CD as procedureCode -> tgtCoding.code = procedureCode "set procedure code";
     } "set coding";
   } "Set procedure, including code";

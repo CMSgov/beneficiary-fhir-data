@@ -204,6 +204,8 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     INPATIENT_TAGS("inpatient_tags", s -> s.contains(" from ccw.inpatient_tags ")),
     /** Represents a query from ccw.outpatient_tags. */
     OUTPATIENT_TAGS("outpatient_tags", s -> s.contains(" from ccw.outpatient_tags ")),
+    /** Represents a query from ccw.snf_tags. */
+    SNF_TAGS("snf_tags", s -> s.contains(" from ccw.snf_tags ")),
     /** Represents a query from ccw.npi_fda_meta. */
     NPI_FDA_META("npi_fda_meta", s -> s.contains(" from ccw.npi_fda_meta ")),
 
