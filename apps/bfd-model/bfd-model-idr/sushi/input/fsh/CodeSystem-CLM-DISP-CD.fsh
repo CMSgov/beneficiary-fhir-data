@@ -6,7 +6,7 @@ Description: "Code indicating the disposition or outcome of the processing of th
 * ^status = #active
 * ^content = #complete
 
-* #1 "DEBIT ACCEPTED""
+* #1 "DEBIT ACCEPTED"
 * #2 "DEBIT ACCEPTED (AUTOMATIC ADJUSTMENT) APPLICABLE THROUGH 4/4/93"
 * #3 "CANCEL ACCEPTED"
 * #4 "OUTPATIENT HISTORY ONLY ACCEPTED"
