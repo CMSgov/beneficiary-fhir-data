@@ -1,103 +1,226 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_UNIQ_ID
+  claimTypes:
+    - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_UNIQ_ID
+  fhirPath: ExplanationOfBenefit.identifier.where(type.coding.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType').value
+- inputPath: ExplanationOfBenefit-Base.CLM_LTST_CLM_IND
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_LTST_CLM_IND
 - inputPath: ExplanationOfBenefit-Base.CLM_FINL_ACTN_IND
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
-  appliesTo:
-    - Inpatient
-  referenceTable: CLM_TYPE_CD
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_FINL_ACTN_IND
 - inputPath: ExplanationOfBenefit-Base.CLM_CNTL_NUM
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_CNTL_NUM
+- inputPath: ExplanationOfBenefit-Base.ORIG_CLM_CNTL_NUM
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: ORIG_CLM_CNTL_NUM
+- inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  referenceTable: CLM_TYPE_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_TYPE_CD
+  fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD').code
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_XREF_EFCTV_SK
   appliesTo:
     - Inpatient
+  BFDDerived: True
+- inputPath: ExplanationOfBenefit-Base.BENE_SK
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: BENE_SK
 - inputPath: ExplanationOfBenefit-Base.CLM_FROM_DT
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_FROM_DT
 - inputPath: ExplanationOfBenefit-Base.CLM_THRU_DT
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_THRU_DT
 - inputPath: ExplanationOfBenefit-Base.CLM_EFCTV_DT
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_EFCTV_DT
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - MCS
+    - NCH
   referenceTable: CLM_SRC_ID
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_SRC_ID
 - inputPath: ExplanationOfBenefit-Base.PRVDR_BLG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: PRVDR_BLG_PRVDR_NPI_NUM
 - inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
   appliesTo:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   referenceTable: CLM_QUERY_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_QUERY_CD
 - inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_NCVRD_CHRG_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_MDCR_DDCTBL_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_MDCR_DDCTBL_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_NRLN_RIC_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_NRLN_RIC_CD
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NRLN_RIC_CD
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
+  BFDDerived: True
 - inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_CMS_PROC_DT
 - inputPath: ExplanationOfBenefit-Base.CLM_PMT_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_PMT_AMT
 - inputPath: ExplanationOfBenefit-Base.family_name_atndg
   appliesTo:
     - Inpatient
 - inputPath: ExplanationOfBenefit-Base.CLM_ATNDG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_ATNDG_PRVDR_NPI_NUM
 - inputPath: ExplanationOfBenefit-Base.family_name_oprtg
   appliesTo:
     - Inpatient
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_OPRTG_PRVDR_NPI_NUM
 - inputPath: DiagnosisComponent.CLM_VAL_SQNC_NUM
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_VAL_SQNC_NUM
 - inputPath: DiagnosisComponent.ROW_NUM
   appliesTo:
     - Inpatient
+  BFDDerived: True
 - inputPath: DiagnosisComponent.CLM_DGNS_CD
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_DGNS_CD
 - inputPath: DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_DGNS_PRCDR_ICD_IND
 - inputPath: DiagnosisComponent.CLM_PROD_TYPE_CD
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_PROD_TYPE_CD
 - inputPath: DiagnosisComponent.CLM_POA_IND
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_POA_IND
 - inputPath: ProcedureComponent.CLM_VAL_SQNC_NUM
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_VAL_SQNC_NUM
 - inputPath: ProcedureComponent.CLM_PRCDR_PRFRM_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_PRCDR_PRFRM_DT
 - inputPath: ProcedureComponent.CLM_PRCDR_CD
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_PRCDR_CD
 - inputPath: ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_PROD
+  sourceColumn: CLM_DGNS_PRCDR_ICD_IND
 - inputPath: LineItemComponent.CLM_LINE_NUM
   appliesTo:
     - Inpatient
+  BFDDerived: True
 - inputPath: LineItemComponent.CLM_LINE_HCPCS_CD
   appliesTo:
     - Inpatient
@@ -107,13 +230,19 @@
     - SNF
     - DME
     - Carrier
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_HCPCS_CD
 - inputPath: LineItemComponent.CLM_REV_APC_HIPPS_CD
   appliesTo:
     - Outpatient
     - HHA
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_REV_APC_HIPPS_CD
 - inputPath: LineItemComponent.CLM_LINE_NDC_CD
   appliesTo:
     - Outpatient
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_NDC_CD
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Inpatient
@@ -121,6 +250,8 @@
     - HHA
     - Hospice
     - SNF
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_NDC_QTY
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD
   appliesTo:
     - Inpatient
@@ -128,6 +259,8 @@
     - HHA
     - Hospice
     - SNF
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_NDC_QTY_QLFYR_CD
 - inputPath: LineItemComponent.CLM_LINE_SRVC_UNIT_QTY
   appliesTo:
     - Inpatient
@@ -135,6 +268,8 @@
     - HHA
     - Hospice
     - SNF
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_SRVC_UNIT_QTY
 - inputPath: LineItemComponent.CLM_LINE_REV_CTR_CD
   appliesTo:
     - Inpatient
@@ -143,6 +278,8 @@
     - Hospice
     - SNF
   referenceTable: CLM_LINE_REV_CTR_CD
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_REV_CTR_CD
 - inputPath: LineItemComponent.CLM_DDCTBL_COINSRNC_CD
   appliesTo:
     - Inpatient
@@ -150,6 +287,8 @@
     - Hospice
     - SNF
   referenceTable: CLM_DDCTBL_COINSRNC_CD
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_DDCTBL_COINSRNC_CD
 - inputPath: LineItemComponent.HCPCS_1_MDFR_CD
   appliesTo:
     - Inpatient
@@ -158,6 +297,8 @@
     - Hospice
     - Carrier
     - DME
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: HCPCS_1_MDFR_CD
 - inputPath: LineItemComponent.HCPCS_2_MDFR_CD
   appliesTo:
     - Inpatient
@@ -166,6 +307,8 @@
     - Hospice
     - Carrier
     - DME
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: HCPCS_2_MDFR_CD
 - inputPath: LineItemComponent.HCPCS_3_MDFR_CD
   appliesTo:
     - Inpatient
@@ -174,6 +317,8 @@
     - Hospice
     - Carrier
     - DME
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: HCPCS_3_MDFR_CD
 - inputPath: LineItemComponent.HCPCS_4_MDFR_CD
   appliesTo:
     - Inpatient
@@ -182,6 +327,8 @@
     - Hospice
     - Carrier
     - DME
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: HCPCS_4_MDFR_CD
 - inputPath: LineItemComponent.HCPCS_5_MDFR_CD
   appliesTo:
     - Inpatient
@@ -190,6 +337,8 @@
     - Hospice
     - Carrier
     - DME
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: HCPCS_5_MDFR_CD
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_RATE_AMT
   appliesTo:
     - Inpatient
@@ -197,22 +346,34 @@
     - HHA
     - Hospice
     - SNF
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_INSTNL_RATE_AMT
 - inputPath: LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Outpatient
     - HHA
+  sourceView: V2_MDCR_CLM_ANSI_SGNTR
+  sourceColumn: CLM_1_REV_CNTR_ANSI_RSN_CD
 - inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Outpatient
+  sourceView: V2_MDCR_CLM_ANSI_SGNTR
+  sourceColumn: CLM_2_REV_CNTR_ANSI_RSN_CD
 - inputPath: LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Outpatient
+  sourceView: V2_MDCR_CLM_ANSI_SGNTR
+  sourceColumn: CLM_3_REV_CNTR_ANSI_RSN_CD
 - inputPath: LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Outpatient
+  sourceView: V2_MDCR_CLM_ANSI_SGNTR
+  sourceColumn: CLM_4_REV_CNTR_ANSI_RSN_CD
 - inputPath: LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Outpatient
+  sourceView: V2_MDCR_CLM_ANSI_SGNTR
+  sourceColumn: CLM_5_REV_CNTR_ANSI_RSN_CD
 - inputPath: LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -220,97 +381,183 @@
     - HHA
     - Hospice
     - SNF
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_NCVRD_CHRG_AMT
 - inputPath: LineItemComponent.CLM_LINE_PRVDR_PMT_AMT
   appliesTo:
     - Inpatient
     - Outpatient
     - Hospice
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_PRVDR_PMT_AMT
 - inputPath: LineItemComponent.CLM_LINE_BENE_PMT_AMT
   appliesTo:
     - Outpatient
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_BENE_PMT_AMT
 - inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_BENE_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_CVRD_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_BLOOD_DDCTBL_AMT
 - inputPath: LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_MDCR_DDCTBL_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_INSTNL_ADJSTD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_INSTNL_RDCD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_INSTNL_MSP1_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT
   appliesTo:
     - Inpatient
-- inputPath: LineItemComponent.GEO_FAC_SSA_STATE_CD
-  appliesTo:
-    - Inpatient
-- inputPath: LineItemComponent.REV_CNTR_DT
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_INSTNL_MSP2_PD_AMT
+- inputPath: LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT
   appliesTo:
     - Outpatient
     - Hospice
     - HHA
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_INSTNL_REV_CTR_DT
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_ACTV_CARE_FROM_DT
 - inputPath: SupportingInfoComponent.CLM_DSCHRG_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_DSCHRG_DT
 - inputPath: SupportingInfoComponent.CLM_ADMSN_TYPE_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_ADMSN_TYPE_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_ADMSN_TYPE_CD
 - inputPath: SupportingInfoComponent.CLM_SUBMSN_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_SUBMSN_DT
 - inputPath: SupportingInfoComponent.BENE_PTNT_STUS_CD
   appliesTo:
     - Inpatient
   referenceTable: BENE_PTNT_STUS_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: BENE_PTNT_STUS_CD
 - inputPath: SupportingInfoComponent.DGNS_DRG_CD
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: DGNS_DRG_CD
 - inputPath: SupportingInfoComponent.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BLOOD_PT_FRNSH_QTY
 - inputPath: SupportingInfoComponent.CLM_MDCR_INSTNL_MCO_PD_SW
   appliesTo:
     - Inpatient
   referenceTable: CLM_MDCR_INSTNL_MCO_PD_SW
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_INSTNL_MCO_PD_SW
 - inputPath: SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_MDCR_NCH_PTNT_STUS_IND_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_NCH_PTNT_STUS_IND_CD
 - inputPath: SupportingInfoComponent.CLM_ADMSN_SRC_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_ADMSN_SRC_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_ADMSN_SRC_CD
 - inputPath: SupportingInfoComponent.TYPE_OF_BILL_CD
   appliesTo:
     - Inpatient
   referenceTable: CLM_REV_CNTR_CD
+  BFDDerived: True
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_NCH_WKLY_PROC_DT
 - inputPath: SupportingInfoComponent.CLM_NCVRD_FROM_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_NCVRD_FROM_DT
 - inputPath: SupportingInfoComponent.CLM_NCVRD_THRU_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_NCVRD_THRU_DT
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_ACTV_CARE_THRU_DT
 - inputPath: SupportingInfoComponent.CLM_MDCR_EXHSTD_DT
   appliesTo:
     - Inpatient
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_MDCR_EXHSTD_DT
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD
+  appliesTo:
+    - Inpatient
+    - SNF
+    - Hospice
+    - HHA
+    - Outpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_FI_ACTN_CD
+  referenceTable: CLM_FI_ACTN_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_DISP_CD
+  appliesTo:
+    - Inpatient
+    - SNF
+    - Hospice
+    - HHA
+    - Outpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_DISP_CD
+  referenceTable: CLM_DISP_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_SBMT_CHRG_AMT
+  claimTypes:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_SBMT_CHRG_AMT

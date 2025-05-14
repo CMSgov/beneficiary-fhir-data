@@ -48,3 +48,5 @@ EOB example:
 java -jar validator_cli.jar outputs/ExplanationOfBenefit.json \
   -ig hl7.fhir.us.carin-bb#2.1.0
 ```
+
+To test a PAC resource, use EOB-Inpatient-FISS-Sample.json instead of EOB-Base-Sample.json

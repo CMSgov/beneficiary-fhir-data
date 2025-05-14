@@ -424,21 +424,8 @@
                 ]
             },
             {
-                "id": "LineItemComponent.GEO_FAC_SSA_STATE_CD",
-                "path": "LineItemComponent.GEO_FAC_SSA_STATE_CD",
-                "label": "Provider State Code",
-                "definition": "This field is transformed into the USPS state code for where the provider or facility is located.",
-                "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "LineItemComponent.REV_CNTR_DT",
-                "path": "LineItemComponent.REV_CNTR_DT",
+                "id": "LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT",
+                "path": "LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT",
                 "label": "Revenue Center Date",
                 "definition": "This is the date of service for the revenue center record.",
                 "min": 0,

@@ -8,6 +8,14 @@ conceptmap "FinalActionIndicator" {
   s:N = t:"cancelled"
 }
 
+conceptmap "CLM_LTST_CLM_IND" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/explanationofbenefit-status"
+
+  s:Y = t:"active"
+  s:N = t:"cancelled"
+}
+
 conceptmap "ClM_TYPE_CD" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://terminology.hl7.org/CodeSystem/claim-type"
@@ -29,6 +37,8 @@ conceptmap "ClM_TYPE_CD" {
   s:72 = t:"professional"
   s:81 = t:"professional"
   s:82 = t:"professional"
+  s:1011 = t:"institutional"
+  s:2011 = t:"institutional"
 }
 
 conceptmap "profile_metadata" {
@@ -52,6 +62,8 @@ conceptmap "profile_metadata" {
   s:72 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
   s:81 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
   s:82 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
+  s:1011 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:2011 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
 }
 
 conceptmap "ClM_TYPE_CD_RAW" {
@@ -75,6 +87,8 @@ conceptmap "ClM_TYPE_CD_RAW" {
   s:72 = t:"Local carrier DMEPOS claim"
   s:81 = t:"Durable medical equipment regional carrier (DMERC); non-DMEPOS claim"
   s:82 = t:"DMERC; DMEPOS claim"
+  s:1011 = t:"011X MEDICARE SS HOSPITAL INPATIENT (PART A) - PHASE 1"
+  s:2011 = t:"011X MEDICARE SS HOSPITAL INPATIENT (PART A)"
 }
 
 conceptmap "subtype" {
@@ -90,6 +104,10 @@ conceptmap "subtype" {
   s:61 = t:"inpatient"
   s:62 = t:"inpatient"
   s:63 = t:"inpatient"
+  s:1011 = t:"inpatient"
+  s:1041 = t:"inpatient"
+  s:2011 = t:"inpatient"
+  s:2041 = t:"inpatient"
 }
 
 conceptmap "CLM_SRC_ID" {
@@ -103,6 +121,26 @@ conceptmap "CLM_SRC_ID" {
   s:"23000" = t:"VIPS"
   s:"24000" = t:"EDPS"
   s:"25000" = t:"EncounterMedicaidDuals"
+}
+
+conceptmap "ADJUDICATION-STATUS" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+
+  s:"20000" = t:"Adjudicated"
+  s:"21000" = t:"PartiallyAdjudicated"
+  s:"22000" = t:"PartiallyAdjudicated"
+  s:"23000" = t:"PartiallyAdjudicated"
+}
+
+conceptmap "REMITTANCE-OUTCOME" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/remittance-outcome"
+
+  s:"20000" = t:"complete"
+  s:"21000" = t:"partial"
+  s:"22000" = t:"partial"
+  s:"23000" = t:"partial"
 }
 
 conceptmap "CLM_DGNS_PRCDR_ICD_IND_PROCEDURE" {
