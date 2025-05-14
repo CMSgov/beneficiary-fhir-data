@@ -84,7 +84,7 @@ class Extractor(ABC):
                         idr_trans_efctv_ts = %(timestamp)s AND {progress_col} > %(last_id)s
                     ) OR idr_trans_efctv_ts > %(timestamp)s OR idr_updt_ts >= %(timestamp)s) AND idr_trans_efctv_ts >= '{get_min_transaction_date()}'""",
                 ),
-                {"timestamp": progress.last_timestamp, "last_id": progress.last_id},
+                {"timestamp": progress.last_ts, "last_id": progress.last_id},
             )
             idr_query_timer.stop()
             return res
@@ -158,6 +158,10 @@ class SnowflakeExtractor(Extractor):
 def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
-        "SELECT table_name, last_id, last_timestamp FROM idr.load_progress WHERE table_name = %(table_name)s",
+        """
+        SELECT table_name, last_id, last_ts, batch_completion_ts 
+        FROM idr.load_progress
+        WHERE table_name = %(table_name)s
+        """,
         {"table_name": table_name},
     )

@@ -1,7 +1,7 @@
 {
     "resourceType": "StructureDefinition",
     "id": "Beneficiary",
-    "url": "https://bluebutton.cms.gov/fhir/StructureDefinition/Beneficiary",
+    "url": "https://bfd.cms.gov/fhir/StructureDefinition/Beneficiary",
     "name": "Beneficary",
     "status": "draft",
     "fhirVersion": "4.0.1",
@@ -108,7 +108,7 @@
                 "type": [
                     {
                         "code": "Bene-MBI",
-                        "targetProfile" : ["https://bluebutton.cms.gov/fhir/StructureDefinition/Bene-MBI"]
+                        "targetProfile" : ["https://bfd.cms.gov/fhir/StructureDefinition/Bene-MBI"]
                     }
                 ]
             },
