@@ -88,7 +88,8 @@ CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
     last_id TEXT NOT NULL,
-    last_timestamp TIMESTAMPTZ NOT NULL
+    last_ts TIMESTAMPTZ NOT NULL,
+    batch_completion_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 

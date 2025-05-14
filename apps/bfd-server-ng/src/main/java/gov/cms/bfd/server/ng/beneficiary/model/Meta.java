@@ -4,13 +4,13 @@ import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /** FHIR metadata information. */
 @Embeddable
 public class Meta {
   @Column(name = "bfd_updated_ts", nullable = false)
-  private LocalDate updatedTimestamp;
+  private LocalDateTime updatedTimestamp;
 
   org.hl7.fhir.r4.model.Meta toFhir() {
     return new org.hl7.fhir.r4.model.Meta()

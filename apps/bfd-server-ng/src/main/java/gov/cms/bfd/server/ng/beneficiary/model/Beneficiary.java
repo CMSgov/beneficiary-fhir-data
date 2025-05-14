@@ -9,10 +9,12 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Patient;
 
 /** Main entity representing the beneficiary table. */
 @Entity
+@Getter
 @Table(name = "beneficiary", schema = "idr")
 public class Beneficiary {
   @Id

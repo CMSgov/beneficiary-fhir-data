@@ -88,4 +88,5 @@ class IdrContractPbpNumber(BaseModel):
 class LoadProgress(BaseModel):
     table_name: str
     last_id: str
-    last_timestamp: datetime
+    last_ts: datetime
+    batch_completion_ts: datetime
