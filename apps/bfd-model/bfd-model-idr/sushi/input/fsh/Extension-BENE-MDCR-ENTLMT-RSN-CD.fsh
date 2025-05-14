@@ -1,6 +1,7 @@
-Extension: BENE_MDCR_ENTLMT_RSN_CD //We can use _ in the name
-Description: "Beneficiary Entitlement Reason Code"
-Id: BENE-MDCR-ENTLMT-RSN-CD // But FHIR ids do not allow _ in them
+Extension: BENE_MDCR_ENTLMT_RSN_CD
+Title: "Beneficiary Entitlement Reason Code"
+Description: "A code identifying the basis in determining a beneficiary's entitlement to Medicare benefits."
+Id: BENE-MDCR-ENTLMT-RSN-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" //see above
 * ^context[+].type = #element
 * ^context[=].expression = "Coverage"

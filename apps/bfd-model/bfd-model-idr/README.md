@@ -1,43 +1,51 @@
-Placeholder directories + structures for mapping between IDR and FHIR.
+Welcome to the README!
+
+This file will be extended, but for this step, we're consolidating multiple steps into a single script. 
+
+Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
 
 To download the FHIR Validator:
 https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
 
-To execute FHIR Mapping language transforms against the sample data.
-To compile the StructureMap:
+Install sushi
 ```sh
-java -jar validator_cli.jar -ig maps/patient.map \
-  -compile https://bfd.cms.gov/MappingLanguage/Resources/Patient \
-  -version 4.0.1 -output StructureMaps/BFD-Patient-StructureMap.json 
-```
-
-To execute:
-```sh
-java -jar validator_cli.jar sample-data/Beneficiary-Sample.json \
-  -output outputs/Patient.json \
-  -transform https://bfd.cms.gov/MappingLanguage/Resources/Patient \
-  -version 4.0.1 \
-  -ig StructureMaps/BFD-Patient-StructureMap.json \
-  -ig StructureDefinitions/Source/Bene-MBI.json \
-  -ig StructureDefinitions/Source/Bene.json \
-  -ig hl7.fhir.us.carin-bb#2.1.0 \
-  -ig maps/Patient-Helper.map
+npm install -g fsh-sushi
 ```
 
 
-Validating sample resources against self-defined StructureDefinitions:
+EOB Institutional Inpatient:
 ```sh
-java -jar validator_cli.jar sample-data/<input>.json \
-  -ig StructureDefinitions/Source/<applicable structure definition>.json
+python compile_resources.py \
+    -m maps/EOB-Base.map \
+    -i sample-data/EOB-Base-Sample.json \
+    -o outputs/EOB.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
+    --test
+```
+Patient:
+```sh
+python compile_resources.py \
+    -m maps/patient.map \
+    -i sample-data/Bene.json \
+    -o outputs/Patient.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
+    --test
+```
+Coverage (part A/B):
+```sh
+python compile_resources.py \
+    -m maps/Coverage-Base.map \
+    -i sample-data/Coverage-FFS-Sample.json \
+    -o outputs/Coverage-FFS.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base \
+    --test
 ```
 
-Validate against C4BB:
-```sh
-java -jar validator_cli.jar outputs/<output_json>.json \
-  -ig hl7.fhir.us.carin-bb#2.1.0
-```
 
-Generate sample data
-```sh
-python sample-data/generator/Patient-Generator.py
-```
+Pass along map with -m
+pass along the sample file with -i
+pass along the output file with -o
+pass along the resource url with -r
+pass along --test to run conformance tests
+
+

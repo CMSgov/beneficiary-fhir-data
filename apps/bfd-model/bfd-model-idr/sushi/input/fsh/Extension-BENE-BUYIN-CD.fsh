@@ -1,6 +1,7 @@
-Extension: BENE_BUYIN_CD //We can use _ in the name
-Description: "Beneficiary Buy-in Indicator"
-Id: BENE-BUYIN-CD // But FHIR ids do not allow _ in them
+Extension: BENE_BUYIN_CD
+Title: "Beneficiary Buy-in Indicator"
+Description: "Monthly Part A and/or Part B entitlement indicator."
+Id: BENE-BUYIN-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD" //see above
 * ^context[+].type = #element
 * ^context[=].expression = "Coverage"
