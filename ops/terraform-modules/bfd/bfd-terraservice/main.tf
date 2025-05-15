@@ -32,6 +32,25 @@ locals {
   kms_key_alias             = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
   kms_config_key_alias      = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
   kms_config_key_mrk_config = one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration)
+
+  # OIT/CMS Cloud configured Security Groups that are expected to always exist
+  tools_sg      = lookup(local.ssm_config, "/bfd/common/enterprise_tools_security_group", null)
+  management_sg = lookup(local.ssm_config, "/bfd/common/management_security_group", null)
+  vpn_sg        = lookup(local.ssm_config, "/bfd/common/vpn_security_group", null)
+
+  # Specify a set of default AZs -- in this case: <region>a, <region>b, <region>c
+  default_azs = {
+    for k, v in data.aws_availability_zone.main :
+    k => v if contains(["a", "b", "c"], v.name_suffix)
+  }
+}
+
+data "aws_availability_zones" "main" {}
+
+data "aws_availability_zone" "main" {
+  for_each = toset(data.aws_availability_zones.main.names)
+
+  name = each.key
 }
 
 data "aws_region" "current" {}
@@ -96,4 +115,34 @@ data "aws_subnet" "main" {
   for_each = toset(flatten([for _, obj in data.aws_subnets.main : obj.ids]))
 
   id = each.key
+}
+
+data "aws_security_group" "vpn" {
+  count = local.vpn_sg != null ? 1 : 0
+
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [local.vpn_sg]
+  }
+}
+
+data "aws_security_group" "management" {
+  count = local.management_sg != null ? 1 : 0
+
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [local.management_sg]
+  }
+}
+
+data "aws_security_group" "tools" {
+  count = local.tools_sg != null ? 1 : 0
+
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [local.tools_sg]
+  }
 }
