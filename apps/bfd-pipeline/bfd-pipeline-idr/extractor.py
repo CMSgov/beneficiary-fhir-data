@@ -8,11 +8,9 @@ from psycopg.rows import class_row
 from pydantic import BaseModel
 import snowflake.connector
 
-from model import LoadProgress
+from model import LoadProgress, T
 from timer import Timer
 
-
-T = TypeVar("T", bound=BaseModel)
 
 idr_query_timer = Timer("idr_query")
 cursor_execute_timer = Timer("cursor_execute")
@@ -55,7 +53,6 @@ class Extractor(ABC):
         connection_string: str,
         fetch_query: str,
         table: str,
-        progress_col: str,
     ) -> Iterator[list[T]]:
         fetch_query = self.get_query(cls, fetch_query)
         progress = get_progress(connection_string, table)
@@ -67,7 +64,7 @@ class Extractor(ABC):
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
                     f"WHERE idr_trans_efctv_ts >= '{get_min_transaction_date()}'",
-                ),
+                ).replace("{ORDER_BY}", "ORDER BY idr_trans_efctv_ts"),
                 {},
             )
             idr_query_timer.stop()
@@ -80,11 +77,12 @@ class Extractor(ABC):
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
                     f"""
-                    WHERE ((
-                        idr_trans_efctv_ts = %(timestamp)s AND {progress_col} > %(last_id)s
-                    ) OR idr_trans_efctv_ts > %(timestamp)s OR idr_updt_ts >= %(timestamp)s) AND idr_trans_efctv_ts >= '{get_min_transaction_date()}'""",
-                ),
-                {"timestamp": progress.last_ts, "last_id": progress.last_id},
+                    WHERE 
+                        (idr_trans_efctv_ts >= %(timestamp)s OR idr_updt_ts >= %(timestamp)s)
+                        AND idr_trans_efctv_ts >= '{get_min_transaction_date()}' 
+                    """,
+                ).replace("{ORDER_BY}", "ORDER BY idr_trans_efctv_ts"),
+                {"timestamp": progress.last_ts},
             )
             idr_query_timer.stop()
             return res
@@ -159,7 +157,7 @@ def get_progress(connection_string: str, table_name: str) -> LoadProgress | None
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
         """
-        SELECT table_name, last_id, last_ts, batch_completion_ts 
+        SELECT table_name, last_ts, batch_completion_ts 
         FROM idr.load_progress
         WHERE table_name = %(table_name)s
         """,

@@ -25,8 +25,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
     bene_line_5_adr VARCHAR(40),
     bene_line_6_adr VARCHAR(40),
     cntct_lang_cd VARCHAR(3),
-    idr_trans_efctv_ts TIMESTAMPTZ,
-    idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ
 );
 
@@ -34,8 +34,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_sk BIGINT NOT NULL,
     bene_xref_efctv_sk BIGINT NOT NULL,
     bene_mbi_id VARCHAR(11),
-    idr_trans_efctv_ts TIMESTAMPTZ,
-    idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
@@ -50,6 +50,51 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id (
     PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
 );
 
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp (
+    bene_sk BIGINT NOT NULL,
+    bene_buyin_cd VARCHAR(2) NOT NULL,
+    bene_tp_type_cd VARCHAR(1) NOT NULL,
+    bene_rng_bgn_dt DATE NOT NULL,
+    bene_rng_end_dt DATE NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, bene_tp_type_cd, idr_trans_efctv_ts)
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus (
+    bene_sk BIGINT NOT NULL,
+    bene_mdcr_stus_cd VARCHAR(2) NOT NULL,
+    mdcr_stus_bgn_dt DATE NOT NULL,
+    mdcr_stus_end_dt DATE NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(bene_sk, mdcr_stus_bgn_dt, mdcr_stus_end_dt, idr_trans_efctv_ts)
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt (
+    bene_sk BIGINT NOT NULL,
+    bene_rng_bgn_dt DATE NOT NULL,
+    bene_rng_end_dt DATE NOT NULL,
+    bene_mdcr_entlmt_type_cd VARCHAR(1),
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, bene_mdcr_entlmt_type_cd, idr_trans_efctv_ts)
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn (
+    bene_sk BIGINT NOT NULL,
+    bene_rng_bgn_dt DATE NOT NULL,
+    bene_rng_end_dt DATE NOT NULL,
+    bene_mdcr_entlmt_rsn_cd VARCHAR(1),
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, idr_trans_efctv_ts)
+);
+
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
     bene_sk BIGINT NOT NULL,
     cntrct_pbp_sk BIGINT NOT NULL,
@@ -58,8 +103,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
     bene_elctn_enrlmt_disenrlmt_cd VARCHAR(1),
     bene_elctn_aplctn_dt DATE,
     bene_enrlmt_efctv_dt DATE,
-    idr_trans_efctv_ts TIMESTAMPTZ,
-    idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ
 );
 
@@ -181,6 +226,85 @@ VALUES(
     '9999-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
 );
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp (
+    bene_sk,
+    bene_buyin_cd,
+    bene_tp_type_cd,
+    bene_rng_bgn_dt,
+    bene_rng_end_dt,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    1, --bene_sk,
+    'D', --bene_buyin_cd,
+    'B', --bene_tp_type_cd,
+    '2024-01-01', --bene_rng_bgn_dt
+    '2024-12-31',--bene_rng_end_dt
+    NOW(),-- idr_trans_efctv_ts,
+    '9999-12-31',-- idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus (
+    bene_sk,
+    bene_mdcr_stus_cd,
+    mdcr_stus_bgn_dt,
+    mdcr_stus_end_dt,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    1, --bene_sk,
+    '10',--bene_mdcr_stus_cd
+    '2024-01-01',--mdcr_stus_bgn_dt
+    '2024-12-31',--mdcr_stus_end_dt
+    NOW(),-- idr_trans_efctv_ts,
+    '9999-12-31',-- idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt (
+    bene_sk,
+    bene_rng_bgn_dt,
+    bene_rng_end_dt,
+    bene_mdcr_entlmt_type_cd,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    1,--bene_sk,
+    '2024-01-01',--mdcr_stus_bgn_dt
+    '2024-12-31',--mdcr_stus_end_dt
+    'B',--bene_mdcr_entlmt_type_cd
+    NOW(),-- idr_trans_efctv_ts,
+    '9999-12-31',-- idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
+
+INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn (
+    bene_sk,
+    bene_rng_bgn_dt,
+    bene_rng_end_dt,
+    bene_mdcr_entlmt_rsn_cd,
+    idr_trans_efctv_ts,
+    idr_trans_obslt_ts,
+    idr_updt_ts
+)
+VALUES(
+    1,--bene_sk,
+    '2024-01-01',--bene_rng_bgn_dt
+    '2024-12-31',--bene_rng_end_dt
+    '1',--bene_mdcr_entlmt_rsn_cd
+    NOW(),-- idr_trans_efctv_ts,
+    '9999-12-31',-- idr_trans_obslt_ts
+    NULL-- idr_updt_ts
+);
+
 
 INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
     bene_sk,

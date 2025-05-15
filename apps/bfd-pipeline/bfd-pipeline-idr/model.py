@@ -1,6 +1,8 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, TypeVar
 from pydantic import BaseModel, BeforeValidator
+
+T = TypeVar("T", bound=BaseModel)
 
 
 def transform_null_date(value: date | None) -> date:
@@ -67,6 +69,47 @@ class IdrBeneficiaryMbi(BaseModel):
     idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
 
 
+class IdrBeneficiaryThirdParty(BaseModel):
+    bene_sk: int
+    bene_buyin_cd: str
+    bene_tp_type_cd: str
+    bene_rng_bgn_dt: date
+    bene_rng_end_dt: date
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+
+
+class IdrBeneficiaryStatus(BaseModel):
+    bene_sk: int
+    bene_mdcr_stus_cd: str
+    mdcr_stus_bgn_dt: date
+    mdcr_stus_end_dt: date
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+
+
+class IdrBeneficiaryEntitlement(BaseModel):
+    bene_sk: int
+    bene_rng_bgn_dt: date
+    bene_rng_end_dt: date
+    bene_mdcr_entlmt_type_cd: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+
+
+class IdrBeneficiaryEntitlementReason(BaseModel):
+    bene_sk: int
+    bene_rng_bgn_dt: date
+    bene_rng_end_dt: date
+    bene_mdcr_entlmt_rsn_cd: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+
+
 class IdrElectionPeriodUsage(BaseModel):
     bene_sk: int
     cntrct_pbp_sk: int
@@ -87,6 +130,5 @@ class IdrContractPbpNumber(BaseModel):
 
 class LoadProgress(BaseModel):
     table_name: str
-    last_id: str
     last_ts: datetime
     batch_completion_ts: datetime
