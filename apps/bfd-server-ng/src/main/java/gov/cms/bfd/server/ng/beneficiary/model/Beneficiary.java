@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 
 /** Main entity representing the beneficiary table. */
@@ -68,5 +69,20 @@ public class Beneficiary {
     patient.setMeta(meta.toFhir());
 
     return patient;
+  }
+
+  /**
+   * Transforms this Beneficiary entity into a FHIR Coverage resource for a specific coverage part.
+   *
+   * @param partIdentifier The identifier for the coverage part (e.g., "part-a", "part-b").
+   * @param fullCompositeId The full ID to be assigned to the FHIR Coverage resource (e.g.,
+   *     "part-a-12345").
+   * @return An {@link Optional} containing the {@link Coverage} resource if applicable for the
+   *     given part, otherwise {@link Optional#empty()}.
+   */
+  public Optional<Coverage> toFhirCoverage(String partIdentifier, String fullCompositeId) {
+    Coverage coverage = new Coverage();
+    // Continue here
+    return Optional.of(coverage);
   }
 }
