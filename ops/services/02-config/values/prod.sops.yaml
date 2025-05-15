@@ -13,8 +13,8 @@
 /bcda/${env}/eft/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:3Y0CuF087HKr/5aVBB/k/39I9qo7vDGbH5mlakoBSutlkFoAK58Rzf11MWO78SzB+Xi+Sf7pdXFU3zieoTH+w0pPapvPvUfI8E6mh6nRSmh6Y6JfXMLOLq/qX8NkvV2EjQg7hDiEjhnCCK+wZ0EjJgWBLbjyMOl6YaBZpBjdlLO9GwGoA0s/rJIlWGyCjuvUaM4ASl9YHPBTEhZWY+fpiJTXeVDfSG8V1v58XtmtCy/XFgAAeRJFtlUSjy0/aD+GiM2pAzDyABO3tJBmjRkDG3uWQ0nXD4AonOuSKONcZUHiux7YdIkdD4uVU6rMGadwxd8wQNVJgAIipul92Y1dMkkoY+Urfsw1z/b2CvtfeEKQ1+bt9vFd,iv:9U5HijGwJ8oDPO8MvdX5aKzxLTLVExKaLcmEl+QNWUY=,tag:zxksvukh0rAItncOS/4wkw==,type:str]
 /bfd/${env}/common/sensitive/cloudbees_jenkins_subnets: ENC[AES256_GCM,data:DOxNFEXcls33cfp59sqT,iv:T3g4NQRcgCFTQZUOjBlo4BqKA1Fx2z8r6Me1CadcqZU=,tag:SFNtBRkxWkeJk20PBm7pvg==,type:str]
 /bfd/${env}/common/sensitive/ec2_user_private_key: ENC[AES256_GCM,data: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,iv:9z2fa9WUtki4by9p8qbcQCCHiaP51lkcXXwhq8HjNb0=,tag:sinRu/Ozq2u1dhI9tdOW+Q==,type:str]
-/bfd/${env}/common/sensitive/rds_master_password: ENC[AES256_GCM,data:MpcybTFHbO4Na9zAHKfOpVlZvhffAtN7mw==,iv:SgliL7IoX1vm324xaxQJy1lNtOaeTxv9hofkYC3x2EI=,tag:jWdvwcLmYVehxAdUegNFKQ==,type:str]
 /bfd/${env}/common/sensitive/victor_ops_url: ENC[AES256_GCM,data:9kX2LhcMRqqefX1arA1reXPn2/c3Lt6nrGUh266T9CWR8YvNTUo9X85tjb+8qyu/qfmO3J4aj2LrctNNnYQcTKm/e17jKAh0PUUvxJI2xePfxgg3wOM8grVfAdKl2l6t+iuQv13/dZEqwvw=,iv:w7BH+qSufTYa1kaEFZFyctI2ZmvCkjxjVtKeLbXj9hs=,tag:kY41/2jViXEI1ZGPNLHwTQ==,type:str]
+/bfd/${env}/database/sensitive/rds_master_password: ENC[AES256_GCM,data:hrMYRfJi3LrRDCPp6LXJ1keieH83nRykag==,iv:YNtQM7wPLWAJ5tKpoJKoDXpw14oVWSCyWdLa0wDQtxE=,tag:2TNkCywWD89zFBF9xKKLGQ==,type:str]
 /bfd/${env}/eft/sensitive/inbound/partners_list_json: ENC[AES256_GCM,data:m/7Fu3Cu17Qp9eKXghzZFXYQsETnbO9cEQ==,iv:poeLMVViZkQEFKfSHPhTiKe2b2xPZd61pAyajzPVcHA=,tag:CNeEJKnQc9aQID0U+moa1Q==,type:str]
 /bfd/${env}/eft/sensitive/inbound/sftp_server/eft_user_home_dir: ENC[AES256_GCM,data:48B6OPbvHc0=,iv:C2YoBl/vrR7rpB3Fv/l4zIu6367IBH8Gx9Na+FiVF7Q=,tag:KQtM4DOAyvlobRt7L+eo3Q==,type:str]
 /bfd/${env}/eft/sensitive/inbound/sftp_server/eft_user_public_key: ENC[AES256_GCM,data:JaKno6gn3bhUoRsexilgYaeIEu4VBaC5rwLp1LJ9P+nVklYqyuUOOMsI7zZQqkFCvLcqHlpWyrLhpT5v7Oh9qb6smaL4ELKmPwhlU4OYk5wgnJ1XnefXF0lWju/bWK2mr6De3erEoSX0TPgsQl2yovFLdQMW7VYmQoRFShBi8FcqkdTSJBLk9ThqxmMH+Qw8lc5hFb46AJK3Oua8Z/FLDjQAHAdQfWb0TKSfc+THF+pYl4J0HWMqHU6NbCr592O1d9aq12SO2hffbzs0FlvymRlgmFao9VeEWn13PPZnczRDkjjV4e5fz+p29r1lv8/qQGT9gfetHoZblz4nrZm6OrD+0kLEGmZtTF7uGlnrDFJfkodQz4d1JIcmOz19y5ZkzlIQL0uzRUe0n3nSFM46p3BoWXUrA4kot14dzdoRjvUrmwY2AwE5yJuEkcwpQnaHn9n7+RheYpf9Op4710BA9XpBtJhmFECx92BZi86eHwDpwRIhwUz8mz8jQWI=,iv:bF1v1Gjj9fa6Hid5UUj7pOboWgBNJDqLl4NlWYfvfPk=,tag:AO3KYPWC9aoCoaJLx+bclg==,type:str]
@@ -82,19 +82,19 @@
 /bfd/${env}/common/nonsensitive/new_relic/metrics/path: /metric/v1
 /bfd/${env}/common/nonsensitive/new_relic/metrics/period: 15
 /bfd/${env}/common/sensitive/new_relic/metrics/insights_key: ENC[AES256_GCM,data:RO2TyYLu0/w9fLu8rm74oXyAY1pMTC3xv7iDEMKectlzr1XCGg==,iv:Gyq6wZhNsoEeVQPcwPksF7gAOpzyppdl6tvSLSFDXUE=,tag:fVJpv6VLsanYrniCKutK9Q==,type:str]
-/bfd/${env}/common/nonsensitive/rds_backup_retention_period: "3"
-/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: "true"
-/bfd/${env}/common/nonsensitive/rds_master_username: bfduser
-/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
-/bfd/${env}/common/nonsensitive/rds_instance_class: db.r6i.12xlarge
-/bfd/${env}/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
-/bfd/${env}/common/nonsensitive/rds_min_reader_nodes: 1
-/bfd/${env}/common/nonsensitive/rds_max_reader_nodes: 3
-/bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
-/bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
-/bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/${env}/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
+/bfd/${env}/database/nonsensitive/rds_backup_retention_period: "3"
+/bfd/${env}/database/nonsensitive/rds_iam_database_authentication_enabled: "true"
+/bfd/${env}/database/nonsensitive/rds_master_username: bfduser
+/bfd/${env}/database/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+/bfd/${env}/database/nonsensitive/rds_security_group: bfd-${env}-aurora-cluster
+/bfd/${env}/database/nonsensitive/rds_instance_class: db.r6i.12xlarge
+/bfd/${env}/database/nonsensitive/scaling/min_nodes: 1
+/bfd/${env}/database/nonsensitive/scaling/max_nodes: 3
+/bfd/${env}/database/nonsensitive/scaling/cpu_target: 50
+/bfd/${env}/database/nonsensitive/scaling/cooldown/scale_in: 300
+/bfd/${env}/database/nonsensitive/scaling/cooldown/scale_out: 300
 /bfd/${env}/migrator/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/migrator/nonsensitive/db/hikari/max_pool_size: UNDEFINED
@@ -495,8 +495,8 @@ sops:
       created_at: "2025-03-31T22:41:25Z"
       enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwGGkV8aeZvx5fp21oXhkSN9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNQ+5RQmcn6PsRqTjAgEQgDsboKccFePd1cbzxpBkMb/rhL9lNTCfSOBvG27HpXfZ6Ml18anFsRGNw8ZbLr/7E1NBC9vdZxAn2XqNSQ==
       aws_profile: ""
-  lastmodified: "2025-05-13T13:09:04Z"
-  mac: ENC[AES256_GCM,data:LlVClZ+tcRyFBsstYetcsB4m5kM/BbFFLlY4QB2JrRjJFGxkwvuG4aees2cvtawhEyNvjirMrPv4dzyH0oyAVCVVfCdKXZF8QhgvWKTQQ4c9NP9AoQS3UNDQqhOPphD3fR0JK40Gqj20RVsAkGXEtUzOFHeOpWYN9RIt0euxnhk=,iv:53e73tlZnRVaJ1OOqnlwi+vb0TUQ5So8NoJfcDANhM0=,tag:HRH010nENtqu493bPTi9LQ==,type:str]
+  lastmodified: "2025-05-15T19:49:49Z"
+  mac: ENC[AES256_GCM,data:pRudMmVtWmmku1w/JXd2YVapXhHIc2cZekSmlntnBbImk1+/bzhFwWP7ecsZCduAqshmiWWa0IddTi3qf4TtkivJWgpve3kdEcLYh7Mn974qHAqh314VcPQvGAhw4dtvB4oYJ2mlHNHfMjk4oa11cmLG82UO/gSoEAlCkQyiq/U=,iv:NWYqgiIERdB6P57mG1xSMKBWgVqXlQItNQanh6Z+rBE=,tag:WUyiAECxBn7hGEvobDHwnw==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
