@@ -94,7 +94,7 @@ data "aws_iam_policy" "permissions_boundary" {
 data "aws_vpc" "main" {
   filter {
     name   = "tag:stack"
-    values = [local.env]
+    values = [local.seed_env]
   }
 }
 
