@@ -39,14 +39,26 @@ locals {
   rds_scaling_cpu_target                  = nonsensitive(local.ssm_config["/bfd/database/scaling/cpu_target"])
   rds_scale_in_cooldown                   = nonsensitive(local.ssm_config["/bfd/database/scaling/cooldown/scale_in"])
   rds_scale_out_cooldown                  = nonsensitive(local.ssm_config["/bfd/database/scaling/cooldown/scale_out"])
-  rds_master_password                     = lookup(local.ssm_config, "/bfd/database/rds_master_password", null)
-  rds_master_username                     = nonsensitive(lookup(local.ssm_config, "/bfd/database/rds_master_username", sensitive(null)))
-  rds_snapshot_identifier                 = lookup(local.ssm_config, "/bfd/database/rds_snapshot_identifier", null)
+  rds_snapshot_identifier                 = one(data.aws_db_cluster_snapshot.main[*].id)
+  rds_master_password                     = local.rds_snapshot_identifier != null ? lookup(local.ssm_config, "/bfd/database/rds_master_password", null) : null
+  rds_master_username                     = local.rds_snapshot_identifier != null ? nonsensitive(lookup(local.ssm_config, "/bfd/database/rds_master_username", sensitive(null))) : null
 
   db_cluster_parameter_group_file = fileexists("${path.module}/db-cluster-parameters/${local.env}.yaml") ? "${path.module}/db-cluster-parameters/${local.env}.yaml" : "${path.module}/db-cluster-parameters/${local.rds_aurora_family}.yaml"
   db_node_parameter_group_file    = fileexists("${path.module}/db-node-parameters/${local.env}.yaml") ? "${path.module}/db-node-parameters/${local.env}.yaml" : "${path.module}/db-node-parameters/${local.rds_aurora_family}.yaml"
   db_cluster_parameters           = toset(yamldecode(file(local.db_cluster_parameter_group_file)))
   db_parameters                   = toset(yamldecode(file(local.db_node_parameter_group_file)))
+
+  enable_rds_scheduled_scaling = !var.disable_rds_scheduling_override && (local.env == "test" || local.is_ephemeral_env)
+  replicas_scaling_target      = local.enable_rds_scheduled_scaling ? one(aws_appautoscaling_target.dynamic_replicas) : one(aws_appautoscaling_target.static_replicas)
+}
+
+data "aws_db_cluster_snapshot" "main" {
+  count = local.is_ephemeral_env ? 1 : 0
+
+  db_cluster_identifier = "bfd-${local.seed_env}-aurora-cluster"
+
+  most_recent                    = var.ephemeral_rds_snapshot_id_override == null
+  db_cluster_snapshot_identifier = var.ephemeral_rds_snapshot_id_override
 }
 
 resource "aws_db_subnet_group" "this" {
