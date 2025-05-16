@@ -149,6 +149,12 @@
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server (${env})
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
