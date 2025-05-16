@@ -6,6 +6,10 @@ resource "aws_kms_key" "config" {
   multi_region                       = true
   enable_key_rotation                = true
   bypass_policy_lockout_safety_check = false
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_kms_alias" "config" {
@@ -23,6 +27,10 @@ resource "aws_kms_replica_key" "config_alt" {
   description                        = "${local.env} config replica; used for sensitive SSM configuration"
   primary_key_arn                    = one(aws_kms_key.config[*].arn)
   bypass_policy_lockout_safety_check = false
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_kms_alias" "config_alt" {
