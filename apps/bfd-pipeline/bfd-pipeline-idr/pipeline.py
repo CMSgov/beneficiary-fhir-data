@@ -26,21 +26,31 @@ def init_logger():
 
 def main():
     init_logger()
-
-    if len(sys.argv) > 1 and sys.argv[1] == "local":
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    pg_connection = f"host={os.environ["BFD_DB_ENDPOINT"]} dbname=idr user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}"
+    if mode == "local":
+        pg_local = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
         run_pipeline(
             PostgresExtractor(
-                connection_string="host=localhost dbname=idr user=bfd password=InsecureLocalDev",
+                connection_string=pg_local,
                 batch_size=100_000,
             ),
-            "host=localhost dbname=idr user=bfd password=InsecureLocalDev",
+            pg_local,
+        )
+    elif mode == "synthetic":
+        run_pipeline(
+            PostgresExtractor(
+                connection_string=pg_connection,
+                batch_size=100_000,
+            ),
+            pg_connection,
         )
     else:
         run_pipeline(
             SnowflakeExtractor(
                 batch_size=100_000,
             ),
-            f"host={os.environ["BFD_DB_ENDPOINT"]} dbname=idr user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}",
+            pg_connection,
         )
 
 

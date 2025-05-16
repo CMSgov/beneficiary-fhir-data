@@ -1,4 +1,6 @@
-# Setup
+# IDR Pipeline
+
+## Setup
 
 Install packages
 
@@ -6,7 +8,7 @@ Install packages
 uv sync
 ```
 
-# Development
+## Development
 
 Initialize the database with test data
 
@@ -26,7 +28,7 @@ Run tests
 uv run pytest
 ```
 
-# Running against live data
+## Running against Snowflake data
 
 Set up credentials
 
@@ -40,8 +42,19 @@ Run the app (optionally specify a minimum transaction date)
 PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 ```
 
-# Adding columns to the model
+## Adding columns to the model
 
 - add the column to `mock-idr.sql` (local representation of the IDR schema)
 - add the column to `bfd.sql` (BFD database definition)
 - add the column to `model.py`, queries will be auto-generated using those fields
+
+## Loading synthetic data
+
+First, ensure you've generated some synthetic data - see directions in `bfd-model/bfd-model-idr/sample-data/generator`
+
+Load it into the IDR mock database and run the pipeline in synthetic data mode.
+
+```sh
+BFD_DB_ENDPOINT=your_db_url BFD_DB_USERNAME=your_user BFD_DB_PASSWORD=your_password uv run load_synthetic.py
+BFD_DB_ENDPOINT=your_db_url BFD_DB_USERNAME=your_user BFD_DB_PASSWORD=your_password uv run pipeline.py synthetic
+```
