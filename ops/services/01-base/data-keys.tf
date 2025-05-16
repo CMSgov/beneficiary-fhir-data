@@ -278,12 +278,6 @@ resource "aws_kms_key" "data" {
 
   policy = data.aws_iam_policy_document.primary_data_key_policy_combined.json
 
-  # Ensure mgmt definition doesn't conflict with identical default_tags with conditional
-  tags = local.env != "mgmt" ? {
-    Environment = local.env
-    stack       = local.env
-  } : {}
-
   lifecycle {
     prevent_destroy = true
   }
@@ -309,11 +303,6 @@ resource "aws_kms_key" "data_alt" {
   deletion_window_in_days            = local.kms_default_deletion_window_days
 
   policy = data.aws_iam_policy_document.alt_data_key_policy_combined.json
-
-  tags = {
-    Environment = local.env
-    stack       = local.env
-  }
 
   lifecycle {
     prevent_destroy = true
