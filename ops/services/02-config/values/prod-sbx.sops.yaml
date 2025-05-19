@@ -117,6 +117,12 @@
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms-slack-alerts
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/high_alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-test
 /bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
 /bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 1
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/cpu: 4096
@@ -769,8 +775,8 @@ sops:
       created_at: "2025-03-31T22:39:00Z"
       enc: AQICAHjP/Aj2Cj3mc/evGqWprczmF5nsbcARIepeXMoZGoJjRgHHMxB3kegUw/6fiO3cdCVZAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJQnqvuN34USrb+OHAgEQgDvtFKzb7rjtFOxzEXKjNz/qXq6fCm/+aP9mc2YdaLXDpAtXStvrMPu57z0WIaq1FHdIIc1tpnPZ5OsteQ==
       aws_profile: ""
-  lastmodified: "2025-05-13T19:26:59Z"
-  mac: ENC[AES256_GCM,data:9Bw8jomYlqkC6NI1r3efqRUNXiGtxkCaX+M47MauOqB0wK1knIztUXlDCIXF46Te/DW48zFkqUvNNRKlBdwVB8DMrZBvPUKfguK4+qb82sxfcwjZWLYHSbPxeCNAxS9QDT50VOjDESzhrZxIYt0KDHcOvFI+8K1PW1bERZaa3TA=,iv:p9JE/96Axq3aDZTlYppXjuQeeL2wsJCBqG0w80atF5M=,tag:RUGehiFmOTywaQtHnOH/fA==,type:str]
+  lastmodified: "2025-05-19T16:08:07Z"
+  mac: ENC[AES256_GCM,data:zZ9n0raO+np8gKVZyKI3oq6nWqDEei53vbnZaVxfammsGen1FzVYpL8xqX6FIG0eH0y0MLg12ZYlcav3+tsVaLYBVZM/NlnP76dA9boUU6wLmX2XXFVKng4hUg6VYuVMyyJYlqK932HjVtpuKSZSAH9CEBiTmNtTN/t5V4tbqdc=,iv:vJgSV7AQIqjYY1DwQxEralVtND9chUw21gAegwjRIOU=,tag:Ym5bcsJBMW+i7qKkZzyuWg==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
