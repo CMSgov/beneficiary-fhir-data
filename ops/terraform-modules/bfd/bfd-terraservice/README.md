@@ -47,11 +47,16 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_availability_zone.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zone) | data source |
+| [aws_availability_zones.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_kms_key.env_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_kms_key.env_config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_security_group.management](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_group.tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_ssm_parameters_by_path.params](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameters_by_path) | data source |
 | [aws_subnet.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_subnets.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
@@ -69,6 +74,7 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_account_id"></a> [account\_id](#output\_account\_id) | The account ID associated with the current caller identity |
+| <a name="output_default_azs"></a> [default\_azs](#output\_default\_azs) | Key-value map of AZ names to their attributes (data.aws\_availability\_zone) of all default AZs that all BFD services exist in. |
 | <a name="output_default_iam_path"></a> [default\_iam\_path](#output\_default\_iam\_path) | Default path for IAM policies and roles. |
 | <a name="output_default_permissions_boundary_arn"></a> [default\_permissions\_boundary\_arn](#output\_default\_permissions\_boundary\_arn) | ARN of the default permissions boundary for IAM Roles. |
 | <a name="output_default_tags"></a> [default\_tags](#output\_default\_tags) | n/a |
@@ -79,10 +85,13 @@ No modules.
 | <a name="output_env_key_arn"></a> [env\_key\_arn](#output\_env\_key\_arn) | ARN of the current environment's general-purpose CMK. |
 | <a name="output_is_ephemeral_env"></a> [is\_ephemeral\_env](#output\_is\_ephemeral\_env) | Returns true when environment is \_ephemeral\_, false when \_established\_ |
 | <a name="output_latest_bfd_release"></a> [latest\_bfd\_release](#output\_latest\_bfd\_release) | This is the latest CMSgov/beneficiary-fhir-data release. Excludes Pre-Releases. |
+| <a name="output_management_sg"></a> [management\_sg](#output\_management\_sg) | The OIT/CMS Cloud provided remote management Security Group (data.aws\_security\_group). |
 | <a name="output_region"></a> [region](#output\_region) | The region name associated with the current caller identity |
 | <a name="output_seed_env"></a> [seed\_env](#output\_seed\_env) | The solution's source environment. For established environments this is equal to the environment's name |
 | <a name="output_service"></a> [service](#output\_service) | The name of the current Terraservice |
 | <a name="output_ssm_config"></a> [ssm\_config](#output\_ssm\_config) | Parameter:Value map that elides repetitive keys, e.g. ssm:/bfd/test/common/vpc\_name is /bfd/comon/vpc\_name |
 | <a name="output_subnets_map"></a> [subnets\_map](#output\_subnets\_map) | Map of subnet layers to the subnets (data.aws\_subnet) in that layer in the current environment's VPC. |
+| <a name="output_tools_sg"></a> [tools\_sg](#output\_tools\_sg) | The OIT/CMS Cloud provided enterprise tools Security Group (data.aws\_security\_group). |
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | The current environment's VPC (data.aws\_vpc). |
+| <a name="output_vpn_sg"></a> [vpn\_sg](#output\_vpn\_sg) | The OIT/CMS Cloud provided VPN Security Group (data.aws\_security\_group). |
 <!-- END_TF_DOCS -->

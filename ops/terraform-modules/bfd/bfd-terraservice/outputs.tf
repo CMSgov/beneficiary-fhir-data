@@ -106,6 +106,12 @@ output "vpc" {
   value       = data.aws_vpc.main
 }
 
+output "default_azs" {
+  description = "Key-value map of AZ names to their attributes (data.aws_availability_zone) of all default AZs that all BFD services exist in."
+  sensitive   = false
+  value       = local.default_azs
+}
+
 output "subnets_map" {
   description = "Map of subnet layers to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
   sensitive   = false
@@ -113,4 +119,22 @@ output "subnets_map" {
     for layer in var.subnet_layers
     : layer => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["Layer"] == layer]
   }
+}
+
+output "tools_sg" {
+  description = "The OIT/CMS Cloud provided enterprise tools Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.tools)
+}
+
+output "vpn_sg" {
+  description = "The OIT/CMS Cloud provided VPN Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.vpn)
+}
+
+output "management_sg" {
+  description = "The OIT/CMS Cloud provided remote management Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.management)
 }
