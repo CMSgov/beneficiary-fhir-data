@@ -95,6 +95,7 @@ class IdrBeneficiaryEntitlement(BaseModel):
     bene_rng_bgn_dt: date
     bene_rng_end_dt: date
     bene_mdcr_entlmt_type_cd: str
+    bene_mdcr_entlmt_stus_cd: str
     idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
     idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
