@@ -20,7 +20,7 @@ Any code changes should be properly commented and accompanied by appropriate uni
 
 ![Workflow diagram for making a contribution to BFD](docs/assets/BFDContributionDiagram.png "Making a Contribution to BFD")
 
-#### FAQ
+#### Contributing FAQ
 Q: What kind of changes don't require an RFC?
 
 A: In general bug fixes and small changes that do not affect behavior or meaning. If you're unsure please quickly ask in the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel or in the Scrum of Scrums meeting. If your PR involves a substantial change, it will be rejected and you will be asked to go through the RFC process.
@@ -41,27 +41,31 @@ If approved by at least two core team members and there are no outstanding reser
 Once accepted the author of the RFC and their team can scope the work within their regular process. Link or reference the RFC in the related JIRA ticket.
 The core team will respond with design feedback, and the author should be prepared to revise it in response.
 
-#### FAQ
+#### RFC FAQ
 Q: What qualifies as a substantive change?
-A: There is no strict definition, however examples of substantive changes are:
 
+A: There is no strict definition, however examples of substantive changes are:
 1. Any change to or addition of an API endpoint (either URL or response) that is not a bug fix.
 2. Changes that affect the ingestion of data into the BFD (the ETL process). 
 3. Changes that significantly alter the structure of the codebase.
 
 Q: What if I'm not sure if I need an RFC?
+
 A: Reach out to the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel or ask in the Scrum of Scrums meeting and see what the BFD team thinks.
 
 
 Q: How should I prepare for an RFC?
+
 A: Bring the idea to the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel or the Scrum of Scrums meeting and talk it over with the core team.
 
 
 Q: What if my RFC is not accepted?
+
 A: It will be closed, but can be reopened if it is updated to address the items that prevented it's acceptance.
 
 
 Q: What if my team doesn’t have the resources to implement our accepted RFC? 
+
 A: Anyone can coordinate with you and the core team to take over the work. 
 
 ### Getting started
@@ -97,7 +101,7 @@ Once all automated checks pass and two reviewers have approved your pull request
 
 If you have any questions feel free to reach out on the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel in CMS slack!
 
-##### FAQ
+##### PR FAQ
 
 Q: What if the core team rejects my PR?
 A: The BFD core team will commit to never rejecting a PR without providing a path forward. The developer who put up the PR should review any feedback, and discuss with their product manager the scope of the work that is now outstanding.
