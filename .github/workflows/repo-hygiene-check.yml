@@ -2,13 +2,13 @@ name: "Repository Hygiene Check"
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
   workflow_dispatch:
 
 jobs:
   check-first-run:
     name: Check For First Run
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     permissions:
@@ -53,7 +53,7 @@ jobs:
     name: Tier 3 Checks
     needs: [check-first-run, resolve-repolinter-json]
     if: needs.check-first-run.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write
@@ -69,3 +69,4 @@ jobs:
           base_branch: 'master'
           pull_request_labels: 'repolinter-initialized, cms-oss, cms-gov'
           token: ${{ secrets.REPOLINTER_AUTO_TOKEN }}
+          
