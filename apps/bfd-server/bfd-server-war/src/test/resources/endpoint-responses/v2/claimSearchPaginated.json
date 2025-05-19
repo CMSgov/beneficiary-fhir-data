@@ -1,243 +1,183 @@
 {
-  "resourceType": "Bundle",
-  "id": "d017cb91-6836-4947-9fa4-13474c3bdb6f",
-  "meta": {
-    "lastUpdated": "2021-12-09T00:19:25.209+00:00"
+  "resourceType" : "Bundle",
+  "id" : "IGNORED_FIELD",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
   },
-  "type": "searchset",
-  "link": [
-    {
-      "relation": "first",
-      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
-    },
-    {
-      "relation": "previous",
-      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
-    },
-    {
-      "relation": "last",
-      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
-    },
-    {
-      "relation": "self",
-      "url": "https://localhost:6500/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
-    }
-  ],
-  "total": 2,
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Claim",
-        "id": "m-654323",
-        "meta": {
-          "lastUpdated": "1970-01-01T00:00:04.000+00:00"
-        },
-        "contained": [
-          {
-            "resourceType": "Patient",
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-                "valueCode": "248153007"
-              }
-            ],
-            "id": "patient",
-            "identifier": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                      "code": "MC",
-                      "display": "Patient's Medicare Number"
-                    }
-                  ]
-                },
-                "system": "http://hl7.org/fhir/sid/us-mbi",
-                "value": "123456MBI"
-              }
-            ],
-            "name": [
-              {
-                "family": "SMITH",
-                "given": [
-                  "J.",
-                  "D."
-                ],
-                "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])"
-              }
-            ],
-            "gender": "male"
+  "type" : "searchset",
+  "total" : 2,
+  "link" : [ {
+    "relation" : "first",
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Claim?service-date=ge1970-07-10&service-date=le1970-07-18&startIndex=0&_count=5&mbi=a7f8e93f09"
+  }, {
+    "relation" : "previous",
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Claim?service-date=ge1970-07-10&service-date=le1970-07-18&startIndex=0&_count=5&mbi=a7f8e93f09"
+  }, {
+    "relation" : "last",
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Claim?service-date=ge1970-07-10&service-date=le1970-07-18&startIndex=0&_count=5&mbi=a7f8e93f09"
+  }, {
+    "relation" : "self",
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Claim/?_count=5&mbi=a7f8e93f09&service-date=ge1970-07-10&service-date=le1970-07-18&startIndex=1"
+  } ],
+  "entry" : [ {
+    "resource" : {
+      "resourceType" : "Claim",
+      "id" : "m-654323",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "contained" : [ {
+        "resourceType" : "Patient",
+        "id" : "patient",
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+          "valueCode" : "248153007"
+        } ],
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "MC",
+              "display" : "Patient's Medicare Number"
+            } ]
           },
-          {
-            "resourceType": "Organization",
-            "id": "provider-org",
-            "extension": [
-              {
-                "url": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
-                "valueCoding": {
-                  "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
-                  "code": "AB"
-                }
-              },
-              {
-                "url": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
-                "valueCoding": {
-                  "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
-                  "code": "BA"
-                }
-              }
-            ],
-            "identifier": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                      "code": "npi",
-                      "display": "National Provider Identifier"
-                    }
-                  ]
-                },
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "9876789102"
-              }
-            ]
+          "system" : "http://hl7.org/fhir/sid/us-mbi",
+          "value" : "123456MBI"
+        } ],
+        "name" : [ {
+          "text" : "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+          "family" : "SMITH",
+          "given" : [ "J.", "D." ]
+        } ],
+        "gender" : "male"
+      }, {
+        "resourceType" : "Organization",
+        "id" : "provider-org",
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
+            "code" : "AB"
           }
-        ],
-        "extension": [
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-type",
-            "valueCoding": {
-              "system": "https://bluebutton.cms.gov/resources/variables/mcs/claim-type",
-              "code": "R"
-            }
+        }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
+            "code" : "BA"
           }
-        ],
-        "identifier": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                  "code": "uc",
-                  "display": "Unique Claim ID"
-                }
-              ]
-            },
-            "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
-            "value": "654323"
-          }
-        ],
-        "status": "active",
-        "type": {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
-              "code": "professional",
-              "display": "Professional"
-            }
-          ]
-        },
-        "use": "claim",
-        "patient": {
-          "reference": "#patient"
-        },
-        "billablePeriod": {
-          "start": "1970-07-18",
-          "end": "1970-07-20"
-        },
-        "created": "2022-01-27T18:26:54+00:00",
-        "provider": {
-          "reference": "#provider-org"
-        },
-        "priority": {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/processpriority",
-              "code": "normal",
-              "display": "Normal"
-            }
-          ]
-        },
-        "diagnosis": [
-          {
-            "sequence": 1,
-            "diagnosisCodeableConcept": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/sid/icd-10-cm",
-                  "code": "HF3IJIF"
-                }
-              ]
-            }
+        } ],
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+              "code" : "npi",
+              "display" : "National Provider Identifier"
+            } ]
           },
-          {
-            "sequence": 2,
-            "diagnosisCodeableConcept": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/sid/icd-9-cm",
-                  "code": "HF3IJIG"
-                }
-              ]
-            }
-          }
-        ],
-        "item": [
-          {
-            "sequence": 1,
-            "productOrService": {
-              "coding": [
-                {
-                  "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-                  "code": "FDSAE"
-                }
-              ]
-            },
-            "modifier": [
-              {
-                "coding": [
-                  {
-                    "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-                    "version": "1",
-                    "code": "A"
-                  }
-                ]
-              }
-            ],
-            "servicedPeriod": {
-              "end": "1970-07-28"
-            }
-          },
-          {
-            "sequence": 2,
-            "productOrService": {
-              "coding": [
-                {
-                  "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-                  "code": "FDAAA"
-                }
-              ]
-            },
-            "modifier": [
-              {
-                "coding": [
-                  {
-                    "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-                    "version": "2",
-                    "code": "B"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "total": {
-          "value": 23.0,
-          "currency": "USD"
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "value" : "9876789102"
+        } ]
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/mcs/claim-type",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/mcs/claim-type",
+          "code" : "R"
         }
+      } ],
+      "identifier" : [ {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "uc",
+            "display" : "Unique Claim ID"
+          } ]
+        },
+        "system" : "https://bluebutton.cms.gov/resources/variables/mcs/icn",
+        "value" : "654323"
+      } ],
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
+          "code" : "professional",
+          "display" : "Professional"
+        } ]
+      },
+      "use" : "claim",
+      "patient" : {
+        "reference" : "#patient"
+      },
+      "billablePeriod" : {
+        "start" : "1970-07-18",
+        "end" : "1970-07-20"
+      },
+      "created" : "IGNORED_FIELD",
+      "provider" : {
+        "reference" : "#provider-org"
+      },
+      "priority" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/processpriority",
+          "code" : "normal",
+          "display" : "Normal"
+        } ]
+      },
+      "diagnosis" : [ {
+        "sequence" : 1,
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+            "code" : "HF3IJIF"
+          } ]
+        }
+      }, {
+        "sequence" : 2,
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+            "code" : "HF3IJIG"
+          } ]
+        }
+      } ],
+      "item" : [ {
+        "sequence" : 1,
+        "productOrService" : {
+          "coding" : [ {
+            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+            "code" : "FDSAE"
+          } ]
+        },
+        "modifier" : [ {
+          "coding" : [ {
+            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+            "version" : "1",
+            "code" : "A"
+          } ]
+        } ],
+        "servicedPeriod" : {
+          "end" : "1970-07-28"
+        }
+      }, {
+        "sequence" : 2,
+        "productOrService" : {
+          "coding" : [ {
+            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+            "code" : "FDAAA"
+          } ]
+        },
+        "modifier" : [ {
+          "coding" : [ {
+            "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+            "version" : "2",
+            "code" : "B"
+          } ]
+        } ]
+      } ],
+      "total" : {
+        "value" : 23.0,
+        "currency" : "USD"
       }
     }
-  ]
+  } ]
 }

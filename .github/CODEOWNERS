@@ -2,10 +2,10 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-* @mjburling @dondevun @aschey-forpeople @malessi
+* @mjburling @dondevun @aschey-forpeople @malessi @alex-dzeda
 
 # BB2 Insights
 /insights/terraform/projects/bb2/* @jimmyfagan @loganbertram
 
 # Administration
-/.github/CODEOWNERS @mjburling @dondevun
+/.github/CODEOWNERS @mjburling @dondevun @aschey-forpeople
