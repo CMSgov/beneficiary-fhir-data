@@ -1,5 +1,4 @@
-"""Base class for Locust tests run against the FHIR endpoints.
-"""
+"""Base class for Locust tests run against the FHIR endpoints."""
 
 import json
 import logging
@@ -39,7 +38,7 @@ def _(environment: Environment, **kwargs) -> None:
     validation.setup_failsafe_event(environment)
 
     # Remove trailing slashes as Locust does not do so itself
-    host_no_trailing_slash = re.sub("[\\/]*$", "", environment.host)
+    host_no_trailing_slash = re.sub("[\\/]*$", "", environment.host or "")
     environment.host = host_no_trailing_slash
 
 
@@ -159,7 +158,13 @@ class BFDUserBase(FastHttpUser):
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
-        context.load_cert_chain(certfile=self.client_cert)
+        try:
+            context.load_cert_chain(certfile=self.client_cert)
+        except Exception as e:
+            logging.error(
+                "Error loading certificate. Ensure the certificate is formatted correctly. %s", e
+            )
+            raise e
         if self.server_public_key:
             context.load_verify_locations(cafile=self.server_public_key)
         return context
@@ -178,8 +183,8 @@ class BFDUserBase(FastHttpUser):
         with self.client.get(
             url,
             headers={**safe_headers, "Cache-Control": "no-store, no-cache"},
-            name=name,  # type: ignore -- known Locust argument
-            catch_response=True,  # type: ignore -- known Locust argument
+            name=name,
+            catch_response=True,
         ) as response:
             if response.status_code != 200:
                 if isinstance(response, ResponseContextManager):
@@ -198,8 +203,8 @@ class BFDUserBase(FastHttpUser):
     def post_by_url(
         self,
         url: str,
-        headers: Optional[Mapping[str, str]] = None,
-        body: Optional[Mapping[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
+        body: Optional[dict[str, str]] = None,
         name: str = "",
     ):
         """Send one POST request and parse the response for pagination.
@@ -217,8 +222,8 @@ class BFDUserBase(FastHttpUser):
             url,
             headers={**safe_headers, "Cache-Control": "no-store, no-cache"},
             data=safe_body,
-            name=name,  # type: ignore -- known Locust argument
-            catch_response=True,  # type: ignore -- known Locust argument
+            name=name,
+            catch_response=True,
         ) as response:
             if response.status_code != 200:
                 if isinstance(response, ResponseContextManager):
@@ -237,8 +242,8 @@ class BFDUserBase(FastHttpUser):
     def run_task(
         self,
         url_callback: Callable,
-        headers: Optional[Mapping[str, str]] = None,
-        body: Optional[Mapping[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
+        body: Optional[dict[str, str]] = None,
         name: str = "",
     ):
         """Figure out which URL we should query next and query the server.
@@ -293,8 +298,8 @@ class BFDUserBase(FastHttpUser):
         self,
         base_path: str,
         params: Optional[Mapping[str, Union[str, int, List[Any]]]] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        body: Optional[Mapping[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
+        body: Optional[dict[str, str]] = None,
         name: str = "",
     ):
         """Run a task using a base path and parameters"""
