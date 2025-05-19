@@ -18,21 +18,21 @@ This aligns with the overarching mission to enable the CMS Enterprise to drive i
 The high-level purpose and location of each piece of the project is listed below.
 
 * [apps](apps) - contains the source code for each of the deployed BFD applications
- * [bfd-data-fda](apps/bfd-data-fda) - downloads FDA Drug code names into a resource used during BFD drug code name lookups
- * [bfd-data-npi](apps/bfd-data-npi) - downloads CMS NPI (National Provider Identification) names into a resource used during BFD NPI lookups
- * [bfd-db-migrator](apps/bfd-db-migrator) - application for safely applying schema updates and data migrations to the BFD database
- * [bfd-model](apps/bfd-model) - contains data models used throughout the BFD project
- * [bfd-pipeline](apps/bfd-pipeline) - application for loading claim data from the provider into the BFD database
- * [bfd-server](apps/bfd-server) - application for serving the BFD database data in FHIR format to users via the BFD API
- * [bfd-shared-test-utils](apps/bfd-shared-test-utils) - utilities shared across BFD projects used in testing
- * [bfd-shared-utils](apps/bfd-shared-utils) - utilities shared across BFD projects used in the application code
- * [utils](apps/utils) - non-application scripts used for testing, development, and database management
+    * [bfd-data-fda](apps/bfd-data-fda) - downloads FDA Drug code names into a resource used during BFD drug code name lookups
+    * [bfd-data-npi](apps/bfd-data-npi) - downloads CMS NPI (National Provider Identification) names into a resource used during BFD NPI lookups
+    * [bfd-db-migrator](apps/bfd-db-migrator) - application for safely applying schema updates and data migrations to the BFD database
+    * [bfd-model](apps/bfd-model) - contains data models used throughout the BFD project
+    * [bfd-pipeline](apps/bfd-pipeline) - application for loading claim data from the provider into the BFD database
+    * [bfd-server](apps/bfd-server) - application for serving the BFD database data in FHIR format to users via the BFD API
+    * [bfd-shared-test-utils](apps/bfd-shared-test-utils) - utilities shared across BFD projects used in testing
+    * [bfd-shared-utils](apps/bfd-shared-utils) - utilities shared across BFD projects used in the application code
+    * [utils](apps/utils) - non-application scripts used for testing, development, and database management
 * [insights](insights) - contains documentation and resources for maintaining BFD Insights, a platform using AWS Cloudwatch to provide analytics and metrics for BFD applications
 * [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
 * [rfcs](docs/rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
 
 ## Contributing
-Many useful guides, documentation items, and runbooks can be found on the [BFD Wiki (https://github.com/CMSgov/beneficiary-fhir-data/wiki), hosted in this repo.
+Many useful guides, documentation items, and runbooks can be found on the [BFD Wiki](https://github.com/CMSgov/beneficiary-fhir-data/wiki), hosted in this repo.
 
 This includes information about [making requests to bfd](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Making-Requests-to-BFD), [synthetic data](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide), and more.
 
@@ -62,7 +62,7 @@ For more information about our Security, Vulnerability, and Responsible Disclosu
 
 A Software Bill of Materials (SBOM) is a formal record containing the details and supply chain relationships of various components used in building software.
 
-In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), a SBOM for this repository is provided here: https://github.com/{{ cookiecutter.project_org }}/{{ cookiecutter.project_repo_name }}/network/dependencies.
+In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), a SBOM for this repository is provided here: <https://github.com/CMSgov/beneficiary-fhir-data/network/dependencies>.
 
 For more information and resources about SBOMs, visit: https://www.cisa.gov/sbom.
 
