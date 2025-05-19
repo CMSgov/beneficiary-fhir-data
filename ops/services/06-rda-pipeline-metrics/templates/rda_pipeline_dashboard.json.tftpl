@@ -1,0 +1,158 @@
+{
+    "widgets": [
+        {
+            "height": 7,
+            "width": 9,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "MAX([fissMaxSeq-fissLastSeq, TIME_SERIES(0)])", "label": "FISS Sequence Number Latency", "id": "fissDiff", "region": "${region}" } ],
+                    [ "${namespace}", "FissClaimRdaSink.lastSeq.value", { "label": "FissClaimRdaSink.lastSeq.value", "id": "fissLastSeq", "visible": false, "region": "${region}" } ],
+                    [ ".", "FissClaimRdaSink.maxSeq.value", { "label": "FissClaimRdaSink.maxSeq.value", "id": "fissMaxSeq", "visible": false, "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false,
+                        "min": 0
+                    }
+                },
+                "title": "FISS Sequence Number Latency",
+                "liveData": true
+            }
+        },
+        {
+            "height": 7,
+            "width": 8,
+            "y": 0,
+            "x": 9,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "MAX([mcsMaxSeq-mcsLastSeq, TIME_SERIES(0)])", "label": "MCS Sequence Number Latency", "id": "mcsDiff", "region": "${region}" } ],
+                    [ "${namespace}", "McsClaimRdaSink.lastSeq.value", { "label": "McsClaimRdaSink.lastSeq.value", "id": "mcsLastSeq", "visible": false, "region": "${region}" } ],
+                    [ ".", "McsClaimRdaSink.maxSeq.value", { "label": "McsClaimRdaSink.maxSeq.value", "id": "mcsMaxSeq", "visible": false, "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false,
+                        "min": 0
+                    }
+                },
+                "title": "MCS Sequence Number Latency",
+                "liveData": true
+            }
+        },
+        {
+            "height": 7,
+            "width": 8,
+            "y": 7,
+            "x": 9,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "MAX([DIFF(mcsLastSeq), TIME_SERIES(0)])", "label": "MCS Throughput", "id": "mcsDiff", "region": "${region}", "period": 300 } ],
+                    [ "${namespace}", "McsClaimRdaSink.lastSeq.value", { "label": "McsClaimRdaSink.lastSeq.value", "id": "mcsLastSeq", "visible": false, "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false
+                    }
+                },
+                "title": "MCS Throughput (5 minute average)",
+                "liveData": true
+            }
+        },
+        {
+            "height": 7,
+            "width": 9,
+            "y": 7,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "MAX([DIFF(fissLastSeq), TIME_SERIES(0)])", "label": "FISS Throughput", "id": "fissDiff", "region": "${region}", "period": 300 } ],
+                    [ "${namespace}", "FissClaimRdaSink.lastSeq.value", { "label": "FissClaimRdaSink.lastSeq.value", "id": "fissLastSeq", "visible": false, "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false
+                    }
+                },
+                "title": "FISS Throughput (5 minute average)",
+                "liveData": true
+            }
+        },
+        {
+            "height": 7,
+            "width": 8,
+            "y": 14,
+            "x": 9,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "McsClaimRdaSink.lastSeq.value", { "label": "McsClaimRdaSink.lastSeq.value", "id": "mcsLastSeq", "region": "${region}" } ],
+                    [ ".", "McsClaimRdaSink.maxSeq.value", { "label": "McsClaimRdaSink.maxSeq.value", "id": "mcsMaxSeq", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 300,
+                "title": "MCS Current Sequence Numbers",
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "height": 7,
+            "width": 9,
+            "y": 14,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "FissClaimRdaSink.lastSeq.value", { "label": "FissClaimRdaSink.lastSeq.value", "id": "fissLastSeq", "region": "${region}" } ],
+                    [ ".", "FissClaimRdaSink.maxSeq.value", { "id": "m1", "region": "${region}", "label": "FissClaimRdaSink.maxSeq.value" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 300,
+                "title": "FISS Current Sequence Numbers",
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "showUnits": false
+                    }
+                }
+            }
+        }
+    ]
+}
