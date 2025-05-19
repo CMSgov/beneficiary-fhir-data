@@ -5,7 +5,16 @@ Roles to include, but not limited to: Project Owner, Technical Lead, Developers/
 
 | Role | Github Handle | Affiliation |
 | :----- | :------ | :------------- |
-| Maintaner | sb-benohe | CMS/DASG |
+| Technical Lead | mjburling | CMS/DASG  |
+| Technical Lead | aschey-forpeople | CMS/DASG/Contractor  |
+| Developers/Contributors | malessi | CMS/DASG/Contractor  |
+| Developers/Contributors | MahiFentaye | CMS/DASG/Contractor |
+| Developers/Contributors | TimRotenSB | CMS/DASG/Contractor |
+| Developers/Contributors | jrpbc | CMS/DASG/Contractor |
+| FHIR SME | alex-dzeda | CMS/DASG/Contractor |
+| Security Team | sb-benohe | CMS/DASG/Contractor |
+
+For past contributions see [Contributors](https://github.com/CMSgov/beneficiary-fhir-data/graphs/contributors).
 
 ### Principles
 These principles guide our data, product, and process decisions, architecture, and approach.
