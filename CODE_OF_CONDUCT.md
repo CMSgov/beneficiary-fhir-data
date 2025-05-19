@@ -22,7 +22,7 @@ This Code of Conduct summarizes federal anti-harassment law and General Services
 
 We expect everyone on the TTS team to exhibit these behaviors and abide by applicable federal laws and GSA policies. In addition, we expect everyone within TTS spaces to exhibit these behaviors and refrain from behavior prohibited by anti-harassment laws and GSA policies on harassment. These spaces include:
 
-- TTS&#39;s physical offices,
+- TTS's physical offices,
 - TTS events and meetings,
 - All of our online forums and virtual collaboration tools, including:
   - Office chat rooms, like Slack
