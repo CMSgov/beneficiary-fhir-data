@@ -94,6 +94,7 @@ CREATE TABLE idr.beneficiary_entitlement (
     bene_rng_end_dt DATE NOT NULL,
     bene_mdcr_entlmt_type_cd VARCHAR(1),
     bene_mdcr_entlmt_stus_cd VARCHAR(1),
+    bene_mdcr_enrlmt_rsn_cd VARCHAR(1),
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,

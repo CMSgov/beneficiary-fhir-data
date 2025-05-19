@@ -79,6 +79,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt (
     bene_rng_end_dt DATE NOT NULL,
     bene_mdcr_entlmt_type_cd VARCHAR(1),
     bene_mdcr_entlmt_stus_cd VARCHAR(1),
+    bene_mdcr_enrlmt_rsn_cd VARCHAR(1),
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
@@ -274,6 +275,7 @@ INSERT INTO cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt (
     bene_rng_end_dt,
     bene_mdcr_entlmt_type_cd,
     bene_mdcr_entlmt_stus_cd,
+    bene_mdcr_enrlmt_rsn_cd,
     idr_trans_efctv_ts,
     idr_trans_obslt_ts,
     idr_updt_ts
@@ -284,6 +286,7 @@ VALUES(
     '2024-12-31',--mdcr_stus_end_dt
     'B',--bene_mdcr_entlmt_type_cd
     'Y',--bene_mdcr_entlmt_stus_cd
+    'I',--bene_mdcr_enrlmt_rsn_cd,
     NOW(),-- idr_trans_efctv_ts,
     '9999-12-31',-- idr_trans_obslt_ts
     NULL-- idr_updt_ts
