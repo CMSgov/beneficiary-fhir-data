@@ -3,23 +3,27 @@ requires-python = ">=3.13"
 name = "locust-tests"
 version = "1.0.0"
 dependencies = [
-  "locust>=2.33.0",
-  "psycopg2-binary>=2.9.7",
-  "psycogreen>=1.0.2",
-  "boto3>=1.37.7",
-  "flask>=3.1.0",
-  "flask-cors>=5.0.1",
+  "locust>=2.37.4",
+  "boto3>=1.38.19",
+  "flask>=3.1.1",
+  "flask-cors>=6.0.0",
   "requests>=2.32.2",
   "gevent>=24.11.1",
-  "urllib3>=2.3.0",
+  "urllib3>=2.4.0",
   "werkzeug>=3.0.6",
   "jinja2>=3.1.6",
   "idna>=3.7",
-  "certifi>=2025.1.31",
+  "certifi>=2025.4.26",
+  "psycopg[binary,pool]>=3.2.9",
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.9.9", "uv>=0.6.4"]
+dev = [
+  "ruff>=0.11.10",
+  "types-boto3[essential]>=1.38.19",
+  "types-gevent>=25.4.0.20250516",
+  "uv>=0.7.5",
+]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
@@ -72,7 +76,7 @@ line-length = 100
 [tool.locust]
 # Specify locust test parameters here or on the command line
 # See https://docs.locust.io/en/stable/configuration.html#pyproject-toml
-headless = true
+# headless = true
 # users = <# users>
 # spawn-rate = <# users to spawn>
 
