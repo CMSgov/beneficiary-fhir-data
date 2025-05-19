@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Utility module for executing database queries.
-"""
+"""Utility module for executing database queries."""
 
+import logging
 from typing import Dict, List, Optional
 
-import psycogreen.gevent
 
-# We need to patch psycopg2 to support green threads
-psycogreen.gevent.patch_psycopg()
-
-import psycopg2
+import psycopg
+import os
 
 LIMIT = 100000
 """Global limit on the number of records to return"""
@@ -25,13 +22,19 @@ def _execute(uri: str, query: str) -> List:
     """
     Execute a PSQL select statement and return its results
     """
-
+    if uri == "":
+        uri = f"user={os.environ["PGUSER"]} password={os.environ["PGPASSWORD"]} host={os.environ["PGHOST"]} dbname={os.environ["PGDATABASE"]}"
     conn = None
+    results = []
     try:
-        with psycopg2.connect(uri) as conn:
+        with psycopg.connect(uri) as conn:
             with conn.cursor() as cursor:
-                cursor.execute(query)
+                # There's additional type validation here to prevent SQL injections,
+                # but this unfortunately doesn't support templated strings like we're using here
+                cursor.execute(query)  # type: ignore
                 results = cursor.fetchall()
+    except Exception as ex:
+        logging.error("Error creating database connection", ex)
     finally:
         if conn:
             conn.close()
@@ -53,7 +56,7 @@ def _get_regression_query(select_query: str) -> str:
     )
 
 
-def get_regression_bene_ids(uri: str) -> List[str]:
+def get_regression_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
     """Retrieves a list of beneficiary IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order
 
@@ -67,7 +70,7 @@ def get_regression_bene_ids(uri: str) -> List[str]:
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_regression_hashed_mbis(uri: str) -> List[str]:
+def get_regression_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
     """Retrieves a list of hashed MBIs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order
 
@@ -81,7 +84,7 @@ def get_regression_hashed_mbis(uri: str) -> List[str]:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_regression_mbis(uri: str) -> List[str]:
+def get_regression_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
     """Retrieves a list of MBIs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order
 
@@ -95,7 +98,9 @@ def get_regression_mbis(uri: str) -> List[str]:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
+def get_regression_contract_ids(
+    uri: str, table_sample_pct: Optional[float] = None
+) -> List[Dict[str, str]]:
     """Retrieves a list of contract IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order, and
     any empty values are excluded
@@ -122,7 +127,7 @@ def get_regression_contract_ids(uri: str) -> List[Dict[str, str]]:
     ]
 
 
-def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
+def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
     """Returns a list of MBI hashes within the set of static, synthetic PAC data
 
     Args:
@@ -137,7 +142,7 @@ def get_regression_pac_hashed_mbis(uri: str) -> List[str]:
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
-def get_regression_pac_mbis(uri: str) -> List[str]:
+def get_regression_pac_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
     """Returns a list of MBI within the set of static, synthetic PAC data
 
     Args:
@@ -245,7 +250,6 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
     ]
 
     return [contract for contract in unfiltered_contracts if contract["id"]]
-
 
 
 def get_pac_mbis(uri: str) -> List:

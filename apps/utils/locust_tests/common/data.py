@@ -3,22 +3,11 @@
 import datetime
 import logging
 from argparse import Namespace
-from typing import Any, Collection, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Collection, Optional, Protocol
 
 
-@runtime_checkable
-class NonSamplingLoadFunction(Protocol):
-    def __call__(self, uri: str) -> Collection[Any]:
-        ...
-
-
-@runtime_checkable
-class SamplingLoadFunction(Protocol):
-    def __call__(self, uri: str, table_sample_pct: Optional[float] = None) -> Collection[Any]:
-        ...
-
-
-LoadFunction = Union[NonSamplingLoadFunction, SamplingLoadFunction]
+class LoadFunction(Protocol):
+    def __call__(self, uri: str, table_sample_pct: Optional[float] = None) -> Collection[Any]: ...
 
 
 def load_from_parsed_opts(
@@ -44,9 +33,6 @@ def load_from_parsed_opts(
     Returns:
         Collection[Any]: A Collection of data returned by the load function
     """
-    if not parsed_opts.database_constr:
-        logging.getLogger().error('"database_constr" was not defined in parsed options')
-        return []
 
     database_constr = str(parsed_opts.database_constr)
     table_sample_percent = float(parsed_opts.table_sample_percent)
@@ -70,7 +56,7 @@ def load_from_uri(
     logger = logging.getLogger()
 
     logger.info("Collecting %s test data...", data_type_name)
-    if use_table_sample and isinstance(load_function, SamplingLoadFunction):
+    if use_table_sample:
         logger.info(f"Table Sampling at: {table_sample_percent}")
         results = load_function(uri=database_constr, table_sample_pct=table_sample_percent)
     else:
