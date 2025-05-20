@@ -29,8 +29,7 @@ def _execute(uri: str, query: str) -> List:
 
 
 def get_regression_bene_sks(uri: str, table_sample_pct=None) -> List[str]:
-    """Retrieves a list of beneficiary IDs within the range of 20,000 contiguous synthetic
-    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+    """Retrieves a random list of beneficiary IDs
 
     Args:
         uri (str): Database URI
@@ -38,13 +37,12 @@ def get_regression_bene_sks(uri: str, table_sample_pct=None) -> List[str]:
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
-    bene_query = "SELECT bene_sk FROM idr.beneficiary limit 10"
+    bene_query = "SELECT bene_sk FROM idr.beneficiary limit 1000"
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
 def get_regression_bene_mbis(uri: str, table_sample_pct=None) -> List[str]:
-    """Retrieves a list of beneficiary IDs within the range of 20,000 contiguous synthetic
-    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+    """Retrieves a random list list of MBIs
 
     Args:
         uri (str): Database URI
