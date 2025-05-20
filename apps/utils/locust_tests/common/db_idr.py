@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, LiteralString
 import os
 
 import psycopg
 
 
-def _execute(uri: str, query: str) -> List:
+def _execute(uri: str, query: LiteralString) -> List:
     """
     Execute a PSQL select statement and return its results
     """
@@ -15,9 +15,8 @@ def _execute(uri: str, query: str) -> List:
     try:
         with psycopg.connect(uri) as conn:
             with conn.cursor() as cursor:
-                # There's additional type validation here to prevent SQL injections,
-                # but this unfortunately doesn't support templated strings like we're using here
-                cursor.execute(query)  # type: ignore
+
+                cursor.execute(query)
                 results = cursor.fetchall()
     except Exception as ex:
         print("Error creating database connection", ex)
@@ -50,5 +49,5 @@ def get_regression_bene_mbis(uri: str, table_sample_pct=None) -> List[str]:
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
-    bene_query = "SELECT bene_mbi_id FROM idr.beneficiary limit 10"
+    bene_query = "SELECT bene_mbi_id FROM idr.beneficiary limit 1000"
     return [str(r[0]) for r in _execute(uri, bene_query)]

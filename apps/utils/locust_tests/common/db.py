@@ -29,8 +29,9 @@ def _execute(uri: str, query: str) -> List:
     try:
         with psycopg.connect(uri) as conn:
             with conn.cursor() as cursor:
-                # There's additional type validation here to prevent SQL injections,
-                # but this unfortunately doesn't support templated strings like we're using here
+                # The execute method here uses additional type validation to prevent SQL injections,
+                # but this unfortunately doesn't support templated strings like we're using here,
+                # so we have to bypass the type check
                 cursor.execute(query)  # type: ignore
                 results = cursor.fetchall()
     except Exception as ex:
