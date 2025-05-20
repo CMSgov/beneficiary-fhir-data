@@ -2,7 +2,7 @@
 
 set -e
 
-image=postgres:16.4
+image=postgres:16.6
 max_connections=500
 docker pull $image
 
