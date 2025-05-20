@@ -1,7 +1,10 @@
+import logging
 from typing import List, LiteralString
 import os
 
 import psycopg
+
+logger = logging.getLogger()
 
 
 def _execute(uri: str, query: LiteralString) -> List:
@@ -19,7 +22,7 @@ def _execute(uri: str, query: LiteralString) -> List:
                 cursor.execute(query)
                 results = cursor.fetchall()
     except Exception as ex:
-        print("Error creating database connection", ex)
+        logger.error("Error creating database connection: %s", ex)
     finally:
         if conn:
             conn.close()

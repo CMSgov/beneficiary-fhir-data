@@ -161,7 +161,7 @@ class BFDUserBase(FastHttpUser):
         try:
             context.load_cert_chain(certfile=self.client_cert)
         except Exception as e:
-            logging.error(
+            self.logger.error(
                 "Error loading certificate. Ensure the certificate is formatted correctly. %s", e
             )
             raise e

@@ -17,6 +17,8 @@ REGRESSION_BENE_RANGE_END = -10000000000001
 """End of the beneficiary range used by the Regression Suite in each environment for
 consistent data"""
 
+logger = logging.getLogger()
+
 
 def _execute(uri: str, query: str) -> List:
     """
@@ -35,7 +37,7 @@ def _execute(uri: str, query: str) -> List:
                 cursor.execute(query)  # type: ignore
                 results = cursor.fetchall()
     except Exception as ex:
-        logging.error("Error creating database connection", ex)
+        logger.error("Error creating database connection: %s", ex)
     finally:
         if conn:
             conn.close()
