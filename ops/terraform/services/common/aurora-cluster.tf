@@ -37,7 +37,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   allow_major_version_upgrade = false
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
-  engine_version              = "16.4"
+  engine_version              = "16.6"
   apply_immediately           = local.rds_apply_immediately
 
   backtrack_window                    = 0

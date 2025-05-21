@@ -34,10 +34,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * This set of tests compare the application's current responses to a set of previously-recorded
@@ -133,32 +130,6 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
             (Supplier<String>) EndpointJsonResponseComparatorE2E::eobReadOutpatient),
         arguments("eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorE2E::eobReadPde),
         arguments("eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorE2E::eobReadSnf));
-  }
-
-  /**
-   * Generates the "golden" files, i.e. the approved responses to compare to. Purpose of this
-   * testing is to perform regression testing against the "Golden Beneficiary Data" at a specific
-   * point in time. It is important to note that this testing focuses on checking for regressions
-   * against the data at that particular moment, and not necessarily against data artifacts. To run
-   * this test, execute the following Maven Command: mvn clean install -DgenerateTestData=true.
-   *
-   * @param endpointId the endpoint id
-   * @param endpointOperation the endpoint operation
-   */
-  @EnabledIfSystemProperty(named = "generateTestData", matches = "true")
-  @ParameterizedTest(name = "endpointId = {0}")
-  @MethodSource("data")
-  public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
-    Path approvedResponseDir = getExpectedJsonResponseDir();
-
-    // Call the server endpoint and save its result out to a file corresponding to
-    // the endpoint Id.
-    String endpointResponse = endpointOperation.get();
-    String jsonResponse = replaceIgnoredFieldsWithFillerText(endpointId, endpointResponse);
-
-    ServerTestUtils.writeFile(
-        jsonResponse,
-        ServerTestUtils.generatePathForEndpointJsonFile(approvedResponseDir, endpointId));
   }
 
   /**

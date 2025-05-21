@@ -7,9 +7,9 @@ copy:
   - /bfd/${env}/common/nonsensitive/kms_key_alias
   - /bfd/${env}/common/nonsensitive/kms_config_key_alias
   - /bfd/${env}/common/nonsensitive/management_security_group
-  - /bfd/${env}/common/nonsensitive/rds_instance_class
   - /bfd/${env}/common/nonsensitive/vpc_name
   - /bfd/${env}/common/nonsensitive/vpn_security_group
+  - /bfd/${env}/database/nonsensitive/rds_instance_class
   - /bfd/${env}/migrator/sensitive/db/password
   - /bfd/${env}/migrator/sensitive/db/username
   - /bfd/${env}/ccw-pipeline/sensitive/db/password
@@ -48,14 +48,15 @@ values:
   /bfd/${env}/common/nonsensitive/env_name_std: ${env}
   /bfd/${env}/common/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
   /bfd/${env}/common/nonsensitive/new_relic_metric_path: /metric/v1
-  /bfd/${env}/common/nonsensitive/rds_backup_retention_period: 1
-  /bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
-  /bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: true
-  /bfd/${env}/common/nonsensitive/rds_min_reader_nodes: 0 # Only enable writer node by default
-  /bfd/${env}/common/nonsensitive/rds_max_reader_nodes: 0 # Only enable writer node by default
-  /bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
-  /bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
-  /bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
+  /bfd/${env}/database/nonsensitive/rds_backup_retention_period: 1
+  /bfd/${env}/database/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+  /bfd/${env}/database/nonsensitive/rds_security_group: bfd-${env}-aurora-cluster
+  /bfd/${env}/database/nonsensitive/rds_iam_database_authentication_enabled: "true"
+  /bfd/${env}/database/nonsensitive/scaling/min_nodes: 0 # Only enable writer node by default
+  /bfd/${env}/database/nonsensitive/scaling/max_nodes: 0 # Only enable writer node by default
+  /bfd/${env}/database/nonsensitive/scaling/cpu_target: 50
+  /bfd/${env}/database/nonsensitive/scaling/cooldown/scale_in: 300
+  /bfd/${env}/database/nonsensitive/scaling/cooldown/scale_out: 300
   /bfd/${env}/migrator/nonsensitive/ecs/resources/cpu: 2048
   /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com

@@ -1,294 +1,224 @@
 {
-  "resourceType": "Bundle",
-  "id": "1856fb88-119e-46b6-a775-ab78ae0f61e9",
-  "meta": {
-    "lastUpdated": "1970-01-01T00:00:01.000+00:00"
+  "resourceType" : "Bundle",
+  "id" : "IGNORED_FIELD",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
   },
-  "type": "searchset",
-  "link": [
-    {
-      "relation": "self",
-      "url": "https://localhost:6500/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+  "type" : "searchset",
+  "total" : 2,
+  "link" : [ {
+    "relation" : "self",
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ClaimResponse/?mbi=3816a4c752&service-date=gt1970-07-18&service-date=lt1970-07-25"
+  } ],
+  "entry" : [ {
+    "resource" : {
+      "resourceType" : "ClaimResponse",
+      "id" : "f-123456",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "contained" : [ {
+        "resourceType" : "Patient",
+        "id" : "patient",
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+          "valueCode" : "248153007"
+        } ],
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "MC",
+              "display" : "Patient's Medicare Number"
+            } ]
+          },
+          "system" : "http://hl7.org/fhir/sid/us-mbi",
+          "value" : "123456MBI"
+        } ],
+        "name" : [ {
+          "text" : "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
+          "family" : "baker",
+          "given" : [ "jim", "k." ]
+        } ],
+        "gender" : "male",
+        "birthDate" : "1975-03-01"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fiss/curr-status",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fiss/curr-status",
+          "code" : "a"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fiss/recd-dt-cymd",
+        "valueDate" : "1970-01-01"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fiss/curr-tran-dt-cymd",
+        "valueDate" : "1970-01-02"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
+          "code" : "gr"
+        }
+      } ],
+      "identifier" : [ {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "uc",
+            "display" : "Unique Claim ID"
+          } ]
+        },
+        "system" : "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
+        "value" : "123456d"
+      } ],
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
+          "code" : "institutional",
+          "display" : "Institutional"
+        } ]
+      },
+      "use" : "claim",
+      "patient" : {
+        "reference" : "#patient"
+      },
+      "created" : "IGNORED_FIELD",
+      "insurer" : {
+        "identifier" : {
+          "value" : "CMS"
+        }
+      },
+      "request" : {
+        "reference" : "Claim/f-123456"
+      },
+      "outcome" : "queued",
+      "item" : [ {
+        "adjudication" : [ {
+          "category" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+              "code" : "denialreason",
+              "display" : "Denial Reason"
+            } ]
+          },
+          "reason" : {
+            "coding" : [ {
+              "system" : "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-rarc",
+              "code" : "rarc"
+            } ]
+          }
+        }, {
+          "category" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+              "code" : "denialreason",
+              "display" : "Denial Reason"
+            } ]
+          },
+          "reason" : {
+            "coding" : [ {
+              "system" : "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-carc",
+              "code" : "car"
+            } ]
+          }
+        }, {
+          "category" : {
+            "coding" : [ {
+              "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+              "code" : "denialreason",
+              "display" : "Denial Reason"
+            } ]
+          },
+          "reason" : {
+            "coding" : [ {
+              "system" : "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-cagc",
+              "code" : "ca"
+            } ]
+          }
+        } ]
+      } ]
     }
-  ],
-  "total": 2,
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "ClaimResponse",
-        "id": "f-123456",
-        "meta": {
-          "lastUpdated": "1970-08-01T00:00:00.000+00:00"
-        },
-        "contained": [
-          {
-            "resourceType": "Patient",
-            "id": "patient",
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-                "valueCode": "248153007"
-              }
-            ],
-            "identifier": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                      "code": "MC",
-                      "display": "Patient's Medicare Number"
-                    }
-                  ]
-                },
-                "system": "http://hl7.org/fhir/sid/us-mbi",
-                "value": "123456MBI"
-              }
-            ],
-            "name": [
-              {
-                "text": "jim k. baker ([max 10 chars of first], [middle initial], [max 15 chars of last])",
-                "family": "baker",
-                "given": [
-                  "jim",
-                  "k."
-                ]
-              }
-            ],
-            "gender": "male",
-            "birthDate": "1975-03-01"
-          }
-        ],
-        "extension": [
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-status",
-            "valueCoding": {
-              "system": "https://bluebutton.cms.gov/resources/variables/fiss/curr-status",
-              "code": "a"
-            }
+  }, {
+    "resource" : {
+      "resourceType" : "ClaimResponse",
+      "id" : "m-654323",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "contained" : [ {
+        "resourceType" : "Patient",
+        "id" : "patient",
+        "extension" : [ {
+          "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+          "valueCode" : "248153007"
+        } ],
+        "identifier" : [ {
+          "type" : {
+            "coding" : [ {
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code" : "MC",
+              "display" : "Patient's Medicare Number"
+            } ]
           },
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/fiss/recd-dt-cymd",
-            "valueDate": "1970-01-01"
-          },
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-tran-dt-cymd",
-            "valueDate": "1970-01-02"
-          },
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
-            "valueCoding": {
-              "system": "https://bluebutton.cms.gov/resources/variables/fiss/group-code",
-              "code": "gr"
-            }
-          }
-        ],
-        "identifier": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                  "code": "uc",
-                  "display": "Unique Claim ID"
-                }
-              ]
-            },
-            "system": "https://bluebutton.cms.gov/resources/variables/fiss/dcn",
-            "value": "123456d"
-          }
-        ],
-        "status": "active",
-        "type": {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
-              "code": "institutional",
-              "display": "Institutional"
-            }
-          ]
+          "system" : "http://hl7.org/fhir/sid/us-mbi",
+          "value" : "123456MBI"
+        } ],
+        "name" : [ {
+          "text" : "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
+          "family" : "SMITH",
+          "given" : [ "J.", "D." ]
+        } ],
+        "gender" : "male"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
+          "code" : "?"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/mcs/claim-receipt-date",
+        "valueDate" : "1970-02-24"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/mcs/status-date",
+        "valueDate" : "1970-01-03"
+      } ],
+      "identifier" : [ {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "uc",
+            "display" : "Unique Claim ID"
+          } ]
         },
-        "use": "claim",
-        "patient": {
-          "reference": "#patient"
-        },
-        "created": "1970-01-01T00:00:01+00:00",
-        "insurer": {
-          "identifier": {
-            "value": "CMS"
-          }
-        },
-        "request": {
-          "reference": "Claim/f-123456"
-        },
-        "outcome": "queued",
-        "item": [
-          {
-            "adjudication": [
-              {
-                "category": {
-                  "coding": [
-                    {
-                      "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
-                      "code": "denialreason",
-                      "display": "Denial Reason"
-                    }
-                  ]
-                },
-                "reason": {
-                  "coding": [
-                    {
-                      "system": "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-rarc",
-                      "code": "rarc"
-                    }
-                  ]
-                }
-              },
-              {
-                "category": {
-                  "coding": [
-                    {
-                      "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
-                      "code": "denialreason",
-                      "display": "Denial Reason"
-                    }
-                  ]
-                },
-                "reason": {
-                  "coding": [
-                    {
-                      "system": "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-carc",
-                      "code": "car"
-                    }
-                  ]
-                }
-              },
-              {
-                "category": {
-                  "coding": [
-                    {
-                      "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
-                      "code": "denialreason",
-                      "display": "Denial Reason"
-                    }
-                  ]
-                },
-                "reason": {
-                  "coding": [
-                    {
-                      "system": "https://bluebutton.cms.gov/resources/variables/fiss/aco-red-cagc",
-                      "code": "ca"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "ClaimResponse",
-        "id": "m-654323",
-        "meta": {
-          "lastUpdated": "1970-01-01T00:00:04.000+00:00"
-        },
-        "contained": [
-          {
-            "resourceType": "Patient",
-            "extension": [
-              {
-                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-                "valueCode": "248153007"
-              }
-            ],
-            "id": "patient",
-            "identifier": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                      "code": "MC",
-                      "display": "Patient's Medicare Number"
-                    }
-                  ]
-                },
-                "system": "http://hl7.org/fhir/sid/us-mbi",
-                "value": "123456MBI"
-              }
-            ],
-            "name": [
-              {
-                "text": "J. D. SMITH ([first initial], [middle initial], [max 6 chars of last])",
-                "family": "SMITH",
-                "given": [
-                  "J.",
-                  "D."
-                ]
-              }
-            ],
-            "gender": "male"
-          }
-        ],
-        "extension": [
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
-            "valueCoding": {
-              "system": "https://bluebutton.cms.gov/resources/variables/mcs/status-code",
-              "code": "?"
-            }
-          },
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-receipt-date",
-            "valueDate": "1970-02-24"
-          },
-          {
-            "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-date",
-            "valueDate": "1970-01-03"
-          }
-        ],
-        "identifier": [
-          {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                  "code": "uc",
-                  "display": "Unique Claim ID"
-                }
-              ]
-            },
-            "system": "https://bluebutton.cms.gov/resources/variables/mcs/icn",
-            "value": "654323"
-          }
-        ],
-        "status": "active",
-        "type": {
-          "coding": [
-            {
-              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
-              "code": "professional",
-              "display": "Professional"
-            }
-          ]
-        },
-        "use": "claim",
-        "patient": {
-          "reference": "#patient"
-        },
-        "created": "2022-01-27T18:23:51+00:00",
-        "insurer": {
-          "identifier": {
-            "value": "CMS"
-          }
-        },
-        "request": {
-          "reference": "Claim/m-654323"
-        },
-        "outcome": "partial"
-      }
+        "system" : "https://bluebutton.cms.gov/resources/variables/mcs/icn",
+        "value" : "654323"
+      } ],
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
+          "code" : "professional",
+          "display" : "Professional"
+        } ]
+      },
+      "use" : "claim",
+      "patient" : {
+        "reference" : "#patient"
+      },
+      "created" : "IGNORED_FIELD",
+      "insurer" : {
+        "identifier" : {
+          "value" : "CMS"
+        }
+      },
+      "request" : {
+        "reference" : "Claim/m-654323"
+      },
+      "outcome" : "partial"
     }
-  ]
+  } ]
 }

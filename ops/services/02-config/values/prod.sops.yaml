@@ -13,8 +13,8 @@
 /bcda/${env}/eft/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:3Y0CuF087HKr/5aVBB/k/39I9qo7vDGbH5mlakoBSutlkFoAK58Rzf11MWO78SzB+Xi+Sf7pdXFU3zieoTH+w0pPapvPvUfI8E6mh6nRSmh6Y6JfXMLOLq/qX8NkvV2EjQg7hDiEjhnCCK+wZ0EjJgWBLbjyMOl6YaBZpBjdlLO9GwGoA0s/rJIlWGyCjuvUaM4ASl9YHPBTEhZWY+fpiJTXeVDfSG8V1v58XtmtCy/XFgAAeRJFtlUSjy0/aD+GiM2pAzDyABO3tJBmjRkDG3uWQ0nXD4AonOuSKONcZUHiux7YdIkdD4uVU6rMGadwxd8wQNVJgAIipul92Y1dMkkoY+Urfsw1z/b2CvtfeEKQ1+bt9vFd,iv:9U5HijGwJ8oDPO8MvdX5aKzxLTLVExKaLcmEl+QNWUY=,tag:zxksvukh0rAItncOS/4wkw==,type:str]
 /bfd/${env}/common/sensitive/cloudbees_jenkins_subnets: ENC[AES256_GCM,data:DOxNFEXcls33cfp59sqT,iv:T3g4NQRcgCFTQZUOjBlo4BqKA1Fx2z8r6Me1CadcqZU=,tag:SFNtBRkxWkeJk20PBm7pvg==,type:str]
 /bfd/${env}/common/sensitive/ec2_user_private_key: ENC[AES256_GCM,data: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,iv:9z2fa9WUtki4by9p8qbcQCCHiaP51lkcXXwhq8HjNb0=,tag:sinRu/Ozq2u1dhI9tdOW+Q==,type:str]
-/bfd/${env}/common/sensitive/rds_master_password: ENC[AES256_GCM,data:MpcybTFHbO4Na9zAHKfOpVlZvhffAtN7mw==,iv:SgliL7IoX1vm324xaxQJy1lNtOaeTxv9hofkYC3x2EI=,tag:jWdvwcLmYVehxAdUegNFKQ==,type:str]
 /bfd/${env}/common/sensitive/victor_ops_url: ENC[AES256_GCM,data:9kX2LhcMRqqefX1arA1reXPn2/c3Lt6nrGUh266T9CWR8YvNTUo9X85tjb+8qyu/qfmO3J4aj2LrctNNnYQcTKm/e17jKAh0PUUvxJI2xePfxgg3wOM8grVfAdKl2l6t+iuQv13/dZEqwvw=,iv:w7BH+qSufTYa1kaEFZFyctI2ZmvCkjxjVtKeLbXj9hs=,tag:kY41/2jViXEI1ZGPNLHwTQ==,type:str]
+/bfd/${env}/database/sensitive/rds_master_password: ENC[AES256_GCM,data:hrMYRfJi3LrRDCPp6LXJ1keieH83nRykag==,iv:YNtQM7wPLWAJ5tKpoJKoDXpw14oVWSCyWdLa0wDQtxE=,tag:2TNkCywWD89zFBF9xKKLGQ==,type:str]
 /bfd/${env}/eft/sensitive/inbound/partners_list_json: ENC[AES256_GCM,data:m/7Fu3Cu17Qp9eKXghzZFXYQsETnbO9cEQ==,iv:poeLMVViZkQEFKfSHPhTiKe2b2xPZd61pAyajzPVcHA=,tag:CNeEJKnQc9aQID0U+moa1Q==,type:str]
 /bfd/${env}/eft/sensitive/inbound/sftp_server/eft_user_home_dir: ENC[AES256_GCM,data:48B6OPbvHc0=,iv:C2YoBl/vrR7rpB3Fv/l4zIu6367IBH8Gx9Na+FiVF7Q=,tag:KQtM4DOAyvlobRt7L+eo3Q==,type:str]
 /bfd/${env}/eft/sensitive/inbound/sftp_server/eft_user_public_key: ENC[AES256_GCM,data:JaKno6gn3bhUoRsexilgYaeIEu4VBaC5rwLp1LJ9P+nVklYqyuUOOMsI7zZQqkFCvLcqHlpWyrLhpT5v7Oh9qb6smaL4ELKmPwhlU4OYk5wgnJ1XnefXF0lWju/bWK2mr6De3erEoSX0TPgsQl2yovFLdQMW7VYmQoRFShBi8FcqkdTSJBLk9ThqxmMH+Qw8lc5hFb46AJK3Oua8Z/FLDjQAHAdQfWb0TKSfc+THF+pYl4J0HWMqHU6NbCr592O1d9aq12SO2hffbzs0FlvymRlgmFao9VeEWn13PPZnczRDkjjV4e5fz+p29r1lv8/qQGT9gfetHoZblz4nrZm6OrD+0kLEGmZtTF7uGlnrDFJfkodQz4d1JIcmOz19y5ZkzlIQL0uzRUe0n3nSFM46p3BoWXUrA4kot14dzdoRjvUrmwY2AwE5yJuEkcwpQnaHn9n7+RheYpf9Op4710BA9XpBtJhmFECx92BZi86eHwDpwRIhwUz8mz8jQWI=,iv:bF1v1Gjj9fa6Hid5UUj7pOboWgBNJDqLl4NlWYfvfPk=,tag:AO3KYPWC9aoCoaJLx+bclg==,type:str]
@@ -48,6 +48,10 @@
 /bfd/${env}/rda-pipeline/sensitive/rda/grpc/port: ENC[AES256_GCM,data:dHw8,iv:0jthazzWyiqnBj5GclDmyEAUphw/IVujkmzn7TUTf8A=,tag:uwr7FbyCxD7m0BhQ5zYy+A==,type:int]
 /bfd/${env}/rda-pipeline/sensitive/hicn_hash/iterations: ENC[AES256_GCM,data:CntbsQ==,iv:SEQN2G8FNK0b1KltgMYcxVFgNxUedmb9wc5U16yq16I=,tag:L+v9AxSyWdFVHZDQGOPEjg==,type:int]
 /bfd/${env}/rda-pipeline/sensitive/hicn_hash/pepper: ENC[AES256_GCM,data:nGDCOuYtjlXMdAquMfJRtL0zR4qPthKdPAGJOwlWViUgvexD8rN7vdQO0s4Rbgqa3nrgNAS7vPJOeQlwe9YU4FVQIWfPsYdorKLzWAJf9mqynliQQ8SeyZ+C50Ve1rS7d7aC+ABdIQsc+ShagkIO6FlYtAaTNUmn6UERehj56oHH1nd76LxRashBW11hHJtV5xZ2ivQZN3nS6YnV/MiAakS+EOTLr0sO4ZhI2r5o44eJYFsqY83eTm8NEz2t0IxurL/LDmPZ2Jqak7Ma/TFO82LJzPcRWE/Keg/Y+CfYyB+0dh/L8awAlnAvXehc5GEsBdxqRBQUurBEQt2TfAOX86SUri/CAeGsl3BOfbt/j3vlPUscGJ0EDICnCpz7AF1PofWg1VCSMjfZ+7WOEX0X58PFH7IaaWKI+sc1MA1wgvjF2R6JUgsrf6KGwsGRm5ifCj2CY78Yki8YsG2MM7BGlBOzAsCe6/GP5/NAcplAIEW4Bf32l48AfNHNy/RS7s1n6Mq9qdFpJcGbeITm6vDz8tEpAESIrVTDFqa5PmoDjrn4g41uIf7XTLx2/PCyoLbIKKA6aSCSAUPfn+nTu9Js6E6FwG2QE7JP5RUJzjzq4wCt5vuwZvaXF2YjWQAX06bMtAq/hSN4FZhpRQDZthloRWOF92nqWktHbLkwVFMn6YY=,iv:yuwXjDP4nOLePLwmE6dywlPXjJ3yJ5zmPMya1bMil+I=,tag:fNjaNjnm4Eq+a2vDNts1ng==,type:str]
+/bfd/${env}/npi-pipeline/sensitive/db/password: ENC[AES256_GCM,data:tzFZJymDcIZqpPBtAur1KuOc8+Z2SZjp,iv:CHDGvhHnVqYwpkdohwF5A15vYfOa2Wtn3UvYX7L47ZY=,tag:qREwVM/QntLLy4woj3x4tg==,type:str]
+/bfd/${env}/npi-pipeline/sensitive/db/username: ENC[AES256_GCM,data:Mvee+c7IqlZsKwmbfqSidnh3,iv:IBJYnyS6xq2RfZOWdBr5tCN/9YvJyf71WLTgHRXt3zE=,tag:ENZ6di2OB1n57F6Pxx4XuQ==,type:str]
+/bfd/${env}/npi-pipeline/sensitive/hicn_hash/iterations: ENC[AES256_GCM,data:KKvCYA==,iv:ysXFhMvrxF6lBkDCrgJChNyP+YO/02A/iLH+E39Oimc=,tag:Qr5bprvauXvI2B4ksQqGYA==,type:int]
+/bfd/${env}/npi-pipeline/sensitive/hicn_hash/pepper: ENC[AES256_GCM,data:Cvx/ROAeO/EUQmm+7bmTGHJ3UOefMqMT0lv6PR15VaznjCgdzsEOvJdvqmcNm2ckX3jacQmxdScrKeKRnxIdxIjALayn+F881RsC28ZRD+vJQsHPpR/PdgVOc55wTeXo75+z8cv2YDdR64M0otChux4N3K2RaFn5aWm4PFKUI7f1Ai/P6RBBOBkDy1XxlNTBJvaQ0JNqS6R1yYJTa6EAFJqmF7urVLPQ5I+Zk12FJGCH7N/Q9iZLZ8AgMfh2o4Myzekgm5ND7jzKoPto8SRuG+QjFvA9WeMNByho6YDKlaVDWPdkekeZa+JaiX0hgXFxhoW76esT/nRlwgL08qF7d5xQ3IAtdXVNqnBrUPWh7DvsxKXdZR0PQRF9RaHSw+bqgPxOqcO9M6oGbIf1SBEFTQjhjw7Xxj/06Ht8DWiu2Y36NLmglj9yPPMHBn9gDOUyIP5pboowsSXgK+qxZq0wHGGYYFuiJ4FdBr44xx4DGpJUqL/qhUe5vhK0OCcf0f6Hhx6oLiFr6eFdM34UTPT+WrU5iavK+bUFhg6gwQ8N2m4Fy94n0Sz3nZ6iJe9ITVAn4aO8j1hS5Qk+iXyWM0j7Kd2ftEaX+wr9+GsDtVglundy1nWCwjrqTFhL6Iy18esxIl1GW0115G/mEGWHFERnocb/dLBGkq7vTME3xWd6OEQ=,iv:H/5Ih/f1rqA7mD200YuUJk7WmfbJOfku17CCHVXjopg=,tag:VsDk4uQD89JuQlOcoTrNtg==,type:str]
 /bfd/${env}/locust/sensitive/db/username: ENC[AES256_GCM,data:v9hoX6uWVB+/Mr6M7Y4k6w==,iv:B7BSyFiEfcjwuHVtexxJkMXOD+LKC47lcWFljN99QRg=,tag:UjNpHb6iO1V7dEek7w82wQ==,type:str]
 /bfd/${env}/locust/sensitive/db/password: ENC[AES256_GCM,data:Cd4+av+ngwc4u9YHd4h0MULAtIdqZvnr,iv:Vd3KTMptphUEHnaBpq3T5oEvb3F4iAQ8d0jGQVsY8nk=,tag:paVSk+jqRyLSlZD78I+9/g==,type:str]
 /bfd/${env}/locust/sensitive/cert/pem_data: ENC[AES256_GCM,data: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,iv:Cy6XH2/MTi06bTQ184PMHzefI8aj6jkaXQZSPKf0ZL8=,tag:AEmFxIMS9c4h1Ow25wjx7A==,type:str]
@@ -82,19 +86,19 @@
 /bfd/${env}/common/nonsensitive/new_relic/metrics/path: /metric/v1
 /bfd/${env}/common/nonsensitive/new_relic/metrics/period: 15
 /bfd/${env}/common/sensitive/new_relic/metrics/insights_key: ENC[AES256_GCM,data:RO2TyYLu0/w9fLu8rm74oXyAY1pMTC3xv7iDEMKectlzr1XCGg==,iv:Gyq6wZhNsoEeVQPcwPksF7gAOpzyppdl6tvSLSFDXUE=,tag:fVJpv6VLsanYrniCKutK9Q==,type:str]
-/bfd/${env}/common/nonsensitive/rds_backup_retention_period: "3"
-/bfd/${env}/common/nonsensitive/rds_iam_database_authentication_enabled: "true"
-/bfd/${env}/common/nonsensitive/rds_master_username: bfduser
-/bfd/${env}/common/nonsensitive/rds_cluster_identifier: bfd-prod-aurora-cluster
-/bfd/${env}/common/nonsensitive/rds_instance_class: db.r6i.12xlarge
-/bfd/${env}/common/nonsensitive/rds_security_group: bfd-prod-aurora-cluster
-/bfd/${env}/common/nonsensitive/rds_min_reader_nodes: 1
-/bfd/${env}/common/nonsensitive/rds_max_reader_nodes: 3
-/bfd/${env}/common/nonsensitive/rds_scaling_cpu_target: 50
-/bfd/${env}/common/nonsensitive/rds_scale_in_cooldown: 300
-/bfd/${env}/common/nonsensitive/rds_scale_out_cooldown: 300
 /bfd/${env}/common/nonsensitive/vpc_name: bfd-prod-vpc
 /bfd/${env}/common/nonsensitive/vpn_security_group: bfd-prod-vpn-private
+/bfd/${env}/database/nonsensitive/rds_backup_retention_period: "3"
+/bfd/${env}/database/nonsensitive/rds_iam_database_authentication_enabled: "true"
+/bfd/${env}/database/nonsensitive/rds_master_username: bfduser
+/bfd/${env}/database/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
+/bfd/${env}/database/nonsensitive/rds_security_group: bfd-${env}-aurora-cluster
+/bfd/${env}/database/nonsensitive/rds_instance_class: db.r6i.12xlarge
+/bfd/${env}/database/nonsensitive/scaling/min_nodes: 1
+/bfd/${env}/database/nonsensitive/scaling/max_nodes: 3
+/bfd/${env}/database/nonsensitive/scaling/cpu_target: 50
+/bfd/${env}/database/nonsensitive/scaling/cooldown/scale_in: 300
+/bfd/${env}/database/nonsensitive/scaling/cooldown/scale_out: 300
 /bfd/${env}/migrator/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/migrator/nonsensitive/db/hikari/max_pool_size: UNDEFINED
@@ -149,6 +153,17 @@
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/high_alert: bfd-${env}-cloudwatch-alarms
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
+/bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 1
+/bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/disk_size: 21
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
 #ENC[AES256_GCM,data:jyBbYSwF1vakUg==,iv:qKT/mouixOrt3eKBsUgjbej7d8CTU70dPNOgvo7JOGw=,tag:A6ql0YA6/QlbA0TL59B9rA==,type:comment]
@@ -176,6 +191,7 @@
 /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
+/bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server prod
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"
@@ -495,8 +511,8 @@ sops:
       created_at: "2025-03-31T22:41:25Z"
       enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwGGkV8aeZvx5fp21oXhkSN9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNQ+5RQmcn6PsRqTjAgEQgDsboKccFePd1cbzxpBkMb/rhL9lNTCfSOBvG27HpXfZ6Ml18anFsRGNw8ZbLr/7E1NBC9vdZxAn2XqNSQ==
       aws_profile: ""
-  lastmodified: "2025-05-13T13:09:04Z"
-  mac: ENC[AES256_GCM,data:LlVClZ+tcRyFBsstYetcsB4m5kM/BbFFLlY4QB2JrRjJFGxkwvuG4aees2cvtawhEyNvjirMrPv4dzyH0oyAVCVVfCdKXZF8QhgvWKTQQ4c9NP9AoQS3UNDQqhOPphD3fR0JK40Gqj20RVsAkGXEtUzOFHeOpWYN9RIt0euxnhk=,iv:53e73tlZnRVaJ1OOqnlwi+vb0TUQ5So8NoJfcDANhM0=,tag:HRH010nENtqu493bPTi9LQ==,type:str]
+  lastmodified: "2025-05-19T16:14:29Z"
+  mac: ENC[AES256_GCM,data:F8uFx0nwHxdgSIXdPoztSaQRGwHPqDpWU9DyfhCVyt7VX73EAM+/Qk9ILl8XWJ2ojUFSccBe7QmRyonxLVQwov683GZ2uNBZnIU8iZ9a8y1li5Vm3xH4etU5HrnmS0bZa6MRCPAge1ReJQmlNX8aGNIOb20I70uZRPh7LEOhvyE=,iv:1J8f1QmKcgWKKsEYgEUsZfPqKIH/ZdtXX9UgrpUbkU4=,tag:UMaTbFJde1qYypP0R8EmYw==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2

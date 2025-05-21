@@ -79,6 +79,6 @@
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/npi_fda_load_job/enabled: true
-/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "true"
+/bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
