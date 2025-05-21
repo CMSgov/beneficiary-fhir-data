@@ -59,4 +59,6 @@ gen_keystore "cn=test.fhir.bfd.cmscloud.local" \
   "test"
 
 echo
-echo "REMEMBER: Store the contents of each <env>-keystore.pfx.b64 in SSM configuration under the /bfd/<env>/server/sensitive/server_keystore_base64 path"
+echo "REMEMBER: "
+echo "* Store the contents of each <env>-keystore.pfx.b64 in SSM configuration under the /bfd/<env>/server/sensitive/server_keystore_base64 path"
+echo "* Store the contents of each <env>-public-cert.pem in SSM configuration under the /bfd/<env>/server/sensitive/server_keystore_public_cert path"
