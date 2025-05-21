@@ -4,6 +4,7 @@ module "terraservice" {
   environment_name     = terraform.workspace
   service              = "server"
   relative_module_root = "ops/services/05-server"
+  subnet_layers        = ["app", "dmz"]
 }
 
 locals {
@@ -22,10 +23,13 @@ locals {
   env_config_key_arns      = module.terraservice.env_config_key_arns
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  vpc                      = module.terraservice.vpc
+  app_subnets              = module.terraservice.subnets_map["app"]
+  dmz_subnets              = module.terraservice.subnets_map["dmz"]
+  azs                      = keys(module.terraservice.default_azs)
 
-  azs            = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  app_subnet_ids = [for _, v in data.aws_subnet.app_subnets : v.id]
-  dmz_subnet_ids = [for _, v in data.aws_subnet.dmz_subnets : v.id]
+  app_subnet_ids = local.app_subnets[*].id
+  dmz_subnet_ids = local.dmz_subnets[*].id
 
   # TODO: Remove "ecs" from the name prefix once we accept this as the new server service
   name_prefix = "bfd-${local.env}-${local.service}-ecs"
