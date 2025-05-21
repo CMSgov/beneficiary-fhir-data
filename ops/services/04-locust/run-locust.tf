@@ -14,29 +14,11 @@ data "aws_ecr_image" "run_locust" {
   image_tag       = local.run_locust_version
 }
 
-data "aws_vpc" "main" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${local.env}-vpc"]
-  }
-}
-
-data "aws_subnets" "app" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
-  }
-  filter {
-    name   = "tag:Layer"
-    values = ["app"]
-  }
-}
-
 resource "aws_security_group" "run_locust" {
   description = "${local.run_locust_lambda_full_name} Lambda security group in ${local.env}"
   name        = "${local.run_locust_lambda_full_name}-sg"
   tags        = { Name = "${local.run_locust_lambda_full_name}-sg" }
-  vpc_id      = data.aws_vpc.main.id
+  vpc_id      = local.vpc.id
 
   egress {
     from_port   = 0
@@ -53,7 +35,7 @@ data "aws_security_group" "aurora_cluster" {
   }
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    values = [local.vpc.id]
   }
 }
 
@@ -99,7 +81,7 @@ resource "aws_lambda_function" "run_locust" {
 
   vpc_config {
     security_group_ids = [aws_security_group.run_locust.id]
-    subnet_ids         = data.aws_subnets.app.ids
+    subnet_ids         = local.app_subnets[*].id
   }
 
   role = aws_iam_role.run_locust.arn
