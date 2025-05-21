@@ -138,8 +138,8 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_PPS_CPTL_FSP_AMT",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_PPS_CPTL_FSP_AMT",
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_FSP_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_FSP_AMT",
                 "label": "Claim PPS Capital FSP Amount",
                 "definition": "The amount of the federal specific portion of the PPS payment for capital.",
                 "min": 0,
