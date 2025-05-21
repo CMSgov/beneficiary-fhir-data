@@ -1,7 +1,7 @@
 locals {
   alerter_lambda_rate           = local.ssm_config["/bfd/${local.service}/error_alerter/rate"]
   alerter_lambda_lookback       = local.ssm_config["/bfd/${local.service}/error_alerter/log_lookback_seconds"]
-  alerter_lambda_slack_hook_ssm = local.ssm_config["/bfd/${local.service}/error_alerter/slack_webhook_ssm"]
+  alerter_lambda_slack_hook_ssm = lookup(local.ssm_config, "/bfd/${local.service}/error_alerter/slack_webhook_ssm", null)
 
   # TODO: Remove "-ecs"
   alerter_name_prefix      = "bfd-${local.env}-${local.target_service}-ecs"
@@ -11,6 +11,8 @@ locals {
 }
 
 data "aws_ssm_parameter" "alerter_slack_webhook" {
+  count = local.alerter_lambda_slack_hook_ssm != null ? 1 : 0
+
   name            = local.alerter_lambda_slack_hook_ssm
   with_decryption = true
 }
@@ -80,7 +82,7 @@ resource "aws_lambda_function" "alerter" {
       LOG_LOOKBACK_SECONDS    = local.alerter_lambda_lookback
       ACCESS_JSON_LOG_GROUP   = data.aws_cloudwatch_log_group.server_access.name
       MESSAGES_JSON_LOG_GROUP = data.aws_cloudwatch_log_group.server_messages.name
-      SLACK_WEBHOOK           = data.aws_ssm_parameter.alerter_slack_webhook.value
+      SLACK_WEBHOOK           = one(data.aws_ssm_parameter.alerter_slack_webhook[*].value)
     }
   }
 
