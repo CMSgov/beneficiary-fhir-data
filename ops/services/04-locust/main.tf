@@ -4,6 +4,7 @@ module "terraservice" {
   environment_name     = terraform.workspace
   service              = "locust"
   relative_module_root = "ops/services/04-locust"
+  subnet_layers        = ["app"]
 }
 
 locals {
@@ -22,6 +23,8 @@ locals {
   env_config_key_arns      = module.terraservice.env_config_key_arns
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  vpc                      = module.terraservice.vpc
+  app_subnets              = module.terraservice.subnets_map["app"]
 
   name_prefix = "bfd-${local.env}-${local.service}"
 }

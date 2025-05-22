@@ -3,7 +3,7 @@ module "terraservice" {
 
   environment_name     = terraform.workspace
   relative_module_root = "ops/services/03-cluster"
-  service              = local.service
+  service              = "cluster"
 
   additional_tags = {
     Layer = local.layer
