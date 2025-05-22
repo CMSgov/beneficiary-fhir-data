@@ -2,13 +2,14 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   environment_name     = terraform.workspace
-  service              = "server"
+  service              = local.service
   relative_module_root = "ops/services/05-server"
   subnet_layers        = ["app", "dmz"]
 }
 
 locals {
-  service                  = module.terraservice.service
+  service = "server"
+
   region                   = module.terraservice.region
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags

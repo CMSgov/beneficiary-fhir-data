@@ -2,13 +2,14 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   environment_name     = terraform.workspace
-  service              = "rda-pipeline-alarms"
+  service              = local.service
   relative_module_root = "ops/services/07-rda-pipeline-alarms"
   subnet_layers        = ["app"]
 }
 
 locals {
-  service                  = module.terraservice.service
+  service = "rda-pipeline-alarms"
+
   region                   = module.terraservice.region
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags
