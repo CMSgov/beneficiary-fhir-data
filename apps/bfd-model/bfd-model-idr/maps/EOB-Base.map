@@ -169,24 +169,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
           amtUsed -> tgtExtension.value = cast(amtUsed,'decimal') "set amtUsed";
         } "add PPS DRG WT ";
 
-        //CLM_HIPPS_UNCOMPD_CARE_AMT - Claim Uncompensated Care Payment Amount
-        institutionalComponents.CLM_HIPPS_UNCOMPD_CARE_AMT as uncompdCareAmt -> tgtAdjudication.extension = create('Extension') as tgtExtension then {
-          src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-HIPPS-UNCOMPD-CARE-AMT" "Add url";
-          src -> tgtExtension.value = create('Money') as tgtMoney then addMoney(uncompdCareAmt, tgtMoney) "Add Money";
-        } "Add non payment reason";
-
-        //for all practical purposes, these will only be present on institutional claims. 
-        src.CLM_OPRTNL_DSPRTNT_AMT as amt -> tgtAdjudication.extension = create('Extension') as tgtExtension then {
-          src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OPRTNL-DSPRTNT-AMT" "Add url";
-          src -> tgtExtension.value = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
-        } "CLM_OPRTNL_DSPRTNT_AMT";
-
-        src.CLM_OPRTNL_IME_AMT as amt -> tgtAdjudication.extension = create('Extension') as tgtExtension then {
-          src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OPRTNL-IME-AMT" "Add url";
-          src -> tgtExtension.value = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
-        } "CLM_OPRTNL_IME_AMT";
-
-
       }"Add adjudication extension for PPS weight number.";
       src -> tgtAdjudication.reason = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus","other") "Set adjudication reason";
       src -> tgtAdjudication.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator","benefitpaymentstatus") "Set adjudication category";
@@ -332,6 +314,22 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
     src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_IP_BENE_DDCTBL_AMT") "Add codeable concept";
     src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_MDCR_IP_BENE_DDCTBL_AMT";
+  //CLM_HIPPS_UNCOMPD_CARE_AMT - Claim Uncompensated Care Payment Amount
+  institutionalComponents.CLM_HIPPS_UNCOMPD_CARE_AMT as uncompdCareAmt -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_HIPPS_UNCOMPD_CARE_AMT") "Add url";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(uncompdCareAmt, tgtMoney) "Add Money";
+  } "Add non payment reason";
+
+  //for all practical purposes, these will only be present on institutional claims. 
+  src.CLM_OPRTNL_DSPRTNT_AMT as amt -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_OPRTNL_DSPRTNT_AMT") "Add url";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
+  } "CLM_OPRTNL_DSPRTNT_AMT";
+
+  src.CLM_OPRTNL_IME_AMT as amt -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_OPRTNL_IME_AMT") "Add url";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
+  } "CLM_OPRTNL_IME_AMT";
 
   //CLM_MDCR_DDCTBL_AMT
   src.CLM_MDCR_DDCTBL_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
