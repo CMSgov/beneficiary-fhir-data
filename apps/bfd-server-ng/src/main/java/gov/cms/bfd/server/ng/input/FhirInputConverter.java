@@ -58,4 +58,38 @@ public class FhirInputConverter {
     }
     return tokenParam.getValue();
   }
+
+  /**
+   * Converts a FHIR {@link IdType} for a Coverage resource into a validated {@link
+   * CoverageCompositeId} object. It parses the ID string, validates its format, and ensures the
+   * part is supported (currently Part A or Part B for detailed FFS mapping).
+   *
+   * @param coverageId The FHIR ID for the Coverage resource.
+   * @return A {@link CoverageCompositeId} containing the parsed part and beneSk.
+   * @throws InvalidRequestException if the ID is null, empty, malformed, or represents an
+   *     unsupported part.
+   */
+  public static CoverageCompositeId toCoverageCompositeId(@Nullable IdType coverageId) {
+    if (coverageId == null
+        || coverageId.getIdPart() == null
+        || coverageId.getIdPart().trim().isEmpty()) {
+      throw new InvalidRequestException("Coverage ID must not be null or empty");
+    }
+
+    String rawCompositeIdStr = coverageId.getIdPart();
+    CoverageCompositeId parsedId =
+        CoverageCompositeId.parse(rawCompositeIdStr); // This already throws for bad format
+
+    // Perform the Part A/B check here
+    String partCode = parsedId.coveragePart().getCode();
+    if (!(CoveragePart.PART_A.getCode().equals(partCode)
+        || CoveragePart.PART_B.getCode().equals(partCode))) {
+      throw new InvalidRequestException(
+          "Unsupported Coverage part for this operation: '"
+              + parsedId.coveragePart().getDisplayName()
+              + "'. Only Part A and Part B are currently supported.");
+    }
+
+    return parsedId;
+  }
 }

@@ -3,6 +3,9 @@ package gov.cms.bfd.server.ng.coverage;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.CoverageIdentity;
+import gov.cms.bfd.server.ng.input.CoverageCompositeId;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +25,17 @@ public class CoverageHandler {
   /**
    * Reads a Coverage resource based on a composite ID ({part}-{bene_sk}).
    *
-   * @param compositeId The ID string in the format {part}-{bene_sk}.
+   * @param parsedId The parsed and validated composite ID containing the CoveragePart and beneSk.
+   * @param compositeId The original full ID string from the request, used for setting Coverage.id.
    * @return An {@link Optional} containing the {@link Coverage} resource if found, otherwise empty.
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
-  public Optional<Coverage> readCoverage(final String compositeId) {
-    String[] idParts = parseCompositeId(compositeId);
-    String partIdentifier = idParts[0];
-    long beneSk = Long.parseLong(idParts[1]);
+  public Optional<Coverage> readCoverage(
+      final CoverageCompositeId parsedId, final String compositeId) {
 
-    // Fetch the beneficiary.
+    String normalizedPartCode = parsedId.coveragePart().getCode(); // e.g., "A", "B"
+    long beneSk = parsedId.beneSk();
+
     Optional<Beneficiary> beneficiaryOpt =
         beneficiaryRepository.findById(beneSk, new DateTimeRange());
 
@@ -41,39 +45,45 @@ public class CoverageHandler {
 
     Beneficiary beneficiary = beneficiaryOpt.get();
 
-    return beneficiary.toFhirCoverage(partIdentifier, compositeId);
+    CoverageIdentity coverageIdentity = CoverageIdentity.from(beneficiary.getMbi());
+    return toFhir(beneficiary, coverageIdentity, normalizedPartCode, compositeId);
   }
 
   /**
-   * Parses the composite ID string "{part}-{bene_sk}" into its components. (This method remains the
-   * same as in the previous detailed example)
+   * Orchestrates the complete transformation of a Beneficiary and its related data into a FHIR
+   * Coverage resource for a specific part.
    *
-   * @param compositeId the compositeId.
-   * @return parseCompositeIdn
+   * @param beneficiary The fully loaded Beneficiary object (including its related collections).
+   * @param normalizedPartCode The normalized coverage part identifier ("A", "B").
+   * @param fullCompositeId The complete ID for the Coverage resource.
+   * @param coverageIdentity The coverage Identity resource.
+   * @return An {@link Optional} containing the fully populated {@link Coverage} resource, or {@link
+   *     Optional#empty()} if essential part-specific data is missing.
    */
-  private String[] parseCompositeId(String compositeId) {
-    int lastHyphenIndex = compositeId.lastIndexOf('-');
-    if (lastHyphenIndex == -1
-        || lastHyphenIndex == 0
-        || lastHyphenIndex == compositeId.length() - 1) {
-      throw new InvalidRequestException(
-          "Invalid Coverage ID format. Expected {part}-{bene_sk}, got: " + compositeId);
-    }
+  private Optional<Coverage> toFhir(
+      Beneficiary beneficiary,
+      CoverageIdentity coverageIdentity,
+      String normalizedPartCode,
+      String fullCompositeId) {
 
-    String part = compositeId.substring(0, lastHyphenIndex);
-    String beneSkStr = compositeId.substring(lastHyphenIndex + 1);
+    Coverage coverage = beneficiary.toFhirCoverage(fullCompositeId);
 
-    if (part.isEmpty() || beneSkStr.isEmpty()) {
-      throw new InvalidRequestException(
-          "Invalid Coverage ID format. Part or bene_sk is empty in: " + compositeId);
-    }
+    coverageIdentity.toFhirMbiIdentifier().ifPresent(coverage::addIdentifier);
+    coverageIdentity.getMbiValue().ifPresent(coverage::setSubscriberId);
 
-    try {
-      Long.parseLong(beneSkStr);
-    } catch (NumberFormatException e) {
-      throw new InvalidRequestException(
-          "Invalid Coverage ID format. Bene SK part is not a number: " + beneSkStr, e);
+    Optional<CoveragePart> partEnumOptional = CoveragePart.forCode(normalizedPartCode);
+
+    if (partEnumOptional.isPresent()) {
+      CoveragePart partEnumInstance = partEnumOptional.get();
+      switch (partEnumInstance) {
+        case PART_A:
+          CoveragePart.addPartACoverageElementsToCoverage(coverage);
+          break;
+        case PART_B:
+          CoveragePart.addPartBCoverageElementsToCoverage(coverage);
+          break;
+      }
     }
-    return new String[] {part, beneSkStr};
+    return Optional.of(coverage);
   }
 }

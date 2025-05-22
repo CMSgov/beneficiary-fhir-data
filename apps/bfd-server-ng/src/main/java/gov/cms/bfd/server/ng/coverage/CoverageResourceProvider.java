@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.input.CoverageCompositeId;
+import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
@@ -33,15 +35,11 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
-    if (coverageId == null
-        || coverageId.getIdPart() == null
-        || coverageId.getIdPart().trim().isEmpty()) {
-      throw new InvalidRequestException("Coverage ID must not be null or empty");
-    }
-    String compositeId = coverageId.getIdPart();
+    CoverageCompositeId parsedCoverageId = FhirInputConverter.toCoverageCompositeId(coverageId);
 
+    // Call the handler with the parsed and validated ID components.
     return coverageHandler
-        .readCoverage(compositeId)
+        .readCoverage(parsedCoverageId, coverageId.getIdPart())
         .orElseThrow(() -> new ResourceNotFoundException(coverageId));
   }
 }
