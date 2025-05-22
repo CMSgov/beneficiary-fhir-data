@@ -115,3 +115,15 @@ resource "aws_lb_target_group" "this" {
     protocol            = upper(local.server_protocol)
   }
 }
+
+resource "aws_route53_record" "this" {
+  name    = "${local.env}.fhir.${data.aws_route53_zone.root.name}"
+  type    = "A"
+  zone_id = data.aws_route53_zone.root.zone_id
+
+  alias {
+    name                   = aws_lb.this.dns_name
+    zone_id                = aws_lb.this.zone_id
+    evaluate_target_health = true
+  }
+}

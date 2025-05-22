@@ -8,24 +8,22 @@ What's included:
 - Autoscaling policies (based on CPU usage)
 - Cloudwatch alarms (to inform autoscaling policies)
 - Security groups for EC2 Instances and Load Balancers
-- Route53 `ALIAS` records for `.local`domains
 
 <!-- BEGIN_TF_DOCS -->
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
 ## Requirements
 
 No requirements.
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -44,12 +42,20 @@ No requirements.
 | <a name="input_legacy_clb_name"></a> [legacy\_clb\_name](#input\_legacy\_clb\_name) | Name of the legacy CLB to associate ASGs to; only necessary for established environments | `string` | `null` | no |
 | <a name="input_legacy_sg_id"></a> [legacy\_sg\_id](#input\_legacy\_sg\_id) | Name of the legacy Security Group to allow ingress from in the app SG | `string` | `null` | no |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
+## Modules
 
+No modules.
+
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
+-->
 ## Resources
 
 | Name | Type |
@@ -63,7 +69,6 @@ No requirements.
 | [aws_lb.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
 | [aws_lb_listener.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
 | [aws_lb_target_group.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
-| [aws_route53_record.nlb_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_security_group.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.base](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group.lb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
@@ -73,9 +78,6 @@ No requirements.
 | [null_resource.set_target_groups](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [aws_kms_key.master_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_rds_cluster.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
-| [aws_route53_zone.root](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
-| [aws_ssm_parameter.zone_is_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
-| [aws_ssm_parameter.zone_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_subnet.app_subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_subnet.dmz_subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
@@ -83,12 +85,11 @@ No requirements.
 | [external_external.current_lt_version](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [external_external.rds](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
-<!-- GENERATED WITH `terraform-docs .`
-     Manually updating the README.md will be overwritten.
-     For more details, see the file '.terraform-docs.yml' or
-     https://terraform-docs.io/user-guide/configuration/
+<!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
+     'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
+     Manually updating sections between TF_DOCS tags may be overwritten.
+     See https://terraform-docs.io/user-guide/configuration/ for more information.
 -->
-
 ## Outputs
 
 | Name | Description |

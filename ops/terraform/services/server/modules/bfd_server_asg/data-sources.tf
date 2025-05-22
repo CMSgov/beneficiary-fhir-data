@@ -54,21 +54,3 @@ data "external" "current_lt_version" {
     local.env
   ]
 }
-
-data "aws_ssm_parameter" "zone_name" {
-  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain"
-  with_decryption = true
-}
-
-data "aws_ssm_parameter" "zone_is_private" {
-  name            = "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_is_private"
-  with_decryption = true
-}
-
-data "aws_route53_zone" "root" {
-  name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
-  private_zone = nonsensitive(data.aws_ssm_parameter.zone_is_private.value)
-  tags = {
-    "ConfigId" = "root"
-  }
-}

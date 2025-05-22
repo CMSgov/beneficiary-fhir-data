@@ -56,10 +56,9 @@ resource "aws_lambda_function" "alerter" {
   function_name = local.alerter_lambda_full_name
 
   description = join("", [
-    "Invoked whenever schedules in the ${aws_scheduler_schedule_group.alerter.name} group execute, ",
-    "this Lambda uses Log Insights to post alerts to Slack indicating the number of 500 errors ",
-    "that have occurred in the past ${local.alerter_lambda_lookback} seconds in ${local.env}'s ",
-    "${local.target_service}"
+    "Invoked on Schedules in the ${aws_scheduler_schedule_group.alerter.name} group, ",
+    "this Lambda queries Log Insights for 500 errors and posts summaries to Slack for errors ",
+    "that occurred in the past ${local.alerter_lambda_lookback} seconds"
   ])
 
   tags = {

@@ -304,10 +304,10 @@ resource "aws_security_group" "server" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "server_allow_tls_nlb" {
-  for_each = aws_security_group.lb
+  for_each = local.listeners
 
   security_group_id            = aws_security_group.server.id
-  referenced_security_group_id = each.value.id
+  referenced_security_group_id = aws_security_group.lb[each.key].id
   from_port                    = local.server_port
   ip_protocol                  = local.server_protocol
   to_port                      = local.server_port

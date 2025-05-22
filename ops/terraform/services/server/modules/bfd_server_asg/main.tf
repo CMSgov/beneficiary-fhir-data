@@ -655,22 +655,6 @@ resource "aws_lb_listener" "main" {
   }
 }
 
-resource "aws_route53_record" "nlb_alias" {
-  for_each = local.lbs
-
-  # The subdomain should be <env>.fhir.<...> for the blue environment and <env>.fhir-green.<...> for
-  # the green
-  name    = "${local.env}.${var.role}${each.key == local.green_state ? "-${local.green_state}" : ""}.${data.aws_route53_zone.root.name}"
-  type    = "A"
-  zone_id = data.aws_route53_zone.root.zone_id
-
-  alias {
-    name                   = aws_lb.main[each.key].dns_name
-    zone_id                = aws_lb.main[each.key].zone_id
-    evaluate_target_health = true
-  }
-}
-
 # security group
 resource "aws_security_group" "lb" {
   for_each = local.lbs
