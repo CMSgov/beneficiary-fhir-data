@@ -215,7 +215,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     #generate claim header financial elements here
     claim['CLM']['CLM_SBMT_CHRG_AMT'] = round(random.uniform(1, 1000000),2)
     claim['CLM']['CLM_PMT_AMT'] = round(random.uniform(1, claim['CLM']['CLM_SBMT_CHRG_AMT']),2)
-    claim['CLM']['CLM_NCVRD_CHRG_AMT'] = claim['CLM']['CLM_SBMT_CHRG_AMT']-claim['CLM']['CLM_PMT_AMT']
     claim['CLM']['CLM_MDCR_DDCTBL_AMT'] = round(random.uniform(1, 1676),2)
     
     claim['CLM_VAL'] = []
@@ -274,7 +273,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
 
     if(clm_type_cd in institutional_claim_types):
         institutional_parts = {}
-
+        institutional_parts['CLM_NCVRD_CHRG_AMT'] = claim['CLM']['CLM_SBMT_CHRG_AMT']-claim['CLM']['CLM_PMT_AMT']
         institutional_parts['CLM_FI_ACTN_CD'] = random.choice(code_systems['CLM_FI_ACTN_CD'])
         institutional_parts['CLM_ADMSN_TYPE_CD'] = random.choice(code_systems['CLM_ADMSN_TYPE_CD'])
         institutional_parts['BENE_PTNT_STUS_CD'] = random.choice(code_systems['BENE_PTNT_STUS_CD'])
@@ -299,6 +298,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_TOT_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_BENE_DDCTBL_AMT'] = round(random.uniform(0,25),2)
+        institutional_parts['CLM_BLOOD_LBLTY_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_COINSRNC_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
         #We'll throw in a non-payment code on occasion 

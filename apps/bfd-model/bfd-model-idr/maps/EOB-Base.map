@@ -339,27 +339,23 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
 
   //From CLM
   //These are institutional-inpatient mappings. For others, ensure that the mappings are correct. 
+  //CLM_MDCR_COINSRNC_AMT
+  institutionalComponents.CLM_MDCR_COINSRNC_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_COINSRNC_AMT") "Add CC";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
+  } "Add CLM_MDCR_COINSRNC_AMT";
   
-  src.CLM_TYPE_CD as clmTypCd where (clmTypCd >= 60 and clmTypCd <= 64) or ( claimType = 1011 or claimType = 2011 or claimType = 1041 or claimType = 2041 ) -> tgt then {
-    //CLM_MDCR_COINSRNC_AMT
-    src.CLM_MDCR_COINSRNC_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
-      src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_COINSRNC_AMT") "Add CC";
-      src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-    } "Add CLM_MDCR_COINSRNC_AMT";
-  
-    //CLM_BLOOD_LBLTY_AMT
-    src.CLM_BLOOD_LBLTY_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
-      src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_BLOOD_LBLTY_AMT") "Add CC";
-      src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-    } "Add CLM_BLOOD_LBLTY_AMT";
+  //CLM_BLOOD_LBLTY_AMT
+  institutionalComponents.CLM_BLOOD_LBLTY_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_BLOOD_LBLTY_AMT") "Add CC";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
+  } "Add CLM_BLOOD_LBLTY_AMT";
 
-    //CLM_NCVRD_CHRG_AMT
-    src.CLM_NCVRD_CHRG_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
-      src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_NCVRD_CHRG_AMT") "Add CC";
-      src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-    } "Add CLM_NCVRD_CHRG_AMT";
-
-  } "Add institutional wrapper for benefitBalance elements";
+  //CLM_NCVRD_CHRG_AMT
+  src.CLM_NCVRD_CHRG_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_NCVRD_CHRG_AMT") "Add CC";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
+  } "Add CLM_NCVRD_CHRG_AMT";
 
   } "Add wrapper for institutional components";
 }
