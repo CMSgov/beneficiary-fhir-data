@@ -18,11 +18,11 @@ data "aws_lb" "main" {
 }
 
 data "aws_lb_target_group" "tg_0" {
-  name = "${data.aws_lb.main.name}-tg-0"
+  name = "bfd-${local.env}-${local.target_service}-ecs-tg-0"
 }
 
 data "aws_lb_target_group" "tg_1" {
-  name = "${data.aws_lb.main.name}-tg-1"
+  name = "bfd-${local.env}-${local.target_service}-ecs-tg-1"
 }
 
 resource "aws_cloudwatch_metric_alarm" "elb_healthy_hosts" {
