@@ -4,5 +4,5 @@ Description: "This field identifies the payment for disproportionate share hospi
 Id: CLM-HIPPS-UNCOMPD-CARE-AMT
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-HIPPS-UNCOMPD-CARE-AMT" 
 * ^context[+].type = #element
-* ^context[=].expression = "ExplanationOfBenefit"
+* ^context[=].expression = "ExplanationOfBenefit.adjudication"
 * value[x] only Money

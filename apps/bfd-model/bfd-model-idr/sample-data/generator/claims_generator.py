@@ -1,9 +1,7 @@
 import random
 import copy
-import datetime
 import string
 import argparse
-import time
 import os 
 import json
 import sys
@@ -11,8 +9,7 @@ import subprocess
 import pandas as pd
 from dateutil.parser import parse
 from datetime import date, datetime, timedelta
-from faker import Faker
-fake = Faker()
+
 
 def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_line_instnl,clm_dcmtn):
     df = pd.json_normalize(clm)
@@ -36,17 +33,6 @@ claims_to_generate_per_person = 5
 
 fiss_clm_type_cds = [1011,1041,1012,1013,1014,1022,1023,1034,1071,1072,1073,1074,1075,1076,1077,1083,1085,1087,1089,1032,1033,1081,1082,1021,1018,2011,2041,2012,2013,2014,2022,2023,2034,2071,2072,2073,2074,2075,2076,2077,2083,2085,2087,2089,2032,2033,2081,2082,2021,2018]
 institutional_claim_types = [10,20,30,40,50,60,61,62,63,64]+fiss_clm_type_cds
-inpatient_fiss = []
-outpatient_inst_fiss = []
-snf_fiss = []
-hospice_fiss = []
-hha_fiss = []
-
-clm_table = []
-clm_line_table = []
-clm_instnl_table = []
-clm_dcmtn_table = []
-clm_line_instnl_table = []
 
 type_1_npis = [1942945159,1437702123,1972944437,1447692959,1558719914,1730548868,1023051596,1003488552,1720749690]
 type_2_npis = [1093792350,1548226988,1477643690,1104867175,1669572467,1508565987,1649041195]
@@ -103,6 +89,7 @@ def add_diagnoses(clm_type_cd=-1):
     diagnosis_list = []
     num_diagnoses = 0
     if(clm_type_cd in (10,20,30,50,60,61,62,63,64)):
+        #inpatient uses concepts of principal, admitting, other, external
         principal_diagnosis = {'CLM_CLM_DGNS_CD':random.choice(available_icd_10_codes),
                                'CLM_VAL_SQNC_NUM':"1",
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
@@ -135,6 +122,11 @@ def add_diagnoses(clm_type_cd=-1):
         diagnosis_list.append(external_1)
         diagnosis_list.append(first_external)
         num_diagnoses = random.randint(2,15)
+    elif(clm_type_cd == 40):
+        #outpatient uses principal, other, external cause of injury, patient reason for visit
+        pass
+
+
 
     if(num_diagnoses>1):
         for diagnosis_sqnc in range(2,num_diagnoses):
@@ -143,11 +135,8 @@ def add_diagnoses(clm_type_cd=-1):
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
                                'CLM_PROD_TYPE_CD':'D',
                                'CLM_POA_IND':random.choice(clm_poa_ind_choices)}
-            #inpatient uses concepts of principal, admitting, other, external
             diagnosis_list.append(diagnosis)
 
-
-        #outpatient uses principal, other, external cause of injury, patient reason for visit
     return diagnosis_list
 
 
@@ -176,7 +165,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
 
 
     #NON-PDE
-    #clm_cntl_num = ''.join(random.choices(string.digits, k=14)) + ''.join(random.choices(string.ascii_uppercase,k=3))
     claim['CLM']['CLM_CNTL_NUM'] = ''.join(random.choices(string.digits, k=14)) + ''.join(random.choices(string.ascii_uppercase,k=3))
     #PDE -> diff Claim control number process.
 
@@ -261,10 +249,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     for diagnosis in diagnoses:
         diagnosis['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
         claim['CLM_PROD'].append(diagnosis)
-    #claim['CLM_PROD'].append(diagnoses)
 
     #clm_dt_sgntr info
-
     clm_dt_sgntr = {}
     clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
     claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
@@ -318,9 +304,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         #We'll throw in a non-payment code on occasion 
         if(random.choice([0,10])>1):
             institutional_parts['CLM_MDCR_NPMT_RSN_CD'] = random.choice(code_systems['CLM_MDCR_NPMT_RSN_CD'])
-        #print(institutional_parts)
         claim['CLM_INSTNL'] = institutional_parts
-    #print(claim['CLM_INSTNL'])
 
 
     num_clm_lines = random.randint(1,15)
@@ -424,7 +408,7 @@ def gen_pac_version_of_claim(claim):
     if('CLM_INSTNL_DRG_OUTLIER_AMT' in pac_claim['CLM_INSTNL']):
         pac_claim['CLM_INSTNL'].pop('CLM_INSTNL_DRG_OUTLIER_AMT')
     pac_claim['CLM_INSTNL']['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
-    pac_claim['CLM']['CLM_SRC_ID']=21000 #FISS. 
+    pac_claim['CLM']['CLM_SRC_ID']=21000 #FISS
 
     if('CLM_DCMTN' in pac_claim):
         if('CLM_NRLN_RIC_CD' in pac_claim['CLM_DCMTN']):
@@ -448,16 +432,12 @@ def pull_code_systems():
                     #print(i['code'])
                     concepts.append(i['code'])
                 code_systems[data['name']] = concepts
-                #print(data)
         except FileNotFoundError:
             print(f"Error: File not found at path: {full_path}")
-            #return None
         except json.JSONDecodeError:
-            print(f"Error: Invalid JSON format in file: {full_path}")
-        # return None
+            print(f"Error: Invalid JSON format in file: {full_path}") 
     return code_systems
     
-
 
 def main():
     parser = argparse.ArgumentParser(description='Generate Synthetic Data for Ingestion by the BFD v3 pipeline.')
@@ -517,7 +497,7 @@ def main():
                 for line in pac_claim['CLM_LINE_INSTNL']:
                     CLM_LINE_INSTNL.append(line)
     save_output_files(CLM,CLM_LINE,CLM_VAL,CLM_DT_SGNTR,CLM_PROD,CLM_INSTNL,CLM_LINE_INSTNL,CLM_DCMTN)
-    pass
+    
 if __name__ == "__main__":
     code_systems = pull_code_systems()
     main() 

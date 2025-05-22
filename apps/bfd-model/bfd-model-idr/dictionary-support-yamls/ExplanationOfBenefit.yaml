@@ -51,7 +51,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTL_NUM
   fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
-- inputPath: ExplanationOfBenefit-Base.ORIG_CLM_CNTL_NUM
+- inputPath: ExplanationOfBenefit-Base.clmCntlArray
   claimTypes:
     - Inpatient
     - Outpatient
@@ -61,8 +61,7 @@
   sources:
     - FISS
     - NCH
-  sourceView: V2_MDCR_CLM
-  sourceColumn: ORIG_CLM_CNTL_NUM
+  BFDDerived: true
   fhirPath: ExplanationOfBenefit.related.where(relationship.coding.system = 'http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship').reference.where(system='https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   claimTypes:
@@ -424,6 +423,10 @@
   sourceColumn: CLM_REV_APC_HIPPS_CD
 - inputPath: LineItemComponent.CLM_LINE_NDC_CD
   claimTypes:
+    - Inpatient
+    - HHA
+    - SNF
+    - Hospice
     - Outpatient
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_CD
@@ -586,11 +589,6 @@
     - Outpatient
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_4_REV_CNTR_ANSI_RSN_CD
-- inputPath: LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD
-  claimTypes:
-    - Outpatient
-  sourceView: V2_MDCR_CLM_ANSI_SGNTR
-  sourceColumn: CLM_5_REV_CNTR_ANSI_RSN_CD
 - inputPath: LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT
   claimTypes:
     - Inpatient
@@ -608,63 +606,114 @@
     - Inpatient
     - Outpatient
     - Hospice
+    - HHA
+    - SNF
+  sources:
+    - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_PRVDR_PMT_AMT
 - inputPath: LineItemComponent.CLM_LINE_BENE_PMT_AMT
   claimTypes:
+    - Inpatient
     - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+  sources:
+    - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PMT_AMT
 - inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
   claimTypes:
     - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+  sources:
+    - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
   claimTypes:
     - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+  sources:
+    - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_CVRD_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT
   claimTypes:
     - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+  sources:
+    - NCH
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BLOOD_DDCTBL_AMT
 - inputPath: LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT
   claimTypes:
-    - HHA
+    - Inpatient
     - Outpatient
     - Hospice
+    - HHA
+    - SNF
   sources:
-    - FISS
     - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_MDCR_DDCTBL_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT
   claimTypes:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_ADJSTD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT
   claimTypes:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_RDCD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT
   claimTypes:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_MSP1_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT
   claimTypes:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_MSP2_PD_AMT
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT
   claimTypes:
+    - Inpatient
+    - SNF
     - Outpatient
     - Hospice
     - HHA
+  sources:
+    - FISS
+    - NCH
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_REV_CTR_DT
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
@@ -702,6 +751,9 @@
 - inputPath: SupportingInfoComponent.CLM_SUBMSN_DT
   claimTypes:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_SUBMSN_DT
 - inputPath: SupportingInfoComponent.BENE_PTNT_STUS_CD
@@ -751,6 +803,9 @@
 - inputPath: SupportingInfoComponent.CLM_ADMSN_SRC_CD
   claimTypes:
     - Inpatient
+  sources:
+    - FISS
+    - NCH
   referenceTable: CLM_ADMSN_SRC_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_ADMSN_SRC_CD
@@ -770,6 +825,8 @@
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   claimTypes:
     - Inpatient
+  sources:
+    - NCH
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_NCH_WKLY_PROC_DT
 - inputPath: SupportingInfoComponent.CLM_NCVRD_FROM_DT
@@ -990,6 +1047,7 @@
   sources:
     - FISS
     - NCH
+  referenceTable: CLM_CNTRCTR_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTRCTR_NUM
 - inputPath: ExplanationOfBenefit-Base.CLM_NCH_PRMRY_PYR_CD
@@ -1002,6 +1060,7 @@
   sources:
     - FISS
     - NCH
+  referenceTable: CLM_NCH_PRMRY_PYR_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_NCH_PRMRY_PYR_CD
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_PRMRY_PYR_AMT

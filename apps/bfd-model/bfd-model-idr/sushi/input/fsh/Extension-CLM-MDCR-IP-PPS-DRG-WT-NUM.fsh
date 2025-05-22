@@ -4,6 +4,6 @@ Description: "The number used to determine a transfer adjusted case mix index fo
 Id: CLM-MDCR-IP-PPS-DRG-WT-NUM
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM" 
 * ^context[+].type = #element
-* ^context[=].expression = "ExplanationOfBenefit"
+* ^context[=].expression = "ExplanationOfBenefit.adjudication"
 * valueDecimal 0..1
 * value[x] only decimal
