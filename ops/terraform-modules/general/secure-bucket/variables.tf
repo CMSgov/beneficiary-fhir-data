@@ -24,3 +24,9 @@ variable "bucket_kms_key_arn" {
   nullable    = false
   description = "ARN of the KMS Key that will be used as the Bucket Key. Objects must be uploaded using this key exclusively."
 }
+
+variable "tags" {
+  type        = map(string)
+  nullable    = true
+  description = "Additional tags to attach to bucket resource."
+}

@@ -9,6 +9,8 @@ resource "aws_s3_bucket" "this" {
   bucket_prefix = var.bucket_prefix
   bucket        = var.bucket_name
   force_destroy = var.force_destroy
+
+  tags = var.tags
 }
 
 data "aws_iam_policy_document" "this" {

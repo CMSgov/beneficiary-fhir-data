@@ -1,0 +1,27 @@
+# This file provides a backend configuration for use in new account bootstrapping contexts. See
+# README for motivation and instructions on using this file in those scenarios.
+
+provider "aws" {
+  region = "us-east-1"
+  default_tags {
+    tags = local.default_tags
+  }
+}
+
+provider "aws" {
+  alias  = "secondary"
+  region = "us-west-2"
+  default_tags {
+    tags = local.default_tags
+  }
+}
+
+terraform {
+  backend "local" {}
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.91"
+    }
+  }
+}
