@@ -1,17 +1,35 @@
-# Key policy statements used by *both* the primary and alt region data keys. Please note: `resources = ["*"]` may seem
-# like an overly permissive statement, but it's actually required for the key to be usable. This *only* applies to kms
-# key policies not iam policies. See the following on key policy statements for more info:
-#   - https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-overview.html#key-policy-elements
-data "aws_iam_policy_document" "data" {
+locals {
+  # The below IAM Roles may not exist in an account that has not enabled AutoScaling or RDS
+  # AutoScaling, so we need to enable their policy fragements dynamically
+  autoscaling_iam_role_arn     = one(data.aws_iam_roles.autoscaling.arns)
+  rds_autoscaling_iam_role_arn = one(data.aws_iam_roles.rds_autoscaling.arns)
+  cpm_iam_role_arn             = one(data.aws_iam_roles.cpm.arns)
+}
+
+data "aws_iam_roles" "autoscaling" {
+  name_regex  = "AWSServiceRoleForAutoScaling"
+  path_prefix = "/aws-service-role/autoscaling.amazonaws.com/"
+}
+
+data "aws_iam_roles" "rds_autoscaling" {
+  name_regex  = "AWSServiceRoleForApplicationAutoScaling_RDSCluster"
+  path_prefix = "/aws-service-role/rds.application-autoscaling.amazonaws.com/"
+}
+
+data "aws_iam_roles" "cpm" {
+  name_regex = "aws-cpm-assume-roleV2"
+}
+
+data "aws_iam_policy_document" "autoscaling" {
+  count = local.autoscaling_iam_role_arn != null ? 1 : 0
+
   # Allow our asg's to use the key to encrypt/decrypt data
   statement {
     sid    = "AllowAsgKeyUsage"
     effect = "Allow"
     principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${local.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
-      ]
+      type        = "AWS"
+      identifiers = [local.autoscaling_iam_role_arn]
     }
     actions = [
       "kms:Encrypt",
@@ -29,10 +47,8 @@ data "aws_iam_policy_document" "data" {
     sid    = "AllowAsgGrantUsage"
     effect = "Allow"
     principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${local.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
-      ]
+      type        = "AWS"
+      identifiers = [local.autoscaling_iam_role_arn]
     }
     actions = [
       "kms:CreateGrant",
@@ -46,6 +62,10 @@ data "aws_iam_policy_document" "data" {
     }
     resources = ["*"]
   }
+}
+
+data "aws_iam_policy_document" "rds_autoscaling" {
+  count = local.rds_autoscaling_iam_role_arn != null ? 1 : 0
 
   # Allow RDS app autoscaling to use the key to encrypt/decrypt data, specifically for Performance
   # Insights
@@ -53,10 +73,8 @@ data "aws_iam_policy_document" "data" {
     sid    = "AllowRdsKeyUsage"
     effect = "Allow"
     principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${local.account_id}:role/aws-service-role/rds.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_RDSCluster"
-      ]
+      type        = "AWS"
+      identifiers = [local.rds_autoscaling_iam_role_arn]
     }
     actions = [
       "kms:Encrypt",
@@ -75,10 +93,8 @@ data "aws_iam_policy_document" "data" {
     sid    = "AllowRdsGrantUsage"
     effect = "Allow"
     principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${local.account_id}:role/aws-service-role/rds.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_RDSCluster"
-      ]
+      type        = "AWS"
+      identifiers = [local.rds_autoscaling_iam_role_arn]
     }
     actions = [
       "kms:CreateGrant",
@@ -92,7 +108,13 @@ data "aws_iam_policy_document" "data" {
     }
     resources = ["*"]
   }
+}
 
+# Key policy statements used by *both* the primary and alt region data keys. Please note: `resources = ["*"]` may seem
+# like an overly permissive statement, but it's actually required for the key to be usable. This *only* applies to kms
+# key policies not iam policies. See the following on key policy statements for more info:
+#   - https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-overview.html#key-policy-elements
+data "aws_iam_policy_document" "data" {
   # Allow cloudwatch to use the key to decrypt data
   statement {
     sid    = "AllowCloudWatchKeyUsage"
@@ -202,15 +224,15 @@ data "aws_iam_policy_document" "data" {
 # continue being able to backup and restore data in the event of a failover. If/when we start managing our own backups,
 # this can be deprecated.
 data "aws_iam_policy_document" "data_alt" {
+  count = local.cpm_iam_role_arn != null ? 1 : 0
+
   # Allow CPM to use the key to encrypt/decrypt data
   statement {
     sid    = "AllowCpmKeyUsage"
     effect = "Allow"
     principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${local.account_id}:role/aws-cpm-assume-roleV2"
-      ]
+      type        = "AWS"
+      identifiers = [local.cpm_iam_role_arn]
     }
     actions = [
       "kms:Encrypt",
@@ -229,10 +251,8 @@ data "aws_iam_policy_document" "data_alt" {
     sid    = "AllowCpmGrantUsage"
     effect = "Allow"
     principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:iam::${local.account_id}:role/aws-cpm-assume-roleV2"
-      ]
+      type        = "AWS"
+      identifiers = [local.cpm_iam_role_arn]
     }
     actions = [
       "kms:CreateGrant",
@@ -249,18 +269,26 @@ data "aws_iam_policy_document" "data_alt" {
 }
 
 data "aws_iam_policy_document" "primary_data_key_policy_combined" {
-  source_policy_documents = [
-    data.aws_iam_policy_document.default_kms_key_policy.json,
-    data.aws_iam_policy_document.data.json
-  ]
+  source_policy_documents = concat(
+    [
+      data.aws_iam_policy_document.default_kms_key_policy.json,
+      data.aws_iam_policy_document.data.json
+    ],
+    data.aws_iam_policy_document.autoscaling[*].json,
+    data.aws_iam_policy_document.rds_autoscaling[*].json
+  )
 }
 
 data "aws_iam_policy_document" "alt_data_key_policy_combined" {
-  source_policy_documents = [
-    data.aws_iam_policy_document.default_kms_key_policy.json,
-    data.aws_iam_policy_document.data.json,
-    data.aws_iam_policy_document.data_alt.json
-  ]
+  source_policy_documents = concat(
+    [
+      data.aws_iam_policy_document.default_kms_key_policy.json,
+      data.aws_iam_policy_document.data.json,
+    ],
+    data.aws_iam_policy_document.autoscaling[*].json,
+    data.aws_iam_policy_document.rds_autoscaling[*].json,
+    data.aws_iam_policy_document.data_alt[*].json
+  )
 }
 
 # Environment data keys for the current region. Note: During a failover event, the alt keys and aliases will need to be
