@@ -340,7 +340,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
   //From CLM
   //These are institutional-inpatient mappings. For others, ensure that the mappings are correct. 
   //CLM_MDCR_COINSRNC_AMT
-  institutionalComponents.CLM_MDCR_COINSRNC_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+  src.CLM_MDCR_COINSRNC_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_COINSRNC_AMT") "Add CC";
     src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_MDCR_COINSRNC_AMT";

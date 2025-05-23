@@ -1109,7 +1109,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_BENE_DDCTBL_AMT
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_COINSRNC_AMT
+- inputPath: ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT
   claimTypes:
     - Inpatient
     - Outpatient
@@ -1117,7 +1117,7 @@
   sources:
     - NCH
     - FISS
-  sourceView: V2_MDCR_CLM_INSTNL
+  sourceView: V2_MDCR_CLM
   sourceColumn: CLM_MDCR_COINSRNC_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_OTHR_PRVDR_NPI_NUM
   claimTypes:

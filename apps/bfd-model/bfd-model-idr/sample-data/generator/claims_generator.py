@@ -210,6 +210,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim['CLM']['CLM_OTHR_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
         claim['CLM']['CLM_RNDRG_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
         claim['CLM']['CLM_BLG_PRVDR_OSCAR_NUM'] = random.choice(avail_oscar_codes_institutional)
+        claim['CLM']['CLM_MDCR_COINSRNC_AMT'] = round(random.uniform(0,25),2)
+
         
     
     #generate claim header financial elements here
@@ -299,7 +301,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_TOT_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_BENE_DDCTBL_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_BLOOD_LBLTY_AMT'] = round(random.uniform(0,25),2)
-        institutional_parts['CLM_MDCR_COINSRNC_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
         #We'll throw in a non-payment code on occasion 
         if(random.choice([0,10])>1):

@@ -112,6 +112,19 @@
                 ]
             },
             {
+                "id": "ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT",
+                "label": "Part A/B Coinsurance Liability Amount",
+                "definition": "The amount of money for which the intermediary has determined that the beneficiary is liable for Part A/B coinsurance on the institutional claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "ExplanationOfBenefit-Base.clmCntlArray",
                 "path": "ExplanationOfBenefit-Base.clmCntlArray",
                 "label": "Claim Control Number List",
