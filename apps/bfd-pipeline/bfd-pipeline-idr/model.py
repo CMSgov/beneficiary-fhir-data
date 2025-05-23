@@ -130,6 +130,56 @@ class IdrContractPbpNumber(BaseModel):
     cntrct_pbp_type_cd: str
 
 
+class IdrClaim(BaseModel):
+    clm_uniq_id: int
+    geo_bene_sk: int
+    clm_dt_sgntr_sk: int
+    clm_type_cd: int
+    clm_num_sk: int
+    bene_sk: int
+    clm_cntl_num: str
+    clm_orig_cntl_num: str
+    clm_from_dt: date
+    clm_thru_dt: date
+    clm_efctv_dt: date
+    clm_finl_actn_ind: str
+    clm_type_cd: int
+    clm_src_id: str
+    clm_query_cd: str
+    clm_mdcr_coinsrnc_amt: int
+    clm_blood_lblty_amt: int
+    clm_ncvrd_chrg_amt: int
+    clm_mdcr_ddctbl_amt: int
+    clm_cntrctr_num: str
+    clm_pmt_amt: int
+    clm_ltst_clm_ind: str
+    clm_atndg_prvdr_npi_num: str
+    clm_oprtg_prvdr_npi_num: str
+    clm_othr_prvdr_npi_num: str
+    clm_rndrg_prvdr_npi_num: str
+    prvdr_blg_prvdr_npi_num: str
+    clm_disp_cd: str
+    clm_sbmt_chrg_amt: int
+    clm_blood_pt_frnsh_qty: int
+    clm_nch_prmry_pyr_cd: str
+    clm_blg_prvdr_oscar_num: str
+    clm_mdcr_coinsrnc_amt: int
+    clm_idr_ld_dt: date
+    clm_nrln_ric_cd: str
+
+
+class IdrClaimDateSignature(BaseModel):
+    clm_dt_sgntr_sk: int
+    clm_cms_proc_dt: date
+    clm_actv_care_from_dt: date
+    clm_dschrg_dt: date
+    clm_submsn_dt: date
+    clm_ncvrd_from_dt: date
+    clm_ncvrd_thru_dt: date
+    clm_actv_care_thru_dt: date
+    clm_mdcr_exhstd_dt: date
+
+
 class LoadProgress(BaseModel):
     table_name: str
     last_ts: datetime

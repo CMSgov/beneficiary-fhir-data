@@ -146,6 +146,156 @@ CREATE TABLE idr.load_progress(
     batch_completion_ts TIMESTAMPTZ NOT NULL
 );
 
+CREATE TABLE idr.claim (
+    clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
+    geo_bene_sk BIGINT,
+    clm_dt_sgntr_sk BIGINT,
+    clm_type_cd INT,
+    clm_num_sk BIGINT,
+    bene_sk BIGINT NOT NULL,
+    clm_cntl_num VARCHAR(40),
+    clm_orig_cntl_num VARCHAR(40),
+    clm_from_dt DATE,
+    clm_thru_dt DATE,
+    clm_efctv_dt DATE,
+    clm_finl_actn_ind VARCHAR(1),
+    clm_src_id VARCHAR(5),
+    clm_query_cd VARCHAR(1),
+    clm_mdcr_coinsrnc_amt NUMERIC,
+    clm_blood_lblty_amt NUMERIC,
+    clm_ncvrd_chrg_amt NUMERIC,
+    clm_mdcr_ddctbl_amt NUMERIC,
+    clm_cntrctr_num VARCHAR(5),
+    clm_pmt_amt NUMERIC,
+    clm_ltst_clm_ind VARCHAR(1),
+    clm_atndg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_othr_prvdr_npi_num VARCHAR(10),
+    clm_rndrg_prvdr_npi_num VARCHAR(10),
+    prvdr_blg_prvdr_npi_num VARCHAR(10),
+    clm_disp_cd VARCHAR(2),
+    clm_sbmt_chrg_amt NUMERIC,
+    clm_blood_pt_frnsh_qty INT,
+    clm_nch_prmry_pyr_cd VARCHAR(1),
+    clm_blg_prvdr_oscar_num VARCHAR(20),
+    clm_idr_ld_dt DATE,
+    clm_nrln_ric_cd VARCHAR(1),
+    bfd_created_ts TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE idr.claim_date_signature (
+    clm_dt_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
+    clm_cms_proc_dt DATE,
+    clm_actv_care_from_dt DATE,
+    clm_dschrg_dt DATE,
+    clm_submsn_dt DATE,
+    clm_ncvrd_from_dt DATE,
+    clm_ncvrd_thru_dt DATE,
+    clm_actv_care_thru_dt DATE,
+    clm_mdcr_exhstd_dt DATE,
+    bfd_created_ts TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE idr.claim_institutional (
+    clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
+    clm_admsn_type_cd VARCHAR(2),
+    bene_ptnt_stus_cd VARCHAR(2),
+    dgns_drg_cd INT,
+    clm_mdcr_instnl_mco_pd_sw VARCHAR(1),
+    clm_admsn_src_cd VARCHAR(2),
+    clm_bill_fac_type_cd VARCHAR(1),
+    clm_bill_clsfctn_cd VARCHAR(1),
+    clm_bill_freq_cd VARCHAR(1),
+    clm_fi_actn_cd VARCHAR(1),
+    clm_mdcr_ip_lrd_use_cnt INT,
+    clm_hipps_uncompd_care_amt NUMERIC,
+    clm_instnl_mdcr_coins_day_cnt INT,
+    clm_instnl_ncvrd_day_cnt NUMERIC,
+    clm_instnl_per_diem_amt NUMERIC,
+    clm_mdcr_npmt_rsn_cd VARCHAR(2),
+    clm_mdcr_ip_pps_drg_wt_num NUMERIC,
+    clm_mdcr_ip_pps_dsprprtnt_amt NUMERIC,
+    clm_mdcr_ip_pps_excptn_amt NUMERIC,
+    clm_mdcr_ip_pps_cptl_fsp_amt NUMERIC,
+    clm_mdcr_ip_pps_cptl_ime_amt NUMERIC,
+    clm_mdcr_ip_pps_outlier_amt NUMERIC,
+    clm_mdcr_ip_pps_cptl_hrmls_amt NUMERIC,
+    clm_pps_ind_cd VARCHAR(1),
+    clm_mdcr_ip_pps_cptl_tot_amt NUMERIC,
+    clm_instnl_cvrd_day_cnt NUMERIC,
+    clm_mdcr_instnl_prmry_pyr_amt NUMERIC,
+    clm_instnl_prfnl_amt NUMERIC,
+    clm_mdcr_ip_bene_ddctbl_amt NUMERIC,
+    clm_instnl_drg_outlier_amt NUMERIC
+);
+
+CREATE TABLE idr.claim_value (
+    clm_uniq_id BIGINT NOT NULL,
+    clm_val_sqnc_num INT,
+    clm_val_cd VARCHAR(2),
+    clm_val_amt NUMERIC,
+    PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
+);
+
+CREATE TABLE idr.claim_procedure_diagnosis (
+    clm_uniq_id BIGINT,
+    clm_val_sqnc_num INT,
+    clm_dgns_prcdr_icd_ind VARCHAR(1),
+    clm_dgns_cd VARCHAR(7),
+    clm_prod_type_cd VARCHAR(1),
+    clm_poa_ind VARCHAR(1),
+    clm_prcdr_prfrm_dt DATE,
+    PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
+);
+
+CREATE TABLE idr.claim_line (
+    clm_uniq_id BIGINT,
+    clm_line_num INT,
+    clm_line_sbmt_chrg_amt NUMERIC,
+    clm_line_alowd_chrg_amt NUMERIC,
+    clm_line_ncvrd_chrg_amt NUMERIC,
+    clm_line_prvdr_pmt_amt NUMERIC,
+    clm_line_bene_pmt_amt NUMERIC,
+    clm_line_bene_pd_amt NUMERIC,
+    clm_line_cvrd_pd_amt NUMERIC,
+    clm_line_blood_ddctbl_amt NUMERIC,
+    clm_line_mdcr_ddctbl_amt NUMERIC,
+    clm_line_hcpcs_cd VARCHAR(5),
+    clm_line_ndc_cd VARCHAR(11),
+    clm_line_ndc_qty INT,
+    clm_line_ndc_qty_qlfyr_cd VARCHAR(2),
+    clm_line_srvc_unit_qty INT,
+    clm_line_rev_ctr_cd VARCHAR(4),
+    hcpcs_1_mdfr_cd VARCHAR(2),
+    hcpcs_2_mdfr_cd VARCHAR(2),
+    hcpcs_3_mdfr_cd VARCHAR(2),
+    hcpcs_4_mdfr_cd VARCHAR(2),
+    hcpcs_5_mdfr_cd VARCHAR(2),
+    PRIMARY KEY(clm_uniq_id, clm_line_num)
+);
+
+CREATE TABLE idr.claim_line_institutional (
+    clm_uniq_id BIGINT,
+    clm_line_num INT,
+    clm_rev_apc_hipps_cd VARCHAR(5),
+    clm_ddctbl_coinsrnc_cd VARCHAR(1),
+    clm_line_instnl_rate_amt NUMERIC,
+    clm_line_instnl_adjstd_amt NUMERIC,
+    clm_line_instnl_rdcd_amt NUMERIC,
+    clm_line_instnl_msp1_pd_amt NUMERIC,
+    clm_line_instnl_msp2_pd_amt NUMERIC,
+    clm_line_instnl_rev_ctr_dt DATE,
+    PRIMARY KEY(clm_uniq_id, clm_line_num)
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.claim_ansi_signature (
+    clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
+    clm_1_rev_cntr_ansi_rsn_cd VARCHAR(3),
+    clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3),
+    clm_3_rev_cntr_ansi_rsn_cd VARCHAR(3),
+    clm_4_rev_cntr_ansi_rsn_cd VARCHAR(3)
+);
+
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
 SELECT bene_mbi_id FROM idr.beneficiary
 GROUP BY bene_mbi_id

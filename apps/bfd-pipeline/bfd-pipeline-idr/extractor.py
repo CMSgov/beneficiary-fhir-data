@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Iterator, Mapping, TypeVar
+from typing import Any, Iterator, Mapping
 from snowflake.connector import DictCursor
 import psycopg
 import os
-import logging
 from psycopg.rows import class_row
 from pydantic import BaseModel
 import snowflake.connector
@@ -98,7 +97,7 @@ class PostgresExtractor(Extractor):
         self, cls: type[T], sql: str, params: Mapping[str, Any]
     ) -> Iterator[list[T]]:
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
-            cur.execute(sql, params)
+            cur.execute(sql, params)  # type: ignore
             batch: list[T] = cur.fetchmany(self.batch_size)
             while len(batch) > 0:
                 yield batch
@@ -108,7 +107,7 @@ class PostgresExtractor(Extractor):
         self, cls: type[T], sql: str, params: dict[str, Any]
     ) -> T | None:
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
-            cur.execute(sql, params)
+            cur.execute(sql, params)  # type: ignore
             return cur.fetchone()
 
 
@@ -128,6 +127,7 @@ class SnowflakeExtractor(Extractor):
     def extract_many(
         self, cls: type[T], sql: str, params: dict[str, Any]
     ) -> Iterator[list[T]]:
+        cur = None
         try:
             cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
@@ -150,7 +150,8 @@ class SnowflakeExtractor(Extractor):
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                 cursor_fetch_timer.stop()
         finally:
-            cur.close()
+            if cur:
+                cur.close()
 
 
 def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
