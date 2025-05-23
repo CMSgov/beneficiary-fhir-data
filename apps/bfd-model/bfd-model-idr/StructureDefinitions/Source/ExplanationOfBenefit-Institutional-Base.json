@@ -151,8 +151,8 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_PPS_CPTL_IME_AMT",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_PPS_CPTL_IME_AMT",
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_IME_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_IME_AMT",
                 "label": "Claim PPS Capital IME Amount",
                 "definition": "The amount of the indirect medical education (IME) (reimbursable amount for teaching hospitals only; an added amount passed by Congress to augment normal prospective payment system [PPS] payments for teaching hospitals to compensate them for higher patient costs resulting from medical education programs for interns and residents) portion of the PPS payment for capital.",
                 "min": 0,
@@ -164,8 +164,8 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_PPS_CPTL_OUTLIER_AMT",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_PPS_CPTL_OUTLIER_AMT",
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
                 "label": "Claim PPS Capital Outlier Amount",
                 "definition": "The amount of the outlier portion of the PPS payment for capital.",
                 "min": 0,
@@ -298,19 +298,6 @@
                 "path": "ExplanationOfBenefit-Institutional-Base.CLM_NCVRD_CHRG_AMT",
                 "label": "Noncovered Charge Amount",
                 "definition": "The non-covered charges for all accommodations and services, reported on an inpatient claim (used for internal NCHMQA editing purposes).",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
-                "label": "Claim PPS Capital Outlier Amount",
-                "definition": "The amount of the outlier portion of the PPS payment for capital.",
                 "min": 0,
                 "max": "1",
                 "type": [
