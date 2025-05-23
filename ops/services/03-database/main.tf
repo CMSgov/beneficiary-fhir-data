@@ -1,10 +1,12 @@
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
+  greenfield           = var.greenfield
+  parent_env           = local.parent_env
   environment_name     = terraform.workspace
   service              = local.service
   relative_module_root = "ops/services/03-database"
-  subnet_layers        = ["data"]
+  subnet_layers        = !var.greenfield ? ["data"] : ["private"]
 }
 
 locals {
@@ -14,7 +16,6 @@ locals {
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
-  seed_env                 = module.terraservice.seed_env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
   latest_bfd_release       = module.terraservice.latest_bfd_release
   ssm_config               = module.terraservice.ssm_config
@@ -26,8 +27,8 @@ locals {
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
   azs                      = module.terraservice.default_azs
-  data_subnets             = module.terraservice.subnets_map["data"]
-  external_sgs             = [module.terraservice.tools_sg, module.terraservice.vpn_sg, module.terraservice.management_sg]
+  data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
+  external_sgs             = !var.greenfield ? [module.terraservice.legacy_tools_sg, module.terraservice.legacy_vpn_sg, module.terraservice.legacy_management_sg] : [module.terraservice.cms_cloud_vpn_sg]
 
   rds_aurora_family                       = "aurora-postgresql16"
   rds_cluster_id                          = nonsensitive(local.ssm_config["/bfd/database/rds_cluster_identifier"])
@@ -56,7 +57,7 @@ locals {
 data "aws_db_cluster_snapshot" "main" {
   count = local.is_ephemeral_env ? 1 : 0
 
-  db_cluster_identifier = "bfd-${local.seed_env}-aurora-cluster"
+  db_cluster_identifier = "bfd-${local.parent_env}-aurora-cluster"
 
   most_recent                    = var.ephemeral_rds_snapshot_id_override == null
   db_cluster_snapshot_identifier = var.ephemeral_rds_snapshot_id_override
@@ -159,10 +160,33 @@ resource "aws_rds_cluster" "this" {
     local.external_sgs[*].id
   )
 
-  monitoring_interval             = 15
-  monitoring_role_arn             = aws_iam_role.db_monitoring.arn
-  performance_insights_enabled    = true
-  performance_insights_kms_key_id = local.env_key_arn
+  # Autoscaled reader nodes, by default, are not configured with Performance Insights. Until
+  # recently, the only option for enabling Performance Insights for those nodes would be to enable
+  # it after they scale-out and reach the "available" state. However, it seems that it is now
+  # possible to enable both Performance Insights and Enhanced Monitoring at the Cluster level for
+  # Aurora Clusters, avoiding such a workaround. Unfortunately, the Terraform AWS Provider does not
+  # properly support enabling both Performance Insights and Enhanced Monitoring at the Cluster level
+  # as of 05/23 (specifically throwing an error indicating that enabling both is only fully
+  # supported for Aurora Limitless DBs), thus necessitating this local-exec provisioner.
+  # Fortunately, once enabled, the settings for these cannot be changed, so we only need them to be
+  # enabled at creation-time.
+  provisioner "local-exec" {
+    environment = {
+      DB_CLUSTER_ID                    = self.cluster_identifier
+      KMS_KEY_ID                       = self.kms_key_id
+      ENHANCED_MONITORING_INTERVAL     = 15
+      ENHANCED_MONITORING_IAM_ROLE_ARN = aws_iam_role.db_monitoring.arn
+    }
+    command     = <<-EOF
+    aws rds modify-db-cluster --db-cluster-identifier "$DB_CLUSTER_ID" \
+      --performance-insights-kms-key-id "$KMS_KEY_ID" \
+      --enable-performance-insights \
+      --monitoring-interval "$ENHANCED_MONITORING_INTERVAL" \
+      --monitoring-role-arn "$ENHANCED_MONITORING_IAM_ROLE_ARN" 1>/dev/null &&
+      echo "Performance Insights and Enhanced Monitoring enabled for $DB_CLUSTER_ID"
+    EOF
+    interpreter = ["/bin/bash", "-c"]
+  }
 
   # Autoscaled reader nodes are not managed by Terraform and Terraform is unable to destroy a
   # cluster with nodes still within it. To support simply running "terraform destroy" in

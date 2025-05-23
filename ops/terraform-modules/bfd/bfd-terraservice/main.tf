@@ -38,6 +38,11 @@ locals {
   legacy_management_sg = lookup(local.ssm_config, "/bfd/common/management_security_group", null)
   legacy_vpn_sg        = lookup(local.ssm_config, "/bfd/common/vpn_security_group", null)
 
+  # OIT/CMS Cloud configured Security Groups that exist in the Greenfield accounts
+  cms_cloud_vpn_sg             = "cmscloud-vpn"
+  cms_cloud_security_tools_sg  = "cmscloud-security-tools"
+  cms_cloud_shared_services_sg = "cmscloud-shared-services"
+
   # Specify a set of default AZs -- in this case: <region>a, <region>b, <region>c
   default_azs = {
     for k, v in data.aws_availability_zone.main :
@@ -106,7 +111,7 @@ data "aws_subnets" "main" {
     values = [data.aws_vpc.main.id]
   }
 
-  tags = var.greenfield ? {
+  tags = !var.greenfield ? {
     Layer = each.key
     } : {
     GroupName = each.key
@@ -146,5 +151,35 @@ data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
     values = [local.legacy_tools_sg]
+  }
+}
+
+data "aws_security_group" "cms_cloud_vpn" {
+  count = local.cms_cloud_vpn_sg != null && var.greenfield ? 1 : 0
+
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [local.cms_cloud_vpn_sg]
+  }
+}
+
+data "aws_security_group" "cms_cloud_security_tools" {
+  count = local.cms_cloud_security_tools_sg != null && var.greenfield ? 1 : 0
+
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [local.cms_cloud_security_tools_sg]
+  }
+}
+
+data "aws_security_group" "cms_cloud_shared_services" {
+  count = local.cms_cloud_shared_services_sg != null && var.greenfield ? 1 : 0
+
+  vpc_id = data.aws_vpc.main.id
+  filter {
+    name   = "tag:Name"
+    values = [local.cms_cloud_shared_services_sg]
   }
 }

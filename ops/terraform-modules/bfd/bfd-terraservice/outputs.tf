@@ -107,11 +107,14 @@ output "default_azs" {
 }
 
 output "subnets_map" {
-  description = "Map of subnet layers to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
+  description = "Map of subnet layers (legacy) or group (greenfield) to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
   sensitive   = false
-  value = {
+  value = !var.greenfield ? {
     for layer in var.subnet_layers
     : layer => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["Layer"] == layer]
+    } : {
+    for group in var.subnet_layers
+    : group => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["GroupName"] == group]
   }
 }
 
@@ -131,4 +134,22 @@ output "legacy_management_sg" {
   description = "The OIT/CMS Cloud provided remote management Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.management)
+}
+
+output "cms_cloud_vpn_sg" {
+  description = "Greenfield only. The OIT/CMS Cloud provided VPN Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.cms_cloud_vpn)
+}
+
+output "cms_cloud_security_tools_sg" {
+  description = "Greenfield only. The OIT/CMS Cloud provided Security Tools Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.cms_cloud_security_tools)
+}
+
+output "cms_cloud_shared_services_sg" {
+  description = "Greenfield only. The OIT/CMS Cloud provided Shared Services Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.cms_cloud_shared_services)
 }

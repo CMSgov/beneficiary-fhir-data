@@ -1,6 +1,11 @@
 variable "ephemeral_rds_snapshot_id_override" {
   default     = null
-  description = "Specify DB Cluster Snapshot ID from `seed_env`. Defaults to null which indicates latest snapshot from the seed cluster on initial definition, falls back to previously specified snapshot on subsequent execution."
+  description = <<-EOF
+  Specify DB Cluster Snapshot ID from `seed_env`. Will cause the Cluster to be created from a
+  Snapshot. Defaults to null which, for ephemeral environments, indicates latest snapshot from the
+  seed cluster on initial definition, falling back to previously specified snapshot on subsequent
+  execution.
+  EOF
   type        = string
 }
 
