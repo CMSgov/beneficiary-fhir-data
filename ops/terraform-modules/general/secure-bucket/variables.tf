@@ -26,7 +26,7 @@ variable "bucket_kms_key_arn" {
 }
 
 variable "tags" {
+  default     = {}
   type        = map(string)
-  nullable    = true
   description = "Additional tags to attach to bucket resource."
 }
