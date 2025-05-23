@@ -305,6 +305,19 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
+                "label": "Claim PPS Capital Outlier Amount",
+                "definition": "The amount of the outlier portion of the PPS payment for capital.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]
