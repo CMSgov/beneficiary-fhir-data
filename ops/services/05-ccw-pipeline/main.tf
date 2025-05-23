@@ -2,13 +2,14 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   environment_name     = terraform.workspace
-  service              = "ccw-pipeline"
+  service              = local.service
   relative_module_root = "ops/services/05-ccw-pipeline"
   subnet_layers        = ["app", "data"]
 }
 
 locals {
-  service                  = module.terraservice.service
+  service = "ccw-pipeline"
+
   region                   = module.terraservice.region
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags
