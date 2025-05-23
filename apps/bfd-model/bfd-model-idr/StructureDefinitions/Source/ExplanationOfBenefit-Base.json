@@ -541,6 +541,19 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT",
+                "label": "Noncovered Charge Amount",
+                "definition": "The non-covered charges for all accommodations and services, reported on an inpatient claim (used for internal NCHMQA editing purposes).",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
