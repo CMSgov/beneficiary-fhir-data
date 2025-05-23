@@ -1,9 +1,9 @@
 locals {
   established_envs = ["test", "prod-sbx", "prod"]
-  seed_env         = one([for x in local.established_envs : x if can(regex("${x}$$", var.environment_name))])
-  service          = var.service
-  env              = var.environment_name
-  github_token     = coalesce(data.external.github_token.result.github_token, "invalid")
+
+  service      = var.service
+  env          = var.environment_name
+  github_token = coalesce(data.external.github_token.result.github_token, "invalid")
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
@@ -33,10 +33,10 @@ locals {
   kms_config_key_alias      = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
   kms_config_key_mrk_config = one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration)
 
-  # OIT/CMS Cloud configured Security Groups that are expected to always exist
-  tools_sg      = lookup(local.ssm_config, "/bfd/common/enterprise_tools_security_group", null)
-  management_sg = lookup(local.ssm_config, "/bfd/common/management_security_group", null)
-  vpn_sg        = lookup(local.ssm_config, "/bfd/common/vpn_security_group", null)
+  # OIT/CMS Cloud configured Security Groups that exist only in the legacy account
+  legacy_tools_sg      = lookup(local.ssm_config, "/bfd/common/enterprise_tools_security_group", null)
+  legacy_management_sg = lookup(local.ssm_config, "/bfd/common/management_security_group", null)
+  legacy_vpn_sg        = lookup(local.ssm_config, "/bfd/common/vpn_security_group", null)
 
   # Specify a set of default AZs -- in this case: <region>a, <region>b, <region>c
   default_azs = {
@@ -94,7 +94,7 @@ data "aws_iam_policy" "permissions_boundary" {
 data "aws_vpc" "main" {
   filter {
     name   = "tag:stack"
-    values = [local.seed_env]
+    values = [var.parent_env]
   }
 }
 
@@ -106,8 +106,10 @@ data "aws_subnets" "main" {
     values = [data.aws_vpc.main.id]
   }
 
-  tags = {
+  tags = var.greenfield ? {
     Layer = each.key
+    } : {
+    GroupName = each.key
   }
 }
 
@@ -118,31 +120,31 @@ data "aws_subnet" "main" {
 }
 
 data "aws_security_group" "vpn" {
-  count = local.vpn_sg != null ? 1 : 0
+  count = local.legacy_vpn_sg != null && !var.greenfield ? 1 : 0
 
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = [local.vpn_sg]
+    values = [local.legacy_vpn_sg]
   }
 }
 
 data "aws_security_group" "management" {
-  count = local.management_sg != null ? 1 : 0
+  count = local.legacy_management_sg != null && !var.greenfield ? 1 : 0
 
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = [local.management_sg]
+    values = [local.legacy_management_sg]
   }
 }
 
 data "aws_security_group" "tools" {
-  count = local.tools_sg != null ? 1 : 0
+  count = local.legacy_tools_sg != null && !var.greenfield ? 1 : 0
 
   vpc_id = data.aws_vpc.main.id
   filter {
     name   = "tag:Name"
-    values = [local.tools_sg]
+    values = [local.legacy_tools_sg]
   }
 }

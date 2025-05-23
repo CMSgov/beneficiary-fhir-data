@@ -25,18 +25,12 @@ output "env" {
 output "is_ephemeral_env" {
   description = "Returns true when environment is _ephemeral_, false when _established_"
   sensitive   = false
-  value       = var.environment_name != local.seed_env
-}
-
-output "seed_env" {
-  description = "The solution's source environment. For established environments this is equal to the environment's name"
-  sensitive   = false
-  value       = local.seed_env
+  value       = var.environment_name != var.parent_env
 }
 
 output "default_tags" {
   value = merge(var.additional_tags, {
-    Environment    = local.seed_env
+    Environment    = var.parent_env
     application    = "bfd"
     business       = "oeda"
     stack          = var.environment_name
@@ -121,19 +115,19 @@ output "subnets_map" {
   }
 }
 
-output "tools_sg" {
+output "legacy_tools_sg" {
   description = "The OIT/CMS Cloud provided enterprise tools Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.tools)
 }
 
-output "vpn_sg" {
+output "legacy_vpn_sg" {
   description = "The OIT/CMS Cloud provided VPN Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.vpn)
 }
 
-output "management_sg" {
+output "legacy_management_sg" {
   description = "The OIT/CMS Cloud provided remote management Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.management)
