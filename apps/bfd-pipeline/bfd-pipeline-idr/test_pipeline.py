@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
 import os
+from typing import cast
+import psycopg
 import time
 import psycopg
-from psycopg.rows import dict_row
+from psycopg.rows import dict_row, DictRow
 import pytest
 from testcontainers.postgres import PostgresContainer
 
@@ -16,9 +18,9 @@ def psql_url():
         psql_url = postgres.get_connection_url()
         conn = psycopg.connect(psql_url)
 
-        conn.execute(open("./mock-idr.sql", "r").read())
+        conn.execute(open("./mock-idr.sql", "r").read())  # type: ignore
         conn.commit()
-        conn.execute(open("./bfd.sql", "r").read())
+        conn.execute(open("./bfd.sql", "r").read())  # type: ignore
         conn.commit()
         yield psql_url
 
@@ -26,7 +28,7 @@ def psql_url():
 class TestPipeline:
     def test_pipeline(self, psql_url: str):
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
-        conn = psycopg.connect(psql_url, row_factory=dict_row)
+        conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")
         assert cur.rowcount == 2
         rows = cur.fetchmany(2)

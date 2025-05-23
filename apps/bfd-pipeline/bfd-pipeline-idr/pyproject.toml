@@ -5,13 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "psycopg>=3.2.6",
-    "pydantic>=2.10.6",
-    "snowflake-connector-python>=3.14.0",
+    "psycopg>=3.2.9",
+    "pydantic>=2.11.5",
+    "snowflake-connector-python>=3.15.0",
 ]
 
 [dependency-groups]
-dev = ["mypy>=1.15.0", "pytest>=8.3.5", "testcontainers>=4.9.2"]
+dev = ["pyright>=1.1.401", "pytest>=8.3.5", "testcontainers>=4.9.2"]
 
 [[tool.mypy.overrides]]
 module = ["testcontainers.*"]

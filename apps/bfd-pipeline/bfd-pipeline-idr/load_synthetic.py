@@ -24,7 +24,7 @@ for table in tables:
         cols_str = ",".join(cols)
         with conn.cursor() as cur:
             with cur.copy(
-                f"COPY cms_vdm_view_mdcr_prd.{table["table"]} ({cols_str}) FROM STDIN"
+                f"COPY cms_vdm_view_mdcr_prd.{table["table"]} ({cols_str}) FROM STDIN"  # type: ignore
             ) as copy:
                 for row in reader:
                     copy.write_row([row[c] if row[c] else None for c in cols])

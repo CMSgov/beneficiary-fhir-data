@@ -1,6 +1,7 @@
 import logging
 import sys
 import os
+from typing import Optional
 from loader import PostgresLoader
 import loader
 from model import (
@@ -66,6 +67,7 @@ def extract_and_load(
     table_to_load: str,
     unique_key: list[str],
     exclude_keys: list[str],
+    batch_timestamp_col: Optional[str],
     connection_string: str,
 ):
     data_iter = data_extractor.extract_idr_data(
@@ -79,6 +81,7 @@ def extract_and_load(
         connection_string=connection_string,
         table=table_to_load,
         unique_key=unique_key,
+        batch_timestamp_col=batch_timestamp_col,
         exclude_keys=exclude_keys,
     )
     loader.load(data_iter, cls)
@@ -100,6 +103,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         table_to_load="idr.beneficiary_history",
         unique_key=["bene_sk", "idr_trans_efctv_ts"],
         exclude_keys=["bene_xref_efctv_sk_computed"],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -115,6 +119,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         table_to_load="idr.beneficiary_mbi_id",
         unique_key=["bene_mbi_id", "idr_trans_efctv_ts"],
         exclude_keys=[],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -130,6 +135,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         table_to_load="idr.beneficiary",
         unique_key=["bene_sk"],
         exclude_keys=["bene_xref_efctv_sk_computed"],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -152,6 +158,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             "idr_trans_efctv_ts",
         ],
         exclude_keys=[],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -173,6 +180,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             "idr_trans_efctv_ts",
         ],
         exclude_keys=[],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -194,6 +202,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             "idr_trans_efctv_ts",
         ],
         exclude_keys=[],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -214,6 +223,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             "idr_trans_efctv_ts",
         ],
         exclude_keys=[],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
@@ -253,6 +263,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         table_to_load="idr.beneficiary_election_period_usage",
         unique_key=["bene_sk", "cntrct_pbp_sk", "bene_enrlmt_efctv_dt"],
         exclude_keys=[],
+        batch_timestamp_col="idr_trans_efctv_ts",
         connection_string=connection_string,
     )
 
