@@ -1,6 +1,8 @@
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
+  greenfield           = var.greenfield
+  parent_env           = local.parent_env
   environment_name     = terraform.workspace
   service              = local.service
   relative_module_root = "ops/services/01-base"
@@ -13,7 +15,6 @@ locals {
   account_id         = module.terraservice.account_id
   default_tags       = module.terraservice.default_tags
   env                = module.terraservice.env
-  seed_env           = module.terraservice.seed_env
   is_ephemeral_env   = module.terraservice.is_ephemeral_env
   latest_bfd_release = module.terraservice.latest_bfd_release
 
