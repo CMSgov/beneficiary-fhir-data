@@ -3,7 +3,7 @@
 
 locals {
   established_envs = ["test", "prod-sbx", "prod"]
-  parent_env       = coalesce(var.parent_env, one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]))
+  parent_env       = terraform.workspace != "default" ? coalesce(var.parent_env, one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))])) : "ignore"
 }
 
 variable "greenfield" {
