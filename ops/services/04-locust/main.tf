@@ -1,10 +1,12 @@
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
+  greenfield           = var.greenfield
+  parent_env           = local.parent_env
   environment_name     = terraform.workspace
   service              = local.service
   relative_module_root = "ops/services/04-locust"
-  subnet_layers        = ["app"]
+  subnet_layers        = !var.greenfield ? ["app"] : ["private"]
 }
 
 locals {
@@ -14,7 +16,6 @@ locals {
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
-  seed_env                 = module.terraservice.seed_env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
   latest_bfd_release       = module.terraservice.latest_bfd_release
   ssm_config               = module.terraservice.ssm_config
@@ -25,7 +26,7 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  app_subnets              = module.terraservice.subnets_map["app"]
+  app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
 
   name_prefix = "bfd-${local.env}-${local.service}"
 }

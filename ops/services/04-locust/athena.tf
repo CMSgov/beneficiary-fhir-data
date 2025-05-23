@@ -12,7 +12,8 @@ module "bucket_athena" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = "${local.name_prefix}-stats"
+  bucket_name        = !var.greenfield ? "${local.name_prefix}-stats" : null
+  bucket_prefix      = var.greenfield ? "${local.name_prefix}-stats" : null
   force_destroy      = local.is_ephemeral_env
 }
 
@@ -103,7 +104,18 @@ resource "aws_lambda_function" "locust_stats_glue_trigger" {
   role = aws_iam_role.locust_stats_glue_trigger.arn
 }
 
+resource "aws_lambda_permission" "allow_s3_locust_stats_glue_trigger" {
+  statement_id   = "${aws_lambda_function.locust_stats_glue_trigger.function_name}-allow-s3"
+  action         = "lambda:InvokeFunction"
+  function_name  = aws_lambda_function.locust_stats_glue_trigger.arn
+  principal      = "s3.amazonaws.com"
+  source_arn     = module.bucket_athena.bucket.arn
+  source_account = local.account_id
+}
+
 resource "aws_s3_bucket_notification" "locust_stats_glue_trigger" {
+  depends_on = [aws_lambda_permission.allow_s3_locust_stats_glue_trigger]
+
   bucket = module.bucket_athena.bucket.id
 
   lambda_function {
@@ -115,13 +127,4 @@ resource "aws_s3_bucket_notification" "locust_stats_glue_trigger" {
     id                  = "${aws_lambda_function.locust_stats_glue_trigger.function_name}-s3-notifs"
     lambda_function_arn = aws_lambda_function.locust_stats_glue_trigger.arn
   }
-}
-
-resource "aws_lambda_permission" "allow_s3_locust_stats_glue_trigger" {
-  statement_id   = "${aws_lambda_function.locust_stats_glue_trigger.function_name}-allow-s3"
-  action         = "lambda:InvokeFunction"
-  function_name  = aws_lambda_function.locust_stats_glue_trigger.arn
-  principal      = "s3.amazonaws.com"
-  source_arn     = module.bucket_athena.bucket.arn
-  source_account = local.account_id
 }

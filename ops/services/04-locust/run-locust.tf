@@ -1,8 +1,9 @@
 locals {
-  run_locust_repository_name  = coalesce(var.run_locust_repository_override, "bfd-mgmt-run-locust")
-  run_locust_version          = coalesce(var.run_locust_version_override, local.latest_bfd_release)
-  run_locust_lambda_name      = "run-locust"
-  run_locust_lambda_full_name = "${local.name_prefix}-${local.run_locust_lambda_name}"
+  run_locust_repository_default = !var.greenfield ? "bfd-mgmt-run-locust" : "bfd-platform-run-locust"
+  run_locust_repository_name    = coalesce(var.run_locust_repository_override, local.run_locust_repository_default)
+  run_locust_version            = coalesce(var.run_locust_version_override, local.latest_bfd_release)
+  run_locust_lambda_name        = "run-locust"
+  run_locust_lambda_full_name   = "${local.name_prefix}-${local.run_locust_lambda_name}"
 }
 
 data "aws_rds_cluster" "main" {
