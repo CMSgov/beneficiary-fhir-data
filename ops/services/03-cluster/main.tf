@@ -1,6 +1,8 @@
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
+  greenfield           = var.greenfield
+  parent_env           = local.parent_env
   environment_name     = terraform.workspace
   relative_module_root = "ops/services/03-cluster"
   service              = local.service
