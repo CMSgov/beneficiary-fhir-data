@@ -13,6 +13,7 @@ from model import (
     IdrBeneficiaryMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
+    IdrClaim,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
@@ -63,18 +64,21 @@ def main():
 def extract_and_load(
     cls: type[T],
     data_extractor: Extractor,
+    connection_string: str,
     fetch_query: str,
     table_to_load: str,
     unique_key: list[str],
     exclude_keys: list[str],
-    batch_timestamp_col: Optional[str],
-    connection_string: str,
+    batch_timestamp_col: str,
+    update_timestamp_col: Optional[str] = None,
 ):
     data_iter = data_extractor.extract_idr_data(
         cls,
         connection_string=connection_string,
         fetch_query=fetch_query,
         table=table_to_load,
+        batch_timestamp_col=batch_timestamp_col,
+        update_timestamp_col=update_timestamp_col,
     )
 
     loader = PostgresLoader(
@@ -104,6 +108,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         unique_key=["bene_sk", "idr_trans_efctv_ts"],
         exclude_keys=["bene_xref_efctv_sk_computed"],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -120,6 +125,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         unique_key=["bene_mbi_id", "idr_trans_efctv_ts"],
         exclude_keys=[],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -136,6 +142,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         unique_key=["bene_sk"],
         exclude_keys=["bene_xref_efctv_sk_computed"],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -159,6 +166,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         ],
         exclude_keys=[],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -181,6 +189,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         ],
         exclude_keys=[],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -203,6 +212,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         ],
         exclude_keys=[],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -224,6 +234,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         ],
         exclude_keys=[],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -264,6 +275,30 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         unique_key=["bene_sk", "cntrct_pbp_sk", "bene_enrlmt_efctv_dt"],
         exclude_keys=[],
         batch_timestamp_col="idr_trans_efctv_ts",
+        update_timestamp_col="idr_updt_ts",
+        connection_string=connection_string,
+    )
+
+    clm = IdrClaim.claim_alias
+    dcmtn = IdrClaim.dcmtn_alias
+    extract_and_load(
+        IdrClaim,
+        data_extractor,
+        fetch_query=f"""
+         SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
+                {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
+                {clm}.clm_num_sk = {dcmtn}.clm_num_sk
+            {{WHERE_CLAUSE}}
+            {{ORDER_BY}}
+        """,
+        table_to_load="idr.claim",
+        unique_key=[],
+        exclude_keys=[],
+        batch_timestamp_col="clm_idr_ld_dt",
         connection_string=connection_string,
     )
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Iterator, Mapping
+from typing import Any, Iterator, Mapping, Optional
 from snowflake.connector import DictCursor
 import psycopg
 import os
@@ -43,7 +43,7 @@ class Extractor(ABC):
         cls: type[T],
         fetch_query: str,
     ) -> str:
-        columns = ",".join(cls.model_fields.keys())
+        columns = ",".join(cls.column_aliases())
         return fetch_query.replace("{COLUMNS}", columns)
 
     def extract_idr_data(
@@ -52,6 +52,8 @@ class Extractor(ABC):
         connection_string: str,
         fetch_query: str,
         table: str,
+        batch_timestamp_col: str,
+        update_timestamp_col: Optional[str] = None,
     ) -> Iterator[list[T]]:
         fetch_query = self.get_query(cls, fetch_query)
         progress = get_progress(connection_string, table)
@@ -62,23 +64,28 @@ class Extractor(ABC):
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
-                    f"WHERE idr_trans_efctv_ts >= '{get_min_transaction_date()}'",
-                ).replace("{ORDER_BY}", "ORDER BY idr_trans_efctv_ts"),
+                    f"WHERE {batch_timestamp_col} >= '{get_min_transaction_date()}'",
+                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
                 {},
             )
             idr_query_timer.stop()
             return res
         else:
             idr_query_timer.start()
-            # Saved progress found, start processing from where we left off
+            # Saved progress found, start processing from where we left
+            update_clause = (
+                f"OR {update_timestamp_col} >= %(timestamp)s"
+                if update_timestamp_col is not None
+                else ""
+            )
             res = self.extract_many(
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
                     f"""
                     WHERE 
-                        (idr_trans_efctv_ts >= %(timestamp)s OR idr_updt_ts >= %(timestamp)s)
-                        AND idr_trans_efctv_ts >= '{get_min_transaction_date()}' 
+                        ({batch_timestamp_col} >= %(timestamp)s {update_clause})
+                        AND {batch_timestamp_col} >= '{get_min_transaction_date()}' 
                     """,
                 ).replace("{ORDER_BY}", "ORDER BY idr_trans_efctv_ts"),
                 {"timestamp": progress.last_ts},
