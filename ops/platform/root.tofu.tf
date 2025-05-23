@@ -7,7 +7,7 @@ locals {
   # if the workspace does not exactly match one of the above account types. Further validation is
   # handled by the Terraservice module. This is only:necessary if greenfield is true, since we don't
   # use the account_type in the legacy environment
-  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x == terraform.workspace])) : "ignore"
+  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace])) : "ignore"
 }
 
 variable "greenfield" {
