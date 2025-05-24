@@ -6,6 +6,8 @@ from loader import PostgresLoader
 import loader
 from model import (
     T,
+    ALIAS_CLM,
+    ALIAS_DCMTN,
     IdrBeneficiary,
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
@@ -14,6 +16,7 @@ from model import (
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrClaim,
+    IdrClaimInstitutional,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
@@ -279,8 +282,9 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         connection_string=connection_string,
     )
 
-    clm = IdrClaim.claim_alias
-    dcmtn = IdrClaim.dcmtn_alias
+    clm = ALIAS_CLM
+    dcmtn = ALIAS_DCMTN
+
     extract_and_load(
         IdrClaim,
         data_extractor,
@@ -296,6 +300,27 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {{ORDER_BY}}
         """,
         table_to_load="idr.claim",
+        unique_key=[],
+        exclude_keys=[],
+        batch_timestamp_col="clm_idr_ld_dt",
+        connection_string=connection_string,
+    )
+
+    extract_and_load(
+        IdrClaimInstitutional,
+        data_extractor,
+        fetch_query=f"""
+         SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl instnl ON
+                {clm}.geo_bene_sk = instnl.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = instnl.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = instnl.clm_type_cd AND
+                {clm}.clm_num_sk = instnl.clm_num_sk
+            {{WHERE_CLAUSE}}
+            {{ORDER_BY}}
+        """,
+        table_to_load="idr.claim_institutional",
         unique_key=[],
         exclude_keys=[],
         batch_timestamp_col="clm_idr_ld_dt",
