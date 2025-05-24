@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.IdrConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -10,7 +11,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 
 /** Main entity representing the beneficiary table. */
 @Entity
@@ -65,8 +70,42 @@ public class Beneficiary {
     patient.setCommunication(List.of(languageCode.toFhir()));
     deathDate.toFhir().ifPresent(patient::setDeceased);
     patient.addExtension(raceCode.toFhir());
-    patient.setMeta(meta.toFhir());
+    patient.setMeta(meta.toFhirPatient());
 
     return patient;
+  }
+
+  /**
+   * Creates an initial, partially populated FHIR Coverage resource using data directly available on
+   * this Beneficiary entity. Further enrichment with part-specific details and status/reason codes
+   * will be done by the handler.
+   *
+   * @param fullCompositeId The full ID for the Coverage resource.
+   * @return A partially populated FHIR Coverage object.
+   */
+  public Coverage toFhirCoverage(String fullCompositeId) {
+    Coverage coverage = new Coverage();
+
+    coverage.setId(fullCompositeId);
+
+    coverage.setMeta(meta.toFhirCoverage());
+
+    coverage.setBeneficiary(new Reference("Patient/" + this.getBeneSk()));
+
+    // probably create a new class for this, RelationshipFactory class maybe? - yes
+    CodeableConcept relationshipCodeConcept = new CodeableConcept();
+    relationshipCodeConcept
+        .addCoding()
+        .setSystem(IdrConstants.SYS_SUBSCRIBER_RELATIONSHIP)
+        .setCode("self")
+        .setDisplay("Self");
+    coverage.setRelationship(relationshipCodeConcept);
+
+    coverage.addPayor(new Reference().setReference("#cms-org"));
+
+    Organization cmsOrg = OrganizationFactory.createCmsOrganization();
+    coverage.addContained(cmsOrg);
+
+    return coverage;
   }
 }
