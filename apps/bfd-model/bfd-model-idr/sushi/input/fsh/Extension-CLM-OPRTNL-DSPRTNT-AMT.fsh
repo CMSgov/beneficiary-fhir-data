@@ -4,5 +4,5 @@ Description: "This is one component of the total amount that is payable on prosp
 Id: CLM-OPRTNL-DSPRTNT-AMT
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OPRTNL-DSPRTNT-AMT" 
 * ^context[+].type = #element
-* ^context[=].expression = "ExplanationOfBenefit"
+* ^context[=].expression = "ExplanationOfBenefit.adjudication"
 * value[x] only Money

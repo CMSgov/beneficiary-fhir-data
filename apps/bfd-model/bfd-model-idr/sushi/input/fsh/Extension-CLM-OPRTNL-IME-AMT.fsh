@@ -4,5 +4,5 @@ Description: "This is one component of the total amount that is payable on PPS c
 Id: CLM-OPRTNL-IME-AMT
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OPRTNL-IME-AMT" 
 * ^context[+].type = #element
-* ^context[=].expression = "ExplanationOfBenefit"
+* ^context[=].expression = "ExplanationOfBenefit.adjudication"
 * value[x] only Money

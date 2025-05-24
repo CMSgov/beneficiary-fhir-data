@@ -37,7 +37,7 @@
                 "id": "SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT",
                 "path": "SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT",
                 "label": "Claim Admission Date",
-                "definition": "On an institutional claim, the date the beneficiary was admitted to the hospital, skilled nursing facility, or religious non-medical health care institution. When this variable appears in the HHA claims (Short Name = HHSTRTDT), it is the date the care began for the HHA services reported on the claim.",
+                "definition": "On an institutional claim, the date the beneficiary was admitted to the hospital, skilled nursing facility, or religious non-medical health care institution. When this variable appears in the HHA claims (Short Name = HHSTRTDT), it is the date the care began for the HHA services reported on the claim. For Hospice claims, the date the beneficiary was admitted to the hospice care.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -238,6 +238,19 @@
                 "type": [
                     {
                         "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_PPS_IND_CD",
+                "path": "SupportingInfoComponent.CLM_PPS_IND_CD",
+                "label": "Claim PPS Indicator Code",
+                "definition": "The code indicating whether or not: (1) the claim is from the prospective payment system (PPS), and/or (2) the beneficiary is a deemed insured MQGE (Medicare Qualified Government Employee)",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
                     }
                 ]
             }

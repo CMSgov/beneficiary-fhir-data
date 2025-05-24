@@ -6,5 +6,5 @@ Id: CLM-NRLN-RIC-CD
 * ^context[+].type = #element
 * ^context[=].expression = "ExplanationOfBenefit"
 * value[x] only Coding
-* value[x] 1..1
+* value[x] 0..1
 * value[x].system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"

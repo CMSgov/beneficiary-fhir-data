@@ -10,14 +10,16 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.BENE_PTNT_STUS_CD as ptntStusCd -> tgt then addDischargeStatus(src, tgt) "Add discharge status";
     src.CLM_ADMSN_TYPE_CD as admitTypeCode -> tgt then addAdmitType(src, tgt) "Add admission type";
     src.CLM_BLOOD_PT_FRNSH_QTY as pintsFurnished -> tgt then addBloodPintsFurnished(src, tgt) "Add blood pints furnished";
-    src.CLM_MDCR_INSTNL_MCO_PD_SW as primaryPayerCode -> tgt then addPrimaryPayer(src, tgt) "Add primary payer switch";
-    src.CLM_MDCR_NCH_PTNT_STUS_IND_CD as patientStatusIndicator -> tgt then addPatientStatusIndicator(src, tgt) "Add patient status indicator";
+    src.CLM_MDCR_INSTNL_MCO_PD_SW as mcoPdSw -> tgt then addMCOPdSw(src, tgt) "Add primary payer switch";
+    src.CLM_PPS_IND_CD as ppsInd -> tgt then addPPSInd(src, tgt) "Add PPS Indicator";
     src.TYPE_OF_BILL_CD as tobCode -> tgt then addTypeOfBill(src, tgt) "Add type of bill code";
     src.CLM_NCH_WKLY_PROC_DT as procDt -> tgt then addProcessingDate(src, tgt) "Add processing date";
     src.CLM_ACTV_CARE_THRU_DT as activeThruDt -> tgt then addNCHThroughDate(src, tgt) "Add processing date";
     src.CLM_NCVRD_FROM_DT as ncvrdFromDt -> tgt then addNCStayFromDate(src, tgt) "Add processing date";
     src.CLM_NCVRD_THRU_DT as ncvrdToDt -> tgt then addNCStayToDate(src, tgt) "Add processing date";
     src.CLM_MDCR_EXHSTD_DT as mdcrExhaustDt -> tgt then addBenefitsExhaustedDate(src, tgt) "Add benefits exhausted date";
+    src.CLM_NCH_PRMRY_PYR_CD as prmryPyrCode -> tgt then addPrimaryPayer(src, tgt) "Add primary payer code";
+
 }
 //timingPeriod
 group addAdmissionPeriod(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -96,6 +98,16 @@ group addBloodPintsFurnished(source src: SupportingInfoComponent, target tgt: Ba
 group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NCH_PRMRY_PYR_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_NCH_PRMRY_PYR_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD",val) "Add coding";
+    } "Add CC";
+}
+//code
+group addMCOPdSw(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_MDCR_INSTNL_MCO_PD_SW") "Add Coding";
     } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
@@ -103,6 +115,17 @@ group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneE
     } "Add CC";
 }
 //code
+group addPPSInd(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_PPS_IND_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_PPS_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",val) "Add coding";
+    } "Add CC";
+}
+//code. Not necessary, duplicative with BENE_PTNT_STUS_CD. 
+/* 
 group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
@@ -112,6 +135,7 @@ group addPatientStatusIndicator(source src: SupportingInfoComponent, target tgt:
         src.CLM_MDCR_NCH_PTNT_STUS_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD", val) "Add coding";
     } "Add CC";
 }
+*/
 group addProcessingDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
@@ -153,7 +177,7 @@ group addBenefitsExhaustedDate(source src: SupportingInfoComponent, target tgt: 
     } "Add category";
     src.CLM_MDCR_EXHSTD_DT as val -> tgt.timing = cast(val, 'date') "add date";
 }
-//code. It will be interesting to see the response here on how these are represented. We may eschew 
+//code. It will be interesting to see the response here on how these are represented.
 group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = translate("TYPE_OF_BILL_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
