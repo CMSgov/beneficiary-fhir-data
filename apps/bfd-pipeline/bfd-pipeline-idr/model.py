@@ -150,15 +150,16 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_type_cd: str
 
 
-class IdrClaim(IdrBaseModel):
-    claim_alias: ClassVar[str] = "clm"
-    dcmtn_alias: ClassVar[str] = "dcmtn"
+ALIAS_CLM = "clm"
+ALIAS_DCMTN = "dcmtn"
 
+
+class IdrClaim(IdrBaseModel):
     clm_uniq_id: int
-    geo_bene_sk: Annotated[int, {"alias": claim_alias}]
-    clm_dt_sgntr_sk: Annotated[int, {"alias": claim_alias}]
-    clm_type_cd: Annotated[int, {"alias": claim_alias}]
-    clm_num_sk: Annotated[int, {"alias": claim_alias}]
+    geo_bene_sk: Annotated[int, {"alias": ALIAS_CLM}]
+    clm_dt_sgntr_sk: Annotated[int, {"alias": ALIAS_CLM}]
+    clm_type_cd: Annotated[int, {"alias": ALIAS_CLM}]
+    clm_num_sk: Annotated[int, {"alias": ALIAS_CLM}]
     bene_sk: int
     clm_cntl_num: str
     clm_orig_cntl_num: str
@@ -187,7 +188,7 @@ class IdrClaim(IdrBaseModel):
     clm_blg_prvdr_oscar_num: str
     clm_mdcr_coinsrnc_amt: int
     clm_idr_ld_dt: date
-    clm_nrln_ric_cd: Annotated[str, {"alias": dcmtn_alias}]
+    clm_nrln_ric_cd: Annotated[str, {"alias": ALIAS_DCMTN}]
 
 
 class IdrClaimDateSignature(IdrBaseModel):
@@ -200,6 +201,39 @@ class IdrClaimDateSignature(IdrBaseModel):
     clm_ncvrd_thru_dt: date
     clm_actv_care_thru_dt: date
     clm_mdcr_exhstd_dt: date
+
+
+class IdrClaimInstitutional(IdrBaseModel):
+    clm_uniq_id: int
+    clm_admsn_type_cd: str
+    bene_ptnt_stus_cd: str
+    dgns_drg_cd: int
+    clm_mdcr_instnl_mco_pd_sw: str
+    clm_admsn_src_cd: str
+    clm_bill_fac_type_cd: str
+    clm_bill_clsfctn_cd: str
+    clm_bill_freq_cd: str
+    clm_fi_actn_cd: str
+    clm_mdcr_ip_lrd_use_cnt: int
+    clm_hipps_uncompd_care_amt: int
+    clm_instnl_mdcr_coins_day_cnt: int
+    clm_instnl_ncvrd_day_cnt: int
+    clm_instnl_per_diem_amt: int
+    clm_mdcr_npmt_rsn_cd: str
+    clm_mdcr_ip_pps_drg_wt_num: int
+    clm_mdcr_ip_pps_dsprprtnt_amt: int
+    clm_mdcr_ip_pps_excptn_amt: int
+    clm_mdcr_ip_pps_cptl_fsp_amt: int
+    clm_mdcr_ip_pps_cptl_ime_amt: int
+    clm_mdcr_ip_pps_outlier_amt: int
+    clm_mdcr_ip_pps_cptl_hrmls_amt: int
+    clm_pps_ind_cd: str
+    clm_mdcr_ip_pps_cptl_tot_amt: int
+    clm_instnl_cvrd_day_cnt: int
+    clm_mdcr_instnl_prmry_pyr_amt: int
+    clm_instnl_prfnl_amt: int
+    clm_mdcr_ip_bene_ddctbl_amt: int
+    clm_instnl_drg_outlier_amt: int
 
 
 class LoadProgress(IdrBaseModel):
