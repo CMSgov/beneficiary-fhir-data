@@ -2,12 +2,14 @@ locals {
   db_environment        = coalesce(var.db_environment_override, local.env)
   db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
 
-  certstores_repository_name = coalesce(var.certstores_repository_override, "bfd-mgmt-mount-certstores")
-  log_router_repository_name = coalesce(var.log_router_repository_override, "bfd-mgmt-server-fluent-bit")
-  server_repository_name     = coalesce(var.server_repository_override, "bfd-server")
-  certstores_version         = coalesce(var.certstores_version_override, local.latest_bfd_release)
-  log_router_version         = coalesce(var.log_router_version_override, local.latest_bfd_release)
-  server_version             = coalesce(var.server_version_override, local.latest_bfd_release)
+  certstores_repository_default = !var.greenfield ? "bfd-mgmt-mount-certstores" : "bfd-platform-mount-certstores"
+  certstores_repository_name    = coalesce(var.certstores_repository_override, local.certstores_repository_default)
+  log_router_repository_default = !var.greenfield ? "bfd-mgmt-server-fluent-bit" : "bfd-platform-server-fluent-bit"
+  log_router_repository_name    = coalesce(var.log_router_repository_override, local.log_router_repository_default)
+  server_repository_name        = coalesce(var.server_repository_override, "bfd-server")
+  certstores_version            = coalesce(var.certstores_version_override, local.latest_bfd_release)
+  log_router_version            = coalesce(var.log_router_version_override, local.latest_bfd_release)
+  server_version                = coalesce(var.server_version_override, local.latest_bfd_release)
 
   server_truststore_path = "/data/${local.truststore_filename}"
   server_keystore_path   = "/data/${local.keystore_filename}"
@@ -324,7 +326,7 @@ data "aws_security_groups" "aurora_cluster" {
     name = "tag:Name"
     values = toset([
       local.db_cluster_identifier,
-      "bfd-${local.seed_env}-aurora-cluster"
+      "bfd-${local.parent_env}-aurora-cluster"
     ])
   }
   filter {
