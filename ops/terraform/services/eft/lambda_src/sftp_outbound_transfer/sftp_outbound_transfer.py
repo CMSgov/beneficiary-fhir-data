@@ -1,11 +1,10 @@
 import json
 import os
 import re
-import socket
 import sys
 from base64 import b64decode
-from datetime import datetime, timezone
-from io import StringIO, BytesIO
+from datetime import UTC, datetime
+from io import BytesIO, StringIO
 from typing import Any
 from urllib.parse import unquote
 
@@ -132,12 +131,10 @@ def _handle_s3_event(s3_object_key: str):
     if not recognized_file:
         raise UnrecognizedFileError(
             message=f"The file {filename} did not match any of {partner}'s recognized files: "
-            + json.dumps(
-                [
-                    {"type": file.type, "pattern": file.filename_pattern}
-                    for file in partner_config.recognized_files
-                ]
-            ),
+            + json.dumps([
+                {"type": file.type, "pattern": file.filename_pattern}
+                for file in partner_config.recognized_files
+            ]),
             s3_object_key=s3_object_key,
             partner=partner,
         )
@@ -156,7 +153,7 @@ def _handle_s3_event(s3_object_key: str):
         input_folder=recognized_file.input_folder,
     )
 
-    file_discovered_time = datetime.utcnow()
+    file_discovered_time = datetime.now(UTC)
     bfd_topic = sns_resource.Topic(BFD_SNS_TOPIC_ARN)
     discovered_notif = StatusNotification(
         details=FileDiscoveredDetails(
@@ -203,9 +200,9 @@ def _handle_s3_event(s3_object_key: str):
                 timeout=global_config.sftp_connect_timeout,
             )
         except (
+            OSError,
             BadHostKeyException,
             AuthenticationException,
-            socket.error,
             SSHException,
             NoValidConnectionsError,
         ) as exc:
@@ -281,7 +278,7 @@ def _handle_s3_event(s3_object_key: str):
                     input_file_path,
                     filename,
                 )
-        except (SSHException, IOError, botocore.exceptions.ClientError) as exc:
+        except (OSError, SSHException, botocore.exceptions.ClientError) as exc:
             raise SFTPTransferError(
                 message=(
                     f"An unrecoverable error occurred when attempting to transfer {filename} to the"
@@ -298,11 +295,11 @@ def _handle_s3_event(s3_object_key: str):
             global_config.sftp_hostname,
         )
 
-        success_time = datetime.utcnow()
+        success_time = datetime.now(UTC)
         success_notif = StatusNotification(
             details=TransferSuccessDetails(
                 partner=partner,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 object_key=s3_object_key,
                 file_type=recognized_file.type,
                 transfer_duration=round((success_time - file_discovered_time).total_seconds()),
@@ -314,16 +311,14 @@ def _handle_s3_event(s3_object_key: str):
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=unused-argument
+def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
     try:
-        if not all(
-            [
-                REGION,
-                BFD_ENVIRONMENT,
-                BUCKET,
-                BUCKET_ROOT_DIR,
-            ]
-        ):
+        if not all([
+            REGION,
+            BFD_ENVIRONMENT,
+            BUCKET,
+            BUCKET_ROOT_DIR,
+        ]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         sns_event = SNSEvent(event)
@@ -344,7 +339,7 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
             for s3_record in s3_event.records:
                 s3_event_time = datetime.fromisoformat(
                     s3_record.event_time.removesuffix("Z")
-                ).replace(tzinfo=timezone.utc)
+                ).replace(tzinfo=UTC)
                 s3_object_key = unquote(s3_record.s3.get_object.key)
                 s3_event_name = s3_record.event_name
                 s3_event_type = S3EventType.from_event_name(s3_event_name)
@@ -366,7 +361,7 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
             notification = StatusNotification(
                 details=TransferFailedDetails(
                     partner=exc.partner or "unknown",
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(UTC),
                     object_key=exc.s3_object_key,
                     error_name=exc.__class__.__name__,
                     reason=exc.message,
@@ -384,7 +379,7 @@ def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=u
         else:
             notification = StatusNotification(
                 details=UnknownErrorDetails(
-                    timestamp=datetime.utcnow(), error_name=exc.__class__.__name__, reason=str(exc)
+                    timestamp=datetime.now(UTC), error_name=exc.__class__.__name__, reason=str(exc)
                 )
             )
 
