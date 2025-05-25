@@ -24,4 +24,6 @@ FROM public.ecr.aws/lambda/python:3.13
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
 COPY . ${LAMBDA_TASK_ROOT}/app
+# Ensure that modules can be imported relative to app directory
+ENV PYTHONPATH="${LAMBDA_TASK_ROOT}:${LAMBDA_TASK_ROOT}/app"
 CMD [ "app.sftp_outbound_transfer.handler" ]
