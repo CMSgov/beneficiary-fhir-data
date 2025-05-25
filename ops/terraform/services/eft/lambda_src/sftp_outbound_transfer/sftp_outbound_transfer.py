@@ -2,7 +2,6 @@ import json
 import os
 import re
 import sys
-from base64 import b64decode
 from datetime import UTC, datetime
 from io import BytesIO, StringIO
 from typing import Any
@@ -12,6 +11,7 @@ import boto3
 import botocore
 import botocore.exceptions
 import paramiko
+import paramiko.pkey
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -182,15 +182,17 @@ def _handle_s3_event(s3_object_key: str):
     )
     with paramiko.SSHClient() as ssh_client:
         try:
-            sftp_host_key = paramiko.RSAKey(
-                data=b64decode(global_config.sftp_host_pub_key.removeprefix("ssh-rsa").strip())
-            )
             sftp_priv_key = paramiko.RSAKey.from_private_key(
                 file_obj=StringIO(global_config.sftp_user_priv_key)
             )
-            ssh_client.get_host_keys().add(
-                hostname=global_config.sftp_hostname, keytype="ssh-rsa", key=sftp_host_key
-            )
+            for sftp_host_key in global_config.sftp_host_pub_keys:
+                ssh_client.get_host_keys().add(
+                    hostname=global_config.sftp_hostname,
+                    keytype=sftp_host_key.key_type,
+                    key=paramiko.PKey.from_type_string(
+                        key_type=sftp_host_key.key_type, key_bytes=sftp_host_key.key_bytes
+                    ),
+                )
             ssh_client.connect(
                 hostname=global_config.sftp_hostname,
                 username=global_config.sftp_username,
