@@ -1,4 +1,4 @@
-"""This module contains constants and utilty functions related to filtering SQS messages shared by
+"""This module contains constants and utility functions related to filtering SQS messages shared by
 both the node and controller modules"""
 from typing import Any, Dict, List
 

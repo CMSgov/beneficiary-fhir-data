@@ -1,7 +1,7 @@
 #!/bin/bash
 # Runs the latest version of BFD server using build artifacts from your git workspace.
 # Requires a directory to copy build artifacts into and use as working directory.
-# Can run the server in remote debugging mode to enable setting breakpoints and debuging in IDEA.
+# Can run the server in remote debugging mode to enable setting breakpoints and debugging in IDEA.
 # Run with -h option to see command line options.
 
 set -e

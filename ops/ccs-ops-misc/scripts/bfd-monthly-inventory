@@ -9,7 +9,7 @@ APPS_DIR=${APPS_DIR:-../../../apps}
 BUILD_APPS="${BUILD_APPS:-true}"
 BFD_SSH_USER=${BFD_SSH_USER:-} # must be set to ssh
 BFD_SSH_KEY_PATH=${BFD_SSH_KEY_PATH:-} # must be set to ssh
-CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
+CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interrupt, etc.
 
 # local variables
 java_inv_dir="$INVENTORY_DIR/java"
@@ -110,7 +110,7 @@ help_message() {
       APPS_DIR=/path/to/bfd-repo/apps inventory-bfd
   
   By default, this script will export the results to a 'monthly_inventory' folder
-  on your desktop (set INVENTORY_DIR env var to overide).
+  on your desktop (set INVENTORY_DIR env var to override).
   
   $(usage)
 

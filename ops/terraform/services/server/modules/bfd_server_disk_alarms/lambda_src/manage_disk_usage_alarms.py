@@ -34,7 +34,7 @@ autoscaling_client = boto3.client("autoscaling", config=boto_config)
 
 
 class AutoScalingEvent(StrEnum):
-    """Represents the possible AWS AutoScaling Notifcations events that this Lambda will react to"""
+    """Represents the possible AWS AutoScaling Notifications events that this Lambda will react to"""
 
     INSTANCE_LAUNCH = "autoscaling:EC2_INSTANCE_LAUNCH"
     """Represents when an EC2 instance is launched in an AutoScaling Group"""

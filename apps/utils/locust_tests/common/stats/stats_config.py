@@ -66,7 +66,7 @@ class StatsConfiguration:
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
-        """Registers commnad-line arguments representing the fields of this dataclass
+        """Registers command-line arguments representing the fields of this dataclass
 
         Args:
             parser (LocustArgumentParser): The argument parser to register custom arguments to

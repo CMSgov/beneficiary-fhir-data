@@ -166,7 +166,7 @@ def processRecords(
 def splitCWLRecord(cwlRecord: dict[str, Any]) -> list[bytes]:
     """
     Splits one CWL record into two, each containing half the log events.
-    Serializes and compreses the data before returning. That data can then be
+    Serializes and compresses the data before returning. That data can then be
     re-ingested into the stream, and it'll appear as though they came from CWL
     directly.
     """

@@ -29,7 +29,7 @@ Runs a maven install.  Use command line options to change behaviors.
 
 build-bfd [script_options...] [maven_args...]
 
-The following options are supported.  All options start with a hypen.  Any arguments 
+The following options are supported.  All options start with a hyphen.  Any arguments 
 after the script options are passed to maven as additional arguments.  To pass a
 hyphenated option to maven use -- to mark an end of the script options and beginning
 of maven arguments.

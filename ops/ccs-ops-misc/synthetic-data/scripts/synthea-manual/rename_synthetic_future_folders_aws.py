@@ -55,8 +55,8 @@ def rename_generated_folders(args):
         new_key = updatedKeys.pop(0)
         
         ## Original idea was to use boto3 to copy the old key to the new one
-        ## However despite trying a number of things, couldnt get it to find the key
-        ## url encoding the key didnt work, copy_object nor copy seems to work (all give 404 finding the key)
+        ## However despite trying a number of things, couldn't get it to find the key
+        ## url encoding the key didn't work, copy_object nor copy seems to work (all give 404 finding the key)
         
         #print("Replacing " + old_key + " with " + new_key)
         #copy_source = {'Bucket': bucket, 'Key': old_key}

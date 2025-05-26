@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # global variables
-CLEANUP="True" # defaults to removing generated files on error, interupt, etc.
+CLEANUP="True" # defaults to removing generated files on error, interrupt, etc.
 
 help() {
   echo
@@ -113,7 +113,7 @@ while [ $# -ge 1 ]; do
     shift
 done
 
-echo "Runnning script with args:"
+echo "Running script with args:"
 echo "=================================================="
 echo "BFD environment(s)           : ${TARGET_ENV}"
 echo "Num beneficiaries to create  : ${NUM_GENERATED_BENES}"
@@ -180,7 +180,7 @@ if [ -z "${UNIQUE_ENVS_PARAM}" ] ; then
   echo "ERROR, no valid environment specified!"
   help
 fi
-echo "enviroments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
+echo "environments to pass to .py validation scripts: ${UNIQUE_ENVS_PARAM}"
 # restore IFS to original state
 IFS=${oIFS}
 
@@ -199,7 +199,7 @@ BFD_END_STATE_PROPERTIES="end_state.properties"
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
 # the directory for synthea output 
 BFD_SYNTHEA_OUTPUT_LOCATION="${TARGET_SYNTHEA_DIR}/output/bfd"
-# directory where Mitre synthea mapping files will be downlowded to.
+# directory where Mitre synthea mapping files will be downloaded to.
 MAPPING_FILES_LOCATION="${TARGET_SYNTHEA_DIR}/src/main/resources/export"
 
 #-------------------- GENERAL SCRIPT/HOUSEKEEPING STUFF --------------------#
@@ -377,8 +377,8 @@ wait_for_manifest_done(){
   echo "waiting for manifest Done"
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
 
-  # wait until the 0_manifest.xml file exists in the /Done folder for all environments being prcoessed; this
-  # op is synchronous meaning that we'll check/wait on one environemnt at a time. Since we have an 'all or nothing'
+  # wait until the 0_manifest.xml file exists in the /Done folder for all environments being processed; this
+  # op is synchronous meaning that we'll check/wait on one environment at a time. Since we have an 'all or nothing'
   # processing model, the extra time to do this synchronously really doesn't matter.
   source .venv/bin/activate
   for s3_bucket in "${S3_BUCKETS[@]}"; do
@@ -453,7 +453,7 @@ clean_up
 
 echo
 echo "============================================="
-echo "BFD Synthea Generation completed SUCCESFULLY!"
+echo "BFD Synthea Generation completed SUCCESSFULLY!"
 echo "============================================="
 # return SUCCESS
 exit 0;

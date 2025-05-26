@@ -294,8 +294,8 @@ def get_active_asg_groups(client):
 def get_active_iam_policies(client):
     policies = []
     paginator = client.get_paginator('list_policies')
-    for respose in paginator.paginate(Scope='Local', PolicyUsageFilter='PermissionsPolicy'):
-        for policy in respose['Policies']:
+    for response in paginator.paginate(Scope='Local', PolicyUsageFilter='PermissionsPolicy'):
+        for policy in response['Policies']:
             policies.append(policy['PolicyName'])
     return policies
 

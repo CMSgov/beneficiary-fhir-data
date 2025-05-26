@@ -20,7 +20,7 @@ ALERT_SLACK_WEBHOOK_URL="${ALERT_SLACK_WEBHOOK_URL:-}"
 ALERT_SLACK_CHAN="${ALERT_SLACK_CHAN:-}"
 PAGE_WEBHOOK_URL="${PAGE_WEBHOOK_URL:-}"
 
-# Default set of endpoints/cert files we will check. Set these via space seperated env vars.
+# Default set of endpoints/cert files we will check. Set these via space separated env vars.
 # example: DEFAULT_ENDPOINTS="foo:443 bar:443" ./cert-checker -s
 DEFAULT_ENDPOINTS="${DEFAULT_ENDPOINTS:-}"
 DEFAULT_CERTFILES="${DEFAULT_CERTFILES:-}"

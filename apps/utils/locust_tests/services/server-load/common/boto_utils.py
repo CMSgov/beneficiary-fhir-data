@@ -11,7 +11,7 @@ def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
     Args:
         ssm_client: An instance of boto3's SSM client
         name (str): The name of the SSM parameter to retrieve
-        with_decrypt (bool, optional): Whether or not to decrypt the retrieved SSM paraemeter.
+        with_decrypt (bool, optional): Whether or not to decrypt the retrieved SSM parameter.
         Defaults to False.
 
     Raises:

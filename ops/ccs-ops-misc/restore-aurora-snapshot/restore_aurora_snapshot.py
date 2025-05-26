@@ -10,7 +10,7 @@ def main():
 
     rds_client = boto3.client("rds")
 
-    # Prompt for a cluster id until a vaild one is input
+    # Prompt for a cluster id until a valid one is input
     while True:
         try:
             source_db_cluster_identifier = input("\nCluster identifier: ")

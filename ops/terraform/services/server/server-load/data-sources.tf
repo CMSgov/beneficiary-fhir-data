@@ -95,7 +95,7 @@ data "aws_ssm_parameter" "container_image_tag_controller" {
 data "aws_security_group" "rds" {
   vpc_id = data.aws_vpc.main.id
   filter {
-    # NOTE: The rds security group shares a name with the rds cluster identifer
+    # NOTE: The rds security group shares a name with the rds cluster identifier
     name   = "tag:Name"
     values = [local.nonsensitive_common_config["rds_cluster_identifier"]]
   }

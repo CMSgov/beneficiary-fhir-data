@@ -145,7 +145,7 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     result = _execute_single_count_query(db_string, query)
     overall_validation_result = field_has_room_in_table(carr_clm_ctrl_num_start, "carrier_claims", "carr_clm_cntl_num", result, overall_validation_result)
 
-    ## Check fi_num_start doesnt exist in all the tables it exists in (cant check range due to fi_num not being convertable to int in prod)
+    ## Check fi_num_start doesn't exist in all the tables it exists in (can't check range due to fi_num not being convertible to int in prod)
     fi_num_start = get_props_value(properties_file, "exporter.bfd.fi_doc_cntl_num_start")
     overall_validation_result = overall_validation_result and check_single_doesnt_exist('outpatient_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
     overall_validation_result = overall_validation_result and check_single_doesnt_exist('inpatient_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
@@ -153,7 +153,7 @@ def check_ranges(properties_file, number_of_benes_to_generate, db_string):
     overall_validation_result = overall_validation_result and check_single_doesnt_exist('snf_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
     overall_validation_result = overall_validation_result and check_single_doesnt_exist('hospice_claims', 'fi_doc_clm_cntl_num', fi_num_start, db_string)
 
-    ## Since MBI and HICN are incremented in difficult-to-query ways, just check if it exists; if it doesnt exist the range should be fine
+    ## Since MBI and HICN are incremented in difficult-to-query ways, just check if it exists; if it doesn't exist the range should be fine
     hicn_start = get_props_value(properties_file, "exporter.bfd.hicn_start")
     overall_validation_result = overall_validation_result and check_single_doesnt_exist('beneficiaries', 'hicn_unhashed', hicn_start, db_string)
         

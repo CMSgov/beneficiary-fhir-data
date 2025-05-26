@@ -235,7 +235,7 @@ pub async fn run_db_query_checker() -> Result<()> {
 }
 
 /// Runs all of the DB queries for the BFD Server's "search for Patients by Part D contract and year-month"
-/// endpoint, for the specfied parameters.
+/// endpoint, for the specified parameters.
 ///
 /// Parameters:
 /// * `db_pool`: The database connection pool to run the query on.

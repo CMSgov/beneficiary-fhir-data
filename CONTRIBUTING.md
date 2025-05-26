@@ -95,7 +95,7 @@ git push origin <your username>/<your feature name>
 # To make sure "origin" points to CMSgov/beneficiary-fhir-data run
 # git remote -v
 # if a different remote points to CMSgov/beneficiary-fhir-data
-# replace "origin" with that remotes name in the origional command
+# replace "origin" with that remotes name in the original command
 ```
 
 ##### Writing a PR

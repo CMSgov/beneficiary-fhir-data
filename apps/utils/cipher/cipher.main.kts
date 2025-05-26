@@ -210,7 +210,7 @@ class Text(private val bytes: ByteString) {
         }
 
     // Converts all secure blocks into cipher blocks and returns modified file.
-    // Uses the provided cache to ensure known cipher blocks are resused.
+    // Uses the provided cache to ensure known cipher blocks are reused.
     fun encrypt(cipher: KmsCipher, cipherCache: CipherCache): Text =
         transform(Span.Secure, Span.Cipher) { context: ByteString, secureText: ByteString ->
             cipherCache.get(context, secureText) ?: cipher.encrypt(secureText)

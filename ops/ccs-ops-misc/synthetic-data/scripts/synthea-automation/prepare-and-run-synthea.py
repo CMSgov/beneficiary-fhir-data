@@ -15,7 +15,7 @@
 #    - Checks if the output folder exists, and creates one if not
 # 2. Validates the output directory is empty
 #    - If the output folder has data from a previous run, the output directory is renamed with a timestamp and a new empty output directory is created
-#    - Since this check handles a non-empty output folder, this step wont fail unless there is an IO issue
+#    - Since this check handles a non-empty output folder, this step won't fail unless there is an IO issue
 # 3. Swaps the script's execution directory to the synthea directory supplied in arg3, since the national script is hardcoded to run other synthea code via relative paths
 # 4. Run the synthea bfd-national shell script with the number of beneficiaries supplied in arg3
 #    - Output of this run will be written to a timestamped log file in the synthea directory

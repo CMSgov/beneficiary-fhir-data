@@ -36,7 +36,7 @@ output "latest_bfd_release" {
 }
 
 output "ssm_config" {
-  description = "Parameter:Value map that elides repetitive keys, e.g. ssm:/bfd/test/common/vpc_name is /bfd/comon/vpc_name"
+  description = "Parameter:Value map that elides repetitive keys, e.g. ssm:/bfd/test/common/vpc_name is /bfd/common/vpc_name"
   sensitive   = true
   value = zipmap(
     [

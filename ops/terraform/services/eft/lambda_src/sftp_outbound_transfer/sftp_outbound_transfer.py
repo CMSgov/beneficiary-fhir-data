@@ -259,7 +259,7 @@ def _handle_s3_event(s3_object_key: str):
                 # Once uploaded, we must modify the file permissions such that the SWEEPS automation
                 # user can interact with the file
                 logger.info(
-                    "Modifying file permissons of %s on %s to 664",
+                    "Modifying file permissions of %s on %s to 664",
                     staging_file_path,
                     global_config.sftp_hostname,
                 )

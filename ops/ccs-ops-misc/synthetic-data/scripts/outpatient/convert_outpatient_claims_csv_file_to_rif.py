@@ -26,7 +26,7 @@ It performs the following:
 2. Verifies all column headers from the input CSV file's top header row are
    all in the expected headers list: header_enum_order_list.
 
-3. Verifies BENE_ID's are for sythetic.  Converts BENE_ID to negative.
+3. Verifies BENE_ID's are for synthetic.  Converts BENE_ID to negative.
 
 4. Validates DATE fields. There have column header names ending in "_DT"
    such as "CLM_FROM_DT". Also those that end in "_DT" and a number, like

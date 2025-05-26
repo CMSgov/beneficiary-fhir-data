@@ -5,10 +5,10 @@ analysis in QuickSight.
 
 ![Resource Diagram](docs/unique-bene-workflow.svg)
 
-## Known Data Discrepencies
+## Known Data Discrepancies
 
 While the goal is to completely capture all historical and real-time data, sometimes errors occur.
-The following is a list of known discrepencies in the data, with dates and reasons.
+The following is a list of known discrepancies in the data, with dates and reasons.
 
 * 09/02/22 - 09/09/22: Due to a typo in the column name, the
 `mdc_jpa_query_eobs_by_bene_id_snf_record_count` field was not being captured.

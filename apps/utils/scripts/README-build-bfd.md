@@ -22,7 +22,7 @@ Runs a maven install.  Use command line options to change behaviors.
 
 build-bfd [script_options...] [maven_args...]
 
-The following options are supported.  All options start with a hypen.  Any arguments 
+The following options are supported.  All options start with a hyphen.  Any arguments 
 after the script options are passed to maven as additional arguments.  To pass a
 hyphenated option to maven use -- to mark an end of the script options and beginning
 of maven arguments.
@@ -281,7 +281,7 @@ $ ./utils/scripts/build-bfd -d -P bfd-model-dsl-codegen-library
 [INFO] |  +- com.google.protobuf:protobuf-java:jar:3.22.3:compile
 [INFO] |  +- com.google.code.findbugs:jsr305:jar:3.0.2:compile
 [INFO] |  +- com.google.code.gson:gson:jar:2.8.9:compile
-[INFO] |  +- com.google.errorprone:error_prone_annotations:jar:2.11.0:compile
+[INFO] |  +- com.google.error-prone:error_prone_annotations:jar:2.11.0:compile
 [INFO] |  +- com.google.guava:guava:jar:32.0.0-jre:compile
 [INFO] |  |  +- com.google.guava:failureaccess:jar:1.0.1:compile
 [INFO] |  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:compile

@@ -71,4 +71,4 @@ that unintended or runaway load testing does not occur:
 - A default timeout of `TEST_RUNTIME_LIMIT` plus 10 minutes will stop the Jenkins build
   automatically if there is no user interaction during that time
 - The default parameters _excluding the Jenkins job itself_ are set to values that will immediately
-  stop the test if not overriden
+  stop the test if not overridden

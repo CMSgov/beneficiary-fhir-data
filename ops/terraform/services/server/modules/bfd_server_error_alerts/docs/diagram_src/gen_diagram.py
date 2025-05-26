@@ -24,7 +24,7 @@ def _solid_cluster(
 
 
 with Diagram(
-    "BFD Server Error Alerts Infastructure", graph_attr=graph_attrs, outformat="png", show=False
+    "BFD Server Error Alerts Infrastructure", graph_attr=graph_attrs, outformat="png", show=False
 ):
     with _solid_cluster(label="server Terraservice"):
         with _solid_cluster(label="bfd_server_error_alerts Terraform module"):

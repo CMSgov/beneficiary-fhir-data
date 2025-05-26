@@ -31,7 +31,7 @@ locals {
     notify = null
     ok     = null
   })
-  # The following trys and coalesces ensure two things: the operator is able to override the
+  # The following tries and coalesces ensure two things: the operator is able to override the
   # SNS topic/destination of each alarm type, and that if no destination is specified (either
   # explicitly such as with the OK SNS topics in prod-sbx/test or through the environment being
   # ephemeral) that Terraform does not raise an error and instead the SNS topic is empty

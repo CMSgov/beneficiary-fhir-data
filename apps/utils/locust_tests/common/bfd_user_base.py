@@ -22,8 +22,8 @@ from common.validation import ValidationResult
 
 _COMPARISONS_METADATA_PATH = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be
-overriden in modules (Locustfiles) that import bfd_user_base using set_comparisons_metadata_path().
-Also overriden by the value of --stats-compare-meta-file"""
+overridden in modules (Locustfiles) that import bfd_user_base using set_comparisons_metadata_path().
+Also overridden by the value of --stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener

@@ -44,7 +44,7 @@ It performs the following:
    all in the expected headers list: header_enum_order_list.
 
 
-4. Verifies BENE_ID's are for sythetic.  Throws an exception if not.
+4. Verifies BENE_ID's are for synthetic.  Throws an exception if not.
 
 5  Validates that the count of fields output is the same
    as header_enum_order_list.

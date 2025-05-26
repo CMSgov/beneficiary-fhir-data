@@ -13,7 +13,7 @@ Installation:
 Usage:
 `python3 restore_aurora_snapshot.py`
 
-The script will prompt for all nessecary information.
+The script will prompt for all necessary information.
 
 Database Failure Scenario Walkthrough
 -------------------------------------

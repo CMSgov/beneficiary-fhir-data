@@ -128,7 +128,7 @@ def create_week_folders_and_manifests(file_data_tuples, synthea_output_filepath,
         for week_key in file_dict.keys():
             if week_key not in weeks_files.keys():
                 weeks_files[week_key] = [file_name]
-            ## If the week exists, add this file to the list of files needed in that week's manifest if it doesnt exist
+            ## If the week exists, add this file to the list of files needed in that week's manifest if it doesn't exist
             elif file_name not in weeks_files[week_key]:
                 weeks_files[week_key].append(file_name)
     

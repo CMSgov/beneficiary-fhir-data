@@ -246,7 +246,7 @@ mappings:
       dbName: xref_dcn_nbr
     - name: adjReqCd
       sqlType: varchar(1)
-      comment: 'Adjustment Requestor Identification: This field identifies the entity
+      comment: 'Adjustment Requester Identification: This field identifies the entity
         responsible for the origin of the claim adjustment'
       dbName: adj_req_cd
     - name: adjReasCd

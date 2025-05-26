@@ -16,11 +16,11 @@ MOUNT_PERMS="${MOUNT_PERMS:-0750}" # defaults to owner=rw group=r others=none
 
 # other options (defaults are likely ok here)
 ADD_HOST_ENTRY="${ADD_HOST_ENTRY:-true}" # add a host entry for the file system (this must be true if the instance is not in BFD VPC)
-ADD_FSTAB_ENTRY="${ADD_FSTAB_ENTRY:-true}" # add a persistant mount entry in $FSTAB_FILE
+ADD_FSTAB_ENTRY="${ADD_FSTAB_ENTRY:-true}" # add a persistent mount entry in $FSTAB_FILE
 MOUNT_SAME_AZ_ONLY="${MOUNT_SAME_AZ_ONLY:-true}" # only mount if we find a mount target on the same az as us
 MOUNT_NOW="${MOUNT_NOW:-true}" # mount the file system when the script runs
 MOUNT_ARGS="tls,iam" # mount efs using iam auth and tls
-FSTAB_OPTIONS=${FSTAB_OPTIONS:-"_netdev,noresvport,$MOUNT_ARGS"} # for EFS the trailing "0 0" is ommitted here as they are required
+FSTAB_OPTIONS=${FSTAB_OPTIONS:-"_netdev,noresvport,$MOUNT_ARGS"} # for EFS the trailing "0 0" is omitted here as they are required
 
 # you should not need to edit these (they are variables for testing purposes)
 ETC_HOSTS_FILE="${ETC_HOSTS_FILE:-/etc/hosts}"
@@ -32,7 +32,7 @@ AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
 AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN:-}"
 
-# interal script variables
+# internal script variables
 PROGNAME=${0##*/}
 file_systems=()
 
@@ -432,7 +432,7 @@ for fs in "${file_systems[@]}"; do
   # mount the file system now if desired
   [[ "$MOUNT_NOW" == true ]] && mount_fs "$fs" "$ap_id"
   
-  # add a persistant mount entry to fstab if desired
+  # add a persistent mount entry to fstab if desired
   [[ "$ADD_FSTAB_ENTRY" == true ]] && add_fstab_entry "$fs" "$ap_id"
 done 
 

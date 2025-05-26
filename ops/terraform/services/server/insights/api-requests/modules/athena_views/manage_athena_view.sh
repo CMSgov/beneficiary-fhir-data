@@ -43,7 +43,7 @@ elif [[ $operation_type == "DESTROY_VIEW" ]]; then
       --output text
   )
 else
-  echo "$operation_type is unsupported, exitting" >&2
+  echo "$operation_type is unsupported, exiting" >&2
   exit 1
 fi
 

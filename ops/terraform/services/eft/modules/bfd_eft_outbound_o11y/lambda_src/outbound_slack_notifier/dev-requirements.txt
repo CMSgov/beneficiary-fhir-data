@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe --constraint=requirements.txt --generate-hashes --no-reuse-hashes --output-file=dev-requirements.txt dev-requirements.in
 #
-astroid==3.1.0 \
+asteroid==3.1.0 \
     --hash=sha256:951798f922990137ac090c53af473db7ab4e70c770e6d7fae0cec59f74411819 \
     --hash=sha256:ac248253bfa4bd924a0de213707e7ebeeb3138abeb48d798784ead1e56d419d4
     # via pylint

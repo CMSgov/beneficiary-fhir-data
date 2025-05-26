@@ -111,7 +111,7 @@ class TaskStats:
     min_response_time: int
     """The fastest response time, in milliseconds, out of all this Task's requests"""
     max_response_time: int
-    """The slowest respone time, in milliseconds, out of all this Task's requests"""
+    """The slowest response time, in milliseconds, out of all this Task's requests"""
     total_reqs_per_second: float
     """The average number of requests-per-second of this Task's requests over the test run"""
     total_fails_per_sec: float

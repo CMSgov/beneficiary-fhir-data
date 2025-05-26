@@ -31,7 +31,7 @@ Below are the required libraries along with what they do.
 
 | Library | Description | Reason for Usage | References |
 | - | - | - | - |
-| `psycopg2` | Library for connecting to a postGres database programatically via python | The tests use this to connect to the environment's database in order to gather various randomized data sets to run each test | <https://pypi.org/project/psycopg2/> |
+| `psycopg2` | Library for connecting to a postGres database programmatically via python | The tests use this to connect to the environment's database in order to gather various randomized data sets to run each test | <https://pypi.org/project/psycopg2/> |
 | `psycogreen` | Library that enables for `psycopg2` to work with coroutine libraries | `locust` uses `gevent` behind-the-scenes to spawn green theads. Without this package, data gathering will block threaded operations | <https://github.com/psycopg/psycogreen/> |
 | `locust` | Test runner framework. Provides various utilities like configuration, argument parsing, and more. Allows for performance statistics collection | Runs the test execution and reporting | <http://docs.locust.io/en/stable/installation.html>
 | `boto3` | Library for interfacing with AWS services | Store and load performance stats from S3 | <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>

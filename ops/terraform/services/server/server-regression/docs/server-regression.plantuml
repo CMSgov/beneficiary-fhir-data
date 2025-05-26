@@ -32,7 +32,7 @@ group Glue Crawler
     "glue-trigger lambda" --> "insights S3"
     "glue-trigger lambda" -> "Glue Crawler":glue-trigger:\ntrigger Glue Crawler
     "Glue Crawler" --> "glue-trigger lambda"
-    "Glue Crawler" -> "insights S3":glue-crawler:\ncrawl new parititions
+    "Glue Crawler" -> "insights S3":glue-crawler:\ncrawl new partitions
     "insights S3" --> "Glue Crawler"
     "Glue Crawler" -> "Glue Metadata Table":glue-crawler:\nadd new tables
     "Glue Metadata Table" --> "insights S3"
@@ -46,7 +46,7 @@ group BFD Deployment Excerpt
         loop ENV for ENV in ("TEST", "PROD-SBX", "PROD")
             "deployment pipeline" -> "deployment pipeline": terraform:\nplan and apply
             "deployment pipeline" -> "parameter store": terraform:\nRequest latest Docker image tag
-            "parameter store" --> "deployment pipeline": Return latest Docker image tage
+            "parameter store" --> "deployment pipeline": Return latest Docker image sstage
             "deployment pipeline" -> "server-regression lambda": terraform:\ndeploy server-regression Lambda to ENV using tag
             "server-regression lambda" -> "AWS ECR": Retrieve tagged server-regression Docker Image
             "AWS ECR" --> "server-regression lambda"
