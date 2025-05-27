@@ -1,6 +1,6 @@
 locals {
   account_types = ["prod", "non-prod"]
-  account_type  = one([for x in local.account_types : x if terraform.workspace == x])
+  account_type  = try(one([for x in local.account_types : x if terraform.workspace == x]), null)
 
   service      = var.service
   github_token = coalesce(data.external.github_token.result.github_token, "invalid")
@@ -33,7 +33,19 @@ locals {
   kms_config_key_mrk_config = one(data.aws_kms_key.config[*].multi_region_configuration)
 }
 
-data "aws_region" "current" {}
+data "aws_region" "current" {
+  # Unfortunately, there is no better place to put these precondition checks. We want to fail-fast
+  # and early when the workspace is invalid, but there is no construct in OpenTofu to do these sorts
+  # of checks early outside of data resources. There is the 'null_data_source' data resource, but
+  # that resource is marked as deprecated with no replacement. So, given that we have no real
+  # choice, this condition lives on this unrelated data resource.
+  lifecycle {
+    postcondition {
+      condition     = local.account_type != null
+      error_message = "Invalid account type. Must be one of: ${join(", ", local.account_types)}"
+    }
+  }
+}
 
 data "aws_caller_identity" "current" {}
 
