@@ -54,21 +54,15 @@ output "ssm_config" {
 }
 
 output "key_alias" {
-  description = "Alias name for the platform general-purpose, multi-region CMK."
+  description = "Alias name for the platform general-purpose CMK."
   sensitive   = false
   value       = local.kms_key_alias
 }
 
-output "key_arns" {
-  description = "ARNs of the platform general-purpose, multi-region CMK."
+output "key_arn" {
+  description = "ARN of the current region's primary platform CMK."
   sensitive   = false
-  value       = local.kms_key_arns
-}
-
-output "current_region_key_arn" {
-  description = "ARN of the current region's primary platform MRK."
-  sensitive   = false
-  value       = one([for arn in local.kms_key_arns : arn if strcontains(arn, local.region)])
+  value       = local.kms_key_arn
 }
 
 output "default_iam_path" {

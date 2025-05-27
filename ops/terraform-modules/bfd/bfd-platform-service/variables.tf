@@ -25,11 +25,11 @@ variable "service" {
   type        = string
 }
 
-variable "lookup_kms_keys" {
+variable "lookup_kms_key" {
   default     = true
   description = <<-EOF
-  Toggles whether or not this module does data lookups for the platform data and config KMS keys.
-  If false, the KMS-related outputs will all be null. Set to false for services that create the keys
+  Toggles whether or not this module does data lookups for the platform KMS key.
+  If false, the KMS-related outputs will all be null. Set to false for services that create the key
   or are otherwise applied prior to the keys existing
   EOF
   nullable    = false

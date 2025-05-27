@@ -29,14 +29,8 @@ locals {
     local.ssm_flattened_data.values
   )
 
-  kms_key_alias      = "alias/bfd-platform-cmk"
-  kms_key_mrk_config = one(data.aws_kms_key.data[*].multi_region_configuration)
-  kms_key_arns = flatten(
-    [
-      for v in coalesce(local.kms_key_mrk_config, []) :
-      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
-    ]
-  )
+  kms_key_alias = "alias/bfd-platform-cmk"
+  kms_key_arn   = one(data.aws_kms_key.platform[*].arn)
 }
 
 data "aws_region" "current" {
@@ -83,8 +77,8 @@ data "aws_ssm_parameters_by_path" "params" {
   with_decryption = true
 }
 
-data "aws_kms_key" "data" {
-  count  = var.lookup_kms_keys ? 1 : 0
+data "aws_kms_key" "platform" {
+  count  = var.lookup_kms_key ? 1 : 0
   key_id = local.kms_key_alias
 }
 
