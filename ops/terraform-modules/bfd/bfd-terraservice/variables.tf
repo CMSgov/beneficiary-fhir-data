@@ -3,6 +3,16 @@ variable "greenfield" {
   description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
 }
 
+variable "lookup_kms_keys" {
+  default     = true
+  description = <<-EOF
+  Toggles whether or not this module does data lookups for the platform and current env KMS keys.
+  If false, the KMS-related outputs will all be null. Set to false for services that create the keys
+  or are otherwise applied prior to the keys existing
+  EOF
+  nullable    = false
+}
+
 variable "relative_module_root" {
   description = "The solution's relative path from the root of beneficiary-fhir-data repository"
   type        = string

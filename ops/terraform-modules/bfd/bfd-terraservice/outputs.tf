@@ -13,7 +13,7 @@ output "service" {
 output "region" {
   description = "The region name associated with the current caller identity"
   sensitive   = false
-  value       = data.aws_region.current.name
+  value       = local.region
 }
 
 output "account_id" {
@@ -59,33 +59,28 @@ output "ssm_config" {
   value       = local.ssm_config
 }
 
-output "env_key_alias" {
-  description = "Alias name for the current environment's general-purpose CMK."
+output "platform_key_alias" {
+  description = "Alias name for the platform CMK."
   sensitive   = false
-  value       = local.kms_key_alias
+  value       = local.platform_key_alias
 }
 
-output "env_config_key_alias" {
-  description = "Alias name for the current environment's configuration-specific, multi-region CMK."
+output "platform_key_arn" {
+  description = "ARN of the current region's primary platform CMK."
   sensitive   = false
-  value       = local.kms_config_key_alias
+  value       = local.platform_key_arn
+}
+
+output "env_key_alias" {
+  description = "Alias name for the current environment's CMK."
+  sensitive   = false
+  value       = local.env_key_alias
 }
 
 output "env_key_arn" {
-  description = "ARN of the current environment's general-purpose CMK."
+  description = "ARN of the current region's primary environment CMK."
   sensitive   = false
-  value       = one(data.aws_kms_key.env_cmk[*].arn)
-}
-
-output "env_config_key_arns" {
-  description = "ARNs of the current environment's configuration-specific, multi-region CMK."
-  sensitive   = false
-  value = flatten(
-    [
-      for v in coalesce(local.kms_config_key_mrk_config, []) :
-      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
-    ]
-  )
+  value       = local.env_key_arn
 }
 
 output "default_iam_path" {

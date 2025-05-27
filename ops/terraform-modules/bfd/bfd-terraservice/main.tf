@@ -1,6 +1,8 @@
 locals {
   established_envs = ["test", "prod-sbx", "prod"]
 
+  region = data.aws_region.current.name
+
   service      = var.service
   github_token = coalesce(data.external.github_token.result.github_token, "invalid")
 
@@ -29,11 +31,10 @@ locals {
     local.ssm_flattened_data.values
   )
 
-  # Using lookup to ensure that this module can be used in Terraservices that may not have SSM
-  # configuration, or could be applied before SSM configuration exists at all
-  kms_key_alias             = lookup(local.ssm_config, "/bfd/common/kms_key_alias", null)
-  kms_config_key_alias      = lookup(local.ssm_config, "/bfd/common/kms_config_key_alias", null)
-  kms_config_key_mrk_config = one(data.aws_kms_key.env_config_cmk[*].multi_region_configuration)
+  platform_key_alias = var.greenfield ? "alias/bfd-platform-cmk" : "alias/bfd-mgmt-cmk"
+  platform_key_arn   = one(data.aws_kms_key.platform[*].arn)
+  env_key_alias      = "alias/bfd-${local.env}-cmk"
+  env_key_arn        = one(data.aws_kms_key.env[*].arn)
 
   # OIT/CMS Cloud configured Security Groups that exist only in the legacy account
   legacy_tools_sg      = lookup(local.ssm_config, "/bfd/common/enterprise_tools_security_group", null)
@@ -103,14 +104,14 @@ data "aws_ssm_parameters_by_path" "params" {
   with_decryption = true
 }
 
-data "aws_kms_key" "env_cmk" {
-  count  = local.kms_key_alias != null ? 1 : 0
-  key_id = local.kms_key_alias
+data "aws_kms_key" "env" {
+  count  = var.lookup_kms_keys ? 1 : 0
+  key_id = local.env_key_alias
 }
 
-data "aws_kms_key" "env_config_cmk" {
-  count  = local.kms_config_key_alias != null ? 1 : 0
-  key_id = local.kms_config_key_alias
+data "aws_kms_key" "platform" {
+  count  = var.lookup_kms_keys ? 1 : 0
+  key_id = local.platform_key_alias
 }
 
 data "aws_iam_policy" "permissions_boundary" {
