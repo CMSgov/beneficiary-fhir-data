@@ -250,12 +250,16 @@ data "aws_iam_policy_document" "combined" {
   )
 }
 
+# Environment keys for the current region. Note: During disaster recovery, the alt keys and aliases
+# will need to be imported (`tofu import aws_kms_key.data_keys["test"] <key_arn>`, tofu import
+# aws_kms_alias.data_keys["prod"] <key_arn>, etc..).Alternatively you can import by enclosing the
+# resource address in single quotes imported (`tofu import 'aws_kms_key.data_keys["test"]'
+# <key_arn>`, tofu import 'aws_kms_alias.data_keys["prod"]' <key_arn>, etc..).
 resource "aws_kms_key" "primary" {
   for_each = toset(local.envs)
 
   description                        = "Primary key for ${local.region} ${each.key}."
   enable_key_rotation                = true
-  multi_region                       = true
   bypass_policy_lockout_safety_check = false
   deletion_window_in_days            = local.kms_default_deletion_window_days
 
@@ -273,13 +277,14 @@ resource "aws_kms_alias" "primary" {
   target_key_id = aws_kms_key.primary[each.key].arn
 }
 
-resource "aws_kms_replica_key" "secondary" {
+resource "aws_kms_key" "secondary" {
   provider = aws.secondary
   for_each = toset(local.envs)
 
   description                        = "Secondary key for ${local.region} ${each.key}. Used in DR scenarios."
-  primary_key_arn                    = aws_kms_key.primary[each.key].arn
+  enable_key_rotation                = true
   bypass_policy_lockout_safety_check = false
+  deletion_window_in_days            = local.kms_default_deletion_window_days
 
   policy = data.aws_iam_policy_document.combined.json
 
@@ -293,5 +298,5 @@ resource "aws_kms_alias" "secondary" {
   for_each = toset(local.envs)
 
   name          = "alias/bfd-${each.key}-cmk"
-  target_key_id = aws_kms_replica_key.secondary[each.key].arn
+  target_key_id = aws_kms_key.secondary[each.key].arn
 }

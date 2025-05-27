@@ -1,6 +1,22 @@
 # This file provides a backend configuration for use in new account bootstrapping contexts. See
 # README for motivation and instructions on using this file in those scenarios.
 
+variable "greenfield" {
+  default     = false
+  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
+}
+
+locals {
+  account_types = ["prod", "non-prod"]
+  # Instead of just defaulting to terraform.workspace, we use one() to ensure an error is generated
+  # if the workspace does not exactly match one of the above account types. Further validation is
+  # handled by the Terraservice module. This is only:necessary if greenfield is true, since we don't
+  # use the account_type in the legacy environment
+  account_type = one([for x in local.account_types : x if x == terraform.workspace])
+
+  _canary_exists = module.terraservice.canary
+}
+
 provider "aws" {
   region = "us-east-1"
   default_tags {
