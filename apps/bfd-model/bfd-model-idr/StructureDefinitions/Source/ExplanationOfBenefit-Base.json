@@ -112,6 +112,19 @@
                 ]
             },
             {
+                "id": "ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT",
+                "label": "Part A/B Coinsurance Liability Amount",
+                "definition": "The amount of money for which the intermediary has determined that the beneficiary is liable for Part A/B coinsurance on the institutional claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "ExplanationOfBenefit-Base.clmCntlArray",
                 "path": "ExplanationOfBenefit-Base.clmCntlArray",
                 "label": "Claim Control Number List",
@@ -279,45 +292,6 @@
                         "targetProfile": [
                             "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Institutional-Base"
                         ]
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT",
-                "path": "ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT",
-                "label": "Part A/B Coinsurance Liability Amount",
-                "definition": "The amount of money for which the intermediary has determined that the beneficiary is liable for Part A/B coinsurance on the institutional claim.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_BLOOD_LBLTY_AMT",
-                "path": "ExplanationOfBenefit-Base.CLM_BLOOD_LBLTY_AMT",
-                "label": "Blood Deductible Liability Amount",
-                "definition": "The amount of money for which the intermediary determined the beneficiary is liable for the blood deductible.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT",
-                "path": "ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT",
-                "label": "Inpatient Noncovered Charge Amount",
-                "definition": "The non-covered charges for all accommodations and services, reported on an inpatient claim (used for internal NCHMQA editing purposes).",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
                     }
                 ]
             },
@@ -534,6 +508,32 @@
                 "path": "ExplanationOfBenefit-Base.CLM_SBMT_CHRG_AMT",
                 "label": "Total Charge Amount",
                 "definition": "The total charges for all services included on the claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_OSCAR_NUM",
+                "path": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_OSCAR_NUM",
+                "label": "Provider Number (OSCAR/CCN)",
+                "definition": "This variable is the provider identification number.  OR The billing number assigned to the supplier of the Part B service/DMEPOS by the National Supplier Clearinghouse, as reported on the line item for the DMERC claim.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT",
+                "label": "Noncovered Charge Amount",
+                "definition": "The non-covered charges for all accommodations and services, reported on an inpatient claim (used for internal NCHMQA editing purposes).",
                 "min": 0,
                 "max": "1",
                 "type": [
