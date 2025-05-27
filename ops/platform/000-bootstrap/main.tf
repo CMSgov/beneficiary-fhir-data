@@ -4,7 +4,7 @@ module "terraservice" {
   greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/000-bootstrap"
-  lookup_kms_keys      = false
+  lookup_kms_key       = false
 }
 
 locals {
