@@ -1,8 +1,12 @@
 terraform {
   required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.91"
+    }
     sops = {
       source  = "carlpett/sops"
-      version = "1.2.0"
+      version = "~> 1.2.0"
     }
   }
 }
@@ -11,8 +15,6 @@ module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   greenfield           = var.greenfield
-  parent_env           = local.parent_env
-  environment_name     = terraform.workspace
   service              = local.service
   relative_module_root = "ops/services/01-config"
 }
@@ -25,6 +27,7 @@ locals {
   default_tags     = module.terraservice.default_tags
   env              = module.terraservice.env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
+  env_key_arn      = module.terraservice.env_key_arn
 
   # Terraform v1.5 does not have templatestring, and even if it did templatefile/templatestring
   # require that all templated values be provided. We cannot provide values for ${env} ahead of
@@ -41,7 +44,6 @@ locals {
   # account ID and replace the tamplate/placeholder in the YAML to make it valid sops
   valid_sops_parent_yaml  = replace(local.raw_sops_parent_yaml, format(local.template_var_regex, "ACCOUNT_ID"), local.account_id)
   enc_parent_data         = yamldecode(local.valid_sops_parent_yaml)
-  sops_key_alias_arn      = local.enc_parent_data.sops.kms[0].arn
   sops_nonsensitive_regex = local.enc_parent_data.sops.unencrypted_regex
 
   decrypted_parent_data = yamldecode(data.sops_external.this.raw)
@@ -99,10 +101,6 @@ data "sops_external" "this" {
   input_type = "yaml"
 }
 
-data "aws_kms_key" "sops_key" {
-  key_id = local.sops_key_alias_arn
-}
-
 resource "aws_ssm_parameter" "this" {
   for_each = local.env_config
 
@@ -111,7 +109,7 @@ resource "aws_ssm_parameter" "this" {
   value          = each.value.is_sensitive ? each.value.str_val : null
   insecure_value = each.value.is_sensitive ? null : try(nonsensitive(each.value.str_val), each.value.str_val)
   type           = each.value.is_sensitive ? "SecureString" : "String"
-  key_id         = each.value.is_sensitive ? data.aws_kms_key.sops_key.id : null
+  key_id         = each.value.is_sensitive ? local.env_key_arn : null
 
   tags = {
     source_file    = each.value.source
