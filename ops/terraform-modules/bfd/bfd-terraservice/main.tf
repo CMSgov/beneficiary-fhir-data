@@ -2,8 +2,10 @@ locals {
   established_envs = ["test", "prod-sbx", "prod"]
 
   service      = var.service
-  env          = var.environment_name
   github_token = coalesce(data.external.github_token.result.github_token, "invalid")
+
+  env        = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
+  parent_env = terraform.workspace
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
@@ -50,7 +52,26 @@ locals {
   }
 }
 
-data "aws_availability_zones" "main" {}
+data "aws_availability_zones" "main" {
+  # Unfortunately, there is no better place to put these precondition checks. We want to fail-fast
+  # and early when the workspace is invalid, but there is no construct in OpenTofu to do these sorts
+  # of checks early outside of data resources. There is the 'null_data_source' data resource, but
+  # that resource is marked as deprecated with no replacement. So, given that we have no real
+  # choice, these conditions live on this unrelated data resource.
+  lifecycle {
+    precondition {
+      // Simple validation ensures that the environment is either one of the established environments or ends with a combined
+      // suffix of "-" and an established environment, e.g. `prod-sbx`, `2554-test`, `2554-ii-prod-sbx` are valid, `-prod`, `2554--test` are not
+      condition     = try(one([for x in local.established_envs : x if can(regex("^${x}$$|^([a-z0-9]+[a-z0-9-])+([^--])-${x}$$", local.env))]) != null, false)
+      error_message = "Invalid environment/workspace name. https://github.com/CMSgov/beneficiary-fhir-data/wiki/Environments#ephemeral-environments for more details."
+    }
+
+    precondition {
+      condition     = local.parent_env != null
+      error_message = "Invalid parent environment. Must be one of: ${join(", ", local.established_envs)}"
+    }
+  }
+}
 
 data "aws_availability_zone" "main" {
   for_each = toset(data.aws_availability_zones.main.names)
@@ -99,7 +120,7 @@ data "aws_iam_policy" "permissions_boundary" {
 data "aws_vpc" "main" {
   filter {
     name   = "tag:stack"
-    values = [var.parent_env]
+    values = [local.parent_env]
   }
 }
 

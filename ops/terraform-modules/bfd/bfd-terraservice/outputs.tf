@@ -25,21 +25,21 @@ output "account_id" {
 output "env" {
   description = "The solution's environment name. Generally, `terraform.workspace`"
   sensitive   = false
-  value       = var.environment_name
+  value       = local.env
 }
 
 output "is_ephemeral_env" {
   description = "Returns true when environment is _ephemeral_, false when _established_"
   sensitive   = false
-  value       = var.environment_name != var.parent_env
+  value       = local.env != local.parent_env
 }
 
 output "default_tags" {
   value = merge(var.additional_tags, {
-    Environment    = var.parent_env
+    Environment    = local.parent_env
     application    = "bfd"
     business       = "oeda"
-    stack          = var.environment_name
+    stack          = local.env
     service        = var.service
     Terraform      = true
     tf_module_root = var.relative_module_root
