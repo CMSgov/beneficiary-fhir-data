@@ -64,10 +64,4 @@ terraform {
     kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-${local.parent_env}-cmk"
     use_lockfile   = var.greenfield
   }
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.91"
-    }
-  }
 }
