@@ -43,7 +43,7 @@ jobs:
         id: run-pytest-set
         run: |
           echo "Testing ${{ matrix.projects.projectName }}"
+          cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
           uv python install
           uv sync
-          cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
           uv run pytest ${{ github.workspace }}/${{ matrix.projects.testsRoot }}
