@@ -14,5 +14,9 @@ locals {
   account_id   = module.terraservice.account_id
   default_tags = module.terraservice.default_tags
 
-  state_variants = local.account_type == "non-prod" ? ["test", "platform-non-prod"] : ["prod-sbx", "prod", "platform-prod"]
+  envs_per_acc = {
+    non-prod = ["test", "platform"]
+    prod     = ["sandbox", "prod-sbx", "platform"]
+  }
+  envs = local.envs_per_acc[local.account_type]
 }

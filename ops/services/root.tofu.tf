@@ -61,7 +61,7 @@ terraform {
     region         = var.region
     dynamodb_table = !var.greenfield ? "bfd-tf-table" : null
     encrypt        = true
-    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-${local.parent_env}-tf-state"
+    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-${local.parent_env}-cmk"
     use_lockfile   = var.greenfield
   }
   required_providers {

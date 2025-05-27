@@ -64,7 +64,7 @@ terraform {
     key          = "ops/platform/${local.service}/tofu.tfstate"
     region       = var.region
     encrypt      = true
-    kms_key_id   = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-${local.account_type}-tf-state"
+    kms_key_id   = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-cmk"
     use_lockfile = true
   }
   required_providers {
