@@ -13,7 +13,7 @@ output "service" {
 output "region" {
   description = "The region name associated with the current caller identity"
   sensitive   = false
-  value       = data.aws_region.current.name
+  value       = local.region
 }
 
 output "account_id" {
@@ -59,32 +59,16 @@ output "key_alias" {
   value       = local.kms_key_alias
 }
 
-output "config_key_alias" {
-  description = "Alias name for the platform, configuration-specific, multi-region CMK."
-  sensitive   = false
-  value       = local.kms_config_key_alias
-}
-
 output "key_arns" {
   description = "ARNs of the platform general-purpose, multi-region CMK."
   sensitive   = false
-  value = flatten(
-    [
-      for v in coalesce(local.kms_key_mrk_config, []) :
-      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
-    ]
-  )
+  value       = local.kms_key_arns
 }
 
-output "config_key_arns" {
-  description = "ARNs of the platform configuration-specific, multi-region CMK."
+output "current_region_key_arn" {
+  description = "ARN of the current region's primary platform MRK."
   sensitive   = false
-  value = flatten(
-    [
-      for v in coalesce(local.kms_config_key_mrk_config, []) :
-      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
-    ]
-  )
+  value       = one([for arn in local.kms_key_arns : arn if strcontains(arn, local.region)])
 }
 
 output "default_iam_path" {

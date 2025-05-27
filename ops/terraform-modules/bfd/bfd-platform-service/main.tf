@@ -1,4 +1,6 @@
 locals {
+  region = data.aws_region.current.name
+
   account_types = ["prod", "non-prod"]
   account_type  = try(one([for x in local.account_types : x if terraform.workspace == x]), null)
 
@@ -27,10 +29,14 @@ locals {
     local.ssm_flattened_data.values
   )
 
-  kms_key_alias             = "alias/bfd-platform-data-cmk"
-  kms_key_mrk_config        = one(data.aws_kms_key.data[*].multi_region_configuration)
-  kms_config_key_alias      = "alias/bfd-platform-config-cmk"
-  kms_config_key_mrk_config = one(data.aws_kms_key.config[*].multi_region_configuration)
+  kms_key_alias      = "alias/bfd-platform-cmk"
+  kms_key_mrk_config = one(data.aws_kms_key.data[*].multi_region_configuration)
+  kms_key_arns = flatten(
+    [
+      for v in coalesce(local.kms_key_mrk_config, []) :
+      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
+    ]
+  )
 }
 
 data "aws_region" "current" {
@@ -78,13 +84,8 @@ data "aws_ssm_parameters_by_path" "params" {
 }
 
 data "aws_kms_key" "data" {
-  count  = local.kms_key_alias != null && var.lookup_kms_keys ? 1 : 0
+  count  = var.lookup_kms_keys ? 1 : 0
   key_id = local.kms_key_alias
-}
-
-data "aws_kms_key" "config" {
-  count  = local.kms_config_key_alias != null && var.lookup_kms_keys ? 1 : 0
-  key_id = local.kms_config_key_alias
 }
 
 data "aws_iam_policy" "permissions_boundary" {
