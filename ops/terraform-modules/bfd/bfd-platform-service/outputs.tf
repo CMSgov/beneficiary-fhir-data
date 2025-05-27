@@ -1,3 +1,9 @@
+output "canary" {
+  description = "Canary output used to ensure that any Terraservice using the root.tofu.tf also uses this module."
+  sensitive   = false
+  value       = true
+}
+
 output "service" {
   description = "The name of the current Terraservice"
   sensitive   = false

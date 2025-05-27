@@ -3,7 +3,9 @@
 
 locals {
   established_envs = ["test", "prod-sbx", "prod"]
-  parent_env       = coalesce(var.parent_env, try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "ignore"))
+  parent_env       = coalesce(var.parent_env, try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "invalid-parent-environment"))
+
+  _canary_exists = module.terraservice.canary
 }
 
 variable "greenfield" {
@@ -66,14 +68,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.91"
-    }
-    # A necessary evil. Early static evaluation within required_providers is not supported in
-    # OpenTofu as of 1.10.0, so it is impossible to dynamically set the providers per-Terraservice
-    # while using a common root tofu.tf. Fortunately, only a single Terraservice (config) requires a
-    # provider other than the aws provider
-    sops = {
-      source  = "carlpett/sops"
-      version = "1.2.0"
     }
   }
 }
