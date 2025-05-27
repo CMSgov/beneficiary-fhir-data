@@ -3,9 +3,10 @@
 import calendar
 import json
 from base64 import b64encode
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
 from io import StringIO
-from typing import Any, Callable, Type
+from typing import Any
 from unittest import mock
 
 import paramiko
@@ -28,12 +29,12 @@ from sns import (
     UnknownErrorDetails,
     send_notification,
 )
-from ssm import GlobalSsmConfig, PartnerSsmConfig, RecognizedFile
+from ssm import GlobalSsmConfig, HostKey, PartnerSsmConfig, RecognizedFile
 
 DEFAULT_MOCK_EVENT_TIME_ISO = "2024-02-12T00:00:00Z"
 DEFAULT_MOCK_EVENT_TIME_DATETIME = datetime.fromisoformat(
     DEFAULT_MOCK_EVENT_TIME_ISO.removesuffix("Z")
-).replace(tzinfo=timezone.utc)
+).replace(tzinfo=UTC)
 DEFAULT_MOCK_EVENT_TIME_UTC_TIMESTAMP = calendar.timegm(
     DEFAULT_MOCK_EVENT_TIME_DATETIME.utctimetuple()
 )
@@ -55,7 +56,9 @@ DEFAULT_MOCK_GLOBAL_CONFIG = GlobalSsmConfig(
     sftp_connect_timeout=10,
     sftp_hostname="test",
     sftp_username="test",
-    sftp_host_pub_key="test",
+    sftp_host_pub_keys=[
+        HostKey.model_validate({"key_type": "ignore", "key_base64": "aWdub3JlCg=="})
+    ],
     sftp_user_priv_key="test",
     enrolled_partners=[DEFAULT_MOCK_PARTNER_NAME],
     home_dirs_to_partner={f"{DEFAULT_MOCK_PARTNER_HOME_DIR}": DEFAULT_MOCK_PARTNER_NAME},
@@ -116,17 +119,15 @@ def generate_event(
         "Records": [
             {
                 "Sns": {
-                    "Message": json.dumps(
-                        {
-                            "Records": [
-                                {
-                                    "eventName": event_name,
-                                    "eventTime": event_time_iso,
-                                    "s3": {"object": {"key": key}},
-                                }
-                            ]
-                        }
-                    )
+                    "Message": json.dumps({
+                        "Records": [
+                            {
+                                "eventName": event_name,
+                                "eventTime": event_time_iso,
+                                "s3": {"object": {"key": key}},
+                            }
+                        ]
+                    })
                 }
             }
         ]
@@ -192,9 +193,9 @@ class TestUpdatePipelineSlisHandler:
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps(
-                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
-                                )
+                                "Message": json.dumps({
+                                    "Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]
+                                })
                             }
                         }
                     ]
@@ -207,17 +208,15 @@ class TestUpdatePipelineSlisHandler:
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps(
-                                    {
-                                        "Records": [
-                                            {
-                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                                "s3": {"object": {}},
-                                            }
-                                        ]
-                                    }
-                                )
+                                "Message": json.dumps({
+                                    "Records": [
+                                        {
+                                            "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                            "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                            "s3": {"object": {}},
+                                        }
+                                    ]
+                                })
                             }
                         }
                     ]
@@ -227,7 +226,7 @@ class TestUpdatePipelineSlisHandler:
         ],
     )
     def test_it_raises_exception_and_sends_notification_if_event_is_invalid(
-        self, event: Any, expected_error: Type[Exception]
+        self, event: Any, expected_error: type[Exception]
     ):
         with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
@@ -263,7 +262,7 @@ class TestUpdatePipelineSlisHandler:
             sftp_connect_timeout=10,
             sftp_hostname="test",
             sftp_username="test",
-            sftp_host_pub_key="test",
+            sftp_host_pub_keys=DEFAULT_MOCK_GLOBAL_CONFIG.sftp_host_pub_keys,
             sftp_user_priv_key="test",
             # With no enrolled partners and an empty home directory to partner dict, the handler is
             # unable to determine which partner the file belongs to (as the home directory may be a
@@ -363,7 +362,7 @@ class TestUpdatePipelineSlisHandler:
 
     def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self):
         event = generate_event()
-        mock_sftp_client.putfo.side_effect = IOError()
+        mock_sftp_client.putfo.side_effect = OSError()
 
         with pytest.raises(SFTPTransferError):
             handler(event=event, context=mock_lambda_context)
@@ -408,14 +407,6 @@ class TestUpdatePipelineSlisHandler:
         mock_boto3_client.return_value = mock_s3_client
 
         handler(event=event, context=mock_lambda_context)
-
-        actual_add_host_key_data = mock_host_keys.add.call_args.kwargs
-        expected_add_host_key_data = {
-            "hostname": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_hostname,
-            "keytype": "ssh-rsa",
-            "key": DEFAULT_MOCK_GLOBAL_CONFIG.sftp_host_pub_key,
-        }
-        assert actual_add_host_key_data == expected_add_host_key_data
 
         actual_ssh_connect_data = mock_ssh_client.connect.call_args.kwargs
         expected_ssh_connect_data = {

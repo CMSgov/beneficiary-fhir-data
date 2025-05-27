@@ -75,10 +75,10 @@ locals {
   # home directory is global, but this outbound configuration is not required. If any are undefined,
   # outbound is considered to be disabled globally for all partners and corresponding resources will
   # not be created.
-  outbound_sftp_host          = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/host", null)
-  outbound_sftp_host_key      = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/trusted_host_key", null)
-  outbound_sftp_username      = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/username", null)
-  outbound_sftp_user_priv_key = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/user_priv_key", null)
+  outbound_sftp_host              = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/host", null)
+  outbound_sftp_trusted_host_keys = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/trusted_host_keys_json", null)
+  outbound_sftp_username          = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/username", null)
+  outbound_sftp_user_priv_key     = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/user_priv_key", null)
   # First, construct the configuration for each partner. Partners with invalid path configuration
   # will be discarded below. We could assume that configuration is infallible for all properties, or
   # that invaild values will fail fast. But, invalid paths may not cause Terraform (really, AWS) to
@@ -173,7 +173,7 @@ locals {
     # outbound requires this configuration to be defined
     for x in [
       local.outbound_sftp_host,
-      local.outbound_sftp_host_key,
+      local.outbound_sftp_trusted_host_keys,
       local.outbound_sftp_username,
       local.outbound_sftp_user_priv_key
     ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]) ? [

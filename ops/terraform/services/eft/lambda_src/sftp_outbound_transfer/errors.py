@@ -10,9 +10,11 @@ class BaseTransferError(Exception):
         self.partner = partner
 
     def __str__(self) -> str:
-        return json.dumps(
-            {"message": self.message, "s3_object_key": self.s3_object_key, "partner": self.partner}
-        )
+        return json.dumps({
+            "message": self.message,
+            "s3_object_key": self.s3_object_key,
+            "partner": self.partner,
+        })
 
 
 class UnknownPartnerError(BaseTransferError): ...

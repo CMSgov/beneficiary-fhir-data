@@ -1,9 +1,0 @@
-pytest
-boto3-stubs
-boto3-stubs[sns,ssm]
-black==24.3.0
-isort
-pylint
-setuptools>=78.1.1
-aiohttp
-idna>=3.7
