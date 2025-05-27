@@ -1,9 +1,16 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.9"
+    }
+  }
+}
+
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   greenfield           = var.greenfield
-  parent_env           = local.parent_env
-  environment_name     = terraform.workspace
   service              = local.service
   relative_module_root = "ops/services/03-locust"
   subnet_layers        = !var.greenfield ? ["app"] : ["private"]
@@ -20,9 +27,7 @@ locals {
   latest_bfd_release       = module.terraservice.latest_bfd_release
   ssm_config               = module.terraservice.ssm_config
   env_key_alias            = module.terraservice.env_key_alias
-  env_config_key_alias     = module.terraservice.env_config_key_alias
   env_key_arn              = module.terraservice.env_key_arn
-  env_config_key_arns      = module.terraservice.env_config_key_arns
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc

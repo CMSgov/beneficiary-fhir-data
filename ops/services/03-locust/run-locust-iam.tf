@@ -47,12 +47,6 @@ data "aws_iam_policy_document" "run_locust_kms" {
     actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
     resources = [local.env_key_arn]
   }
-
-  statement {
-    sid       = "AllowDecryptWithEnvConfigCmk"
-    actions   = ["kms:Decrypt"]
-    resources = local.env_config_key_arns
-  }
 }
 
 resource "aws_iam_policy" "run_locust_kms" {
