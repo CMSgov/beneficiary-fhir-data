@@ -517,19 +517,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Base.CLM_NCH_PRMRY_PYR_CD",
-                "path": "ExplanationOfBenefit-Base.CLM_NCH_PRMRY_PYR_CD",
-                "label": "NCH Primary Payer code",
-                "definition": "The code outlining the primary payer.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_OSCAR_NUM",
                 "path": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_OSCAR_NUM",
                 "label": "Provider Number (OSCAR/CCN)",

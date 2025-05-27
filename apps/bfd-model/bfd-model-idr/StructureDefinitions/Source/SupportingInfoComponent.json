@@ -253,7 +253,20 @@
                         "code": "string"
                     }
                 ]
-            }
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_NCH_PRMRY_PYR_CD",
+                "path": "SupportingInfoComponent.CLM_NCH_PRMRY_PYR_CD",
+                "label": "NCH Primary Payer code",
+                "definition": "The code outlining the primary payer.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
             
         ]
     }

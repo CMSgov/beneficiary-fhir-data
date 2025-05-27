@@ -36,7 +36,8 @@
         {"ROW_NUM":"6","CLM_BLOOD_PT_FRNSH_QTY":"15"},
         {"ROW_NUM":"7","CLM_MDCR_INSTNL_MCO_PD_SW":"N"},
         {"ROW_NUM":"9","CLM_ADMSN_SRC_CD":"2"}, 
-        {"ROW_NUM":"10","TYPE_OF_BILL_CD":"0123"}
+        {"ROW_NUM":"10","TYPE_OF_BILL_CD":"0123"},
+        {"ROW_NUM":"11","CLM_NCH_PRMRY_PYR_CD":"Z"}
     ],
     "lineItemComponents":[
         {"CLM_LINE_NUM":"1","CLM_LINE_HCPCS_CD":"99213","CLM_REV_APC_HIPPS_CD":"","CLM_LINE_NDC_CD":"","CLM_LINE_NDC_QTY":"","CLM_LINE_SRVC_UNIT_QTY":"3.000","CLM_LINE_REV_CTR_CD":"0636","CLM_DDCTBL_COINSRNC_CD":"M","CLM_LINE_PRVDR_PMT_AMT":"11.15"},
@@ -60,6 +61,5 @@
     "CLM_OTHR_PRVDR_NPI_NUM":"1942945159",
     "family_name_rndrg":"Dazed",
     "CLM_RNDRG_PRVDR_NPI_NUM":"1942945159",
-    "CLM_NCH_PRMRY_PYR_CD":"Z",
     "CLM_BLG_PRVDR_OSCAR_NUM":"00054"
 }
