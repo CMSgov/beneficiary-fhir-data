@@ -12,7 +12,7 @@ locals {
   region       = module.terraservice.region
   account_id   = module.terraservice.account_id
   default_tags = module.terraservice.default_tags
-  kms_key_arn  = one([for arn in module.terraservice.key_arns : arn if strcontains(arn, local.region)])
+  kms_key_arn  = module.terraservice.current_region_key_arn
 
   ecr_container_repositories = toset([
     # utility container image repositories
