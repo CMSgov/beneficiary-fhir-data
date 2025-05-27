@@ -1,9 +1,16 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.9"
+    }
+  }
+}
+
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
   greenfield           = var.greenfield
-  parent_env           = local.parent_env
-  environment_name     = terraform.workspace
   relative_module_root = "ops/services/02-cluster"
   service              = local.service
 
