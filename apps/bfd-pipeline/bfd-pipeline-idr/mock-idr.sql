@@ -157,19 +157,19 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
-    clm_type_cd INT,
-    clm_num_sk BIGINT,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     clm_nrln_ric_cd VARCHAR(1),
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
-    clm_type_cd INT,
-    clm_num_sk BIGINT,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     clm_admsn_type_cd VARCHAR(2),
     bene_ptnt_stus_cd VARCHAR(2),
     dgns_drg_cd INT,
@@ -213,10 +213,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
-    clm_type_cd INT,
-    clm_num_sk BIGINT,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     clm_val_sqnc_num INT,
     clm_val_cd VARCHAR(2),
     clm_val_amt NUMERIC,
@@ -224,10 +224,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
-    clm_type_cd INT,
-    clm_num_sk BIGINT,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     clm_val_sqnc_num INT,
     clm_dgns_prcdr_icd_ind VARCHAR(1),
     clm_dgns_cd VARCHAR(7),
@@ -238,10 +238,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
-    clm_uniq_id BIGINT,
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
-    clm_type_cd INT,
+    clm_uniq_id BIGINT NOT NULL,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT,
     clm_line_num INT,
     clm_line_sbmt_chrg_amt NUMERIC,
@@ -271,8 +271,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     geo_bene_sk BIGINT,
     clm_dt_sgntr_sk BIGINT,
     clm_ansi_sgntr_sk BIGINT,
-    clm_type_cd INT,
-    clm_num_sk BIGINT,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     clm_line_num INT,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),

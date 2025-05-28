@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated, ClassVar, Iterable, Literal, TypeVar
+from typing import Annotated, Iterable, Optional, TypeVar
 from pydantic import BaseModel, BeforeValidator
 from constants import DEFAULT_DATE
 
@@ -29,16 +29,70 @@ def transform_null_float(value: float | None) -> float:
     return value
 
 
+PRIMARY_KEY = "primary_key"
+BATCH_TIMESTAMP = "batch_timestamp"
+UPDATE_TIMESTAMP = "update_timestamp"
+ALIAS = "alias"
+INSERT_EXCLUDE = "insert_exclude"
+
+
 class IdrBaseModel(BaseModel):
+    @staticmethod
+    def table() -> str: ...
+
+    @staticmethod
+    def computed_keys() -> list[str]:
+        return []
+
     @classmethod
-    def _format_column_alias(cls, key: str) -> str:
+    def unique_key(cls) -> list[str]:
+        return [
+            key
+            for key in cls.model_fields.keys()
+            if cls._extract_meta(key, PRIMARY_KEY) == True
+        ]
+
+    @classmethod
+    def batch_timestamp_col(cls) -> Optional[str]:
+        return cls._get_timestamp_col(BATCH_TIMESTAMP)
+
+    @classmethod
+    def update_timestamp_col(cls) -> Optional[str]:
+        return cls._get_timestamp_col(UPDATE_TIMESTAMP)
+
+    @classmethod
+    def _get_timestamp_col(cls, meta_key: str) -> Optional[str]:
+        keys = [
+            key
+            for key in cls.model_fields.keys()
+            if cls._extract_meta(key, meta_key) == True
+        ]
+
+        if len(keys) > 1:
+            raise ValueError("More than one batch timestamp key supplied")
+        if len(keys) == 0:
+            return None
+
+        return keys[0]
+
+    @classmethod
+    def _extract_meta(cls, key: str, meta_key: str) -> Optional[str]:
         metadata = cls.model_fields[key].metadata
 
         if (
             len(metadata) > 0
             and isinstance(metadata[0], Iterable)
-            and "alias" in metadata[0]
+            and meta_key in metadata[0]
         ):
+            return metadata[0][meta_key]
+        else:
+            return None
+
+    @classmethod
+    def _format_column_alias(cls, key: str) -> str:
+        metadata = cls.model_fields[key].metadata
+        alias = cls._extract_meta(key, ALIAS)
+        if alias is not None:
             return f"{metadata[0]['alias']}.{key}"
         else:
             return key
@@ -51,12 +105,20 @@ class IdrBaseModel(BaseModel):
     def columns_raw(cls) -> list[str]:
         return [key for key in cls.model_fields.keys()]
 
+    @classmethod
+    def insert_keys(cls) -> list[str]:
+        return [
+            key
+            for key in cls.model_fields.keys()
+            if cls._extract_meta(key, INSERT_EXCLUDE) != True
+        ]
+
 
 T = TypeVar("T", bound=IdrBaseModel)
 
 
 class IdrBeneficiary(IdrBaseModel):
-    bene_sk: int
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_xref_efctv_sk: int
     bene_mbi_id: str
     bene_1st_name: str
@@ -77,88 +139,135 @@ class IdrBeneficiary(IdrBaseModel):
     bene_line_5_adr: Annotated[str, BeforeValidator(transform_null_string)]
     bene_line_6_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: datetime
+    idr_trans_efctv_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table() -> str:
+        return "idr.beneficiary"
+
+    def computed_keys() -> list[str]:
+        return ["bene_xref_efctv_sk_computed"]
 
 
 class IdrBeneficiaryHistory(IdrBaseModel):
-    bene_sk: int
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_xref_efctv_sk: int
     bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
-    idr_trans_efctv_ts: datetime
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table() -> str:
+        return "idr.beneficiary_history"
+
+    def computed_keys() -> list[str]:
+        return ["bene_xref_efctv_sk_computed"]
 
 
-class IdrBeneficiaryMbi(IdrBaseModel):
-    bene_mbi_id: str
+class IdrBeneficiaryMbiId(IdrBaseModel):
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
     bene_mbi_efctv_dt: date
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date)]
-    idr_trans_efctv_ts: datetime
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table() -> str:
+        return "idr.beneficiary_mbi_id"
 
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
-    bene_sk: int
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_buyin_cd: str
-    bene_tp_type_cd: str
-    bene_rng_bgn_dt: date
-    bene_rng_end_dt: date
-    idr_trans_efctv_ts: datetime
+    bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
+    bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table():
+        return "idr.beneficiary_third_party"
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: int
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_mdcr_stus_cd: str
-    mdcr_stus_bgn_dt: date
-    mdcr_stus_end_dt: date
-    idr_trans_efctv_ts: datetime
+    mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table():
+        return "idr.beneficiary_status"
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
-    bene_sk: int
-    bene_rng_bgn_dt: date
-    bene_rng_end_dt: date
-    bene_mdcr_entlmt_type_cd: str
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_stus_cd: str
     bene_mdcr_enrlmt_rsn_cd: str
-    idr_trans_efctv_ts: datetime
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table() -> str:
+        return "idr.beneficiary_entitlement"
 
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
-    bene_sk: int
-    bene_rng_bgn_dt: date
-    bene_rng_end_dt: date
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
-    idr_trans_efctv_ts: datetime
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
-    idr_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date)]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
+
+    def table() -> str:
+        return "idr.beneficiary_entitlement_reason"
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: int
-    cntrct_pbp_sk: int
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_cntrct_num: str
     bene_pbp_num: str
     bene_elctn_enrlmt_disenrlmt_cd: str
     bene_elctn_aplctn_dt: date
-    bene_enrlmt_efctv_dt: date
-    idr_trans_efctv_ts: datetime
+    bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
+
+    def table():
+        return "idr.election_period_usage"
 
 
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: int
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     cntrct_drug_plan_ind_cd: str
     cntrct_pbp_type_cd: str
+
+    def table():
+        return "idr.contract_pbp_number"
 
 
 ALIAS_CLM = "clm"
@@ -167,11 +276,11 @@ ALIAS_SGNTR = "sgntr"
 
 
 class IdrClaim(IdrBaseModel):
-    clm_uniq_id: int
-    geo_bene_sk: Annotated[int, {"alias": ALIAS_CLM}]
-    clm_dt_sgntr_sk: Annotated[int, {"alias": ALIAS_CLM}]
-    clm_type_cd: Annotated[int, {"alias": ALIAS_CLM}]
-    clm_num_sk: Annotated[int, {"alias": ALIAS_CLM}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+    clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+    clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
+    clm_num_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     bene_sk: int
     clm_cntl_num: str
     clm_orig_cntl_num: Annotated[str, BeforeValidator(transform_null_string)]
@@ -202,14 +311,17 @@ class IdrClaim(IdrBaseModel):
     clm_blood_pt_frnsh_qty: int
     clm_nch_prmry_pyr_cd: str
     clm_blg_prvdr_oscar_num: str
-    clm_idr_ld_dt: date
+    clm_idr_ld_dt: Annotated[date, {BATCH_TIMESTAMP: True}]
     clm_nrln_ric_cd: Annotated[
-        str, {"alias": ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
+
+    def table():
+        return "idr.claim"
 
 
 class IdrClaimDateSignature(IdrBaseModel):
-    clm_dt_sgntr_sk: Annotated[int, {"alias": ALIAS_SGNTR}]
+    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_SGNTR}]
     clm_cms_proc_dt: date
     clm_actv_care_from_dt: date
     clm_dschrg_dt: date
@@ -219,11 +331,14 @@ class IdrClaimDateSignature(IdrBaseModel):
     clm_actv_care_thru_dt: date
     clm_mdcr_exhstd_dt: date
     clm_nch_wkly_proc_dt: date
-    clm_idr_ld_dt: date
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+
+    def table() -> str:
+        return "idr.claim_date_signature"
 
 
 class IdrClaimInstitutional(IdrBaseModel):
-    clm_uniq_id: int
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_admsn_type_cd: str
     bene_ptnt_stus_cd: str
     dgns_drg_cd: int
@@ -250,17 +365,27 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_instnl_prfnl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_ip_bene_ddctbl_amt: float
     clm_instnl_drg_outlier_amt: float
-    clm_idr_ld_dt: date
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+
+    def table() -> str:
+        return "idr.claim_institutional"
 
 
 class IdrClaimValue(IdrBaseModel):
-    clm_uniq_id: int
-    clm_val_sqnc_num: int
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_val_cd: str
     clm_val_amt: float
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+
+    def table() -> str:
+        return "idr.claim_value"
 
 
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
     batch_completion_ts: datetime
+
+    def table() -> str:
+        return "idr.load_progress"

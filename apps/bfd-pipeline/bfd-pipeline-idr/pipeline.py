@@ -14,12 +14,13 @@ from model import (
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
     IdrBeneficiaryHistory,
-    IdrBeneficiaryMbi,
+    IdrBeneficiaryMbiId,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrClaim,
     IdrClaimDateSignature,
     IdrClaimInstitutional,
+    IdrClaimValue,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
@@ -72,29 +73,14 @@ def extract_and_load(
     data_extractor: Extractor,
     connection_string: str,
     fetch_query: str,
-    table_to_load: str,
-    unique_key: list[str],
-    exclude_keys: list[str],
-    batch_timestamp_col: str,
-    update_timestamp_col: Optional[str] = None,
 ):
     data_iter = data_extractor.extract_idr_data(
         cls,
         connection_string=connection_string,
         fetch_query=fetch_query,
-        table=table_to_load,
-        batch_timestamp_col=batch_timestamp_col,
-        update_timestamp_col=update_timestamp_col,
     )
 
-    loader = PostgresLoader(
-        connection_string=connection_string,
-        table=table_to_load,
-        unique_key=unique_key,
-        batch_timestamp_col=batch_timestamp_col,
-        immutable=update_timestamp_col is None,
-        exclude_keys=exclude_keys,
-    )
+    loader = PostgresLoader(connection_string=connection_string)
     loader.load(data_iter, cls)
     return loader
 
@@ -111,16 +97,11 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary_history",
-        unique_key=["bene_sk", "idr_trans_efctv_ts"],
-        exclude_keys=["bene_xref_efctv_sk_computed"],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
     extract_and_load(
-        IdrBeneficiaryMbi,
+        IdrBeneficiaryMbiId,
         data_extractor,
         fetch_query="""
             SELECT {COLUMNS}
@@ -128,11 +109,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary_mbi_id",
-        unique_key=["bene_mbi_id", "idr_trans_efctv_ts"],
-        exclude_keys=[],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -145,11 +121,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary",
-        unique_key=["bene_sk"],
-        exclude_keys=["bene_xref_efctv_sk_computed"],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -164,16 +135,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary_status",
-        unique_key=[
-            "bene_sk",
-            "mdcr_stus_bgn_dt",
-            "mdcr_stus_end_dt",
-            "idr_trans_efctv_ts",
-        ],
-        exclude_keys=[],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -186,17 +147,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary_third_party",
-        unique_key=[
-            "bene_sk",
-            "bene_rng_bgn_dt",
-            "bene_rng_end_dt",
-            "bene_tp_type_cd",
-            "idr_trans_efctv_ts",
-        ],
-        exclude_keys=[],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -209,17 +159,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary_entitlement",
-        unique_key=[
-            "bene_sk",
-            "bene_rng_bgn_dt",
-            "bene_rng_end_dt",
-            "bene_mdcr_entlmt_type_cd",
-            "idr_trans_efctv_ts",
-        ],
-        exclude_keys=[],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -232,16 +171,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """,
-        table_to_load="idr.beneficiary_entitlement_reason",
-        unique_key=[
-            "bene_sk",
-            "bene_rng_bgn_dt",
-            "bene_rng_end_dt",
-            "idr_trans_efctv_ts",
-        ],
-        exclude_keys=[],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -256,13 +185,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         """,
     )
     pbp_iter = data_extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
-    pbp_loader = PostgresLoader(
-        connection_string=connection_string,
-        table="idr.contract_pbp_number",
-        unique_key=["cntrct_pbp_sk"],
-        immutable=True,
-        exclude_keys=[],
-    )
+    pbp_loader = PostgresLoader(connection_string=connection_string)
     pbp_loader.load(pbp_iter, IdrContractPbpNumber)
 
     extract_and_load(
@@ -279,11 +202,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             )
             SELECT {COLUMNS} FROM dupes WHERE row_order = 1
             """,
-        table_to_load="idr.beneficiary_election_period_usage",
-        unique_key=["bene_sk", "cntrct_pbp_sk", "bene_enrlmt_efctv_dt"],
-        exclude_keys=[],
-        batch_timestamp_col="idr_trans_efctv_ts",
-        update_timestamp_col="idr_updt_ts",
         connection_string=connection_string,
     )
 
@@ -309,10 +227,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {{WHERE_CLAUSE}} AND {claim_type_clause}
             {{ORDER_BY}}
         """,
-        table_to_load="idr.claim",
-        unique_key=["clm_uniq_id"],
-        exclude_keys=[],
-        batch_timestamp_col="clm_idr_ld_dt",
         connection_string=connection_string,
     )
 
@@ -330,10 +244,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             {{WHERE_CLAUSE}} AND {claim_type_clause}
             {{ORDER_BY}}
         """,
-        table_to_load="idr.claim_institutional",
-        unique_key=["clm_uniq_id"],
-        exclude_keys=[],
-        batch_timestamp_col="clm_idr_ld_dt",
         connection_string=connection_string,
     )
 
@@ -354,10 +264,23 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
         """,
-        table_to_load="idr.claim_date_signature",
-        unique_key=["clm_dt_sgntr_sk"],
-        exclude_keys=[],
-        batch_timestamp_col="clm_idr_ld_dt",
+        connection_string=connection_string,
+    )
+
+    extract_and_load(
+        IdrClaimValue,
+        data_extractor,
+        fetch_query=f"""
+           SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val val ON
+                {clm}.geo_bene_sk = val.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = val.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = val.clm_type_cd AND
+                {clm}.clm_num_sk = val.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause}
+            {{ORDER_BY}}
+        """,
         connection_string=connection_string,
     )
 

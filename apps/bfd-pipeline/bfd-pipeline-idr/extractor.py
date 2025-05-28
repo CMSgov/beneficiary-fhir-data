@@ -54,12 +54,11 @@ class Extractor(ABC):
         cls: type[T],
         connection_string: str,
         fetch_query: str,
-        table: str,
-        batch_timestamp_col: str,
-        update_timestamp_col: Optional[str] = None,
     ) -> Iterator[list[T]]:
         fetch_query = self.get_query(cls, fetch_query)
-        progress = get_progress(connection_string, table)
+        progress = get_progress(connection_string, cls.table())
+        batch_timestamp_col = cls.batch_timestamp_col()
+        update_timestamp_col = cls.update_timestamp_col()
         if progress is None:
             idr_query_timer.start()
             # No saved progress, process the whole table from the beginning

@@ -23,34 +23,26 @@ class PostgresLoader:
     def __init__(
         self,
         connection_string: str,
-        table: str,
-        unique_key: list[str],
-        exclude_keys: list[str],
-        immutable: bool,
-        batch_timestamp_col: Optional[str] = None,
     ):
         self.conn = psycopg.connect(connection_string)
-        self.table = table
-        self.unique_key = unique_key
-        self.exclude_keys = exclude_keys
-        self.immutable = immutable
-        self.batch_timestamp_col = batch_timestamp_col
 
     def refresh_materialized_view(self, view_name: str):
         self.conn.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view_name}")  # type: ignore
         self.conn.commit()
 
     def load(self, fetch_results: Iterator[list[T]], model: type[T]):
-        insert_cols = list(model.model_fields.keys())
+        insert_cols = list(model.insert_keys())
         insert_cols.sort()
         cols_str = ", ".join(insert_cols)
+        unique_key = model.unique_key()
 
         update_set = ", ".join(
-            [f"{v}=EXCLUDED.{v}" for v in insert_cols if not v in self.unique_key]
+            [f"{v}=EXCLUDED.{v}" for v in insert_cols if not v in unique_key]
         )
         timestamp = datetime.now(timezone.utc)
+        table = model.table()
         # trim the schema from the table name to create the temp table (temp tables can't be created with an explicit schema set)
-        temp_table = self.table.split(".")[1] + "_temp"
+        temp_table = table.split(".")[1] + "_temp"
         with self.conn.cursor() as cur:
             # load each batch in a separate transaction
             for results in fetch_results:
@@ -62,15 +54,16 @@ class PostgresLoader:
                 # For simplicity's sake, we'll create our temp tables using the existing schema and just drop the columns we need to ignore
                 temp_table_timer.start()
                 cur.execute(
-                    f"CREATE TEMPORARY TABLE {temp_table} (LIKE {self.table}) ON COMMIT DROP"  # type: ignore
+                    f"CREATE TEMPORARY TABLE {temp_table} (LIKE {table}) ON COMMIT DROP"  # type: ignore
                 )
+                immutable = model.update_timestamp_col() is None
                 meta_keys = (
                     ["bfd_created_ts"]
-                    if self.immutable
+                    if immutable
                     else ["bfd_created_ts", "bfd_updated_ts"]
                 )
                 # Created/updated columns don't need to be loaded from the source.
-                exclude_cols = self.exclude_keys + meta_keys
+                exclude_cols = model.computed_keys() + meta_keys
                 for col in exclude_cols:
                     cur.execute(f"ALTER TABLE {temp_table} DROP COLUMN {col}")  # type: ignore
                 temp_table_timer.stop()
@@ -94,7 +87,7 @@ class PostgresLoader:
                     # In these cases, we can assume any conflicting rows have already been loaded so "DO NOTHING" is appropriate here.
                     on_conflict = (
                         "DO NOTHING"
-                        if self.immutable
+                        if immutable
                         else f"DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s"
                     )
                     timestamp_placeholders = ",".join(
@@ -104,9 +97,9 @@ class PostgresLoader:
                     insert_timer.start()
                     cur.execute(
                         f"""
-                        INSERT INTO {self.table}({cols_str}, {",".join(meta_keys)})
+                        INSERT INTO {table}({cols_str}, {",".join(meta_keys)})
                         SELECT {cols_str},{timestamp_placeholders} FROM {temp_table}
-                        ON CONFLICT ({",".join(self.unique_key)}) {on_conflict}
+                        ON CONFLICT ({",".join(unique_key)}) {on_conflict}
                         """,  # type: ignore
                         {"timestamp": timestamp},
                     )
@@ -115,8 +108,9 @@ class PostgresLoader:
                     last = results[len(results) - 1].model_dump()
                     # Some tables that contain reference data (like contract info) may not have the normal IDR timestamps
                     # For now we won't support incremental refreshes for those tables
-                    if self.batch_timestamp_col:
-                        last_timestamp = last[self.batch_timestamp_col]
+                    batch_timestamp_col = model.batch_timestamp_col()
+                    if batch_timestamp_col:
+                        last_timestamp = last[batch_timestamp_col]
                         cur.execute(
                             f"""
                             INSERT INTO idr.load_progress(table_name, last_ts, batch_completion_ts)
@@ -124,7 +118,7 @@ class PostgresLoader:
                             ON CONFLICT (table_name) DO UPDATE SET last_ts = EXCLUDED.last_ts
                             """,
                             {
-                                "table": self.table,
+                                "table": table,
                                 "last_ts": last_timestamp,
                             },
                         )
@@ -135,7 +129,7 @@ class PostgresLoader:
                     SET batch_completion_ts = NOW()
                     WHERE table_name = %(table)s
                     """,
-                    {"table": self.table},
+                    {"table": table},
                 )
                 commit_timer.start()
                 self.conn.commit()

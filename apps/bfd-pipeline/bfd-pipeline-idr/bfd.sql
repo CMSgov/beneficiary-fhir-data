@@ -148,10 +148,10 @@ CREATE TABLE idr.load_progress(
 
 CREATE TABLE idr.claim (
     clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
-    clm_type_cd INT,
-    clm_num_sk BIGINT,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     bene_sk BIGINT NOT NULL,
     clm_cntl_num VARCHAR(40),
     clm_orig_cntl_num VARCHAR(40),
@@ -198,7 +198,6 @@ CREATE TABLE idr.claim_date_signature (
     clm_actv_care_thru_dt DATE,
     clm_mdcr_exhstd_dt DATE,
     clm_nch_wkly_proc_dt DATE,
-    clm_idr_ld_dt DATE,
     bfd_created_ts TIMESTAMPTZ NOT NULL
 );
 
@@ -230,32 +229,33 @@ CREATE TABLE idr.claim_institutional (
     clm_instnl_prfnl_amt NUMERIC,
     clm_mdcr_ip_bene_ddctbl_amt NUMERIC,
     clm_instnl_drg_outlier_amt NUMERIC,
-    clm_idr_ld_dt DATE,
     bfd_created_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_value (
     clm_uniq_id BIGINT NOT NULL,
-    clm_val_sqnc_num INT,
+    clm_val_sqnc_num INT NOT NULL,
     clm_val_cd VARCHAR(2),
     clm_val_amt NUMERIC,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
 );
 
 CREATE TABLE idr.claim_procedure_diagnosis (
-    clm_uniq_id BIGINT,
-    clm_val_sqnc_num INT,
+    clm_uniq_id BIGINT NOT NULL,
+    clm_val_sqnc_num INT NOT NULL,
     clm_dgns_prcdr_icd_ind VARCHAR(1),
     clm_dgns_cd VARCHAR(7),
     clm_prod_type_cd VARCHAR(1),
     clm_poa_ind VARCHAR(1),
     clm_prcdr_prfrm_dt DATE,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
 );
 
 CREATE TABLE idr.claim_line (
     clm_uniq_id BIGINT,
-    clm_line_num INT,
+    clm_line_num INT NOT NULL,
     clm_line_sbmt_chrg_amt NUMERIC,
     clm_line_alowd_chrg_amt NUMERIC,
     clm_line_ncvrd_chrg_amt NUMERIC,
@@ -276,12 +276,13 @@ CREATE TABLE idr.claim_line (
     hcpcs_3_mdfr_cd VARCHAR(2),
     hcpcs_4_mdfr_cd VARCHAR(2),
     hcpcs_5_mdfr_cd VARCHAR(2),
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
 CREATE TABLE idr.claim_line_institutional (
-    clm_uniq_id BIGINT,
-    clm_line_num INT,
+    clm_uniq_id BIGINT NOT NULL,
+    clm_line_num INT NOT NULL,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),
     clm_line_instnl_rate_amt NUMERIC,
@@ -290,6 +291,7 @@ CREATE TABLE idr.claim_line_institutional (
     clm_line_instnl_msp1_pd_amt NUMERIC,
     clm_line_instnl_msp2_pd_amt NUMERIC,
     clm_line_instnl_rev_ctr_dt DATE,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
@@ -298,7 +300,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.claim_ansi_signature (
     clm_1_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_3_rev_cntr_ansi_rsn_cd VARCHAR(3),
-    clm_4_rev_cntr_ansi_rsn_cd VARCHAR(3)
+    clm_4_rev_cntr_ansi_rsn_cd VARCHAR(3),
+    bfd_created_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
