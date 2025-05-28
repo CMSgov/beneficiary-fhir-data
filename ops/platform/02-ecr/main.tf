@@ -3,7 +3,7 @@ module "terraservice" {
 
   greenfield           = var.greenfield
   service              = local.service
-  relative_module_root = "ops/platform/03-ecr"
+  relative_module_root = "ops/platform/02-ecr"
 }
 
 locals {
