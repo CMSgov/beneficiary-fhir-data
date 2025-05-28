@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.IdrConstants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -11,7 +10,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -90,16 +88,9 @@ public class Beneficiary {
 
     coverage.setMeta(meta.toFhirCoverage());
 
-    coverage.setBeneficiary(new Reference("Patient/" + this.getBeneSk()));
+    coverage.setBeneficiary(new Reference("Patient/" + beneSk));
 
-    // probably create a new class for this, RelationshipFactory class maybe? - yes
-    CodeableConcept relationshipCodeConcept = new CodeableConcept();
-    relationshipCodeConcept
-        .addCoding()
-        .setSystem(IdrConstants.SYS_SUBSCRIBER_RELATIONSHIP)
-        .setCode("self")
-        .setDisplay("Self");
-    coverage.setRelationship(relationshipCodeConcept);
+    coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
 
     coverage.addPayor(new Reference().setReference("#cms-org"));
 

@@ -77,19 +77,7 @@ public class FhirInputConverter {
     }
 
     String rawCompositeIdStr = coverageId.getIdPart();
-    CoverageCompositeId parsedId =
-        CoverageCompositeId.parse(rawCompositeIdStr); // This already throws for bad format
 
-    // Perform the Part A/B check here
-    String partCode = parsedId.coveragePart().getCode();
-    if (!(CoveragePart.PART_A.getCode().equals(partCode)
-        || CoveragePart.PART_B.getCode().equals(partCode))) {
-      throw new InvalidRequestException(
-          "Unsupported Coverage part for this operation: '"
-              + parsedId.coveragePart().getDisplayName()
-              + "'. Only Part A and Part B are currently supported.");
-    }
-
-    return parsedId;
+    return CoverageCompositeId.parse(rawCompositeIdStr);
   }
 }

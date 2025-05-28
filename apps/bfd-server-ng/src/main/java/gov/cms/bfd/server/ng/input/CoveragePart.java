@@ -14,23 +14,29 @@ import org.hl7.fhir.r4.model.Coverage;
  */
 @Getter
 public enum CoveragePart {
-  /** Represents the part A medicare segment. */
-  PART_A("A", "Part A", "part-a"),
-  /** Represents the part B medicare segment. */
-  PART_B("B", "Part B", "part-b"),
-  /** Represents the part C medicare segment. */
-  PART_C("C", "Part C", "part-c"),
-  /** Represents the part D medicare segment. */
-  PART_D("D", "Part D", "part-d");
+  /** Represents Medicare Part A. */
+  PART_A("A", "Part A", "part-a", "1", "MEDICARE"),
 
-  private final String code; // The single character code (A, B, C, D)
-  private final String displayName;
-  private final String standardUrlPrefix; // e.g., "part-a"
+  /** Represents Medicare Part B. */
+  PART_B("B", "Part B", "part-b", "121", "MEDICARE FFS");
 
-  CoveragePart(String code, String displayName, String standardUrlPrefix) {
-    this.code = code;
-    this.displayName = displayName;
-    this.standardUrlPrefix = standardUrlPrefix;
+  private final String standardCode;
+  private final String standardDisplay;
+  private final String standardSystem; // "part-a", "part-b"
+  private final String soptCode;
+  private final String soptDisplay; // "MEDICARE", "MEDICARE FFS"
+
+  CoveragePart(
+      String standardCode,
+      String standardDisplay,
+      String standardSystem,
+      String soptCode,
+      String soptDisplay) {
+    this.standardCode = standardCode;
+    this.standardDisplay = standardDisplay;
+    this.standardSystem = standardSystem;
+    this.soptCode = soptCode;
+    this.soptDisplay = soptDisplay;
   }
 
   /**
@@ -48,7 +54,7 @@ public enum CoveragePart {
       return Optional.empty();
     }
     for (CoveragePart part : values()) {
-      if (part.getStandardUrlPrefix().equalsIgnoreCase(rawUrlPrefix)) {
+      if (part.getStandardSystem().equalsIgnoreCase(rawUrlPrefix)) {
         return Optional.of(part);
       }
     }
@@ -68,9 +74,7 @@ public enum CoveragePart {
         .orElseThrow(
             () ->
                 new InvalidRequestException(
-                    "Unrecognized coverage part identifier prefix: '"
-                        + rawUrlPrefix
-                        + "' for the given context."));
+                    "Unrecognized or unsupported coverage part identifier prefix provided."));
   }
 
   /**
@@ -87,7 +91,7 @@ public enum CoveragePart {
               + (code == null ? "null" : "'" + code + "'"));
     }
     for (CoveragePart part : values()) {
-      if (part.getCode().equals(code)) {
+      if (part.getStandardCode().equals(code)) {
         return Optional.of(part);
       }
     }
@@ -100,16 +104,22 @@ public enum CoveragePart {
    * @param coverage The Coverage.
    */
   public static void addPartACoverageElementsToCoverage(Coverage coverage) {
+
     CodeableConcept typeCode = new CodeableConcept();
-    typeCode.addCoding().setSystem(IdrConstants.SYS_SOPT).setCode("1").setDisplay("MEDICARE");
+    typeCode
+        .addCoding()
+        .setSystem(IdrConstants.SYS_SOPT)
+        .setCode(PART_A.getStandardCode())
+        .setDisplay(PART_A.getSoptDisplay());
     coverage.setType(typeCode);
 
+    // Set Coverage.class
     Coverage.ClassComponent classComponent = new Coverage.ClassComponent();
     classComponent
         .setType(
             new CodeableConcept()
                 .addCoding(new Coding(IdrConstants.SYS_COVERAGE_CLASS, "plan", null)))
-        .setValue("Part A");
+        .setValue(PART_A.getStandardCode());
     coverage.addClass_(classComponent);
   }
 
@@ -120,7 +130,11 @@ public enum CoveragePart {
    */
   public static void addPartBCoverageElementsToCoverage(Coverage coverage) {
     CodeableConcept typeCode = new CodeableConcept();
-    typeCode.addCoding().setSystem(IdrConstants.SYS_SOPT).setCode("121").setDisplay("MEDICARE FFS");
+    typeCode
+        .addCoding()
+        .setSystem(IdrConstants.SYS_SOPT)
+        .setCode(PART_B.getStandardCode())
+        .setDisplay(PART_A.soptDisplay);
     coverage.setType(typeCode);
 
     Coverage.ClassComponent classComponent = new Coverage.ClassComponent();
@@ -128,7 +142,7 @@ public enum CoveragePart {
         .setType(
             new CodeableConcept()
                 .addCoding(new Coding(IdrConstants.SYS_COVERAGE_CLASS, "plan", null)))
-        .setValue("Part B");
+        .setValue(PART_B.getStandardCode());
     coverage.addClass_(classComponent);
   }
 }

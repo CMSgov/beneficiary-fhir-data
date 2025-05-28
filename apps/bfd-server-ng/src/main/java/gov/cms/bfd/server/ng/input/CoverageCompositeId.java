@@ -30,7 +30,7 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
    */
   public static CoverageCompositeId parse(String rawCompositeId) {
 
-    Matcher standardMatcher = STANDARD_COVERAGE_ID_PATTERN.matcher(rawCompositeId);
+    Matcher standardMatcher = STANDARD_COVERAGE_ID_PATTERN.matcher(rawCompositeId.trim());
     if (standardMatcher.matches()) {
       String rawPartPrefix = standardMatcher.group(1);
       String beneSkStr = standardMatcher.group(2);
@@ -51,14 +51,5 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
         "Invalid Coverage ID format. Expected pattern like 'part-a-123'. Got: '"
             + rawCompositeId
             + "'");
-  }
-
-  /**
-   * Gets the normalized single character code for the coverage part (e.g., "A").
-   *
-   * @return The coverage part code.
-   */
-  public String getPartCode() {
-    return coveragePart.getCode();
   }
 }

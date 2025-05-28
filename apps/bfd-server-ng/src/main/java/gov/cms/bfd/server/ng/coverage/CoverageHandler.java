@@ -33,20 +33,37 @@ public class CoverageHandler {
   public Optional<Coverage> readCoverage(
       final CoverageCompositeId parsedId, final String compositeId) {
 
-    String normalizedPartCode = parsedId.coveragePart().getCode(); // e.g., "A", "B"
+    String normalizedPartCode = parsedId.coveragePart().getStandardCode(); // e.g., "A", "B"
     long beneSk = parsedId.beneSk();
 
     Optional<Beneficiary> beneficiaryOpt =
         beneficiaryRepository.findById(beneSk, new DateTimeRange());
+    Optional<Beneficiary> currentEffectiveBeneficiaryOpt =
+        filterForCurrentEffective(beneficiaryOpt);
 
-    if (beneficiaryOpt.isEmpty()) {
+    if (currentEffectiveBeneficiaryOpt.isEmpty()) {
       return Optional.empty();
     }
 
-    Beneficiary beneficiary = beneficiaryOpt.get();
+    Beneficiary beneficiary = currentEffectiveBeneficiaryOpt.get();
 
     CoverageIdentity coverageIdentity = CoverageIdentity.from(beneficiary.getMbi());
     return toFhir(beneficiary, coverageIdentity, normalizedPartCode, compositeId);
+  }
+
+  /**
+   * Filters an Optional to ensure that if a beneficiary is present. if beneSk equals its xrefSk
+   * (i.e., it's the current effective record).
+   *
+   * @param beneficiaryOpt The Optional Beneficiary, potentially from a repository call.
+   * @return An Optional containing the Beneficiary if it was present and is current effective,
+   *     otherwise an empty Optional.
+   */
+  private Optional<Beneficiary> filterForCurrentEffective(Optional<Beneficiary> beneficiaryOpt) {
+    return beneficiaryOpt.filter(
+        beneficiary -> {
+          return beneficiary.getBeneSk() == beneficiary.getXrefSk();
+        });
   }
 
   /**
