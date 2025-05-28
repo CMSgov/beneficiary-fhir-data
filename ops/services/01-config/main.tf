@@ -29,20 +29,16 @@ locals {
   is_ephemeral_env = module.terraservice.is_ephemeral_env
   env_key_arn      = module.terraservice.env_key_arn
 
-  # Terraform v1.5 does not have templatestring, and even if it did templatefile/templatestring
-  # require that all templated values be provided. We cannot provide values for ${env} ahead of
-  # computing ephemeral config, so this precludes the usage of those functions. However, "templates"
-  # in YAML don't need to call any built-in functions or do anything fancy--all "templates" in our
-  # YAML should be compatible with envsubst--so we can do our own "templating" with this regex
-  # combined with format() and replace()
+  # templatefile/templatestring require that all templated values be provided. We cannot provide
+  # values for ${env} ahead of computing ephemeral config, so this alone makes it impossible to use
+  # those functions. However, "templates" in YAML don't need to call any built-in functions or do
+  # anything fancy--all "templates" in our YAML should be compatible with envsubst--so we can do our
+  # own "templating" with this regex combined with format() and replace()
   template_var_regex = "/\\$\\{{0,1}%s\\}{0,1}/"
 
-  parent_yaml_file     = "${path.module}/values/${local.parent_env}.sops.yaml"
-  raw_sops_parent_yaml = file(local.parent_yaml_file)
-  # sops cannot decrypt the YAML until the KMS key ARN includes the raw Account ID. We want to
-  # protect the ID, so we cannot store it literally in the sops YAML. So, this will take the current
-  # account ID and replace the tamplate/placeholder in the YAML to make it valid sops
-  valid_sops_parent_yaml  = replace(local.raw_sops_parent_yaml, format(local.template_var_regex, "ACCOUNT_ID"), local.account_id)
+  parent_yaml_file        = "${path.module}/values/${local.parent_env}.sopsw.yaml"
+  raw_sops_parent_yaml    = file(local.parent_yaml_file)
+  valid_sops_parent_yaml  = data.external.valid_sops_yaml.result.valid_sops
   enc_parent_data         = yamldecode(local.valid_sops_parent_yaml)
   sops_nonsensitive_regex = local.enc_parent_data.sops.unencrypted_regex
 
@@ -96,13 +92,29 @@ locals {
   }
 }
 
+data "external" "valid_sops_yaml" {
+  # sops (not sopsw, our custom wrapper) cannot decrypt the YAML until the KMS key ARNs include the
+  # Account ID and the sops metadata block includes valid "lastmodified" and "mac" properties. We
+  # need to use sopsw's "-c/--cat" function to construct a valid sops file so that it can be
+  # consumed by the sops provider
+  program = [
+    "bash",
+    "-c",
+    # Allows us to pipe to yq so that sopsw does not need to emit JSON to work with this external
+    # data source
+    <<-EOF
+    ${path.module}/scripts/sopsw -c values/test.sopsw.yaml | yq -o=json '{"valid_sops": (. | tostring)}'
+    EOF
+  ]
+}
+
 data "sops_external" "this" {
   source     = local.valid_sops_parent_yaml
   input_type = "yaml"
 }
 
 resource "aws_ssm_parameter" "this" {
-  for_each = local.env_config
+  for_each = !var.greenfield ? local.env_config : merge(local.env_config, { for k, v in local.env_config : trimprefix(k, "/ng") => v })
 
   name           = each.key
   tier           = "Intelligent-Tiering"

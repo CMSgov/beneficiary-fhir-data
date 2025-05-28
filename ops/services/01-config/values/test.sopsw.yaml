@@ -406,8 +406,6 @@ sops:
       created_at: "2025-05-27T19:52:16Z"
       enc: AQICAHiPbrjkmNx+EYhjapAcRZIMA3ZR2GNT7wyj5sHbBNyOGAF17E6mrIKaKhcUd1RSQiP9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMntBTVLMQ39edYjbeAgEQgDuox7IUmQqwRJ7Jkf5Z8DClv9nGJZcbyWG+uekETOxp9y9+7dEp4YU7kZbUpDfwwc5jXZIkZJB3i42EYw==
       aws_profile: ""
-  lastmodified: "2025-05-27T20:43:28Z"
-  mac: ENC[AES256_GCM,data:mOe+Du0Dvz75PWR/n0kFsVhRgB+0/oe/280oVurwRo5q0qhuSllMPy1o8V6/WV74qNFPqdbNRkrG+AeQB0kfzqzVZTouZtNQuLY/pJLefRaGIvitAHt9qUM0K9oBNvtnWwVcYCTOxTTY0SwTAndwv0u+7pbbcbgcOIvjH+NLNNA=,iv:plBgMDcVM6Q5z8sHUNBoLT2y25szbJsjKQuXVeb2Tlw=,tag:CGP/iaPRzT4UAq9xm/Aocg==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
