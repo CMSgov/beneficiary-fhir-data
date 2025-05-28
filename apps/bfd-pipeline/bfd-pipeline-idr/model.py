@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Annotated, Iterable, Optional, TypeVar
 from pydantic import BaseModel, BeforeValidator
-from constants import DEFAULT_DATE
+from constants import CLAIM_TYPE_CODES, DEFAULT_DATE
 
 
 def transform_null_date(value: date | None) -> date:
@@ -39,6 +39,9 @@ INSERT_EXCLUDE = "insert_exclude"
 class IdrBaseModel(BaseModel):
     @staticmethod
     def table() -> str: ...
+
+    @staticmethod
+    def fetch_query() -> str: ...
 
     @staticmethod
     def computed_keys() -> list[str]:
@@ -151,6 +154,14 @@ class IdrBeneficiary(IdrBaseModel):
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
 
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
+
 
 class IdrBeneficiaryHistory(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
@@ -168,6 +179,14 @@ class IdrBeneficiaryHistory(IdrBaseModel):
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
 
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
+
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
     bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
@@ -181,6 +200,14 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
 
     def table() -> str:
         return "idr.beneficiary_mbi_id"
+
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
 
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
@@ -198,6 +225,14 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
     def table():
         return "idr.beneficiary_third_party"
 
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
+
 
 class IdrBeneficiaryStatus(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
@@ -212,6 +247,14 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
     def table():
         return "idr.beneficiary_status"
+
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
@@ -230,6 +273,14 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
     def table() -> str:
         return "idr.beneficiary_entitlement"
 
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
+
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
@@ -244,6 +295,14 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
     def table() -> str:
         return "idr.beneficiary_entitlement_reason"
+
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
@@ -260,6 +319,19 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     def table():
         return "idr.election_period_usage"
 
+    def fetch_query() -> str:
+        # equivalent to "select distinct on", but Snowflake has different syntax for that so it's unfortunately not portable
+        return """
+            WITH dupes as (
+                SELECT {COLUMNS}, ROW_NUMBER() OVER (PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
+                {ORDER_BY} DESC) as row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
+                {WHERE_CLAUSE}
+                {ORDER_BY}
+            )
+            SELECT {COLUMNS} FROM dupes WHERE row_order = 1
+            """
+
 
 class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
@@ -269,10 +341,23 @@ class IdrContractPbpNumber(IdrBaseModel):
     def table():
         return "idr.contract_pbp_number"
 
+    def fetch_query() -> str:
+        return f"""
+        SELECT {{COLUMNS}}
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
+        WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_DATE}'
+        """
+
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
 ALIAS_SGNTR = "sgntr"
+
+
+def claim_type_clause() -> str:
+    return (
+        f"{ALIAS_CLM}.clm_type_cd IN ({','.join([str(c) for c in CLAIM_TYPE_CODES])})"
+    )
 
 
 class IdrClaim(IdrBaseModel):
@@ -316,8 +401,23 @@ class IdrClaim(IdrBaseModel):
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
 
-    def table():
+    def table() -> str:
         return "idr.claim"
+
+    def fetch_query() -> str:
+        clm = ALIAS_CLM
+        dcmtn = ALIAS_DCMTN
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
+                {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
+                {clm}.clm_num_sk = {dcmtn}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{ORDER_BY}}
+        """
 
 
 class IdrClaimDateSignature(IdrBaseModel):
@@ -335,6 +435,24 @@ class IdrClaimDateSignature(IdrBaseModel):
 
     def table() -> str:
         return "idr.claim_date_signature"
+
+    def fetch_query() -> str:
+        clm = ALIAS_CLM
+        sgntr = ALIAS_SGNTR
+        return f"""
+            WITH dupes as (
+                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
+                    PARTITION BY {sgntr}.clm_dt_sgntr_sk 
+                    {{ORDER_BY}} DESC) 
+                AS row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
+                ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
+                {{WHERE_CLAUSE}}
+                {{ORDER_BY}}
+            )
+            SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
+        """
 
 
 class IdrClaimInstitutional(IdrBaseModel):
@@ -370,6 +488,20 @@ class IdrClaimInstitutional(IdrBaseModel):
     def table() -> str:
         return "idr.claim_institutional"
 
+    def fetch_query() -> str:
+        clm = ALIAS_CLM
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl instnl ON
+                {clm}.geo_bene_sk = instnl.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = instnl.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = instnl.clm_type_cd AND
+                {clm}.clm_num_sk = instnl.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{ORDER_BY}}
+        """
+
 
 class IdrClaimValue(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
@@ -381,11 +513,36 @@ class IdrClaimValue(IdrBaseModel):
     def table() -> str:
         return "idr.claim_value"
 
+    def fetch_query() -> str:
+        clm = ALIAS_CLM
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val val ON
+                {clm}.geo_bene_sk = val.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = val.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = val.clm_type_cd AND
+                {clm}.clm_num_sk = val.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{ORDER_BY}}
+        """
+
 
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
     batch_completion_ts: datetime
 
+    @staticmethod
+    def query_placeholder() -> str:
+        return "table_name"
+
     def table() -> str:
         return "idr.load_progress"
+
+    def fetch_query() -> str:
+        return f"""
+        SELECT table_name, last_ts, batch_completion_ts 
+        FROM idr.load_progress
+        WHERE table_name = %({LoadProgress.query_placeholder()})s
+        """

@@ -72,12 +72,10 @@ def extract_and_load(
     cls: type[T],
     data_extractor: Extractor,
     connection_string: str,
-    fetch_query: str,
 ):
     data_iter = data_extractor.extract_idr_data(
         cls,
         connection_string=connection_string,
-        fetch_query=fetch_query,
     )
 
     loader = PostgresLoader(connection_string=connection_string)
@@ -91,36 +89,18 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     extract_and_load(
         IdrBeneficiaryHistory,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryMbiId,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
     bene_loader = extract_and_load(
         IdrBeneficiary,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
@@ -129,61 +109,30 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     extract_and_load(
         IdrBeneficiaryStatus,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryThirdParty,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryEntitlement,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryEntitlementReason,
         data_extractor,
-        fetch_query="""
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """,
         connection_string=connection_string,
     )
 
     # number of records in this table is relatively small (~300,000) and we don't have created/updated timestamps
     # so we can just sync all of the non-obsolete records each time
-    pbp_fetch_query = data_extractor.get_query(
-        IdrContractPbpNumber,
-        f"""
-        SELECT {{COLUMNS}}
-        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
-        WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_DATE}'
-        """,
-    )
+    pbp_fetch_query = data_extractor.get_query(IdrContractPbpNumber)
     pbp_iter = data_extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
     pbp_loader = PostgresLoader(connection_string=connection_string)
     pbp_loader.load(pbp_iter, IdrContractPbpNumber)
@@ -191,96 +140,30 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     extract_and_load(
         IdrElectionPeriodUsage,
         data_extractor,
-        # equivalent to "select distinct on", but Snowflake has different syntax for that so it's unfortunately not portable
-        fetch_query="""
-            WITH dupes as (
-                SELECT {COLUMNS}, ROW_NUMBER() OVER (PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
-                {ORDER_BY} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
-                {WHERE_CLAUSE}
-                {ORDER_BY}
-            )
-            SELECT {COLUMNS} FROM dupes WHERE row_order = 1
-            """,
         connection_string=connection_string,
-    )
-
-    clm = ALIAS_CLM
-    dcmtn = ALIAS_DCMTN
-    sgntr = ALIAS_SGNTR
-
-    claim_type_clause = (
-        f"{clm}.clm_type_cd IN ({','.join([str(c) for c in CLAIM_TYPE_CODES])})"
     )
 
     extract_and_load(
         IdrClaim,
         data_extractor,
-        fetch_query=f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
-                {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
-                {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause}
-            {{ORDER_BY}}
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrClaimInstitutional,
         data_extractor,
-        fetch_query=f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl instnl ON
-                {clm}.geo_bene_sk = instnl.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = instnl.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = instnl.clm_type_cd AND
-                {clm}.clm_num_sk = instnl.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause}
-            {{ORDER_BY}}
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrClaimDateSignature,
         data_extractor,
-        fetch_query=f"""
-            WITH dupes as (
-                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY {sgntr}.clm_dt_sgntr_sk 
-                    {{ORDER_BY}} DESC) 
-                AS row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
-                ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
-                {{WHERE_CLAUSE}}
-                {{ORDER_BY}}
-            )
-            SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
-        """,
         connection_string=connection_string,
     )
 
     extract_and_load(
         IdrClaimValue,
         data_extractor,
-        fetch_query=f"""
-           SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val val ON
-                {clm}.geo_bene_sk = val.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = val.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = val.clm_type_cd AND
-                {clm}.clm_num_sk = val.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause}
-            {{ORDER_BY}}
-        """,
         connection_string=connection_string,
     )
 

@@ -41,8 +41,8 @@ class Extractor(ABC):
     def get_query(
         self,
         cls: type[T],
-        fetch_query: str,
     ) -> str:
+        fetch_query = cls.fetch_query()
         columns = ",".join(cls.column_aliases())
         columns_raw = ",".join(cls.columns_raw())
         return fetch_query.replace("{COLUMNS}", columns).replace(
@@ -53,9 +53,8 @@ class Extractor(ABC):
         self,
         cls: type[T],
         connection_string: str,
-        fetch_query: str,
     ) -> Iterator[list[T]]:
-        fetch_query = self.get_query(cls, fetch_query)
+        fetch_query = self.get_query(cls)
         progress = get_progress(connection_string, cls.table())
         batch_timestamp_col = cls.batch_timestamp_col()
         update_timestamp_col = cls.update_timestamp_col()
@@ -168,10 +167,6 @@ class SnowflakeExtractor(Extractor):
 def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
-        """
-        SELECT table_name, last_ts, batch_completion_ts 
-        FROM idr.load_progress
-        WHERE table_name = %(table_name)s
-        """,
-        {"table_name": table_name},
+        LoadProgress.fetch_query(),
+        {LoadProgress.query_placeholder(): table_name},
     )
