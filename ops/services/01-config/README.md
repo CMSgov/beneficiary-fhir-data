@@ -6,15 +6,13 @@ This Terraservice is responsible for defining a given BFD environment's configur
 
 _Note: This does not include transitive dependencies (dependencies of dependencies)._
 
-| Terraservice | Required for Established? | Required for Ephemeral? | Details |
-|---|---|---|---|
-| `base` | Yes | Yes | N/A |
+N/A
 
 ## Overview
 
 Configuration management can get away from us, becoming wildly complex if there isn't a conscious effort to _keep things simple_.
 While simplicity is in the eye of the beholder, this Terraservice seeks to be as simple as possible and no simpler.
-To that end, this service is comprised of a single `main.tf`, 3 per-environment `.sops.yaml` configuration files, and a special `ephemeral.yaml`. Further, this Terraservice creates _only_ `aws_ssm_parameter` resources.
+To that end, this service is comprised of a single `main.tf`, 3 per-environment `.sopsw.yaml` configuration files, and a special `ephemeral.yaml`. Further, this Terraservice creates _only_ `aws_ssm_parameter` resources.
 
 In general, terraform reads encrypted **and** plaintext yaml-encoded _<key>:<value>_ pairs from specific files found in the [values directory](.values) and translates them into the appropriate AWS SSM Parameter Store Hierarchies.
 
@@ -77,31 +75,33 @@ Technical controls for standards enforcement are still forthcoming. As a stopgap
 
 If the below [prerequisites](#prerequisites) are met, users will _generally_ interact with the environment-specific configuration by using one or more scripts in the [scripts](./scripts) directory for those encrypted values, otherwise a text-editor of their choosing when adjusting plain text values.
 
-Note that `.sops.yaml` files are not fully `sops`-compliant as the AWS Account ID is expected to be provided at `decrypt`/`edit`-time using `envsubst` or some other means of templating.
+**Note that `.sopsw.yaml` files are not fully `sops`-compliant encrypted YAML**. Operators _MUST_ use the `sopsw` (in `apps/utils/scripts/sopsw` or the symlink'd variant at `./scripts/sopsw`) utility script when working with these files. It is recommended to add the `apps/utils/scripts` folder to your shell's `PATH` for easier use.
 
-#### Viewing decrypted YAML using `envsubst` and `sops decrypt`
+The `sopsw` script provides a simplified CLI exposing all of the operations that would be necessary to interact with these files on a regular basis. View the available commands using `sopsw -h`.
+
+#### Viewing decrypted YAML using `sopsw -d/--decrypt`
 
 **WARNING:** This will present unencrypted, sensitive data to stdout. Do not execute this while sharing your screen during presentations or pairing opportunities.
 
-To see the raw, _untemplated_ configuration as terraform does through via external data source for e.g. `./values/test.yaml`, execute the following from the module root directory:
+To see the raw, _untemplated_ configuration as terraform does through via external data source for e.g. `./values/test.sopsw.yaml`, execute the following from the module root directory:
 
 ```sh
-ACCOUNT_ID="$(aws sts get-caller-identity --query 'Account' --output text)" envsubst '$ACCOUNT_ID' < values/test.sops.yaml | sops decrypt --input-type yaml --output-type yaml /dev/stdin
+scripts/sopsw -d values/test.sopsw.yaml
 ```
 
-#### Editing with edit-yaml.sh and Updating with terraform
+#### Editing encrypted YAML using `sopsw -e/--edit`
 
-To edit the encrypted values under e.g. `./values/prod-sbx.yaml` use the following steps:
+To edit the encrypted values under e.g. `./values/prod-sbx.sopsw.yaml`:
 
-1. Select the appropriate workspace: `terraform workspace select prod-sbx`
-2. Ensure a familiar editor is defined in your environment, e.g. `export EDITOR=vim`
-3. Run the edit script from the module root directory: `scripts/edit-yaml.sh prod-sbx`
-4. Save and quit after making any desired changes
-5. Review updates following [the aforementioned viewing instructions](#viewing-decrypted-yaml-using-envsubst-and-sops-decrypt)
-6. Ensure terraform can successfully plan by running `terraform plan`
-7. Commit your changes to an appropriate feature branch
-8. Solicit feedback by pull request
-9. Follow the typical, monolithic release process
+1. Ensure `EDITOR` is set to your preferred editor; for VS Code, `EDITOR` should be `code -w`
+2. Use `sopsw` like so:
+
+   ```bash
+   scripts/sopsw -e values/prod-sbx.sopsw.yaml
+   ```
+
+3. Make the relevant changes to `prod-sbx.sopsw.yaml` in the opened editor window/tab
+4. Save and close the editor window/tab
 
 ### Prerequisites
 
@@ -125,8 +125,8 @@ In addition to the [Requirements (below)](#requirements), you (or the automation
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
-| <a name="requirement_sops"></a> [sops](#requirement\_sops) | 1.2.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.9 |
+| <a name="requirement_sops"></a> [sops](#requirement\_sops) | ~> 1.2.0 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -135,7 +135,12 @@ In addition to the [Requirements (below)](#requirements), you (or the automation
 -->
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
+| <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -158,8 +163,8 @@ No inputs.
 | Name | Type |
 |------|------|
 | [aws_ssm_parameter.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
-| [aws_kms_key.sops_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
-| [sops_external.this](https://registry.terraform.io/providers/carlpett/sops/1.2.0/docs/data-sources/external) | data source |
+| [external_external.valid_sops_yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
+| [sops_external.this](https://registry.terraform.io/providers/carlpett/sops/latest/docs/data-sources/external) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
