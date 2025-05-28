@@ -47,6 +47,10 @@ class IdrBaseModel(BaseModel):
     def column_aliases(cls) -> list[str]:
         return [cls._format_column_alias(key) for key in cls.model_fields.keys()]
 
+    @classmethod
+    def columns_raw(cls) -> list[str]:
+        return [key for key in cls.model_fields.keys()]
+
 
 T = TypeVar("T", bound=IdrBaseModel)
 
@@ -159,6 +163,7 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
+ALIAS_SGNTR = "sgntr"
 
 
 class IdrClaim(IdrBaseModel):
@@ -204,7 +209,7 @@ class IdrClaim(IdrBaseModel):
 
 
 class IdrClaimDateSignature(IdrBaseModel):
-    clm_dt_sgntr_sk: int
+    clm_dt_sgntr_sk: Annotated[int, {"alias": ALIAS_SGNTR}]
     clm_cms_proc_dt: date
     clm_actv_care_from_dt: date
     clm_dschrg_dt: date
@@ -213,6 +218,8 @@ class IdrClaimDateSignature(IdrBaseModel):
     clm_ncvrd_thru_dt: date
     clm_actv_care_thru_dt: date
     clm_mdcr_exhstd_dt: date
+    clm_nch_wkly_proc_dt: date
+    clm_idr_ld_dt: date
 
 
 class IdrClaimInstitutional(IdrBaseModel):

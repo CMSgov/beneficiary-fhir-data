@@ -197,6 +197,8 @@ CREATE TABLE idr.claim_date_signature (
     clm_ncvrd_thru_dt DATE,
     clm_actv_care_thru_dt DATE,
     clm_mdcr_exhstd_dt DATE,
+    clm_nch_wkly_proc_dt DATE,
+    clm_idr_ld_dt DATE,
     bfd_created_ts TIMESTAMPTZ NOT NULL
 );
 

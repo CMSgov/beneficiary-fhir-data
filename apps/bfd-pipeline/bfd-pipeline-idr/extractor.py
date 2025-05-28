@@ -44,7 +44,10 @@ class Extractor(ABC):
         fetch_query: str,
     ) -> str:
         columns = ",".join(cls.column_aliases())
-        return fetch_query.replace("{COLUMNS}", columns)
+        columns_raw = ",".join(cls.columns_raw())
+        return fetch_query.replace("{COLUMNS}", columns).replace(
+            "{COLUMNS_NO_ALIAS}", columns_raw
+        )
 
     def extract_idr_data(
         self,

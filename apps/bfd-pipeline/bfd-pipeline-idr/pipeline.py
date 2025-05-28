@@ -6,6 +6,7 @@ from constants import DEFAULT_DATE, CLAIM_TYPE_CODES
 from loader import PostgresLoader
 import loader
 from model import (
+    ALIAS_SGNTR,
     T,
     ALIAS_CLM,
     ALIAS_DCMTN,
@@ -17,6 +18,7 @@ from model import (
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrClaim,
+    IdrClaimDateSignature,
     IdrClaimInstitutional,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
@@ -287,6 +289,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
 
     clm = ALIAS_CLM
     dcmtn = ALIAS_DCMTN
+    sgntr = ALIAS_SGNTR
 
     claim_type_clause = (
         f"{clm}.clm_type_cd IN ({','.join([str(c) for c in CLAIM_TYPE_CODES])})"
@@ -329,6 +332,30 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         """,
         table_to_load="idr.claim_institutional",
         unique_key=["clm_uniq_id"],
+        exclude_keys=[],
+        batch_timestamp_col="clm_idr_ld_dt",
+        connection_string=connection_string,
+    )
+
+    extract_and_load(
+        IdrClaimDateSignature,
+        data_extractor,
+        fetch_query=f"""
+            WITH dupes as (
+                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
+                    PARTITION BY {sgntr}.clm_dt_sgntr_sk 
+                    {{ORDER_BY}} DESC) 
+                AS row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
+                ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
+                {{WHERE_CLAUSE}}
+                {{ORDER_BY}}
+            )
+            SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
+        """,
+        table_to_load="idr.claim_date_signature",
+        unique_key=["clm_dt_sgntr_sk"],
         exclude_keys=[],
         batch_timestamp_col="clm_idr_ld_dt",
         connection_string=connection_string,

@@ -208,7 +208,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr (
     clm_ncvrd_from_dt DATE,
     clm_ncvrd_thru_dt DATE,
     clm_actv_care_thru_dt DATE,
-    clm_mdcr_exhstd_dt DATE
+    clm_mdcr_exhstd_dt DATE,
+    clm_nch_wkly_proc_dt DATE
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (
