@@ -103,7 +103,7 @@ data "external" "valid_sops_yaml" {
     # Allows us to pipe to yq so that sopsw does not need to emit JSON to work with this external
     # data source
     <<-EOF
-    ${path.module}/scripts/sopsw -c values/test.sopsw.yaml | yq -o=json '{"valid_sops": (. | tostring)}'
+    ${path.module}/scripts/sopsw -c ${local.parent_yaml_file} | yq -o=json '{"valid_sops": (. | tostring)}'
     EOF
   ]
 }
