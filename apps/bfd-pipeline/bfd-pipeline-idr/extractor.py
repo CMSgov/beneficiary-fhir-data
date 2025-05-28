@@ -4,9 +4,9 @@ from snowflake.connector import DictCursor
 import psycopg
 import os
 from psycopg.rows import class_row
-from pydantic import BaseModel
 import snowflake.connector
 
+from constants import DEFAULT_DATE
 from model import LoadProgress, T
 from timer import Timer
 
@@ -71,10 +71,12 @@ class Extractor(ABC):
             idr_query_timer.stop()
             return res
         else:
+            previous_batch_complete = progress.batch_completion_ts != DEFAULT_DATE
+            op = ">" if previous_batch_complete else ">="
             idr_query_timer.start()
             # Saved progress found, start processing from where we left
             update_clause = (
-                f"OR {update_timestamp_col} >= %(timestamp)s"
+                f"OR {update_timestamp_col} {op} %(timestamp)s"
                 if update_timestamp_col is not None
                 else ""
             )
@@ -84,10 +86,10 @@ class Extractor(ABC):
                     "{WHERE_CLAUSE}",
                     f"""
                     WHERE 
-                        ({batch_timestamp_col} >= %(timestamp)s {update_clause})
-                        AND {batch_timestamp_col} >= '{get_min_transaction_date()}' 
+                        ({batch_timestamp_col} {op} %(timestamp)s {update_clause})
+                        AND {batch_timestamp_col} {op} '{get_min_transaction_date()}' 
                     """,
-                ).replace("{ORDER_BY}", "ORDER BY idr_trans_efctv_ts"),
+                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
                 {"timestamp": progress.last_ts},
             )
             idr_query_timer.stop()

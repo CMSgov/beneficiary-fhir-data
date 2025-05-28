@@ -1,11 +1,12 @@
 from datetime import date, datetime
 from typing import Annotated, ClassVar, Iterable, Literal, TypeVar
-from pydantic import BaseModel, BeforeValidator, Field
+from pydantic import BaseModel, BeforeValidator
+from constants import DEFAULT_DATE
 
 
 def transform_null_date(value: date | None) -> date:
     if value is None:
-        return date.fromisoformat("9999-12-31")
+        return date.fromisoformat(DEFAULT_DATE)
     else:
         return value
 
@@ -19,6 +20,12 @@ def transform_null_string(value: str | None) -> str:
 def transform_default_string(value: str | None) -> str:
     if value is None or value == "~":
         return ""
+    return value
+
+
+def transform_null_float(value: float | None) -> float:
+    if value is None:
+        return 0.0
     return value
 
 
@@ -162,19 +169,23 @@ class IdrClaim(IdrBaseModel):
     clm_num_sk: Annotated[int, {"alias": ALIAS_CLM}]
     bene_sk: int
     clm_cntl_num: str
-    clm_orig_cntl_num: str
+    clm_orig_cntl_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_from_dt: date
     clm_thru_dt: date
     clm_efctv_dt: date
+    clm_obslt_dt: date
+    clm_bill_clsfctn_cd: str
+    clm_bill_fac_type_cd: str
+    clm_bill_freq_cd: str
     clm_finl_actn_ind: str
     clm_src_id: str
     clm_query_cd: str
-    clm_mdcr_coinsrnc_amt: int
-    clm_blood_lblty_amt: int
-    clm_ncvrd_chrg_amt: int
-    clm_mdcr_ddctbl_amt: int
+    clm_mdcr_coinsrnc_amt: float
+    clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_ncvrd_chrg_amt: float
+    clm_mdcr_ddctbl_amt: float
     clm_cntrctr_num: str
-    clm_pmt_amt: int
+    clm_pmt_amt: float
     clm_ltst_clm_ind: str
     clm_atndg_prvdr_npi_num: str
     clm_oprtg_prvdr_npi_num: str
@@ -182,13 +193,14 @@ class IdrClaim(IdrBaseModel):
     clm_rndrg_prvdr_npi_num: str
     prvdr_blg_prvdr_npi_num: str
     clm_disp_cd: str
-    clm_sbmt_chrg_amt: int
+    clm_sbmt_chrg_amt: float
     clm_blood_pt_frnsh_qty: int
     clm_nch_prmry_pyr_cd: str
     clm_blg_prvdr_oscar_num: str
-    clm_mdcr_coinsrnc_amt: int
     clm_idr_ld_dt: date
-    clm_nrln_ric_cd: Annotated[str, {"alias": ALIAS_DCMTN}]
+    clm_nrln_ric_cd: Annotated[
+        str, {"alias": ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
 
 
 class IdrClaimDateSignature(IdrBaseModel):
@@ -210,30 +222,35 @@ class IdrClaimInstitutional(IdrBaseModel):
     dgns_drg_cd: int
     clm_mdcr_instnl_mco_pd_sw: str
     clm_admsn_src_cd: str
-    clm_bill_fac_type_cd: str
-    clm_bill_clsfctn_cd: str
-    clm_bill_freq_cd: str
     clm_fi_actn_cd: str
     clm_mdcr_ip_lrd_use_cnt: int
-    clm_hipps_uncompd_care_amt: int
+    clm_hipps_uncompd_care_amt: float
     clm_instnl_mdcr_coins_day_cnt: int
-    clm_instnl_ncvrd_day_cnt: int
-    clm_instnl_per_diem_amt: int
+    clm_instnl_ncvrd_day_cnt: float
+    clm_instnl_per_diem_amt: float
     clm_mdcr_npmt_rsn_cd: str
-    clm_mdcr_ip_pps_drg_wt_num: int
-    clm_mdcr_ip_pps_dsprprtnt_amt: int
-    clm_mdcr_ip_pps_excptn_amt: int
-    clm_mdcr_ip_pps_cptl_fsp_amt: int
-    clm_mdcr_ip_pps_cptl_ime_amt: int
-    clm_mdcr_ip_pps_outlier_amt: int
-    clm_mdcr_ip_pps_cptl_hrmls_amt: int
+    clm_mdcr_ip_pps_drg_wt_num: float
+    clm_mdcr_ip_pps_dsprprtnt_amt: float
+    clm_mdcr_ip_pps_excptn_amt: float
+    clm_mdcr_ip_pps_cptl_fsp_amt: float
+    clm_mdcr_ip_pps_cptl_ime_amt: float
+    clm_mdcr_ip_pps_outlier_amt: float
+    clm_mdcr_ip_pps_cptl_hrmls_amt: float
     clm_pps_ind_cd: str
-    clm_mdcr_ip_pps_cptl_tot_amt: int
-    clm_instnl_cvrd_day_cnt: int
-    clm_mdcr_instnl_prmry_pyr_amt: int
-    clm_instnl_prfnl_amt: int
-    clm_mdcr_ip_bene_ddctbl_amt: int
-    clm_instnl_drg_outlier_amt: int
+    clm_mdcr_ip_pps_cptl_tot_amt: float
+    clm_instnl_cvrd_day_cnt: float
+    clm_mdcr_instnl_prmry_pyr_amt: float
+    clm_instnl_prfnl_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_bene_ddctbl_amt: float
+    clm_instnl_drg_outlier_amt: float
+    clm_idr_ld_dt: date
+
+
+class IdrClaimValue(IdrBaseModel):
+    clm_uniq_id: int
+    clm_val_sqnc_num: int
+    clm_val_cd: str
+    clm_val_amt: float
 
 
 class LoadProgress(IdrBaseModel):

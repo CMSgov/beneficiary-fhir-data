@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Iterator, Optional, TypeVar
+from constants import DEFAULT_DATE
 from timer import Timer
 import psycopg
 from model import T
@@ -25,12 +26,14 @@ class PostgresLoader:
         table: str,
         unique_key: list[str],
         exclude_keys: list[str],
+        immutable: bool,
         batch_timestamp_col: Optional[str] = None,
     ):
         self.conn = psycopg.connect(connection_string)
         self.table = table
         self.unique_key = unique_key
         self.exclude_keys = exclude_keys
+        self.immutable = immutable
         self.batch_timestamp_col = batch_timestamp_col
 
     def refresh_materialized_view(self, view_name: str):
@@ -61,11 +64,13 @@ class PostgresLoader:
                 cur.execute(
                     f"CREATE TEMPORARY TABLE {temp_table} (LIKE {self.table}) ON COMMIT DROP"  # type: ignore
                 )
+                meta_keys = (
+                    ["bfd_created_ts"]
+                    if self.immutable
+                    else ["bfd_created_ts", "bfd_updated_ts"]
+                )
                 # Created/updated columns don't need to be loaded from the source.
-                exclude_cols = self.exclude_keys + [
-                    "bfd_created_ts",
-                    "bfd_updated_ts",
-                ]
+                exclude_cols = self.exclude_keys + meta_keys
                 for col in exclude_cols:
                     cur.execute(f"ALTER TABLE {temp_table} DROP COLUMN {col}")  # type: ignore
                 temp_table_timer.stop()
@@ -85,13 +90,23 @@ class PostgresLoader:
                 copy_timer.stop()
 
                 if len(results) > 0:
+                    # For immutable tables, we may still be attempting to re-load some data due to a batch cancellation.
+                    # In these cases, we can assume any conflicting rows have already been loaded so "DO NOTHING" is appropriate here.
+                    on_conflict = (
+                        "DO NOTHING"
+                        if self.immutable
+                        else f"DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s"
+                    )
+                    timestamp_placeholders = ",".join(
+                        "%(timestamp)s" for _ in meta_keys
+                    )
                     # Upsert into the main table
                     insert_timer.start()
                     cur.execute(
                         f"""
-                        INSERT INTO {self.table}({cols_str}, bfd_created_ts, bfd_updated_ts)
-                        SELECT {cols_str}, %(timestamp)s, %(timestamp)s FROM {temp_table}
-                        ON CONFLICT ({",".join(self.unique_key)}) DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s
+                        INSERT INTO {self.table}({cols_str}, {",".join(meta_keys)})
+                        SELECT {cols_str},{timestamp_placeholders} FROM {temp_table}
+                        ON CONFLICT ({",".join(self.unique_key)}) {on_conflict}
                         """,  # type: ignore
                         {"timestamp": timestamp},
                     )
@@ -105,7 +120,7 @@ class PostgresLoader:
                         cur.execute(
                             f"""
                             INSERT INTO idr.load_progress(table_name, last_ts, batch_completion_ts)
-                            VALUES(%(table)s, %(last_ts)s, '9999-12-31')
+                            VALUES(%(table)s, %(last_ts)s, '{DEFAULT_DATE}')
                             ON CONFLICT (table_name) DO UPDATE SET last_ts = EXCLUDED.last_ts
                             """,
                             {

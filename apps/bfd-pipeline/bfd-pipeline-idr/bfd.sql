@@ -158,6 +158,10 @@ CREATE TABLE idr.claim (
     clm_from_dt DATE,
     clm_thru_dt DATE,
     clm_efctv_dt DATE,
+    clm_obslt_dt DATE,
+    clm_bill_clsfctn_cd VARCHAR(1),
+    clm_bill_fac_type_cd VARCHAR(1),
+    clm_bill_freq_cd VARCHAR(1),
     clm_finl_actn_ind VARCHAR(1),
     clm_src_id VARCHAR(5),
     clm_query_cd VARCHAR(1),
@@ -203,9 +207,6 @@ CREATE TABLE idr.claim_institutional (
     dgns_drg_cd INT,
     clm_mdcr_instnl_mco_pd_sw VARCHAR(1),
     clm_admsn_src_cd VARCHAR(2),
-    clm_bill_fac_type_cd VARCHAR(1),
-    clm_bill_clsfctn_cd VARCHAR(1),
-    clm_bill_freq_cd VARCHAR(1),
     clm_fi_actn_cd VARCHAR(1),
     clm_mdcr_ip_lrd_use_cnt INT,
     clm_hipps_uncompd_care_amt NUMERIC,
@@ -226,7 +227,9 @@ CREATE TABLE idr.claim_institutional (
     clm_mdcr_instnl_prmry_pyr_amt NUMERIC,
     clm_instnl_prfnl_amt NUMERIC,
     clm_mdcr_ip_bene_ddctbl_amt NUMERIC,
-    clm_instnl_drg_outlier_amt NUMERIC
+    clm_instnl_drg_outlier_amt NUMERIC,
+    clm_idr_ld_dt DATE,
+    bfd_created_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_value (

@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 from typing import Optional
+from constants import DEFAULT_DATE, CLAIM_TYPE_CODES
 from loader import PostgresLoader
 import loader
 from model import (
@@ -89,6 +90,7 @@ def extract_and_load(
         table=table_to_load,
         unique_key=unique_key,
         batch_timestamp_col=batch_timestamp_col,
+        immutable=update_timestamp_col is None,
         exclude_keys=exclude_keys,
     )
     loader.load(data_iter, cls)
@@ -245,10 +247,10 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     # so we can just sync all of the non-obsolete records each time
     pbp_fetch_query = data_extractor.get_query(
         IdrContractPbpNumber,
-        """
-        SELECT {COLUMNS}
+        f"""
+        SELECT {{COLUMNS}}
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
-        WHERE cntrct_pbp_sk_obslt_dt >= '9999-12-31'
+        WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_DATE}'
         """,
     )
     pbp_iter = data_extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
@@ -256,6 +258,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         connection_string=connection_string,
         table="idr.contract_pbp_number",
         unique_key=["cntrct_pbp_sk"],
+        immutable=True,
         exclude_keys=[],
     )
     pbp_loader.load(pbp_iter, IdrContractPbpNumber)
@@ -285,22 +288,26 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     clm = ALIAS_CLM
     dcmtn = ALIAS_DCMTN
 
+    claim_type_clause = (
+        f"{clm}.clm_type_cd IN ({','.join([str(c) for c in CLAIM_TYPE_CODES])})"
+    )
+
     extract_and_load(
         IdrClaim,
         data_extractor,
         fetch_query=f"""
-         SELECT {{COLUMNS}}
+            SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
                 {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            {{WHERE_CLAUSE}}
+            {{WHERE_CLAUSE}} AND {claim_type_clause}
             {{ORDER_BY}}
         """,
         table_to_load="idr.claim",
-        unique_key=[],
+        unique_key=["clm_uniq_id"],
         exclude_keys=[],
         batch_timestamp_col="clm_idr_ld_dt",
         connection_string=connection_string,
@@ -310,18 +317,18 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         IdrClaimInstitutional,
         data_extractor,
         fetch_query=f"""
-         SELECT {{COLUMNS}}
+            SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl instnl ON
                 {clm}.geo_bene_sk = instnl.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = instnl.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = instnl.clm_type_cd AND
                 {clm}.clm_num_sk = instnl.clm_num_sk
-            {{WHERE_CLAUSE}}
+            {{WHERE_CLAUSE}} AND {claim_type_clause}
             {{ORDER_BY}}
         """,
         table_to_load="idr.claim_institutional",
-        unique_key=[],
+        unique_key=["clm_uniq_id"],
         exclude_keys=[],
         batch_timestamp_col="clm_idr_ld_dt",
         connection_string=connection_string,
