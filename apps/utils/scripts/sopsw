@@ -129,7 +129,7 @@ while [ $# -gt 0 ]; do
       sops_file=$(extract_argument "$@")
 
       sops_file_content="$(cat "$sops_file")"
-      printf "%s " "$sops_file_content" >"$sops_file"
+      printf "%s\n " "$sops_file_content" >"$sops_file"
 
       shift
       ;;
