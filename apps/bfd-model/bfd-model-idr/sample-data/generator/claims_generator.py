@@ -126,8 +126,6 @@ def add_diagnoses(clm_type_cd=-1):
         #outpatient uses principal, other, external cause of injury, patient reason for visit
         pass
 
-
-
     if(num_diagnoses>1):
         for diagnosis_sqnc in range(2,num_diagnoses):
             diagnosis = {'CLM_CLM_DGNS_CD':random.choice(available_icd_10_codes),
@@ -150,6 +148,9 @@ def gen_procedure_icd10pcs():
 
 def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today())):
     claim = {'CLM':{},'CLM_LINE':[],'CLM_DT_SGNTR':{},'CLM_LINE_INSTNL':[], 'CLM_DCMTN':{}}
+    clm_dt_sgntr = {}
+    clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
+    claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
     clm_type_cd = 60
     claim['CLM']['CLM_TYPE_CD'] = clm_type_cd
@@ -173,14 +174,17 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     
     claim['CLM']['CLM_NUM_SK'] = 1
     claim['CLM']['CLM_EFCTV_DT'] = str(date.today())
-    claim['CLM']['CLM_OBSLT'] = '9999-12-31'
-    claim['CLM']['CLM_GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
+    claim['CLM']['CLM_OBSLT_DT'] = '9999-12-31'
+    claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     claim['CLM']['BENE_SK'] = bene_sk
     claim['CLM']['CLM_DISP_CD'] = random.choice(code_systems['CLM_DISP_CD'])
     claim['CLM']['CLM_QUERY_CD'] = random.choice(code_systems['CLM_QUERY_CD'])
-    claim['CLM']['CLM_BILL_CLSFCTN_CD'] = random.choice(code_systems['CLM_BILL_CLSFCTN_CD'])
-    claim['CLM']['CLM_BILL_FAC_TYPE_CD'] = random.choice(code_systems['CLM_BILL_FAC_TYPE_CD'])
-    claim['CLM']['CLM_BILL_FREQ_CD'] = random.choice(code_systems['CLM_BILL_FREQ_CD'])
+
+    tob_code = random.choice(code_systems['CLM_BILL_FREQ_CD'])
+    claim['CLM']['CLM_BILL_FAC_TYPE_CD'] = tob_code[0]
+    claim['CLM']['CLM_BILL_CLSFCTN_CD'] = tob_code[1]
+    claim['CLM']['CLM_BILL_FREQ_CD'] = tob_code[2]
+
     claim['CLM']['CLM_CNTRCTR_NUM'] = random.choice(code_systems['CLM_CNTRCTR_NUM'])
     claim['CLM']['CLM_NCH_PRMRY_PYR_CD'] = random.choice(code_systems['CLM_NCH_PRMRY_PYR_CD'])
 
@@ -201,6 +205,10 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     if(claim['CLM']['CLM_TYPE_CD'] in (20,30,50,60,61,62,63,64)):
         #part A!
         claim['CLM_DCMTN']['CLM_NRLN_RIC_CD'] = 'V' #inpatient
+        claim['CLM_DCMTN']['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+        claim['CLM_DCMTN']['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
+        claim['CLM_DCMTN']['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+        claim['CLM_DCMTN']['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
 
     #provider elements:
     if((clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in fiss_clm_type_cds):
@@ -212,23 +220,27 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim['CLM']['CLM_BLG_PRVDR_OSCAR_NUM'] = random.choice(avail_oscar_codes_institutional)
         claim['CLM']['CLM_MDCR_COINSRNC_AMT'] = round(random.uniform(0,25),2)
 
-        
-    
     #generate claim header financial elements here
     claim['CLM']['CLM_SBMT_CHRG_AMT'] = round(random.uniform(1, 1000000),2)
     claim['CLM']['CLM_PMT_AMT'] = round(random.uniform(1, claim['CLM']['CLM_SBMT_CHRG_AMT']),2)
     claim['CLM']['CLM_MDCR_DDCTBL_AMT'] = round(random.uniform(1, 1676),2)
-    claim['CLM']['CLM_NCVRD_CHRG_AMT'] = claim['CLM']['CLM_SBMT_CHRG_AMT']-claim['CLM']['CLM_PMT_AMT']
+    claim['CLM']['CLM_NCVRD_CHRG_AMT'] = round(claim['CLM']['CLM_SBMT_CHRG_AMT']-claim['CLM']['CLM_PMT_AMT'],2)
     claim['CLM_VAL'] = []
     #CLM_OPRTNL_DSPRTNT_AMT + CLM_OPRTNL_IME_AMT
     if(claim['CLM']['CLM_TYPE_CD'] in (20,40,60,61,62,63,64)):
         #Note, this is a table we'll use sparsely, it appears. I've replaced the 5 key unique identifier with CLM_UNIQ_ID.
-        clm_val_dsprtnt = {'CLM_UNIQ_ID':claim['CLM']['CLM_UNIQ_ID'],
+        clm_val_dsprtnt = {'CLM_DT_SGNTR_SK':claim['CLM']['CLM_DT_SGNTR_SK'],
+                        'CLM_NUM_SK':claim['CLM']['CLM_NUM_SK'],
+                        'GEO_BENE_SK':claim['CLM']['GEO_BENE_SK'],
+                        'CLM_TYPE_CD':claim['CLM']['CLM_TYPE_CD'],
                         'CLM_VAL_CD':18,
                         'CLM_VAL_AMT':round(random.uniform(1,15000),2),
                         'CLM_VAL_SQNC_NUM':1}
         claim['CLM_VAL'].append(clm_val_dsprtnt)
-        clm_val_ime = {'CLM_UNIQ_ID':claim['CLM']['CLM_UNIQ_ID'],
+        clm_val_ime = {'CLM_DT_SGNTR_SK':claim['CLM']['CLM_DT_SGNTR_SK'],
+                       'CLM_NUM_SK':claim['CLM']['CLM_NUM_SK'],
+                        'GEO_BENE_SK':claim['CLM']['GEO_BENE_SK'],
+                        'CLM_TYPE_CD':claim['CLM']['CLM_TYPE_CD'],
                         'CLM_VAL_CD':19,
                         'CLM_VAL_AMT':round(random.uniform(1,15000),2),
                         'CLM_VAL_SQNC_NUM':1}
@@ -242,19 +254,22 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
             procedure = gen_procedure_icd10pcs()
             procedure['CLM_PRCDR_PRFRM_DT'] = random_date(claim['CLM']['CLM_FROM_DT'],claim['CLM']['CLM_THRU_DT'])
             procedure['CLM_VAL_SQNC_NUM'] = proc
-            procedure['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
+            procedure['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+            procedure['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
+            procedure['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+            procedure['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
             claim['CLM_PROD'].append(procedure)
 
     #add diagnoses
     diagnoses = add_diagnoses(clm_type_cd=clm_type_cd)
     for diagnosis in diagnoses:
-        diagnosis['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
+        diagnosis['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+        diagnosis['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
+        diagnosis['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+        diagnosis['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
         claim['CLM_PROD'].append(diagnosis)
 
     #clm_dt_sgntr info
-    clm_dt_sgntr = {}
-    clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
-    claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     clm_dt_sgntr['CLM_ACTV_CARE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
     clm_dt_sgntr['CLM_DSCHRG_DT'] = claim['CLM']['CLM_THRU_DT']
     clm_dt_sgntr['CLM_SUBMSN_DT'] = claim['CLM']['CLM_THRU_DT'] #This synthetic hospital is really on top of it!
@@ -275,6 +290,11 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
 
     if(clm_type_cd in institutional_claim_types):
         institutional_parts = {}
+        institutional_parts['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+        institutional_parts['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+        institutional_parts['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
+        institutional_parts['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
+
         institutional_parts['CLM_FI_ACTN_CD'] = random.choice(code_systems['CLM_FI_ACTN_CD'])
         institutional_parts['CLM_ADMSN_TYPE_CD'] = random.choice(code_systems['CLM_ADMSN_TYPE_CD'])
         institutional_parts['BENE_PTNT_STUS_CD'] = random.choice(code_systems['BENE_PTNT_STUS_CD'])
@@ -285,7 +305,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_LRD_USE_CNT'] = random.randint(0,10)
         institutional_parts['CLM_INSTNL_PER_DIEM_AMT'] = round(random.uniform(0,350),2)
         institutional_parts['CLM_HIPPS_UNCOMPD_CARE_AMT'] = round(random.uniform(0,350),2)
-        institutional_parts['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
         institutional_parts['CLM_MDCR_INSTNL_PRMRY_PYR_AMT'] = round(random.uniform(0,3500),2)
         institutional_parts['CLM_INSTNL_DRG_OUTLIER_AMT'] =  round(random.uniform(0,3500),2)
         institutional_parts['CLM_MDCR_IP_PPS_DSPRPRTNT_AMT'] = round(random.uniform(0,3500),2)
@@ -311,6 +330,16 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     for line in range(num_clm_lines):
         claim_line = {}
         claim_line_inst = {}
+        claim_line['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+        claim_line['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+        claim_line['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
+        claim_line['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
+        claim_line['CLM_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
+        claim_line_inst['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+        claim_line_inst['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+        claim_line_inst['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
+        claim_line_inst['CLM_NUM_SK'] = claim['CLM']['CLM_TYPE_CD']
+        claim_line_inst['CLM_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
 
         claim_line['CLM_LINE_HCPCS_CD'] = random.choice(proc_codes_cpt_hcpcs)
         num_mods = random.randint(0,5)
@@ -354,7 +383,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line['CLM_LINE_NUM'] = line
         claim_line_inst['CLM_LINE_NUM'] = line
         claim['CLM_LINE'].append(claim_line)
-        #print("clm:line:",claim_line_inst)
         claim['CLM_LINE_INSTNL'].append(claim_line_inst)
 
         #CLM_REV_APC_HIPPS_CD never populated for CLM_TYPE_CD 60 apart from null values (00000,0,~)
@@ -373,21 +401,37 @@ def gen_pac_version_of_claim(claim):
     '''
     pac_claim = copy.deepcopy(claim)
     pac_claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
+
     if(pac_claim['CLM']['CLM_TYPE_CD'] in (60,61,62,63,64)):
         pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1011,2011,1041,2041],weights=[.48,.48,.02,.02])[0]
     
     if('CLM_BLOOD_PT_FRNSH_QTY' in pac_claim['CLM']):
         pac_claim['CLM'].pop('CLM_BLOOD_PT_FRNSH_QTY')
     pac_claim['CLM']['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
+    pac_claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     for i in range(len(pac_claim['CLM_LINE'])):
         pac_claim['CLM_LINE'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
+        pac_claim['CLM_LINE'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
+        pac_claim['CLM_LINE'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
+        pac_claim['CLM_LINE'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
     for i in range(len(pac_claim['CLM_LINE_INSTNL'])):
         pac_claim['CLM_LINE_INSTNL'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
+        pac_claim['CLM_LINE_INSTNL'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
+        pac_claim['CLM_LINE_INSTNL'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
+        pac_claim['CLM_LINE_INSTNL'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
     for i in range(len(pac_claim['CLM_VAL'])):
-        pac_claim['CLM_VAL'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
+        pac_claim['CLM_VAL'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
+        pac_claim['CLM_VAL'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] 
+        pac_claim['CLM_VAL'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
+    for i in range(len(pac_claim['CLM_INSTNL'])):
+        pac_claim['CLM_INSTNL']['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
+        pac_claim['CLM_INSTNL']['CLM_DT_SGNTR_SK'] = pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] 
+        pac_claim['CLM_INSTNL']['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
    
     for i in range(len(pac_claim['CLM_PROD'])):
-        pac_claim['CLM_PROD'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
+        pac_claim['CLM_PROD'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
+        pac_claim['CLM_PROD'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
+        pac_claim['CLM_PROD'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
     pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
     if('CLM_MDCR_EXHSTD_DT' in pac_claim['CLM_DT_SGNTR']):
         pac_claim['CLM_DT_SGNTR'].pop('CLM_MDCR_EXHSTD_DT')
@@ -407,7 +451,10 @@ def gen_pac_version_of_claim(claim):
         pac_claim['CLM_INSTNL'].pop('CLM_PPS_IND_CD')
     if('CLM_INSTNL_DRG_OUTLIER_AMT' in pac_claim['CLM_INSTNL']):
         pac_claim['CLM_INSTNL'].pop('CLM_INSTNL_DRG_OUTLIER_AMT')
-    pac_claim['CLM_INSTNL']['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
+    #pac_claim['CLM_INSTNL']['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
+    pac_claim['CLM_INSTNL']['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
+    pac_claim['CLM_INSTNL']['CLM_DT_SGNTR_SK'] = pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] 
+
     pac_claim['CLM']['CLM_SRC_ID']=21000 #FISS
 
     if('CLM_DCMTN' in pac_claim):
