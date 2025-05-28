@@ -407,5 +407,4 @@ sops:
       enc: AQICAHiPbrjkmNx+EYhjapAcRZIMA3ZR2GNT7wyj5sHbBNyOGAF17E6mrIKaKhcUd1RSQiP9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMntBTVLMQ39edYjbeAgEQgDuox7IUmQqwRJ7Jkf5Z8DClv9nGJZcbyWG+uekETOxp9y9+7dEp4YU7kZbUpDfwwc5jXZIkZJB3i42EYw==
       aws_profile: ""
   unencrypted_regex: /nonsensitive/
-  mac_only_encrypted: true
   version: 3.10.2
