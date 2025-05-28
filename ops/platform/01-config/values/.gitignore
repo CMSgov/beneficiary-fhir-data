@@ -1,0 +1,4 @@
+*
+!.gitignore
+!.sops.yaml
+!platform.sopsw.yaml
