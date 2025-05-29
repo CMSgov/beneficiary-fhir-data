@@ -241,11 +241,12 @@ CREATE TABLE idr.claim_value (
     PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
 );
 
-CREATE TABLE idr.claim_procedure_diagnosis (
+CREATE TABLE idr.claim_procedure (
     clm_uniq_id BIGINT NOT NULL,
     clm_val_sqnc_num INT NOT NULL,
     clm_dgns_prcdr_icd_ind VARCHAR(1),
     clm_dgns_cd VARCHAR(7),
+    clm_prcdr_cd VARCHAR(7),
     clm_prod_type_cd VARCHAR(1),
     clm_poa_ind VARCHAR(1),
     clm_prcdr_prfrm_dt DATE,

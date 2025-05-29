@@ -623,6 +623,36 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         """
 
 
+class IdrClaimProcedure(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
+    clm_prcdr_cd: str
+    clm_dgns_prcdr_icd_ind: str
+    clm_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prod_type_cd: str
+    clm_poa_ind: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prcdr_prfrm_dt: date
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+
+    def table() -> str:
+        return "idr.claim_procedure"
+
+    def fetch_query() -> str:
+        clm = ALIAS_CLM
+        line = ALIAS_LINE
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {line} ON
+                {clm}.geo_bene_sk = {line}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {line}.clm_type_cd AND
+                {clm}.clm_num_sk = {line}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{ORDER_BY}}
+        """
+
+
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime

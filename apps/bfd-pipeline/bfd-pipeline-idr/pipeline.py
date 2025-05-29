@@ -18,6 +18,7 @@ from model import (
     IdrClaimInstitutional,
     IdrClaimLine,
     IdrClaimLineInstitutional,
+    IdrClaimProcedure,
     IdrClaimValue,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
@@ -120,6 +121,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         IdrClaimLine,
         IdrClaimLineInstitutional,
         IdrClaimAnsiSignature,
+        IdrClaimProcedure,
     )
 
     logger.info("done")

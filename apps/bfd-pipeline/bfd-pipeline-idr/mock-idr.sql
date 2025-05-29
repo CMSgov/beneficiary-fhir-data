@@ -229,6 +229,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_val_sqnc_num INT,
+    clm_prcdr_cd VARCHAR(7),
     clm_dgns_prcdr_icd_ind VARCHAR(1),
     clm_dgns_cd VARCHAR(7),
     clm_prod_type_cd VARCHAR(1),
