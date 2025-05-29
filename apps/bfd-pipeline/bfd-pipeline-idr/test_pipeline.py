@@ -92,6 +92,11 @@ class TestPipeline:
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 3217710515066
 
+        cur = conn.execute("select * from idr.claim_line")
+        assert cur.rowcount == 1
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 3217710515066
+
         # TODO: add these back when synthetic coverage data is available
         # cur = conn.execute("select * from idr.beneficiary_third_party")
         # rows = cur.fetchall()

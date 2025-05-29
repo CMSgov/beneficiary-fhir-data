@@ -20,6 +20,7 @@ from model import (
     IdrClaim,
     IdrClaimDateSignature,
     IdrClaimInstitutional,
+    IdrClaimLine,
     IdrClaimValue,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
@@ -75,10 +76,10 @@ def extract_and_load(
 ):
     data_iter = data_extractor.extract_idr_data(
         cls,
-        connection_string=connection_string,
+        connection_string,
     )
 
-    loader = PostgresLoader(connection_string=connection_string)
+    loader = PostgresLoader(connection_string)
     loader.load(data_iter, cls)
     return loader
 
@@ -89,19 +90,19 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     extract_and_load(
         IdrBeneficiaryHistory,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryMbiId,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     bene_loader = extract_and_load(
         IdrBeneficiary,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     bene_loader.refresh_materialized_view("idr.overshare_mbis")
@@ -109,62 +110,68 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
     extract_and_load(
         IdrBeneficiaryStatus,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryThirdParty,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryEntitlement,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrBeneficiaryEntitlementReason,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     # number of records in this table is relatively small (~300,000) and we don't have created/updated timestamps
     # so we can just sync all of the non-obsolete records each time
     pbp_fetch_query = data_extractor.get_query(IdrContractPbpNumber)
     pbp_iter = data_extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
-    pbp_loader = PostgresLoader(connection_string=connection_string)
+    pbp_loader = PostgresLoader(connection_string)
     pbp_loader.load(pbp_iter, IdrContractPbpNumber)
 
     extract_and_load(
         IdrElectionPeriodUsage,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrClaim,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrClaimInstitutional,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrClaimDateSignature,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
     )
 
     extract_and_load(
         IdrClaimValue,
         data_extractor,
-        connection_string=connection_string,
+        connection_string,
+    )
+
+    extract_and_load(
+        IdrClaimLine,
+        data_extractor,
+        connection_string,
     )
 
     logger.info("done")
