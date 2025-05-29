@@ -1,9 +1,9 @@
 locals {
   lb_blue_is_public             = nonsensitive(tobool(local.ssm_config["/bfd/${local.service}/lb_is_public"]))
-  lb_internal_vpc_peering_cidrs = [for peer, conf in data.aws_vpc_peering_connection.peers : conf.peer_cidr_block]
-  lb_internal_vpcs_cidrs        = [data.aws_vpc.mgmt.cidr_block, local.vpc.cidr_block]
+  lb_internal_vpc_peering_cidrs = values(data.aws_vpc_peering_connection.peers)[*].peer_cidr_block
+  lb_internal_vpcs_cidrs        = !var.greenfield ? [one(data.aws_vpc.mgmt[*].cidr_block), local.vpc.cidr_block] : [local.vpc.cidr_block]
   lb_internal_ingress_cidrs     = concat(local.lb_internal_vpc_peering_cidrs, local.lb_internal_vpcs_cidrs)
-  lb_internal_ingress_pl_ids    = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
+  lb_internal_ingress_pl_ids    = concat([data.aws_ec2_managed_prefix_list.vpn.id], data.aws_ec2_managed_prefix_list.jenkins[*].id)
   lb_ingress_port               = 443
   lb_protocol                   = "TCP"
   lb_name_prefix                = "${local.name_prefix}-nlb"
@@ -117,9 +117,11 @@ resource "aws_lb_target_group" "this" {
 }
 
 resource "aws_route53_record" "this" {
-  name    = "${local.env}.fhir.${data.aws_route53_zone.root.name}"
+  count = !var.greenfield ? 1 : 0
+
+  name    = "${local.env}.fhir.${one(data.aws_route53_zone.root[*].name)}"
   type    = "A"
-  zone_id = data.aws_route53_zone.root.zone_id
+  zone_id = one(data.aws_route53_zone.root[*].zone_id)
 
   alias {
     name                   = aws_lb.this.dns_name

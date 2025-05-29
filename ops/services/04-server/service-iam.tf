@@ -90,12 +90,6 @@ data "aws_iam_policy_document" "ssm_params" {
       ]
     ])
   }
-
-  statement {
-    sid       = "AllowDecryptParametersWithConfigCMK"
-    actions   = ["kms:Decrypt"]
-    resources = local.env_config_key_arns
-  }
 }
 
 resource "aws_iam_policy" "ssm_params" {
