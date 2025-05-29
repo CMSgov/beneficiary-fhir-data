@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_line_instnl,clm_dcmtn):
     Path("out").mkdir(exist_ok=True)
     df = pd.json_normalize(clm)
+    df['CLM_BLOOD_PT_FRNSH_QTY'] = df['CLM_BLOOD_PT_FRNSH_QTY'].astype('Int64')
     df.to_csv('out/SYNTHETIC_CLM.csv', index=False)
     df = pd.json_normalize(clm_line)
     df.to_csv('out/SYNTHETIC_CLM_LINE.csv', index=False)
