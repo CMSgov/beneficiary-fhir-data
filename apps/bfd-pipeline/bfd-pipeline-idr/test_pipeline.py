@@ -1,12 +1,12 @@
 from datetime import datetime, timezone
-import os
 from typing import cast
 import psycopg
 import time
-import psycopg
 from psycopg.rows import dict_row, DictRow
 import pytest
-from testcontainers.postgres import PostgresContainer
+
+# https://github.com/testcontainers/testcontainers-python/issues/305
+from testcontainers.postgres import PostgresContainer  # type: ignore
 
 from load_synthetic import load_from_csv
 from pipeline import run_pipeline

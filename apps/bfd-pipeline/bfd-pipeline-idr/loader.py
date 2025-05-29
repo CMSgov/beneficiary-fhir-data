@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Iterator, Optional, TypeVar
+from typing import Iterator
 from constants import DEFAULT_DATE
 from timer import Timer
 import psycopg

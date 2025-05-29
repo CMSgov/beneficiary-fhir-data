@@ -23,7 +23,7 @@ from model import (
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
 )
-from extractor import Extractor, PostgresExtractor, SnowflakeExtractor, print_timers
+from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
 import extractor
 
 logger = logging.getLogger(__name__)

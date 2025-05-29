@@ -24,7 +24,7 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str):
         with open(f"{src_folder}/{table["csv_name"]}", "r") as f:
             reader = csv.DictReader(f)
 
-            cols = list(typing.cast(typing.Iterable, reader.fieldnames))
+            cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
             cols_str = ",".join(cols)
             with conn.cursor() as cur:
                 with cur.copy(

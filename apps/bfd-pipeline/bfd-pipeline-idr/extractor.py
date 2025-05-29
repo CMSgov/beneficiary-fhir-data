@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any, Iterator, Mapping, Optional
+from datetime import date, datetime
+from typing import Iterator, Mapping
 from snowflake.connector import DictCursor
 import psycopg
 import os
@@ -15,6 +16,8 @@ idr_query_timer = Timer("idr_query")
 cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
+
+type DbType = str | float | int | bool | date | datetime
 
 
 def print_timers():
@@ -34,7 +37,7 @@ def get_min_transaction_date() -> str:
 class Extractor(ABC):
     @abstractmethod
     def extract_many(
-        self, cls: type[T], sql: str, params: dict[str, Any]
+        self, cls: type[T], sql: str, params: dict[str, DbType]
     ) -> Iterator[list[T]]:
         pass
 
@@ -104,7 +107,7 @@ class PostgresExtractor(Extractor):
         self.batch_size = batch_size
 
     def extract_many(
-        self, cls: type[T], sql: str, params: Mapping[str, Any]
+        self, cls: type[T], sql: str, params: Mapping[str, DbType]
     ) -> Iterator[list[T]]:
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -114,7 +117,7 @@ class PostgresExtractor(Extractor):
                 batch = cur.fetchmany(self.batch_size)
 
     def extract_single(
-        self, cls: type[T], sql: str, params: dict[str, Any]
+        self, cls: type[T], sql: str, params: dict[str, DbType]
     ) -> T | None:
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
             cur.execute(sql, params)  # type: ignore
@@ -124,7 +127,7 @@ class PostgresExtractor(Extractor):
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int):
         super().__init__()
-        self.conn = snowflake.connector.connect(
+        self.conn = snowflake.connector.connect(  # type: ignore
             user=os.environ["IDR_USERNAME"],
             password=os.environ["IDR_PASSWORD"],
             account=os.environ["IDR_ACCOUNT"],
@@ -135,7 +138,7 @@ class SnowflakeExtractor(Extractor):
         self.batch_size = batch_size
 
     def extract_many(
-        self, cls: type[T], sql: str, params: dict[str, Any]
+        self, cls: type[T], sql: str, params: dict[str, DbType]
     ) -> Iterator[list[T]]:
         cur = None
         try:
@@ -146,10 +149,10 @@ class SnowflakeExtractor(Extractor):
 
             cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use queries that return dicts
-            batch: list[dict] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+            batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
             cursor_fetch_timer.stop()
 
-            while len(batch) > 0:
+            while len(batch) > 0:  # type: ignore
                 transform_timer.start()
                 data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
                 transform_timer.stop()

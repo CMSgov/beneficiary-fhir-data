@@ -79,7 +79,7 @@ class IdrBaseModel(BaseModel):
         return keys[0]
 
     @classmethod
-    def _extract_meta(cls, key: str, meta_key: str) -> Optional[str]:
+    def _extract_meta(cls, key: str, meta_key: str) -> Optional[object]:
         metadata = cls.model_fields[key].metadata
 
         if (
@@ -87,7 +87,7 @@ class IdrBaseModel(BaseModel):
             and isinstance(metadata[0], Iterable)
             and meta_key in metadata[0]
         ):
-            return metadata[0][meta_key]
+            return metadata[0][meta_key]  # type: ignore
         else:
             return None
 
@@ -148,12 +148,15 @@ class IdrBeneficiary(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table() -> str:
         return "idr.beneficiary"
 
+    @staticmethod
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -173,12 +176,15 @@ class IdrBeneficiaryHistory(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table() -> str:
         return "idr.beneficiary_history"
 
+    @staticmethod
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -198,9 +204,11 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table() -> str:
         return "idr.beneficiary_mbi_id"
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -222,9 +230,11 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table():
         return "idr.beneficiary_third_party"
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -245,9 +255,11 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table():
         return "idr.beneficiary_status"
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -270,9 +282,11 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table() -> str:
         return "idr.beneficiary_entitlement"
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -293,9 +307,11 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
+    @staticmethod
     def table() -> str:
         return "idr.beneficiary_entitlement_reason"
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -316,9 +332,11 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     idr_trans_efctv_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
 
+    @staticmethod
     def table():
         return "idr.election_period_usage"
 
+    @staticmethod
     def fetch_query() -> str:
         # equivalent to "select distinct on", but Snowflake has different syntax for that so it's unfortunately not portable
         return """
@@ -338,9 +356,11 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_drug_plan_ind_cd: str
     cntrct_pbp_type_cd: str
 
-    def table():
+    @staticmethod
+    def table() -> str:
         return "idr.contract_pbp_number"
 
+    @staticmethod
     def fetch_query() -> str:
         return f"""
         SELECT {{COLUMNS}}
@@ -402,9 +422,11 @@ class IdrClaim(IdrBaseModel):
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
@@ -434,9 +456,11 @@ class IdrClaimDateSignature(IdrBaseModel):
     clm_nch_wkly_proc_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_date_signature"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
@@ -486,9 +510,11 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_instnl_drg_outlier_amt: float
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_institutional"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         return f"""
@@ -511,9 +537,11 @@ class IdrClaimValue(IdrBaseModel):
     clm_val_amt: float
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_value"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         return f"""
@@ -554,9 +582,11 @@ class IdrClaimLine(IdrBaseModel):
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_line"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
@@ -587,9 +617,11 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_line_instnl_rev_ctr_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_line_institutional"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
@@ -613,9 +645,11 @@ class IdrClaimAnsiSignature(IdrBaseModel):
     clm_3_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_4_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_ansi_signature"
 
+    @staticmethod
     def fetch_query() -> str:
         return """
             SELECT {COLUMNS}
@@ -634,9 +668,11 @@ class IdrClaimProcedure(IdrBaseModel):
     clm_prcdr_prfrm_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
+    @staticmethod
     def table() -> str:
         return "idr.claim_procedure"
 
+    @staticmethod
     def fetch_query() -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
@@ -662,9 +698,11 @@ class LoadProgress(IdrBaseModel):
     def query_placeholder() -> str:
         return "table_name"
 
+    @staticmethod
     def table() -> str:
         return "idr.load_progress"
 
+    @staticmethod
     def fetch_query() -> str:
         return f"""
         SELECT table_name, last_ts, batch_completion_ts 
