@@ -459,8 +459,8 @@ def gen_pac_version_of_claim(claim):
     pac_claim['CLM']['CLM_SRC_ID']=21000 #FISS
 
     if('CLM_DCMTN' in pac_claim):
-        if('CLM_NRLN_RIC_CD' in pac_claim['CLM_DCMTN']):
-            pac_claim['CLM']['CLM_RIC_CD'] = pac_claim['CLM_DCMTN']['CLM_NRLN_RIC_CD']
+        #if('CLM_NRLN_RIC_CD' in pac_claim['CLM_DCMTN']):
+            #pac_claim['CLM']['CLM_RIC_CD'] = pac_claim['CLM_DCMTN']['CLM_NRLN_RIC_CD']
         pac_claim.pop('CLM_DCMTN')
 
     return pac_claim
