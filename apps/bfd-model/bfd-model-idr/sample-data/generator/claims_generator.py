@@ -515,7 +515,10 @@ def main():
     CLM_DT_SGNTR = []
     CLM_PROD = []
     CLM_DCMTN = []
+    pt_complete = 0
     for pt_bene_sk in bene_sk_list:
+        if((pt_complete)%1000 == 0 and pt_complete>0):
+            print(f"Completed {pt_complete} patients with {claims_to_generate_per_person} claims per patient.")
         for i in range(claims_to_generate_per_person):
             clm_from_dt_min = '2018-01-01'
             claim = gen_claim(bene_sk = pt_bene_sk,minDate = clm_from_dt_min)
@@ -544,6 +547,7 @@ def main():
                 CLM_INSTNL.append(pac_claim['CLM_INSTNL'])
                 for line in pac_claim['CLM_LINE_INSTNL']:
                     CLM_LINE_INSTNL.append(line)
+        pt_complete+=1
     save_output_files(CLM,CLM_LINE,CLM_VAL,CLM_DT_SGNTR,CLM_PROD,CLM_INSTNL,CLM_LINE_INSTNL,CLM_DCMTN)
     
 if __name__ == "__main__":
