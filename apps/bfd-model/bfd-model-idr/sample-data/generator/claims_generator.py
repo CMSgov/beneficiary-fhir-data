@@ -227,6 +227,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     claim['CLM']['CLM_PMT_AMT'] = round(random.uniform(1, claim['CLM']['CLM_SBMT_CHRG_AMT']),2)
     claim['CLM']['CLM_MDCR_DDCTBL_AMT'] = round(random.uniform(1, 1676),2)
     claim['CLM']['CLM_NCVRD_CHRG_AMT'] = round(claim['CLM']['CLM_SBMT_CHRG_AMT']-claim['CLM']['CLM_PMT_AMT'],2)
+    claim['CLM']['CLM_BLOOD_LBLTY_AMT'] = round(random.uniform(0,25),2)
     claim['CLM_VAL'] = []
     #CLM_OPRTNL_DSPRTNT_AMT + CLM_OPRTNL_IME_AMT
     if(claim['CLM']['CLM_TYPE_CD'] in (20,40,60,61,62,63,64)):
@@ -319,7 +320,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_TOT_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_BENE_DDCTBL_AMT'] = round(random.uniform(0,25),2)
-        institutional_parts['CLM_BLOOD_LBLTY_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
         #We'll throw in a non-payment code on occasion 
         if(random.choice([0,10])>1):

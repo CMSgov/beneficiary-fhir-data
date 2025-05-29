@@ -1193,7 +1193,7 @@
   sources:
     - NCH
     - FISS
-  sourceView: V2_MDCR_CLM_INSTNL
+  sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLOOD_LBLTY_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_BLOOD_LBLTY_AMT').used.value
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT
