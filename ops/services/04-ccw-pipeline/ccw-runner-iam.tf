@@ -36,12 +36,6 @@ resource "aws_iam_policy" "ccw_runner_ssm" {
 
 data "aws_iam_policy_document" "ccw_runner_kms" {
   statement {
-    sid       = "AllowDecryptionOfConfigKeys"
-    actions   = ["kms:Decrypt"]
-    resources = local.env_config_key_arns
-  }
-
-  statement {
     sid = "AllowEncryptionAndDecryptionOfMasterKeys"
     actions = [
       "kms:Encrypt",

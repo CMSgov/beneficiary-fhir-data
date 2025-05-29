@@ -70,9 +70,9 @@ data "aws_iam_policy_document" "ccw_ssm_params" {
   }
 
   statement {
-    sid       = "AllowDecryptParametersWithConfigCMK"
+    sid       = "AllowDecryptParametersWithEnvCMK"
     actions   = ["kms:Decrypt"]
-    resources = local.env_config_key_arns
+    resources = [local.env_key_arn]
   }
 }
 

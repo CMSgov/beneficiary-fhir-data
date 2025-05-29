@@ -1,10 +1,19 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.9"
+    }
+  }
+}
+
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  environment_name     = terraform.workspace
+  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/04-ccw-pipeline"
-  subnet_layers        = ["app", "data"]
+  subnet_layers        = !var.greenfield ? ["app", "data"] : ["public", "private"]
 }
 
 locals {
@@ -14,19 +23,15 @@ locals {
   account_id               = module.terraservice.account_id
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
-  seed_env                 = module.terraservice.seed_env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
   latest_bfd_release       = module.terraservice.latest_bfd_release
   ssm_config               = module.terraservice.ssm_config
-  env_key_alias            = module.terraservice.env_key_alias
-  env_config_key_alias     = module.terraservice.env_config_key_alias
   env_key_arn              = module.terraservice.env_key_arn
-  env_config_key_arns      = module.terraservice.env_config_key_arns
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  app_subnets              = module.terraservice.subnets_map["app"]
-  data_subnets             = module.terraservice.subnets_map["data"]
+  app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
+  data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
 
   name_prefix = "bfd-${local.env}-${local.service}"
 
@@ -64,7 +69,8 @@ module "bucket_ccw" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = local.name_prefix
+  bucket_name        = !var.greenfield ? local.name_prefix : null
+  bucket_prefix      = var.greenfield ? local.name_prefix : null
   force_destroy      = local.is_ephemeral_env
 }
 
