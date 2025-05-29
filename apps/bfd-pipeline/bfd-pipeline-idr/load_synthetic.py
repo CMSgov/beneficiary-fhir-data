@@ -21,18 +21,22 @@ tables = [
 
 def load_from_csv(conn: psycopg.Connection, src_folder: str):
     for table in tables:
-        with open(f"{src_folder}/{table["csv_name"]}", "r") as f:
-            reader = csv.DictReader(f)
+        file = f"{src_folder}/{table["csv_name"]}"
+        try:
+            with open(file, "r") as f:
+                reader = csv.DictReader(f)
 
-            cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
-            cols_str = ",".join(cols)
-            with conn.cursor() as cur:
-                with cur.copy(
-                    f"COPY cms_vdm_view_mdcr_prd.{table["table"]} ({cols_str}) FROM STDIN"  # type: ignore
-                ) as copy:
-                    for row in reader:
-                        copy.write_row([row[c] if row[c] else None for c in cols])
-            conn.commit()
+                cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
+                cols_str = ",".join(cols)
+                with conn.cursor() as cur:
+                    with cur.copy(
+                        f"COPY cms_vdm_view_mdcr_prd.{table["table"]} ({cols_str}) FROM STDIN"  # type: ignore
+                    ) as copy:
+                        for row in reader:
+                            copy.write_row([row[c] if row[c] else None for c in cols])
+                conn.commit()
+        except OSError as e:
+            print(f"Unable to load file, skipping: {e}")
 
 
 if __name__ == "__main__":
