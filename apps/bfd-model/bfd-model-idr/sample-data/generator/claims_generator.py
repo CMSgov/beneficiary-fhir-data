@@ -7,27 +7,29 @@ import json
 import sys
 import subprocess
 import pandas as pd
+from pathlib import Path
 from dateutil.parser import parse
 from datetime import date, datetime, timedelta
 
 
 def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_line_instnl,clm_dcmtn):
+    Path("out").mkdir(exist_ok=True)
     df = pd.json_normalize(clm)
-    df.to_csv('../../outputs/SYNTHETIC_CLM.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM.csv', index=False)
     df = pd.json_normalize(clm_line)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_LINE.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_LINE.csv', index=False)
     df = pd.json_normalize(clm_val)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_VAL.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_VAL.csv', index=False)
     df = pd.json_normalize(clm_dt_sgntr)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_DT_SGNTR.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_DT_SGNTR.csv', index=False)
     df = pd.json_normalize(clm_prod)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_PROD.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_PROD.csv', index=False)
     df = pd.json_normalize(clm_instnl)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_INSTNL.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_INSTNL.csv', index=False)
     df = pd.DataFrame(clm_line_instnl)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_LINE_INSTNL.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_LINE_INSTNL.csv', index=False)
     df = pd.json_normalize(clm_dcmtn)
-    df.to_csv('../../outputs/SYNTHETIC_CLM_DCMTN.csv', index=False)
+    df.to_csv('out/SYNTHETIC_CLM_DCMTN.csv', index=False)
 
 claims_to_generate_per_person = 5
 
