@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "run_locust_ssm" {
         "sensitive/cert/key",
         "sensitive/cert/pem_data",
       ]
-      : "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/${local.env}/${local.service}/${param}"
+      : "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.service}/${param}" # TODO: Remove /ng/
     ]
   }
 }
