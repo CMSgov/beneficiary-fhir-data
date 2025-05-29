@@ -574,6 +574,38 @@ class IdrClaimLine(IdrBaseModel):
         """
 
 
+class IdrClaimLineInstitutional(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
+    clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_ddctbl_coinsrnc_cd: str
+    clm_line_instnl_rate_amt: float
+    clm_line_instnl_adjstd_amt: float
+    clm_line_instnl_rdcd_amt: float
+    clm_line_instnl_msp1_pd_amt: float
+    clm_line_instnl_msp2_pd_amt: float
+    clm_line_instnl_rev_ctr_dt: date
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+
+    def table() -> str:
+        return "idr.claim_line_institutional"
+
+    def fetch_query() -> str:
+        clm = ALIAS_CLM
+        line = ALIAS_LINE
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl {line} ON
+                {clm}.geo_bene_sk = {line}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {line}.clm_type_cd AND
+                {clm}.clm_num_sk = {line}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{ORDER_BY}}
+        """
+
+
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime

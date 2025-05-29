@@ -1,15 +1,10 @@
 import logging
 import sys
 import os
-from typing import Optional
-from constants import DEFAULT_DATE, CLAIM_TYPE_CODES
 from loader import PostgresLoader
 import loader
 from model import (
-    ALIAS_SGNTR,
     T,
-    ALIAS_CLM,
-    ALIAS_DCMTN,
     IdrBeneficiary,
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
@@ -21,6 +16,7 @@ from model import (
     IdrClaimDateSignature,
     IdrClaimInstitutional,
     IdrClaimLine,
+    IdrClaimLineInstitutional,
     IdrClaimValue,
     IdrContractPbpNumber,
     IdrElectionPeriodUsage,
@@ -170,6 +166,12 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
 
     extract_and_load(
         IdrClaimLine,
+        data_extractor,
+        connection_string,
+    )
+
+    extract_and_load(
+        IdrClaimLineInstitutional,
         data_extractor,
         connection_string,
     )
