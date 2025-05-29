@@ -203,7 +203,7 @@
 /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
 /bfd/${env}/server/nonsensitive/paths/files/war: UNDEFINED
 /bfd/${env}/server/nonsensitive/lb_is_public: "false"
-/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: '[ "bfd-prod-vpc-to-dpc-prod-vpc", "bfd-prod-vpc-to-bluebutton-prod", "bfd-prod-vpc-to-bcda-prod-vpc", "bfd-prod-to-ab2d-prod" ]'
+/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: '[ "bfd-prod-vpc-to-dpc-prod-vpc", "bfd-prod-vpc-to-bluebutton-prod", "bfd-prod-vpc-to-bcda-prod-vpc", "bfd-prod-to-ab2d-prod", "bfd-prod-vpc to dpc-east-prod" ]'
 /bfd/${env}/server/nonsensitive/asg_min_instance_count: "3"
 /bfd/${env}/server/nonsensitive/asg_max_instance_count: "12"
 /bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: "9"
@@ -516,8 +516,8 @@ sops:
       created_at: "2025-03-31T22:41:25Z"
       enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwGGkV8aeZvx5fp21oXhkSN9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNQ+5RQmcn6PsRqTjAgEQgDsboKccFePd1cbzxpBkMb/rhL9lNTCfSOBvG27HpXfZ6Ml18anFsRGNw8ZbLr/7E1NBC9vdZxAn2XqNSQ==
       aws_profile: ""
-  lastmodified: "2025-05-29T14:35:56Z"
-  mac: ENC[AES256_GCM,data:kCsJu/rp62pxd9xeQswWYtkNCPeTc2vy8p8efLLFovfuzxoufTYZ/dpUGuXQzBUKOS/BtlzM5zZtV/3rAr/IdquEALfH49S43t0PFn40Qlz/QcjHlD7Tu7l2D0el36h7B4BQcoA2wQJ5Sr0Xl9HdSUyWH/IErKzTx8yRfPERswE=,iv:KePz47sOGGQxLKTtIUJvLTeLpHo/bXe+9Bq4MUYkdJg=,tag:a8oMReYUdqdDyXD1xLowPw==,type:str]
+  lastmodified: "2025-05-29T15:09:16Z"
+  mac: ENC[AES256_GCM,data:R1ilAJa+Md1e6xdGicSOACcTHd0Uz5kdDl1vrgauL2blXOaX5LZ3irrviIZsuQreY+aZL/UVUcwGpmIq158uymws6Vzv7UdYrb6Ixg195YFg5OIpt4m4TwW1W1zC/Mkx0BkV+vfjSfftg2K4HGWFG8nyNtF1KmPhjT9gCQ1eQwY=,iv:pzoa2nI/LxUE26mkjWm6a+Z7K8dfn/MlDTH7pmFXXdk=,tag:bBn8UtiS/0jOxN47kJJujw==,type:str]
   unencrypted_regex: /nonsensitive/
   mac_only_encrypted: true
   version: 3.10.2
