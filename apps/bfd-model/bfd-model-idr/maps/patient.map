@@ -11,7 +11,7 @@ uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as targe
 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper" 
 
-//This refers to a patient where XREF_BENE_EFCTV_SK == BENE_SK. See notes for the other identity use case.
+//This refers to a patient where BENE_XREF_EFCTV_SK == BENE_SK. See notes for the other identity use case.
 
 group createPatient(source src: Bene, target patient: BFDPatient){
     
@@ -82,7 +82,7 @@ group createPatient(source src: Bene, target patient: BFDPatient){
 
     src.BENE_SK as bene_sk -> patient.id = bene_sk "Assign BENE_SK as identifier.";
 
-    src.ALL_BENE_SKs as bene_sks where (bene_sks != src.XREF_EFCTV_BENE_SK) -> patient.link = create('BackboneElement') as patientLink then{
+    src.ALL_BENE_SKs as bene_sks where (bene_sks != src.BENE_XREF_EFCTV_SK) -> patient.link = create('BackboneElement') as patientLink then{
         src -> patientLink.type = "replaces" "replaces type";
         src -> patientLink.other = create('Reference') as tgtReference,
         tgtReference.reference = append("Patient/",bene_sks),

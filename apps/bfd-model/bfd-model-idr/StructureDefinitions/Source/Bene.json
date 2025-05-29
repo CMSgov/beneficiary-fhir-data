@@ -113,8 +113,8 @@
                 ]
             },
             {
-                "id": "Beneficiary.XREF_EFCTV_BENE_SK",
-                "path": "Beneficiary.XREF_EFCTV_BENE_SK",
+                "id": "Beneficiary.BENE_XREF_EFCTV_SK",
+                "path": "Beneficiary.BENE_XREF_EFCTV_SK",
                 "label": "Effective Beneficiary SK ",
                 "definition": "Effective BENE_SK for the individual, representing the XREF_EFCTV_SK",
                 "min": 1,
