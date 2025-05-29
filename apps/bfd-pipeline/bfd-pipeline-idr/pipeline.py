@@ -13,6 +13,7 @@ from model import (
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrClaim,
+    IdrClaimAnsiSignature,
     IdrClaimDateSignature,
     IdrClaimInstitutional,
     IdrClaimLine,
@@ -80,19 +81,20 @@ def extract_and_load(
     return loader
 
 
+def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]):
+    for c in cls:
+        extract_and_load(c, data_extractor, connection_string)
+
+
 def run_pipeline(data_extractor: Extractor, connection_string: str):
     logger.info("load start")
 
-    extract_and_load(
+    load_all(
+        data_extractor,
+        connection_string,
         IdrBeneficiaryHistory,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrBeneficiaryMbiId,
-        data_extractor,
-        connection_string,
+        IdrBeneficiary,
     )
 
     bene_loader = extract_and_load(
@@ -100,80 +102,24 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         data_extractor,
         connection_string,
     )
-
     bene_loader.refresh_materialized_view("idr.overshare_mbis")
 
-    extract_and_load(
+    load_all(
+        data_extractor,
+        connection_string,
         IdrBeneficiaryStatus,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrBeneficiaryThirdParty,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrBeneficiaryEntitlement,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrBeneficiaryEntitlementReason,
-        data_extractor,
-        connection_string,
-    )
-
-    # number of records in this table is relatively small (~300,000) and we don't have created/updated timestamps
-    # so we can just sync all of the non-obsolete records each time
-    pbp_fetch_query = data_extractor.get_query(IdrContractPbpNumber)
-    pbp_iter = data_extractor.extract_many(IdrContractPbpNumber, pbp_fetch_query, {})
-    pbp_loader = PostgresLoader(connection_string)
-    pbp_loader.load(pbp_iter, IdrContractPbpNumber)
-
-    extract_and_load(
+        IdrContractPbpNumber,
         IdrElectionPeriodUsage,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrClaim,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrClaimInstitutional,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrClaimDateSignature,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrClaimValue,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrClaimLine,
-        data_extractor,
-        connection_string,
-    )
-
-    extract_and_load(
         IdrClaimLineInstitutional,
-        data_extractor,
-        connection_string,
+        IdrClaimAnsiSignature,
     )
 
     logger.info("done")

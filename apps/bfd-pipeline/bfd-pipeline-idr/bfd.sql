@@ -295,7 +295,7 @@ CREATE TABLE idr.claim_line_institutional (
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
-CREATE TABLE cms_vdm_view_mdcr_prd.claim_ansi_signature (
+CREATE TABLE idr.claim_ansi_signature (
     clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
     clm_1_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3),

@@ -606,6 +606,23 @@ class IdrClaimLineInstitutional(IdrBaseModel):
         """
 
 
+class IdrClaimAnsiSignature(IdrBaseModel):
+    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_1_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_2_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_3_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_4_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+
+    def table() -> str:
+        return "idr.claim_ansi_signature"
+
+    def fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
+        """
+
+
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
