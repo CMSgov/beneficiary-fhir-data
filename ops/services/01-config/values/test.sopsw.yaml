@@ -403,8 +403,12 @@ sops:
       enc: AQICAHjBO4c7NwZiL7N5hO4QC8rTQko34sT4bSQZfprKlBvDugG+t+iWTR8TfpIKeiRlMhKPAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMRrFcPgYkhf6K0VFLAgEQgDuxNoKOYRFuIJCvZghaIY7NUw376CTrEPJ22RNTxauBIrxIoUPaXJqpGSUUZG2Qy0UL1D6aJMmrimRo0g==
       aws_profile: ""
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-test-config-cmk
-      created_at: "2025-05-27T19:52:16Z"
-      enc: AQICAHiPbrjkmNx+EYhjapAcRZIMA3ZR2GNT7wyj5sHbBNyOGAF17E6mrIKaKhcUd1RSQiP9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMntBTVLMQ39edYjbeAgEQgDuox7IUmQqwRJ7Jkf5Z8DClv9nGJZcbyWG+uekETOxp9y9+7dEp4YU7kZbUpDfwwc5jXZIkZJB3i42EYw==
+      created_at: "2025-05-29T19:01:40Z"
+      enc: AQICAHiPbrjkmNx+EYhjapAcRZIMA3ZR2GNT7wyj5sHbBNyOGAE0WIJoovZskBsKlb8+eOJJAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMnyt5QccCYBgOFQJhAgEQgDuJeg6uYxVcV9LyWc5Z3OUI0pH6PN0EmSTVVT1zzU9U3STS/UbUWFamXyCrx9H2PKvWK4+J5V+XpICDkg==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-test-cmk
+      created_at: "2025-05-29T19:01:40Z"
+      enc: AQICAHhpau57Qqqbkr+2cxoVjt0o2Zaxd2L7jNmxsbyVFDT0MQEqGU/PwMl3pk9IdqWUqI9CAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMmARy2S34ICP5wUvwAgEQgDvXh+WeKQmvwqEbtihdnqvHYoqiapk0lSt/inF43vO/fODplsEoO2X+n7ZpQI6ueNPLTpwgq85Ulyth4A==
       aws_profile: ""
   unencrypted_regex: /nonsensitive/
   version: 3.10.2

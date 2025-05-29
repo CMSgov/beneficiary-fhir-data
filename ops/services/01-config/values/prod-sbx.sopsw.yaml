@@ -778,8 +778,12 @@
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-sbx-config-cmk
-      created_at: "2025-03-31T22:39:00Z"
-      enc: AQICAHjP/Aj2Cj3mc/evGqWprczmF5nsbcARIepeXMoZGoJjRgHHMxB3kegUw/6fiO3cdCVZAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJQnqvuN34USrb+OHAgEQgDvtFKzb7rjtFOxzEXKjNz/qXq6fCm/+aP9mc2YdaLXDpAtXStvrMPu57z0WIaq1FHdIIc1tpnPZ5OsteQ==
+      created_at: "2025-05-29T19:05:53Z"
+      enc: AQICAHjP/Aj2Cj3mc/evGqWprczmF5nsbcARIepeXMoZGoJjRgEWnXeZXOdYTOK+0Taf8naEAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMi0DaHhH+B54CnDG4AgEQgDsIozzPndHkr4X0/0pPYbXBtAHdrV2kVNHJK+ceFKGiao5nr6+0WLf5SqiYTG7/xXhq+y586liuEICVig==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-sbx-cmk
+      created_at: "2025-05-29T19:05:53Z"
+      enc: AQICAHhHJZYi+MFRKFTHfYVWYS6PhbzwLNq4isexRIBWUW6UVAH4Ndc/EKAA1HaRcc5c8g8oAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMTqA93UNqsY1x3om7AgEQgDtH+Xr32/CfQZrgyGLkNdubzJdoQbEd6cEqYjpjf4QC1VNG2pZ5tgfA7OeasPCaRkuZtJ3yCEpucHMrWw==
       aws_profile: ""
   unencrypted_regex: /nonsensitive/
   version: 3.10.2

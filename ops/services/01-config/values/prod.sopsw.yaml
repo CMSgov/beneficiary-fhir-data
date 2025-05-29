@@ -513,8 +513,12 @@
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-config-cmk
-      created_at: "2025-03-31T22:41:25Z"
-      enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwGGkV8aeZvx5fp21oXhkSN9AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNQ+5RQmcn6PsRqTjAgEQgDsboKccFePd1cbzxpBkMb/rhL9lNTCfSOBvG27HpXfZ6Ml18anFsRGNw8ZbLr/7E1NBC9vdZxAn2XqNSQ==
+      created_at: "2025-05-29T19:04:20Z"
+      enc: AQICAHhDU5TEXlSzCuwgEhOD+8VtTSryq9kZTlVBTGj0GA1NiwFflV/+fBDPw67t9oOXUituAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMbzX5gi0SSIOxXPW6AgEQgDs+xb2QjDbbs3IJBL1YjRK3xo/qIouGknXOW4soNOA0CpPSpCQsJnf1AIAC5WyLpowG/bM3NLoEquljgQ==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-cmk
+      created_at: "2025-05-29T19:04:20Z"
+      enc: AQICAHg3sz5ry44Cuf3QUyf8sUndrMm3J3stOfeajttEhIQYqAGxsp3bDFMw1nvVbCeSLL/nAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMy4B9segwYT3flZZ2AgEQgDvam459XiR4jqqyYsdkKsjLD6ophaseFcM8Y/WHZCPGtHsQtC+wDTghVjbi5dFA3KCRBIK2E+4gwAgCOg==
       aws_profile: ""
   unencrypted_regex: /nonsensitive/
   version: 3.10.2
