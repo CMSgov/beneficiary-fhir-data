@@ -1,3 +1,9 @@
+output "canary" {
+  description = "Canary output used to ensure that any Terraservice using the root.tofu.tf also uses this module."
+  sensitive   = false
+  value       = true
+}
+
 output "service" {
   description = "The name of the current Terraservice"
   sensitive   = false
@@ -7,7 +13,7 @@ output "service" {
 output "region" {
   description = "The region name associated with the current caller identity"
   sensitive   = false
-  value       = data.aws_region.current.name
+  value       = local.region
 }
 
 output "account_id" {
@@ -19,27 +25,21 @@ output "account_id" {
 output "env" {
   description = "The solution's environment name. Generally, `terraform.workspace`"
   sensitive   = false
-  value       = var.environment_name
+  value       = local.env
 }
 
 output "is_ephemeral_env" {
   description = "Returns true when environment is _ephemeral_, false when _established_"
   sensitive   = false
-  value       = var.environment_name != local.seed_env
-}
-
-output "seed_env" {
-  description = "The solution's source environment. For established environments this is equal to the environment's name"
-  sensitive   = false
-  value       = local.seed_env
+  value       = local.env != local.parent_env
 }
 
 output "default_tags" {
   value = merge(var.additional_tags, {
-    Environment    = local.seed_env
+    Environment    = local.parent_env
     application    = "bfd"
     business       = "oeda"
-    stack          = var.environment_name
+    stack          = local.env
     service        = var.service
     Terraform      = true
     tf_module_root = var.relative_module_root
@@ -59,33 +59,28 @@ output "ssm_config" {
   value       = local.ssm_config
 }
 
-output "env_key_alias" {
-  description = "Alias name for the current environment's general-purpose CMK."
+output "platform_key_alias" {
+  description = "Alias name for the platform CMK."
   sensitive   = false
-  value       = local.kms_key_alias
+  value       = local.platform_key_alias
 }
 
-output "env_config_key_alias" {
-  description = "Alias name for the current environment's configuration-specific, multi-region CMK."
+output "platform_key_arn" {
+  description = "ARN of the current region's primary platform CMK."
   sensitive   = false
-  value       = local.kms_config_key_alias
+  value       = local.platform_key_arn
+}
+
+output "env_key_alias" {
+  description = "Alias name for the current environment's CMK."
+  sensitive   = false
+  value       = local.env_key_alias
 }
 
 output "env_key_arn" {
-  description = "ARN of the current environment's general-purpose CMK."
+  description = "ARN of the current region's primary environment CMK."
   sensitive   = false
-  value       = one(data.aws_kms_key.env_cmk[*].arn)
-}
-
-output "env_config_key_arns" {
-  description = "ARNs of the current environment's configuration-specific, multi-region CMK."
-  sensitive   = false
-  value = flatten(
-    [
-      for v in coalesce(local.kms_config_key_mrk_config, []) :
-      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
-    ]
-  )
+  value       = local.env_key_arn
 }
 
 output "default_iam_path" {
@@ -113,28 +108,49 @@ output "default_azs" {
 }
 
 output "subnets_map" {
-  description = "Map of subnet layers to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
+  description = "Map of subnet layers (legacy) or group (greenfield) to the subnets (data.aws_subnet) in that layer in the current environment's VPC."
   sensitive   = false
-  value = {
+  value = !var.greenfield ? {
     for layer in var.subnet_layers
     : layer => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["Layer"] == layer]
+    } : {
+    for group in var.subnet_layers
+    : group => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["GroupName"] == group]
   }
 }
 
-output "tools_sg" {
+output "legacy_tools_sg" {
   description = "The OIT/CMS Cloud provided enterprise tools Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.tools)
 }
 
-output "vpn_sg" {
+output "legacy_vpn_sg" {
   description = "The OIT/CMS Cloud provided VPN Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.vpn)
 }
 
-output "management_sg" {
+output "legacy_management_sg" {
   description = "The OIT/CMS Cloud provided remote management Security Group (data.aws_security_group)."
   sensitive   = false
   value       = one(data.aws_security_group.management)
+}
+
+output "cms_cloud_vpn_sg" {
+  description = "Greenfield only. The OIT/CMS Cloud provided VPN Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.cms_cloud_vpn)
+}
+
+output "cms_cloud_security_tools_sg" {
+  description = "Greenfield only. The OIT/CMS Cloud provided Security Tools Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.cms_cloud_security_tools)
+}
+
+output "cms_cloud_shared_services_sg" {
+  description = "Greenfield only. The OIT/CMS Cloud provided Shared Services Security Group (data.aws_security_group)."
+  sensitive   = false
+  value       = one(data.aws_security_group.cms_cloud_shared_services)
 }

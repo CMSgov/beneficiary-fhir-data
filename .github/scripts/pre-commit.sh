@@ -50,11 +50,11 @@ checkSecretFilesForPlainText() {
 }
 
 checkSopsFiles() {
-  echo "Verifying sops.yaml files..."
+  echo "Verifying sopsw.yaml files..."
 
   set +e
 
-  IFS=$'\n' read -d '' -r -a sops_files < <(git diff --cached --name-only --diff-filter=ACM | grep "sops\.yaml" && printf '\0')
+  IFS=$'\n' read -d '' -r -a sops_files < <(git diff --cached --name-only --diff-filter=ACM | grep "sopsw\.yaml" && printf '\0')
 
   for sops_file in "${sops_files[@]}"; do
     if [[ ! "$(command -v sops)" ]]; then
@@ -71,20 +71,18 @@ checkSopsFiles() {
     echo "Checking sops file $sops_file_name..."
 
     sops_file_path="$(git rev-parse --show-toplevel)/$sops_file"
-    # Counter-intuitively, we do not want sops to be able to decrypt any sops.yaml file with just a
+    # Counter-intuitively, we do not want sops to be able to decrypt any sopsw.yaml file with just a
     # "sops decrypt" command, as we wish to secure our account ID. So, if it can be decrypted, that
     # means that somehow the placeholder was replaced with the real account ID.
     if sops decrypt "$sops_file_path" &>/dev/null; then
-      echo "sops can decrypt $sops_file_name without being provided account ID. Replace account ID with '\$ACCOUNT_ID' and try again"
+      echo "sops can decrypt $sops_file_name without being provided account ID. Try using 'sopsw -C $sops_file_name' to convert the file to what sopsw expects."
       exit 1
     fi
 
-    sops_temp_dir="$(mktemp -d)"
-    sops_temp_file="$sops_temp_dir/$sops_file_name"
-    ACCOUNT_ID="$(aws sts get-caller-identity --query 'Account' --output text)" envsubst '$ACCOUNT_ID' <"$sops_file_path" >"$sops_temp_file"
+    sopsw_script_path="$(git rev-parse --show-toplevel)/apps/utils/scripts/sopsw"
 
     # Now, if the templated sops file cannot be decrypted, that means that it is invalid
-    if ! sops decrypt "$sops_temp_file" &>/dev/null; then
+    if ! $sopsw_script_path -d "$sops_file_path" &>/dev/null; then
       echo "sops cannot decrypt account ID templated $sops_file_name. This means one of two things:"
       cat <<EOF
 1. You are trying to commit changes to sops configuration across multiple accounts. You need to
@@ -97,7 +95,10 @@ EOF
       exit 1
     fi
 
+    sops_temp_dir="$(mktemp -d)"
+    sops_temp_file="$sops_temp_dir/$sops_file_name"
     # Finally, ensure that sops indicates the file is encrypted before allowing commit
+    $sopsw_script_path -c "$sops_file_path" >"$sops_temp_file"
     sops_encrypted="$(sops filestatus "$sops_temp_file" | jq -r '.encrypted')"
     if [[ $sops_encrypted != "true" ]]; then
       echo "sops is indicating $sops_file is unencrypted. Do not commit this file unless it is encrypted"

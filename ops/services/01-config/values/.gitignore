@@ -1,0 +1,7 @@
+*
+!.gitignore
+!.sops.yaml
+!test.sopsw.yaml
+!prod.sopsw.yaml
+!prod-sbx.sopsw.yaml
+!ephemeral.yaml

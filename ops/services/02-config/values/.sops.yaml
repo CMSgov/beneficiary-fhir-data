@@ -1,6 +1,0 @@
-creation_rules:
-  - unencrypted_regex: /nonsensitive/
-    mac_only_encrypted: true
-stores:
-  yaml:
-    indent: 2

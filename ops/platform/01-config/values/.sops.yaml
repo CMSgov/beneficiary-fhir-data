@@ -1,0 +1,5 @@
+creation_rules:
+  - unencrypted_regex: /nonsensitive/
+stores:
+  yaml:
+    indent: 2
