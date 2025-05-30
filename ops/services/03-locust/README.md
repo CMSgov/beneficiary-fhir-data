@@ -59,7 +59,7 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.9 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -70,8 +70,12 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
+| <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
 | <a name="input_run_locust_repository_override"></a> [run\_locust\_repository\_override](#input\_run\_locust\_repository\_override) | Overrides the ECR repository for the 'run-locust' container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_run_locust_version_override"></a> [run\_locust\_version\_override](#input\_run\_locust\_version\_override) | Overrides the version for 'run-locust' container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -139,8 +143,6 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 | [aws_iam_policy_document.run_locust_ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_security_group.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
-| [aws_subnets.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
-| [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'

@@ -32,7 +32,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.9 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -47,8 +47,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | <a name="input_certstores_version_override"></a> [certstores\_version\_override](#input\_certstores\_version\_override) | Overrides the version for certstores container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
 | <a name="input_ephemeral_regression_override"></a> [ephemeral\_regression\_override](#input\_ephemeral\_regression\_override) | Enables the execution and creation of the regression-wrapper during CodeDeploy deployment. Applies _only_ to ephemeral environments, ignored in established environments | `bool` | `false` | no |
+| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
 | <a name="input_log_router_repository_override"></a> [log\_router\_repository\_override](#input\_log\_router\_repository\_override) | Overrides the ECR repository for the log\_router container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_log_router_version_override"></a> [log\_router\_version\_override](#input\_log\_router\_version\_override) | Overrides the version for log\_router container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
+| <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |
 | <a name="input_server_repository_override"></a> [server\_repository\_override](#input\_server\_repository\_override) | Overrides the ECR repository for the server container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_server_version_override"></a> [server\_version\_override](#input\_server\_version\_override) | Overrides the version for server container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 
@@ -129,7 +133,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_ecr_image.server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecs_cluster) | data source |
 | [aws_iam_policy.ecs_execution_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
-| [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
 | [aws_iam_policy_document.certstores_s3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.codedeploy_assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.codedeploy_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
@@ -151,11 +154,8 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_route53_zone.root](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_security_groups.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_groups) | data source |
-| [aws_ssm_parameter.zone_is_private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_ssm_parameter.zone_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
-| [aws_subnet.app_subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
-| [aws_subnet.dmz_subnets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
-| [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+| [aws_ssm_parameter.zones_list](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_vpc.mgmt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 | [aws_vpc_peering_connection.peers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc_peering_connection) | data source |
 | [external_external.keystore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |

@@ -24,7 +24,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.9 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -38,8 +38,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | <a name="input_ccw_runner_repository_override"></a> [ccw\_runner\_repository\_override](#input\_ccw\_runner\_repository\_override) | Overrides the ECR repository for the ccw-runner container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_ccw_runner_version_override"></a> [ccw\_runner\_version\_override](#input\_ccw\_runner\_version\_override) | Overrides the version for ccw-runner container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
+| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
+| <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
 | <a name="input_pipeline_repository_override"></a> [pipeline\_repository\_override](#input\_pipeline\_repository\_override) | Overrides the ECR repository for the pipeline container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_pipeline_version_override"></a> [pipeline\_version\_override](#input\_pipeline\_version\_override) | Overrides the version for pipeline container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'

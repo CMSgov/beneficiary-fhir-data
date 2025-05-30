@@ -23,7 +23,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.91 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.9 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -34,8 +34,12 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
 | <a name="input_manifests_verifier_repository_override"></a> [manifests\_verifier\_repository\_override](#input\_manifests\_verifier\_repository\_override) | Overrides the ECR repository for the manifests-verifier container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_manifests_verifier_version_override"></a> [manifests\_verifier\_version\_override](#input\_manifests\_verifier\_version\_override) | Overrides the version for manifests-verifier container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
+| <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
+| <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -98,6 +102,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_sns_topic.slos_alert_sns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
 | [aws_sns_topic.slos_warning_sns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
 | [aws_sns_topic.verifier_alert_topic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/sns_topic) | data source |
+| [aws_ssm_parameter.ccw_pipeline_bucket_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
