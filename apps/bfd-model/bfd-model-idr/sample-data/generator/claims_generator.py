@@ -99,23 +99,23 @@ def add_diagnoses(clm_type_cd=-1):
                                'CLM_PROD_TYPE_CD':'P',
                                'CLM_POA_IND':'~'}
         first_diagnosis = {'CLM_DGNS_CD':principal_diagnosis['CLM_DGNS_CD'],
-                               'CLM_VAL_SQNC_NUM':"2",
+                               'CLM_VAL_SQNC_NUM':"1",
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
                                'CLM_PROD_TYPE_CD':'D',
                                'CLM_POA_IND':random.choice(clm_poa_ind_choices)
                                }
         admitting_diagnosis = {'CLM_DGNS_CD':random.choice(available_icd_10_codes),
-                               'CLM_VAL_SQNC_NUM':"3",
+                               'CLM_VAL_SQNC_NUM':"1",
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
                                'CLM_PROD_TYPE_CD':'A',
                                'CLM_POA_IND':'~'} 
         external_1 = {'CLM_DGNS_CD':random.choice(available_icd_10_codes),
-                               'CLM_VAL_SQNC_NUM':"4",
+                               'CLM_VAL_SQNC_NUM':"1",
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
                                'CLM_PROD_TYPE_CD':'E',
                                'CLM_POA_IND':random.choice(clm_poa_ind_choices)} 
         first_external = {'CLM_DGNS_CD':external_1['CLM_DGNS_CD'],
-                               'CLM_VAL_SQNC_NUM':"5",
+                               'CLM_VAL_SQNC_NUM':"1",
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
                                'CLM_PROD_TYPE_CD':'1',
                                'CLM_POA_IND':'~'} 
@@ -132,7 +132,7 @@ def add_diagnoses(clm_type_cd=-1):
     if(num_diagnoses>1):
         for diagnosis_sqnc in range(2,num_diagnoses):
             diagnosis = {'CLM_DGNS_CD':random.choice(available_icd_10_codes),
-                               'CLM_VAL_SQNC_NUM':5+diagnosis_sqnc,
+                               'CLM_VAL_SQNC_NUM':diagnosis_sqnc,
                                'CLM_DGNS_PRCDR_ICD_IND':"0",
                                'CLM_PROD_TYPE_CD':'D',
                                'CLM_POA_IND':random.choice(clm_poa_ind_choices)}
@@ -258,9 +258,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         for proc in range(1,num_procedures_to_add):
             procedure = gen_procedure_icd10pcs()
             procedure['CLM_PRCDR_PRFRM_DT'] = random_date(claim['CLM']['CLM_FROM_DT'],claim['CLM']['CLM_THRU_DT'])
-            # sequence numbers need to be unique
-            # adding 100 here to avoid conflicts with the diagnosis items
-            procedure['CLM_VAL_SQNC_NUM'] = 100 + proc
+            procedure['CLM_VAL_SQNC_NUM'] = proc
             procedure['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
             procedure['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
             procedure['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
