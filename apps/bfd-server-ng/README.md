@@ -45,7 +45,7 @@ On the entrypoint:
 - Click "modify options"
 - Check "Add dependencies with 'provided' scope to classpath"
 
-Note that Intellij's support for Spring Boot features requires the licensed version, 
+Note that Intellij's support for Spring Boot features requires the licensed version,
 but the community edition can still run it without all the bells and whistles.
 
 ### From the CLI
@@ -66,6 +66,17 @@ or using environment variables only
 ```sh
 export BFD_ENV=1000-test
 export SPRING_PROFILES_ACTIVE=aws
+mvn spring-boot:run
+```
+
+### Connecting to a specific database
+
+Override the database connection parameters to change the database from the default local configuration
+
+```sh
+export BFD_SENSITIVE_DB_USERNAME=user 
+export BFD_SENSITIVE_DB_PASSWORD=password 
+export BFD_LOCAL_DB_HOST=host 
 mvn spring-boot:run
 ```
 

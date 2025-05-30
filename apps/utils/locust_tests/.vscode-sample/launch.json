@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Locust",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "locust",
+            "args": [
+                "-f",
+                "v2/regression_suite.py",
+                "--headless",
+                "--client-cert-path=/path/to/your/cert",
+                "--users=10",
+                "--spawn-rate=10",
+                "--spawned-runtime=1h30m",
+                "--host=https://test.bfd.cms.gov"
+            ],
+            "console": "integratedTerminal",
+            "gevent": true
+        }
+    ]
+}

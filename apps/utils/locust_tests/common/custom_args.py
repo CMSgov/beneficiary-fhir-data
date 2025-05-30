@@ -18,7 +18,7 @@ def register_custom_args(parser: LocustArgumentParser):
     parser.add_argument(
         "--database-connection-string",
         type=str,
-        required=True,
+        required=False,
         help=(
             "Specifies database connection string including username, url-encoded password, URI,"
             " port and DB schema; ex: postgres://USERNAME:URL_ENCODED_PASSWORD@URI:PORT/SCHEMA."
@@ -26,6 +26,7 @@ def register_custom_args(parser: LocustArgumentParser):
         ),
         dest="database_constr",
         env_var="LOCUST_BFD_DATABASE_CONNECTION_STRING",
+        default="",
     )
     parser.add_argument(
         "--spawned-runtime",
@@ -64,7 +65,7 @@ def register_custom_args(parser: LocustArgumentParser):
         help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
         dest="locust_tags",
         env_var="LOCUST_TAGS",
-        default=""
+        default="",
     )
     parser.add_argument(
         "--locust-exclude-tags",
@@ -72,7 +73,7 @@ def register_custom_args(parser: LocustArgumentParser):
         help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
         dest="locust_exclude_tags",
         env_var="LOCUST_EXCLUDE_TAGS",
-        default=""
+        default="",
     )
 
     StatsConfiguration.register_custom_args(parser)
