@@ -43,4 +43,7 @@ locals {
 
   green_state = "green"
   blue_state  = "blue"
+
+  zones                = jsondecode(nonsensitive(data.aws_ssm_parameter.zones_list.value))
+  root_zone_configured = contains(local.zones, "root")
 }

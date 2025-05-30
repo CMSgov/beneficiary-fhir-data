@@ -117,9 +117,11 @@ resource "aws_lb_target_group" "this" {
 }
 
 resource "aws_route53_record" "this" {
-  name    = "${local.env}.fhir.${data.aws_route53_zone.root.name}"
+  count = local.root_zone_configured ? 1 : 0
+
+  name    = "${local.env}.fhir.${one(data.aws_route53_zone.root[*].name)}"
   type    = "A"
-  zone_id = data.aws_route53_zone.root.zone_id
+  zone_id = one(data.aws_route53_zone.root[*].zone_id)
 
   alias {
     name                   = aws_lb.this.dns_name
