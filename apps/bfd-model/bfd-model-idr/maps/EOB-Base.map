@@ -95,7 +95,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_CNTRCTR_NUM as fiNum -> tgt.extension = create('Extension') as tgtExtension then {
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/CodeSystem/CLM-CNTRCTR-NUM",
+          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM",
           tgtCoding.code = fiNum "Add code";
         } "Add coding";
     } "CLM_CNTRCTR_NUM";
@@ -346,7 +346,7 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
   } "Add CLM_MDCR_COINSRNC_AMT";
   
   //CLM_BLOOD_LBLTY_AMT
-  institutionalComponents.CLM_BLOOD_LBLTY_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+  src.CLM_BLOOD_LBLTY_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_BLOOD_LBLTY_AMT") "Add CC";
     src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_BLOOD_LBLTY_AMT";

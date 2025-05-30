@@ -279,19 +279,6 @@
                         "code": "string"
                     }
                 ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_BLOOD_LBLTY_AMT",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_BLOOD_LBLTY_AMT",
-                "label": "Blood Deductible Liability Amount",
-                "definition": "The amount of money for which the intermediary determined the beneficiary is liable for the blood deductible.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
             }
             
         ]
