@@ -177,6 +177,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     
     claim['CLM']['CLM_NUM_SK'] = 1
     claim['CLM']['CLM_EFCTV_DT'] = str(date.today())
+    claim['CLM']['CLM_IDR_LD_DT'] = str(date.today())
     claim['CLM']['CLM_OBSLT_DT'] = '9999-12-31'
     claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     claim['CLM']['BENE_SK'] = bene_sk
@@ -239,7 +240,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
                         'CLM_TYPE_CD':claim['CLM']['CLM_TYPE_CD'],
                         'CLM_VAL_CD':18,
                         'CLM_VAL_AMT':round(random.uniform(1,15000),2),
-                        'CLM_VAL_SQNC_NUM':1}
+                        'CLM_VAL_SQNC_NUM':14}
         claim['CLM_VAL'].append(clm_val_dsprtnt)
         clm_val_ime = {'CLM_DT_SGNTR_SK':claim['CLM']['CLM_DT_SGNTR_SK'],
                        'CLM_NUM_SK':claim['CLM']['CLM_NUM_SK'],
@@ -247,7 +248,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
                         'CLM_TYPE_CD':claim['CLM']['CLM_TYPE_CD'],
                         'CLM_VAL_CD':19,
                         'CLM_VAL_AMT':round(random.uniform(1,15000),2),
-                        'CLM_VAL_SQNC_NUM':1}
+                        'CLM_VAL_SQNC_NUM':3}
         claim['CLM_VAL'].append(clm_val_ime)
 
     #Add procedures
