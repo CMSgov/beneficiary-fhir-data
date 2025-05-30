@@ -1,3 +1,16 @@
+# `ecr` Platform Terraservice
+
+This Terraservice is responsible for defining account-wide ECR repositories.
+
+## Direct Terraservice Dependencies
+
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
+
+| Terraservice | Required?
+|---|---|---|---|
+| `bootstrap` | Yes |
+| `config` | Yes |
+
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
