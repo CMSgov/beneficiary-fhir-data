@@ -28,8 +28,8 @@ usage() {
   echo "  -h, --help                            Display this help message"
   echo "  -d <FILE>, --decrypt <FILE>           Decrypt the provided sops <FILE>"
   echo "  -e <FILE>, --edit <FILE>              Open the provided sops <FILE> in \$EDITOR for editing"
-  echo "  -c <FILE>, --cat <FILE>               Print the templated, still encrypted, valid sops file to STDOUT. Useful for Terraform that ingests sops YAML"
-  echo "  -C <FILE>, --convert <FILE>           Convert the provided sops file <FILE> into a BFD 'partial sops' file that can be used with this script"
+  echo "  -c <FILE>, --convert-to <FILE>        Convert sopsw <FILE> to a valid, encrypted sops file, printing to STDOUT. Useful for Terraform that ingests sops YAML"
+  echo "  -C <FILE>, --convert-from <FILE>      Convert sops <FILE> into a BFD 'partial sops'/sopsw file, printing to STDOUT. that can be used with this script"
   echo "  -R <FILE>, --rewrite <FILE>           Not for use in interactive contexts. Intended for use as \$EDITOR with sops -e"
 }
 
@@ -49,6 +49,11 @@ prepare_temp_file() {
   ACCOUNT_ID="$aws_account_id" envsubst '$ACCOUNT_ID' < <(yq '. * {"sops": {"lastmodified": "1970-01-01T00:00:00Z", "mac": ""}}' <"$sops_file") >"$tmp_sops_file"
   EDITOR="$SCRIPT_DIR/sopsw -R" sops --ignore-mac "$tmp_sops_file"
 }
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 0
+fi
 
 while [ $# -gt 0 ]; do
   case $1 in
@@ -87,7 +92,7 @@ while [ $# -gt 0 ]; do
 
       shift
       ;;
-    -c | --cat)
+    -c | --convert-to)
       if ! has_argument "$@"; then
         echo "File not specified." >&2
         usage
@@ -102,7 +107,7 @@ while [ $# -gt 0 ]; do
 
       shift
       ;;
-    -C | --convert)
+    -C | --convert-from)
       if ! has_argument "$@"; then
         echo "File not specified." >&2
         usage
@@ -113,7 +118,8 @@ while [ $# -gt 0 ]; do
 
       masked_sops="$(sed 's/\(- arn: arn:aws:kms:.*:\)[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/\1\$\{ACCOUNT_ID\}/' <"$sops_file")"
       partial_bfd_sops="$(echo "$masked_sops" | yq '. | del(.sops.lastmodified) | del(.sops.mac)')"
-      echo "$partial_bfd_sops" >"$sops_file"
+
+      echo "$partial_bfd_sops"
 
       shift
       ;;
