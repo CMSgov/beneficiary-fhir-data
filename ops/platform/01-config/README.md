@@ -60,8 +60,10 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Type |
 |------|------|
 | [aws_ssm_parameter.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
-| [external_external.valid_sops_yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
-| [sops_external.this](https://registry.terraform.io/providers/carlpett/sops/latest/docs/data-sources/external) | data source |
+| [external_external.account_sops_yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
+| [external_external.root_sops_yaml](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
+| [sops_external.account](https://registry.terraform.io/providers/carlpett/sops/latest/docs/data-sources/external) | data source |
+| [sops_external.root](https://registry.terraform.io/providers/carlpett/sops/latest/docs/data-sources/external) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
