@@ -27,24 +27,41 @@ locals {
   default_tags = module.terraservice.default_tags
   key_arn      = module.terraservice.key_arn
 
-  platform_yaml_file       = "${path.module}/values/platform.sopsw.yaml"
-  raw_sops_platform_yaml   = file(local.platform_yaml_file)
-  valid_sops_platform_yaml = data.external.valid_sops_yaml.result.valid_sops
-  enc_platform_data        = yamldecode(local.valid_sops_platform_yaml)
-  sops_nonsensitive_regex  = local.enc_platform_data.sops.unencrypted_regex
+  sops_config_yaml        = yamldecode(file("${path.module}/values/.sops.yaml"))
+  sops_nonsensitive_regex = local.sops_config_yaml.creation_rules[0].unencrypted_regex
 
-  decrypted_platform_data = yamldecode(data.sops_external.this.raw)
-  platform_ssm_config = {
-    for key, val in nonsensitive(local.decrypted_platform_data)
+  root_yaml_file       = "${path.module}/values/platform.root.sopsw.yaml"
+  raw_root_sops_yaml   = file(local.root_yaml_file)
+  valid_root_sops_yaml = data.external.root_sops_yaml.result.valid_sops
+
+  account_yaml_file       = "${path.module}/values/platform.${local.account_type}.sopsw.yaml"
+  raw_account_sops_yaml   = file(local.account_yaml_file)
+  valid_account_sops_yaml = data.external.account_sops_yaml.result.valid_sops
+
+  decrypted_root_data    = yamldecode(data.sops_external.root.raw)
+  decrypted_account_data = yamldecode(data.sops_external.account.raw)
+
+  root_ssm_config = {
+    for key, val in nonsensitive(local.decrypted_root_data)
     : key => {
       str_val      = tostring(val)
       is_sensitive = length(regexall(local.sops_nonsensitive_regex, key)) == 0
-      source       = basename(local.platform_yaml_file)
+      source       = basename(local.root_yaml_file)
     } if lower(tostring(val)) != "undefined"
   }
+  account_ssm_config = {
+    for key, val in nonsensitive(local.decrypted_account_data)
+    : key => {
+      str_val      = tostring(val)
+      is_sensitive = length(regexall(local.sops_nonsensitive_regex, key)) == 0
+      source       = basename(local.account_yaml_file)
+    } if lower(tostring(val)) != "undefined"
+  }
+  # Account-specific keys take precedence over root ("common") YAML
+  platform_ssm_config = merge(local.root_ssm_config, local.account_ssm_config)
 }
 
-data "external" "valid_sops_yaml" {
+data "external" "root_sops_yaml" {
   # sops (not sopsw, our custom wrapper) cannot decrypt the YAML until the KMS key ARNs include the
   # Account ID and the sops metadata block includes valid "lastmodified" and "mac" properties. We
   # need to use sopsw's "-c/--cat" function to construct a valid sops file so that it can be
@@ -55,13 +72,28 @@ data "external" "valid_sops_yaml" {
     # Allows us to pipe to yq so that sopsw does not need to emit JSON to work with this external
     # data source
     <<-EOF
-    ${path.module}/scripts/sopsw -c ${local.platform_yaml_file} | yq -o=json '{"valid_sops": (. | tostring)}'
+    ${path.module}/scripts/sopsw -c ${local.root_yaml_file} | yq -o=json '{"valid_sops": (. | tostring)}'
     EOF
   ]
 }
 
-data "sops_external" "this" {
-  source     = local.valid_sops_platform_yaml
+data "external" "account_sops_yaml" {
+  program = [
+    "bash",
+    "-c",
+    <<-EOF
+    ${path.module}/scripts/sopsw -c ${local.account_yaml_file} | yq -o=json '{"valid_sops": (. | tostring)}'
+    EOF
+  ]
+}
+
+data "sops_external" "root" {
+  source     = local.valid_root_sops_yaml
+  input_type = "yaml"
+}
+
+data "sops_external" "account" {
+  source     = local.valid_account_sops_yaml
   input_type = "yaml"
 }
 
