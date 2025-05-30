@@ -74,33 +74,33 @@ class TestPipeline:
         cur = conn.execute("select * from idr.claim")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 3217710515066
+        assert rows[0]["clm_uniq_id"] == 1071939711295
         assert rows[0]["clm_nrln_ric_cd"] == "V"
 
         cur = conn.execute("select * from idr.claim_institutional")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 3217710515066
+        assert rows[0]["clm_uniq_id"] == 1071939711295
 
         cur = conn.execute("select * from idr.claim_date_signature")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_dt_sgntr_sk"] == 534755410773
+        assert rows[0]["clm_dt_sgntr_sk"] == 322823692141
 
         cur = conn.execute("select * from idr.claim_value")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 3217710515066
+        assert rows[0]["clm_uniq_id"] == 1071939711295
 
         cur = conn.execute("select * from idr.claim_line")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 3217710515066
+        assert rows[0]["clm_uniq_id"] == 1071939711295
 
         cur = conn.execute("select * from idr.claim_line_institutional")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 3217710515066
+        assert rows[0]["clm_uniq_id"] == 1071939711295
 
         cur = conn.execute("select * from idr.claim_ansi_signature")
         assert cur.rowcount == 1
@@ -110,7 +110,7 @@ class TestPipeline:
         cur = conn.execute("select * from idr.claim_procedure")
         assert cur.rowcount == 1
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 3217710515066
+        assert rows[0]["clm_uniq_id"] == 1071939711295
 
         # TODO: add these back when synthetic coverage data is available
         # cur = conn.execute("select * from idr.beneficiary_third_party")

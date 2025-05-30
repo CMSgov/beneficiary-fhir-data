@@ -96,7 +96,7 @@ class IdrBaseModel(BaseModel):
         metadata = cls.model_fields[key].metadata
         alias = cls._extract_meta(key, ALIAS)
         if alias is not None:
-            return f"{metadata[0]['alias']}.{key}"
+            return f"{metadata[0][ALIAS]}.{key}"
         else:
             return key
 
@@ -493,7 +493,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_instnl_mdcr_coins_day_cnt: int
     clm_instnl_ncvrd_day_cnt: float
     clm_instnl_per_diem_amt: float
-    clm_mdcr_npmt_rsn_cd: str
+    clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_mdcr_ip_pps_drg_wt_num: float
     clm_mdcr_ip_pps_dsprprtnt_amt: float
     clm_mdcr_ip_pps_excptn_amt: float
@@ -501,7 +501,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_mdcr_ip_pps_cptl_ime_amt: float
     clm_mdcr_ip_pps_outlier_amt: float
     clm_mdcr_ip_pps_cptl_hrmls_amt: float
-    clm_pps_ind_cd: str
+    clm_pps_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_mdcr_ip_pps_cptl_tot_amt: float
     clm_instnl_cvrd_day_cnt: float
     clm_mdcr_instnl_prmry_pyr_amt: float
@@ -590,6 +590,7 @@ class IdrClaimLine(IdrBaseModel):
     def fetch_query() -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
+        # Note: joining on clm_uniq_id isn't strictly necessary, but it did seem to improve performance a bit
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
@@ -598,6 +599,7 @@ class IdrClaimLine(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk AND
+                {clm}.clm_from_dt = {line}.clm_from_dt AND
                 {clm}.clm_uniq_id = {line}.clm_uniq_id
             {{WHERE_CLAUSE}} AND {claim_type_clause()}
             {{ORDER_BY}}
@@ -632,7 +634,8 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_num_sk = {line}.clm_num_sk
+                {clm}.clm_num_sk = {line}.clm_num_sk AND
+                {clm}.clm_from_dt = {line}.clm_from_dt
             {{WHERE_CLAUSE}} AND {claim_type_clause()}
             {{ORDER_BY}}
         """
@@ -660,10 +663,10 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 class IdrClaimProcedure(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
+    clm_prod_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     clm_prcdr_cd: str
     clm_dgns_prcdr_icd_ind: str
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_prod_type_cd: str
     clm_poa_ind: Annotated[str, BeforeValidator(transform_null_string)]
     clm_prcdr_prfrm_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]

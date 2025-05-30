@@ -251,7 +251,7 @@ CREATE TABLE idr.claim_procedure (
     clm_poa_ind VARCHAR(1),
     clm_prcdr_prfrm_dt DATE,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
+    PRIMARY KEY(clm_uniq_id, clm_prod_type_cd, clm_val_sqnc_num)
 );
 
 CREATE TABLE idr.claim_line (

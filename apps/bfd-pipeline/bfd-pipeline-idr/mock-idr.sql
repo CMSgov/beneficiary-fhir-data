@@ -228,14 +228,14 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
     clm_dt_sgntr_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
-    clm_val_sqnc_num INT,
+    clm_val_sqnc_num INT NOT NULL,
     clm_prcdr_cd VARCHAR(7),
     clm_dgns_prcdr_icd_ind VARCHAR(1),
     clm_dgns_cd VARCHAR(7),
     clm_prod_type_cd VARCHAR(1),
     clm_poa_ind VARCHAR(1),
     clm_prcdr_prfrm_dt DATE,
-    PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_val_sqnc_num)
+    PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_prod_type_cd, clm_val_sqnc_num)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
@@ -243,8 +243,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     geo_bene_sk BIGINT NOT NULL,
     clm_dt_sgntr_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
-    clm_num_sk BIGINT,
-    clm_line_num INT,
+    clm_num_sk BIGINT NOT NULL,
+    clm_line_num INT NOT NULL,
+    clm_from_dt DATE NOT NULL,
     clm_line_sbmt_chrg_amt NUMERIC,
     clm_line_alowd_chrg_amt NUMERIC,
     clm_line_ncvrd_chrg_amt NUMERIC,
@@ -274,7 +275,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     clm_ansi_sgntr_sk BIGINT,
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
-    clm_line_num INT,
+    clm_from_dt DATE NOT NULL,
+    clm_line_num INT NOT NULL,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),
     clm_line_instnl_rate_amt NUMERIC,
