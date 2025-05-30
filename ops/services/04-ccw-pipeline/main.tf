@@ -72,6 +72,8 @@ module "bucket_ccw" {
   bucket_name        = !var.greenfield ? local.name_prefix : null
   bucket_prefix      = var.greenfield ? local.name_prefix : null
   force_destroy      = local.is_ephemeral_env
+
+  ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
 }
 
 resource "aws_ecs_task_definition" "ccw" {

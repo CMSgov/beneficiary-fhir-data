@@ -15,6 +15,8 @@ module "bucket_athena" {
   bucket_name        = !var.greenfield ? "${local.name_prefix}-stats" : null
   bucket_prefix      = var.greenfield ? "${local.name_prefix}-stats" : null
   force_destroy      = local.is_ephemeral_env
+
+  ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
 }
 
 resource "aws_athena_workgroup" "locust_stats" {

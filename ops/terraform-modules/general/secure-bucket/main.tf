@@ -109,3 +109,17 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
     bucket_key_enabled = true
   }
 }
+
+resource "aws_ssm_parameter" "bucket_name" {
+  count = var.ssm_param_name != null && trimspace(var.ssm_param_name) != "" ? 1 : 0
+
+  name           = var.ssm_param_name
+  tier           = "Intelligent-Tiering"
+  type           = "String"
+  insecure_value = aws_s3_bucket.this.bucket
+
+  tags = {
+    for_bucket    = aws_s3_bucket.this.bucket
+    DO_NOT_MODIFY = true
+  }
+}

@@ -23,6 +23,8 @@ module "bucket_certstores" {
   bucket_prefix      = "bfd-${local.env}-${local.service}-certstores"
   bucket_kms_key_arn = local.env_key_arn
   force_destroy      = true
+
+  ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/certstores_bucket"
 }
 
 # Necessary as the certstores may not exist on first run and Terraform's aws_s3_object data resource

@@ -30,3 +30,14 @@ variable "tags" {
   type        = map(string)
   description = "Additional tags to attach to bucket resource."
 }
+
+variable "ssm_param_name" {
+  type        = string
+  nullable    = true
+  default     = null
+  description = <<-EOF
+  Name of SSM parameter storing the name of the created bucket. Useful in contexts where the bucket
+  is created using a bucket prefix instead of a static name. If null, no parameter is created.
+  Defaults to null.
+  EOF
+}
