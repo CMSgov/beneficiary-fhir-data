@@ -35,12 +35,12 @@ locals {
 
 data "aws_sns_topic" "slos_alert_sns" {
   count = local.slos_env_sns.alert != null ? 1 : 0
-  name  = local.slos_env_sns.alert
+  name  = var.greenfield ? local.slos_env_sns.alert : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 data "aws_sns_topic" "slos_warning_sns" {
   count = local.slos_env_sns.warning != null ? 1 : 0
-  name  = local.slos_env_sns.warning
+  name  = var.greenfield ? local.slos_env_sns.warning : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 resource "aws_cloudwatch_metric_alarm" "slo_data_load_ingestion_time" {

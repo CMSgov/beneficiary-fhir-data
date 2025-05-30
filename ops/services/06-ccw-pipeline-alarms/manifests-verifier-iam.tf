@@ -63,12 +63,6 @@ resource "aws_iam_policy" "verifier_rds" {
 
 data "aws_iam_policy_document" "verifier_kms" {
   statement {
-    sid       = "AllowDecryptionOfConfigKeys"
-    actions   = ["kms:Decrypt"]
-    resources = local.env_config_key_arns
-  }
-
-  statement {
     sid = "AllowEncryptionAndDecryptionOfMasterKeys"
     actions = [
       "kms:Encrypt",

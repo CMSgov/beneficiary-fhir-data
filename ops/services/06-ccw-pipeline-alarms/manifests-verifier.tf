@@ -1,12 +1,11 @@
 locals {
-  verifier_repository_name  = coalesce(var.manifests_verifier_repository_override, "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda")
-  verifier_version          = coalesce(var.manifests_verifier_version_override, local.latest_bfd_release)
-  verifier_alert_topics_ssm = nonsensitive(lookup(local.ssm_config, "/bfd/${local.service}/verifier/alert_topics", null))
-  verifier_alert_topics     = local.verifier_alert_topics_ssm != null ? [for v in split(",", local.verifier_alert_topics_ssm) : trimspace(v)] : null
-  verifier_lambda_name      = "manifests-verifier"
-  verifier_lambda_full_name = "${local.name_prefix}-${local.verifier_lambda_name}"
-
-  ccw_pipeline_bucket_name = "bfd-${local.env}-${local.target_service}"
+  verifier_repository_default = !var.greenfield ? "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda" : "bfd-platform-pipeline-ccw-manifests-verifier-lambda"
+  verifier_repository_name    = coalesce(var.manifests_verifier_repository_override, local.verifier_repository_default)
+  verifier_version            = coalesce(var.manifests_verifier_version_override, local.latest_bfd_release)
+  verifier_alert_topics_ssm   = nonsensitive(lookup(local.ssm_config, "/bfd/${local.service}/verifier/alert_topics", null))
+  verifier_alert_topics       = local.verifier_alert_topics_ssm != null ? [for v in split(",", local.verifier_alert_topics_ssm) : trimspace(v)] : null
+  verifier_lambda_name        = "manifests-verifier"
+  verifier_lambda_full_name   = "${local.name_prefix}-${local.verifier_lambda_name}"
 }
 
 data "aws_sns_topic" "verifier_alert_topic" {
@@ -23,8 +22,12 @@ data "aws_rds_cluster" "main" {
   cluster_identifier = "bfd-${local.env}-aurora-cluster"
 }
 
+data "aws_ssm_parameter" "ccw_pipeline_bucket_name" {
+  name = "/bfd/${local.env}/${local.target_service}/nonsensitive/bucket"
+}
+
 data "aws_s3_bucket" "ccw_pipeline" {
-  bucket = local.ccw_pipeline_bucket_name
+  bucket = nonsensitive(data.aws_ssm_parameter.ccw_pipeline_bucket_name.value)
 }
 
 resource "aws_scheduler_schedule_group" "verifier" {

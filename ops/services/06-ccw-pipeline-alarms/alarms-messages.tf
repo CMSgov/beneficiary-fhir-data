@@ -20,12 +20,12 @@ locals {
 
 data "aws_sns_topic" "msgs_alert_sns" {
   count = local.msgs_env_sns.alert != null ? 1 : 0
-  name  = local.msgs_env_sns.alert
+  name  = var.greenfield ? local.msgs_env_sns.alert : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 data "aws_sns_topic" "msgs_warning_sns" {
   count = local.msgs_env_sns.warning != null ? 1 : 0
-  name  = local.msgs_env_sns.warning
+  name  = var.greenfield ? local.msgs_env_sns.warning : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 resource "aws_cloudwatch_metric_alarm" "errors" {
