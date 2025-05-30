@@ -19,7 +19,7 @@ locals {
 
 data "aws_sns_topic" "msgs_actions" {
   for_each = { for k, v in local.msgs_topic_names : k => v if v != null }
-  name     = each.value
+  name     = var.greenfield ? each.value : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 resource "aws_cloudwatch_metric_alarm" "errors" {
