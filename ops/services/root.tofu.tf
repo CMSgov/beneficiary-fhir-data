@@ -3,7 +3,11 @@
 
 locals {
   established_envs = ["test", "prod-sbx", "prod"]
-  parent_env       = coalesce(var.parent_env, try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "invalid-parent-environment"))
+  parent_env = coalesce(
+    var.parent_env,
+    try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "invalid-workspace"),
+    "invalid-parent-env"
+  )
 
   _canary_exists = module.terraservice.canary
 }
