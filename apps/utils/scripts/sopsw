@@ -29,7 +29,7 @@ usage() {
   echo "  -d <FILE>, --decrypt <FILE>           Decrypt the provided sops <FILE>"
   echo "  -e <FILE>, --edit <FILE>              Open the provided sops <FILE> in \$EDITOR for editing"
   echo "  -c <FILE>, --convert-to <FILE>        Convert sopsw <FILE> to a valid, encrypted sops file, printing to STDOUT. Useful for Terraform that ingests sops YAML"
-  echo "  -C <FILE>, --convert-from <FILE>      Convert sops <FILE> into a BFD 'partial sops'/sopsw file, printing to STDOUT. that can be used with this script"
+  echo "  -C <FILE>, --convert-from <FILE>      Convert sops <FILE> into a BFD 'partial sops'/sopsw file, printing to STDOUT"
   echo "  -R <FILE>, --rewrite <FILE>           Not for use in interactive contexts. Intended for use as \$EDITOR with sops -e"
 }
 
