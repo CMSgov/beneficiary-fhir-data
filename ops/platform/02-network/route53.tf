@@ -1,18 +1,16 @@
 locals {
-  zone_ssm_path          = "/bfd/network/route53/zone/"
-  route53_ssm_keys       = nonsensitive([for k in keys(local.ssm_config) : k if startswith(k, local.zone_ssm_path)])
-  hosted_zone_config_ids = distinct([for k in local.route53_ssm_keys : split("/", trimprefix(k, local.zone_ssm_path))[0]])
+  route53_ssm_path = "/bfd/network/route53"
   hosted_zones = {
-    for zone in local.hosted_zone_config_ids :
+    for zone in jsondecode(nonsensitive(local.ssm_config["${local.route53_ssm_path}/zones_list_json"])) :
     zone => {
-      domain  = nonsensitive(local.ssm_config["${local.zone_ssm_path}${zone}/domain"])
-      comment = nonsensitive(local.ssm_config["${local.zone_ssm_path}${zone}/comment"])
+      domain  = nonsensitive(local.ssm_config["${local.route53_ssm_path}/zone/${zone}/domain"])
+      comment = nonsensitive(local.ssm_config["${local.route53_ssm_path}/zone/${zone}/comment"])
       # If a hosted zone does not specify any VPC associations, it is considered a Public zone. If
       # any VPCs are specified, it is considered Private. We do not want to configure any
       # internet-facing, public Route53 Hosted Zones, so returning an empty list will result in an
       # error
-      internal_vpc_ids = jsondecode(nonsensitive(local.ssm_config["${local.zone_ssm_path}${zone}/internal_vpcs_list_json"]))
-      external_vpc_ids = jsondecode(nonsensitive(lookup(local.ssm_config, "${local.zone_ssm_path}${zone}/external_vpcs_list_json", "[]")))
+      internal_vpc_ids = jsondecode(nonsensitive(local.ssm_config["${local.route53_ssm_path}/zone/${zone}/internal_vpcs_list_json"]))
+      external_vpc_ids = jsondecode(nonsensitive(lookup(local.ssm_config, "${local.route53_ssm_path}/zone/${zone}/external_vpcs_list_json", "[]")))
     }
   }
   all_internal_r53_vpcs = flatten(values(local.hosted_zones)[*].internal_vpc_ids)

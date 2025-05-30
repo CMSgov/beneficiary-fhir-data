@@ -1,3 +1,8 @@
+#ENC[AES256_GCM,data:o9HaP5N7fr+lZEqBu5Fn8p1KPt7/5OWS7qsV5/2e5cijNh9XJPrI3Vda52zB2z1Jubpopup2I6ehf/lGRGvsz98yJ13kBswBT2HEr9JCZXzlXYkhuTajB/DjRoRQ6CEsQNu3a5daT/ui,iv:CqeraoABl0KflXn0J2ZZef4Zalipq7I9iizijpKJcek=,tag:zKNf817D9yZSWTDCgcjxuA==,type:comment]
+/bfd/platform/network/nonsensitive/route53/zones_list_json: |-
+  [
+    "root"
+  ]
 /bfd/platform/network/sensitive/route53/zone/root/domain: ENC[AES256_GCM,data:NqF4jL/a219kP1zQEQnBHx/f,iv:V5uqNePEZ41XgRhYFz0yb/PmxHfQYoqvHY91vwFLTbw=,tag:fbFBHvB94Zaqm6ZeZ9UgBw==,type:str]
 /bfd/platform/network/sensitive/route53/zone/root/comment: ENC[AES256_GCM,data:FSuN0VvQjEPb9UAdveNqGp4GvKGanCN3cbDnzON7zazGtLT017+AjIPJcCvxJRqQ513vGGEqXqoPeYPsbESxl9KBQeo3FhOM7ir/63ph,iv:hYd3Ss6L4Cpct/9O2QKsEdVTmlm1WPp7aQdQbBD3OVA=,tag:uGuO3r0F8CgygmIEBLPVlw==,type:str]
 #ENC[AES256_GCM,data:Pn2iduLxKPoJBETNs7AgJ/9z19d9iaOLmANbOhnxguKnFA1EceLU8DSsfGBIAM+SyA9Vby1BeEg=,iv:kcUNqWYe8AcGT+0QOgXZvlRwbw6L4nIJgsjvE4X5av4=,tag:dRjHl9oHB+eHZSbsPL+zag==,type:comment]
