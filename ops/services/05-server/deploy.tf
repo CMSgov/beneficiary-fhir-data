@@ -1,6 +1,6 @@
 resource "aws_codedeploy_app" "server" {
   compute_platform = "ECS"
-  name             = local.service
+  name             = local.name_prefix
 }
 
 resource "aws_codedeploy_deployment_group" "server" {

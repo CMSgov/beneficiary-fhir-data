@@ -49,3 +49,23 @@ pass along the resource url with -r
 pass along --test to run conformance tests
 
 
+To generate synthetic claims data, the claims_generator.py script is used. As of 5/22/25, it will only generate inpatient institutional claims and their PAC equivalent claim type codes. 
+To utilize it:
+```sh
+python claims_generator.py \
+    --sushi \
+    --benes <bene_filename.csv>
+```
+
+--sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK. 
+The files output will be in the outputs folder, there are several files:
+SYNTHETIC_CLM_DCMTN.csv
+SYNTHETIC_CLM_LINE_INSTNL.csv
+SYNTHETIC_CLM_INSTNL.csv
+SYNTHETIC_CLM_DT_SGNTR.csv
+SYNTHETIC_CLM_PROD.csv
+SYNTHETIC_CLM_VAL.csv
+SYNTHETIC_CLM_LINE.csv
+SYNTHETIC_CLM.csv
+
+These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.

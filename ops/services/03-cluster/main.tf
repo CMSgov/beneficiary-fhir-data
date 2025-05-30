@@ -15,7 +15,8 @@ module "terraservice" {
 locals {
   # Derived Values
   ## Module Lookups
-  service          = module.terraservice.service
+  service = "cluster"
+
   default_tags     = module.terraservice.default_tags
   env              = module.terraservice.env
   is_ephemeral_env = module.terraservice.is_ephemeral_env

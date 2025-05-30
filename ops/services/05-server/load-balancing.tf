@@ -1,7 +1,7 @@
 locals {
   lb_blue_is_public             = nonsensitive(tobool(local.ssm_config["/bfd/${local.service}/lb_is_public"]))
   lb_internal_vpc_peering_cidrs = [for peer, conf in data.aws_vpc_peering_connection.peers : conf.peer_cidr_block]
-  lb_internal_vpcs_cidrs        = [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block]
+  lb_internal_vpcs_cidrs        = [data.aws_vpc.mgmt.cidr_block, local.vpc.cidr_block]
   lb_internal_ingress_cidrs     = concat(local.lb_internal_vpc_peering_cidrs, local.lb_internal_vpcs_cidrs)
   lb_internal_ingress_pl_ids    = [data.aws_ec2_managed_prefix_list.vpn.id, data.aws_ec2_managed_prefix_list.jenkins.id]
   lb_ingress_port               = 443
@@ -31,7 +31,7 @@ resource "aws_lb" "this" {
   name                             = local.lb_name_prefix
   internal                         = !local.lb_blue_is_public
   load_balancer_type               = "network"
-  security_groups                  = [for _, v in aws_security_group.lb : v.id]
+  security_groups                  = values(aws_security_group.lb)[*].id
   subnets                          = local.lb_subnets
   enable_deletion_protection       = !local.is_ephemeral_env
   idle_timeout                     = 60
@@ -64,7 +64,7 @@ resource "aws_security_group" "lb" {
 
   name        = "${local.lb_name_prefix}-${each.key}-sg"
   description = "Allow blue/green ingress to the ${local.lb_name_prefix} NLB; egress to ${local.service} ECS Service containers"
-  vpc_id      = data.aws_vpc.main.id
+  vpc_id      = local.vpc.id
   tags        = merge({ Name = "${local.lb_name_prefix}-${each.key}-sg" })
 
   ingress {
@@ -99,10 +99,10 @@ resource "aws_lb_target_group" "this" {
   # resources--the Listeners are.
   count = length(local.listeners)
 
-  name                   = "${aws_lb.this.name}-tg-${count.index}"
+  name                   = "${local.name_prefix}-tg-${count.index}"
   port                   = local.server_port
   protocol               = upper(local.server_protocol)
-  vpc_id                 = data.aws_vpc.main.id
+  vpc_id                 = local.vpc.id
   deregistration_delay   = 30
   connection_termination = true
   target_type            = "ip"
@@ -113,5 +113,17 @@ resource "aws_lb_target_group" "this" {
     unhealthy_threshold = 5
     port                = local.server_port
     protocol            = upper(local.server_protocol)
+  }
+}
+
+resource "aws_route53_record" "this" {
+  name    = "${local.env}.fhir.${data.aws_route53_zone.root.name}"
+  type    = "A"
+  zone_id = data.aws_route53_zone.root.zone_id
+
+  alias {
+    name                   = aws_lb.this.dns_name
+    zone_id                = aws_lb.this.zone_id
+    evaluate_target_health = true
   }
 }

@@ -2,9 +2,8 @@ from datetime import datetime, timezone
 from typing import Iterator, TypeVar
 from timer import Timer
 import psycopg
-from pydantic import BaseModel
+from model import T
 
-T = TypeVar("T", bound=BaseModel)
 
 temp_table_timer = Timer("temp_table")
 copy_timer = Timer("copy")
@@ -25,13 +24,11 @@ class PostgresLoader:
         connection_string: str,
         table: str,
         unique_key: list[str],
-        sort_key: str,
         exclude_keys: list[str],
     ):
         self.conn = psycopg.connect(connection_string)
         self.table = table
         self.unique_key = unique_key
-        self.sort_key = sort_key
         self.exclude_keys = exclude_keys
 
     def refresh_materialized_view(self, view_name: str):
@@ -99,20 +96,18 @@ class PostgresLoader:
                     insert_timer.stop()
 
                     last = results[len(results) - 1].model_dump()
-                    last_id = last[self.sort_key]
                     # Some tables that contain reference data (like contract info) may not have the normal IDR timestamps
                     # For now we won't support incremental refreshes for those tables
                     if "idr_trans_efctv_ts" in last:
                         last_timestamp = last["idr_trans_efctv_ts"]
                         cur.execute(
                             f"""
-                            INSERT INTO idr.load_progress(table_name, last_id, last_ts, batch_completion_ts)
-                            VALUES(%(table)s, %(last_id)s, %(last_ts)s, '9999-12-31')
-                            ON CONFLICT (table_name) DO UPDATE SET last_id = EXCLUDED.last_id, last_ts = EXCLUDED.last_ts
+                            INSERT INTO idr.load_progress(table_name, last_ts, batch_completion_ts)
+                            VALUES(%(table)s, %(last_ts)s, '9999-12-31')
+                            ON CONFLICT (table_name) DO UPDATE SET last_ts = EXCLUDED.last_ts
                             """,
                             {
                                 "table": self.table,
-                                "last_id": last_id,
                                 "last_ts": last_timestamp,
                             },
                         )

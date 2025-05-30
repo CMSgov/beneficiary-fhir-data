@@ -2,9 +2,11 @@ from enum import StrEnum
 
 
 class S3EventType(StrEnum):
-    """Represents the types of S3 events that this Lambda is invoked by and supports. The value of
-    each Enum is a substring that is matched for on the "eventName" property of an invocation
-    event"""
+    """Represents the types of S3 events that this Lambda is invoked by and supports.
+
+    The value of each Enum is a substring that is matched for on the "eventName" property of an
+    invocation event
+    """
 
     OBJECT_CREATED = "ObjectCreated"
 

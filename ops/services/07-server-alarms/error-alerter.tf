@@ -1,7 +1,7 @@
 locals {
   alerter_lambda_rate           = local.ssm_config["/bfd/${local.service}/error_alerter/rate"]
   alerter_lambda_lookback       = local.ssm_config["/bfd/${local.service}/error_alerter/log_lookback_seconds"]
-  alerter_lambda_slack_hook_ssm = local.ssm_config["/bfd/${local.service}/error_alerter/slack_webhook_ssm"]
+  alerter_lambda_slack_hook_ssm = lookup(local.ssm_config, "/bfd/${local.service}/error_alerter/slack_webhook_ssm", null)
 
   # TODO: Remove "-ecs"
   alerter_name_prefix      = "bfd-${local.env}-${local.target_service}-ecs"
@@ -11,6 +11,8 @@ locals {
 }
 
 data "aws_ssm_parameter" "alerter_slack_webhook" {
+  count = local.alerter_lambda_slack_hook_ssm != null ? 1 : 0
+
   name            = local.alerter_lambda_slack_hook_ssm
   with_decryption = true
 }
@@ -54,10 +56,9 @@ resource "aws_lambda_function" "alerter" {
   function_name = local.alerter_lambda_full_name
 
   description = join("", [
-    "Invoked whenever schedules in the ${aws_scheduler_schedule_group.alerter.name} group execute, ",
-    "this Lambda uses Log Insights to post alerts to Slack indicating the number of 500 errors ",
-    "that have occurred in the past ${local.alerter_lambda_lookback} seconds in ${local.env}'s ",
-    "${local.target_service}"
+    "Invoked on Schedules in the ${aws_scheduler_schedule_group.alerter.name} group, ",
+    "this Lambda queries Log Insights for 500 errors and posts summaries to Slack for errors ",
+    "that occurred in the past ${local.alerter_lambda_lookback} seconds"
   ])
 
   tags = {
@@ -80,7 +81,7 @@ resource "aws_lambda_function" "alerter" {
       LOG_LOOKBACK_SECONDS    = local.alerter_lambda_lookback
       ACCESS_JSON_LOG_GROUP   = data.aws_cloudwatch_log_group.server_access.name
       MESSAGES_JSON_LOG_GROUP = data.aws_cloudwatch_log_group.server_messages.name
-      SLACK_WEBHOOK           = data.aws_ssm_parameter.alerter_slack_webhook.value
+      SLACK_WEBHOOK           = one(data.aws_ssm_parameter.alerter_slack_webhook[*].value)
     }
   }
 

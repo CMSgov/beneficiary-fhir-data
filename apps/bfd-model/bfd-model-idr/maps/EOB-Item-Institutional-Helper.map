@@ -36,7 +36,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_MSP2_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP2(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
     
-    src.REV_CNTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
+    src.CLM_LINE_INSTNL_REV_CTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
 }
 
 group addMoney(source src: String, target tgt: Money){

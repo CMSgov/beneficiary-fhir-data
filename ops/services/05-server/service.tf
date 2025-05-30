@@ -299,15 +299,15 @@ resource "aws_ecs_task_definition" "server" {
 resource "aws_security_group" "server" {
   name        = "${local.name_prefix}-sg"
   description = "Allow igress from NLBs to ${local.service} ECS service containers; egress anywhere"
-  vpc_id      = data.aws_vpc.main.id
+  vpc_id      = local.vpc.id
   tags        = { Name = "${local.name_prefix}-sg" }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "server_allow_tls_nlb" {
-  for_each = aws_security_group.lb
+  for_each = local.listeners
 
   security_group_id            = aws_security_group.server.id
-  referenced_security_group_id = each.value.id
+  referenced_security_group_id = aws_security_group.lb[each.key].id
   from_port                    = local.server_port
   ip_protocol                  = local.server_protocol
   to_port                      = local.server_port
@@ -329,7 +329,7 @@ data "aws_security_groups" "aurora_cluster" {
   }
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    values = [local.vpc.id]
   }
 }
 
@@ -383,7 +383,7 @@ resource "aws_ecs_service" "server" {
   network_configuration {
     assign_public_ip = false
     security_groups  = [aws_security_group.server.id]
-    subnets          = [for _, subnet in data.aws_subnet.app_subnets : subnet.id]
+    subnets          = local.app_subnet_ids
   }
 }
 

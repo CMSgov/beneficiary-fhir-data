@@ -17,16 +17,22 @@ copy:
   - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/iterations
   - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/pepper
   - /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/interval
-  - /bfd/${env}/pipeline/sensitive/rda/grpc/auth_token
-  - /bfd/${env}/pipeline/sensitive/rda/grpc/port
-  - /bfd/${env}/pipeline/sensitive/rda/grpc/host
-  - /bfd/${env}/server/nonsensitive/asg_desired_instance_count
-  - /bfd/${env}/server/nonsensitive/asg_instance_warmup_time
-  - /bfd/${env}/server/nonsensitive/asg_max_instance_count
-  - /bfd/${env}/server/nonsensitive/asg_max_warm_instance_count
-  - /bfd/${env}/server/nonsensitive/asg_min_instance_count
-  - /bfd/${env}/server/nonsensitive/launch_template_instance_type
-  - /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb
+  - /bfd/${env}/rda-pipeline/sensitive/db/password
+  - /bfd/${env}/rda-pipeline/sensitive/db/username
+  - /bfd/${env}/rda-pipeline/sensitive/hicn_hash/iterations
+  - /bfd/${env}/rda-pipeline/sensitive/hicn_hash/pepper
+  - /bfd/${env}/rda-pipeline/sensitive/npi/grpc/auth_token
+  - /bfd/${env}/rda-pipeline/sensitive/rda/grpc/port
+  - /bfd/${env}/rda-pipeline/sensitive/rda/grpc/host
+  - /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/interval
+  - /bfd/${env}/npi-pipeline/sensitive/db/password
+  - /bfd/${env}/npi-pipeline/sensitive/db/username
+  - /bfd/${env}/npi-pipeline/sensitive/hicn_hash/iterations
+  - /bfd/${env}/npi-pipeline/sensitive/hicn_hash/pepper
+  - /bfd/${env}/locust/sensitive/db/password
+  - /bfd/${env}/locust/sensitive/db/username
+  - /bfd/${env}/locust/sensitive/cert/pem_data
+  - /bfd/${env}/locust/sensitive/cert/key
   - /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds
   - /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds
   - /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id
@@ -40,8 +46,6 @@ copy:
   - /bfd/${env}/server/sensitive/test_client_key
   - /bfd/${env}/server/sensitive/test_client_samhsa_cert
   - /bfd/${env}/server/sensitive/test_client_samhsa_key
-  - /bfd/${env}/server/sensitive/server_regression_cert
-  - /bfd/${env}/server/sensitive/server_regression_key
 # "values" defines a key-value map exactly the same as the typical seed environment ".sops.yaml"
 # configuration format. Takes precedence over any copied SSM parameters
 values:
@@ -61,40 +65,49 @@ values:
   /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
-  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/idempotency_enabled: true
-  /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/enabled: "false"
-  /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/namespace: "bfd-${env}/ccw-pipeline"
   /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/cpu: 8192
   /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/memory: 16384
   /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50
+  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/idempotency_enabled: true
+  /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/enabled: "false"
+  /bfd/${env}/ccw-pipeline/nonsensitive/micrometer_cw/namespace: "bfd-${env}/ccw-pipeline"
   /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(30 minutes)
-  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/enabled: false
-  /bfd/${env}/ccw-pipeline/nonsensitive/ccw/slo/weekend_data_availability/verifier/alert_topic: UNDEFINED
-  /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/mode: UNDEFINED
-  /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/region: us-east-1
-  /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/bucket: UNDEFINED
-  /bfd/${env}/pipeline/nonsensitive/rda/grpc/inprocess_server/s3/dir: UNDEFINED
-  /bfd/${env}/pipeline/nonsensitive/rda/job/enabled: false
-  /bfd/${env}/pipeline/nonsensitive/rda/job/process_dlq: true
-  /bfd/${env}/pipeline/nonsensitive/rda/job/starting_fiss_seq_num: 0
-  /bfd/${env}/pipeline/nonsensitive/rda/job/starting_mcs_seq_num: 0
-  /bfd/${env}/pipeline/nonsensitive/rda/job/sequence_range_update_interval_seconds: 300
-  /bfd/${env}/pipeline/nonsensitive/rda/cleanup/enabled: false
-  /bfd/${env}/pipeline/nonsensitive/rda/cleanup/run_size: UNDEFINED
-  /bfd/${env}/pipeline/nonsensitive/rda/cleanup/transaction_size: UNDEFINED
-  /bfd/${env}/pipeline/nonsensitive/rda/instance_type: m6a.large
-  /bfd/${env}/server/nonsensitive/data_server_dir: /usr/local/bfd-server
-  /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_host: https://gov-metric-api.newrelic.com
-  /bfd/${env}/server/nonsensitive/data_server_new_relic_metric_path: /metric/v1
+  /bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: UNDEFINED
+  /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/alert: UNDEFINED
+  /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: UNDEFINED
+  /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: UNDEFINED
+  /bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: UNDEFINED
+  /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 4096
+  /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 8192
+  /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/grpc/inprocess_server/s3/region: us-east-1
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/job/process_dlq: true
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/job/starting_fiss_seq_num: 0
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/job/starting_mcs_seq_num: 0
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/job/sequence_range_update_interval_seconds: 300
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/cleanup/enabled: false
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/cleanup/run_size: UNDEFINED
+  /bfd/${env}/rda-pipeline/nonsensitive/rda/cleanup/transaction_size: UNDEFINED
+  /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/enabled: "false"
+  /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/namespace: "bfd-${env}/rda-pipeline"
+  /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/high_alert: UNDEFINED
+  /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/alert: UNDEFINED
+  /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/warning: UNDEFINED
+  /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/high_alert: UNDEFINED
+  /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: UNDEFINED
+  /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: UNDEFINED
+  /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/cpu: 4096
+  /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/memory: 8192
+  /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/disk_size: 21
+  /bfd/${env}/server/nonsensitive/ecs/capacity/min: 1
+  /bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
+  /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
+  /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
   /bfd/${env}/server/nonsensitive/pac/enabled: true
   /bfd/${env}/server/nonsensitive/pac/claim_source_types: fiss,mcs
   /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
   /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
   /bfd/${env}/server/nonsensitive/lb_is_public: false
-  /bfd/${env}/server/nonsensitive/launch_template_volume_iops: 3000
-  /bfd/${env}/server/nonsensitive/launch_template_volume_size_gb: 60
-  /bfd/${env}/server/nonsensitive/launch_template_volume_throughput: 250
-  /bfd/${env}/server/nonsensitive/launch_template_volume_type: gp3
   /bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
     []
   /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
@@ -114,7 +127,6 @@ values:
   /bfd/${env}/server/nonsensitive/db/wrapper/host_selector_strategy: leastConnections
   /bfd/${env}/server/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
   /bfd/${env}/server/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
-  /bfd/${env}/server/nonsensitive/ecs/capacity/min: 1
-  /bfd/${env}/server/nonsensitive/ecs/capacity/max: 3
-  /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
-  /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+  /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
+  /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
+  /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: UNDEFINED

@@ -10,6 +10,7 @@
 !.sensitive-files
 !.terraform-docs.yml
 !.python-version
+!.opentofu-version
 !.mvn
 
 # Ignore everything within top-level dist directory

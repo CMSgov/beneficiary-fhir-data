@@ -1,8 +1,10 @@
 import json
+from base64 import b64decode
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 import botocore.exceptions
+from pydantic import BaseModel, BeforeValidator, Field, TypeAdapter
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm.client import SSMClient
@@ -11,11 +13,16 @@ else:
     SSMClient = object
 
 
+class HostKey(BaseModel):
+    key_type: str
+    key_bytes: Annotated[bytes, BeforeValidator(b64decode)] = Field(validation_alias="key_base64")
+
+
 @dataclass(frozen=True, eq=True)
 class GlobalSsmConfig:
     sftp_connect_timeout: int
     sftp_hostname: str
-    sftp_host_pub_key: str
+    sftp_host_pub_keys: list[HostKey]
     sftp_username: str
     sftp_user_priv_key: str
     enrolled_partners: list[str]
@@ -35,10 +42,13 @@ class GlobalSsmConfig:
             path=f"/bfd/{env}/eft/sensitive/outbound/sftp/host",
             with_decrypt=True,
         )
-        sftp_host_pub_key = get_ssm_parameter(
-            ssm_client=ssm_client,
-            path=f"/bfd/{env}/eft/sensitive/outbound/sftp/trusted_host_key",
-            with_decrypt=True,
+        sftp_host_pub_keys = TypeAdapter(list[HostKey]).validate_json(
+            get_ssm_parameter(
+                ssm_client=ssm_client,
+                path=f"/bfd/{env}/eft/sensitive/outbound/sftp/trusted_host_keys_json",
+                with_decrypt=True,
+            ),
+            by_alias=True,
         )
         sftp_username = get_ssm_parameter(
             ssm_client=ssm_client,
@@ -69,7 +79,7 @@ class GlobalSsmConfig:
         return GlobalSsmConfig(
             sftp_connect_timeout=sftp_connect_timeout,
             sftp_hostname=sftp_hostname,
-            sftp_host_pub_key=sftp_host_pub_key,
+            sftp_host_pub_keys=sftp_host_pub_keys,
             sftp_username=sftp_username,
             sftp_user_priv_key=sftp_user_priv_key,
             enrolled_partners=enrolled_partners,

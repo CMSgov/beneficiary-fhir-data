@@ -108,7 +108,7 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
         RuntimeError: If any AWS API operations fail
     """
     try:
-        if not all([REGION, BFD_ENVIRONMENT, DB_CLUSTER_NAME, ETL_BUCKET_ID, ALERT_TOPIC_ARNS]):
+        if not all([REGION, BFD_ENVIRONMENT, DB_CLUSTER_NAME, ETL_BUCKET_ID]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         rds_client = boto3.client("rds", config=BOTO_CONFIG)

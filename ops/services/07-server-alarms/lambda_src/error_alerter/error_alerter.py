@@ -107,12 +107,7 @@ def __gen_log_insights_url(
 
 
 def handler(event: dict[str, str], context: Any):
-    if not all([
-        REGION,
-        BFD_ENVIRONMENT,
-        LOG_LOOKBACK_SECONDS,
-        SLACK_WEBHOOK,
-    ]):
+    if not all([REGION, BFD_ENVIRONMENT, LOG_LOOKBACK_SECONDS]):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return
 
@@ -291,18 +286,22 @@ def handler(event: dict[str, str], context: Any):
         ]
     }
 
-    logger.info("POSTing %s to Slack Webhook...", slack_message)
+    if SLACK_WEBHOOK:
+        logger.info("POSTing %s to Slack Webhook...", slack_message)
 
-    request = Request(SLACK_WEBHOOK, method="POST")
-    request.add_header("Content-Type", "application/json")
-    try:
-        with urlopen(request, data=json.dumps(slack_message).encode("utf-8")) as response:
-            if response.status == 200:
-                logger.info("Message posted successfully")
-            else:
-                logger.error("%s response received from Slack", response.status)
-    except URLError:
-        logger.error(
-            "An unrecoverable error occurred attempting to post Slack message: ",
-            exc_info=True,
-        )
+        request = Request(SLACK_WEBHOOK, method="POST")
+        request.add_header("Content-Type", "application/json")
+        try:
+            with urlopen(request, data=json.dumps(slack_message).encode("utf-8")) as response:
+                if response.status == 200:
+                    logger.info("Message posted successfully")
+                else:
+                    logger.error("%s response received from Slack", response.status)
+        except URLError:
+            logger.error(
+                "An unrecoverable error occurred attempting to post Slack message: ",
+                exc_info=True,
+            )
+    else:
+        logger.info("No Slack webhook defined, logging Slack message instead")
+        logger.info(slack_message)

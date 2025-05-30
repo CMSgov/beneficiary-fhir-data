@@ -1,7 +1,8 @@
 locals {
   verifier_repository_name  = coalesce(var.manifests_verifier_repository_override, "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda")
   verifier_version          = coalesce(var.manifests_verifier_version_override, local.latest_bfd_release)
-  verifier_alert_topics     = [for v in split(",", nonsensitive(local.ssm_config["/bfd/${local.service}/verifier/alert_topics"])) : trimspace(v)]
+  verifier_alert_topics_ssm = nonsensitive(lookup(local.ssm_config, "/bfd/${local.service}/verifier/alert_topics", null))
+  verifier_alert_topics     = local.verifier_alert_topics_ssm != null ? [for v in split(",", local.verifier_alert_topics_ssm) : trimspace(v)] : null
   verifier_lambda_name      = "manifests-verifier"
   verifier_lambda_full_name = "${local.name_prefix}-${local.verifier_lambda_name}"
 
@@ -9,7 +10,7 @@ locals {
 }
 
 data "aws_sns_topic" "verifier_alert_topic" {
-  count = length(local.verifier_alert_topics)
+  count = local.verifier_alert_topics != null ? length(local.verifier_alert_topics) : 0
   name  = local.verifier_alert_topics[count.index]
 }
 
@@ -27,7 +28,7 @@ data "aws_s3_bucket" "ccw_pipeline" {
 }
 
 resource "aws_scheduler_schedule_group" "verifier" {
-  name = "${local.verifier_lambda_full_name}-lambda-schedules"
+  name = "${local.verifier_lambda_full_name}-schedules"
 }
 
 resource "aws_scheduler_schedule" "verifier" {
