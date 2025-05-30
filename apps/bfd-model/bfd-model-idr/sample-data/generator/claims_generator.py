@@ -417,7 +417,6 @@ def gen_pac_version_of_claim(claim):
         pac_claim['CLM_LINE'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
         pac_claim['CLM_LINE'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
     for i in range(len(pac_claim['CLM_LINE_INSTNL'])):
-        pac_claim['CLM_LINE_INSTNL'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
         pac_claim['CLM_LINE_INSTNL'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
         pac_claim['CLM_LINE_INSTNL'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
         pac_claim['CLM_LINE_INSTNL'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
