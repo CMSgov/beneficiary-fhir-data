@@ -382,7 +382,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line_inst['CLM_LINE_INSTNL_REV_CTR_DT'] = claim['CLM']['CLM_FROM_DT']
 
         claim_line['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
-        claim_line_inst['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
         claim_line['CLM_LINE_NUM'] = line
         claim_line_inst['CLM_LINE_NUM'] = line
         claim['CLM_LINE'].append(claim_line)
