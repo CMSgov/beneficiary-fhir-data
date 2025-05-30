@@ -25,7 +25,7 @@ locals {
 
   envs_per_acc = {
     non-prod = ["test", "platform"]
-    prod     = ["sandbox", "prod-sbx", "platform"]
+    prod     = ["sandbox", "prod", "platform"]
   }
   envs = local.envs_per_acc[local.account_type]
 }
