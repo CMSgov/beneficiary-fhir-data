@@ -10,7 +10,7 @@ uv sync
 
 ## Development
 
-Initialize the database with test data
+Initialize the database with test data. Test data must be generated first.
 
 ```sh
 ./run-db.sh
