@@ -2,7 +2,7 @@
 # _all_ Terraservices, so be careful!
 
 locals {
-  established_envs = ["test", "prod-sbx", "prod"]
+  established_envs = !var.greenfield ? ["test", "prod-sbx", "prod"] : ["test", "sandbox", "prod"]
   parent_env = coalesce(
     var.parent_env,
     try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "invalid-workspace"),

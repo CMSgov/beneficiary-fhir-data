@@ -26,7 +26,7 @@ Environments can generally be classified as _established_ or _ephemeral_.
 ### Established Environments
 
 There are three, known _established environments_ with their respective configuration coming from appropriately named, environment-specific yaml files found in the aforementioned values directory.
-Practically speaking, this module configures the path-to-production established environments of `test`, `prod-sbx`, and `prod`.
+Practically speaking, this module configures the path-to-production established environments of `test`, `prod-sbx`/`sandbox`, and `prod`.
 These environments are not only established but they endure: they are **not** ephemeral nor temporary.
 
 Each of the established environments has specific yaml files in the values directory specific to their configuration.
@@ -38,7 +38,7 @@ Ephemeral environments use the values stored in `values/ephemeral.yaml` under th
 These environments effectively copy the values from their seed environment's AWS SSM Parameters as defined in the `copy` list in `ephemeral.yaml`.
 
 Terraform identifies the ephemeral environment's seed from the workspace name itself.
-This module expects that all workspace environment names will end in one of `test`, `prod-sbx`, or `prod`.
+This module expects that all workspace environment names will end in one of `test`, `prod-sbx`/`sandbox`, or `prod`.
 
 ## Additional Information
 
@@ -56,12 +56,12 @@ Between storing JSON strings in the yaml context here and being fetching those v
 
 Technical controls for standards enforcement are still forthcoming. As a stopgap, here are some guidelines in the spirit of keeping things simple:
 
-- All workspaces must end in one of the three path-to-production established environments of `test`, `prod-sbx`, or `prod`
-- Ephemeral environment workspace should generally be of a pattern similar to `<jira-id>-<env>`, e.g. `2544-test`, `2544-prod-sbx`, `2554-prod`.
+- All workspaces must end in one of the three path-to-production established environments of `test`, `prod-sbx`/`sandbox`, or `prod`
+- Ephemeral environment workspace should generally be of a pattern similar to `<jira-id>-<env>`, e.g. `2544-test`, `2544-prod-sbx`/`2544-sandbox`, `2554-prod`.
 - Keys must conform the following (nested keys within YAML transformed into paths):
   - `/${root}/${env}/${service}/${sensitivity}/...`
 - `${root}` is typically `bfd`, but may be any of our partners
-- `${env}` is typically one of `test`, `prod-sbx`, `prod` or ephemeral format `<jira-id>-<env>`, e.g. `2544-test`
+- `${env}` is typically one of `test`, `prod-sbx`/`sandbox`, `prod` or ephemeral format `<jira-id>-<env>`, e.g. `2544-test`
 - `${group}` must be one of the supported groups: `common`, `migrator`, `pipeline`, `server`
 - `${subgroup}` is optional, as of January 2023, examples include `ccw`, `rda`, `shared`
 - `${sensitivity}` should one of `nonsensitive` or `sensitive`, and indicates whether the parameter is encrypted at rest (thus, sensitive/secret) or not

@@ -257,7 +257,7 @@ resource "aws_appautoscaling_target" "dynamic_replicas" {
 resource "aws_appautoscaling_target" "static_replicas" {
   depends_on = [aws_rds_cluster_instance.writer]
 
-  # only applicable for prod/prod-sbx (not test or ephemeral)
+  # only applicable for prod/prod-sbx/sandbox (not test or ephemeral)
   count = !local.enable_rds_scheduled_scaling ? 1 : 0
 
   service_namespace  = "rds"

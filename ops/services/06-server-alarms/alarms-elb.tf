@@ -1,10 +1,11 @@
 locals {
-  # Ensures that prod and prod-sbx always have a valid alarm alert destination, as the application
-  # of this Terraservice will fail-fast otherwise. In the event this module is being applied in a
-  # non-critical environment (i.e. an ephemeral environment/test) the lookup will ensure that an
-  # empty configuration will be returned instead of an error if no configuration is available.
+  # Ensures that prod and prod-sbx/sandbox always have a valid alarm alert destination, as the
+  # application of this Terraservice will fail-fast otherwise. In the event this module is being
+  # applied in a non-critical environment (i.e. an ephemeral environment/test) the lookup will
+  # ensure that an empty configuration will be returned instead of an error if no configuration is
+  # available.
   elb_high_alert_path  = "/bfd/${local.service}/sns_topics/elb/high_alert"
-  elb_high_alert_topic = contains(["prod", "prod-sbx"], local.env) ? local.ssm_config[local.elb_high_alert_path] : lookup(local.ssm_config, local.elb_high_alert_path, null)
+  elb_high_alert_topic = contains(["prod", "prod-sbx", "sandbox"], local.env) ? local.ssm_config[local.elb_high_alert_path] : lookup(local.ssm_config, local.elb_high_alert_path, null)
   elb_high_alert_arn   = data.aws_sns_topic.elb_high_alert_sns[*].arn
 }
 

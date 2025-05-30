@@ -1,10 +1,10 @@
 locals {
-  # Ensures that prod and prod-sbx always have a valid alarm alert destination, as the application
-  # of this Terraservice will fail-fast otherwise
+  # Ensures that prod and prod-sbx/sandbox always have a valid alarm alert destination, as the
+  # application of this Terraservice will fail-fast otherwise
   slos_high_alert_topic_path = "/bfd/${local.service}/sns_topics/slos/high_alert"
   slos_alert_topic_path      = "/bfd/${local.service}/sns_topics/slos/alert"
   slos_warning_topic_path    = "/bfd/${local.service}/sns_topics/slos/warning"
-  slos_env_sns = contains(["prod", "prod-sbx"], local.env) ? {
+  slos_env_sns = contains(["prod", "prod-sbx", "sandbox"], local.env) ? {
     high_alert = local.ssm_config[local.slos_high_alert_topic_path]
     alert      = local.ssm_config[local.slos_alert_topic_path]
     warning    = local.ssm_config[local.slos_warning_topic_path]

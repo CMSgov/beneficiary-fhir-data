@@ -1,7 +1,7 @@
 locals {
   msgs_alert_topic_path   = "/bfd/${local.service}/sns_topics/msgs/alert"
   msgs_warning_topic_path = "/bfd/${local.service}/sns_topics/msgs/warning"
-  msgs_env_sns = contains(["prod", "prod-sbx"], local.env) ? {
+  msgs_env_sns = contains(["prod", "prod-sbx", "sandbox"], local.env) ? {
     alert   = local.ssm_config[local.msgs_alert_topic_path]
     warning = local.ssm_config[local.msgs_warning_topic_path]
     } : {

@@ -19,7 +19,7 @@ fi
 
 # Ensure that whatever environment this script is running in is NOT an established environment. We
 # never want to destroy nodes in our established environments
-if [[ $trimmed_bfd_env == "prod" || $trimmed_bfd_env == "prod-sbx" || $trimmed_bfd_env == "test" ]]; then
+if [[ $trimmed_bfd_env == "prod" || $trimmed_bfd_env == "sandbox" || $trimmed_bfd_env == "prod-sbx" || $trimmed_bfd_env == "test" ]]; then
   echo "Cannot destroy nodes in established environment $BFD_ENVIRONMENT"
   exit 1
 fi

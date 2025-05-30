@@ -99,7 +99,9 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
             "Starting Regression Suite test by invoking %s Lambda...", RUN_LOCUST_LAMBDA_NAME
         )
         compare_tag = (
-            "ecs_release" if BFD_ENVIRONMENT in ["test", "prod", "prod-sbx"] else BFD_ENVIRONMENT
+            "ecs_release"
+            if BFD_ENVIRONMENT in ["test", "prod", "prod-sbx", "sandbox"]
+            else BFD_ENVIRONMENT
         )
         response = lambda_client.invoke(
             FunctionName=RUN_LOCUST_LAMBDA_NAME,

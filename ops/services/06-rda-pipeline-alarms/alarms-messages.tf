@@ -9,7 +9,7 @@ locals {
     # In the event this module is being applied in a non-critical environment (i.e. an ephemeral
     # environment/test) using lookup() will ensure that an empty configuration will be returned
     # instead of an error if no configuration is available.
-    : k => contains(["prod", "prod-sbx"], local.env) ? nonsensitive(local.ssm_config[v]) : nonsensitive(lookup(local.ssm_config, v, sensitive(null)))
+    : k => contains(["prod", "prod-sbx", "sandbox"], local.env) ? nonsensitive(local.ssm_config[v]) : nonsensitive(lookup(local.ssm_config, v, sensitive(null)))
   }
   msgs_topic_arns = merge(
     { for k, _ in local.msgs_topic_paths : k => null },
