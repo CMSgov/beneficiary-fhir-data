@@ -13,7 +13,6 @@
 /bcda/${env}/eft/sensitive/inbound/s3_notifications/received_file_targets_json: ENC[AES256_GCM,data:3Y0CuF087HKr/5aVBB/k/39I9qo7vDGbH5mlakoBSutlkFoAK58Rzf11MWO78SzB+Xi+Sf7pdXFU3zieoTH+w0pPapvPvUfI8E6mh6nRSmh6Y6JfXMLOLq/qX8NkvV2EjQg7hDiEjhnCCK+wZ0EjJgWBLbjyMOl6YaBZpBjdlLO9GwGoA0s/rJIlWGyCjuvUaM4ASl9YHPBTEhZWY+fpiJTXeVDfSG8V1v58XtmtCy/XFgAAeRJFtlUSjy0/aD+GiM2pAzDyABO3tJBmjRkDG3uWQ0nXD4AonOuSKONcZUHiux7YdIkdD4uVU6rMGadwxd8wQNVJgAIipul92Y1dMkkoY+Urfsw1z/b2CvtfeEKQ1+bt9vFd,iv:9U5HijGwJ8oDPO8MvdX5aKzxLTLVExKaLcmEl+QNWUY=,tag:zxksvukh0rAItncOS/4wkw==,type:str]
 /bfd/${env}/common/sensitive/cloudbees_jenkins_subnets: ENC[AES256_GCM,data:DOxNFEXcls33cfp59sqT,iv:T3g4NQRcgCFTQZUOjBlo4BqKA1Fx2z8r6Me1CadcqZU=,tag:SFNtBRkxWkeJk20PBm7pvg==,type:str]
 /bfd/${env}/common/sensitive/ec2_user_private_key: ENC[AES256_GCM,data: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,iv:9z2fa9WUtki4by9p8qbcQCCHiaP51lkcXXwhq8HjNb0=,tag:sinRu/Ozq2u1dhI9tdOW+Q==,type:str]
-/bfd/${env}/common/sensitive/victor_ops_url: ENC[AES256_GCM,data:9kX2LhcMRqqefX1arA1reXPn2/c3Lt6nrGUh266T9CWR8YvNTUo9X85tjb+8qyu/qfmO3J4aj2LrctNNnYQcTKm/e17jKAh0PUUvxJI2xePfxgg3wOM8grVfAdKl2l6t+iuQv13/dZEqwvw=,iv:w7BH+qSufTYa1kaEFZFyctI2ZmvCkjxjVtKeLbXj9hs=,tag:kY41/2jViXEI1ZGPNLHwTQ==,type:str]
 /bfd/${env}/database/sensitive/rds_master_password: ENC[AES256_GCM,data:hrMYRfJi3LrRDCPp6LXJ1keieH83nRykag==,iv:YNtQM7wPLWAJ5tKpoJKoDXpw14oVWSCyWdLa0wDQtxE=,tag:2TNkCywWD89zFBF9xKKLGQ==,type:str]
 /bfd/${env}/eft/sensitive/inbound/partners_list_json: ENC[AES256_GCM,data:m/7Fu3Cu17Qp9eKXghzZFXYQsETnbO9cEQ==,iv:poeLMVViZkQEFKfSHPhTiKe2b2xPZd61pAyajzPVcHA=,tag:CNeEJKnQc9aQID0U+moa1Q==,type:str]
 /bfd/${env}/eft/sensitive/inbound/sftp_server/eft_user_home_dir: ENC[AES256_GCM,data:48B6OPbvHc0=,iv:C2YoBl/vrR7rpB3Fv/l4zIu6367IBH8Gx9Na+FiVF7Q=,tag:KQtM4DOAyvlobRt7L+eo3Q==,type:str]
@@ -129,11 +128,11 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 200
 /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(10 minutes)
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
-/bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-${env}-cloudwatch-alarms,bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
-/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms
-/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
-/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
-/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-platform-splunk-on-call-incident,bfd-platform-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-platform-splunk-on-call-incident
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-alerts
+/bfd/${env}/ccw-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-warnings
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
@@ -158,12 +157,12 @@
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/enabled: "false"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/batch_size: 100000
 /bfd/${env}/rda-pipeline/nonsensitive/rda/samhsa/backfill/log_interval: 900
-/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms
-/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
-/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
-/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/high_alert: bfd-${env}-cloudwatch-alarms
-/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
-/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-platform-splunk-on-call-incident
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/alert: bfd-platform-slack-bfd-alerts
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-warnings
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/high_alert: bfd-platform-splunk-on-call-incident
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-alerts
+/bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-warnings
 /bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
 /bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 1
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/cpu: 4096
@@ -499,16 +498,16 @@
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
-/bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/mgmt/common/sensitive/slack_webhook_bfd_test
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-${env}-cloudwatch-alarms
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-${env}-cloudwatch-alarms
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-${env}-cloudwatch-alarms
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-${env}-cloudwatch-alarms-slack-bfd-alerts
-/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-${env}-cloudwatch-alarms-slack-bfd-warnings
-/bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/breach_topic: bfd-prod-cloudwatch-alarms
+/bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/platform/alerting/sensitive/slack/bfd-internal-alerts/webhook
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/elb/high_alert: bfd-platform-splunk-on-call-incident
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/alert: bfd-platform-splunk-on-call-incident
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/logs/warning: bfd-platform-slack-bfd-warnings
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-platform-splunk-on-call-incident
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-platform-slack-bfd-alerts
+/bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-warnings
+/bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/breach_topic: bfd-platform-splunk-on-call-incident
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/lambda_errors/ok_topic: UNDEFINED
-/bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-prod-cloudwatch-alarms-slack-bfd-alerts
+/bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/breach_topic: bfd-platform-slack-bfd-alerts
 /bfd/${env}/eft/nonsensitive/outbound/o11y/alarms/sns_failures/ok_topic: UNDEFINED
 sops:
   kms:
