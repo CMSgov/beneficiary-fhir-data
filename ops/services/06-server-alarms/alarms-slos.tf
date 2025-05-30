@@ -149,17 +149,17 @@ locals {
 
 data "aws_sns_topic" "slos_high_alert_sns" {
   count = local.slos_env_sns.high_alert != null ? 1 : 0
-  name  = local.slos_env_sns.high_alert
+  name  = var.greenfield ? local.slos_env_sns.high_alert : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 data "aws_sns_topic" "slos_alert_sns" {
   count = local.slos_env_sns.alert != null ? 1 : 0
-  name  = local.slos_env_sns.alert
+  name  = var.greenfield ? local.slos_env_sns.alert : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 data "aws_sns_topic" "slos_warning_sns" {
   count = local.slos_env_sns.warning != null ? 1 : 0
-  name  = local.slos_env_sns.warning
+  name  = var.greenfield ? local.slos_env_sns.warning : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 data "external" "client_ssls_by_partner" {

@@ -10,7 +10,7 @@ locals {
 
 data "aws_sns_topic" "elb_high_alert_sns" {
   count = local.elb_high_alert_topic != null ? 1 : 0
-  name  = local.elb_high_alert_topic
+  name  = var.greenfield ? local.elb_high_alert_topic : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
 }
 
 data "aws_lb" "main" {
