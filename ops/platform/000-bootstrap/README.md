@@ -1,3 +1,22 @@
+# `bootstrap` Platform Terraservice
+
+This Platform Terraservice is intended to be the _very_ first OpenTofu `apply`'d in any new BFD AWS Account; as such, it has been granted a special "layer prefix" of `000`.
+
+Because OpenTofu requires state to function, and a new BFD AWS Account will have no resources (that we control) within it, there must be _some_ mechanism to "boostrap" ourselves so that we can begin `apply`ing our OpenTofu IaC. This Terraservice is the means by which we do this. Once `bootstrap` has been `apply`'d, _all_ of the fundamental resources (KMS keys, state S3 Buckets, CodeBuild Pipelines) will exist such that it will be possible to `apply` all other OpenTofu.
+
+## Bootstrapping a new Account
+
+Since this Terraservice is special and must be applied prior to any of the state Buckets that the `root.tofu.tf` expects, a `local-tofu.tf` file is provided within this Terraservice's directory. Operators boostrapping a new AWS Account must follow these steps:
+
+1. _Temporarily_ replace the symlink'd `tofu.tf` with the contents of `local-tofu.tf`
+1. `tofu init` the `local` state
+1. `apply` this Terraservice
+1. Restore the symlink'd `tofu.tf` and rename `local-tofu.tf` to `local-tofu.tf.disabled`
+1. `tofu init -var account_type=<ACCOUNT_TYPE> -reconfigure` to ensure that the appopriate state Bucket, created by _this_ Terraservice, is used
+1. Push the `local` state into the remote `s3` state backend: `tofu state push terraform.tfstate`
+
+Following these steps ensures that the boostrapped resources are stored in state using the S3 Bucket and KMS key created by this Terraservice. This also enables us to automatically deploy _changes_ to these resources (and other fundamental resources unrelated to OpenTofu state management) in our CI/CD Workflows, provided that these changes do not fundamentally alter the OpenTofu state resources.
+
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
