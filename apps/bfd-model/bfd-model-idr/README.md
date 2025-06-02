@@ -7,9 +7,9 @@ Downloading the FHIR validator is necessary to run the following scripts, along 
 To download the FHIR Validator:
 https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
 
-Install sushi
+Install sushi + fhirpath.js + yaml
 ```sh
-npm install -g fsh-sushi
+npm install -g fsh-sushi yaml fhirpath
 ```
 
 
@@ -18,7 +18,7 @@ EOB Institutional Inpatient:
 python compile_resources.py \
     -m maps/EOB-Base.map \
     -i sample-data/EOB-Base-Sample.json \
-    -o outputs/EOB.json \
+    -o outputs/ExplanationOfBenefit.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
     --test
 ```
