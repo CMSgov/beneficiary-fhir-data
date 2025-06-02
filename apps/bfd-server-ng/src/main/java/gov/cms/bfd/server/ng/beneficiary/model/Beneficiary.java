@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -27,9 +28,6 @@ public class Beneficiary {
   @Column(name = "bene_xref_efctv_sk_computed", nullable = false)
   private long xrefSk;
 
-  @Column(name = "bene_mbi_id", nullable = false)
-  private String mbi;
-
   @Column(name = "bene_brth_dt", nullable = false)
   private LocalDate birthDate;
 
@@ -46,6 +44,7 @@ public class Beneficiary {
   @Embedded private Address address;
   @Embedded private Meta meta;
   @Embedded private DeathDate deathDate;
+  @Embedded private Identity identity;
 
   /**
    * Transforms the beneficiary record to its FHIR representation.
@@ -79,9 +78,10 @@ public class Beneficiary {
    * will be done by the handler.
    *
    * @param fullCompositeId The full ID for the Coverage resource.
+   * @param coveragePart the coverage Part
    * @return A partially populated FHIR Coverage object.
    */
-  public Coverage toFhirCoverage(String fullCompositeId) {
+  public Coverage toFhirCoverage(String fullCompositeId, CoveragePart coveragePart) {
     Coverage coverage = new Coverage();
 
     coverage.setId(fullCompositeId);
@@ -97,6 +97,11 @@ public class Beneficiary {
     Organization cmsOrg = OrganizationFactory.createCmsOrganization();
     coverage.addContained(cmsOrg);
 
+    identity.toFhirMbiIdentifier().ifPresent(coverage::addIdentifier);
+    coverage.setSubscriberId(identity.getMbiValue());
+
+    coverage.setType(coveragePart.toFhirTypeCode());
+    coverage.addClass_(coveragePart.toFhirClassComponent());
     return coverage;
   }
 }

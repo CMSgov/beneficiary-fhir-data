@@ -35,11 +35,10 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
-    CoverageCompositeId parsedCoverageId = FhirInputConverter.toCoverageCompositeId(coverageId);
+    CoverageCompositeId compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
 
-    // Call the handler with the parsed and validated ID components.
     return coverageHandler
-        .readCoverage(parsedCoverageId, coverageId.getIdPart())
+        .readCoverage(compositeId, coverageId.getIdPart())
         .orElseThrow(() -> new ResourceNotFoundException(coverageId));
   }
 }

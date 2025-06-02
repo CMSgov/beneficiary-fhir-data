@@ -99,50 +99,33 @@ public enum CoveragePart {
   }
 
   /**
-   * Adds PartA Coverage Elements To Coverage.
+   * Creates TypeCode.
    *
-   * @param coverage The Coverage.
+   * @return TypeCode
    */
-  public static void addPartACoverageElementsToCoverage(Coverage coverage) {
+  public CodeableConcept toFhirTypeCode() {
 
     CodeableConcept typeCode = new CodeableConcept();
     typeCode
         .addCoding()
         .setSystem(IdrConstants.SYS_SOPT)
-        .setCode(PART_A.getStandardCode())
-        .setDisplay(PART_A.getSoptDisplay());
-    coverage.setType(typeCode);
-
-    // Set Coverage.class
-    Coverage.ClassComponent classComponent = new Coverage.ClassComponent();
-    classComponent
-        .setType(
-            new CodeableConcept()
-                .addCoding(new Coding(IdrConstants.SYS_COVERAGE_CLASS, "plan", null)))
-        .setValue(PART_A.getStandardCode());
-    coverage.addClass_(classComponent);
+        .setCode(this.getStandardCode())
+        .setDisplay(this.getSoptDisplay());
+    return typeCode;
   }
 
   /**
-   * Adds PartB Coverage Elements To Coverage.
+   * Creates ClassComponent.
    *
-   * @param coverage The Coverage.
+   * @return classComponent
    */
-  public static void addPartBCoverageElementsToCoverage(Coverage coverage) {
-    CodeableConcept typeCode = new CodeableConcept();
-    typeCode
-        .addCoding()
-        .setSystem(IdrConstants.SYS_SOPT)
-        .setCode(PART_B.getStandardCode())
-        .setDisplay(PART_A.soptDisplay);
-    coverage.setType(typeCode);
-
+  public Coverage.ClassComponent toFhirClassComponent() {
     Coverage.ClassComponent classComponent = new Coverage.ClassComponent();
     classComponent
         .setType(
             new CodeableConcept()
                 .addCoding(new Coding(IdrConstants.SYS_COVERAGE_CLASS, "plan", null)))
-        .setValue(PART_B.getStandardCode());
-    coverage.addClass_(classComponent);
+        .setValue(this.getStandardCode());
+    return classComponent;
   }
 }

@@ -41,15 +41,11 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
       try {
         return new CoverageCompositeId(part, Long.parseLong(beneSkStr));
       } catch (NumberFormatException e) {
-        throw new InvalidRequestException(
-            "Invalid beneficiary SK format in Coverage ID: '" + beneSkStr + "'");
+        throw new InvalidRequestException("Invalid beneficiary SK format in Coverage ID");
       }
     }
 
-    // If the pattern did not match
     throw new InvalidRequestException(
-        "Invalid Coverage ID format. Expected pattern like 'part-a-123'. Got: '"
-            + rawCompositeId
-            + "'");
+        "Invalid Coverage ID format. Expected pattern like 'part-a-123'.");
   }
 }
