@@ -31,3 +31,14 @@ locals {
 
   slack_channels = jsondecode(nonsensitive(local.ssm_config["/bfd/alerting/slack/channels_list_json"]))
 }
+
+data "aws_iam_policy_document" "service_assume_role" {
+  for_each = toset(["sns", "lambda"])
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["${each.value}.amazonaws.com"]
+    }
+  }
+}
