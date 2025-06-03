@@ -26,9 +26,33 @@ locals {
   )
 }
 
+data "aws_iam_policy_document" "slack_alerter_invoke" {
+  statement {
+    sid       = "AllowSNSSendMessage"
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.slack_alerter_invoke.arn]
+
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ForAnyValue:ArnEquals"
+      variable = "aws:SourceArn"
+      values   = concat(values(aws_sns_topic.slack)[*].arn, [aws_sns_topic.splunk_incident.arn])
+    }
+  }
+}
+
 resource "aws_sqs_queue" "slack_alerter_invoke" {
   name              = "${local.slack_lambda_full_name}-sqs"
   kms_master_key_id = local.kms_key_arn
+}
+
+resource "aws_sqs_queue_policy" "slack_alerter_invoke" {
+  queue_url = aws_sqs_queue.slack_alerter_invoke.id
+  policy    = data.aws_iam_policy_document.slack_alerter_invoke.json
 }
 
 resource "aws_sqs_queue" "slack_alerter_dlq" {
