@@ -79,18 +79,18 @@ def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": ":warning: *CloudWatch Alarm Alert* :warning:\n",
+                    "text": (
+                        f":warning: *Alarm Alert: `{alarm_name}`* :warning:\n\n{alarm_message}\n"
+                    ),
                 },
             },
+            {"type": "divider"},
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"_Alarm Name:_ `{alarm_name}`\n"
-                        f"_Alarm Reason:_ `{alarm_reason}`\n"
-                        f"_Alarm Metric:_ `{alarm_metric}`\n"
-                        f"_Alarm Message:_ {alarm_message}\n"
+                        f"_Alarm Reason:_ `{alarm_reason}`\n_Alarm Metric:_ `{alarm_metric}`\n"
                     ),
                 },
             },
@@ -118,7 +118,7 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:
             "%s alert received; sending Slack message to #%s: %s",
             type(alert).__name__,
             TOPIC_TO_CHANNEL_MAP[topic_name],
-            json.dumps(slack_message, indent=0),
+            json.dumps(slack_message),
         )
 
         request = Request(webhook_url, method="POST")
