@@ -1,4 +1,3 @@
-import itertools
 import json
 import os
 from functools import singledispatch
@@ -7,8 +6,8 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.parser import envelopes, parse
-from aws_lambda_powertools.utilities.parser.models import SnsModel
+from aws_lambda_powertools.utilities.parser import envelopes
+from aws_lambda_powertools.utilities.parser.models import SnsNotificationModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from pydantic import BaseModel, Field, TypeAdapter
 
@@ -88,10 +87,10 @@ def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"\t_Alarm Name:_ `{alarm_name}`\n"
-                        f"\t_Alarm Reason:_ `{alarm_reason}`\n"
-                        f"\t_Alarm Metric:_ `{alarm_metric}`\n"
-                        f"\t_Alarm Message:_ {alarm_message}\n"
+                        f"_Alarm Name:_ `{alarm_name}`\n"
+                        f"_Alarm Reason:_ `{alarm_reason}`\n"
+                        f"_Alarm Metric:_ `{alarm_metric}`\n"
+                        f"_Alarm Message:_ {alarm_message}\n"
                     ),
                 },
             },
@@ -101,11 +100,14 @@ def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[str, Any], context: LambdaContext) -> None:
-    sns_events = parse(event=event, model=list[SnsModel], envelope=envelopes.SqsEnvelope)
+    sns_notifs = [
+        sns_notif
+        for sns_notif in envelopes.SqsEnvelope().parse(data=event, model=SnsNotificationModel)
+        if sns_notif is not None
+    ]
     alerts = [
-        (x.Sns.TopicArn, TypeAdapter(Alert).validate_json(x.Sns.Message))
-        for x in itertools.chain.from_iterable(event.Records for event in sns_events)
-        if x.Sns.Message is str
+        (sns_notif.TopicArn, TypeAdapter(Alert).validate_json(str(sns_notif.Message)))
+        for sns_notif in sns_notifs
     ]
 
     for topic_arn, alert in alerts:
