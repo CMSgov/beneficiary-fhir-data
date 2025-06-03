@@ -147,6 +147,33 @@ data "aws_iam_policy_document" "data" {
     resources = ["*"]
   }
 
+  statement {
+    sid    = "AllowSNSKeyUsage"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "AllowSQSKeyUsage"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["sqs.amazonaws.com"]
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+    ]
+    resources = ["*"]
+  }
 
   # Allow cloudwatch logs to use the key to encrypt/decrypt data
   statement {
