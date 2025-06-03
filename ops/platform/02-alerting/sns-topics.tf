@@ -1,6 +1,5 @@
 locals {
   splunk_on_call_url = local.ssm_config["/bfd/alerting/splunk_on_call_subscription_url"]
-  slack_topics       = jsondecode(nonsensitive(local.ssm_config["/bfd/alerting/slack/channels_list_json"]))
 }
 
 data "aws_iam_policy_document" "topic_template" {
@@ -58,14 +57,6 @@ resource "aws_sns_topic_policy" "splunk_incident" {
   )
 }
 
-# output "name" {
-#   value = format(
-#     data.aws_iam_policy_document.topic_template.json,
-#     aws_sns_topic.splunk_incident.arn,
-#     aws_sns_topic.splunk_incident.arn
-#   )
-# }
-
 # resource "aws_sns_topic_subscription" "splunk_incident" {
 #   protocol               = "https"
 #   topic_arn              = aws_sns_topic.splunk_incident.arn
@@ -81,7 +72,7 @@ resource "aws_sns_topic_policy" "splunk_incident" {
 # }
 
 resource "aws_sns_topic" "slack" {
-  for_each = toset(local.slack_topics)
+  for_each = toset(local.slack_channels)
 
   name              = nonsensitive(local.ssm_config["/bfd/alerting/slack/${each.key}/topic"])
   display_name      = "Invokes a Lambda that sends the contents of the notification to #${each.key}"
@@ -89,7 +80,7 @@ resource "aws_sns_topic" "slack" {
 }
 
 resource "aws_sns_topic_policy" "slack" {
-  for_each = toset(local.slack_topics)
+  for_each = toset(local.slack_channels)
 
   arn = aws_sns_topic.slack[each.key].arn
   policy = format(

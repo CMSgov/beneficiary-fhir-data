@@ -18,11 +18,16 @@ module "terraservice" {
 locals {
   service = "alerting"
 
-  region       = module.terraservice.region
-  account_id   = module.terraservice.account_id
-  default_tags = module.terraservice.default_tags
-  kms_key_arn  = module.terraservice.key_arn
-  ssm_config   = module.terraservice.ssm_config
+  region                   = module.terraservice.region
+  account_id               = module.terraservice.account_id
+  default_tags             = module.terraservice.default_tags
+  kms_key_alias            = module.terraservice.key_alias
+  kms_key_arn              = module.terraservice.key_arn
+  ssm_config               = module.terraservice.ssm_config
+  iam_path                 = module.terraservice.default_iam_path
+  permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
   name_prefix = "bfd-platform"
+
+  slack_channels = jsondecode(nonsensitive(local.ssm_config["/bfd/alerting/slack/channels_list_json"]))
 }
