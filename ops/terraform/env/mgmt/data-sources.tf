@@ -17,6 +17,10 @@ data "aws_kms_key" "cmk" {
   key_id = "alias/bfd-mgmt-cmk"
 }
 
+data "aws_kms_key" "test_cmk" {
+  key_id = "alias/bfd-test-cmk"
+}
+
 data "aws_kms_key" "config_cmk" {
   key_id = "alias/bfd-mgmt-config-cmk"
 }
@@ -109,4 +113,35 @@ data "aws_iam_policy_document" "snyk_container_scanning_trust_policy" {
       values   = [local.ssm_config["/bfd/common/snyk/organization_id"]]
     }
   }
+}
+
+data "aws_iam_policy_document" "lambda_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_sns_topic" "victor_ops" {
+  name = "bfd-prod-cloudwatch-alarms"
+}
+
+data "aws_sns_topic" "internal_alert_slack" {
+  #FIXME: replace when slack alert is in mgmt
+  name = "bfd-test-cloudwatch-alarms-slack-bfd-test"
+}
+
+data "aws_sns_topic" "bfd_alerts_slack" {
+  name = "bfd-test-cloudwatch-alarms-slack-bfd-alerts"
+}
+
+data "aws_sns_topic" "bfd_notices_slack" {
+  name = "bfd-test-cloudwatch-alarms-slack-bfd-notices"
+}
+
+data "aws_sns_topic" "bfd_warnings_slack" {
+    name = "bfd-test-cloudwatch-alarms-slack-bfd-warnings"
 }
