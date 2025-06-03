@@ -1,0 +1,49 @@
+package gov.cms.bfd.server.ng.claim.model;
+
+import gov.cms.bfd.server.ng.SystemUrls;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
+
+import java.util.Optional;
+
+@Embeddable
+public class BillingProvider {
+  @Column(name = "prvdr_blg_prvdr_npi_num")
+  private String billingNpiNumber;
+
+  @Column(name = "clm_blg_prvdr_oscar_num")
+  private String billingOscarNumber;
+
+  private static final String PROVIDER_ORG = "provider-org";
+
+  Optional<Organization> toFhir(ClaimTypeCode claimTypeCode) {
+    if (!(claimTypeCode.isBetween(5, 69)
+        || claimTypeCode.isBetween(2000, 2700)
+        || claimTypeCode.isBetween(1000, 1700))) {
+      return Optional.empty();
+    }
+
+    var organization = OrganizationFactory.toFhir();
+    organization.setId(PROVIDER_ORG);
+    organization.addIdentifier(
+        new Identifier()
+            .setSystem(SystemUrls.NPI)
+            .setValue(billingNpiNumber)
+            .setType(
+                new CodeableConcept()
+                    .addCoding(
+                        new Coding()
+                            .setSystem(SystemUrls.HL7_IDENTIFIER)
+                            .setCode("NPI")
+                            .setDisplay("National provider identifier"))));
+    organization.addIdentifier(
+        new Identifier()
+            .setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS)
+            .setValue(billingOscarNumber));
+    organization.setName("PROVIDER ORG SOURCED FROM NPPES");
+  }
+}

@@ -34,6 +34,7 @@ BATCH_TIMESTAMP = "batch_timestamp"
 UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
+DERIVED = "derived"
 
 
 class IdrBaseModel(BaseModel):
@@ -102,11 +103,15 @@ class IdrBaseModel(BaseModel):
 
     @classmethod
     def column_aliases(cls) -> list[str]:
-        return [cls._format_column_alias(key) for key in cls.model_fields.keys()]
+        return [cls._format_column_alias(key) for key in cls.columns_raw()]
 
     @classmethod
     def columns_raw(cls) -> list[str]:
-        return [key for key in cls.model_fields.keys()]
+        return [
+            key
+            for key in cls.model_fields.keys()
+            if cls._extract_meta(key, DERIVED) != True
+        ]
 
     @classmethod
     def insert_keys(cls) -> list[str]:
@@ -664,12 +669,13 @@ class IdrClaimProcedure(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_prod_type_cd: Annotated[str, {PRIMARY_KEY: True}]
-    clm_prcdr_cd: str
+    clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dgns_prcdr_icd_ind: str
-    clm_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_poa_ind: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcdr_prfrm_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+    bfd_row_num: Annotated[int, {DERIVED: True}]
 
     @staticmethod
     def table() -> str:
@@ -680,7 +686,7 @@ class IdrClaimProcedure(IdrBaseModel):
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
-            SELECT {{COLUMNS}}
+            SELECT {{COLUMNS}}, ROW_NUMBER() OVER (PARTITION BY clm_uniq_id) AS bfd_row_num
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
