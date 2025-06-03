@@ -2,7 +2,7 @@ data "aws_iam_policy_document" "slack_alerter_logs" {
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = [aws_cloudwatch_log_group.slack_alerter.arn]
+    resources = ["${aws_cloudwatch_log_group.slack_alerter.arn}:*"]
   }
 }
 
