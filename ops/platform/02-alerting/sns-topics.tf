@@ -84,19 +84,12 @@ resource "aws_sns_topic_policy" "splunk_incident" {
   )
 }
 
-# resource "aws_sns_topic_subscription" "splunk_incident" {
-#   protocol               = "https"
-#   topic_arn              = aws_sns_topic.splunk_incident.arn
-#   endpoint               = local.splunk_on_call_url
-#   endpoint_auto_confirms = true
-# }
-
-# resource "aws_sns_topic_subscription" "slack_webhook" {
-#   count     = local.enable_victor_ops ? 1 : 0
-#   topic_arn = aws_sns_topic.cloudwatch_alarms.arn
-#   protocol  = "lambda"
-#   endpoint  = aws_lambda_function.this["bfd_alerts"].arn
-# }
+resource "aws_sns_topic_subscription" "splunk_incident" {
+  protocol               = "https"
+  topic_arn              = aws_sns_topic.splunk_incident.arn
+  endpoint               = local.splunk_on_call_url
+  endpoint_auto_confirms = true
+}
 
 resource "aws_cloudwatch_log_group" "slack_success" {
   for_each = local.slack_channel_to_topic
