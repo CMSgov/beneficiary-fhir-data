@@ -1,6 +1,7 @@
 locals {
+  locust_stats_bucket       = "${local.name_prefix}-stats"
   locust_stats_table        = "data"
-  locust_stats_db_name      = replace(module.bucket_athena.bucket.bucket, "-", "_")
+  locust_stats_db_name      = replace(local.locust_stats_bucket, "-", "_")
   locust_stats_crawler_name = "${replace(local.locust_stats_db_name, "_", "-")}-crawler"
 
   glue_trigger_lambda_name      = "locust-stats-glue-trigger"
@@ -12,15 +13,15 @@ module "bucket_athena" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? "${local.name_prefix}-stats" : null
-  bucket_prefix      = var.greenfield ? "${local.name_prefix}-stats" : null
+  bucket_name        = !var.greenfield ? local.locust_stats_bucket : null
+  bucket_prefix      = var.greenfield ? local.locust_stats_bucket : null
   force_destroy      = local.is_ephemeral_env
 
   ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
 }
 
 resource "aws_athena_workgroup" "locust_stats" {
-  name = module.bucket_athena.bucket.bucket
+  name = local.locust_stats_bucket
 
   configuration {
     enforce_workgroup_configuration = true
