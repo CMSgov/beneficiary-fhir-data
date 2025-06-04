@@ -1,0 +1,147 @@
+#!/bin/bash
+
+set -Eeou pipefail
+
+SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
+readonly SCRIPT_DIR
+
+TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')"
+readonly TMP_DIR
+
+sops_file=""
+tmp_sops_file=""
+aws_account_id=""
+
+cleanup() {
+  if [[ -f $tmp_sops_file ]]; then
+    rm "$tmp_sops_file"
+  fi
+  exit
+}
+trap cleanup ERR EXIT
+
+usage() {
+  echo "Usage: $(basename "$0") [OPTIONS]"
+  echo "sopsw (SOPS Wrapper) is a wrapper around the sops CLI that makes working with BFD's encrypted configuration more pleasant and sops-like."
+  echo
+  echo "Options:"
+  echo "  -h, --help                            Display this help message"
+  echo "  -d <FILE>, --decrypt <FILE>           Decrypt the provided sops <FILE>"
+  echo "  -e <FILE>, --edit <FILE>              Open the provided sops <FILE> in \$EDITOR for editing"
+  echo "  -c <FILE>, --convert-to <FILE>        Convert sopsw <FILE> to a valid, encrypted sops file, printing to STDOUT. Useful for Terraform that ingests sops YAML"
+  echo "  -C <FILE>, --convert-from <FILE>      Convert sops <FILE> into a BFD 'partial sops'/sopsw file, printing to STDOUT"
+  echo "  -R <FILE>, --rewrite <FILE>           Not for use in interactive contexts. Intended for use as \$EDITOR with sops -e"
+}
+
+has_argument() {
+  [[ ("$1" == *=* && -n ${1#*=}) || (-n "$2" && "$2" != -*) ]]
+}
+
+extract_argument() {
+  echo "${2:-${1#*=}}"
+}
+
+prepare_temp_file() {
+  tmp_sops_file="$TMP_DIR/$(basename "$sops_file")"
+
+  aws_account_id="$(aws sts get-caller-identity --query 'Account' --output text)"
+
+  ACCOUNT_ID="$aws_account_id" envsubst '$ACCOUNT_ID' < <(yq '. * {"sops": {"lastmodified": "1970-01-01T00:00:00Z", "mac": ""}}' <"$sops_file") >"$tmp_sops_file"
+  EDITOR="$SCRIPT_DIR/sopsw -R" sops --ignore-mac "$tmp_sops_file"
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+  exit 0
+fi
+
+while [ $# -gt 0 ]; do
+  case $1 in
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    -d | --decrypt)
+      if ! has_argument "$@"; then
+        echo "File not specified." >&2
+        usage
+        exit 1
+      fi
+
+      sops_file=$(extract_argument "$@")
+      prepare_temp_file
+
+      sops -d "$tmp_sops_file"
+
+      shift
+      ;;
+    -e | --edit)
+      if ! has_argument "$@"; then
+        echo "File not specified." >&2
+        usage
+        exit 1
+      fi
+
+      sops_file=$(extract_argument "$@")
+      prepare_temp_file
+
+      sops --indent 2 --unencrypted-regex '/nonsensitive/' edit "$tmp_sops_file"
+      masked_sops="$(sed 's/\(- arn: arn:aws:kms:.*:\)[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/\1\$\{ACCOUNT_ID\}/' <"$tmp_sops_file")"
+      valid_sops="$(echo "$masked_sops" | yq '. | del(.sops.lastmodified) | del(.sops.mac)')"
+      echo "$valid_sops" >"$sops_file"
+
+      shift
+      ;;
+    -c | --convert-to)
+      if ! has_argument "$@"; then
+        echo "File not specified." >&2
+        usage
+        exit 1
+      fi
+
+      sops_file=$(extract_argument "$@")
+
+      prepare_temp_file
+
+      cat "$tmp_sops_file"
+
+      shift
+      ;;
+    -C | --convert-from)
+      if ! has_argument "$@"; then
+        echo "File not specified." >&2
+        usage
+        exit 1
+      fi
+
+      sops_file=$(extract_argument "$@")
+
+      masked_sops="$(sed 's/\(- arn: arn:aws:kms:.*:\)[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/\1\$\{ACCOUNT_ID\}/' <"$sops_file")"
+      partial_bfd_sops="$(echo "$masked_sops" | yq '. | del(.sops.lastmodified) | del(.sops.mac)')"
+
+      echo "$partial_bfd_sops"
+
+      shift
+      ;;
+    -R | --rewrite)
+      if ! has_argument "$@"; then
+        echo "File not specified." >&2
+        usage
+        exit 1
+      fi
+
+      sops_file=$(extract_argument "$@")
+
+      sops_file_content="$(cat "$sops_file")"
+      printf "%s\n " "$sops_file_content" >"$sops_file"
+
+      shift
+      ;;
+    *)
+      echo "Invalid option: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+  shift
+done

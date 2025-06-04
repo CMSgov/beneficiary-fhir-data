@@ -7,7 +7,9 @@ locals {
   # if the workspace does not exactly match one of the above account types. Further validation is
   # handled by the Terraservice module. This is only:necessary if greenfield is true, since we don't
   # use the account_type in the legacy environment
-  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x == terraform.workspace])) : "ignore"
+  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace])) : "invalid-account-type"
+
+  _canary_exists = module.terraservice.canary
 }
 
 variable "greenfield" {
@@ -62,21 +64,7 @@ terraform {
     key          = "ops/platform/${local.service}/tofu.tfstate"
     region       = var.region
     encrypt      = true
-    kms_key_id   = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-${local.account_type}-tf-state"
+    kms_key_id   = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-cmk"
     use_lockfile = true
-  }
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.91"
-    }
-    # A necessary evil. Early static evaluation within required_providers is not supported in
-    # OpenTofu as of 1.10.0, so it is impossible to dynamically set the providers per-Terraservice
-    # while using a common root tofu.tf. Fortunately, only a single Terraservice (config) requires a
-    # provider other than the aws provider
-    sops = {
-      source  = "carlpett/sops"
-      version = "~> 1.2.0"
-    }
   }
 }

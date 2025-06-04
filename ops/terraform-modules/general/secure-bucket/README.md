@@ -14,7 +14,7 @@ This module exports the full properties of the created `aws_s3_bucket` resource 
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.5.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.10.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
@@ -32,6 +32,8 @@ This module exports the full properties of the created `aws_s3_bucket` resource 
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Full Bucket name. Maps to `aws_s3_bucket.bucket`. Conflicts with 'bucket\_prefix'. | `string` | `null` | no |
 | <a name="input_bucket_prefix"></a> [bucket\_prefix](#input\_bucket\_prefix) | Bucket name prefix. Maps to `aws_s3_bucket.bucket_prefix`. Conflicts with 'bucket\_name'. | `string` | `null` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Enable bucket force destroy. Maps to `aws_s3_bucket.force_destroy`. | `bool` | `false` | no |
+| <a name="input_ssm_param_name"></a> [ssm\_param\_name](#input\_ssm\_param\_name) | Name of SSM parameter storing the name of the created bucket. Useful in contexts where the bucket<br/>is created using a bucket prefix instead of a static name. If null, no parameter is created.<br/>Defaults to null. | `string` | `null` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Additional tags to attach to bucket resource. | `map(string)` | `{}` | no |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -55,6 +57,7 @@ No modules.
 | [aws_s3_bucket_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
+| [aws_ssm_parameter.bucket_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_iam_policy_document.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -67,4 +70,5 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_bucket"></a> [bucket](#output\_bucket) | `aws_s3_bucket` resource created by this module. |
+| <a name="output_ssm_bucket_name"></a> [ssm\_bucket\_name](#output\_ssm\_bucket\_name) | `aws_ssm_parameter` resource created by this module. Is null if var.ssm\_param\_name is unspecified/null. |
 <!-- END_TF_DOCS -->
