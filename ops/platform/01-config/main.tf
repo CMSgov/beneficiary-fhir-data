@@ -31,11 +31,9 @@ locals {
   sops_nonsensitive_regex = local.sops_config_yaml.creation_rules[0].unencrypted_regex
 
   root_yaml_file       = "${path.module}/values/platform.root.sopsw.yaml"
-  raw_root_sops_yaml   = file(local.root_yaml_file)
   valid_root_sops_yaml = data.external.root_sops_yaml.result.valid_sops
 
-  account_yaml_file       = "${path.module}/values/platform.${local.account_type}.sopsw.yaml"
-  raw_account_sops_yaml   = file(local.account_yaml_file)
+  account_yaml_file       = var.greenfield ? "${path.module}/values/platform.${local.account_type}.sopsw.yaml" : local.root_yaml_file
   valid_account_sops_yaml = data.external.account_sops_yaml.result.valid_sops
 
   decrypted_root_data    = yamldecode(data.sops_external.root.raw)

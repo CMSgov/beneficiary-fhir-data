@@ -60,11 +60,12 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket       = !var.greenfield ? "bfd-tf-state" : "bfd-platform-${local.account_type}-tf-state"
-    key          = "ops/platform/${local.service}/tofu.tfstate"
-    region       = var.region
-    encrypt      = true
-    kms_key_id   = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-cmk"
-    use_lockfile = true
+    bucket         = !var.greenfield ? "bfd-tf-state" : "bfd-platform-${local.account_type}-tf-state"
+    key            = !var.greenfield ? "ops/platform/${local.service}/terraform.tfstate" : "ops/platform/${local.service}/tofu.tfstate"
+    region         = var.region
+    dynamodb_table = !var.greenfield ? "bfd-tf-table" : null
+    encrypt        = true
+    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-cmk"
+    use_lockfile   = var.greenfield
   }
 }
