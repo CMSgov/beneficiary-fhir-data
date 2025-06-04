@@ -203,7 +203,7 @@ resource "aws_scheduler_schedule" "this" {
     mode = "OFF"
   }
 
-  schedule_expression = "rate(30 days)"
+  schedule_expression = "cron(0 0 5 * *)"
 
   target {
     arn      = data.aws_ecs_cluster.main.arn
