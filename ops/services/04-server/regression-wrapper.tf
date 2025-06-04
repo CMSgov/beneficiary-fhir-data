@@ -6,6 +6,22 @@ locals {
   rw_lambda_src       = replace(local.rw_lambda_name, "-", "_")
 }
 
+# We need to look at the network interfaces created by the Load Balancer to extract the private IP
+# address so that the run-locust Lambda is able to connect to public LBs (like the prod-sbx/sandbox
+# LB)
+data "aws_network_interfaces" "load_balancer" {
+  depends_on = [aws_lb.this]
+
+  filter {
+    name   = "description"
+    values = ["ELB ${aws_lb.this.arn_suffix}"]
+  }
+}
+
+data "aws_network_interface" "load_balancer" {
+  id = data.aws_network_interfaces.load_balancer.ids[0]
+}
+
 data "aws_lambda_function" "run_locust" {
   count = local.regression_wrapper_enabled ? 1 : 0
 
@@ -61,7 +77,7 @@ resource "aws_lambda_function" "regression_wrapper" {
   environment {
     variables = {
       BFD_ENVIRONMENT        = local.env
-      LOCUST_HOST            = "https://${aws_lb.this.dns_name}:${aws_lb_listener.this[local.green_state].port}"
+      LOCUST_HOST            = "https://${data.aws_network_interface.load_balancer.private_ip}:${aws_lb_listener.this[local.green_state].port}"
       RUN_LOCUST_LAMBDA_NAME = one(data.aws_lambda_function.run_locust[*].function_name)
     }
   }
