@@ -34,6 +34,11 @@ moved {
 }
 
 moved {
+  from = aws_cloudwatch_log_subscription_filter.cloudwatch-access-log-subscription
+  to   = aws_cloudwatch_log_subscription_filter.cloudwatch_access_log_subscription
+}
+
+moved {
   from = module.glue-table-api-requests
   to   = module.glue_table_api_requests
 }

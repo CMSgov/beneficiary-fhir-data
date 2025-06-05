@@ -65,7 +65,7 @@ data "aws_cloudwatch_log_group" "server_access" {
 }
 
 # TODO: Only here to ensure legacy server logs continue to be ingested; remove
-resource "aws_cloudwatch_log_subscription_filter" "cloudwatch-access-log-subscription" {
+resource "aws_cloudwatch_log_subscription_filter" "cloudwatch_access_log_subscription" {
   name = "${local.full_name}-access-log-subscription"
   # Set the log group name so that if we use an environment ending in "-dev", it will get logs from
   # the "real" log group for that environment. So we could make an environment "prod-sbx-dev" that
