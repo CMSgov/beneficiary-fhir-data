@@ -185,6 +185,6 @@ resource "aws_cloudwatch_event_rule" "guardduty_runtime_health" {
 }
 
 resource "aws_cloudwatch_event_target" "guardduty_runtime_health" {
-  rule = aws_cloudwatch_event_rule.guardduty_runtime_health.name
-  arn  = data.aws_sns_topic.internal_alert_slack.arn
+  rule     = aws_cloudwatch_event_rule.guardduty_runtime_health.name
+  arn      = data.aws_sns_topic.internal_alert_slack.arn
 }
