@@ -33,6 +33,8 @@ locals {
   app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
   data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
 
+  is_prod = local.env == "prod"
+
   name_prefix = "bfd-${local.env}-${local.service}"
 
   pipeline_repository_name = coalesce(var.pipeline_repository_override, "bfd-pipeline-app")
@@ -69,7 +71,7 @@ module "bucket_ccw" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? local.name_prefix : null
+  bucket_name        = !var.greenfield ? "bfd-${local.env}-etl-${local.account_id}" : null
   bucket_prefix      = var.greenfield ? local.name_prefix : null
   force_destroy      = local.is_ephemeral_env
 
