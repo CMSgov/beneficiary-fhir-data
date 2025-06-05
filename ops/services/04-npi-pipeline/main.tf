@@ -203,7 +203,7 @@ resource "aws_scheduler_schedule" "this" {
     mode = "OFF"
   }
 
-  schedule_expression = "cron(0 0 5 * *)"
+  schedule_expression = "cron(0 0 5 * ? *)"
 
   target {
     arn      = data.aws_ecs_cluster.main.arn
