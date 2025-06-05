@@ -30,7 +30,7 @@ locals {
 
 data "aws_sns_topic" "slos_actions" {
   for_each = { for k, v in local.slos_topic_names : k => v if v != null }
-  name     = var.greenfield ? each.value : "bfd-${local.env}-cloudwatch-alarms-slack-bfd-test"
+  name     = each.value
 }
 
 # Creates alarms for FissClaimRdaSink.extract.latency.millis.max and
