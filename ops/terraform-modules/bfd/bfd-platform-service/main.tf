@@ -29,7 +29,7 @@ locals {
     local.ssm_flattened_data.values
   )
 
-  kms_key_alias = "alias/bfd-platform-cmk"
+  kms_key_alias = !var.greenfield ? "alias/bfd-mgmt-cmk" : "alias/bfd-platform-cmk"
   kms_key_arn   = one(data.aws_kms_key.platform[*].arn)
 }
 
@@ -40,8 +40,8 @@ data "aws_region" "current" {
   # that resource is marked as deprecated with no replacement. So, given that we have no real
   # choice, this condition lives on this unrelated data resource.
   lifecycle {
-    postcondition {
-      condition     = local.account_type != null
+    precondition {
+      condition     = !(var.greenfield && local.account_type == null)
       error_message = "Invalid account type. Must be one of: ${join(", ", local.account_types)}"
     }
   }
@@ -56,7 +56,7 @@ data "external" "github_token" {
 data "aws_iam_account_alias" "current" {
   lifecycle {
     postcondition {
-      condition     = endswith(self.account_alias, terraform.workspace) && !(endswith(self.account_alias, "non-prod") && terraform.workspace != "non-prod")
+      condition     = !var.greenfield || endswith(self.account_alias, terraform.workspace) && !(endswith(self.account_alias, "non-prod") && terraform.workspace != "non-prod")
       error_message = "The current account does not match the selected workspace. Select a workspace that matches the current account type."
     }
   }
