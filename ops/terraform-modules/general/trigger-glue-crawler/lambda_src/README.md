@@ -1,6 +1,6 @@
-# `locust-stats-glue-trigger` Lambda Source
+# `trigger-glue-crawler` Lambda Source
 
-This subdirectory contains the Python source code for the `locust-stats-glue-trigger` Lambda.
+This subdirectory contains the Python source code for the `trigger-glue-crawler` Lambda.
 
 ## Environment Setup
 

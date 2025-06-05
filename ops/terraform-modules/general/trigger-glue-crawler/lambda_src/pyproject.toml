@@ -1,7 +1,7 @@
 [project]
 # Support Python 3.13+.
 requires-python = ">=3.13"
-name = "locust-stats-glue-trigger"
+name = "trigger-glue-trigger"
 version = "1.0.0"
 dependencies = ["boto3", "aws-lambda-powertools[all]"]
 
