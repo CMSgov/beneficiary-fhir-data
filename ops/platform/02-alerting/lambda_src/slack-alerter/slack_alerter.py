@@ -103,16 +103,7 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:
         topic_arn = sns_notif.TopicArn
         topic_name = topic_arn.split(":")[-1]
         raw_message = str(sns_notif.Message)
-        try:
-            # Try CloudWatch Alarm first
-            alert = TypeAdapter(CloudWatchAlarmAlertModel).validate_json(raw_message)
-        except Exception:
-            try:
-                # Fallback to EventBridge event format
-                alert = TypeAdapter(EventBridgeAlertModel).validate_json(raw_message)
-            except Exception:
-                logger.warning("Unrecognized alert format: %s", raw_message)
-                continue
+        alert = TypeAdapter(Alert).validate_json(raw_message)
         webhook_url = TOPIC_TO_WEBHOOK_MAP.get(topic_name)
         channel = TOPIC_TO_CHANNEL_MAP.get(topic_name)
         if not webhook_url or not channel:
