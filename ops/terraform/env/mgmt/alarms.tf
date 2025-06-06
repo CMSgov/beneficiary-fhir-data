@@ -147,7 +147,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_init_fail" {
 
 data "aws_sns_topic" "internal_alert_slack" {
   #FIXME: replace when slack alert is in mgmt
-  name = "bfd-test-cloudwatch-alarms-slack-bfd-test"
+  name = "bfd-platform-slack-bfd-internal-alerts"
 }
 
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
@@ -185,6 +185,6 @@ resource "aws_cloudwatch_event_rule" "guardduty_runtime_health" {
 }
 
 resource "aws_cloudwatch_event_target" "guardduty_runtime_health" {
-  rule     = aws_cloudwatch_event_rule.guardduty_runtime_health.name
-  arn      = data.aws_sns_topic.internal_alert_slack.arn
+  rule = aws_cloudwatch_event_rule.guardduty_runtime_health.name
+  arn  = data.aws_sns_topic.internal_alert_slack.arn
 }
