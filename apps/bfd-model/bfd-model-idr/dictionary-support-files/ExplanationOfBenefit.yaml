@@ -61,7 +61,7 @@
   sources:
     - FISS
     - NCH
-  BFDDerived: true
+  bfdDerived: true
   fhirPath: ExplanationOfBenefit.related.where(relationship.coding.system = 'http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship').reference.where(system='https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   appliesTo:
@@ -77,7 +77,7 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_XREF_EFCTV_SK
   appliesTo:
     - Inpatient
-  BFDDerived: True
+  bfdDerived: True
 - inputPath: ExplanationOfBenefit-Base.BENE_SK
   appliesTo:
     - Inpatient
@@ -206,7 +206,7 @@
   sources:
     - NCH
     - FISS
-  BFDDerived: True
+  bfdDerived: True
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_OPRTNL_DSPRTNT_AMT').used.value
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
   appliesTo:
@@ -214,7 +214,7 @@
   sources:
     - NCH
     - FISS
-  BFDDerived: True
+  bfdDerived: True
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_OPRTNL_IME_AMT').used.value
 - inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
   appliesTo:
@@ -290,7 +290,7 @@
 - inputPath: DiagnosisComponent.ROW_NUM
   appliesTo:
     - Inpatient
-  BFDDerived: True
+  bfdDerived: True
 - inputPath: DiagnosisComponent.CLM_DGNS_CD
   appliesTo:
     - Inpatient
@@ -458,6 +458,9 @@
     - SNF
     - Hospice
     - Outpatient
+  sources:
+    - NCH
+    - FISS
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_CD
   fhirPath: ExplanationOfBenefit.item.detail.productOrService.where(coding.system='http://hl7.org/fhir/sid/ndc').coding.code
@@ -882,8 +885,7 @@
   sources:
     - FISS
     - NCH
-  referenceTable: CLM_REV_CNTR_CD
-  BFDDerived: True
+  bfdDerived: True
   notes: This field is derived from 0 + CLM_BILL_FAC_TYPE_CD + CLM_BILL_CLSFCTN_CD + CLM_BILL_FREQ_CD because the codes are dependent upon one another, and require concatenation to be meaningful in a machine-readable format. 
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://www.nubc.org/CodeSystem/TypeOfBill').code
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
@@ -1095,7 +1097,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT').used.value
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND_CD
+- inputPath: SupportingInfoComponent.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
   sources:
@@ -1139,7 +1141,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTRCTR_NUM
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM').value.code
-- inputPath: ExplanationOfBenefit-Base.CLM_NCH_PRMRY_PYR_CD
+- inputPath: SupportingInfoComponent.CLM_NCH_PRMRY_PYR_CD
   appliesTo:
     - Inpatient
     - HHA

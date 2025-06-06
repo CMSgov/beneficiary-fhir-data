@@ -16,7 +16,6 @@
                 "id": "DiagnosisComponent",
                 "path": "DiagnosisComponent",
                 "label": "Diagnosis Info for IDR. Ignore in DD Generation",
-                "definition": "DiagnosisComponent definition.",
                 "min": 1,
                 "max": "1"
             },
@@ -24,7 +23,6 @@
                 "id": "DiagnosisComponent.CLM_VAL_SQNC_NUM",
                 "path": "DiagnosisComponent.CLM_VAL_SQNC_NUM",
                 "label": "Diagnosis Sequence Number",
-                "definition": "This field represents the diagnosis sequence number. We don't actually end up using this, but we have it in our schema for diagnostic purposes.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -36,7 +34,7 @@
             {
                 "id": "DiagnosisComponent.ROW_NUM",
                 "path": "DiagnosisComponent.ROW_NUM",
-                "label": "Generated row number",
+                "label": "Generated Row Number",
                 "definition": "This is a non-overlapping number that should be used as the sequence number for a diagnosis on a given claim.",
                 "min": 1,
                 "max": "1",
@@ -50,7 +48,6 @@
                 "id": "DiagnosisComponent.CLM_DGNS_CD",
                 "path": "DiagnosisComponent.CLM_DGNS_CD",
                 "label": "Claim Diagnosis Code",
-                "definition": "A given diagnosis code.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -63,7 +60,6 @@
                 "id": "DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND",
                 "path": "DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND",
                 "label": "Diagnosis Procedure ICD indicator",
-                "definition": "This field indicates the ICD version of the diagnosis codes. Spaces or 9 for ICD-9, 0 for ICD-10-PCS.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -76,7 +72,6 @@
                 "id": "DiagnosisComponent.CLM_PROD_TYPE_CD",
                 "path": "DiagnosisComponent.CLM_PROD_TYPE_CD",
                 "label": "Diagnosis Prod Type Code",
-                "definition": "This field indicates the type code of the diagnosis.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -89,7 +84,6 @@
                 "id": "DiagnosisComponent.CLM_POA_IND",
                 "path": "DiagnosisComponent.CLM_POA_IND",
                 "label": "Claim Present on Admission Indicator",
-                "definition": "This field indicates if a diagnosis was present on admission.",
                 "min": 1,
                 "max": "1",
                 "type": [
