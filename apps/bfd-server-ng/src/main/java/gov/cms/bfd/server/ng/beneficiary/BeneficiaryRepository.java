@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.beneficiary.model.Identity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +37,7 @@ public class BeneficiaryRepository {
   //
   // NOTE - it would be simpler to do the WHERE NOT EXISTS on OvershareMBI after the UNION, but
   // that doesn't appear to be supported by the JQL parser.
-  public List<Identity> getPatientIdentities(long beneSk) {
+  public List<PatientIdentity> getPatientIdentities(long beneSk) {
     return entityManager
         .createQuery(
             """
@@ -45,16 +45,16 @@ public class BeneficiaryRepository {
                 SELECT
                   bene.beneSk beneSk,
                   bene.xrefSk xrefSk,
-                  bene.mbi mbi,
+                  bene.identity.mbi mbi,
                   mbiId.effectiveDate effectiveDate,
                   mbiId.obsoleteDate obsoleteDate
                 FROM
                   Beneficiary bene
                   LEFT JOIN BeneficiaryMbiId mbiId
-                    ON bene.mbi = mbiId.mbi
+                    ON bene.identity.mbi = mbiId.mbi
                     AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
-                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.mbi)
+                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
                 UNION
                 SELECT
                   beneHistory.beneSk beneSk,
@@ -69,13 +69,13 @@ public class BeneficiaryRepository {
                   ON mbiId.mbi = beneHistory.mbi
                   AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                 WHERE bene.beneSk = :beneSk
-                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.mbi)
+                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
               )
-              SELECT new Identity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
+              SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
               FROM allBeneInfo abi
               GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
             """,
-            Identity.class)
+            PatientIdentity.class)
         .setParameter("beneSk", beneSk)
         .getResultList();
   }
@@ -99,7 +99,7 @@ public class BeneficiaryRepository {
    * @return beneficiary record
    */
   public Optional<Beneficiary> findByIdentifier(String mbi, DateTimeRange lastUpdatedRange) {
-    return searchBeneficiary("mbi", mbi, lastUpdatedRange);
+    return searchBeneficiary("identity.mbi", mbi, lastUpdatedRange);
   }
 
   /**
@@ -134,17 +134,16 @@ public class BeneficiaryRepository {
                 """
                 SELECT b
                 FROM Beneficiary b
-                WHERE b.%s = :%s
+                WHERE b.%s = :id
                   AND ((cast(:lowerBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                   AND ((cast(:upperBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
                 """,
-                idColumnName,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
                 lastUpdatedRange.getUpperBoundSqlOperator()),
             Beneficiary.class)
-        .setParameter(idColumnName, idColumnValue)
+        .setParameter("id", idColumnValue)
         .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
         .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()
