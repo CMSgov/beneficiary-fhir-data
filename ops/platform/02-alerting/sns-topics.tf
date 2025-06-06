@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "topic_template" {
 
     principals {
       type        = "Service"
-      identifiers = ["cloudwatch.amazonaws.com"]
+      identifiers = ["cloudwatch.amazonaws.com", "events.amazonaws.com"]
     }
   }
 
