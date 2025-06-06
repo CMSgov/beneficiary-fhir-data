@@ -29,6 +29,9 @@ arg_parser.add_argument(
     default="locustfile.py",
 )
 arg_parser.add_argument(
+    "--host", dest="host", type=str, help="host to run against", default="localhost"
+)
+arg_parser.add_argument(
     "--locust-tags",
     dest="locust-tags",
     type=str,
@@ -66,8 +69,9 @@ num_workers = config.get("workers", 1)
 locustfile = config.get("locustfile", "locustfile.py")
 tags = config.get("locust-tags", "")
 exclude_tags = config.get("locust-exclude-tags", "")
-conn_str = config.get("database_constr")
+conn_str = config.get("database_constr", "")
 cert_path = config.get("client_cert_path")
+host = config.get("host", "")
 
 if not conn_str or not cert_path:
     raise ValueError("Bad values given")
@@ -80,6 +84,7 @@ master_process = subprocess.Popen(
         "--master",
         "--headless",
         f"--expect-workers={num_workers}",
+        f"--host={host}",
         f"--locust-tags={tags}",
         f"--locust-exclude-tags={exclude_tags}",
         f"--database-connection-string={conn_str}",
@@ -121,6 +126,7 @@ for i in range(int(num_workers)):
                 "-f",
                 locustfile,
                 "--worker",
+                f"--host={host}",
                 "--database-connection-string",
                 conn_str,
                 "--client-cert-path",

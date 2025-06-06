@@ -1,9 +1,9 @@
 """Members of this file/module are related to writing performance statistics to a user-specified
 data "store" (such as to file or AWS S3)"""
+
 import json
 import logging
 import os
-import time
 from dataclasses import asdict
 
 from gevent import monkey
