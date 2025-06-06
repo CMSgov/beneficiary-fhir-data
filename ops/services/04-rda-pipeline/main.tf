@@ -124,6 +124,10 @@ resource "aws_ecs_task_definition" "rda" {
             name  = "BFD_RDA_JOB_ENABLED"
             value = "true"
           },
+          {
+            name  = "BFD_RDA_GRPC_INPROCESS_SERVER_S3_BUCKET"
+            value = module.bucket_rda.bucket.bucket
+          },
           # CCW Pipeline Job defaults to enabled, so we need to explicitly disable it.
           {
             name  = "BFD_CCW_JOB_ENABLED"
