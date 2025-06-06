@@ -212,6 +212,23 @@ data "aws_iam_policy_document" "data" {
     resources = ["*"]
   }
 
+  statement {
+    sid    = "AllowEventsKeyUsage"
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "events.amazonaws.com"
+      ]
+    }
+    actions = [
+      "kms:GenerateDataKey*",
+      "kms:Encrypt",
+      "kms:Decrypt"
+    ]
+    resources = ["*"]
+  }
+  
   # Allow ECS Fargate to generate a data key and describe the key
   statement {
     sid    = "AllowECSFargateKeyUsage"
