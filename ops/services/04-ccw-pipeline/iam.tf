@@ -270,8 +270,8 @@ resource "aws_iam_role" "ccw_rif" {
 
 resource "aws_iam_role_policy_attachment" "ccw_rif" {
   for_each = local.is_prod ? {
-    kms = one(aws_iam_policy.ccw_execution_ecr[*].arn)
-    s3  = one(aws_iam_policy.ccw_execution_logs[*].arn)
+    kms = one(aws_iam_policy.ccw_rif_kms[*].arn)
+    s3  = one(aws_iam_policy.ccw_rif_s3[*].arn)
   } : {}
 
   role       = one(aws_iam_role.ccw_rif[*].name)
