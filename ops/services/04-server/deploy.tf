@@ -74,6 +74,10 @@ resource "null_resource" "codedeploy_server" {
         task_definition_arn   = aws_ecs_task_definition.server.arn
         container_name        = local.service
         container_port        = local.server_port
+        base_fargate          = local.server_cps_fargate_base
+        weight_fargate        = local.server_cps_fargate_weight
+        base_fargate_spot     = local.server_cps_fargate_spot_base
+        weight_fargate_spot   = local.server_cps_fargate_spot_weight
         validation_lambda_arn = one(aws_lambda_function.regression_wrapper[*].arn)
       })
     }

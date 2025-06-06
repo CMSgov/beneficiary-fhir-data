@@ -57,6 +57,8 @@ locals {
 
   enable_rds_scheduled_scaling = !var.disable_rds_scheduling_override && (local.env == "test" || local.is_ephemeral_env)
   replicas_scaling_target      = local.enable_rds_scheduled_scaling ? one(aws_appautoscaling_target.dynamic_replicas) : one(aws_appautoscaling_target.static_replicas)
+
+  monitoring_interval = 15
 }
 
 data "aws_db_cluster_snapshot" "main" {
@@ -179,7 +181,7 @@ resource "aws_rds_cluster" "this" {
     environment = {
       DB_CLUSTER_ID                    = self.cluster_identifier
       KMS_KEY_ID                       = self.kms_key_id
-      ENHANCED_MONITORING_INTERVAL     = 15
+      ENHANCED_MONITORING_INTERVAL     = local.monitoring_interval
       ENHANCED_MONITORING_IAM_ROLE_ARN = aws_iam_role.db_monitoring.arn
     }
     command     = <<-EOF
@@ -225,6 +227,7 @@ resource "aws_rds_cluster_instance" "writer" {
   instance_class               = local.rds_instance_class
   preferred_maintenance_window = aws_rds_cluster.this.preferred_maintenance_window
   publicly_accessible          = false
+  monitoring_interval          = local.monitoring_interval
   tags                         = { Layer = "data" }
 }
 

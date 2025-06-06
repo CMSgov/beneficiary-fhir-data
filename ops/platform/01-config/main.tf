@@ -33,7 +33,7 @@ locals {
   root_yaml_file       = "${path.module}/values/platform.root.sopsw.yaml"
   valid_root_sops_yaml = data.external.root_sops_yaml.result.valid_sops
 
-  account_yaml_file       = var.greenfield ? "${path.module}/values/platform.${local.account_type}.sopsw.yaml" : local.root_yaml_file
+  account_yaml_file       = var.greenfield ? "${path.module}/values/platform.${local.account_type}.sopsw.yaml" : "${path.module}/values/platform.legacy.sopsw.yaml"
   valid_account_sops_yaml = data.external.account_sops_yaml.result.valid_sops
 
   decrypted_root_data    = yamldecode(data.sops_external.root.raw)

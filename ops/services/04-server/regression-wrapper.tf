@@ -19,7 +19,7 @@ data "aws_network_interfaces" "load_balancer" {
 }
 
 data "aws_network_interface" "load_balancer" {
-  id = data.aws_network_interfaces.load_balancer.ids[0]
+  id = sort(data.aws_network_interfaces.load_balancer.ids)[0]
 }
 
 data "aws_lambda_function" "run_locust" {
