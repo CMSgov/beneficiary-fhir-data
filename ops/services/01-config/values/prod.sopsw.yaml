@@ -494,6 +494,10 @@
   -----END CERTIFICATE-----
 /bfd/${env}/server/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate/base: 1
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate/weight: 0
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate_spot/base: 0
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate_spot/weight: 100
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
