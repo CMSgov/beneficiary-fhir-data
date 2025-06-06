@@ -81,24 +81,8 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-data "aws_sns_topic" "alerts_topic" {
-  name = "bfd-platform-slack-bfd-alerts"
-
-}
-
 resource "aws_s3_bucket_notification" "bucket_notifications" {
   bucket = module.bucket.id
-
-  dynamic "topic" {
-    for_each = toset(local.envs)
-
-    content {
-      events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "databases/bfd-insights-bfd-${topic.key}/bfd_insights_bfd_${replace(topic.key, "-", "_")}_api_requests_errors/"
-      id            = "bfd-${topic.key}-bfd-insights-error-slack"
-      topic_arn     = data.aws_sns_topic.alerts_topic.arn
-    }
-  }
 
   dynamic "lambda_function" {
     for_each = data.aws_lambda_function.server_regression_glue_triggers
@@ -110,6 +94,18 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
       filter_prefix       = "databases/bfd-insights-bfd-${lambda_function.key}/bfd_insights_bfd_${replace(lambda_function.key, "-", "_")}_server_regression/"
       filter_suffix       = ".stats.json"
       id                  = "bfd-${lambda_function.key}-server-regression-glue-trigger"
+      lambda_function_arn = lambda_function.value.arn
+    }
+  }
+  dynamic "lambda_function" {
+    for_each = data.aws_lambda_function.bfd_insights_error_slack
+
+    content {
+      events = [
+        "s3:ObjectCreated:*",
+      ]
+      filter_prefix       = "databases/bfd-insights-bfd-${lambda_function.key}/bfd_insights_bfd_${replace(lambda_function.key, "-", "_")}_api_requests_errors/"
+      id                  = "bfd-${lambda_function.key}-bfd-insights-error-slack"
       lambda_function_arn = lambda_function.value.arn
     }
   }

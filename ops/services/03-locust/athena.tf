@@ -4,8 +4,9 @@ locals {
   locust_stats_db_name      = replace(local.locust_stats_bucket, "-", "_")
   locust_stats_crawler_name = "${replace(local.locust_stats_db_name, "_", "-")}-crawler"
 
-  glue_trigger_lambda_name      = "locust-stats-trigger-crawler"
+  glue_trigger_lambda_name      = "locust-stats-glue-trigger"
   glue_trigger_lambda_full_name = "${local.name_prefix}-${local.glue_trigger_lambda_name}"
+  glue_trigger_lambda_src       = replace(local.glue_trigger_lambda_name, "-", "_")
 }
 
 module "bucket_athena" {
@@ -62,26 +63,54 @@ resource "aws_glue_crawler" "locust_stats" {
   }
 }
 
-module "locust_stats_trigger" {
-  source = "../../terraform-modules/general/trigger-glue-crawler"
+data "archive_file" "locust_stats_glue_trigger_src" {
+  type        = "zip"
+  output_path = "${path.module}/lambda_src/${local.glue_trigger_lambda_name}/${local.glue_trigger_lambda_src}.zip"
 
-  iam_path                     = local.iam_path
-  iam_permissions_boundary_arn = local.permissions_boundary_arn
-  kms_key_arn                  = local.env_key_arn
+  source {
+    content  = file("${path.module}/lambda_src/${local.glue_trigger_lambda_name}/${local.glue_trigger_lambda_src}.py")
+    filename = "${local.glue_trigger_lambda_src}.py"
+  }
+}
 
-  lambda_name = local.glue_trigger_lambda_full_name
+resource "aws_cloudwatch_log_group" "locust_stats_glue_trigger" {
+  name         = "/aws/lambda/${local.glue_trigger_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
 
-  crawler_name  = aws_glue_crawler.locust_stats.name
-  crawler_arn   = aws_glue_crawler.locust_stats.arn
-  database_name = local.locust_stats_db_name
-  table_name    = local.locust_stats_table
-  partitions    = ["hash"]
+resource "aws_lambda_function" "locust_stats_glue_trigger" {
+  function_name = local.glue_trigger_lambda_full_name
+  description   = "Triggers the ${aws_glue_crawler.locust_stats.name} Glue Crawler to run when new statistics are uploaded to S3"
+  tags          = { Name = local.glue_trigger_lambda_full_name }
+  kms_key_arn   = local.env_key_arn
+
+  filename         = data.archive_file.locust_stats_glue_trigger_src.output_path
+  source_code_hash = data.archive_file.locust_stats_glue_trigger_src.output_base64sha256
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:7"]
+  architectures    = ["arm64"]
+  handler          = "${local.glue_trigger_lambda_src}.handler"
+  memory_size      = 128
+  package_type     = "Zip"
+  runtime          = "python3.13"
+  timeout          = 300
+
+  environment {
+    variables = {
+      CRAWLER_NAME  = aws_glue_crawler.locust_stats.name
+      DATABASE_NAME = local.locust_stats_db_name
+      TABLE_NAME    = local.locust_stats_table
+      PARTITIONS    = "hash"
+    }
+  }
+
+  role = aws_iam_role.locust_stats_glue_trigger.arn
 }
 
 resource "aws_lambda_permission" "allow_s3_locust_stats_glue_trigger" {
-  statement_id   = "${module.locust_stats_trigger.lambda.function_name}-allow-s3"
+  statement_id   = "${aws_lambda_function.locust_stats_glue_trigger.function_name}-allow-s3"
   action         = "lambda:InvokeFunction"
-  function_name  = module.locust_stats_trigger.lambda.arn
+  function_name  = aws_lambda_function.locust_stats_glue_trigger.arn
   principal      = "s3.amazonaws.com"
   source_arn     = module.bucket_athena.bucket.arn
   source_account = local.account_id
@@ -98,7 +127,7 @@ resource "aws_s3_bucket_notification" "locust_stats_glue_trigger" {
     ]
     filter_prefix       = "databases/${local.locust_stats_db_name}/${local.locust_stats_table}/"
     filter_suffix       = ".stats.json"
-    id                  = "${module.locust_stats_trigger.lambda.function_name}-s3-notifs"
-    lambda_function_arn = module.locust_stats_trigger.lambda.arn
+    id                  = "${aws_lambda_function.locust_stats_glue_trigger.function_name}-s3-notifs"
+    lambda_function_arn = aws_lambda_function.locust_stats_glue_trigger.arn
   }
 }
