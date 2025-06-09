@@ -11,7 +11,7 @@ import itertools
 import os
 import re
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import boto3
 import psycopg
@@ -20,7 +20,12 @@ from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 from psycopg.rows import dict_row
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, Field, TypeAdapter
+
+if TYPE_CHECKING:
+    from mypy_boto3_ecs.type_defs import CapacityProviderStrategyItemTypeDef
+else:
+    CapacityProviderStrategyItemTypeDef = object
 
 REGION = os.environ.get("AWS_CURRENT_REGION", default="us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", default="")
@@ -35,6 +40,9 @@ CCW_TASK_SUBNETS = [
 CCW_TASK_SECURITY_GROUP_ID = os.environ.get("CCW_TASK_SECURITY_GROUP_ID", default="")
 CCW_TASK_TAGS = TypeAdapter(dict[str, Any]).validate_json(
     os.environ.get("CCW_TASK_TAGS_JSON", default="")
+)
+CCW_TASK_CAPACITY_PROVIDER_STRATEGIES = TypeAdapter(list["CapacityProviderStrategy"]).validate_json(
+    os.environ.get("CCW_TASK_CAPACITY_PROVIDER_STRATEGIES", default="")
 )
 BOTO_CONFIG = Config(
     region_name=REGION,
@@ -57,6 +65,12 @@ S3_KEY_PATTERN = re.compile(
 )
 
 logger = Logger()
+
+
+class CapacityProviderStrategy(BaseModel):
+    capacity_provider: str = Field(serialization_alias="capacityProvider")
+    weight: int
+    base: int
 
 
 class ManifestFilesResultModel(BaseModel):
@@ -205,6 +219,10 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
 
         logger.info("No running CCW Pipeline Tasks found; proceeding to launch a new Task...")
         ecs_client.run_task(
+            capacityProviderStrategy=[
+                cast(CapacityProviderStrategyItemTypeDef, strategy.model_dump(by_alias=True))
+                for strategy in CCW_TASK_CAPACITY_PROVIDER_STRATEGIES
+            ],
             taskDefinition=CCW_TASK_DEFINITION_ARN,
             cluster=ECS_CLUSTER_ARN,
             group=CCW_TASK_GROUP,
