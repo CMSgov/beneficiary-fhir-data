@@ -11,17 +11,14 @@ locals {
   log_router_version            = coalesce(var.log_router_version_override, local.latest_bfd_release)
   server_version                = coalesce(var.server_version_override, local.latest_bfd_release)
 
-  server_truststore_path         = "/data/${local.truststore_filename}"
-  server_keystore_path           = "/data/${local.keystore_filename}"
-  server_port                    = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
-  server_min_capacity            = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/min"])
-  server_max_capacity            = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
-  server_cps_fargate_base        = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity_provider/fargate/base"]))
-  server_cps_fargate_weight      = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity_provider/fargate/weight"]))
-  server_cps_fargate_spot_base   = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity_provider/fargate_spot/base"]))
-  server_cps_fargate_spot_weight = tonumber(nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity_provider/fargate_spot/weight"]))
-  server_cpu                     = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  server_memory                  = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  server_truststore_path              = "/data/${local.truststore_filename}"
+  server_keystore_path                = "/data/${local.keystore_filename}"
+  server_port                         = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
+  server_min_capacity                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/min"])
+  server_max_capacity                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
+  server_capacity_provider_strategies = module.data_strategies.strategies
+  server_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  server_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   # TODO: Remove "/ng/" prefix when config is switched to
   server_ssm_hierarchies = [
     "/ng/bfd/${local.env}/${local.service}/sensitive/",
@@ -40,6 +37,14 @@ data "aws_rds_cluster" "main" {
 
 data "aws_ecs_cluster" "main" {
   cluster_name = "bfd-${local.env}-cluster"
+}
+
+module "data_strategies" {
+  source = "../../terraform-modules/bfd/bfd-data-ecs-strategies"
+
+  service      = local.service
+  ssm_config   = local.ssm_config
+  cluster_name = data.aws_ecs_cluster.main.cluster_name
 }
 
 data "aws_ecr_image" "certstores" {
@@ -377,16 +382,13 @@ resource "aws_ecs_service" "server" {
     container_port   = local.server_port
   }
 
-  capacity_provider_strategy {
-    base              = local.server_cps_fargate_base
-    capacity_provider = "FARGATE"
-    weight            = local.server_cps_fargate_weight
-  }
-
-  capacity_provider_strategy {
-    base              = local.server_cps_fargate_spot_base
-    capacity_provider = "FARGATE_SPOT"
-    weight            = local.server_cps_fargate_spot_weight
+  dynamic "capacity_provider_strategy" {
+    for_each = local.server_capacity_provider_strategies
+    content {
+      capacity_provider = capacity_provider_strategy.value.capacity_provider
+      base              = capacity_provider_strategy.value.base
+      weight            = capacity_provider_strategy.value.weight
+    }
   }
 
   deployment_controller {

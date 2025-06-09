@@ -54,11 +54,12 @@ locals {
     "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
     "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
-  ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
-  ccw_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
-  ccw_loader_thread_multiple = 3
-  ccw_thread_multiple_claims = 25
+  ccw_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  ccw_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  ccw_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
+  ccw_capacity_provider_strategies = module.data_strategies.strategies
+  ccw_loader_thread_multiple       = 3
+  ccw_thread_multiple_claims       = 25
 }
 
 resource "aws_cloudwatch_log_group" "ccw_messages" {
