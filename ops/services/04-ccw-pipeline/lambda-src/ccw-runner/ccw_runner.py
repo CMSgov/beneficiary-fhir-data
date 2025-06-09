@@ -227,7 +227,6 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
             cluster=ECS_CLUSTER_ARN,
             group=CCW_TASK_GROUP,
             count=1,
-            launchType="FARGATE",
             platformVersion="LATEST",
             networkConfiguration={
                 "awsvpcConfiguration": {
