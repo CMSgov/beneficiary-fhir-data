@@ -51,11 +51,12 @@ locals {
     "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
     "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
-  rda_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  rda_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
-  rda_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
-  rda_loader_thread_multiple = 3
-  rda_thread_multiple_claims = 25
+  rda_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  rda_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  rda_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
+  rda_capacity_provider_strategies = module.data_strategies.strategies
+  rda_loader_thread_multiple       = 3
+  rda_thread_multiple_claims       = 25
 }
 
 resource "aws_cloudwatch_log_group" "rda_messages" {
@@ -218,10 +219,13 @@ resource "aws_ecs_service" "rda" {
   scheduling_strategy                = "REPLICA"
   task_definition                    = aws_ecs_task_definition.rda.arn
 
-  capacity_provider_strategy {
-    base              = 1
-    capacity_provider = "FARGATE_SPOT"
-    weight            = 100
+  dynamic "capacity_provider_strategy" {
+    for_each = local.rda_capacity_provider_strategies
+    content {
+      capacity_provider = capacity_provider_strategy.value.capacity_provider
+      base              = capacity_provider_strategy.value.base
+      weight            = capacity_provider_strategy.value.weight
+    }
   }
 
   deployment_controller {
