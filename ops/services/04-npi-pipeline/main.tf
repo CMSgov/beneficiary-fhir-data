@@ -51,10 +51,11 @@ locals {
     "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
     "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
-  npi_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  npi_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
-  npi_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
-  npi_loader_thread_multiple = 3
+  npi_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  npi_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  npi_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
+  npi_capacity_provider_strategies = module.data_strategies.strategies
+  npi_loader_thread_multiple       = 3
 }
 
 resource "aws_cloudwatch_log_group" "messages" {
@@ -212,15 +213,18 @@ resource "aws_scheduler_schedule" "this" {
     ecs_parameters {
       task_definition_arn     = aws_ecs_task_definition.this.arn
       task_count              = 1
-      launch_type             = "FARGATE"
       group                   = local.service
       enable_ecs_managed_tags = true
       propagate_tags          = "TASK_DEFINITION"
+      platform_version        = "LATEST"
 
-      capacity_provider_strategy {
-        base              = 1
-        weight            = 100
-        capacity_provider = "FARGATE"
+      dynamic "capacity_provider_strategy" {
+        for_each = local.npi_capacity_provider_strategies
+        content {
+          capacity_provider = capacity_provider_strategy.value.capacity_provider
+          base              = capacity_provider_strategy.value.base
+          weight            = capacity_provider_strategy.value.weight
+        }
       }
 
       network_configuration {
