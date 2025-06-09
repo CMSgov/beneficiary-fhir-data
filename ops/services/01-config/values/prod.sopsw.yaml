@@ -110,6 +110,8 @@
 /bfd/${env}/migrator/nonsensitive/new_relic/metrics/period: UNDEFINED
 /bfd/${env}/migrator/nonsensitive/ecs/resources/cpu: 2048
 /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
+/bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/ccw-pipeline/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/ccw-pipeline/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/ccw-pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
@@ -126,6 +128,8 @@
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 200
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/ccw-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/ccw-pipeline/nonsensitive/runner_lambda/schedule_expression: rate(10 minutes)
 /bfd/${env}/ccw-pipeline/nonsensitive/ccw/new_relic/app_name: BFD Pipeline ccw (${env})
 /bfd/${env}/ccw-pipeline-alarms/nonsensitive/verifier/alert_topics: bfd-platform-splunk-on-call-incident,bfd-platform-slack-bfd-alerts
@@ -136,6 +140,8 @@
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/rda-pipeline/nonsensitive/ecs/resources/disk_size: 21
+/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 1
+/bfd/${env}/rda-pipeline/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 100
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/enabled: "true"
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/namespace: bfd-${env}/rda-pipeline
 /bfd/${env}/rda-pipeline/nonsensitive/micrometer_cw/interval: PT1M
@@ -168,6 +174,8 @@
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/disk_size: 21
+/bfd/${env}/npi-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/npi-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
 #ENC[AES256_GCM,data:jyBbYSwF1vakUg==,iv:qKT/mouixOrt3eKBsUgjbej7d8CTU70dPNOgvo7JOGw=,tag:A6ql0YA6/QlbA0TL59B9rA==,type:comment]
@@ -494,12 +502,12 @@
   -----END CERTIFICATE-----
 /bfd/${env}/server/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate/base: 1
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate/weight: 0
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate_spot/base: 0
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/fargate_spot/weight: 100
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 16384
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/base: 1
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/weight: 0
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 0
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 100
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/platform/alerting/sensitive/slack/bfd-internal-alerts/webhook
