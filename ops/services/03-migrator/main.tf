@@ -51,8 +51,9 @@ locals {
     "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
     "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
-  cpu    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  memory = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  capacity_provider_strategies = module.data_strategies.strategies
 }
 
 resource "aws_cloudwatch_log_group" "messages" {
@@ -176,6 +177,14 @@ resource "null_resource" "start_migrator" {
       CONTAINER_NAME      = local.service
       CLUSTER_NAME        = data.aws_ecs_cluster.main.cluster_name
       TASK_DEFINITION_ARN = aws_ecs_task_definition.this.arn
+      CAPACITY_PROVIDER_STRATEGIES = jsonencode([
+        for strategy in local.capacity_provider_strategies
+        : {
+          capacityProvider = strategy.capacity_provider
+          base             = tonumber(strategy.base)
+          weight           = tonumber(strategy.weight)
+        }
+      ])
       NETWORK_CONFIG_JSON = jsonencode({
         awsvpcConfiguration = {
           assignPublicIp = "DISABLED"

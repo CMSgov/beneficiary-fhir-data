@@ -2,6 +2,14 @@ data "aws_ecs_cluster" "main" {
   cluster_name = "bfd-${local.env}-cluster"
 }
 
+module "data_strategies" {
+  source = "../../terraform-modules/bfd/bfd-data-ecs-strategies"
+
+  service      = local.service
+  ssm_config   = local.ssm_config
+  cluster_name = data.aws_ecs_cluster.main.cluster_name
+}
+
 data "aws_rds_cluster" "main" {
   cluster_identifier = local.db_cluster_identifier
 }
