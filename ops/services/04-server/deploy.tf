@@ -69,16 +69,13 @@ resource "null_resource" "codedeploy_server" {
       SERVICE_NAME = local.service
       CLUSTER_NAME = data.aws_ecs_cluster.main.cluster_name
       APPSPEC_YAML = templatefile("${path.module}/templates/server-appspec.yaml.tftpl", {
-        application_name      = aws_codedeploy_app.server.name
-        deployment_group_name = aws_codedeploy_deployment_group.server.deployment_group_name
-        task_definition_arn   = aws_ecs_task_definition.server.arn
-        container_name        = local.service
-        container_port        = local.server_port
-        base_fargate          = local.server_cps_fargate_base
-        weight_fargate        = local.server_cps_fargate_weight
-        base_fargate_spot     = local.server_cps_fargate_spot_base
-        weight_fargate_spot   = local.server_cps_fargate_spot_weight
-        validation_lambda_arn = one(aws_lambda_function.regression_wrapper[*].arn)
+        application_name             = aws_codedeploy_app.server.name
+        deployment_group_name        = aws_codedeploy_deployment_group.server.deployment_group_name
+        task_definition_arn          = aws_ecs_task_definition.server.arn
+        container_name               = local.service
+        container_port               = local.server_port
+        capacity_provider_strategies = local.server_capacity_provider_strategies
+        validation_lambda_arn        = one(aws_lambda_function.regression_wrapper[*].arn)
       })
     }
     interpreter = ["/bin/bash"]
