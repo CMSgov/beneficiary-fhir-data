@@ -16,12 +16,12 @@
   fhirPath: Patient.name.given[1]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_MIDL_NAME
-- inputPath: Beneficiary.BENE_DOB
+- inputPath: Beneficiary.BENE_BRTH_DT
   appliesTo:
     - Patient
   fhirPath: Patient.birthDate
   sourceView: V2_MDCR_BENE
-  sourceColumn: BENE_DOB
+  sourceColumn: BENE_BRTH_DT
 - inputPath: Beneficiary.BENE_DEATH_DT
   appliesTo:
     - Patient
@@ -54,58 +54,59 @@
   appliesTo:
     - Patient
   fhirPath: Patient.meta.lastUpdated
+  bfdDerived: True
 - inputPath: Beneficiary.GEO_USPS_STATE_CD
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].state
+  fhirPath: Patient.address.state
   sourceView: V2_MDCR_BENE
   sourceColumn: GEO_USPS_STATE_CD
 - inputPath: Beneficiary.GEO_ZIP5_CD
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].postalCode
+  fhirPath: Patient.address.postalCode
   sourceView: V2_MDCR_BENE
   sourceColumn: GEO_ZIP5_CD
 - inputPath: Beneficiary.BENE_LINE_1_ADR
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].line[0]
+  fhirPath: Patient.address.line[0]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_LINE_1_ADR
 - inputPath: Beneficiary.BENE_LINE_2_ADR
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].line[1]
+  fhirPath: Patient.address.line[1]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_LINE_2_ADR
 - inputPath: Beneficiary.BENE_LINE_3_ADR
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].line[2]
+  fhirPath: Patient.address.line[2]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_LINE_3_ADR
 - inputPath: Beneficiary.BENE_LINE_4_ADR
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].line[3]
+  fhirPath: Patient.address.line[3]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_LINE_4_ADR
 - inputPath: Beneficiary.BENE_LINE_5_ADR
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].line[4]
+  fhirPath: Patient.address.line[4]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_LINE_5_ADR
 - inputPath: Beneficiary.BENE_LINE_6_ADR
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].line[5]
+  fhirPath: Patient.address.line[5]
   sourceView: V2_MDCR_BENE
   sourceColumn: BENE_LINE_6_ADR
 - inputPath: Beneficiary.GEO_ZIP_PLC_NAME
   appliesTo:
     - Patient
-  fhirPath: Patient.address[0].city
+  fhirPath: Patient.address.city
   sourceView: V2_MDCR_BENE
   sourceColumn: GEO_ZIP_PLC_NAME
 - inputPath: Beneficiary.CNTCT_LANG_CD

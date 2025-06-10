@@ -3,6 +3,7 @@
     - PartA
     - PartB
   fhirPath: Coverage.class.where(type.coding.code='plan').value
+  bfdDerived: True
 - inputPath: Coverage-Base.BENE_MBI_ID
   appliesTo:
     - PartA
@@ -86,6 +87,7 @@
   referenceTable: BENE_ESRD_STUS_ID
   sourceView: V2_MDCR_BENE_MDCR_STUS_CD
   sourceColumn: BENE_ESRD_STUS_ID
+  nameOverride: Beneficiary ESRD Status ID
 - inputPath: Coverage-Base.BENE_DSBLD_STUS_ID
   appliesTo:
     - PartA
@@ -94,3 +96,4 @@
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID').value.code
   sourceView: V2_MDCR_BENE_MDCR_STUS_CD
   sourceColumn: BENE_DSBLD_STUS_ID
+  nameOverride: Beneficiary Disabled Status Code
