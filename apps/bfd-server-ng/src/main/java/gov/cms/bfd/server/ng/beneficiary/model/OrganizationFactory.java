@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.SystemUrls;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -23,7 +23,7 @@ public final class OrganizationFactory {
 
     // Set the Meta information, including the C4BB Organization profile.
     Meta orgMeta = new Meta();
-    orgMeta.addProfile(IdrConstants.PROFILE_C4BB_ORGANIZATION);
+    orgMeta.addProfile(SystemUrls.PROFILE_C4BB_ORGANIZATION);
     cmsOrg.setMeta(orgMeta);
     cmsOrg.setActive(true);
     cmsOrg.setName("Centers for Medicare and Medicaid Services");
@@ -33,7 +33,7 @@ public final class OrganizationFactory {
 
     // Set the purpose of the contact.
     CodeableConcept contactPurpose = new CodeableConcept();
-    contactPurpose.addCoding(new Coding(IdrConstants.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
+    contactPurpose.addCoding(new Coding(SystemUrls.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
     contact.setPurpose(contactPurpose);
 
     contact.addTelecom(

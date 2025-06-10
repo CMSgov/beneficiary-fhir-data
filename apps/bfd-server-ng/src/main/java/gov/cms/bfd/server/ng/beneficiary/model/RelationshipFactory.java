@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.SystemUrls;
 import org.hl7.fhir.r4.model.CodeableConcept;
 
 /**
@@ -15,7 +15,7 @@ public final class RelationshipFactory {
    * Creates a FHIR {@link CodeableConcept} representing the "self" subscriber relationship. This
    * indicates that the beneficiary is their own subscriber.
    *
-   * <p>System: {@link gov.cms.bfd.server.ng.IdrConstants#SYS_SUBSCRIBER_RELATIONSHIP}
+   * <p>System: {@link SystemUrls#SYS_SUBSCRIBER_RELATIONSHIP}
    * (http://terminology.hl7.org/CodeSystem/subscriber-relationship) Code: "self" Display: "Self"
    *
    * @return A {@link CodeableConcept} for the "self" relationship.
@@ -24,7 +24,7 @@ public final class RelationshipFactory {
     CodeableConcept relationshipCodeableConcept = new CodeableConcept();
     relationshipCodeableConcept
         .addCoding()
-        .setSystem(IdrConstants.SYS_SUBSCRIBER_RELATIONSHIP)
+        .setSystem(SystemUrls.SYS_SUBSCRIBER_RELATIONSHIP)
         .setCode("self")
         .setDisplay("Self");
     return relationshipCodeableConcept;

@@ -1,10 +1,11 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
+import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,10 @@ public class BeneficiaryRepository {
 
   // TODO: this has not yet been thoroughly tested with edge cases.
   // It will likely need some adjustments.
+
+  /** ZonedDateTime. */
+  public static final ZonedDateTime ZONED_DATE_TIME_MIN_PRACTICAL_UTC =
+      ZonedDateTime.of(1, 1, 1, 0, 0, 0, 0, DateUtil.ZONE_ID_UTC);
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -107,7 +112,7 @@ public class BeneficiaryRepository {
    *
    * @return last updated timestamp
    */
-  public LocalDateTime beneficiaryLastUpdated() {
+  public ZonedDateTime beneficiaryLastUpdated() {
     return entityManager
         .createQuery(
             """
@@ -119,11 +124,11 @@ public class BeneficiaryRepository {
                 "idr.beneficiary_mbi_id"
               )
               """,
-            LocalDateTime.class)
+            ZonedDateTime.class)
         .getResultList()
         .stream()
         .findFirst()
-        .orElse(LocalDateTime.MIN);
+        .orElse(ZONED_DATE_TIME_MIN_PRACTICAL_UTC);
   }
 
   private Optional<Beneficiary> searchBeneficiary(
@@ -135,8 +140,8 @@ public class BeneficiaryRepository {
                 SELECT b
                 FROM Beneficiary b
                 WHERE b.%s = :id
-                  AND ((cast(:lowerBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-                  AND ((cast(:upperBound AS LocalDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                   AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
                 """,
                 idColumnName,

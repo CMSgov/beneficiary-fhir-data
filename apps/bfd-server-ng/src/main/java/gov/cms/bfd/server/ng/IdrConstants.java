@@ -1,6 +1,19 @@
 package gov.cms.bfd.server.ng;
 
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_0;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_00;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_10;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_11;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_20;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_21;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_31;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_40;
+import static gov.cms.bfd.server.ng.coverage.MedicareStatusCode.CODE_TILDE;
+
+import gov.cms.bfd.server.ng.coverage.MedicareStatusCode;
+import gov.cms.bfd.server.ng.coverage.YesNoUnknownIndicator;
 import java.time.LocalDate;
+import java.util.Optional;
 
 /** Constants representing specific values found in the IDR database. */
 public class IdrConstants {
@@ -14,59 +27,45 @@ public class IdrConstants {
   public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
 
   /**
-   * URL for the CARIN Blue Button (C4BB) Coverage Profile, version 2.1.0. <a
-   * href="http://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Coverage.html">C4BB
-   * Coverage 2.1.0</a>
+   * Translates a BFD/BlueButton Medicare Status Code to an ESRD (End-Stage Renal Disease) Indicator
+   * code.
+   *
+   * @param medicareStatus The BFD/BlueButton Medicare Status Code (e.g., from BENE_MDCR_STUS_CD).
+   * @return An {@link Optional} containing the ESRD indicator code if translation is possible,
+   *     otherwise {@link Optional#empty()}.
    */
-  // add version numbers
-  public static final String PROFILE_C4BB_COVERAGE =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0";
+  public static Optional<String> translateMedicareStatusToEsrdCode(String medicareStatus) {
+    if (medicareStatus == null) {
+      return Optional.empty();
+    }
+    MedicareStatusCode medicareStatusCode = MedicareStatusCode.fromCode(medicareStatus).get();
+
+    return switch (medicareStatusCode) {
+      case CODE_0, CODE_00 -> Optional.of(YesNoUnknownIndicator.UNKNOWN.getCode());
+      case CODE_11, CODE_21, CODE_31 -> Optional.of(YesNoUnknownIndicator.YES.getCode());
+      case CODE_10, CODE_20, CODE_40 -> Optional.of(YesNoUnknownIndicator.NO.getCode());
+      case CODE_TILDE -> Optional.empty();
+    };
+  }
 
   /**
-   * URL for the US Core Coverage Profile, version 6.1.0. <a
-   * href="http://hl7.org/fhir/us/core/STU6.1/StructureDefinition-us-core-coverage.html">US Core
-   * Coverage 6.1.0</a>
+   * Translates a BFD/BlueButton Medicare Status Code to a Disability Indicator code.
+   *
+   * @param medicareStatus The BFD/BlueButton Medicare Status Code (e.g., from BENE_MDCR_STUS_CD).
+   * @return An {@link Optional} containing the Disability indicator code if translation is
+   *     possible, otherwise {@link Optional#empty()}.
    */
-  public static final String PROFILE_US_CORE_COVERAGE =
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0";
+  public static Optional<String> translateMedicareStatusToDisabilityCode(String medicareStatus) {
+    if (medicareStatus == null) {
+      return Optional.empty();
+    }
+    MedicareStatusCode medicareStatusCode = MedicareStatusCode.fromCode(medicareStatus).get();
 
-  /**
-   * URL for the CARIN Blue Button (C4BB) Organization Profile, version 2.1.0. Used for the
-   * contained CMS Organization. <a
-   * href="http://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Organization.html">C4BB
-   * Organization 2.1.0</a>
-   */
-  public static final String PROFILE_C4BB_ORGANIZATION =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
-
-  /**
-   * System URL for the HL7 Subscriber Relationship code system. Used for {@code
-   * Coverage.relationship.coding.system}. <a
-   * href="http://terminology.hl7.org/CodeSystem/subscriber-relationship">Subscriber
-   * Relationship</a>
-   */
-  public static final String SYS_SUBSCRIBER_RELATIONSHIP =
-      "http://terminology.hl7.org/CodeSystem/subscriber-relationship";
-
-  /**
-   * System URL for the NAHDO Standard Payer Type/Product/Plan (SOPT) code system. Used for {@code
-   * Coverage.type.coding.system}. <a href="https://nahdo.org/sopt">NAHDO SOPT</a>
-   */
-  public static final String SYS_SOPT = "https://nahdo.org/sopt";
-
-  /**
-   * System URL for the HL7 Coverage Class code system. Used for {@code
-   * Coverage.class.type.coding.system}. <a
-   * href="http://terminology.hl7.org/CodeSystem/coverage-class">Coverage Class</a>
-   */
-  public static final String SYS_COVERAGE_CLASS =
-      "http://terminology.hl7.org/CodeSystem/coverage-class";
-
-  /**
-   * System URL for the HL7 Contact Entity Type code system. Used for {@code
-   * Organization.contact.purpose.coding.system}. <a
-   * href="http://terminology.hl7.org/CodeSystem/contactentity-type">Contact Entity Type</a>
-   */
-  public static final String SYS_CONTACT_ENTITY_TYPE =
-      "http://terminology.hl7.org/CodeSystem/contactentity-type";
+    return switch (medicareStatusCode) {
+      case CODE_0, CODE_00 -> Optional.of(YesNoUnknownIndicator.UNKNOWN.getCode());
+      case CODE_20, CODE_21 -> Optional.of(YesNoUnknownIndicator.YES.getCode());
+      case CODE_10, CODE_11, CODE_31, CODE_40 -> Optional.of(YesNoUnknownIndicator.NO.getCode());
+      case CODE_TILDE -> Optional.empty(); // "null" mapping
+    };
+  }
 }

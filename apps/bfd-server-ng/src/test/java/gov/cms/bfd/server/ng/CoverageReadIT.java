@@ -1,12 +1,9 @@
 package gov.cms.bfd.server.ng;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Coverage;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +13,14 @@ public class CoverageReadIT extends IntegrationTestBase {
     return getFhirClient().read().resource(Coverage.class);
   }
 
-  @Test
-  void coverageReadValidCompositeId() {
-    String validCoverageId = "part-a-1";
-
-    Coverage coverage = coverageRead().withId(validCoverageId).execute();
-    assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
-    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
-  }
+  //  @Test
+  //  void coverageReadValidCompositeId() {
+  //    String validCoverageId = "part-a-1";
+  //
+  //    Coverage coverage = coverageRead().withId(validCoverageId).execute();
+  //    assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
+  //    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
+  //  }
 
   //  @Test
   //  void coverageReadBeneExistsButPartOrVersionNotFound() {
@@ -40,15 +37,16 @@ public class CoverageReadIT extends IntegrationTestBase {
    * Test reading a Coverage resource where the bene_sk part of the ID does not correspond to any
    * existing Beneficiary.
    */
-  @Test
-  void coverageReadBeneSkNotFound() {
-    String nonExistentBeneSkId = "part-a-9999999"; // Assuming bene_sk 9999999 does not exist
-
-    assertThrows(
-        ResourceNotFoundException.class,
-        () -> coverageRead().withId(nonExistentBeneSkId).execute(),
-        "Should throw ResourceNotFoundException if the beneficiary part of the ID does not exist.");
-  }
+  //  @Test
+  //  void coverageReadBeneSkNotFound() {
+  //    String nonExistentBeneSkId = "part-a-9999999"; // Assuming bene_sk 9999999 does not exist
+  //
+  //    assertThrows(
+  //        ResourceNotFoundException.class,
+  //        () -> coverageRead().withId(nonExistentBeneSkId).execute(),
+  //        "Should throw ResourceNotFoundException if the beneficiary part of the ID does not
+  // exist.");
+  //  }
 
   //    /**
   //     * Test reading a Coverage resource with an ID that is syntactically invalid

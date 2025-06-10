@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -77,26 +77,27 @@ public enum CoveragePart {
                     "Unrecognized or unsupported coverage part identifier prefix provided."));
   }
 
-  /**
-   * Finds a {@link CoveragePart} enum constant by its single character code (e.g., "A", "B").
-   *
-   * @param code The single character code. Must not be null.
-   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
-   *     Optional#empty()} if not found.
-   */
-  public static Optional<CoveragePart> forCode(String code) {
-    if (code == null || code.length() != 1) {
-      throw new IllegalArgumentException(
-          "Input code must be a single non-null character for CoveragePart.forCode(). Received: "
-              + (code == null ? "null" : "'" + code + "'"));
-    }
-    for (CoveragePart part : values()) {
-      if (part.getStandardCode().equals(code)) {
-        return Optional.of(part);
-      }
-    }
-    return Optional.empty();
-  }
+  //  /**
+  //   * Finds a {@link CoveragePart} enum constant by its single character code (e.g., "A", "B").
+  //   *
+  //   * @param code The single character code. Must not be null.
+  //   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
+  //   *     Optional#empty()} if not found.
+  //   */
+  //  public static Optional<CoveragePart> forCode(String code) {
+  //    if (code == null || code.length() != 1) {
+  //      throw new IllegalArgumentException(
+  //          "Input code must be a single non-null character for CoveragePart.forCode(). Received:
+  // "
+  //              + (code == null ? "null" : "'" + code + "'"));
+  //    }
+  //    for (CoveragePart part : values()) {
+  //      if (part.getStandardCode().equals(code)) {
+  //        return Optional.of(part);
+  //      }
+  //    }
+  //    return Optional.empty();
+  //  }
 
   /**
    * Creates TypeCode.
@@ -108,8 +109,8 @@ public enum CoveragePart {
     CodeableConcept typeCode = new CodeableConcept();
     typeCode
         .addCoding()
-        .setSystem(IdrConstants.SYS_SOPT)
-        .setCode(this.getStandardCode())
+        .setSystem(SystemUrls.SYS_SOPT)
+        .setCode(this.getSoptCode())
         .setDisplay(this.getSoptDisplay());
     return typeCode;
   }
@@ -124,8 +125,8 @@ public enum CoveragePart {
     classComponent
         .setType(
             new CodeableConcept()
-                .addCoding(new Coding(IdrConstants.SYS_COVERAGE_CLASS, "plan", null)))
-        .setValue(this.getStandardCode());
+                .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "plan", null)))
+        .setValue(this.getStandardDisplay());
     return classComponent;
   }
 }
