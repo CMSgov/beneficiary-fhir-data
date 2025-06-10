@@ -528,20 +528,20 @@ public class SamhsaUtilTest {
    */
   public DMEClaim getNonSamhsaDMEClaim() {
     DMEClaim claim =
-            DMEClaim.builder()
-                    .claimId(1234567890)
-                    .diagnosisPrincipalCode("NONSAMHSA")
-                    .diagnosis1Code("NONSAMHSA")
-                    .lines(
-                            List.of(
-                                    DMEClaimLine.builder()
-                                            .diagnosisCode("NONSAMHSA")
-                                            .lineNumber((short) 1)
-                                            .hcpcsCode("NONSAMHSA")
-                                            .build()))
-                    .dateFrom(LocalDate.parse("1970-01-01"))
-                    .dateThrough(LocalDate.now())
-                    .build();
+        DMEClaim.builder()
+            .claimId(1234567890)
+            .diagnosisPrincipalCode("NONSAMHSA")
+            .diagnosis1Code("NONSAMHSA")
+            .lines(
+                List.of(
+                    DMEClaimLine.builder()
+                        .diagnosisCode("NONSAMHSA")
+                        .lineNumber((short) 1)
+                        .hcpcsCode("NONSAMHSA")
+                        .build()))
+            .dateFrom(LocalDate.parse("1970-01-01"))
+            .dateThrough(LocalDate.now())
+            .build();
     return claim;
   }
 
