@@ -83,7 +83,7 @@ public class SamhsaUtilTest {
   @Test
   public void shouldReturnSamhsaHCPCS() {
     Optional<SamhsaEntry> entry =
-        samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_HCPCS_CODE), Optional.of(TEST_SAMHSA_HCPCS_COLUMN));
+            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_HCPCS_CODE), Optional.of(TEST_SAMHSA_HCPCS_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
@@ -96,7 +96,7 @@ public class SamhsaUtilTest {
   @Test
   public void shouldReturnSamhsaProcedure() {
     Optional<SamhsaEntry> entry =
-            samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_PROC_CODE), Optional.of(TEST_SAMHSA_PROC_COLUMN));
+            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_PROC_CODE), Optional.of(TEST_SAMHSA_PROC_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
@@ -109,7 +109,7 @@ public class SamhsaUtilTest {
   @Test
   public void shouldReturnSamhsaDrug() {
     Optional<SamhsaEntry> entry =
-            samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DRG_CODE), Optional.of(TEST_SAMHSA_DRG_COLUMN));
+            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DRG_CODE), Optional.of(TEST_SAMHSA_DRG_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
@@ -122,7 +122,7 @@ public class SamhsaUtilTest {
   @Test
   public void shouldReturnSamhsaDiagnosis() {
     Optional<SamhsaEntry> entry =
-            samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DIAG_CODE), Optional.of(TEST_SAMHSA_DIAG_COLUMN));
+            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DIAG_CODE), Optional.of(TEST_SAMHSA_DIAG_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
@@ -139,7 +139,7 @@ public class SamhsaUtilTest {
     samhsaUtil.processRdaClaim(fissClaim, entityManager);
     verify(entityManager, times(2)).merge(captor.capture());
     List<FissTag> tags = captor.getAllValues();
-    assertEquals(tags.stream().filter(t -> t.getClaim().equals(fissClaim.getClaimId())).count(), 2);
+    assertEquals(2, tags.stream().filter(t -> t.getClaim().equals(fissClaim.getClaimId())).count());
   }
 
   /** This test should not try to save a tag. */
@@ -160,7 +160,7 @@ public class SamhsaUtilTest {
     verify(entityManager, times(2)).merge(captor.capture());
     List<McsTag> tags = captor.getAllValues();
     assertEquals(
-        tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count(), 2);
+            2, tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count());
   }
 
   /** This test should create Carrier Tags and attempt to save them to the database. */
@@ -519,22 +519,20 @@ public class SamhsaUtilTest {
    * @return A fake Non-Samhsa DME claim.
    */
   public DMEClaim getNonSamhsaDMEClaim() {
-    DMEClaim claim =
-        DMEClaim.builder()
-            .claimId(1234567890)
-            .diagnosisPrincipalCode("NONSAMHSA")
-            .diagnosis1Code("NONSAMHSA")
-            .lines(
-                List.of(
-                    DMEClaimLine.builder()
-                        .diagnosisCode("NONSAMHSA")
-                        .lineNumber((short) 1)
-                        .hcpcsCode("NONSAMHSA")
-                        .build()))
-            .dateFrom(LocalDate.parse("1970-01-01"))
-            .dateThrough(LocalDate.now())
-            .build();
-    return claim;
+      return DMEClaim.builder()
+          .claimId(1234567890)
+          .diagnosisPrincipalCode("NONSAMHSA")
+          .diagnosis1Code("NONSAMHSA")
+          .lines(
+              List.of(
+                  DMEClaimLine.builder()
+                      .diagnosisCode("NONSAMHSA")
+                      .lineNumber((short) 1)
+                      .hcpcsCode("NONSAMHSA")
+                      .build()))
+          .dateFrom(LocalDate.parse("1970-01-01"))
+          .dateThrough(LocalDate.now())
+          .build();
   }
 
   /**
