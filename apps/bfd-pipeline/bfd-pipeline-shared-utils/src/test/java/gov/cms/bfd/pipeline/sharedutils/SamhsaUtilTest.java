@@ -48,11 +48,29 @@ public class SamhsaUtilTest {
   /** Entity manager that will be mocked. */
   EntityManager entityManager;
 
-  /** A SAMHSA code to use in the tests. */
-  private static final String TEST_SAMHSA_CODE = "H0005";
+  /** A SAMHSA hcpcs code to use in the tests. */
+  private static final String TEST_SAMHSA_HCPCS_CODE = "H0005";
 
-  /** Column to use in the tests. */
-  private static final String TEST_SAMHSA_COLUMN = "hcpcs_code";
+  /** HCPCS column to use in the tests. */
+  private static final String TEST_SAMHSA_HCPCS_COLUMN = "hcpcs_code";
+
+  /** A SAMHSA procedure code to use in the tests. */
+  private static final String TEST_SAMHSA_PROC_CODE = "HZ2ZZZZ";
+
+  /** Procedure column to use in the tests. */
+  private static final String TEST_SAMHSA_PROC_COLUMN = "proc_code";
+
+  /** A SAMHSA drug code to use in the tests. */
+  private static final String TEST_SAMHSA_DRG_CODE = "522";
+
+  /** Drug column to use in the tests. */
+  private static final String TEST_SAMHSA_DRG_COLUMN = "drg_code";
+
+  /** A SAMHSA procedure code to use in the tests. */
+  private static final String TEST_SAMHSA_DIAG_CODE = "F10.10";
+
+  /** Procedure column to use in the tests. */
+  private static final String TEST_SAMHSA_DIAG_COLUMN = "diag_code";
 
   /** Test setup. */
   @BeforeEach
@@ -61,12 +79,56 @@ public class SamhsaUtilTest {
     entityManager = mock(EntityManager.class);
   }
 
-  /** This test should return a SAMHSA code entry for the given code. */
+  /** This test should return a SAMHSA HCPCS code entry for the given code. */
   @Test
-  public void shouldReturnSamhsaEntry() {
+  public void shouldReturnSamhsaHCPCS() {
     Optional<SamhsaEntry> entry =
-        samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_CODE), Optional.of(TEST_SAMHSA_COLUMN));
-    assertTrue(entry.isPresent());
+        samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_HCPCS_CODE), Optional.of(TEST_SAMHSA_HCPCS_COLUMN));
+
+    assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
+
+    assertEquals("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+            entry.get().getSystem(),
+            "Unexpected system for HCPCS column");
+  }
+
+  /** This test should return a SAMHSA HCPCS code entry for the given code. */
+  @Test
+  public void shouldReturnSamhsaProcedure() {
+    Optional<SamhsaEntry> entry =
+            samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_PROC_CODE), Optional.of(TEST_SAMHSA_PROC_COLUMN));
+
+    assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
+
+    assertEquals("http://www.cms.gov/Medicare/Coding/ICD10",
+            entry.get().getSystem(),
+            "Unexpected system for Procedure column");
+  }
+
+  /** This test should return a SAMHSA DRG code entry for the given code. */
+  @Test
+  public void shouldReturnSamhsaDrug() {
+    Optional<SamhsaEntry> entry =
+            samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DRG_CODE), Optional.of(TEST_SAMHSA_DRG_COLUMN));
+
+    assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
+
+    assertEquals("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
+            entry.get().getSystem(),
+            "Unexpected system for DRG column");
+  }
+
+  /** This test should return a SAMHSA Diagnosis code entry for the given code. */
+  @Test
+  public void shouldReturnSamhsaDiagnosis() {
+    Optional<SamhsaEntry> entry =
+            samhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DIAG_CODE), Optional.of(TEST_SAMHSA_DIAG_COLUMN));
+
+    assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
+
+    assertEquals("http://hl7.org/fhir/sid/icd-10-cm",
+            entry.get().getSystem(),
+            "Unexpected system for DIAG column");
   }
 
   /** This test should create FISS Tags and attempt to save them to the database. */
