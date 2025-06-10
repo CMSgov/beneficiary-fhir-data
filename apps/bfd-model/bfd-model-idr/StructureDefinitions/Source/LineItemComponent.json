@@ -16,7 +16,6 @@
                 "id": "LineItemComponent",
                 "path": "LineItemComponent",
                 "label": "LineItemComponent for IDR. Ignore in DD Generation",
-                "definition": "LineItemComponent definition.",
                 "min": 1,
                 "max": "1"
             },
@@ -24,7 +23,6 @@
                 "id": "LineItemComponent.CLM_LINE_NUM",
                 "path": "LineItemComponent.CLM_LINE_NUM",
                 "label": "Line Item Sequence Number",
-                "definition": "This variable identifies an individual line number on a claim.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -36,8 +34,7 @@
             {
                 "id": "LineItemComponent.CLM_LINE_HCPCS_CD",
                 "path": "LineItemComponent.CLM_LINE_HCPCS_CD",
-                "label": "Line Item Sequence Number",
-                "definition": "This field represents the item's HCPCS code, if available.",
+                "label": "Line Item HCPCS Code",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -49,8 +46,7 @@
             {
                 "id": "LineItemComponent.CLM_REV_APC_HIPPS_CD",
                 "path": "LineItemComponent.CLM_REV_APC_HIPPS_CD",
-                "label": "Line Item Sequence Number",
-                "definition": "This field contains one of two potential pieces of data; the Ambulatory Payment Classification (APC) code or the Health Insurance Prospective Payment System (HIPPS) code, which corresponds with the revenue center line for the claim.",
+                "label": "Line Item APC / HIPPS Code",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -63,7 +59,6 @@
                 "id": "LineItemComponent.CLM_LINE_NDC_CD",
                 "path": "LineItemComponent.CLM_LINE_NDC_CD",
                 "label": "Revenue Center National Drug Code",
-                "definition": "This field may contain one of three types of identifiers: the National Drug Code (NDC), the Universal Product Code (UPC), or the number assigned by the Food and Drug Administration (FDA) to an investigational device (IDE) after the manufacturer has approval to conduct a clinical trial.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -75,8 +70,7 @@
             {
                 "id": "LineItemComponent.CLM_LINE_NDC_QTY",
                 "path": "LineItemComponent.CLM_LINE_NDC_QTY",
-                "label": "Line Item NDC quantity",
-                "definition": "This field represents the NDC quantity of the drug provided.",
+                "label": "Line Item NDC Quantity",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -88,8 +82,7 @@
             {
                 "id": "LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD",
                 "path": "LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD",
-                "label": "Line Item NDC quantity qualifier code",
-                "definition": "This field represents the NDC quantity qualifier code of the drug provided.",
+                "label": "Line Item NDC Quantity Qualifier Code",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -101,8 +94,7 @@
             {
                 "id": "LineItemComponent.CLM_LINE_SRVC_UNIT_QTY",
                 "path": "LineItemComponent.CLM_LINE_SRVC_UNIT_QTY",
-                "label": "Line Item service unit quantity",
-                "definition": "This field represents the quantity of the service provided on the line item.",
+                "label": "Line Item Service Unit Quantity",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -115,7 +107,6 @@
                 "id": "LineItemComponent.CLM_LINE_REV_CTR_CD",
                 "path": "LineItemComponent.CLM_LINE_REV_CTR_CD",
                 "label": "Line Item Revenue Center Code",
-                "definition": "The provider-assigned revenue code for each cost center for which a separate charge is billed (type of accommodation or ancillary).",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -128,7 +119,6 @@
                 "id": "LineItemComponent.CLM_DDCTBL_COINSRNC_CD",
                 "path": "LineItemComponent.CLM_DDCTBL_COINSRNC_CD",
                 "label": "Line Item Revenue Center Code",
-                "definition": "Code indicating whether the revenue center charges are subject to deductible and/or coinsurance.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -140,8 +130,7 @@
             {
                 "id": "LineItemComponent.HCPCS_1_MDFR_CD",
                 "path": "LineItemComponent.HCPCS_1_MDFR_CD",
-                "label": "HCPCS Modifier code 1",
-                "definition": "The first code to modify the HCPCS procedure code associated with the claim-line. This provides more specific procedure identification for the line-item service.",
+                "label": "HCPCS Modifier Code 1",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -153,8 +142,7 @@
             {
                 "id": "LineItemComponent.HCPCS_2_MDFR_CD",
                 "path": "LineItemComponent.HCPCS_2_MDFR_CD",
-                "label": "HCPCS Modifier code 2",
-                "definition": "The second code to modify the HCPCS procedure code associated with the claim-line. This provides more specific procedure identification for the line-item service.",
+                "label": "HCPCS Modifier Code 2",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -166,8 +154,7 @@
             {
                 "id": "LineItemComponent.HCPCS_3_MDFR_CD",
                 "path": "LineItemComponent.HCPCS_3_MDFR_CD",
-                "label": "HCPCS Modifier code 3",
-                "definition": "The third code to modify the HCPCS procedure code associated with the claim-line. This provides more specific procedure identification for the line-item service.",
+                "label": "HCPCS Modifier Code 3",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -179,8 +166,7 @@
             {
                 "id": "LineItemComponent.HCPCS_4_MDFR_CD",
                 "path": "LineItemComponent.HCPCS_4_MDFR_CD",
-                "label": "HCPCS Modifier code 4",
-                "definition": "The fourth code to modify the HCPCS procedure code associated with the claim-line. This provides more specific procedure identification for the line-item service.",
+                "label": "HCPCS Modifier Code 4",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -192,8 +178,7 @@
             {
                 "id": "LineItemComponent.HCPCS_5_MDFR_CD",
                 "path": "LineItemComponent.HCPCS_5_MDFR_CD",
-                "label": "HCPCS Modifier code 5",
-                "definition": "The fifth code to modify the HCPCS procedure code associated with the claim-line. This provides more specific procedure identification for the line-item service.",
+                "label": "HCPCS Modifier Code 5",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -206,7 +191,6 @@
                 "id": "LineItemComponent.CLM_LINE_INSTNL_RATE_AMT",
                 "path": "LineItemComponent.CLM_LINE_INSTNL_RATE_AMT",
                 "label": "Claim Line Institutional Rate Amount",
-                "definition": "Charges relating to unit cost associated with the revenue center code.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -218,8 +202,7 @@
             {
                 "id": "LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD",
                 "path": "LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD",
-                "label": "Claim Line Adjustment reason code 1",
-                "definition": "The first code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "label": "Claim Line Adjustment Reason Code 1",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -231,8 +214,7 @@
             {
                 "id": "LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD",
                 "path": "LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD",
-                "label": "Claim Line Adjustment reason code 1",
-                "definition": "The second code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "label": "Claim Line Adjustment Reason Code 1",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -244,8 +226,7 @@
             {
                 "id": "LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD",
                 "path": "LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD",
-                "label": "Claim Line Adjustment reason code 1",
-                "definition": "The third code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "label": "Claim Line Adjustment Reason Code 1",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -257,8 +238,7 @@
             {
                 "id": "LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD",
                 "path": "LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD",
-                "label": "Claim Line Adjustment reason code 1",
-                "definition": "The fourth code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "label": "Claim Line Adjustment Reason Code 1",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -270,8 +250,7 @@
             {
                 "id": "LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD",
                 "path": "LineItemComponent.CLM_5_REV_CNTR_ANSI_RSN_CD",
-                "label": "Claim Line Adjustment reason code 1",
-                "definition": "The fifth code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment).",
+                "label": "Claim Line Adjustment Reason Code 1",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -284,7 +263,6 @@
                 "id": "LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT",
                 "path": "LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT",
                 "label": "Revenue Center Non-Covered Charge Amount",
-                "definition": "The charge amount related to a revenue center code for services that are not covered by Medicare.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -297,7 +275,6 @@
                 "id": "LineItemComponent.CLM_LINE_PRVDR_PMT_AMT",
                 "path": "LineItemComponent.CLM_LINE_PRVDR_PMT_AMT",
                 "label": "Revenue Center Provider Payment Amount",
-                "definition": "The amount Medicare paid for the services reported on the revenue center record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -310,7 +287,6 @@
                 "id": "LineItemComponent.CLM_LINE_BENE_PMT_AMT",
                 "path": "LineItemComponent.CLM_LINE_BENE_PMT_AMT",
                 "label": "Revenue Center Patient Responsibility Payment Amount",
-                "definition": "The amount paid by the beneficiary to the provider for the line-item service.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -323,7 +299,6 @@
                 "id": "LineItemComponent.CLM_LINE_BENE_PD_AMT",
                 "path": "LineItemComponent.CLM_LINE_BENE_PD_AMT",
                 "label": "Claim Line Beneficiary Paid Amount",
-                "definition": "The amount paid to the beneficiary for the services reported on the line item.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -336,7 +311,6 @@
                 "id": "LineItemComponent.CLM_LINE_CVRD_PD_AMT",
                 "path": "LineItemComponent.CLM_LINE_CVRD_PD_AMT",
                 "label": "Claim Line Covered Paid Amount",
-                "definition": "The amount Medicare paid for the services reported on the revenue center record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -349,7 +323,6 @@
                 "id": "LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT",
                 "path": "LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT",
                 "label": "Claim Line Blood Deductible Amount",
-                "definition": "This variable is the dollar amount the beneficiary is responsible for related to the deductible for blood products that appear on the revenue center record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -362,7 +335,6 @@
                 "id": "LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT",
                 "path": "LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT",
                 "label": "Part B Deductible Amount",
-                "definition": "This variable is the beneficiary’s liability under the annual Part B deductible for the revenue center record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -375,7 +347,6 @@
                 "id": "LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT",
                 "path": "LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT",
                 "label": "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount",
-                "definition": "This variable is the beneficiary’s liability for coinsurance for the revenue center record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -388,7 +359,6 @@
                 "id": "LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT",
                 "path": "LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT",
                 "label": "Revenue Center Reduced Coinsurance Amount",
-                "definition": "For all services subject to Outpatient prospective payment system (PPS or OPPS), the amount of coinsurance applicable to the line for a particular service (as indicated by the HCPCS code) for which the provider has elected to reduce the coinsurance amount.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -401,7 +371,6 @@
                 "id": "LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT",
                 "path": "LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT",
                 "label": "Revenue Center 1st Medicare Secondary Payer Paid Amount",
-                "definition": "The amount paid by the primary payer when the payer is primary to Medicare (Medicare is a secondary).",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -414,7 +383,6 @@
                 "id": "LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT",
                 "path": "LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT",
                 "label": "Revenue Center 2nd Medicare Secondary Payer Paid Amount",
-                "definition": "The amount paid by the secondary payer when two payers are primary to Medicare (Medicare is the tertiary payer).",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -427,7 +395,6 @@
                 "id": "LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT",
                 "path": "LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT",
                 "label": "Revenue Center Date",
-                "definition": "This is the date of service for the revenue center record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -440,7 +407,6 @@
                 "id": "LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT",
                 "path": "LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT",
                 "label": "Line Item Allowed Charge Amount",
-                "definition": "The amount of allowed charges for the line-item service on the institutional claim.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -453,7 +419,6 @@
                 "id": "LineItemComponent.CLM_LINE_SBMT_CHRG_AMT",
                 "path": "LineItemComponent.CLM_LINE_SBMT_CHRG_AMT",
                 "label": "Submitted Charge Amount",
-                "definition": "The line-item total charges (covered and non-covered) for all accommodations and services (related to the revenue code) for a billing period before reduction for the deductible and coinsurance amounts and before an adjustment for the cost of services provided.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -461,7 +426,7 @@
                         "code": "string"
                     }
                 ]
-            },
+            }
             
         ]
     }

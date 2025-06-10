@@ -1,3 +1,7 @@
+locals {
+  ccw_rif_role_name = !var.greenfield ? "bfd-${local.env}-ccw-rif" : "${local.name_prefix}-ccw-rif-upload-role"
+}
+
 data "aws_iam_policy_document" "service_assume_role" {
   for_each = toset(["ecs-tasks", "lambda", "scheduler"])
   statement {
@@ -185,5 +189,91 @@ resource "aws_iam_role_policy_attachment" "ccw_execution" {
   }
 
   role       = aws_iam_role.ccw_execution.name
+  policy_arn = each.value
+}
+
+data "aws_iam_policy_document" "ccw_rif_trust" {
+  count = local.is_prod ? 1 : 0
+
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        for arn in split(" ", local.ssm_config["/bfd/${local.service}/ccw/ccw_rif_role_principal_arns"]) : trimspace(arn)
+      ]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [local.ssm_config["/bfd/${local.service}/ccw/ccw_rif_role_external_id"]]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "ccw_rif_kms" {
+  count = local.is_prod ? 1 : 0
+
+  statement {
+    actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
+    resources = [local.env_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "ccw_rif_kms" {
+  count = local.is_prod ? 1 : 0
+
+  name        = "${local.ccw_rif_role_name}-kms-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.ccw_rif_role_name} IAM Role to use the ${local.env} KMS key"
+  policy      = one(data.aws_iam_policy_document.ccw_rif_kms[*].json)
+}
+
+data "aws_iam_policy_document" "ccw_rif_s3" {
+  count = local.is_prod ? 1 : 0
+
+  statement {
+    sid       = "AllowListingOfCCWBucket"
+    actions   = ["s3:ListBucket"]
+    resources = [module.bucket_ccw.bucket.arn]
+  }
+
+  statement {
+    sid       = "AllowPuttingAndGettingObjectsInCCWBucket"
+    actions   = ["s3:GetObject", "s3:PutObject"]
+    resources = ["${module.bucket_ccw.bucket.arn}/*"]
+  }
+}
+
+resource "aws_iam_policy" "ccw_rif_s3" {
+  count = local.is_prod ? 1 : 0
+
+  name        = "${local.ccw_rif_role_name}-s3-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.ccw_rif_role_name} IAM Role to interact with the ${module.bucket_ccw.bucket.bucket} Bucket"
+  policy      = one(data.aws_iam_policy_document.ccw_rif_s3[*].json)
+}
+
+resource "aws_iam_role" "ccw_rif" {
+  count = local.is_prod ? 1 : 0
+
+  name                  = local.ccw_rif_role_name
+  path                  = local.iam_path
+  permissions_boundary  = local.permissions_boundary_arn
+  description           = "Role assumed by CCW to read and write to the ${local.env} production and verification ETL buckets."
+  max_session_duration  = 43200 # max session duration is 12 hours (43200 seconds)- going big for long data-loads
+  assume_role_policy    = one(data.aws_iam_policy_document.ccw_rif_trust[*].json)
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "ccw_rif" {
+  for_each = local.is_prod ? {
+    kms = one(aws_iam_policy.ccw_rif_kms[*].arn)
+    s3  = one(aws_iam_policy.ccw_rif_s3[*].arn)
+  } : {}
+
+  role       = one(aws_iam_role.ccw_rif[*].name)
   policy_arn = each.value
 }

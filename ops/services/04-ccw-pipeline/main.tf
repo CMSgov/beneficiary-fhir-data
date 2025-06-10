@@ -33,6 +33,8 @@ locals {
   app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
   data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
 
+  is_prod = local.env == "prod"
+
   name_prefix = "bfd-${local.env}-${local.service}"
 
   pipeline_repository_name = coalesce(var.pipeline_repository_override, "bfd-pipeline-app")
@@ -52,11 +54,12 @@ locals {
     "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
     "/ng/bfd/${local.env}/common/nonsensitive/",
   ]
-  ccw_cpu                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  ccw_memory                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
-  ccw_disk_size              = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
-  ccw_loader_thread_multiple = 3
-  ccw_thread_multiple_claims = 25
+  ccw_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  ccw_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  ccw_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
+  ccw_capacity_provider_strategies = module.data_strategies.strategies
+  ccw_loader_thread_multiple       = 3
+  ccw_thread_multiple_claims       = 25
 }
 
 resource "aws_cloudwatch_log_group" "ccw_messages" {
@@ -69,7 +72,7 @@ module "bucket_ccw" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? local.name_prefix : null
+  bucket_name        = !var.greenfield ? "bfd-${local.env}-etl-${local.account_id}" : null
   bucket_prefix      = var.greenfield ? local.name_prefix : null
   force_destroy      = local.is_ephemeral_env
 

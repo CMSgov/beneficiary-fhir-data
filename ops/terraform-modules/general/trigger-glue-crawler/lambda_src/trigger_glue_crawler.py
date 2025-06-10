@@ -43,16 +43,19 @@ S3_KEY_MATCH_REGEX = re.compile(
 logger = Logger()
 
 
-def try_run_crawler(glue_client: GlueClient, name: str) -> None:
+def try_run_crawler(glue_client: GlueClient, name: str) -> bool:
     for wait_time in RETRY_TIMES:
         try:
             glue_client.start_crawler(Name=name)
+            return True
         except glue_client.exceptions.CrawlerRunningException:
             logger.warning(
                 "%s was already running, waiting %f seconds before retrying...", name, wait_time
             )
 
         time.sleep(wait_time)
+
+    return False
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
@@ -62,7 +65,7 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:
 
     try:
         s3_event = next(x for x in parse(model=S3Model, event=event).Records)
-        glue_client = boto3.client(service_name="glue", region_name="us-east-1")  # type: ignore
+        glue_client = boto3.client(service_name="glue", region_name=REGION, config=BOTO_CONFIG)  # type: ignore
 
         decoded_file_key = unquote(s3_event.s3.object.key)
         partition_matches = [

@@ -25,7 +25,8 @@ task_id="$(
     --cluster "$CLUSTER_NAME" \
     --task-definition "$TASK_DEFINITION_ARN" \
     --count 1 \
-    --launch-type "FARGATE" \
+    --platform-version "LATEST" \
+    --capacity-provider-strategy "$CAPACITY_PROVIDER_STRATEGIES" \
     --network-configuration "$NETWORK_CONFIG_JSON" \
     --tags "$TASK_TAGS_JSON" \
     --query "tasks[0].taskArn" \

@@ -13,6 +13,12 @@ revision:
               LoadBalancerInfo:
                 ContainerName: "${container_name}"
                 ContainerPort: ${container_port}
+              CapacityProviderStrategy:
+                %{~ for strategy in capacity_provider_strategies ~}
+                - CapacityProvider: ${strategy.capacity_provider}
+                  Base: ${strategy.base}
+                  Weight: ${strategy.weight}
+                %{~ endfor ~}
       %{~ if validation_lambda_arn != null ~}
       Hooks:
         - AfterAllowTestTraffic: "${validation_lambda_arn}"

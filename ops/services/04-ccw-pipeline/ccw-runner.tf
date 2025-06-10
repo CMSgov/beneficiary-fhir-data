@@ -68,15 +68,16 @@ resource "aws_lambda_function" "ccw_runner" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT            = local.env
-      DB_ENDPOINT                = data.aws_rds_cluster.main.reader_endpoint
-      CCW_BUCKET                 = module.bucket_ccw.bucket.bucket
-      ECS_CLUSTER_ARN            = data.aws_ecs_cluster.main.arn
-      CCW_TASK_DEFINITION_ARN    = aws_ecs_task_definition.ccw.arn
-      CCW_TASK_GROUP             = local.service
-      CCW_TASK_SUBNETS           = join(",", local.writer_adjacent_subnets)
-      CCW_TASK_SECURITY_GROUP_ID = aws_security_group.ccw_runner.id
-      CCW_TASK_TAGS_JSON         = jsonencode(local.default_tags)
+      BFD_ENVIRONMENT                       = local.env
+      DB_ENDPOINT                           = data.aws_rds_cluster.main.reader_endpoint
+      CCW_BUCKET                            = module.bucket_ccw.bucket.bucket
+      ECS_CLUSTER_ARN                       = data.aws_ecs_cluster.main.arn
+      CCW_TASK_DEFINITION_ARN               = aws_ecs_task_definition.ccw.arn
+      CCW_TASK_GROUP                        = local.service
+      CCW_TASK_SUBNETS                      = join(",", local.writer_adjacent_subnets)
+      CCW_TASK_SECURITY_GROUP_ID            = aws_security_group.ccw_runner.id
+      CCW_TASK_TAGS_JSON                    = jsonencode(local.default_tags)
+      CCW_TASK_CAPACITY_PROVIDER_STRATEGIES = jsonencode(local.ccw_capacity_provider_strategies)
     }
   }
 

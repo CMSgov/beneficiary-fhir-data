@@ -66,6 +66,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_bucket_certstores"></a> [bucket\_certstores](#module\_bucket\_certstores) | ../../terraform-modules/general/secure-bucket | n/a |
+| <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
