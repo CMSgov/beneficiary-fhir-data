@@ -273,9 +273,6 @@ class GeneratorUtil():
         df.to_csv("out/SYNTHETIC_BENE_MBI_ID.csv", index=False)
 
         df = pd.json_normalize(self.mdcr_stus)
-      #  df = df[[
-
-     #   ]]
         df.to_csv("out/SYNTHETIC_BENE_MDCR_STUS.csv", index=False)
         df = pd.json_normalize(self.mdcr_entlmt)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", index=False)
