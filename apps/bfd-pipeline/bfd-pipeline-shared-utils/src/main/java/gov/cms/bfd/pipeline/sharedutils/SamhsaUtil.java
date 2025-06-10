@@ -127,7 +127,7 @@ public class SamhsaUtil {
   /** Instance of this class. Will be a singleton. */
   private static SamhsaUtil samhsaUtil;
 
-  /** The file from which SAMHSA entries are pulled. Must be in the resources folder. */
+  /** The file from which SAMHSA entries are pulled. Must be in the `resources` folder. */
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
 
   private static final String[] PRCDR_SYSTEMS = {
@@ -188,7 +188,7 @@ public class SamhsaUtil {
   }
 
   /**
-   * Gets an input stream from a file in the resources folder.
+   * Gets an input stream from a file in the `resources` folder.
    *
    * @throws IOException Exception thrown when the resource cannot be loaded.
    */
@@ -228,7 +228,7 @@ public class SamhsaUtil {
    * @param tableEntry The tableEntry object for this table.
    * @param dates If present, contains the active dates for this claim.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
-   *     claim has more than one lineitem.
+   *     claim has more than one line item.
    * @param nonCodeFields Fields that are not Samhsa codes. This will be skipped during iteration.
    * @param entityManager The entity manager.
    * @return true if a SAMHSA tag should be created.
@@ -248,7 +248,7 @@ public class SamhsaUtil {
         continue;
       }
       String code = (String) claim[entry.getValue()];
-      // having a continue here instead of a nested block reduces cognitive complexity.
+      // having a `continue` here instead of a nested block reduces cognitive complexity.
       if (code == null) {
         continue;
       }
@@ -315,8 +315,7 @@ public class SamhsaUtil {
         entry.getEndDate().equalsIgnoreCase("Active")
             ? LocalDate.MAX
             : LocalDate.parse(entry.getEndDate());
-    CodeDateRange result = new CodeDateRange(startDate, endDate);
-    return result;
+      return new CodeDateRange(startDate, endDate);
   }
 
   private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
