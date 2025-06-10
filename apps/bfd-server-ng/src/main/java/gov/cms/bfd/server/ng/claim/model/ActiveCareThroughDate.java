@@ -1,0 +1,23 @@
+package gov.cms.bfd.server.ng.claim.model;
+
+import gov.cms.bfd.server.ng.DateUtil;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+
+import java.time.LocalDate;
+
+@Embeddable
+public class ActiveCareThroughDate {
+  @Column(name = "clm_actv_care_thru_dt")
+  private LocalDate activeCareThroughDate;
+
+  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return supportingInfoFactory
+        .createSupportingInfo()
+        .setCategory(BlueButtonSupportingInfoCategory.CARE_THROUGH_DATE.toFhir())
+        .setTiming(new DateTimeType().setValue(DateUtil.toDate(activeCareThroughDate)));
+  }
+}

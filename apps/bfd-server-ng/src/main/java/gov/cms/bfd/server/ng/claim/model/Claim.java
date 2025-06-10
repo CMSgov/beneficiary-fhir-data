@@ -4,6 +4,8 @@ import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -29,6 +31,9 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
+  @ManyToOne private ClaimDateSignature claimDateSignature;
+  @OneToOne private ClaimInstitutional claimInstitutional;
+
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -38,6 +43,9 @@ public class Claim {
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimProcessDate claimProcessDate;
   @Embedded private BillingProvider billingProvider;
+  @Embedded private BloodPints bloodPints;
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
+  @Embedded private TypeOfBillCode typeOfBillCode;
 
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
@@ -69,6 +77,18 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(p.castToReference(eob));
             });
+
+    var supportingInfoFactory = new SupportingInfoFactory();
+    eob.addSupportingInfo(bloodPints.toFhir(supportingInfoFactory));
+    eob.addSupportingInfo(nchPrimaryPayorCode.toFhir(supportingInfoFactory));
+    eob.addSupportingInfo(typeOfBillCode.toFhir(supportingInfoFactory));
+    for (var supportingInfo : claimDateSignature.toFhir(supportingInfoFactory)) {
+      eob.addSupportingInfo(supportingInfo);
+    }
+    for (var supportingInfo : claimInstitutional.toFhir(supportingInfoFactory)) {
+      eob.addSupportingInfo(supportingInfo);
+    }
+    eob.addItem();
     return eob;
   }
 }

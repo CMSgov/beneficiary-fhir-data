@@ -1,0 +1,24 @@
+package gov.cms.bfd.server.ng.claim.model;
+
+import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.SequenceGenerator;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+
+import java.time.LocalDate;
+
+@Embeddable
+public class NchWeeklyProcessingDate {
+  @Column(name = "clm_nch_wkly_proc_dt")
+  private LocalDate weeklyProcessingDate;
+
+  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return supportingInfoFactory
+        .createSupportingInfo()
+        .setCategory(BlueButtonSupportingInfoCategory.WEEKLY_PROCESS_DATE.toFhir())
+        .setTiming(new DateTimeType().setValue(DateUtil.toDate(weeklyProcessingDate)));
+  }
+}

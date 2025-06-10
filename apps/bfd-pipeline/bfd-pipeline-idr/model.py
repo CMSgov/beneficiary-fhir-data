@@ -611,10 +611,17 @@ class IdrClaimLine(IdrBaseModel):
         """
 
 
+def transform_default_hipps_code(value: str | None) -> str:
+    if value is None or value == "00000":
+        return ""
+    else:
+        return value
+
+
 class IdrClaimLineInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
-    clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
     clm_ddctbl_coinsrnc_cd: str
     clm_line_instnl_rate_amt: float
     clm_line_instnl_adjstd_amt: float
@@ -639,8 +646,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_num_sk = {line}.clm_num_sk AND
-                {clm}.clm_from_dt = {line}.clm_from_dt
+                {clm}.clm_num_sk = {line}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause()}
             {{ORDER_BY}}
         """

@@ -24,7 +24,7 @@ public class SystemUrls {
   public static final String PROFILE_US_CORE_ORGANIZATION_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0";
 
-  // Hl7
+  // Hl7 Code Systems
 
   /**
    * <a href="https://terminology.hl7.org/1.0.0/CodeSystem-v3-NullFlavor.html">Hl7 Null Flavor.</a>
@@ -38,6 +38,12 @@ public class SystemUrls {
 
   public static final String HL7_DIAGNOSIS_TYPE =
       "http://terminology.hl7.org/CodeSystem/ex-diagnosistype";
+
+  public static final String HL7_CLAIM_INFORMATION =
+      "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
+
+  public static final String HL7_DATA_ABSENT =
+      "http://terminology.hl7.org/CodeSystem/data-absent-reason";
 
   // US Core
   /**
@@ -84,6 +90,9 @@ public class SystemUrls {
   public static final String CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType";
 
+  public static final String CARIN_CODE_SYSTEM_SUPPORTING_INFO_TYPE =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType";
+
   // CMS Blue Button
 
   public static final String BLUE_BUTTON_CLAIM_TYPE_CODE =
@@ -122,6 +131,51 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT";
 
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADMISSION_SOURCE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PATIENT_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADMISSION_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_SUPPORTING_INFORMATION =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PRIMARY_PAYOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_MCO_PAID_SWITCH =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_FACILITY_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_BILL_CLASSIFICATION_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_BILL_FREQUENCY_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD";
+
+  // CMS
+
+  public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
+  public static final String CMS_ICD_10 = "http://www.cms.gov/Medicare/Coding/ICD10";
+  public static final String CMS_MS_DRG =
+      "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software";
+  public static final String CMS_HCPCS = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+  public static final String CMS_HIPPS =
+      "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes";
+
+  // NUBC
+  public static final String NUBC_PATIENT_DISCHARGE_STATUS =
+      "https://www.nubc.org/CodeSystem/PatDischargeStatus";
+  public static final String NUBC_POINT_OF_ORIGIN = "https://www.nubc.org/CodeSystem/PointOfOrigin";
+  public static final String NUBC_TYPE_OF_ADMIT =
+      "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit";
+  public static final String NUBC_TYPE_OF_BILL = "https://www.nubc.org/CodeSystem/TypeOfBill";
+
   // Other
 
   /**
@@ -146,11 +200,13 @@ public class SystemUrls {
 
   public static final String NPI = "http://hl7.org/fhir/sid/us-npi";
 
+  public static final String NDC = "http://hl7.org/fhir/sid/ndc";
+
   public static final String CMS_CERTIFICATION_NUMBERS =
       "http://terminology.hl7.org/NamingSystem/CCN";
 
-  public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
-  public static final String CMS_ICD_10 = "http://www.cms.gov/Medicare/Coding/ICD10";
   public static final String ICD_9_CM = "http://hl7.org/fhir/sid/icd-9-cm";
   public static final String ICD_10_CM = "http://hl7.org/fhir/sid/icd-10-cm";
+  public static final String UNITS_OF_MEASURE = "http://unitsofmeasure.org";
+  public static final String AMA_CPT = "http://www.ama-assn.org/go/cpt";
 }

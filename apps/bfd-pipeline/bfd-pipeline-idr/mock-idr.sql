@@ -275,7 +275,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     clm_ansi_sgntr_sk BIGINT,
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
-    clm_from_dt DATE NOT NULL,
     clm_line_num INT NOT NULL,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),
