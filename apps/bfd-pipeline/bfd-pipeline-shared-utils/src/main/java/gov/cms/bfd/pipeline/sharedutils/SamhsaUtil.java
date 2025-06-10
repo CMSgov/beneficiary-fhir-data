@@ -315,7 +315,7 @@ public class SamhsaUtil {
         entry.getEndDate().equalsIgnoreCase("Active")
             ? LocalDate.MAX
             : LocalDate.parse(entry.getEndDate());
-      return new CodeDateRange(startDate, endDate);
+    return new CodeDateRange(startDate, endDate);
   }
 
   private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
