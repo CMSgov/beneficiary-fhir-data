@@ -83,52 +83,60 @@ public class SamhsaUtilTest {
   @Test
   public void shouldReturnSamhsaHCPCS() {
     Optional<SamhsaEntry> entry =
-            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_HCPCS_CODE), Optional.of(TEST_SAMHSA_HCPCS_COLUMN));
+        SamhsaUtil.getSamhsaCode(
+            Optional.of(TEST_SAMHSA_HCPCS_CODE), Optional.of(TEST_SAMHSA_HCPCS_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
-    assertEquals("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
-            entry.get().getSystem(),
-            "Unexpected system for HCPCS column");
+    assertEquals(
+        "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        entry.get().getSystem(),
+        "Unexpected system for HCPCS column");
   }
 
   /** This test should return a SAMHSA HCPCS code entry for the given code. */
   @Test
   public void shouldReturnSamhsaProcedure() {
     Optional<SamhsaEntry> entry =
-            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_PROC_CODE), Optional.of(TEST_SAMHSA_PROC_COLUMN));
+        SamhsaUtil.getSamhsaCode(
+            Optional.of(TEST_SAMHSA_PROC_CODE), Optional.of(TEST_SAMHSA_PROC_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
-    assertEquals("http://www.cms.gov/Medicare/Coding/ICD10",
-            entry.get().getSystem(),
-            "Unexpected system for Procedure column");
+    assertEquals(
+        "http://www.cms.gov/Medicare/Coding/ICD10",
+        entry.get().getSystem(),
+        "Unexpected system for Procedure column");
   }
 
   /** This test should return a SAMHSA DRG code entry for the given code. */
   @Test
   public void shouldReturnSamhsaDrug() {
     Optional<SamhsaEntry> entry =
-            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DRG_CODE), Optional.of(TEST_SAMHSA_DRG_COLUMN));
+        SamhsaUtil.getSamhsaCode(
+            Optional.of(TEST_SAMHSA_DRG_CODE), Optional.of(TEST_SAMHSA_DRG_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
-    assertEquals("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
-            entry.get().getSystem(),
-            "Unexpected system for DRG column");
+    assertEquals(
+        "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software",
+        entry.get().getSystem(),
+        "Unexpected system for DRG column");
   }
 
   /** This test should return a SAMHSA Diagnosis code entry for the given code. */
   @Test
   public void shouldReturnSamhsaDiagnosis() {
     Optional<SamhsaEntry> entry =
-            SamhsaUtil.getSamhsaCode(Optional.of(TEST_SAMHSA_DIAG_CODE), Optional.of(TEST_SAMHSA_DIAG_COLUMN));
+        SamhsaUtil.getSamhsaCode(
+            Optional.of(TEST_SAMHSA_DIAG_CODE), Optional.of(TEST_SAMHSA_DIAG_COLUMN));
 
     assertTrue(entry.isPresent(), "Expected a SAMHSA entry to be present");
 
-    assertEquals("http://hl7.org/fhir/sid/icd-10-cm",
-            entry.get().getSystem(),
-            "Unexpected system for DIAG column");
+    assertEquals(
+        "http://hl7.org/fhir/sid/icd-10-cm",
+        entry.get().getSystem(),
+        "Unexpected system for DIAG column");
   }
 
   /** This test should create FISS Tags and attempt to save them to the database. */
@@ -160,7 +168,7 @@ public class SamhsaUtilTest {
     verify(entityManager, times(2)).merge(captor.capture());
     List<McsTag> tags = captor.getAllValues();
     assertEquals(
-            2, tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count());
+        2, tags.stream().filter(t -> t.getClaim().equals(mcsClaim.getIdrClmHdIcn())).count());
   }
 
   /** This test should create Carrier Tags and attempt to save them to the database. */
@@ -519,20 +527,22 @@ public class SamhsaUtilTest {
    * @return A fake Non-Samhsa DME claim.
    */
   public DMEClaim getNonSamhsaDMEClaim() {
-      return DMEClaim.builder()
-          .claimId(1234567890)
-          .diagnosisPrincipalCode("NONSAMHSA")
-          .diagnosis1Code("NONSAMHSA")
-          .lines(
-              List.of(
-                  DMEClaimLine.builder()
-                      .diagnosisCode("NONSAMHSA")
-                      .lineNumber((short) 1)
-                      .hcpcsCode("NONSAMHSA")
-                      .build()))
-          .dateFrom(LocalDate.parse("1970-01-01"))
-          .dateThrough(LocalDate.now())
-          .build();
+    DMEClaim claim =
+            DMEClaim.builder()
+                    .claimId(1234567890)
+                    .diagnosisPrincipalCode("NONSAMHSA")
+                    .diagnosis1Code("NONSAMHSA")
+                    .lines(
+                            List.of(
+                                    DMEClaimLine.builder()
+                                            .diagnosisCode("NONSAMHSA")
+                                            .lineNumber((short) 1)
+                                            .hcpcsCode("NONSAMHSA")
+                                            .build()))
+                    .dateFrom(LocalDate.parse("1970-01-01"))
+                    .dateThrough(LocalDate.now())
+                    .build();
+    return claim;
   }
 
   /**
