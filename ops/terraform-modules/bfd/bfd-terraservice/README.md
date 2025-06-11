@@ -8,7 +8,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.5.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.10.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
@@ -22,10 +22,11 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_environment_name"></a> [environment\_name](#input\_environment\_name) | The solution's environment name. Generally, `terraform.workspace` | `string` | n/a | yes |
 | <a name="input_relative_module_root"></a> [relative\_module\_root](#input\_relative\_module\_root) | The solution's relative path from the root of beneficiary-fhir-data repository | `string` | n/a | yes |
 | <a name="input_service"></a> [service](#input\_service) | Service _or_ terraservice name. | `string` | n/a | yes |
 | <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags to merge into final default\_tags output | `map(string)` | `{}` | no |
+| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
+| <a name="input_lookup_kms_keys"></a> [lookup\_kms\_keys](#input\_lookup\_kms\_keys) | Toggles whether or not this module does data lookups for the platform and current env KMS keys.<br/>If false, the KMS-related outputs will all be null. Set to false for services that create the keys<br/>or are otherwise applied prior to the keys existing | `bool` | `true` | no |
 | <a name="input_ssm_hierarchy_roots"></a> [ssm\_hierarchy\_roots](#input\_ssm\_hierarchy\_roots) | List of SSM Hierarchy roots. Module executes a recursive lookup for all roots for `common` and service-specific hierarchies. | `list(string)` | <pre>[<br/>  "bfd"<br/>]</pre> | no |
 | <a name="input_subnet_layers"></a> [subnet\_layers](#input\_subnet\_layers) | List of subnet 'layers' (app, data, dmz, etc.) from which each subnet associated with that layer will be looked up. | `list(string)` | `[]` | no |
 
@@ -51,9 +52,12 @@ No modules.
 | [aws_availability_zones.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy.permissions_boundary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy) | data source |
-| [aws_kms_key.env_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
-| [aws_kms_key.env_config_cmk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_kms_key.env](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
+| [aws_kms_key.platform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_key) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_security_group.cms_cloud_security_tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_group.cms_cloud_shared_services](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
+| [aws_security_group.cms_cloud_vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.management](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.tools](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
 | [aws_security_group.vpn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_group) | data source |
@@ -74,24 +78,27 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_account_id"></a> [account\_id](#output\_account\_id) | The account ID associated with the current caller identity |
+| <a name="output_canary"></a> [canary](#output\_canary) | Canary output used to ensure that any Terraservice using the root.tofu.tf also uses this module. |
+| <a name="output_cms_cloud_security_tools_sg"></a> [cms\_cloud\_security\_tools\_sg](#output\_cms\_cloud\_security\_tools\_sg) | Greenfield only. The OIT/CMS Cloud provided Security Tools Security Group (data.aws\_security\_group). |
+| <a name="output_cms_cloud_shared_services_sg"></a> [cms\_cloud\_shared\_services\_sg](#output\_cms\_cloud\_shared\_services\_sg) | Greenfield only. The OIT/CMS Cloud provided Shared Services Security Group (data.aws\_security\_group). |
+| <a name="output_cms_cloud_vpn_sg"></a> [cms\_cloud\_vpn\_sg](#output\_cms\_cloud\_vpn\_sg) | Greenfield only. The OIT/CMS Cloud provided VPN Security Group (data.aws\_security\_group). |
 | <a name="output_default_azs"></a> [default\_azs](#output\_default\_azs) | Key-value map of AZ names to their attributes (data.aws\_availability\_zone) of all default AZs that all BFD services exist in. |
 | <a name="output_default_iam_path"></a> [default\_iam\_path](#output\_default\_iam\_path) | Default path for IAM policies and roles. |
 | <a name="output_default_permissions_boundary_arn"></a> [default\_permissions\_boundary\_arn](#output\_default\_permissions\_boundary\_arn) | ARN of the default permissions boundary for IAM Roles. |
 | <a name="output_default_tags"></a> [default\_tags](#output\_default\_tags) | n/a |
 | <a name="output_env"></a> [env](#output\_env) | The solution's environment name. Generally, `terraform.workspace` |
-| <a name="output_env_config_key_alias"></a> [env\_config\_key\_alias](#output\_env\_config\_key\_alias) | Alias name for the current environment's configuration-specific, multi-region CMK. |
-| <a name="output_env_config_key_arns"></a> [env\_config\_key\_arns](#output\_env\_config\_key\_arns) | ARNs of the current environment's configuration-specific, multi-region CMK. |
-| <a name="output_env_key_alias"></a> [env\_key\_alias](#output\_env\_key\_alias) | Alias name for the current environment's general-purpose CMK. |
-| <a name="output_env_key_arn"></a> [env\_key\_arn](#output\_env\_key\_arn) | ARN of the current environment's general-purpose CMK. |
+| <a name="output_env_key_alias"></a> [env\_key\_alias](#output\_env\_key\_alias) | Alias name for the current environment's CMK. |
+| <a name="output_env_key_arn"></a> [env\_key\_arn](#output\_env\_key\_arn) | ARN of the current region's primary environment CMK. |
 | <a name="output_is_ephemeral_env"></a> [is\_ephemeral\_env](#output\_is\_ephemeral\_env) | Returns true when environment is \_ephemeral\_, false when \_established\_ |
 | <a name="output_latest_bfd_release"></a> [latest\_bfd\_release](#output\_latest\_bfd\_release) | This is the latest CMSgov/beneficiary-fhir-data release. Excludes Pre-Releases. |
-| <a name="output_management_sg"></a> [management\_sg](#output\_management\_sg) | The OIT/CMS Cloud provided remote management Security Group (data.aws\_security\_group). |
+| <a name="output_legacy_management_sg"></a> [legacy\_management\_sg](#output\_legacy\_management\_sg) | The OIT/CMS Cloud provided remote management Security Group (data.aws\_security\_group). |
+| <a name="output_legacy_tools_sg"></a> [legacy\_tools\_sg](#output\_legacy\_tools\_sg) | The OIT/CMS Cloud provided enterprise tools Security Group (data.aws\_security\_group). |
+| <a name="output_legacy_vpn_sg"></a> [legacy\_vpn\_sg](#output\_legacy\_vpn\_sg) | The OIT/CMS Cloud provided VPN Security Group (data.aws\_security\_group). |
+| <a name="output_platform_key_alias"></a> [platform\_key\_alias](#output\_platform\_key\_alias) | Alias name for the platform CMK. |
+| <a name="output_platform_key_arn"></a> [platform\_key\_arn](#output\_platform\_key\_arn) | ARN of the current region's primary platform CMK. |
 | <a name="output_region"></a> [region](#output\_region) | The region name associated with the current caller identity |
-| <a name="output_seed_env"></a> [seed\_env](#output\_seed\_env) | The solution's source environment. For established environments this is equal to the environment's name |
 | <a name="output_service"></a> [service](#output\_service) | The name of the current Terraservice |
 | <a name="output_ssm_config"></a> [ssm\_config](#output\_ssm\_config) | Parameter:Value map that elides repetitive keys, e.g. ssm:/bfd/test/common/vpc\_name is /bfd/comon/vpc\_name |
-| <a name="output_subnets_map"></a> [subnets\_map](#output\_subnets\_map) | Map of subnet layers to the subnets (data.aws\_subnet) in that layer in the current environment's VPC. |
-| <a name="output_tools_sg"></a> [tools\_sg](#output\_tools\_sg) | The OIT/CMS Cloud provided enterprise tools Security Group (data.aws\_security\_group). |
+| <a name="output_subnets_map"></a> [subnets\_map](#output\_subnets\_map) | Map of subnet layers (legacy) or group (greenfield) to the subnets (data.aws\_subnet) in that layer in the current environment's VPC. |
 | <a name="output_vpc"></a> [vpc](#output\_vpc) | The current environment's VPC (data.aws\_vpc). |
-| <a name="output_vpn_sg"></a> [vpn\_sg](#output\_vpn\_sg) | The OIT/CMS Cloud provided VPN Security Group (data.aws\_security\_group). |
 <!-- END_TF_DOCS -->

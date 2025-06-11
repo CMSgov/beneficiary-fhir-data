@@ -623,6 +623,12 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
     clm_ansi_sgntr_sk: int
+
+
+class IdrClaimLineInstitutional(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
+    clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_ddctbl_coinsrnc_cd: str
     clm_line_instnl_rate_amt: float
     clm_line_instnl_adjstd_amt: float
@@ -647,7 +653,8 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_num_sk = {line}.clm_num_sk
+                {clm}.clm_num_sk = {line}.clm_num_sk AND
+                {clm}.clm_from_dt = {line}.clm_from_dt
             {{WHERE_CLAUSE}} AND {claim_type_clause()}
             {{ORDER_BY}}
         """

@@ -134,11 +134,11 @@ class RegressionV2User(BFDUserBase):
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient/_search",
             body={
-                    "_id": next(self.bene_ids),
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": "25",
-                },
+                "_id": next(self.bene_ids),
+                "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
+                "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                "_count": "25",
+            },
             name="/v2/fhir/Patient search by coverage contract (all pages)",
         )
 
@@ -149,12 +149,12 @@ class RegressionV2User(BFDUserBase):
 
         self.run_task_by_parameters(
             base_path="/v2/fhir/Patient/_search",
-                body={
-                    "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{next(self.mbis)}",
-                    "_IncludeIdentifiers": "mbi",
-                },
-                name="/v2/fhir/Patient search by mbi / includeIdentifiers = mbi",
-            )
+            body={
+                "identifier": f"https://bluebutton.cms.gov/resources/identifier/mbi-hash|{next(self.mbis)}",
+                "_IncludeIdentifiers": "mbi",
+            },
+            name="/v2/fhir/Patient search by mbi / includeIdentifiers = mbi",
+        )
 
     @tag("patient", "patient_test_id_include_mbi")
     @task
