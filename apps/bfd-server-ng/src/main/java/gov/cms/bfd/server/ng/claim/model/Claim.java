@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -11,6 +12,9 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Entity
 @Getter
@@ -31,9 +35,6 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
-  @ManyToOne private ClaimDateSignature claimDateSignature;
-  @OneToOne private ClaimInstitutional claimInstitutional;
-
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -46,6 +47,11 @@ public class Claim {
   @Embedded private BloodPints bloodPints;
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
+  @Embedded private CareTeam careTeam;
+
+  @ManyToOne private ClaimDateSignature claimDateSignature;
+  @OneToOne private ClaimInstitutional claimInstitutional;
+  @ManyToMany private List<ClaimLine> claimLines;
 
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
@@ -79,16 +85,26 @@ public class Claim {
             });
 
     var supportingInfoFactory = new SupportingInfoFactory();
-    eob.addSupportingInfo(bloodPints.toFhir(supportingInfoFactory));
-    eob.addSupportingInfo(nchPrimaryPayorCode.toFhir(supportingInfoFactory));
-    eob.addSupportingInfo(typeOfBillCode.toFhir(supportingInfoFactory));
-    for (var supportingInfo : claimDateSignature.toFhir(supportingInfoFactory)) {
-      eob.addSupportingInfo(supportingInfo);
-    }
-    for (var supportingInfo : claimInstitutional.toFhir(supportingInfoFactory)) {
-      eob.addSupportingInfo(supportingInfo);
-    }
-    eob.addItem();
+    var initialSupportingInfo =
+        List.of(
+            bloodPints.toFhir(supportingInfoFactory),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+            typeOfBillCode.toFhir(supportingInfoFactory));
+    Stream.of(
+            initialSupportingInfo,
+            claimDateSignature.toFhir(supportingInfoFactory),
+            claimInstitutional.toFhir(supportingInfoFactory))
+        .flatMap(Collection::stream)
+        .forEach(eob::addSupportingInfo);
+
+    claimLines.forEach(c -> eob.addItem(c.toFhir()));
+    careTeam
+        .toFhir(eob)
+        .forEach(
+            c -> {
+              eob.addCareTeam(c.careTeam());
+              eob.addContained(c.practitioner());
+            });
     return eob;
   }
 }

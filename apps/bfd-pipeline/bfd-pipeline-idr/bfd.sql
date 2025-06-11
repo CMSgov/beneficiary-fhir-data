@@ -285,6 +285,7 @@ CREATE TABLE idr.claim_line (
 CREATE TABLE idr.claim_line_institutional (
     clm_uniq_id BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
+    clm_ansi_sgntr_sk BIGINT,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),
     clm_line_instnl_rate_amt NUMERIC,

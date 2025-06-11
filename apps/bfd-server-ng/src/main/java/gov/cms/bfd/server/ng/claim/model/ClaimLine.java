@@ -1,24 +1,35 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.FhirUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Entity
 public class ClaimLine {
   @Column(name = "clm_line_num")
   private int lineNumber;
 
-  @OneToOne private ClaimLineInstitutional claimLineInstitutional;
+  @Column(name = "clm_line_rev_ctr_cd")
+  private ClaimLineRevenueCenterCode revenueCenterCode;
 
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
+  @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
+  @Embedded private AdjudicationCharge adjudicationCharge;
+
+  @OneToOne private ClaimLineInstitutional claimLineInstitutional;
 
   ExplanationOfBenefit.ItemComponent toFhir() {
     var line = new ExplanationOfBenefit.ItemComponent();
@@ -29,6 +40,21 @@ public class ClaimLine {
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     ndc.toFhir().ifPresent(line::addDetail);
     line.setQuantity(serviceUnitQuantity.toFhir());
+
+    var revenueCoding = revenueCenterCode.toFhir();
+    revenueCoding.addCoding(claimLineInstitutional.getDeductibleCoinsuranceCode().toFhir());
+    line.setRevenue(revenueCoding);
+    line.addModifier(hcpcsModifierCode.toFhir());
+
+    Stream.of(
+            claimLineInstitutional.getAnsiSignature().toFhir(),
+            adjudicationCharge.toFhir(),
+            claimLineInstitutional.getAdjudicationCharge().toFhir())
+        .flatMap(Collection::stream)
+        .forEach(line::addAdjudication);
+    line.setServiced(
+        new DateTimeType(DateUtil.toDate(claimLineInstitutional.getRevenueCenterDate())));
+
     return line;
   }
 }

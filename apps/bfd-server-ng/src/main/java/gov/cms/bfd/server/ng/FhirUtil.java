@@ -3,8 +3,12 @@ package gov.cms.bfd.server.ng;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
+import java.util.regex.Pattern;
+
 public class FhirUtil {
   private FhirUtil() {}
+
+  private static final Pattern IS_INTEGER = Pattern.compile("\\d+");
 
   public static CodeableConcept checkDataAbsent(CodeableConcept codeableConcept) {
     if (codeableConcept.getCoding().isEmpty()) {
@@ -13,6 +17,15 @@ public class FhirUtil {
               .setSystem(SystemUrls.HL7_DATA_ABSENT)
               .setCode("not-applicable")
               .setDisplay("Not Applicable"));
+    }
+    return codeableConcept;
+  }
+
+  public static String getHcpcsSystem(String code) {
+    if (IS_INTEGER.matcher(code).matches()) {
+      return SystemUrls.AMA_CPT;
+    } else {
+      return SystemUrls.CMS_HCPCS;
     }
   }
 }

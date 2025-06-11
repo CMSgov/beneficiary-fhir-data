@@ -622,6 +622,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
+    clm_ansi_sgntr_sk: int
     clm_ddctbl_coinsrnc_cd: str
     clm_line_instnl_rate_amt: float
     clm_line_instnl_adjstd_amt: float
@@ -654,10 +655,18 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 class IdrClaimAnsiSignature(IdrBaseModel):
     clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True}]
-    clm_1_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_2_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_3_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_4_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_1_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
+    clm_2_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
+    clm_3_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
+    clm_4_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
 
     @staticmethod
     def table() -> str:
