@@ -45,11 +45,10 @@ locals {
   # subnets by AZ
   writer_adjacent_subnets = [for subnet in local.data_subnets : subnet.id if subnet.availability_zone == local.rds_writer_az]
 
-  # TODO: Remove "/ng/" prefix when config is switched to
   ssm_hierarchies = [
-    "/ng/bfd/${local.env}/${local.service}/sensitive/",
-    "/ng/bfd/${local.env}/${local.service}/nonsensitive/",
-    "/ng/bfd/${local.env}/common/nonsensitive/",
+    "/bfd/${local.env}/${local.service}/sensitive/",
+    "/bfd/${local.env}/${local.service}/nonsensitive/",
+    "/bfd/${local.env}/common/nonsensitive/",
   ]
   cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
   memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])

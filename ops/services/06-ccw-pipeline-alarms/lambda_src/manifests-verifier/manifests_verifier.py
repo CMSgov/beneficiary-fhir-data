@@ -126,12 +126,11 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
                 "describe-db-clusters returned invalid data for "
                 f"{DB_CLUSTER_NAME}: {described_clusters!s}"
             ) from exc
-        # TODO: Remove "/ng/"
         db_username = parameters.get_parameter(
-            f"/ng/bfd/{BFD_ENVIRONMENT}/ccw-pipeline/sensitive/db/username", decrypt=True
+            f"/bfd/{BFD_ENVIRONMENT}/ccw-pipeline/sensitive/db/username", decrypt=True
         )
         db_password = parameters.get_parameter(
-            f"/ng/bfd/{BFD_ENVIRONMENT}/ccw-pipeline/sensitive/db/password", decrypt=True
+            f"/bfd/{BFD_ENVIRONMENT}/ccw-pipeline/sensitive/db/password", decrypt=True
         )
 
         logger.info(
