@@ -9,6 +9,8 @@ locals {
   env        = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
   parent_env = terraform.workspace
 
+  env_vpc = one([for _, v in data.aws_vpc.main : v if v.tags["stack"] == local.env])
+
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
     # TODO: Remove "/ng/" prefix when Greenfield/"next-gen" services are migrated to completely
@@ -50,6 +52,17 @@ locals {
   default_azs = {
     for k, v in data.aws_availability_zone.main :
     k => v if contains(["a", "b", "c"], v.name_suffix)
+  }
+
+  local_cidrs = toset([for vpc in data.aws_vpc.main : vpc.cidr_block])
+  all_connections = { for k, v in data.aws_vpc_peering_connection.main :
+    v.tags["Name"] => {
+      connection_id = k
+      peering_owner = v.peer_owner_id
+      local_cidr    = contains(local.local_cidrs, v.cidr_block) ? v.cidr_block : v.peer_cidr_block
+      foreign_cidr  = contains(local.local_cidrs, v.cidr_block) ? v.peer_cidr_block : v.cidr_block
+      env           = one([for _, vpc in data.aws_vpc.main : vpc.tags["stack"] if contains([v.vpc_id, v.peer_vpc_id], vpc.id)])
+    }
   }
 }
 
@@ -118,11 +131,11 @@ data "aws_iam_policy" "permissions_boundary" {
   name = "ct-ado-poweruser-permissions-boundary-policy"
 }
 
+data "aws_vpcs" "main" {}
+
 data "aws_vpc" "main" {
-  filter {
-    name   = "tag:stack"
-    values = [local.parent_env]
-  }
+  for_each = toset(data.aws_vpcs.main.ids)
+  id       = each.value
 }
 
 data "aws_subnets" "main" {
@@ -130,7 +143,7 @@ data "aws_subnets" "main" {
 
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
+    values = [local.env_vpc.id]
   }
 
   tags = !var.greenfield ? {
@@ -146,10 +159,17 @@ data "aws_subnet" "main" {
   id = each.key
 }
 
+data "aws_vpc_peering_connections" "main" {}
+
+data "aws_vpc_peering_connection" "main" {
+  for_each = toset(data.aws_vpc_peering_connections.main.ids)
+  id       = each.value
+}
+
 data "aws_security_group" "vpn" {
   count = local.legacy_vpn_sg != null && !var.greenfield ? 1 : 0
 
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
     values = [local.legacy_vpn_sg]
@@ -159,7 +179,7 @@ data "aws_security_group" "vpn" {
 data "aws_security_group" "management" {
   count = local.legacy_management_sg != null && !var.greenfield ? 1 : 0
 
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
     values = [local.legacy_management_sg]
@@ -169,7 +189,7 @@ data "aws_security_group" "management" {
 data "aws_security_group" "tools" {
   count = local.legacy_tools_sg != null && !var.greenfield ? 1 : 0
 
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
     values = [local.legacy_tools_sg]
@@ -179,7 +199,7 @@ data "aws_security_group" "tools" {
 data "aws_security_group" "cms_cloud_vpn" {
   count = local.cms_cloud_vpn_sg != null && var.greenfield ? 1 : 0
 
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
     values = [local.cms_cloud_vpn_sg]
@@ -189,7 +209,7 @@ data "aws_security_group" "cms_cloud_vpn" {
 data "aws_security_group" "cms_cloud_security_tools" {
   count = local.cms_cloud_security_tools_sg != null && var.greenfield ? 1 : 0
 
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
     values = [local.cms_cloud_security_tools_sg]
@@ -199,7 +219,7 @@ data "aws_security_group" "cms_cloud_security_tools" {
 data "aws_security_group" "cms_cloud_shared_services" {
   count = local.cms_cloud_shared_services_sg != null && var.greenfield ? 1 : 0
 
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
     values = [local.cms_cloud_shared_services_sg]
