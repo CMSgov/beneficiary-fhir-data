@@ -25,8 +25,8 @@ locals {
   }
   ssm_config = zipmap(
     [
-      for name in local.ssm_flattened_data.names :
-      "/${replace(name, "/((non)*sensitive|${local.env})//", "")}"
+      for name in local.ssm_flattened_data.names
+      : replace(name, "/((non)*sensitive|${local.env})//", "")
     ],
     local.ssm_flattened_data.values
   )
