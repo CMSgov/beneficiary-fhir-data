@@ -98,7 +98,7 @@ output "default_permissions_boundary_arn" {
 output "vpc" {
   description = "The current environment's VPC (data.aws_vpc)."
   sensitive   = false
-  value       = data.aws_vpc.main
+  value       = local.env_vpc
 }
 
 output "default_azs" {
@@ -117,6 +117,12 @@ output "subnets_map" {
     for group in var.subnet_layers
     : group => [for _, subnet in data.aws_subnet.main : subnet if subnet.tags["GroupName"] == group]
   }
+}
+
+output "all_connections" {
+  description = "Map of all peering connections in all VPCs to their properties"
+  sensitive   = false
+  value       = local.all_connections
 }
 
 output "legacy_tools_sg" {

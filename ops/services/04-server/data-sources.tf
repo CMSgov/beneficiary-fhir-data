@@ -7,14 +7,6 @@ data "aws_vpc" "mgmt" {
   }
 }
 
-data "aws_vpc_peering_connection" "peers" {
-  for_each = !var.greenfield ? nonsensitive(toset(jsondecode(local.ssm_config["/bfd/${local.service}/lb_vpc_peerings_json"]))) : toset([])
-
-  tags = {
-    Name = each.key
-  }
-}
-
 data "aws_ec2_managed_prefix_list" "jenkins" {
   count = !var.greenfield ? 1 : 0
 

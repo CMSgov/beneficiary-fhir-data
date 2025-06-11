@@ -213,7 +213,6 @@
 /bfd/${env}/server/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
 /bfd/${env}/server/nonsensitive/paths/files/war: UNDEFINED
 /bfd/${env}/server/nonsensitive/lb_is_public: "false"
-/bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: '[ "bfd-test-vpc-to-bluebutton-test" ]'
 /bfd/${env}/server/nonsensitive/asg_min_instance_count: "3"
 /bfd/${env}/server/nonsensitive/asg_max_instance_count: "12"
 /bfd/${env}/server/nonsensitive/asg_max_warm_instance_count: "9"
