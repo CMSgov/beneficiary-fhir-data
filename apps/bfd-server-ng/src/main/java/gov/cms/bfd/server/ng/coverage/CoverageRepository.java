@@ -2,17 +2,13 @@ package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryEntitlement;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryEntitlementReason;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryStatus;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryThirdParty;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +33,7 @@ public class CoverageRepository {
   public Optional<CoverageDetails> findCoverageDetailsSingleQueryAttempt(
       CoverageCompositeId coverageCompositeId, DateTimeRange lastUpdatedRange) {
 
-    long beneSk = coverageCompositeId.beneSk();
+    var beneSk = coverageCompositeId.beneSk();
     String partTypeCode = coverageCompositeId.coveragePart().getStandardCode();
 
     Optional<Beneficiary> beneficiaryOpt =
@@ -49,71 +45,58 @@ public class CoverageRepository {
       return Optional.empty();
     }
     Beneficiary beneficiary = beneficiaryOpt.get();
-
-    ZoneId processingZone = ZoneId.of("America/New_York");
-    LocalDate currentDateForPeriods = ZonedDateTime.now(processingZone).toLocalDate();
-    ZonedDateTime currentTransactionalBoundary = ZonedDateTime.now(processingZone);
+    LocalDate currentDateForPeriods = OffsetDateTime.now(ZoneOffset.ofHours(-12)).toLocalDate();
 
     String jpqlRelatedDetails =
+        // maybe start with BeneficiaryStatus or BenEntitlment
+        // join on bgndt and ednDt
         """
-            SELECT tp, bs, be, ber
-            FROM BeneficiaryThirdParty tp
+            SELECT NEW gov.cms.bfd.server.ng.coverage.CoverageDetails( tp, bs, be, ber
+            )
+            FROM BeneficiaryEntitlement be
+            LEFT JOIN BeneficiaryThirdParty tp ON be.beneSk = tp.beneSk
+                AND tp.benefitRangeBeginDate = be.benefitRangeBeginDate
+                ANd tp.benefitRangeEndDate = be.benefitRangeEndDate
+                AND tp.idrTransObsoleteTimestamp = be.idrTransObsoleteTimestamp
+                AND tp.thirdPartyTypeCode = be.medicareEntitlementTypeCode
             LEFT JOIN BeneficiaryStatus bs ON bs.beneSk = tp.beneSk
-                AND bs.idrTransEffectiveTimestamp <= :transactionalBoundary
-                AND bs.idrTransObsoleteTimestamp > :transactionalBoundary
-                AND bs.medicareStatusBeginDate <= :referenceDate
-                AND bs.medicareStatusEndDate >= :referenceDate
-            LEFT JOIN BeneficiaryEntitlement be ON be.beneSk = tp.beneSk
-                AND be.medicareEntitlementTypeCode = :partTypeCode
-                AND be.idrTransEffectiveTimestamp <= :transactionalBoundary
-                AND be.idrTransObsoleteTimestamp > :transactionalBoundary
+                AND bs.medicareStatusBeginDate = tp.benefitRangeBeginDate
+                AND bs.medicareStatusEndDate= tp.benefitRangeEndDate
+                AND bs.idrTransObsoleteTimestamp = tp.idrTransObsoleteTimestamp
+            LEFT JOIN BeneficiaryEntitlementReason ber ON ber.beneSk = tp.beneSk
+                AND ber.idrTransObsoleteTimestamp = be.idrTransObsoleteTimestamp
+                AND ber.benefitRangeBeginDate = be.benefitRangeBeginDate
+                AND ber.benefitRangeEndDate = be.benefitRangeEndDate
+            WHERE bs.beneSk = :beneSkParam
+                AND be.idrTransObsoleteTimestamp < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE
                 AND be.benefitRangeBeginDate <= :referenceDate
                 AND be.benefitRangeEndDate >= :referenceDate
-            LEFT JOIN BeneficiaryEntitlementReason ber ON ber.beneSk = tp.beneSk
-                AND ber.idrTransEffectiveTimestamp <= :transactionalBoundary
-                AND ber.idrTransObsoleteTimestamp > :transactionalBoundary
-                AND ber.benefitRangeBeginDate <= :referenceDate
-                AND ber.benefitRangeEndDate >= :referenceDate
-            WHERE tp.beneSk = :beneSkParam
-                AND tp.thirdPartyTypeCode = :partTypeCode
-                AND tp.idrTransEffectiveTimestamp <= :transactionalBoundary
-                AND tp.idrTransObsoleteTimestamp > :transactionalBoundary
-                AND tp.benefitRangeBeginDate <= :referenceDate
-                AND tp.benefitRangeEndDate >= :referenceDate
+                AND be.medicareEntitlementTypeCode = :partTypeCode
             """;
 
-    TypedQuery<Object[]> query =
+    TypedQuery<CoverageDetails> query =
         entityManager
-            .createQuery(jpqlRelatedDetails, Object[].class)
+            .createQuery(jpqlRelatedDetails, CoverageDetails.class)
             .setParameter("beneSkParam", beneSk)
             .setParameter("partTypeCode", partTypeCode)
             .setParameter("referenceDate", currentDateForPeriods)
-            .setParameter("transactionalBoundary", currentTransactionalBoundary)
             .setMaxResults(1);
 
-    List<Object[]> relatedResults = query.getResultList();
+    List<CoverageDetails> relatedResults = query.getResultList();
 
-    Optional<BeneficiaryThirdParty> finalThirdPartyOpt = Optional.empty();
-    Optional<BeneficiaryStatus> finalStatusOpt = Optional.empty();
-    Optional<BeneficiaryEntitlement> finalEntitlementOpt = Optional.empty();
-    Optional<BeneficiaryEntitlementReason> finalReasonOpt = Optional.empty();
-
-    if (!relatedResults.isEmpty()) {
-      Object[] firstRelatedRow = relatedResults.get(0);
-      finalThirdPartyOpt = Optional.ofNullable((BeneficiaryThirdParty) firstRelatedRow[0]);
-      finalStatusOpt = Optional.ofNullable((BeneficiaryStatus) firstRelatedRow[1]);
-      finalEntitlementOpt = Optional.ofNullable((BeneficiaryEntitlement) firstRelatedRow[2]);
-      finalReasonOpt = Optional.ofNullable((BeneficiaryEntitlementReason) firstRelatedRow[3]);
+    if (relatedResults.isEmpty()) {
+      return Optional.of(
+          CoverageDetails.builder()
+              .beneficiary(beneficiary)
+              .thirdPartyDetails(Optional.empty())
+              .currentStatus(Optional.empty())
+              .partEntitlement(Optional.empty())
+              .currentEntitlementReason(Optional.empty())
+              .build());
     }
 
-    CoverageDetails details =
-        CoverageDetails.builder()
-            .beneficiary(beneficiary)
-            .thirdPartyDetails(finalThirdPartyOpt)
-            .currentStatus(finalStatusOpt)
-            .partEntitlement(finalEntitlementOpt)
-            .currentEntitlementReason(finalReasonOpt)
-            .build();
+    CoverageDetails details = relatedResults.get(0);
+    details.setBeneficiary(beneficiary);
 
     return Optional.of(details);
   }

@@ -30,9 +30,6 @@ public class BeneficiaryEntitlement {
   @Column(name = "bene_mdcr_entlmt_stus_cd", length = 1)
   private String medicareEntitlementStatusCode;
 
-  @Column(name = "idr_trans_efctv_ts", nullable = false)
-  private ZonedDateTime idrTransEffectiveTimestamp;
-
   @Column(name = "idr_trans_obslt_ts", nullable = false)
   private ZonedDateTime idrTransObsoleteTimestamp;
 

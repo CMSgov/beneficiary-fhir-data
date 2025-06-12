@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
-import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
@@ -22,7 +22,7 @@ public class BeneficiaryRepository {
 
   /** ZonedDateTime. */
   public static final ZonedDateTime ZONED_DATE_TIME_MIN_PRACTICAL_UTC =
-      ZonedDateTime.of(1, 1, 1, 0, 0, 0, 0, DateUtil.ZONE_ID_UTC);
+      ZonedDateTime.of(1, 1, 1, 0, 0, 0, 0, IdrConstants.ZONE_ID_UTC);
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.

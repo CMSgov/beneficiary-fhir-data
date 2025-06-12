@@ -92,10 +92,10 @@ public class Beneficiary {
 
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
 
-    coverage.addPayor(new Reference().setReference("#cms-org"));
-
     Organization cmsOrg = OrganizationFactory.createCmsOrganization();
     coverage.addContained(cmsOrg);
+
+    coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
 
     identity.toFhirMbiIdentifier().ifPresent(coverage::addIdentifier);
     coverage.setSubscriberId(identity.getMbiValue());

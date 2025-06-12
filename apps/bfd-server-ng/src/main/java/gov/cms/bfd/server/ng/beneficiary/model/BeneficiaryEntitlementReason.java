@@ -21,9 +21,6 @@ public class BeneficiaryEntitlementReason {
   @Column(name = "bene_rng_end_dt", nullable = false)
   private LocalDate benefitRangeEndDate;
 
-  @Column(name = "idr_trans_efctv_ts", nullable = false)
-  private ZonedDateTime idrTransEffectiveTimestamp;
-
   @Column(name = "bene_mdcr_entlmt_rsn_cd", length = 1)
   private String medicareEntitlementReasonCode;
 

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -29,7 +30,7 @@ public class DeathDate {
               new DateTimeType(
                   DateUtil.toDate(d),
                   TemporalPrecisionEnum.DAY,
-                  TimeZone.getTimeZone(DateUtil.ZONE_ID_UTC)));
+                  TimeZone.getTimeZone(IdrConstants.ZONE_ID_UTC)));
     } else {
       return Optional.empty();
     }

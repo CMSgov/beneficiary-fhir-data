@@ -24,9 +24,6 @@ public class BeneficiaryThirdParty {
   @Column(name = "bene_tp_type_cd", nullable = false, length = 1)
   private String thirdPartyTypeCode;
 
-  @Column(name = "idr_trans_efctv_ts", nullable = false)
-  private ZonedDateTime idrTransEffectiveTimestamp;
-
   @Column(name = "bene_buyin_cd", nullable = false, length = 2)
   private String buyInCode;
 

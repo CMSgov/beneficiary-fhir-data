@@ -21,9 +21,6 @@ public class BeneficiaryStatus {
   @Column(name = "mdcr_stus_end_dt", nullable = false)
   private LocalDate medicareStatusEndDate;
 
-  @Column(name = "idr_trans_efctv_ts", nullable = false)
-  private ZonedDateTime idrTransEffectiveTimestamp;
-
   @Column(name = "bene_mdcr_stus_cd", nullable = false, length = 2)
   private String medicareStatusCode;
 
