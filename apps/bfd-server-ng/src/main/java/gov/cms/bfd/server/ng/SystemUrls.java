@@ -110,6 +110,9 @@ public class SystemUrls {
   public static String CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole";
 
+  public static String CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus";
+
   // CMS Blue Button
 
   public static final String BLUE_BUTTON_CLAIM_TYPE_CODE =
@@ -181,6 +184,18 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD";
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DEDUCTIBLE_COINSURANCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD";
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM";
+
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_NONPAYMENT_REASON_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
+  public static final String BLUE_BUTTON_CODE_SYSTEM_NONPAYMENT_REASON_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
+
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_FINAL_ACTION_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD";
+  public static final String BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD";
 
   // CMS
 

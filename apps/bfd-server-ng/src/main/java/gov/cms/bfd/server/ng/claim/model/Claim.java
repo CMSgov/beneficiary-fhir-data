@@ -38,11 +38,7 @@ public class Claim {
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
-  @Embedded private ClaimContractorNumber claimContractorNumber;
-  @Embedded private ClaimRecordTypeCode claimRecordTypeCode;
-  @Embedded private ClaimDispositionCode claimDispositionCode;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private ClaimProcessDate claimProcessDate;
+  @Embedded private ClaimExtensions claimExtensions;
   @Embedded private BillingProvider billingProvider;
   @Embedded private BloodPints bloodPints;
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
@@ -71,11 +67,10 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(i.castToReference(eob));
             });
-    eob.addExtension(claimContractorNumber.toFhir());
-    eob.addExtension(claimRecordTypeCode.toFhir());
-    eob.addExtension(claimDispositionCode.toFhir());
-    eob.setPayment(claimPaymentAmount.toFhir());
-    eob.addExtension(claimProcessDate.toFhir());
+    eob.setExtension(
+        Stream.of(claimExtensions.toFhir(), claimInstitutional.getExtensions().toFhir())
+            .flatMap(Collection::stream)
+            .toList());
     billingProvider
         .toFhir(claimTypeCode)
         .ifPresent(
@@ -93,11 +88,11 @@ public class Claim {
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.toFhir(supportingInfoFactory),
-            claimInstitutional.toFhir(supportingInfoFactory))
+            claimInstitutional.getSupportingInfo().toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
-    claimLines.forEach(c -> eob.addItem(c.toFhir()));
+    eob.setItem(claimLines.stream().map(ClaimLine::toFhir).toList());
     careTeam
         .toFhir(eob)
         .forEach(
@@ -105,6 +100,7 @@ public class Claim {
               eob.addCareTeam(c.careTeam());
               eob.addContained(c.practitioner());
             });
+    eob.addAdjudication(claimInstitutional.getPpsDrgWeight().toFhir());
     return eob;
   }
 }
