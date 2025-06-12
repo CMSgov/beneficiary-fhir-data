@@ -19,7 +19,7 @@ public class IdrConstants {
    * UTC {@link ZoneId}. UTC should be used for all datetime conversions to/from an instant
    * represented by {@link java.util.Date}.
    */
-  public static final ZoneId ZONE_ID_UTC = ZoneId.of("America/New_York");
+  public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
   /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
   public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);

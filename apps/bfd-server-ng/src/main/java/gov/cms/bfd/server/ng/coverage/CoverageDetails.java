@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryEntitlement;
@@ -30,52 +31,33 @@ import org.hl7.fhir.r4.model.Period;
 @AllArgsConstructor
 public class CoverageDetails {
 
-  private Beneficiary beneficiary;
-
+  private final Beneficiary beneficiary;
   private final Optional<BeneficiaryThirdParty> thirdPartyDetails;
   private final Optional<BeneficiaryStatus> currentStatus;
   private final Optional<BeneficiaryEntitlement> partEntitlement;
   private final Optional<BeneficiaryEntitlementReason> currentEntitlementReason;
 
   /**
-   * No-arg constructor for frameworks or manual instantiation if needed, or if @Builder doesn't
-   * generate one and it's required elsewhere.
-   */
-  public CoverageDetails() {
-    this.thirdPartyDetails = Optional.empty();
-    this.currentStatus = Optional.empty();
-    this.partEntitlement = Optional.empty();
-    this.currentEntitlementReason = Optional.empty();
-  }
-
-  /**
-   * CoverageDetails Constructor used in CoverageDetails repository jpa query The Beneficiary object
-   * will be set separately.
+   * Constructor specifically for use with JPQL SELECT NEW expressions. It accepts direct entity
+   * types (which can be null from LEFT JOINs) and wraps them in Optional internally.
    *
-   * @param entitlement entitlement
-   * @param reason reason
-   * @param status status
-   * @param thirdParty thirdParty
+   * @param beneficiary The main Beneficiary entity.
+   * @param thirdParty The joined BeneficiaryThirdParty entity (can be null).
+   * @param status The joined BeneficiaryStatus entity (can be null).
+   * @param entitlement The joined BeneficiaryEntitlement entity (can be null).
+   * @param reason The joined BeneficiaryEntitlementReason entity (can be null).
    */
   public CoverageDetails(
+      Beneficiary beneficiary,
       BeneficiaryThirdParty thirdParty,
       BeneficiaryStatus status,
       BeneficiaryEntitlement entitlement,
       BeneficiaryEntitlementReason reason) {
+    this.beneficiary = beneficiary;
     this.thirdPartyDetails = Optional.ofNullable(thirdParty);
     this.currentStatus = Optional.ofNullable(status);
     this.partEntitlement = Optional.ofNullable(entitlement);
     this.currentEntitlementReason = Optional.ofNullable(reason);
-    // this.beneficiary will be set later by the calling code
-  }
-
-  /**
-   * Setter for beneficiary.
-   *
-   * @param beneficiary the beneficiary
-   */
-  public void setBeneficiary(Beneficiary beneficiary) {
-    this.beneficiary = beneficiary;
   }
 
   /**
@@ -102,7 +84,7 @@ public class CoverageDetails {
               if (benefitPeriodStartDate != null) {
                 Period period = new Period().setStart(DateUtil.toDate(benefitPeriodStartDate));
                 if (benefitPeriodEndDate != null
-                    && benefitPeriodEndDate.isBefore(LocalDate.of(9999, 12, 31))) {
+                    && benefitPeriodEndDate.isBefore(IdrConstants.DEFAULT_DATE)) {
                   period.setEnd(DateUtil.toDate(benefitPeriodEndDate));
                 }
                 coverage.setPeriod(period);

@@ -37,9 +37,11 @@ public class CoverageHandler {
 
     // Fetch all necessary details using the CoverageRepository
     Optional<CoverageDetails> detailsOpt =
-        coverageRepository.findCoverageDetailsSingleQueryAttempt(
-            coverageCompositeId, new DateTimeRange());
+        coverageRepository.findCoverageDetails(coverageCompositeId, new DateTimeRange());
 
+    if (detailsOpt.isEmpty()) {
+      return Optional.empty();
+    }
     CoverageDetails detailsSO = detailsOpt.get();
     return Optional.of(detailsSO.toFhir(compositeId, coverageCompositeId.coveragePart()));
   }

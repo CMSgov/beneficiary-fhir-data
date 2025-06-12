@@ -23,7 +23,7 @@ public class Meta {
 
     return new org.hl7.fhir.r4.model.Meta()
         .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-        .addProfile(SystemUrls.PROFILE_C4BB_COVERAGE)
-        .addProfile(SystemUrls.PROFILE_US_CORE_COVERAGE);
+        .addProfile(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0)
+        .addProfile(SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0);
   }
 }
