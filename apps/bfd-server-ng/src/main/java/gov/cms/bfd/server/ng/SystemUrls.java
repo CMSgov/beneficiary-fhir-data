@@ -24,7 +24,7 @@ public class SystemUrls {
    * Coverage 2.1.0</a>
    */
   // add version numbers
-  public static final String PROFILE_C4BB_COVERAGE =
+  public static final String PROFILE_C4BB_COVERAGE_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0";
 
   /**
@@ -32,7 +32,7 @@ public class SystemUrls {
    * href="http://hl7.org/fhir/us/core/STU6.1/StructureDefinition-us-core-coverage.html">US Core
    * Coverage 6.1.0</a>
    */
-  public static final String PROFILE_US_CORE_COVERAGE =
+  public static final String PROFILE_US_CORE_COVERAGE_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0";
 
   /**
@@ -41,7 +41,7 @@ public class SystemUrls {
    * href="http://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Organization.html">C4BB
    * Organization 2.1.0</a>
    */
-  public static final String PROFILE_C4BB_ORGANIZATION =
+  public static final String PROFILE_C4BB_ORGANIZATION_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
 
   /**

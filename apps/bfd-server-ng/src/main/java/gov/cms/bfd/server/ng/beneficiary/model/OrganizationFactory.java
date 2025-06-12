@@ -23,7 +23,7 @@ public final class OrganizationFactory {
 
     // Set the Meta information, including the C4BB Organization profile.
     Meta orgMeta = new Meta();
-    orgMeta.addProfile(SystemUrls.PROFILE_C4BB_ORGANIZATION);
+    orgMeta.addProfile(SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
     cmsOrg.setMeta(orgMeta);
     cmsOrg.setActive(true);
     cmsOrg.setName("Centers for Medicare and Medicaid Services");

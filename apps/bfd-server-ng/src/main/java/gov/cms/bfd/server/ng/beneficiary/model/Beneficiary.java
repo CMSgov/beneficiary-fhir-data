@@ -22,22 +22,22 @@ import org.hl7.fhir.r4.model.Reference;
 @Table(name = "beneficiary", schema = "idr")
 public class Beneficiary {
   @Id
-  @Column(name = "bene_sk", nullable = false)
+  @Column(name = "bene_sk")
   private long beneSk;
 
-  @Column(name = "bene_xref_efctv_sk_computed", nullable = false)
+  @Column(name = "bene_xref_efctv_sk_computed")
   private long xrefSk;
 
-  @Column(name = "bene_brth_dt", nullable = false)
+  @Column(name = "bene_brth_dt")
   private LocalDate birthDate;
 
-  @Column(name = "bene_race_cd", nullable = false)
+  @Column(name = "bene_race_cd")
   private RaceCode raceCode;
 
   @Column(name = "bene_sex_cd")
   private Optional<SexCode> sexCode;
 
-  @Column(name = "cntct_lang_cd", nullable = false)
+  @Column(name = "cntct_lang_cd")
   private LanguageCode languageCode;
 
   @Embedded private Name beneficiaryName;

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.input;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.model.Coverage;
  * parts based on their exact, predefined raw URL prefix strings.
  */
 @Getter
+@AllArgsConstructor
 public enum CoveragePart {
   /** Represents Medicare Part A. */
   PART_A("A", "Part A", "part-a", "1", "MEDICARE"),
@@ -25,19 +27,6 @@ public enum CoveragePart {
   private final String standardSystem; // "part-a", "part-b"
   private final String soptCode;
   private final String soptDisplay; // "MEDICARE", "MEDICARE FFS"
-
-  CoveragePart(
-      String standardCode,
-      String standardDisplay,
-      String standardSystem,
-      String soptCode,
-      String soptDisplay) {
-    this.standardCode = standardCode;
-    this.standardDisplay = standardDisplay;
-    this.standardSystem = standardSystem;
-    this.soptCode = soptCode;
-    this.soptDisplay = soptDisplay;
-  }
 
   /**
    * Finds a {@link CoveragePart} by matching the provided {@code rawUrlPrefix} against either the

@@ -61,6 +61,61 @@ CREATE TABLE idr.beneficiary_mbi_id (
     PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
 );
 
+CREATE TABLE idr.beneficiary_third_party (
+    bene_sk BIGINT NOT NULL,
+    bene_buyin_cd VARCHAR(2) NOT NULL,
+    bene_tp_type_cd VARCHAR(1) NOT NULL,
+    bene_rng_bgn_dt DATE NOT NULL,
+    bene_rng_end_dt DATE NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, bene_tp_type_cd, idr_trans_efctv_ts)
+);
+
+CREATE TABLE idr.beneficiary_status (
+    bene_sk BIGINT NOT NULL,
+    bene_mdcr_stus_cd VARCHAR(2) NOT NULL,
+    mdcr_stus_bgn_dt DATE NOT NULL,
+    mdcr_stus_end_dt DATE NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, mdcr_stus_bgn_dt, mdcr_stus_end_dt, idr_trans_efctv_ts)
+);
+
+CREATE TABLE idr.beneficiary_entitlement (
+    bene_sk BIGINT NOT NULL,
+    bene_rng_bgn_dt DATE NOT NULL,
+    bene_rng_end_dt DATE NOT NULL,
+    bene_mdcr_entlmt_type_cd VARCHAR(1),
+    bene_mdcr_entlmt_stus_cd VARCHAR(1),
+    bene_mdcr_enrlmt_rsn_cd VARCHAR(1),
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, bene_mdcr_entlmt_type_cd, idr_trans_efctv_ts)
+);
+
+CREATE TABLE idr.beneficiary_entitlement_reason (
+    bene_sk BIGINT NOT NULL,
+    bene_rng_bgn_dt DATE NOT NULL,
+    bene_rng_end_dt DATE NOT NULL,
+    bene_mdcr_entlmt_rsn_cd VARCHAR(1),
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, idr_trans_efctv_ts)
+);
+
 CREATE TABLE idr.beneficiary_election_period_usage (
     bene_sk BIGINT NOT NULL,
     cntrct_pbp_sk BIGINT NOT NULL,
