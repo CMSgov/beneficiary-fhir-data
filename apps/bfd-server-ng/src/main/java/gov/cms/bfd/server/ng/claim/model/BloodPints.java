@@ -15,7 +15,7 @@ public class BloodPints {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.BLOOD_PINTS.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_BLOOD_PT_FRNSH_QTY.toFhir())
         .setValue(
             new SimpleQuantity()
                 .setValue(bloodPints)

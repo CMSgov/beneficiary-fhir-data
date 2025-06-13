@@ -15,7 +15,7 @@ public class NchPrimaryPayorCode {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.PRIMARY_PAYOR_CODE.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_NCH_PRMRY_PYR_CD.toFhir())
         .setCode(
             new CodeableConcept(
                 new Coding()

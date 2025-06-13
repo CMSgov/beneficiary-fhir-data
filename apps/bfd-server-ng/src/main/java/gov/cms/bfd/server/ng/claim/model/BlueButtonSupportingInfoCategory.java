@@ -9,18 +9,19 @@ import java.util.Optional;
 
 @AllArgsConstructor
 public enum BlueButtonSupportingInfoCategory {
-  BLOOD_PINTS("CLM_BLOOD_PT_FRNSH_QTY", Optional.of("Blood Pints Furnished Quantity")),
-  MCO_PAID_SWITCH("CLM_MDCR_INSTNL_MCO_PD_SW", Optional.of("MCO Paid Switch")),
-  WEEKLY_PROCESS_DATE("CLM_NCH_WKLY_PROC_DT", Optional.of("Weekly Process Date")),
-  NONCONVERED_FROM_DATE("CLM_NCVRD_FROM_DT", Optional.of("Noncovered Stay From Date")),
-  NONCOVERED_THROUGH_DATE("CLM_NCVRD_THRU_DT", Optional.of("Noncovered Stay Through Date")),
-  CARE_THROUGH_DATE("CLM_ACTV_CARE_THRU_DT", Optional.of("Covered Care Through Date")),
-  BENEFITS_EXHAUSTED_DATE("CLM_MDCR_EXHSTD_DT", Optional.of("Medicare Benefits Exhausted Date")),
-  PRIMARY_PAYOR_CODE("CLM_NCH_PRMRY_PYR_CD", Optional.empty()),
-  PPS_INDICATOR_CODE("CLM_PPS_IND_CD", Optional.of("Claim PPS Indicator Code"));
+  CLM_NCH_WKLY_PROC_DT("CLM_NCH_WKLY_PROC_DT", "Weekly Process Date"),
+  CLM_BLOOD_PT_FRNSH_QTY("CLM_BLOOD_PT_FRNSH_QTY", "Blood Pints Furnished Quantity"),
+  CLM_MDCR_INSTNL_MCO_PD_SW("CLM_MDCR_INSTNL_MCO_PD_SW", "MCO Paid Switch"),
+  CLM_MDCR_NCH_PTNT_STUS_IND_CD("CLM_MDCR_NCH_PTNT_STUS_IND_CD", "Patient Status Code"),
+  CLM_ACTV_CARE_THRU_DT("CLM_ACTV_CARE_THRU_DT", "Covered Care Through Date"),
+  CLM_NCVRD_FROM_DT("CLM_NCVRD_FROM_DT", "Noncovered Stay From Date"),
+  CLM_NCVRD_THRU_DT("CLM_NCVRD_THRU_DT", "Noncovered Stay Through Date"),
+  CLM_MDCR_EXHSTD_DT("CLM_MDCR_EXHSTD_DT", "Medicare Benefits Exhausted Date"),
+  CLM_PPS_IND_CD("CLM_PPS_IND_CD", "Claim PPS Indicator Code"),
+  CLM_NCH_PRMRY_PYR_CD("CLM_NCH_PRMRY_PYR_CD", "NCH Primary Payer Code");
 
   private final String code;
-  private final Optional<String> display;
+  private final String display;
 
   CodeableConcept toFhir() {
     var coding =

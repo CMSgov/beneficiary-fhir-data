@@ -16,8 +16,8 @@ public class Meta {
     var meta =
         new org.hl7.fhir.r4.model.Meta()
             .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-            .addProfile(claimTypeCode.getProfileMetaUrl())
             .setSource(claimSourceId.getSource());
+    claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
     claimSourceId.toFhirAdjudicationStatus().ifPresent(meta::addTag);
     return meta;
   }

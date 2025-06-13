@@ -27,7 +27,7 @@ public enum McoPaidSwitch {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.MCO_PAID_SWITCH.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_INSTNL_MCO_PD_SW.toFhir())
         .setCode(
             new CodeableConcept(
                 new Coding()

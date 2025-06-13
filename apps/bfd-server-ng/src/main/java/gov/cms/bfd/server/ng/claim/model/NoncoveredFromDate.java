@@ -17,7 +17,7 @@ public class NoncoveredFromDate {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.NONCONVERED_FROM_DATE.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT.toFhir())
         .setTiming(new DateTimeType().setValue(DateUtil.toDate(noncoveredFromDate)));
   }
 }

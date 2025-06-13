@@ -24,9 +24,11 @@ def get_enum_val(concept, int_codes):
     if code == "~":
         return f'NA("","{concept['display']}")'
     else:
-        if not int_codes:
-            code = f'"{code}"'
-        return f"{prefix}{code}({code},\"{concept['display']}\")"
+        if int_codes:
+            code_fmt = code
+        else:
+            code_fmt = f'"{code}"'
+        return f"{prefix}{code}({code_fmt},\"{concept['display']}\")"
 
 
 if __name__ == "__main__":
@@ -34,3 +36,7 @@ if __name__ == "__main__":
     gen_enum("CodeSystem-CLM-DDCTBL-COINSRNC-CD.json")
     gen_enum("CodeSystem-Benefit-Balance.json")
     gen_enum("CodeSystem-CLM-TYPE-CD.json", int_codes=True)
+    gen_enum("CodeSystem-Benefit-Balance.json")
+    gen_enum("CodeSystem-Supporting-Information.json")
+    gen_enum("CodeSystem-CLM-ADMSN-SRC-CD.json")
+    gen_enum("CodeSystem-BENE-PTNT-STUS-CD.json")

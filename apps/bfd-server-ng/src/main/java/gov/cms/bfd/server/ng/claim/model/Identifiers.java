@@ -27,7 +27,7 @@ public class Identifiers {
                         new Coding()
                             .setSystem(SystemUrls.CARIN_CODE_SYSTEM_IDENTIFIER_TYPE)
                             .setCode("uc")
-                            .setDisplay("Unique Claim IDd"))),
+                            .setDisplay("Unique Claim ID"))),
         new Identifier()
             .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
             .setValue(claimControlNumber));

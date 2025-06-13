@@ -17,7 +17,7 @@ public class ActiveCareThroughDate {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CARE_THROUGH_DATE.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_ACTV_CARE_THRU_DT.toFhir())
         .setTiming(new DateTimeType().setValue(DateUtil.toDate(activeCareThroughDate)));
   }
 }

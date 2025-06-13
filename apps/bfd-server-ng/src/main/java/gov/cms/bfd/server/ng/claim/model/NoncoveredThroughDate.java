@@ -16,7 +16,7 @@ public class NoncoveredThroughDate {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.NONCOVERED_THROUGH_DATE.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
         .setTiming(new DateTimeType().setValue(DateUtil.toDate(noncoveredThroughDate)));
   }
 }

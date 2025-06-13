@@ -86,8 +86,11 @@ public class SystemUrls {
   public static final String CARIN_STRUCTURE_DEFINITION_PHARMACY =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0";
 
-  public static final String CARIN_STRUCTURE_DEFINITION_INSTITUTIONAL =
+  public static final String CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0";
+
+  public static final String CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0";
 
   public static final String CARIN_STRUCTURE_DEFINITION_PROFESSIONAL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0";

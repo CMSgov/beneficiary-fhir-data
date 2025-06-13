@@ -45,6 +45,7 @@ public class Claim {
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private CareTeam careTeam;
   @Embedded private BenefitBalance benefitBalance;
+  @Embedded private AdjudicationCharge adjudicationCharge;
 
   @ManyToOne private ClaimDateSignature claimDateSignature;
   @OneToOne private ClaimInstitutional claimInstitutional;
@@ -104,6 +105,8 @@ public class Claim {
     eob.addAdjudication(claimInstitutional.getPpsDrgWeight().toFhir());
     eob.addBenefitBalance(
         benefitBalance.toFhir(claimInstitutional.getBenefitBalanceInstitutional(), claimValues));
+    claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
+    eob.addAdjudication(adjudicationCharge.toFhir());
     return eob;
   }
 }

@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Reference;
 
 import java.util.Arrays;
 import java.util.List;
@@ -185,8 +187,35 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
+    var shouldAdd =
+        switch (code) {
+          case 60, 61, 62, 63, 64, 1011, 1041, 2011, 2041 -> true;
+          default -> false;
+        };
+    if (!shouldAdd) {
+      return Optional.empty();
+    }
+
+    return Optional.of(
+        new ExplanationOfBenefit.InsuranceComponent()
+            .setFocal(true)
+            .setCoverage(new Reference().setDisplay("Part A")));
+  }
+
   boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);
+  }
+
+  Optional<String> toFhirStructureDefinition() {
+    return switch (code) {
+      case 1, 2, 3, 4 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY);
+      case 10, 20, 30, 50, 60, 61, 62, 63, 1011, 2011 ->
+          Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL);
+      case 40 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL);
+      case 71, 72, 81, 82 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL);
+      default -> Optional.empty();
+    };
   }
 
   private Optional<ClaimSubtype> getClaimSubtype() {

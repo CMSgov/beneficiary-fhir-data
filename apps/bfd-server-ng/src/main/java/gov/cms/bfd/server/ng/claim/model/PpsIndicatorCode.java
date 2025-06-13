@@ -16,7 +16,7 @@ public enum PpsIndicatorCode {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.PPS_INDICATOR_CODE.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_PPS_IND_CD.toFhir())
         .setCode(new CodeableConcept(new Coding().setDisplay(display).setCode(code)));
   }
 }

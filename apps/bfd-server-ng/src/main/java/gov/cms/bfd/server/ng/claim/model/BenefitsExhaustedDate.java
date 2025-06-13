@@ -16,7 +16,7 @@ public class BenefitsExhaustedDate {
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.BENEFITS_EXHAUSTED_DATE.toFhir())
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_EXHSTD_DT.toFhir())
         .setTiming(new DateTimeType().setValue(DateUtil.toDate(benefitsExhaustedDate)));
   }
 }

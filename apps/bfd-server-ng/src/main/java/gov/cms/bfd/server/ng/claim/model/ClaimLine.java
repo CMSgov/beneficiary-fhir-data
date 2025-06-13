@@ -9,10 +9,8 @@ import jakarta.persistence.OneToOne;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.SimpleQuantity;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Entity
@@ -27,7 +25,7 @@ public class ClaimLine {
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
-  @Embedded private AdjudicationCharge adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
 
   @OneToOne private ClaimLineInstitutional claimLineInstitutional;
 
