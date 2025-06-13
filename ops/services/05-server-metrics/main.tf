@@ -26,6 +26,5 @@ locals {
   ssm_config       = module.terraservice.ssm_config
 
   target_service = "server"
-  # TODO: Remove ecs suffix part when server is fully migrated to Fargate
-  namespace = "bfd-${local.env}/${local.target_service}/ecs"
+  namespace      = !var.greenfield ? "bfd-${local.env}/${local.target_service}/ecs" : "bfd-${local.env}/${local.target_service}"
 }

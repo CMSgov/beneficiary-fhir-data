@@ -73,11 +73,26 @@ resource "aws_cloudwatch_metric_alarm" "server_query_logging_listener_warning" {
   metric_name = "query-logging-listener/count/warning"
   namespace   = local.namespace
 
-  dimensions = {
-    LogGroupName = data.aws_cloudwatch_log_group.server_messages.name
-  }
-
   # NOTE: alarm should always be a low severity notification
+  alarm_actions = local.logs_warning_arn
+
+  datapoints_to_alarm = 1
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "samhsa_mismatch_error" {
+  alarm_name          = "${local.alarm_name_prefix}-samhsa-mismatch-error"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  threshold           = 1
+  evaluation_periods  = 1
+  period              = 60
+  statistic           = "Sum"
+
+  alarm_description = "${local.target_service} has encountered a SAMHSA 2.0 filter mismatch error in ${local.env}"
+
+  metric_name = "samhsa-mismatch/count/error"
+  namespace   = local.namespace
+
   alarm_actions = local.logs_warning_arn
 
   datapoints_to_alarm = 1

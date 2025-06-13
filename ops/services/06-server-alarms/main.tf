@@ -30,23 +30,22 @@ locals {
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
   target_service = "server"
-  # TODO: Remove ecs suffix part when server is fully migrated to Fargate
-  namespace = "bfd-${local.env}/${local.target_service}/ecs"
+  namespace      = !var.greenfield ? "bfd-${local.env}/${local.target_service}/ecs" : "bfd-${local.env}/${local.target_service}"
 
-  # TODO: Remove "-ecs" suffix when Fargate migration is completed
-  slo_dashboard_url                  = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=bfd-${local.env}-server-ecs-slos"
-  default_dashboard_url              = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=bfd-${local.env}-server-ecs"
+  slo_dashboard                      = !var.greenfield ? "bfd-${local.env}-server-ecs-slos" : "bfd-${local.env}-server-slos"
+  slo_dashboard_url                  = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=${local.slo_dashboard}"
+  default_dashboard                  = !var.greenfield ? "bfd-${local.env}-server-ecs" : "bfd-${local.env}-server"
+  default_dashboard_url              = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=${local.default_dashboard}"
   default_dashboard_message_fragment = <<-EOF
 View the relevant CloudWatch dashboards below for more information:
 
-* <${local.slo_dashboard_url}|bfd-${local.env}-server-ecs-slos>
+* <${local.slo_dashboard_url}|${local.slo_dashboard}>
     * This dashboard visualizes SLOs along with ${local.target_service} Task count and CPU/memory utilization
-* <${local.default_dashboard_url}|bfd-${local.env}-server-ecs>
+* <${local.default_dashboard_url}|${local.default_dashboard}>
     * This dashboard visualizes data such as request count and latency per-endpoint and per-partner, and more
   EOF
 
-  # TODO: Remove "-ecs" suffix when Fargate migration is completed
-  alarm_name_prefix = "bfd-${local.env}-${local.target_service}-ecs"
+  alarm_name_prefix = "bfd-${local.env}-${local.target_service}"
 }
 
 data "aws_cloudwatch_log_group" "server_access" {
