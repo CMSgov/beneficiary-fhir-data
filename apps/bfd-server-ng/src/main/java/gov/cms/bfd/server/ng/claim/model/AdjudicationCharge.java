@@ -9,28 +9,28 @@ import java.util.List;
 @Embeddable
 public class AdjudicationCharge {
   @Column(name = "clm_line_ncvrd_chrg_amt")
-  private float noncoveredChargeAmount;
+  private double noncoveredChargeAmount;
 
   @Column(name = "clm_line_alowd_chrg_amt")
-  private float allowedChargeAmount;
+  private double allowedChargeAmount;
 
   @Column(name = "clm_line_sbmt_chrg_amt")
-  private float submittedChargeAmount;
+  private double submittedChargeAmount;
 
   @Column(name = "clm_line_prvdr_pmt_amt")
-  private float providerPaymentAmount;
+  private double providerPaymentAmount;
 
   @Column(name = "clm_line_bene_pmt_amt")
-  private float benePaymentAmount;
+  private double benePaymentAmount;
 
   @Column(name = "clm_line_bene_pd_amt")
-  private float benePaidAmount;
+  private double benePaidAmount;
 
   @Column(name = "clm_line_cvrd_pd_amt")
-  private float coveredPaidAmount;
+  private double coveredPaidAmount;
 
   @Column(name = "clm_line_mdcr_ddctbl_amt")
-  private float deductibleAmount;
+  private double deductibleAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(

@@ -26,7 +26,7 @@ public enum IdrUnit {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
 
-  SimpleQuantity toFhir(float value) {
+  SimpleQuantity toFhir(double value) {
     var quantity = new SimpleQuantity();
     quantity
         .setValue(value)

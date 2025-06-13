@@ -49,6 +49,7 @@ public class Claim {
   @ManyToOne private ClaimDateSignature claimDateSignature;
   @OneToOne private ClaimInstitutional claimInstitutional;
   @ManyToMany private List<ClaimLine> claimLines;
+  @ManyToMany private List<ClaimValue> claimValues;
 
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
@@ -102,7 +103,7 @@ public class Claim {
             });
     eob.addAdjudication(claimInstitutional.getPpsDrgWeight().toFhir());
     eob.addBenefitBalance(
-        benefitBalance.toFhir(claimInstitutional.getBenefitBalanceInstitutional()));
+        benefitBalance.toFhir(claimInstitutional.getBenefitBalanceInstitutional(), claimValues));
     return eob;
   }
 }

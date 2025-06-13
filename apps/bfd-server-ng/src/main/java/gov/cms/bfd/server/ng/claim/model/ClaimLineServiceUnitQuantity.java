@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.SimpleQuantity;
 @Embeddable
 public class ClaimLineServiceUnitQuantity {
   @Column(name = "clm_line_srvc_unit_qty")
-  private float serviceUnitQuantity;
+  private double serviceUnitQuantity;
 
   SimpleQuantity toFhir() {
     var quantity = new SimpleQuantity();

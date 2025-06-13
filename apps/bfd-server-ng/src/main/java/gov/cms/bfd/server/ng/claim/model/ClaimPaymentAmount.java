@@ -5,7 +5,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 public class ClaimPaymentAmount {
   @Column(name = "clm_pmt_amt")
-  private float claimPaymentAmount;
+  private double claimPaymentAmount;
 
   ExplanationOfBenefit.PaymentComponent toFhir() {
     return new ExplanationOfBenefit.PaymentComponent()

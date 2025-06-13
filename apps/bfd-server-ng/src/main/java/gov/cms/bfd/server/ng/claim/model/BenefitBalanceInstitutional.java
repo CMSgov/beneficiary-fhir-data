@@ -19,46 +19,46 @@ public class BenefitBalanceInstitutional {
   private int totalCoinsuranceDays;
 
   @Column(name = "clm_instnl_cvrd_day_cnt")
-  private float totalCoveredDays;
+  private double totalCoveredDays;
 
   @Column(name = "clm_instnl_per_diem_amt")
-  private float perDiemAmount;
+  private double perDiemAmount;
 
   @Column(name = "clm_mdcr_ip_pps_dsprprtnt_amt")
-  private float ppsDisproportionateAmount;
+  private double ppsDisproportionateAmount;
 
   @Column(name = "clm_mdcr_ip_pps_excptn_amt")
-  private float ppsExceptionAmount;
+  private double ppsExceptionAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_fsp_amt")
-  private float ppsCapitalFspAmount;
+  private double ppsCapitalFspAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_ime_amt")
-  private float ppsCapitalImeAmount;
+  private double ppsCapitalImeAmount;
 
   @Column(name = "clm_mdcr_ip_pps_outlier_amt")
-  private float ppsOutlierAmount;
+  private double ppsOutlierAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_hrmls_amt")
-  private float ppsCapitalHarmlessAmount;
+  private double ppsCapitalHarmlessAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_tot_amt")
-  private float ppsCapitalTotalAmount;
+  private double ppsCapitalTotalAmount;
 
   @Column(name = "clm_mdcr_instnl_prmry_pyr_amt")
-  private float primaryPayerAmount;
+  private double primaryPayerAmount;
 
   @Column(name = "clm_instnl_prfnl_amt")
-  private float professionalAmount;
+  private double professionalAmount;
 
   @Column(name = "clm_instnl_drg_outlier_amt")
-  private float drgOutlierAmount;
+  private double drgOutlierAmount;
 
   @Column(name = "clm_mdcr_ip_bene_ddctbl_amt")
-  private float beneDeductibleAmount;
+  private double beneDeductibleAmount;
 
   @Column(name = "clm_hipps_uncompd_care_amt")
-  private float hippsUncompensatedCareAmount;
+  private double hippsUncompensatedCareAmount;
 
   List<ExplanationOfBenefit.BenefitComponent> toFhir() {
     return List.of(

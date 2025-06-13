@@ -51,7 +51,13 @@ public enum BenefitBalanceInstitutionalType {
         .setUsed(new UnsignedIntType(val));
   }
 
-  ExplanationOfBenefit.BenefitComponent toFhirMoney(float val) {
+  ExplanationOfBenefit.BenefitComponent toFhirIntType(long val) {
+    return new ExplanationOfBenefit.BenefitComponent()
+        .setType(toFhirType())
+        .setUsed(new UnsignedIntType(val));
+  }
+
+  ExplanationOfBenefit.BenefitComponent toFhirMoney(double val) {
     return new ExplanationOfBenefit.BenefitComponent()
         .setType(toFhirType())
         .setUsed(new USD().setValue(val));

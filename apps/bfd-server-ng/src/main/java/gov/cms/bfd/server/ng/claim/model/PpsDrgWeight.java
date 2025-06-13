@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Extension;
 @Embeddable
 public class PpsDrgWeight {
   @Column(name = "clm_mdcr_ip_pps_drg_wt_num")
-  private float ppsDrgWeight;
+  private double ppsDrgWeight;
 
   ExplanationOfBenefit.AdjudicationComponent toFhir() {
     var adjudication = new ExplanationOfBenefit.AdjudicationComponent();

@@ -16,7 +16,7 @@ public class ClaimLineNdc {
   private Optional<String> ndcCode;
 
   @Column(name = "clm_line_ndc_qty")
-  private float ndcQuantity;
+  private double ndcQuantity;
 
   @Column(name = "clm_line_ndc_qty_qlfyr_cd")
   private Optional<IdrUnit> ndcQuantityQualifierCode;

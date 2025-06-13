@@ -12,19 +12,19 @@ import java.util.stream.Stream;
 
 public class BenefitBalance {
   @Column(name = "clm_mdcr_ddctbl_amt")
-  private float deductibleAmount;
+  private double deductibleAmount;
 
   @Column(name = "clm_mdcr_coinsrnc_amt")
-  private float coinsuranceAmount;
+  private double coinsuranceAmount;
 
   @Column(name = "clm_blood_lblty_amt")
-  private float bloodLiabilityAmount;
+  private double bloodLiabilityAmount;
 
   @Column(name = "clm_ncvrd_chrg_amt")
-  private float noncoveredChargeAmount;
+  private double noncoveredChargeAmount;
 
   ExplanationOfBenefit.BenefitBalanceComponent toFhir(
-      BenefitBalanceInstitutional benefitBalanceInstitutional) {
+      BenefitBalanceInstitutional benefitBalanceInstitutional, List<ClaimValue> claimValues) {
     return new ExplanationOfBenefit.BenefitBalanceComponent()
         .setCategory(
             new CodeableConcept(
@@ -33,7 +33,10 @@ public class BenefitBalance {
                     .setCode("1")
                     .setDisplay("Medical Care")))
         .setFinancial(
-            Stream.of(toFhirBenefits(), benefitBalanceInstitutional.toFhir())
+            Stream.of(
+                    toFhirBenefits(),
+                    benefitBalanceInstitutional.toFhir(),
+                    BenefitBalanceClaimValue.toFhir(claimValues))
                 .flatMap(Collection::stream)
                 .toList());
   }

@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -8,6 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 import java.util.Arrays;
 
+@AllArgsConstructor
 @Getter
 public enum ClaimAdmissionTypeCode {
   UNKNOWN("0", "Unknown Value (but present in data)"),
@@ -29,8 +31,8 @@ public enum ClaimAdmissionTypeCode {
   RESERVED_8("8", "Reserved"),
   UNKNOWN_INFO_NOT_AVAILABLE("9", "Unknown - Information not available.");
 
-  private String code;
-  private String display;
+  private final String code;
+  private final String display;
 
   public static ClaimAdmissionTypeCode fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();

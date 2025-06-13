@@ -9,19 +9,19 @@ import java.util.List;
 @Embeddable
 public class AdjudicationChargeInstitutional {
   @Column(name = "clm_line_instnl_adjstd_amt")
-  private float adjustedAmount;
+  private double adjustedAmount;
 
   @Column(name = "clm_line_instnl_rdcd_amt")
-  private float reducedAmount;
+  private double reducedAmount;
 
   @Column(name = "clm_line_instnl_msp1_pd_amt")
-  private float msp1PaidAmount;
+  private double msp1PaidAmount;
 
   @Column(name = "clm_line_instnl_msp2_pd_amt")
-  private float msp2PaidAmount;
+  private double msp2PaidAmount;
 
   @Column(name = "clm_line_instnl_rate_amt")
-  private float rateAmount;
+  private double rateAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
