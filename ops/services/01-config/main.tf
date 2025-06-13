@@ -79,17 +79,28 @@ locals {
     # erroneously specified for copying
     local.ephemeral_vals
   ) : local.parent_ssm_config
-  env_config = {
+  # TODO: Remove
+  ng_env_config = {
     for k, v in local.untemplated_env_config
     # At this point, replace all ${env}/$env with the actual environment name so that the SSM
     # parameter contains the name of its environment as expected
-    # TODO: When Greenfield/"next-gen" services are migrated to, remove "/ng/" suffix -- remember to change bfd-terraservice as well!
     : "/ng/${trim(replace(k, format(local.template_var_regex, "env"), local.env), "/")}" => {
       str_val      = replace(v.str_val, format(local.template_var_regex, "env"), local.env)
       is_sensitive = v.is_sensitive
       source       = v.source
     }
   }
+  # TODO: Remove merge() when ng_env_config is removed
+  env_config = merge({
+    for k, v in local.untemplated_env_config
+    # At this point, replace all ${env}/$env with the actual environment name so that the SSM
+    # parameter contains the name of its environment as expected
+    : replace(k, format(local.template_var_regex, "env"), local.env) => {
+      str_val      = replace(v.str_val, format(local.template_var_regex, "env"), local.env)
+      is_sensitive = v.is_sensitive
+      source       = v.source
+    }
+  }, local.ng_env_config)
 }
 
 data "external" "valid_sops_yaml" {

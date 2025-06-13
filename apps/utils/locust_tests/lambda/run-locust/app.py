@@ -89,20 +89,19 @@ def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     try:
         invoke_event = InvokeEventModel.model_validate(event)
 
-        # TODO: Remove /ng/ prefix
         # Assuming we get this far, invoke_event should have the information
         # required to run the lambda:
         username = get_parameter(
-            name=f"/ng/bfd/{BFD_ENVIRONMENT}/locust/sensitive/db/username", decrypt=True
+            name=f"/bfd/{BFD_ENVIRONMENT}/locust/sensitive/db/username", decrypt=True
         )
         raw_password = get_parameter(
-            name=f"/ng/bfd/{BFD_ENVIRONMENT}/locust/sensitive/db/password", decrypt=True
+            name=f"/bfd/{BFD_ENVIRONMENT}/locust/sensitive/db/password", decrypt=True
         )
         cert_key = get_parameter(
-            name=f"/ng/bfd/{BFD_ENVIRONMENT}/locust/sensitive/cert/key", decrypt=True
+            name=f"/bfd/{BFD_ENVIRONMENT}/locust/sensitive/cert/key", decrypt=True
         )
         cert = get_parameter(
-            name=f"/ng/bfd/{BFD_ENVIRONMENT}/locust/sensitive/cert/pem_data", decrypt=True
+            name=f"/bfd/{BFD_ENVIRONMENT}/locust/sensitive/cert/pem_data", decrypt=True
         )
 
         cert_path = "/tmp/bfd_test_cert.pem"

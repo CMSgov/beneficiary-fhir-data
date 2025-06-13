@@ -69,11 +69,9 @@ resource "aws_cloudwatch_log_destination_policy" "cwl_destination_policy" {
 }
 
 data "aws_ssm_parameter" "bb2_account_id" {
-  # TODO: Remove "/ng/" suffix when old Terraform is destroyed
-  name = "/ng/bb2/${local.env}/common/sensitive/account_id"
+  name = "/bb2/${local.env}/common/sensitive/account_id"
 }
 
 data "aws_ssm_parameter" "bb2_legacy_account_id" {
-  # TODO: Remove "/ng/" suffix when old Terraform is destroyed
-  name = "/ng/bb2/${local.env}/common/sensitive/legacy_account_id"
+  name = "/bb2/${local.env}/common/sensitive/legacy_account_id"
 }

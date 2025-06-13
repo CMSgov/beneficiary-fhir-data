@@ -437,3 +437,16 @@ resource "aws_cloudwatch_log_metric_filter" "query_logging_listener_count_warnin
     unit      = "Count"
   }
 }
+
+resource "aws_cloudwatch_log_metric_filter" "samhsa_mismatch_error_count" {
+  name           = "${local.namespace}/samhsa-mismatch/count/error"
+  log_group_name = local.log_groups.messages
+  pattern        = "{ $.message = %Samhsa: Claim ID mismatch between old SAMHSA filter% }"
+
+  metric_transformation {
+    name      = "samhsa-mismatch/count/error"
+    namespace = local.namespace
+    value     = "1"
+    unit      = "Count"
+  }
+}

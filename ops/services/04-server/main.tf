@@ -38,8 +38,7 @@ locals {
   app_subnet_ids = local.app_subnets[*].id
   dmz_subnet_ids = local.dmz_subnets[*].id
 
-  # TODO: Remove "ecs" from the name prefix once we accept this as the new server service
-  name_prefix = "bfd-${local.env}-${local.service}-ecs"
+  name_prefix = !var.greenfield ? "bfd-${local.env}-${local.service}-ecs" : "bfd-${local.env}-${local.service}"
 
   green_state = "green"
   blue_state  = "blue"

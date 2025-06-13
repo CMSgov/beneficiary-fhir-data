@@ -32,9 +32,8 @@ data "aws_iam_policy_document" "verifier_ssm" {
   statement {
     actions = ["ssm:GetParameter"]
     resources = [
-      # TODO: Remove "/ng/" when possible
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.target_service}/sensitive/db/username",
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.target_service}/sensitive/db/password"
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/${local.env}/${local.target_service}/sensitive/db/username",
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/${local.env}/${local.target_service}/sensitive/db/password"
     ]
   }
 }

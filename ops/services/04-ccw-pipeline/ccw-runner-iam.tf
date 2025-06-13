@@ -20,9 +20,8 @@ data "aws_iam_policy_document" "ccw_runner_ssm" {
   statement {
     actions = ["ssm:GetParameter"]
     resources = [
-      # TODO: Remove "/ng/" prefix
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.service}/sensitive/db/username",
-      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/ng/bfd/${local.env}/${local.service}/sensitive/db/password"
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/${local.env}/${local.service}/sensitive/db/username",
+      "arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/${local.env}/${local.service}/sensitive/db/password"
     ]
   }
 }

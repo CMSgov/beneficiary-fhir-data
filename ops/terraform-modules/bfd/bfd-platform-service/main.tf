@@ -9,8 +9,7 @@ locals {
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
-    # TODO: Remove "/ng/" prefix when Greenfield/"next-gen" services are migrated to completely
-    ["/ng/${root}/platform/common", "/ng/${root}/platform/${local.service}"]
+    ["${root}/platform/common", "${root}/platform/${local.service}"]
   ])
   ssm_flattened_data = {
     names = flatten(
@@ -22,9 +21,8 @@ locals {
   }
   ssm_config = zipmap(
     [
-      for name in local.ssm_flattened_data.names :
-      # TODO: Remove trimprefix when Greenfield/"next-gen" services are migrated to completely
-      "/${trimprefix(replace(name, "/((non)*sensitive|platform)//", ""), "/ng/")}"
+      for name in local.ssm_flattened_data.names
+      : replace(name, "/((non)*sensitive|platform)//", "")
     ],
     local.ssm_flattened_data.values
   )

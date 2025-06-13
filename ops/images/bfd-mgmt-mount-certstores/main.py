@@ -114,12 +114,11 @@ def main(
     print("Downloading healthcheck certificate from SSM...")
     ssm = boto3.client("ssm")  # type: ignore
 
-    # TODO: Remove /ng/ prefix
     cert = ssm.get_parameter(
-        Name=f"/ng/bfd/{bfd_env}/server/sensitive/test_client_cert", WithDecryption=True
+        Name=f"/bfd/{bfd_env}/server/sensitive/test_client_cert", WithDecryption=True
     )["Parameter"].get("Value", None)
     key = ssm.get_parameter(
-        Name=f"/ng/bfd/{bfd_env}/server/sensitive/test_client_key",  # gitleaks:allow
+        Name=f"/bfd/{bfd_env}/server/sensitive/test_client_key",  # gitleaks:allow
         WithDecryption=True,
     )["Parameter"].get("Value", None)
     if not cert or not key:
