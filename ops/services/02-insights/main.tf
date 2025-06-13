@@ -16,7 +16,7 @@ module "terraservice" {
 }
 
 locals {
-  service = "insights"
+  service  = "insights"
   partners = ["bcda", "bfd", "bb2", "ab2d"]
 
   region                   = module.terraservice.region
@@ -49,39 +49,39 @@ module "bucket_insights_bfd" {
 }
 
 resource "aws_s3_object" "env_prefixes" {
-  for_each = merge(
+  for_each = var.greenfield ? merge(
     {
-      for partner in local.partners: "${partner}-streams" => {
+      for partner in local.partners : "${partner}-streams" => {
         key = "${partner}/streams/"
       }
     },
     {
-      for partner in local.partners: "${parner}-results" => {
+      for partner in local.partners : "${partner}-results" => {
         key = "${partner}/results/"
       }
     }
-  )
+  ) : {}
 
-  bucket = module.bucket_insights_bfd.bucket.name
-  key = each.value.key
-  content = ""
+  bucket       = module.bucket_insights_bfd[0].bucket.id
+  key          = each.value.key
+  content      = ""
   content_type = "application/octet-stream"
 }
 
 resource "aws_athena_workgroup" "this" {
-  for_each = toset([local.partners]) 
-  name = "${local.env}-${each.key}"
+  for_each = var.greenfield ? toset(local.partners) : toset([])
+  name     = "${local.env}-${each.key}"
 
   configuration {
-    enforce_workgroup_configuration = true
+    enforce_workgroup_configuration    = true
     publish_cloudwatch_metrics_enabled = true
 
     result_configuration {
-      output_location = "s3://${module.bucket_insights_bfd.bucket.name}/${each.key}/results/"
-  
+      output_location = "s3://${module.bucket_insights_bfd[0].bucket.bucket}/${each.key}/results/"
+
       encryption_configuration {
         encryption_option = "SSE_KMS"
-        kms_key_arn = module.terraservice.aws_kms_key.env.arn
+        kms_key_arn       = module.terraservice.env_key_arn
       }
     }
   }
@@ -90,19 +90,24 @@ resource "aws_athena_workgroup" "this" {
 }
 
 resource "aws_glue_catalog_database" "this" {
-  for_each = toset(local.partners)
-  name = "${local.env}-${each.key}"
+  for_each = var.greenfield ? {
+    for partner in local.partners : partner => {
+      name = "${local.env}-${partner}"
+    }
+  } : {}
+
+  name = each.value.name
 }
 
 resource "aws_glue_crawler" "this" {
-  for_each = toset(local.partners)
-  name = "bfd-${local.env}-${each.key}-crawler"
-  role = aws_iam_role.glue_role.arn
-  database_name = aws_glue_catalog_database.this["${local.env}-${each.key}"].name
+  for_each      = var.greenfield ? toset(local.partners) : toset([])
+  name          = "bfd-${local.env}-${each.key}-crawler"
+  role          = aws_iam_role.this.arn
+  database_name = aws_glue_catalog_database.this[each.key].name
   #table_prefix 
 
   s3_target {
-   path = "s3://${module.bucket_insights_bfd.bucket.name}/${each.key}/streams/" 
+    path = "s3://${module.bucket_insights_bfd[0].bucket.bucket}/${each.key}/streams/"
   }
 
   configuration = jsonencode({
@@ -145,9 +150,6 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
-  role = aws_iam_role.this
+  role       = aws_iam_role.this.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
 }
-
-
-
