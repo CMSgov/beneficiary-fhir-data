@@ -27,6 +27,20 @@ if TYPE_CHECKING:
 else:
     CapacityProviderStrategyItemTypeDef = object
 
+
+class CapacityProviderStrategy(BaseModel):
+    capacity_provider: str = Field(serialization_alias="capacityProvider")
+    weight: int
+    base: int
+
+
+class ManifestFilesResultModel(BaseModel):
+    """Pydantic model modeling columns returned from the s3_manifest_files database table."""
+
+    s3_key: str
+    status: str
+
+
 REGION = os.environ.get("AWS_CURRENT_REGION", default="us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", default="")
 DB_ENDPOINT = os.environ.get("DB_ENDPOINT", default="")
@@ -41,7 +55,7 @@ CCW_TASK_SECURITY_GROUP_ID = os.environ.get("CCW_TASK_SECURITY_GROUP_ID", defaul
 CCW_TASK_TAGS = TypeAdapter(dict[str, Any]).validate_json(
     os.environ.get("CCW_TASK_TAGS_JSON", default="")
 )
-CCW_TASK_CAPACITY_PROVIDER_STRATEGIES = TypeAdapter(list["CapacityProviderStrategy"]).validate_json(
+CCW_TASK_CAPACITY_PROVIDER_STRATEGIES = TypeAdapter(list[CapacityProviderStrategy]).validate_json(
     os.environ.get("CCW_TASK_CAPACITY_PROVIDER_STRATEGIES", default="")
 )
 BOTO_CONFIG = Config(
@@ -65,19 +79,6 @@ S3_KEY_PATTERN = re.compile(
 )
 
 logger = Logger()
-
-
-class CapacityProviderStrategy(BaseModel):
-    capacity_provider: str = Field(serialization_alias="capacityProvider")
-    weight: int
-    base: int
-
-
-class ManifestFilesResultModel(BaseModel):
-    """Pydantic model modeling columns returned from the s3_manifest_files database table."""
-
-    s3_key: str
-    status: str
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
