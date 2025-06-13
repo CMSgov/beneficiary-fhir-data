@@ -4,12 +4,14 @@ import copy
 import string
 import datetime
 import pandas as pd
+import os
+import json
 from dateutil.parser import parse
 from faker import Faker
 from pathlib import Path
 
 
-class PatientGeneratorUtil:
+class GeneratorUtil():
     def __init__(self):
         self.fake = Faker()
         self.used_bene_sk = []
@@ -18,7 +20,35 @@ class PatientGeneratorUtil:
         self.bene_hstry_table = []
         self.mbi_table = {}
         self.address_options = []
+        self.mdcr_stus = []
+        self.mdcr_entlmt = []
+        self.mdcr_tp = []
+        self.mdcr_rsn = []
+        self.code_systems  = {}
+
         self.load_addresses()
+        self.load_code_systems()
+
+    def load_code_systems(self):
+        code_systems = {}
+        relative_path = "../../sushi/fsh-generated/resources"
+        for file in os.listdir(relative_path):
+            if('.json' not in file or 'CodeSystem' not in file):
+                continue
+            full_path = relative_path+"/"+file
+            try:
+                with open(full_path, 'r') as file:
+                    data = json.load(file)
+                    concepts = []
+                    for i in data['concept']:
+                        #print(i['code'])
+                        concepts.append(i['code'])
+                    code_systems[data['name']] = concepts
+            except FileNotFoundError:
+                print(f"Error: File not found at path: {full_path}")
+            except json.JSONDecodeError:
+                print(f"Error: Invalid JSON format in file: {full_path}") 
+        self.code_systems = code_systems 
 
     def load_addresses(self):
         with open("beneficiary-components/addresses.csv", "r") as file:
@@ -66,7 +96,7 @@ class PatientGeneratorUtil:
         patient["IDR_UPDT_TS"] = str(
             self.fake.date_time_between_dates(efctv_ts, max_date)
         )
-        patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31 00:00:00.000000"
+        patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
     def create_base_patient(self):
         patient = {}
@@ -114,6 +144,72 @@ class PatientGeneratorUtil:
             self.set_timestamps(mbi_obj, efctv_dt)
             self.mbi_table[mbi] = mbi_obj
 
+    def generate_coverages(self, patient):
+        mdcr_stus_cd = '~'
+        while(mdcr_stus_cd in ('0','~','00')):
+            mdcr_stus_cd = random.choice(self.code_systems['BENE_MDCR_STUS_CD'])
+
+        medicare_start_date = self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']
+        #STUS
+        stus_row = {"BENE_SK":patient['BENE_SK'],
+                    'IDR_LTST_TRANS_FLG':'Y',
+                    'BENE_MDCR_STUS_CD': mdcr_stus_cd,
+                    "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                    "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                    "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                    'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
+                    }
+        self.mdcr_stus.append(stus_row)    
+        
+        bene_rng_end_dt = ''
+        if(random.randint(0,10)>8):
+            bene_rng_end_dt=datetime.date.today().strftime("%Y-%m-%d")
+        
+        buy_in_cd = random.choice(self.code_systems['BENE_BUYIN_CD'])
+
+        entitlement_reason = random.choice(self.code_systems['BENE_MDCR_ENTLMT_RSN_CD'])
+        rsn_row = {"BENE_SK":patient['BENE_SK'],
+                    'IDR_LTST_TRANS_FLG':'Y',
+                    "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                    "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",                        
+                    "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                    'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
+                    'BENE_MDCR_ENTLMT_RSN_CD': entitlement_reason
+                }
+        self.mdcr_rsn.append(rsn_row)
+        for coverage_type in ['A','B']:
+            
+            #ENTLMT
+            entlmt_row = {"BENE_SK":patient['BENE_SK'],
+                        'IDR_LTST_TRANS_FLG':'Y',
+                        'BENE_MDCR_ENTLMT_TYPE_CD': coverage_type,
+                        'BENE_MDCR_ENRLMT_RSN_CD': random.choice(self.code_systems['BENE_ENRLMT_RSN_CD']),
+                        'BENE_MDCR_ENTLMT_STUS_CD': 'Y',
+                        "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                        "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                        "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                        'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
+                        'BENE_RNG_BGN_DT': medicare_start_date,
+            }
+            if(len(bene_rng_end_dt)):
+                entlmt_row['BENE_RNG_END_DT']=bene_rng_end_dt
+            else:
+                entlmt_row['BENE_RNG_END_DT']='9999-12-31'
+            self.mdcr_entlmt.append(entlmt_row)
+            #TP
+            if(random.randint(0,10)==10):
+                tp_row = {"BENE_SK":patient['BENE_SK'],
+                            'IDR_LTST_TRANS_FLG':'Y',
+                            'BENE_TP_TYPE_CD': coverage_type,
+                            "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                            "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                            "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
+                            'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
+                            'BENE_BUYIN_CD': buy_in_cd
+                }
+                self.mdcr_tp.append(tp_row)
+            
+
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
@@ -149,17 +245,18 @@ class PatientGeneratorUtil:
         df.to_csv("out/SYNTHETIC_BENE.csv", index=False)
 
         df = pd.json_normalize(self.bene_hstry_table)
-        df = df[
-            [
-                "BENE_SK",
-                "BENE_XREF_EFCTV_SK",
-                "BENE_MBI_ID",
-                "IDR_TRANS_EFCTV_TS",
-                "IDR_UPDT_TS",
-                "IDR_TRANS_OBSLT_TS",
+        if(df.size>0):
+            df = df[
+                [
+                    "BENE_SK",
+                    "BENE_XREF_EFCTV_SK",
+                    "BENE_MBI_ID",
+                    "IDR_TRANS_EFCTV_TS",
+                    "IDR_UPDT_TS",
+                    "IDR_TRANS_OBSLT_TS",
+                ]
             ]
-        ]
-        df.to_csv("out/SYNTHETIC_BENE_HSTRY.csv", index=False)
+            df.to_csv("out/SYNTHETIC_BENE_HSTRY.csv", index=False)
 
         arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
         df = pd.json_normalize(arr)
@@ -174,3 +271,14 @@ class PatientGeneratorUtil:
             ]
         ]
         df.to_csv("out/SYNTHETIC_BENE_MBI_ID.csv", index=False)
+
+        df = pd.json_normalize(self.mdcr_stus)
+        df.to_csv("out/SYNTHETIC_BENE_MDCR_STUS.csv", index=False)
+        df = pd.json_normalize(self.mdcr_entlmt)
+        df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", index=False)
+        df = pd.json_normalize(self.mdcr_tp)
+        df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
+        
+        df = pd.json_normalize(self.mdcr_rsn)
+        df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
+        
