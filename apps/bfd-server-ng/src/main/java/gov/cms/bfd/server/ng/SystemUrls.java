@@ -53,6 +53,9 @@ public class SystemUrls {
   public static final String HL7_ADJUDICATION =
       "http://terminology.hl7.org/CodeSystem/adjudication";
 
+  public static final String HL7_BENEFIT_CATEGORY =
+      "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
+
   // US Core
   /**
    * <a href="https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-ethnicity.html">US Core
@@ -196,6 +199,9 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD";
   public static final String BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD";
+
+  public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
   // CMS
 

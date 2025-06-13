@@ -28,3 +28,4 @@ def get_enum_val(concept):
 if __name__ == "__main__":
     gen_enum("CodeSystem-CLM-REV-CNTR-CD.json")
     gen_enum("CodeSystem-CLM-DDCTBL-COINSRNC-CD.json")
+    gen_enum("CodeSystem-Benefit-Balance.json")

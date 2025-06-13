@@ -1,0 +1,94 @@
+package gov.cms.bfd.server.ng.claim.model;
+
+import gov.cms.bfd.server.ng.SystemUrls;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.UnsignedIntType;
+
+import java.util.List;
+
+@Embeddable
+public class BenefitBalanceInstitutional {
+  @Column(name = "clm_mdcr_ip_lrd_use_cnt")
+  private int lifetimeReserveDaysUsed;
+
+  @Column(name = "clm_instnl_mdcr_coins_day_cnt")
+  private int totalCoinsuranceDays;
+
+  @Column(name = "clm_instnl_cvrd_day_cnt")
+  private float totalCoveredDays;
+
+  @Column(name = "clm_instnl_per_diem_amt")
+  private float perDiemAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_dsprprtnt_amt")
+  private float ppsDisproportionateAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_excptn_amt")
+  private float ppsExceptionAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_cptl_fsp_amt")
+  private float ppsCapitalFspAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_cptl_ime_amt")
+  private float ppsCapitalImeAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_outlier_amt")
+  private float ppsOutlierAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_cptl_hrmls_amt")
+  private float ppsCapitalHarmlessAmount;
+
+  @Column(name = "clm_mdcr_ip_pps_cptl_tot_amt")
+  private float ppsCapitalTotalAmount;
+
+  @Column(name = "clm_mdcr_instnl_prmry_pyr_amt")
+  private float primaryPayerAmount;
+
+  @Column(name = "clm_instnl_prfnl_amt")
+  private float professionalAmount;
+
+  @Column(name = "clm_instnl_drg_outlier_amt")
+  private float drgOutlierAmount;
+
+  @Column(name = "clm_mdcr_ip_bene_ddctbl_amt")
+  private float beneDeductibleAmount;
+
+  @Column(name = "clm_hipps_uncompd_care_amt")
+  private float hippsUncompensatedCareAmount;
+
+  List<ExplanationOfBenefit.BenefitComponent> toFhir() {
+    return List.of(
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_LRD_USE_CNT.toFhirIntType(
+            lifetimeReserveDaysUsed),
+        BenefitBalanceInstitutionalType.CLM_INSTNL_MDCR_COINS_DAY_CNT.toFhirIntType(
+            totalCoinsuranceDays),
+        BenefitBalanceInstitutionalType.CLM_INSTNL_CVRD_DAY_CNT.toFhirIntType(
+            // These are always whole numbers, but IDR stores them as floats
+            Math.round(totalCoveredDays)),
+        BenefitBalanceInstitutionalType.CLM_INSTNL_PER_DIEM_AMT.toFhirMoney(perDiemAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT.toFhirMoney(
+            ppsDisproportionateAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_EXCPTN_AMT.toFhirMoney(ppsExceptionAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_CPTL_FSP_AMT.toFhirMoney(
+            ppsCapitalFspAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_CPTL_IME_AMT.toFhirMoney(
+            ppsCapitalImeAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_OUTLIER_AMT.toFhirMoney(ppsOutlierAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT.toFhirMoney(
+            ppsCapitalHarmlessAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_CPTL_TOT_AMT.toFhirMoney(
+            ppsCapitalTotalAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_INSTNL_PRMRY_PYR_AMT.toFhirMoney(
+            primaryPayerAmount),
+        BenefitBalanceInstitutionalType.CLM_INSTNL_PRFNL_AMT.toFhirMoney(professionalAmount),
+        BenefitBalanceInstitutionalType.CLM_INSTNL_DRG_OUTLIER_AMT.toFhirMoney(drgOutlierAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_IP_BENE_DDCTBL_AMT.toFhirMoney(
+            beneDeductibleAmount),
+        BenefitBalanceInstitutionalType.CLM_HIPPS_UNCOMPD_CARE_AMT.toFhirMoney(
+            hippsUncompensatedCareAmount));
+  }
+}

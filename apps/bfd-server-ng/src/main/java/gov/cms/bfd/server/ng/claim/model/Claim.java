@@ -44,6 +44,7 @@ public class Claim {
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private CareTeam careTeam;
+  @Embedded private BenefitBalance benefitBalance;
 
   @ManyToOne private ClaimDateSignature claimDateSignature;
   @OneToOne private ClaimInstitutional claimInstitutional;
@@ -67,10 +68,9 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(i.castToReference(eob));
             });
-    eob.setExtension(
-        Stream.of(claimExtensions.toFhir(), claimInstitutional.getExtensions().toFhir())
-            .flatMap(Collection::stream)
-            .toList());
+    Stream.of(claimExtensions.toFhir(), claimInstitutional.getExtensions().toFhir())
+        .flatMap(Collection::stream)
+        .forEach(eob::addExtension);
     billingProvider
         .toFhir(claimTypeCode)
         .ifPresent(
@@ -92,7 +92,7 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
-    eob.setItem(claimLines.stream().map(ClaimLine::toFhir).toList());
+    claimLines.stream().map(ClaimLine::toFhir).forEach(eob::addItem);
     careTeam
         .toFhir(eob)
         .forEach(
@@ -101,6 +101,8 @@ public class Claim {
               eob.addContained(c.practitioner());
             });
     eob.addAdjudication(claimInstitutional.getPpsDrgWeight().toFhir());
+    eob.addBenefitBalance(
+        benefitBalance.toFhir(claimInstitutional.getBenefitBalanceInstitutional()));
     return eob;
   }
 }
