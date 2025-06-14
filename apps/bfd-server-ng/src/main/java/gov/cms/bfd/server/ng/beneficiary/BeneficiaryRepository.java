@@ -102,6 +102,22 @@ public class BeneficiaryRepository {
     return searchBeneficiary("mbi", mbi, lastUpdatedRange);
   }
 
+  public Optional<Long> getXrefBeneSk(long beneSk) {
+    return entityManager
+        .createQuery(
+            """
+              SELECT b.xrefSk
+              FROM Beneficiary b
+              WHERE b.beneSk = :beneSk
+              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+            """,
+            Long.class)
+        .setParameter("beneSk", beneSk)
+        .getResultList()
+        .stream()
+        .findFirst();
+  }
+
   /**
    * Returns the last updated timestamp for the beneficiary data ingestion process.
    *

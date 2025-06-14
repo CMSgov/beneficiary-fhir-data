@@ -11,6 +11,8 @@ public class DateUtil {
   /** UTC time zone. UTC should be used for all datetime conversions and representations. */
   public static final TimeZone TIME_ZONE_UTC = TimeZone.getTimeZone("UTC");
 
+  private DateUtil() {}
+
   /**
    * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
    *

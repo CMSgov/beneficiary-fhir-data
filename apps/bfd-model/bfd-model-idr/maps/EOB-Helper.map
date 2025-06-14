@@ -165,8 +165,8 @@ conceptmap "HL7_DIAGTYPE" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
 
-  s:"A" = t:"principal"
-  s:"P" = t:"admitting"
+  s:"A" = t:"admitting"
+  s:"P" = t:"principal"
 }
 
 conceptmap "C4BB_DIAGTYPE" {
