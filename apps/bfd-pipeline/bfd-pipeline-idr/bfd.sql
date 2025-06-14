@@ -184,7 +184,8 @@ CREATE TABLE idr.claim (
     clm_blg_prvdr_oscar_num VARCHAR(20),
     clm_idr_ld_dt DATE,
     clm_nrln_ric_cd VARCHAR(1),
-    bfd_created_ts TIMESTAMPTZ NOT NULL
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_date_signature (

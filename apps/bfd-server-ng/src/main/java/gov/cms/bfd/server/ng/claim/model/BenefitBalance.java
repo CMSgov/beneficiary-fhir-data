@@ -2,13 +2,12 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 public class BenefitBalance {
   @Column(name = "clm_mdcr_ddctbl_amt")

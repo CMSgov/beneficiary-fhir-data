@@ -2,15 +2,22 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import lombok.Getter;
-
+import jakarta.persistence.JoinColumn;
 import java.time.LocalDate;
+
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
 
 @Getter
 @Entity
+@Table(name = "claim_line_institutional", schema = "idr")
 public class ClaimLineInstitutional {
+  @EmbeddedId ClaimLineInstitutionalId claimLineInstitutionalId;
 
   @Column(name = "clm_ddctbl_coinsrnc_cd")
   private ClaimLineDeductibleCoinsuranceCode deductibleCoinsuranceCode;
@@ -22,5 +29,14 @@ public class ClaimLineInstitutional {
 
   @Embedded private AdjudicationChargeInstitutional adjudicationCharge;
 
-  @OneToOne private ClaimAnsiSignature ansiSignature;
+  @OneToOne
+  @JoinColumn(name = "clm_ansi_sgntr_sk")
+  private ClaimAnsiSignature ansiSignature;
+
+  @OneToOne
+  @JoinColumns({
+    @JoinColumn(name = "clm_uniq_id", referencedColumnName = "clm_uniq_id"),
+    @JoinColumn(name = "clm_line_num", referencedColumnName = "clm_line_num")
+  })
+  private ClaimLine claimLine;
 }

@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
 import gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -1,14 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.SystemUrls;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
-import java.util.Arrays;
 
 @AllArgsConstructor
 @Getter

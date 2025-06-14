@@ -3,17 +3,23 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import jakarta.persistence.Table;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+
 @Entity
+@Table(name = "claim_ansi_signature", schema = "idr")
 public class ClaimAnsiSignature {
-  @Column(name = "clm_ansi_sgntr_sk")
+  @Id
+  @Column(name = "clm_ansi_sgntr_sk", insertable = false, updatable = false)
   private long ansiSignatureSk;
 
   @Column(name = "clm_1_rev_cntr_ansi_rsn_cd")

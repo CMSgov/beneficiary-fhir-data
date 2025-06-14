@@ -3,11 +3,9 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
-import org.hl7.fhir.r4.model.CodeType;
+import java.time.LocalDate;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
-
-import java.time.LocalDate;
 
 public class ClaimProcessDate {
   @Column(name = "clm_cms_proc_dt")

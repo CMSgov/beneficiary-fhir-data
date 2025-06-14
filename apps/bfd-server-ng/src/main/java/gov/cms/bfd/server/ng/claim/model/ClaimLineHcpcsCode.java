@@ -1,13 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.FhirUtil;
-import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import org.hl7.fhir.r4.model.Coding;
-
 import java.util.Optional;
-import java.util.regex.Pattern;
+import org.hl7.fhir.r4.model.Coding;
 
 @Embeddable
 public class ClaimLineHcpcsCode {

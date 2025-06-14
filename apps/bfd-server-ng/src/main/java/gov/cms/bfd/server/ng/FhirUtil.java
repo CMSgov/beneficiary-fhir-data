@@ -1,9 +1,8 @@
 package gov.cms.bfd.server.ng;
 
+import java.util.regex.Pattern;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-
-import java.util.regex.Pattern;
 
 public class FhirUtil {
   private FhirUtil() {}

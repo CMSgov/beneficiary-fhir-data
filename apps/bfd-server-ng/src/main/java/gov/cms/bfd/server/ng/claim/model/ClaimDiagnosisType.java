@@ -1,10 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
@@ -15,9 +14,9 @@ public enum ClaimDiagnosisType {
   PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE);
 
-  private String idrCode;
-  private String fhirCode;
-  private String system;
+  private final String idrCode;
+  private final String fhirCode;
+  private final String system;
 
   public static ClaimDiagnosisType fromIdrCode(String idrCode) {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst().get();

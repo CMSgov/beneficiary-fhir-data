@@ -1,10 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 public class BenefitBalanceClaimValue {
   private BenefitBalanceClaimValue() {}

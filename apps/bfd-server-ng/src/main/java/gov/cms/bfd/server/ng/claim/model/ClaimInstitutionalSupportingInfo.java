@@ -1,12 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-import java.util.List;
-
-@Embedded
+@Embeddable
 public class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_admsn_src_cd")
   private ClaimAdmissionSourceCode claimAdmissionSourceCode;

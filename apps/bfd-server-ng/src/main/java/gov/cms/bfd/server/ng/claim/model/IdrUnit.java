@@ -1,13 +1,11 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.SimpleQuantity;
-
 import java.util.Arrays;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.SimpleQuantity;
 
 @Getter
 @AllArgsConstructor
@@ -19,8 +17,8 @@ public enum IdrUnit {
   GR("GR", "g"),
   EA("EA", "[arb'U]");
 
-  private String idrCode;
-  private String fhirUnit;
+  private final String idrCode;
+  private final String fhirUnit;
 
   public static Optional<IdrUnit> tryFromCode(String idrCode) {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();

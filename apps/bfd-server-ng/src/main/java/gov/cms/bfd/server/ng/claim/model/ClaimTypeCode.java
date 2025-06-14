@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
+import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -8,10 +10,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
@@ -150,11 +148,8 @@ public enum ClaimTypeCode {
   _2800(2800, "DME MEDICARE SS DME"),
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
 
-  private int code;
-  //  private ClaimType claimType;
-  //  private Optional<ClaimSubtype> claimSubtype;
-  //  private String profileMetaUrl;
-  private String display;
+  private final int code;
+  private final String display;
   private static final String INSURER_ORG = "insurer-org";
 
   public static ClaimTypeCode fromCode(int code) {

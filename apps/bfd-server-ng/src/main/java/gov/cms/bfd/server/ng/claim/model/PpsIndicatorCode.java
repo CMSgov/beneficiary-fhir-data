@@ -1,16 +1,17 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SequenceGenerator;
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+@AllArgsConstructor
 public enum PpsIndicatorCode {
   PPS("2", "PPS bill; claim contains PPS indicator"),
   NOT_PPS("unknown", "Not a PPS bill");
 
-  private String code;
-  private String display;
+  private final String code;
+  private final String display;
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {

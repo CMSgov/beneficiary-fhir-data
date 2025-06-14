@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-import java.util.Optional;
-
 @AllArgsConstructor
 public enum BlueButtonSupportingInfoCategory {
   CLM_NCH_WKLY_PROC_DT("CLM_NCH_WKLY_PROC_DT", "Weekly Process Date"),
@@ -24,13 +22,12 @@ public enum BlueButtonSupportingInfoCategory {
   private final String display;
 
   CodeableConcept toFhir() {
-    var coding =
-        new Coding()
-            .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_SUPPORTING_INFORMATION)
-            .setCode(code);
-    display.ifPresent(coding::setDisplay);
     return new CodeableConcept()
-        .addCoding(coding)
+        .addCoding(
+            new Coding()
+                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_SUPPORTING_INFORMATION)
+                .setCode(code)
+                .setDisplay(display))
         .addCoding(
             new Coding()
                 .setSystem(SystemUrls.HL7_CLAIM_INFORMATION)

@@ -1,11 +1,12 @@
 package gov.cms.bfd.server.ng.claim.converter;
 
-import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.claim.model.IdrUnit;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import java.util.Optional;
 
+@Converter(autoApply = true)
 public class IdrUnitConverter implements AttributeConverter<Optional<IdrUnit>, String> {
   @Override
   public String convertToDatabaseColumn(Optional<IdrUnit> unit) {

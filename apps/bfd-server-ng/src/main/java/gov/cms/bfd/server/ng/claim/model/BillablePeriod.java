@@ -4,11 +4,10 @@ import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.time.LocalDate;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
-
-import java.time.LocalDate;
 
 @Embeddable
 public class BillablePeriod {

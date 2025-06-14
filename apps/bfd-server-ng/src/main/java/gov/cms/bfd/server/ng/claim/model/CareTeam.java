@@ -3,12 +3,10 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 public class CareTeam {

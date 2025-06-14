@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 public class EobResourceProvider implements IResourceProvider {
-  private EobHandler eobHandler;
+  private final EobHandler eobHandler;
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {

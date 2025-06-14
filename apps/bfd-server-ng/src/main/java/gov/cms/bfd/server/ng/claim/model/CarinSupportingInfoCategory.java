@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-import java.util.Optional;
-
 @AllArgsConstructor
 public enum CarinSupportingInfoCategory {
   ACTIVE_CARE_FROM_DATE("admissionperiod"),

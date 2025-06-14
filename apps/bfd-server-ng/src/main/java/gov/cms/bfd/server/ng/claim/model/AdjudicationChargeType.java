@@ -22,7 +22,7 @@ public enum AdjudicationChargeType {
       "Eligible Amount",
       "CLM_LINE_ALOWD_CHRG_AMT",
       "Line Allowed Charge Amount"),
-  SUBMITTED_CHARGE_AMOUNT(
+  LINE_SUBMITTED_CHARGE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "submitted",
       "Submitted Amount",

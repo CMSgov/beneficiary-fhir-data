@@ -3,18 +3,23 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 @Entity
-@Table(name = "claim_procedure")
+@Table(name = "claim_procedure", schema = "idr")
 public class ClaimProcedure {
+  @EmbeddedId ClaimProcedureId claimProcedureId;
+
   @Column(name = "clm_val_sqnc_num")
   private int sequenceNumber;
 
@@ -27,9 +32,6 @@ public class ClaimProcedure {
   @Column(name = "clm_prcdr_cd")
   private Optional<String> procedureCode;
 
-  @Column(name = "bfd_row_num")
-  private int rowNumber;
-
   @Column(name = "clm_prod_type_cd")
   private ClaimDiagnosisType diagnosisType;
 
@@ -39,7 +41,11 @@ public class ClaimProcedure {
   @Column(name = "clm_dgns_cd")
   private Optional<String> diagnosisCode;
 
-  public Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
+  @ManyToOne
+  @JoinColumn(name = "clm_uniq_id")
+  private Claim claim;
+
+  Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     if (procedureCode.isEmpty()) {
       return Optional.empty();
     }
@@ -65,12 +71,12 @@ public class ClaimProcedure {
     return Optional.of(procedure);
   }
 
-  public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis() {
+  Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis() {
     if (diagnosisCode.isEmpty()) {
       return Optional.empty();
     }
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
-    diagnosis.setSequence(rowNumber);
+    diagnosis.setSequence(claimProcedureId.getRowNumber());
     diagnosis.addType(
         new CodeableConcept()
             .addCoding(

@@ -3,10 +3,9 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.time.LocalDate;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Period;
-
-import java.time.LocalDate;
 
 @Embeddable
 public class AdmissionPeriod {

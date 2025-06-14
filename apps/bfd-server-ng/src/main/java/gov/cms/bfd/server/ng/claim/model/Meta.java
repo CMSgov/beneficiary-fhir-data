@@ -1,10 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-
 import java.time.LocalDateTime;
 
 @Embeddable

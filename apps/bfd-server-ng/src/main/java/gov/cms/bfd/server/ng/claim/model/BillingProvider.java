@@ -3,12 +3,11 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
-
-import java.util.Optional;
 
 @Embeddable
 public class BillingProvider {
@@ -45,5 +44,7 @@ public class BillingProvider {
             .setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS)
             .setValue(billingOscarNumber));
     organization.setName("PROVIDER ORG SOURCED FROM NPPES");
+
+    return Optional.of(organization);
   }
 }

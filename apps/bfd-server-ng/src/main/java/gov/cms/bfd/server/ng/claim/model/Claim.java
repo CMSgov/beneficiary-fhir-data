@@ -4,23 +4,24 @@ import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Entity
 @Getter
 @Table(name = "claim", schema = "idr")
 public class Claim {
-  @Column(name = "clm_uniq_id")
+  @Id
+  @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 
   @Column(name = "bene_sk")
@@ -47,10 +48,20 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
 
-  @ManyToOne private ClaimDateSignature claimDateSignature;
-  @OneToOne private ClaimInstitutional claimInstitutional;
-  @ManyToMany private List<ClaimLine> claimLines;
-  @ManyToMany private List<ClaimValue> claimValues;
+  @OneToOne(mappedBy = "claim")
+  private ClaimDateSignature claimDateSignature;
+
+  @OneToOne(mappedBy = "claim")
+  private ClaimInstitutional claimInstitutional;
+
+  @OneToMany(mappedBy = "claim")
+  private List<ClaimLine> claimLines;
+
+  @OneToMany(mappedBy = "claim")
+  private List<ClaimValue> claimValues;
+
+  @OneToMany(mappedBy = "claim")
+  private List<ClaimProcedure> claimProcedures;
 
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
@@ -70,9 +81,19 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(i.castToReference(eob));
             });
-    Stream.of(claimExtensions.toFhir(), claimInstitutional.getExtensions().toFhir())
+
+    Stream.of(
+            claimExtensions.toFhir(),
+            claimInstitutional.getExtensions().toFhir(),
+            List.of(claimDateSignature.getClaimProcessDate().toFhir()))
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
+
+    for (var procedure : claimProcedures) {
+      procedure.toFhirProcedure().ifPresent(eob::addProcedure);
+      procedure.toFhirDiagnosis().ifPresent(eob::addDiagnosis);
+    }
+
     billingProvider
         .toFhir(claimTypeCode)
         .ifPresent(
@@ -89,7 +110,7 @@ public class Claim {
             typeOfBillCode.toFhir(supportingInfoFactory));
     Stream.of(
             initialSupportingInfo,
-            claimDateSignature.toFhir(supportingInfoFactory),
+            claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             claimInstitutional.getSupportingInfo().toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);

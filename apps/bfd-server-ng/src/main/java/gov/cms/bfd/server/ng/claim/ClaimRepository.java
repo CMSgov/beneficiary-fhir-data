@@ -1,14 +1,11 @@
 package gov.cms.bfd.server.ng.claim;
 
-import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import jakarta.persistence.EntityManager;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
@@ -21,6 +18,13 @@ public class ClaimRepository {
             """
               SELECT c
               FROM Claim c
+              JOIN c.claimLines cl
+              JOIN c.claimDateSignature cds
+              JOIN c.claimProcedures cp
+              LEFT JOIN c.claimInstitutional ci
+              LEFT JOIN cl.claimLineInstitutional cli
+              LEFT JOIN cli.ansiSignature as
+              LEFT JOIN c.claimValues cv
               where c.claimUniqueId = :claimUniqueId
               """,
             Claim.class)
@@ -41,19 +45,6 @@ public class ClaimRepository {
               """,
             Claim.class)
         .setParameter("xrefSk", xrefSk)
-        .getResultList();
-  }
-
-  public List<ClaimProcedure> getClaimProcedures(List<Long> claimIds) {
-    return entityManager
-        .createQuery(
-            """
-            SELECT c
-            FROM ClaimProcedure cp
-            WHERE claimUniqueId IN :claimIds
-            """,
-            ClaimProcedure.class)
-        .setParameter("claimIds", claimIds)
         .getResultList();
   }
 }

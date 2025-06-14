@@ -3,11 +3,10 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.List;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
-
-import java.util.List;
 
 @Embeddable
 public class Identifiers {
