@@ -270,8 +270,31 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT",
+                "label": "Hospice Period Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT",
+                "label": "Claim Total Visit Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
-
             
         ]
     }

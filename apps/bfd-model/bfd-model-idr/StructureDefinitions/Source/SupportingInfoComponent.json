@@ -248,6 +248,54 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_QLFY_STAY_FROM_DT",
+                "path": "SupportingInfoComponent.CLM_QLFY_STAY_FROM_DT",
+                "label": "Qualified Stay From Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_QLFY_STAY_THRU_DT",
+                "path": "SupportingInfoComponent.CLM_QLFY_STAY_THRU_DT",
+                "label": "Qualified Stay Through Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_HHA_LUP_IND_CD",
+                "path": "SupportingInfoComponent.CLM_HHA_LUP_IND_CD",
+                "label": "Claim LUPA Indicator Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_HHA_RFRL_CD",
+                "path": "SupportingInfoComponent.CLM_HHA_RFRL_CD",
+                "label": "Claim Referral Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
             }
             
         ]

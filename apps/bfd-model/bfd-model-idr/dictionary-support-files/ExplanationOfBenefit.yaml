@@ -1010,6 +1010,24 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_NCVRD_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_THRU_DT').exists()).timing
+- inputPath: SupportingInfoComponent.CLM_QLFY_STAY_FROM_DT
+  appliesTo:
+    - SNF
+  sources:
+    - NCH
+    - FISS
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_QLFY_STAY_FROM_DT
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_FROM_DT').exists()).timing
+- inputPath: SupportingInfoComponent.CLM_QLFY_STAY_THRU_DT
+  appliesTo:
+    - SNF
+  sources:
+    - NCH
+    - FISS
+  sourceView: V2_MDCR_CLM_DT_SGNTR
+  sourceColumn: CLM_QLFY_STAY_THRU_DT
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_THRU_DT').exists()).timing
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT
   appliesTo:
     - Inpatient
@@ -1433,3 +1451,39 @@
   sourceColumn: CLM_REV_CNTR_STUS_CD
   referenceTable: CLM_REV_CNTR_STUS_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD').value.code
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT
+  appliesTo:
+    - Hospice
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_HOSPC_PRD_CNT
+  fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_HOSPC_PRD_CNT').used
+
+
+- inputPath: SupportingInfoComponent.CLM_HHA_LUP_IND_CD
+  appliesTo:
+    - HHA
+  sources:
+    - NCH
+  referenceTable: CLM_HHA_LUP_IND_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_HHA_LUP_IND_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_HHA_LUP_IND_CD').exists()).code.coding.code
+- inputPath: SupportingInfoComponent.CLM_HHA_RFRL_CD
+  appliesTo:
+    - HHA
+  sources:
+    - NCH
+  referenceTable: CLM_HHA_RFRL_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_HHA_RFRL_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_HHA_RFRL_CD').exists()).code.coding.code
+- inputPath: SupportingInfoComponent.CLM_MDCR_HHA_TOT_VISIT_CNT
+  appliesTo:
+    - HHA
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_HHA_TOT_VISIT_CNT
+  fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_HHA_TOT_VISIT_CNT').used

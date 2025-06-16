@@ -183,7 +183,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
     #clm_type_cd = 60
-    clm_type_cd = random.choice([40,60])
+    clm_type_cd = random.choice([10,20,30,40,50,60])
     claim['CLM']['CLM_TYPE_CD'] = clm_type_cd
 
     clm_src_id = -1
@@ -320,16 +320,24 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     if(clm_type_cd in (10,20,30,50,60,61,62,63,64)):
         clm_dt_sgntr['CLM_ACTV_CARE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
         clm_dt_sgntr['CLM_DSCHRG_DT'] = claim['CLM']['CLM_THRU_DT']
+        if(clm_type_cd in (20,30)):
+            if(random.choice([0,1])):
+                clm_dt_sgntr['CLM_QLFY_STAY_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
+                clm_dt_sgntr['CLM_QLFY_STAY_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
+            else:
+                clm_dt_sgntr['CLM_QLFY_STAY_FROM_DT'] = '1000-01-01'
+                clm_dt_sgntr['CLM_QLFY_STAY_THRU_DT'] = '1000-01-01'
+            
         if(clm_type_cd in (50,60,61,62,63,64)):
             clm_dt_sgntr['CLM_MDCR_EXHSTD_DT'] = claim['CLM']['CLM_THRU_DT']
+            if(random.choice([0,1])):
+                clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = claim['CLM']['CLM_THRU_DT']
+                clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
+            else:
+                clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = '1000-01-01'
+                clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = '1000-01-01'
             if(clm_type_cd >= 60 ):
                 clm_dt_sgntr['CLM_ACTV_CARE_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
-                if(random.choice([0,1])):
-                    clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = claim['CLM']['CLM_THRU_DT']
-                    clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
-                else:
-                    clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = '1000-01-01'
-                    clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = '1000-01-01'
 
 
     clm_dt_sgntr['CLM_SUBMSN_DT'] = claim['CLM']['CLM_THRU_DT'] #This synthetic hospital is really on top of it!
@@ -371,8 +379,18 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_TOT_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_BENE_DDCTBL_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
+
+        if(clm_type_cd==10):
+            if(random.choice([0,1])):
+                institutional_parts['CLM_HHA_LUP_IND_CD'] = 'L'
+            institutional_parts['CLM_HHA_RFRL_CD'] = random.choice(code_systems['CLM_HHA_RFRL_CD'])
+            institutional_parts['CLM_MDCR_HHA_TOT_VISIT_CNT'] = round(random.uniform(0,25),2)
+
+
         if(clm_type_cd==40):
             institutional_parts['CLM_MDCR_INSTNL_BENE_PD_AMT'] = round(random.uniform(0,25),2)
+        if(clm_type_cd==50):
+            institutional_parts['CLM_MDCR_HOSPC_PRD_CNT'] = random.choice(['1','2','3'])
         #We'll throw in a non-payment code on occasion 
         if(random.choice([0,10])>1):
             institutional_parts['CLM_MDCR_NPMT_RSN_CD'] = random.choice(code_systems['CLM_MDCR_NPMT_RSN_CD'])
@@ -508,8 +526,16 @@ def gen_pac_version_of_claim(claim):
         pac_claim['CLM_INSTNL'].pop('CLM_MDCR_INSTNL_PRMRY_PYR_AMT')
     if('CLM_PPS_IND_CD' in pac_claim['CLM_INSTNL']):
         pac_claim['CLM_INSTNL'].pop('CLM_PPS_IND_CD')
+    if('CLM_MDCR_HOSPC_PRD_CNT' in pac_claim['CLM_INSTNL']):
+        pac_claim['CLM_INSTNL'].pop('CLM_MDCR_HOSPC_PRD_CNT')
     if('CLM_INSTNL_DRG_OUTLIER_AMT' in pac_claim['CLM_INSTNL']):
         pac_claim['CLM_INSTNL'].pop('CLM_INSTNL_DRG_OUTLIER_AMT')
+    if('CLM_MDCR_HHA_TOT_VISIT_CNT' in pac_claim['CLM_INSTNL']):
+        pac_claim['CLM_INSTNL'].pop('CLM_MDCR_HHA_TOT_VISIT_CNT')
+    if('CLM_HHA_LUP_IND_CD' in pac_claim['CLM_INSTNL']):
+        pac_claim['CLM_INSTNL'].pop('CLM_HHA_LUP_IND_CD')
+    if('CLM_HHA_RFRL_CD' in pac_claim['CLM_INSTNL']):
+        pac_claim['CLM_INSTNL'].pop('CLM_HHA_RFRL_CD')
     if('CLM_MDCR_INSTNL_BENE_PD_AMT' in pac_claim['CLM_INSTNL']):
         pac_claim['CLM_INSTNL'].pop('CLM_MDCR_INSTNL_BENE_PD_AMT')
     if('CLM_ANSI_SGNTR_SK' in pac_claim['CLM_LINE_INSTNL']):
@@ -519,7 +545,6 @@ def gen_pac_version_of_claim(claim):
     if('CLM_REV_CNTR_STUS_CD' in pac_claim['CLM_LINE_INSTNL']):
         pac_claim['CLM_LINE_INSTNL'].pop('CLM_REV_CNTR_STUS_CD')
 
-    
     #pac_claim['CLM_INSTNL']['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
     pac_claim['CLM_INSTNL']['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
     pac_claim['CLM_INSTNL']['CLM_DT_SGNTR_SK'] = pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] 
