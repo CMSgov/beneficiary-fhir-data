@@ -1,5 +1,5 @@
 locals {
-  established_envs = ["test", "prod-sbx", "prod"]
+  established_envs = !var.greenfield ? ["test", "prod-sbx", "prod"] : ["test", "sandbox", "prod"]
 
   region = data.aws_region.current.name
 
@@ -9,7 +9,20 @@ locals {
   env        = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
   parent_env = terraform.workspace
 
-  env_vpc = one([for _, v in data.aws_vpc.main : v if v.tags["stack"] == local.env])
+  # There are no tags from which we can divine the environment a VPC is associated. Fortunately, we
+  # know the name of our VPCs, and they should _never_ change, so it's OK to just check the name of
+  # the VPC and return its associated env.
+  vpcs_to_env = !var.greenfield ? {
+    "bfd-test-vpc"     = "test"
+    "bfd-prod-sbx-vpc" = "prod-sbx"
+    "bfd-prod-vpc"     = "prod"
+    "bfd-mgmt-vpc"     = "mgmt"
+    } : {
+    "bfd-east-test"         = "test"
+    "bfd-sandbox-east-prod" = "sandbox"
+    "bfd-east-prod"         = "prod"
+  }
+  env_vpc = one([for v in data.aws_vpc.main : v if local.vpcs_to_env[v.tags["Name"]] == local.env])
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
@@ -52,14 +65,17 @@ locals {
     k => v if contains(["a", "b", "c"], v.name_suffix)
   }
 
-  local_cidrs = toset([for vpc in data.aws_vpc.main : vpc.cidr_block])
-  all_connections = { for k, v in data.aws_vpc_peering_connection.main :
-    v.tags["Name"] => {
-      connection_id = k
-      peering_owner = v.peer_owner_id
-      local_cidr    = contains(local.local_cidrs, v.cidr_block) ? v.cidr_block : v.peer_cidr_block
-      foreign_cidr  = contains(local.local_cidrs, v.cidr_block) ? v.peer_cidr_block : v.cidr_block
-      env           = one([for _, vpc in data.aws_vpc.main : vpc.tags["stack"] if contains([v.vpc_id, v.peer_vpc_id], vpc.id)])
+  local_cidrs = toset([for v in data.aws_vpc.main : v.cidr_block])
+  all_connections = { for pc_id, pc in data.aws_vpc_peering_connection.main :
+    pc.tags["Name"] => {
+      connection_id = pc_id
+      peering_owner = pc.peer_owner_id
+      local_cidr    = contains(local.local_cidrs, pc.cidr_block) ? pc.cidr_block : pc.peer_cidr_block
+      foreign_cidr  = contains(local.local_cidrs, pc.cidr_block) ? pc.peer_cidr_block : pc.cidr_block
+      env = one([
+        for vpc in data.aws_vpc.main
+        : local.vpcs_to_env[vpc.tags["Name"]] if contains([pc.vpc_id, pc.peer_vpc_id], vpc.id)
+      ])
     }
   }
 }
