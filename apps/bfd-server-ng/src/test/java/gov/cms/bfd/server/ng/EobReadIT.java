@@ -17,5 +17,6 @@ public class EobReadIT extends IntegrationTestBase {
   void eobReadValidLong() {
     var eob = eobRead().withId(1071939711295L).execute();
     assertFalse(eob.isEmpty());
+    expect.serializer("fhir+json").toMatchSnapshot(eob);
   }
 }
