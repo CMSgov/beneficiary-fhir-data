@@ -7,6 +7,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -40,7 +41,9 @@ public class ClaimProcedure {
   @Column(name = "clm_dgns_cd")
   private Optional<String> diagnosisCode;
 
-  @ManyToOne private Claim claim;
+  @ManyToOne
+  @JoinColumn(name = "clm_uniq_id")
+  private Claim claim;
 
   Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     if (procedureCode.isEmpty()) {

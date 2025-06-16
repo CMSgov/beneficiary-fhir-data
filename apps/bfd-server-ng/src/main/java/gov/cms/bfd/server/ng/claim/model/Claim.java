@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -65,7 +66,7 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private List<ClaimValue> claimValues;
 
-  @OneToMany
+  @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private List<ClaimProcedure> claimProcedures;
 

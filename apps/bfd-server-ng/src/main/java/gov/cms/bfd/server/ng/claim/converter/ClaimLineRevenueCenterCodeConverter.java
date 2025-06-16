@@ -2,7 +2,9 @@ package gov.cms.bfd.server.ng.claim.converter;
 
 import gov.cms.bfd.server.ng.claim.model.ClaimLineRevenueCenterCode;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
+@Converter(autoApply = true)
 public class ClaimLineRevenueCenterCodeConverter
     implements AttributeConverter<ClaimLineRevenueCenterCode, String> {
   @Override

@@ -17,6 +17,6 @@ public class ClaimProcedureId implements Serializable {
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 
-  @Column(name = "bfd_row_num")
+  @Column(name = "bfd_row_num", insertable = false, updatable = false)
   private int rowNumber;
 }

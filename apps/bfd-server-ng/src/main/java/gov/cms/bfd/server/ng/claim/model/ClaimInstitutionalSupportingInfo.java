@@ -28,7 +28,6 @@ public class ClaimInstitutionalSupportingInfo {
         claimAdmissionSourceCode.toFhir(supportingInfoFactory),
         patientStatusCode.toFhir(supportingInfoFactory),
         claimAdmissionTypeCode.toFhir(supportingInfoFactory),
-        claimAdmissionTypeCode.toFhir(supportingInfoFactory),
         mcoPaidSwitch.toFhir(supportingInfoFactory),
         diagnosisDrgCode.toFhir(supportingInfoFactory));
   }
