@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
@@ -17,6 +18,6 @@ public class NoncoveredThroughDate {
     return supportingInfoFactory
         .createSupportingInfo()
         .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
-        .setTiming(new DateTimeType().setValue(DateUtil.toDate(noncoveredThroughDate)));
+        .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredThroughDate)));
   }
 }

@@ -60,7 +60,7 @@ public enum BenefitBalanceInstitutionalType {
   ExplanationOfBenefit.BenefitComponent toFhirMoney(double val) {
     return new ExplanationOfBenefit.BenefitComponent()
         .setType(toFhirType())
-        .setUsed(new USD().setValue(val));
+        .setUsed(USD.toFhir(val));
   }
 
   private CodeableConcept toFhirType() {

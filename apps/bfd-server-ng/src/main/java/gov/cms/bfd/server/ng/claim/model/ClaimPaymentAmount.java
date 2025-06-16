@@ -8,7 +8,6 @@ public class ClaimPaymentAmount {
   private double claimPaymentAmount;
 
   ExplanationOfBenefit.PaymentComponent toFhir() {
-    return new ExplanationOfBenefit.PaymentComponent()
-        .setAmount(new USD().setValue(claimPaymentAmount));
+    return new ExplanationOfBenefit.PaymentComponent().setAmount(USD.toFhir(claimPaymentAmount));
   }
 }

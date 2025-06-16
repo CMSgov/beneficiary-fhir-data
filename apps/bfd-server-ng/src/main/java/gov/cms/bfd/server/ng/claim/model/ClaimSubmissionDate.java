@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
@@ -15,7 +16,7 @@ public class ClaimSubmissionDate {
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     var supportingInfo = supportingInfoFactory.createSupportingInfo();
-    supportingInfo.setTiming(new DateTimeType().setValue(DateUtil.toDate(claimSubmissionDate)));
+    supportingInfo.setTiming(new DateType().setValue(DateUtil.toDate(claimSubmissionDate)));
     supportingInfo.setCategory(CarinSupportingInfoCategory.SUBMISSION_DATE.toFhir());
     return supportingInfo;
   }

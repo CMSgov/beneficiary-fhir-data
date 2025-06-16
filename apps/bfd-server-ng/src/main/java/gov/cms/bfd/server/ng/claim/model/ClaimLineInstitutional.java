@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.Optional;
+
 import lombok.Getter;
 
 @Getter
@@ -33,4 +35,8 @@ public class ClaimLineInstitutional {
 
   @OneToOne(mappedBy = "claimLineInstitutional")
   private ClaimLine claimLine;
+
+  public Optional<ClaimAnsiSignature> getAnsiSignature() {
+    return Optional.ofNullable(ansiSignature);
+  }
 }

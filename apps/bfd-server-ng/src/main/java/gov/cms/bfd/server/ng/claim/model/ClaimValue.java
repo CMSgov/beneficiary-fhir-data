@@ -16,10 +16,12 @@ public class ClaimValue {
   @Column(name = "clm_val_cd")
   private String claimValueCode;
 
-  @Column(name = "claim_val_amt")
+  @Column(name = "clm_val_amt")
   private double claimValueAmount;
 
-  @ManyToOne private Claim claim;
+  @JoinColumn(name = "clm_uniq_id")
+  @ManyToOne
+  private Claim claim;
 
   private static final String VALUE_CODE_DISPROPORTIONATE = "18";
   private static final String VALUE_CODE_IME = "19";

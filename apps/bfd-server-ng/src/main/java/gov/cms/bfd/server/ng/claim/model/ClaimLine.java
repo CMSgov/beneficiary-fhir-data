@@ -13,9 +13,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Entity
@@ -39,7 +41,9 @@ public class ClaimLine {
   @OneToOne
   private ClaimLineInstitutional claimLineInstitutional;
 
-  @ManyToOne private Claim claim;
+  @JoinColumn(name = "clm_uniq_id")
+  @ManyToOne
+  private Claim claim;
 
   ExplanationOfBenefit.ItemComponent toFhir() {
     var line = new ExplanationOfBenefit.ItemComponent();
@@ -57,13 +61,13 @@ public class ClaimLine {
     line.addModifier(hcpcsModifierCode.toFhir());
 
     Stream.of(
-            claimLineInstitutional.getAnsiSignature().toFhir(),
-            adjudicationCharge.toFhir(),
-            claimLineInstitutional.getAdjudicationCharge().toFhir())
+            claimLineInstitutional.getAnsiSignature().map(ClaimAnsiSignature::toFhir),
+            Optional.of(adjudicationCharge.toFhir()),
+            Optional.of(claimLineInstitutional.getAdjudicationCharge().toFhir()))
+        .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
-    line.setServiced(
-        new DateTimeType(DateUtil.toDate(claimLineInstitutional.getRevenueCenterDate())));
+    line.setServiced(new DateType(DateUtil.toDate(claimLineInstitutional.getRevenueCenterDate())));
 
     return line;
   }

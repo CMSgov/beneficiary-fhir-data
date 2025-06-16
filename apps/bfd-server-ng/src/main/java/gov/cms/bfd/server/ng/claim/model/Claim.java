@@ -58,11 +58,11 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
-  @OneToMany
+  @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private List<ClaimLine> claimLines;
 
-  @OneToMany
+  @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private List<ClaimValue> claimValues;
 

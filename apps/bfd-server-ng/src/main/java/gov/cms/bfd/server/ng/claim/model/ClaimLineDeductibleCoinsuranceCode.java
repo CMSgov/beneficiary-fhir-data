@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
+import java.util.Arrays;
+
 @Getter
 @AllArgsConstructor
 public enum ClaimLineDeductibleCoinsuranceCode {
@@ -21,6 +23,10 @@ public enum ClaimLineDeductibleCoinsuranceCode {
 
   private final String code;
   private final String display;
+
+  public static ClaimLineDeductibleCoinsuranceCode fromCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+  }
 
   Coding toFhir() {
     return new Coding()

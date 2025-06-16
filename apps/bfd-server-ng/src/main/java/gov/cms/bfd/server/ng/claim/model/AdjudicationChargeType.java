@@ -121,6 +121,6 @@ public enum AdjudicationChargeType {
                         .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
                         .setCode(coding2Code)
                         .setDisplay(coding2Display)))
-        .setAmount(new USD().setValue(value));
+        .setAmount(USD.toFhir(value));
   }
 }
