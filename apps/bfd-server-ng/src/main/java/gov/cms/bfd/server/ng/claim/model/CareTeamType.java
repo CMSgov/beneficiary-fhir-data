@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 
 @AllArgsConstructor
 public enum CareTeamType {
@@ -47,7 +48,7 @@ public enum CareTeamType {
                         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
                         .setCode(roleCode)
                         .setDisplay(roleDisplay)))
-            .setProvider(practitioner.castToReference(eob));
+            .setProvider(new Reference(practitioner));
     return new CareTeamComponents(practitioner, component);
   }
 

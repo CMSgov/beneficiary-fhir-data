@@ -7,10 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.List;
-
 import lombok.Getter;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Getter
 @Entity
@@ -23,7 +20,6 @@ public class ClaimDateSignature {
   @Embedded private ClaimDateSupportingInfo supportingInfo;
   @Embedded private ClaimProcessDate claimProcessDate;
 
-  @JoinColumn(name = "clm_dt_sgntr_sk")
-  @OneToOne
+  @OneToOne(mappedBy = "claimDateSignature")
   private Claim claim;
 }

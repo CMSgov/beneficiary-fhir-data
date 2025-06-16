@@ -426,6 +426,9 @@ class IdrClaim(IdrBaseModel):
     clm_nrln_ric_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
+    ]
 
     @staticmethod
     def table() -> str:

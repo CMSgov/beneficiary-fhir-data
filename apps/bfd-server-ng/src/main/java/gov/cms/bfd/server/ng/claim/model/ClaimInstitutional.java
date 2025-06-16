@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -18,8 +17,7 @@ public class ClaimInstitutional {
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;
 
-  @OneToOne
-  @JoinColumn(name = "clm_uniq_id")
+  @OneToOne(mappedBy = "claimInstitutional")
   private Claim claim;
 
   @Embedded private ClaimInstitutionalSupportingInfo supportingInfo;

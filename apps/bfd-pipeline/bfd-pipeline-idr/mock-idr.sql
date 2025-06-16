@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS cms_vdm_view_mdcr_prd.v2_mdcr_bene;
-DROP TABLE IF EXISTS cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry;
-DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd;
+DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
 
 CREATE SCHEMA cms_vdm_view_mdcr_prd;
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
@@ -153,7 +151,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_blood_pt_frnsh_qty INT,
     clm_nch_prmry_pyr_cd VARCHAR(1),
     clm_blg_prvdr_oscar_num VARCHAR(20),
-    clm_idr_ld_dt DATE NOT NULL
+    clm_idr_ld_dt DATE NOT NULL,
+    idr_updt_ts TIMESTAMPTZ
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (

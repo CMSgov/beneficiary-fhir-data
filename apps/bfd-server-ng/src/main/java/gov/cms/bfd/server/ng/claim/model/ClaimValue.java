@@ -5,7 +5,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Optional;
 
@@ -20,9 +19,7 @@ public class ClaimValue {
   @Column(name = "claim_val_amt")
   private double claimValueAmount;
 
-  @ManyToOne
-  @JoinColumn(name = "clm_uniq_id")
-  private Claim claim;
+  @ManyToOne private Claim claim;
 
   private static final String VALUE_CODE_DISPROPORTIONATE = "18";
   private static final String VALUE_CODE_IME = "19";

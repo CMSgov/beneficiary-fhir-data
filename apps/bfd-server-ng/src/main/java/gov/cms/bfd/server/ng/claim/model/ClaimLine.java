@@ -8,8 +8,8 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Collection;
@@ -32,16 +32,18 @@ public class ClaimLine {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
 
-  @OneToOne(mappedBy = "claimLine")
+  @JoinColumns({
+    @JoinColumn(name = "clm_uniq_id", referencedColumnName = "clm_uniq_id"),
+    @JoinColumn(name = "clm_line_num", referencedColumnName = "clm_line_num")
+  })
+  @OneToOne
   private ClaimLineInstitutional claimLineInstitutional;
 
-  @ManyToOne
-  @JoinColumn(name = "clm_uniq_id")
-  private Claim claim;
+  @ManyToOne private Claim claim;
 
   ExplanationOfBenefit.ItemComponent toFhir() {
     var line = new ExplanationOfBenefit.ItemComponent();
-    line.setSequence(claimLineId.getLineNumber());
+    line.setSequence(claimLineId.getClaimLineNumber());
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     claimLineInstitutional.getHippsCode().toFhir().ifPresent(productOrService::addCoding);

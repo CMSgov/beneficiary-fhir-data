@@ -1,7 +1,4 @@
-DROP TABLE IF EXISTS idr.beneficiary;
-DROP TABLE IF EXISTS idr.beneficiary_history;
-DROP TABLE IF EXISTS idr.load_progress;
-DROP SCHEMA IF EXISTS idr;
+DROP SCHEMA IF EXISTS idr CASCADE;
 
 CREATE SCHEMA idr;
 CREATE TABLE idr.beneficiary(
@@ -184,6 +181,7 @@ CREATE TABLE idr.claim (
     clm_blg_prvdr_oscar_num VARCHAR(20),
     clm_idr_ld_dt DATE,
     clm_nrln_ric_cd VARCHAR(1),
+    idr_updt_ts TIMESTAMPTZ,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );

@@ -25,7 +25,7 @@ public class ClaimRepository {
               LEFT JOIN cl.claimLineInstitutional cli
               LEFT JOIN cli.ansiSignature as
               LEFT JOIN c.claimValues cv
-              where c.claimUniqueId = :claimUniqueId
+              WHERE c.claimUniqueId = :claimUniqueId
               """,
             Claim.class)
         .setParameter("claimUniqueId", claimUniqueId)

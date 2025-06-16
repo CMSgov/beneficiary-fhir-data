@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Reference;
 
 @Entity
 @Getter
@@ -48,19 +49,24 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
 
-  @OneToOne(mappedBy = "claim")
+  @OneToOne
+  @JoinColumn(name = "clm_dt_sgntr_sk")
   private ClaimDateSignature claimDateSignature;
 
-  @OneToOne(mappedBy = "claim")
+  @OneToOne
+  @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
-  @OneToMany(mappedBy = "claim")
+  @OneToMany
+  @JoinColumn(name = "clm_uniq_id")
   private List<ClaimLine> claimLines;
 
-  @OneToMany(mappedBy = "claim")
+  @OneToMany
+  @JoinColumn(name = "clm_uniq_id")
   private List<ClaimValue> claimValues;
 
-  @OneToMany(mappedBy = "claim")
+  @OneToMany
+  @JoinColumn(name = "clm_uniq_id")
   private List<ClaimProcedure> claimProcedures;
 
   public ExplanationOfBenefit toFhir() {
@@ -79,7 +85,7 @@ public class Claim {
         .ifPresent(
             i -> {
               eob.addContained(i);
-              eob.setInsurer(i.castToReference(eob));
+              eob.setInsurer(new Reference(i));
             });
 
     Stream.of(
@@ -99,7 +105,7 @@ public class Claim {
         .ifPresent(
             p -> {
               eob.addContained(p);
-              eob.setProvider(p.castToReference(eob));
+              eob.setProvider(new Reference(p));
             });
 
     var supportingInfoFactory = new SupportingInfoFactory();

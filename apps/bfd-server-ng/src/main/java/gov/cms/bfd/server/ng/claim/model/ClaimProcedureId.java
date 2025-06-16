@@ -3,12 +3,13 @@ package gov.cms.bfd.server.ng.claim.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
-
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@EqualsAndHashCode
 @Getter
 @AllArgsConstructor
 @Embeddable

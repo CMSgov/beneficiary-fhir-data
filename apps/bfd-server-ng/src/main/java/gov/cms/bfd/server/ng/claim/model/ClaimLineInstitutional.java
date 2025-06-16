@@ -5,12 +5,10 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import java.time.LocalDate;
-
 import jakarta.persistence.JoinColumns;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Getter;
 
 @Getter
@@ -33,10 +31,6 @@ public class ClaimLineInstitutional {
   @JoinColumn(name = "clm_ansi_sgntr_sk")
   private ClaimAnsiSignature ansiSignature;
 
-  @OneToOne
-  @JoinColumns({
-    @JoinColumn(name = "clm_uniq_id", referencedColumnName = "clm_uniq_id"),
-    @JoinColumn(name = "clm_line_num", referencedColumnName = "clm_line_num")
-  })
+  @OneToOne(mappedBy = "claimLineInstitutional")
   private ClaimLine claimLine;
 }
