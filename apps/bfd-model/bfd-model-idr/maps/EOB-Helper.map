@@ -176,6 +176,7 @@ conceptmap "C4BB_DIAGTYPE" {
   s:"1" = t:"externalcauseofinjury"
   s:"D" = t:"other"
   s:"E" = t:"externalcauseofinjury"
+  s:"R" = t:"patientreasonforvisit"
 }
 
 conceptmap "C4BB-SupportingInfo-Categories" {

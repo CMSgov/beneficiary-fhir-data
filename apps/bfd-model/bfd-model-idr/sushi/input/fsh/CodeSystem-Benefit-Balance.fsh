@@ -29,3 +29,5 @@ Description: "This code system includes a selection of codes which convey inform
 * #CLM_OPRTNL_IME_AMT "Operating Indirect Medical Education Amount" "This is one component of the total amount that is payable on PPS claims, and reflects the IME (indirect medical education) payments for operating expenses (such as labor) for the claim."
 * #CLM_OPRTNL_DSPRTNT_AMT "Operating Disproportionate Share Amount" "This is one component of the total amount that is payable on prospective payment system (PPS) claims and reflects the DSH (disproportionate share hospital) payments for operating expenses (such as labor) for the claim."
 * #CLM_HIPPS_UNCOMPD_CARE_AMT "Claim Uncompensated Care Payment Amount" "This field identifies the payment for disproportionate share hospitals (DSH). It represents the uncompensated care amount of the payment."
+* #CLM_MDCR_INSTNL_BENE_PD_AMT "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the claim."
+* #CLM_PRVDR_PMT_AMT "The amount paid, from the Medicare trust fund, to the provider for the services reported on the claim."

@@ -127,9 +127,28 @@ def add_diagnoses(clm_type_cd=-1):
         num_diagnoses = random.randint(2,15)
     elif(clm_type_cd == 40):
         #outpatient uses principal, other, external cause of injury, patient reason for visit
-        pass
+        principal_diagnosis = {'CLM_DGNS_CD':random.choice(available_icd_10_codes),
+                               'CLM_VAL_SQNC_NUM':"1",
+                               'CLM_DGNS_PRCDR_ICD_IND':"0",
+                               'CLM_PROD_TYPE_CD':'P',
+                               'CLM_POA_IND':'~'}
+        first_diagnosis = {'CLM_DGNS_CD':principal_diagnosis['CLM_DGNS_CD'],
+                               'CLM_VAL_SQNC_NUM':"1",
+                               'CLM_DGNS_PRCDR_ICD_IND':"0",
+                               'CLM_PROD_TYPE_CD':'D',
+                               'CLM_POA_IND':'~'
+                               }
+        rfv_diag = {'CLM_DGNS_CD':principal_diagnosis['CLM_DGNS_CD'],
+                               'CLM_VAL_SQNC_NUM':"1",
+                               'CLM_DGNS_PRCDR_ICD_IND':"0",
+                               'CLM_PROD_TYPE_CD':'1',
+                               'CLM_POA_IND':'~'} 
+        diagnosis_list.append(principal_diagnosis)
+        diagnosis_list.append(first_diagnosis)
+        diagnosis_list.append(rfv_diag)
+        num_diagnoses = random.randint(2,15)
 
-    if(num_diagnoses>1):
+    if(num_diagnoses>1 and clm_type_cd in (10,20,30,50,60,61,62,63,64)):
         for diagnosis_sqnc in range(2,num_diagnoses):
             diagnosis = {'CLM_DGNS_CD':random.choice(available_icd_10_codes),
                                'CLM_VAL_SQNC_NUM':diagnosis_sqnc,
@@ -137,6 +156,14 @@ def add_diagnoses(clm_type_cd=-1):
                                'CLM_PROD_TYPE_CD':'D',
                                'CLM_POA_IND':random.choice(clm_poa_ind_choices)}
             diagnosis_list.append(diagnosis)
+    elif(clm_type_cd == 40):
+        for diagnosis_sqnc in range(2,num_diagnoses):
+            diagnosis = {'CLM_DGNS_CD':random.choice(available_icd_10_codes),
+                               'CLM_VAL_SQNC_NUM':diagnosis_sqnc,
+                               'CLM_DGNS_PRCDR_ICD_IND':"0",
+                               'CLM_PROD_TYPE_CD':'D'}
+            diagnosis_list.append(diagnosis)
+
 
     return diagnosis_list
 
@@ -155,7 +182,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
     claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
-    clm_type_cd = 60
+    #clm_type_cd = 60
+    clm_type_cd = random.choice([40,60])
     claim['CLM']['CLM_TYPE_CD'] = clm_type_cd
 
     clm_src_id = -1
@@ -213,6 +241,13 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim['CLM_DCMTN']['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
         claim['CLM_DCMTN']['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
         claim['CLM_DCMTN']['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
+    elif(claim['CLM']['CLM_TYPE_CD'] == 40):
+        #outpatient
+        claim['CLM_DCMTN']['CLM_NRLN_RIC_CD'] = 'W' #outpatient
+        claim['CLM_DCMTN']['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
+        claim['CLM_DCMTN']['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
+        claim['CLM_DCMTN']['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
+        claim['CLM_DCMTN']['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
 
     #provider elements:
     if((clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in fiss_clm_type_cds):
@@ -230,6 +265,11 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     claim['CLM']['CLM_MDCR_DDCTBL_AMT'] = round(random.uniform(1, 1676),2)
     claim['CLM']['CLM_NCVRD_CHRG_AMT'] = round(claim['CLM']['CLM_SBMT_CHRG_AMT']-claim['CLM']['CLM_PMT_AMT'],2)
     claim['CLM']['CLM_BLOOD_LBLTY_AMT'] = round(random.uniform(0,25),2)
+
+    if(clm_type_cd in (40,71,72,81,82)):
+        #be sure to check that DME claims meet the above.
+        claim['CLM']['CLM_PRVDR_PMT_AMT'] = round(random.uniform(0,25),2)
+
     claim['CLM_VAL'] = []
     #CLM_OPRTNL_DSPRTNT_AMT + CLM_OPRTNL_IME_AMT
     if(claim['CLM']['CLM_TYPE_CD'] in (20,40,60,61,62,63,64)):
@@ -251,6 +291,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
                         'CLM_VAL_SQNC_NUM':3}
         claim['CLM_VAL'].append(clm_val_ime)
 
+
+    #CHECKPOINT outpatient. 
     #Add procedures
     claim['CLM_PROD'] = []
     if(clm_type_cd == 60):
@@ -275,17 +317,23 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim['CLM_PROD'].append(diagnosis)
 
     #clm_dt_sgntr info
-    clm_dt_sgntr['CLM_ACTV_CARE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
-    clm_dt_sgntr['CLM_DSCHRG_DT'] = claim['CLM']['CLM_THRU_DT']
+    if(clm_type_cd in (10,20,30,50,60,61,62,63,64)):
+        clm_dt_sgntr['CLM_ACTV_CARE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
+        clm_dt_sgntr['CLM_DSCHRG_DT'] = claim['CLM']['CLM_THRU_DT']
+        if(clm_type_cd in (50,60,61,62,63,64)):
+            clm_dt_sgntr['CLM_MDCR_EXHSTD_DT'] = claim['CLM']['CLM_THRU_DT']
+            if(clm_type_cd >= 60 ):
+                clm_dt_sgntr['CLM_ACTV_CARE_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
+                if(random.choice([0,1])):
+                    clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = claim['CLM']['CLM_THRU_DT']
+                    clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
+                else:
+                    clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = '1000-01-01'
+                    clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = '1000-01-01'
+
+
     clm_dt_sgntr['CLM_SUBMSN_DT'] = claim['CLM']['CLM_THRU_DT'] #This synthetic hospital is really on top of it!
-    clm_dt_sgntr['CLM_MDCR_EXHSTD_DT'] = claim['CLM']['CLM_THRU_DT']
-    clm_dt_sgntr['CLM_ACTV_CARE_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
-    if(random.choice([0,1])):
-        clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = claim['CLM']['CLM_THRU_DT']
-        clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
-    else:
-        clm_dt_sgntr['CLM_NCVRD_FROM_DT'] = '1000-01-01'
-        clm_dt_sgntr['CLM_NCVRD_THRU_DT'] = '1000-01-01'
+    
 
     #clm_dt_sgntr['CLM_MDCR_NCH_PTNT_STUS_IND_CD'] = random.choice(code_systems['CLM_MDCR_NCH_PTNT_STUS_IND_CD'])
     clm_dt_sgntr['CLM_CMS_PROC_DT'] = claim['CLM']['CLM_THRU_DT']
@@ -323,6 +371,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_TOT_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_BENE_DDCTBL_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
+        if(clm_type_cd==40):
+            institutional_parts['CLM_MDCR_INSTNL_BENE_PD_AMT'] = round(random.uniform(0,25),2)
         #We'll throw in a non-payment code on occasion 
         if(random.choice([0,10])>1):
             institutional_parts['CLM_MDCR_NPMT_RSN_CD'] = random.choice(code_systems['CLM_MDCR_NPMT_RSN_CD'])
@@ -380,6 +430,14 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line_inst['CLM_LINE_INSTNL_MSP1_PD_AMT'] = round(random.uniform(0,15),2)
         claim_line_inst['CLM_LINE_INSTNL_MSP2_PD_AMT'] = round(random.uniform(0,2),2)
         claim_line_inst['CLM_LINE_INSTNL_REV_CTR_DT'] = claim['CLM']['CLM_FROM_DT']
+
+        #In contrast to v2 DD this appears to populated in many.
+        claim_line_inst['CLM_REV_DSCNT_IND_CD'] = random.choice(code_systems['CLM_REV_DSCNT_IND_CD'])
+        claim_line_inst['CLM_OTAF_ONE_IND_CD'] = random.choice(code_systems['CLM_OTAF_ONE_IND_CD'])
+        claim_line_inst['CLM_REV_PACKG_IND_CD'] = random.choice(code_systems['CLM_REV_PACKG_IND_CD'])
+        claim_line_inst['CLM_REV_PMT_MTHD_CD'] = random.choice(code_systems['CLM_REV_PMT_MTHD_CD'])
+        claim_line_inst['CLM_REV_CNTR_STUS_CD'] = random.choice(code_systems['CLM_REV_CNTR_STUS_CD'])
+        claim_line_inst['CLM_ANSI_SGNTR_SK'] = random.choice(['8585','1','4365','1508','5555','9204','6857','5816','11978'])
 
         claim_line['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
         claim_line['CLM_LINE_NUM'] = line
@@ -452,6 +510,16 @@ def gen_pac_version_of_claim(claim):
         pac_claim['CLM_INSTNL'].pop('CLM_PPS_IND_CD')
     if('CLM_INSTNL_DRG_OUTLIER_AMT' in pac_claim['CLM_INSTNL']):
         pac_claim['CLM_INSTNL'].pop('CLM_INSTNL_DRG_OUTLIER_AMT')
+    if('CLM_MDCR_INSTNL_BENE_PD_AMT' in pac_claim['CLM_INSTNL']):
+        pac_claim['CLM_INSTNL'].pop('CLM_MDCR_INSTNL_BENE_PD_AMT')
+    if('CLM_ANSI_SGNTR_SK' in pac_claim['CLM_LINE_INSTNL']):
+        pac_claim['CLM_LINE_INSTNL'].pop('CLM_ANSI_SGNTR_SK')
+    if('CLM_OTAF_ONE_IND_CD' in pac_claim['CLM_LINE_INSTNL']):
+        pac_claim['CLM_LINE_INSTNL'].pop('CLM_OTAF_ONE_IND_CD')
+    if('CLM_REV_CNTR_STUS_CD' in pac_claim['CLM_LINE_INSTNL']):
+        pac_claim['CLM_LINE_INSTNL'].pop('CLM_REV_CNTR_STUS_CD')
+
+    
     #pac_claim['CLM_INSTNL']['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
     pac_claim['CLM_INSTNL']['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
     pac_claim['CLM_INSTNL']['CLM_DT_SGNTR_SK'] = pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] 
