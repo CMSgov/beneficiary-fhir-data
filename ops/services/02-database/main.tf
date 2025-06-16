@@ -195,6 +195,19 @@ resource "aws_rds_cluster" "this" {
     interpreter = ["/bin/bash", "-c"]
   }
 
+  lifecycle {
+    # Ignore all changes to these properties as the above local-exec manages them. Yes, this makes
+    # is so that manual changes to these values are ignored, but setting them via Terraform does not
+    # work properly anyways
+    ignore_changes = [
+      monitoring_interval,
+      monitoring_role_arn,
+      performance_insights_enabled,
+      performance_insights_kms_key_id,
+      performance_insights_retention_period,
+    ]
+  }
+
   # Autoscaled reader nodes are not managed by Terraform and Terraform is unable to destroy a
   # cluster with nodes still within it. To support simply running "terraform destroy" in
   # environments with autoscaling enabled, a helper script is used that will automatically mark all
@@ -227,7 +240,7 @@ resource "aws_rds_cluster_instance" "writer" {
   instance_class               = local.rds_instance_class
   preferred_maintenance_window = aws_rds_cluster.this.preferred_maintenance_window
   publicly_accessible          = false
-  monitoring_interval          = local.monitoring_interval
+  monitoring_interval          = !var.greenfield ? local.monitoring_interval : null
   tags                         = { Layer = "data" }
 }
 
