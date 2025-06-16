@@ -1,20 +1,35 @@
 # This file provides a backend configuration for use in new account bootstrapping contexts. See
 # README for motivation and instructions on using this file in those scenarios.
 
-variable "greenfield" {
-  default     = false
-  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
-}
-
 locals {
   account_types = ["prod", "non-prod"]
   # Instead of just defaulting to terraform.workspace, we use one() to ensure an error is generated
   # if the workspace does not exactly match one of the above account types. Further validation is
   # handled by the Terraservice module. This is only:necessary if greenfield is true, since we don't
   # use the account_type in the legacy environment
-  account_type = one([for x in local.account_types : x if x == terraform.workspace])
+  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace])) : "invalid-account-type"
 
   _canary_exists = module.terraservice.canary
+}
+
+variable "account_type" {
+  description = <<-EOF
+  The account type being targeted to create platform resources within. Will correspond with
+  `terraform.workspace`. Necessary on `tofu init` and `tofu workspace select` _only_. In all other
+  situations, the account type will be divined from `terraform.workspace`.
+  EOF
+  type        = string
+  nullable    = true
+  default     = null
+  validation {
+    condition     = var.account_type == null || one([for x in local.account_types : x if var.account_type == x]) != null
+    error_message = "Invalid account type. Must be one of 'prod' or 'non-prod'."
+  }
+}
+
+variable "greenfield" {
+  default     = false
+  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
 }
 
 provider "aws" {
@@ -34,10 +49,4 @@ provider "aws" {
 
 terraform {
   backend "local" {}
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.91"
-    }
-  }
 }
