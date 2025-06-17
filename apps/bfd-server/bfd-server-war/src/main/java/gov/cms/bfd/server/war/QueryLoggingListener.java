@@ -177,9 +177,9 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     /** Represents the query for EOB by bene id (SNF). */
     EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from ccw.snf_claims "))),
     /** Represents the query for partially adjudicated claims (fiss). */
-    FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
+    FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss_claims")),
     /** Represents the query for partially adjudicated claims (mcs). */
-    MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from rda.mcs")),
+    MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from rda.mcs_claims")),
     /** Represents the query for mbi cache lookup. */
     MBI_CACHE("mbi_cache_lookup", s -> s.contains("from rda.mbi_cache")),
     /** Represents the query for loaded batches. */
