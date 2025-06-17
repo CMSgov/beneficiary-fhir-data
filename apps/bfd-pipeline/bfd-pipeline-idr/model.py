@@ -23,6 +23,12 @@ def transform_default_string(value: str | None) -> str:
     return value
 
 
+def transform_empty_string(value: str | None) -> str:
+    if value is None:
+        return ""
+    return value.strip()
+
+
 def transform_null_float(value: float | None) -> float:
     if value is None:
         return 0.0
@@ -412,10 +418,14 @@ class IdrClaim(IdrBaseModel):
     clm_cntrctr_num: str
     clm_pmt_amt: float
     clm_ltst_clm_ind: str
-    clm_atndg_prvdr_npi_num: str
-    clm_oprtg_prvdr_npi_num: str
-    clm_othr_prvdr_npi_num: str
-    clm_rndrg_prvdr_npi_num: str
+    clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_atndg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_oprtg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_othr_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_blg_prvdr_npi_num: str
     clm_disp_cd: str
     clm_sbmt_chrg_amt: float
@@ -688,7 +698,7 @@ class IdrClaimProcedure(IdrBaseModel):
     clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_prod_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_dgns_prcdr_icd_ind: str
+    clm_dgns_prcdr_icd_ind: Annotated[str, BeforeValidator(transform_empty_string)]
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcdr_prfrm_dt: date
