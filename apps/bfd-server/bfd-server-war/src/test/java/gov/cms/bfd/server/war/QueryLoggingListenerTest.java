@@ -155,7 +155,7 @@ public final class QueryLoggingListenerTest {
     assertEquals(QueryType.EOBS_BY_BENE_ID_SNF, QueryType.computeQueryType(queryInfo));
   }
 
-  /** Verifies that {@link QueryType#FISS_CLAIMS} works as expected. */
+  /** Verifies that {@link QueryType#FISS_DIAGNOSIS_CODES} works as expected. */
   @Test
   public void computeQueryType_FISS_CLAIM() {
     QueryInfo queryInfo =
@@ -165,7 +165,7 @@ public final class QueryLoggingListenerTest {
     assertEquals(QueryType.FISS_DIAGNOSIS_CODES, QueryType.computeQueryType(queryInfo));
   }
 
-  /** Verifies that {@link QueryType#MCS_CLAIMS} works as expected. */
+  /** Verifies that {@link QueryType#MCS_DIAGNOSIS_CODES} works as expected. */
   @Test
   public void computeQueryType_MCS_CLAIM() {
     QueryInfo queryInfo =
