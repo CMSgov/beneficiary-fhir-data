@@ -60,13 +60,12 @@ public class CoverageRepository {
                 AND ber.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE
                 AND ber.benefitRangeBeginDate = bs.medicareStatusBeginDate
                 AND ber.benefitRangeEndDate = bs.medicareStatusEndDate
-            WHERE b.beneSk = :beneSkParam
+            WHERE b.beneSk = :beneSk
               AND b.beneSk = b.xrefSk
               AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
               AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
               AND NOT EXISTS (SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
             ORDER BY
-              b.beneSk,
               be.benefitRangeBeginDate DESC
             """;
 
@@ -79,7 +78,7 @@ public class CoverageRepository {
     TypedQuery<CoverageDetails> query =
         entityManager
             .createQuery(jpql, CoverageDetails.class)
-            .setParameter("beneSkParam", beneSk)
+            .setParameter("beneSk", beneSk)
             .setParameter("partTypeCode", partTypeCode)
             .setParameter("referenceDate", currentDateForPeriods)
             .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))

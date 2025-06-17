@@ -80,10 +80,12 @@ public class CoverageDetails {
 
               benefitPeriodStartDate.ifPresent(
                   startDate -> {
-                    Period period = new Period().setStart(DateUtil.toDate(startDate));
+                    Period period = new Period().setStartElement(DateUtil.toFhirDate(startDate));
                     benefitPeriodEndDate
                         .filter(endDate -> endDate.isBefore(IdrConstants.DEFAULT_DATE))
-                        .ifPresent(validEndDate -> period.setEnd(DateUtil.toDate(validEndDate)));
+                        .ifPresent(
+                            validEndDate ->
+                                period.setEndElement(DateUtil.toFhirDate(validEndDate)));
 
                     coverage.setPeriod(period);
                     coverage.setStatus(Coverage.CoverageStatus.ACTIVE);

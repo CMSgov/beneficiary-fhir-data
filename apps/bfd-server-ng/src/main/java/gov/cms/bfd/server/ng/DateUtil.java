@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.ng;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import org.hl7.fhir.r4.model.DateTimeType;
 
 /** Date utility methods. */
 public class DateUtil {
@@ -15,6 +17,23 @@ public class DateUtil {
    */
   public static Date toDate(LocalDate localDate) {
     return Date.from(localDate.atStartOfDay(IdrConstants.ZONE_ID_UTC).toInstant());
+  }
+
+  /**
+   * Converts a LocalDate to a FHIR DateTimeType with DAY precision. The underlying instant is
+   * midnight UTC of the given LocalDate.
+   *
+   * @param localDate The LocalDate to convert.
+   * @return A FHIR DateTimeType with DAY precision, or null if input is null.
+   */
+  public static DateTimeType toFhirDate(LocalDate localDate) {
+    if (localDate == null) {
+      return null;
+    }
+    Date utilDate = toDate(localDate);
+    DateTimeType fhirDate = new DateTimeType(utilDate);
+    fhirDate.setPrecision(TemporalPrecisionEnum.DAY);
+    return fhirDate;
   }
 
   /**

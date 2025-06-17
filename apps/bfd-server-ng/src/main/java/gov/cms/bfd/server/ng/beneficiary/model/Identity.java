@@ -22,35 +22,8 @@ import org.hl7.fhir.r4.model.Identifier;
 @NoArgsConstructor
 public class Identity {
 
-  // The id field is not actually used here, but JPA requires some unique ID for every entity, even
-  // if it's just used for joins.
-  // Ideally, we could use beneSk + mbi, but this becomes tricky because MBI may not always be
-  // present.
-  //  @Id Long rowId;
   @Column(name = "bene_mbi_id")
   private String mbi;
-
-  //  /**
-  //   * Constructs a CoverageBeneficiaryIdentity.
-  //   *
-  //   * <p>// * @param rowId row ID from the query that created this object
-  //   *
-  //   * @param mbi The beneficiary's current MBI. Can be null if not available.
-  //   */
-  //  public Identity(String mbi) {
-  //    this.mbi = mbi;
-  //    //    this.rowId = rowId;
-  //  }
-
-  //  /**
-  //   * Factory method to create a CoverageBeneficiaryIdentity from an MBI string.
-  //   *
-  //   * @param mbi The beneficiary's MBI.
-  //   * @return A new CoverageIdentity instance.
-  //   */
-  //  public static Identity from(String mbi) {
-  //    return new Identity(mbi);
-  //  }
 
   /**
    * Transforms this identity information into a FHIR {@link Identifier} for the MBI. This
