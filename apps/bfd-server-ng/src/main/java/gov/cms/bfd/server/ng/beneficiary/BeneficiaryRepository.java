@@ -81,7 +81,7 @@ public class BeneficiaryRepository {
   }
 
   /**
-   * Retrieve a {@link Beneficiary} record by its ID and last updated timestamp.
+   * Retrieves a {@link Beneficiary} record by its ID and last updated timestamp.
    *
    * @param beneSk bene surrogate key
    * @param lastUpdatedRange last updated search range
@@ -92,7 +92,7 @@ public class BeneficiaryRepository {
   }
 
   /**
-   * Retrieve a {@link Beneficiary} record by its MBI and last updated timestamp.
+   * Retrieves a {@link Beneficiary} record by its MBI and last updated timestamp.
    *
    * @param mbi bene MBI
    * @param lastUpdatedRange last updated search range
@@ -102,6 +102,12 @@ public class BeneficiaryRepository {
     return searchBeneficiary("mbi", mbi, lastUpdatedRange);
   }
 
+  /**
+   * Retrieves the xrefSk from the beneSk.
+   *
+   * @param beneSk original beneSk
+   * @return xrefSk for the bene
+   */
   public Optional<Long> getXrefBeneSk(long beneSk) {
     return entityManager
         .createQuery(

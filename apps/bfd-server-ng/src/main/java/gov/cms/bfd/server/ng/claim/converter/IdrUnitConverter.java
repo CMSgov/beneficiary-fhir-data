@@ -5,6 +5,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Optional;
 
+/** Database code converter. */
 @Converter(autoApply = true)
 public class IdrUnitConverter implements AttributeConverter<Optional<IdrUnit>, String> {
   @Override

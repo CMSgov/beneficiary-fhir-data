@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.PatientStatusCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+/** Database code converter. */
 @Converter(autoApply = true)
 public class PatientStatusCodeConverter implements AttributeConverter<PatientStatusCode, String> {
   @Override

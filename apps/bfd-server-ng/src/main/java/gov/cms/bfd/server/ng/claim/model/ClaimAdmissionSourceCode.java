@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Claim admission codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimAdmissionSourceCode {
@@ -119,6 +120,12 @@ public enum ClaimAdmissionSourceCode {
   private final String code;
   private final String display;
 
+  /**
+   * Convert from a database code.
+   *
+   * @param code database code
+   * @return claim admission source code
+   */
   public static ClaimAdmissionSourceCode fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
   }

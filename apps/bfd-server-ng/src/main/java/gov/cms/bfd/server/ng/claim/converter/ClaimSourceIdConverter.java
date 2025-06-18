@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+/** Database code converter. */
 @Converter(autoApply = true)
 public class ClaimSourceIdConverter implements AttributeConverter<ClaimSourceId, String> {
   @Override

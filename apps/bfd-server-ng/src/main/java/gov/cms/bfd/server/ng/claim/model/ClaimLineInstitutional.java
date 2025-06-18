@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import lombok.Getter;
 
+/** Institutional claim line table. */
 @Getter
 @Entity
 @Table(name = "claim_line_institutional", schema = "idr")
@@ -34,6 +35,11 @@ public class ClaimLineInstitutional {
   @OneToOne(mappedBy = "claimLineInstitutional")
   private ClaimLine claimLine;
 
+  /**
+   * Return claim ANSI signature data if available.
+   *
+   * @return claim ANSI signature
+   */
   public Optional<ClaimAnsiSignature> getAnsiSignature() {
     return Optional.ofNullable(ansiSignature);
   }

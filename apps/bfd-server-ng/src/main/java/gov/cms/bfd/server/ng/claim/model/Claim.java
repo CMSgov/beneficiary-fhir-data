@@ -18,6 +18,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
+/** Claim table. */
 @Entity
 @Getter
 @Table(name = "claim", schema = "idr")
@@ -70,6 +71,11 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private List<ClaimProcedure> claimProcedures;
 
+  /**
+   * Convert the claim info to a FHIR ExplanationOfBenefit.
+   *
+   * @return ExplanationOfBenefit
+   */
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import java.util.Iterator;
 
+/** Utility class to create a monotonic sequence. Useful for generating FHIR sequence numbers. */
 public class SequenceGenerator implements Iterator<Integer> {
   private int current = 1;
 

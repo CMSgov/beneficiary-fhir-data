@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Claim ANSI signature table. */
 @Entity
 @Table(name = "claim_ansi_signature", schema = "idr")
 public class ClaimAnsiSignature {

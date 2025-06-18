@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Claim line table. */
 @Entity
 @Table(name = "claim_line", schema = "idr")
 public class ClaimLine {

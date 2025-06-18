@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.claim.model.McoPaidSwitch;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+/** Database code converter. */
 @Converter(autoApply = true)
 public class McoPaidSwitchConverter implements AttributeConverter<McoPaidSwitch, String> {
   @Override

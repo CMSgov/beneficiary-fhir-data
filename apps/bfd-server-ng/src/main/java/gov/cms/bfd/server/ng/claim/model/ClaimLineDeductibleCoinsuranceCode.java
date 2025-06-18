@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
+/** Deductible coinsurance codes. */
 @Getter
 @AllArgsConstructor
 public enum ClaimLineDeductibleCoinsuranceCode {
@@ -35,6 +36,12 @@ public enum ClaimLineDeductibleCoinsuranceCode {
   private final String code;
   private final String display;
 
+  /**
+   * Convert from a database code.
+   *
+   * @param code database code
+   * @return coinsurance code
+   */
   public static ClaimLineDeductibleCoinsuranceCode fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
   }

@@ -2,16 +2,22 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/** Repository methods for claims. */
 @Component
 @AllArgsConstructor
 public class ClaimRepository {
   private EntityManager entityManager;
 
+  /**
+   * Search for a claim by its ID.
+   *
+   * @param claimUniqueId claim ID
+   * @return claim
+   */
   public Optional<Claim> findById(long claimUniqueId) {
     return entityManager
         .createQuery(
@@ -32,19 +38,5 @@ public class ClaimRepository {
         .getResultList()
         .stream()
         .findFirst();
-  }
-
-  public List<Claim> getClaimsFromXrefSk(long xrefSk) {
-    return entityManager
-        .createQuery(
-            """
-              SELECT c
-              FROM Claim c
-              JOIN Beneficiary b ON b.beneSk = c.beneSk
-              WHERE b.xrefSk = :xrefSk
-              """,
-            Claim.class)
-        .setParameter("xrefSk", xrefSk)
-        .getResultList();
   }
 }
