@@ -7,19 +7,32 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 
+/** Types of units. */
 @Getter
 @AllArgsConstructor
 public enum IdrUnit {
+  /** Milliliters. */
   ML("ML", "mL"),
+  /** Milligrams. */
   ME("ME", "mg"),
+  /** Unit. */
   UN("UN", "[arb'U]"),
+  /** International Unit. */
   F2("F2", "[IU]"),
+  /** Grams. */
   GR("GR", "g"),
+  /** Each. */
   EA("EA", "[arb'U]");
 
   private final String idrCode;
   private final String fhirUnit;
 
+  /**
+   * Convert from a database code.
+   *
+   * @param idrCode database code
+   * @return IDR unit
+   */
   public static Optional<IdrUnit> tryFromCode(String idrCode) {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }

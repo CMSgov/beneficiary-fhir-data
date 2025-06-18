@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Patient status info. */
 @AllArgsConstructor
 @Getter
 public enum PatientStatusCode {
@@ -313,11 +314,18 @@ public enum PatientStatusCode {
   _98("98", "RESERVED FOR NATIONAL ASSIGNMENT"),
   /** 99 - RESERVED FOR NATIONAL ASSIGNMENT. */
   _99("99", "RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** NA. */
   NA("", "NO DESCRIPTION AVAILABLE");
 
   private final String code;
   private final String display;
 
+  /**
+   * Convert from a database code.
+   *
+   * @param code database code
+   * @return patient status code
+   */
   public static PatientStatusCode fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
   }

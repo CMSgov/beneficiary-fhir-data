@@ -32,7 +32,7 @@ class TypeOfBillCode {
                             "0" + facilityTypeCode + billClassificationCode + billFrequencyCode))
                 .addCoding(
                     new Coding()
-                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_BILL_CLASSIFICATION_CODE)
+                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FACILITY_TYPE_CODE)
                         .setCode(facilityTypeCode))
                 .addCoding(
                     new Coding()

@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Procedure and diagnosis table. */
 @Entity
 @Table(name = "claim_procedure", schema = "idr")
 public class ClaimProcedure {

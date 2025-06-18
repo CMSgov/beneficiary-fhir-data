@@ -8,15 +8,24 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Payment indicator. */
 @Getter
 @AllArgsConstructor
 public enum McoPaidSwitch {
+  /** Unpaid. */
   UNPAID("0", "No managed care organization (MCO) payment"),
+  /** Paid. */
   PAID("1", "MCO paid provider for the claim");
 
   private final String code;
   private final String display;
 
+  /**
+   * Converts from a database code.
+   *
+   * @param code database code.
+   * @return paid switch
+   */
   public static McoPaidSwitch fromCode(String code) {
     return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst().get();
   }

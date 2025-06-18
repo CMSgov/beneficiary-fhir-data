@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
+/** Revenue centers. */
 @AllArgsConstructor
 @Getter
 public enum ClaimLineRevenueCenterCode {
@@ -1443,6 +1444,12 @@ public enum ClaimLineRevenueCenterCode {
   private final String code;
   private final String display;
 
+  /**
+   * Converts from a database code.
+   *
+   * @param code database code
+   * @return revenue center code
+   */
   public static ClaimLineRevenueCenterCode fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
   }

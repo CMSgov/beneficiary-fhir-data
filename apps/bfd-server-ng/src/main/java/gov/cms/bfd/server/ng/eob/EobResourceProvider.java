@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
+/** FHIR endpoints for the ExplanationOfBenefit resource. */
 @RequiredArgsConstructor
 @Component
 public class EobResourceProvider implements IResourceProvider {

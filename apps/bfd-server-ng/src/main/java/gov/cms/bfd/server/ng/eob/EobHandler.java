@@ -10,6 +10,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
+/**
+ * Handler methods for the ExplanationOfBenefit resource. This is called after the FHIR inputs from
+ * the resource provider are converted into input types that are easier to work with.
+ */
 @Component
 @RequiredArgsConstructor
 public class EobHandler {

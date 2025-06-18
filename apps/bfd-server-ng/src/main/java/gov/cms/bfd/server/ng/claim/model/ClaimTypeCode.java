@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 
+/** Claim type codes. */
 @Getter
 @AllArgsConstructor
 public enum ClaimTypeCode {
@@ -290,6 +291,12 @@ public enum ClaimTypeCode {
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
 
+  /**
+   * Converts from a database code.
+   *
+   * @param code database code
+   * @return claim type code
+   */
   public static ClaimTypeCode fromCode(int code) {
     return Arrays.stream(values()).filter(c -> c.code == code).findFirst().get();
   }
