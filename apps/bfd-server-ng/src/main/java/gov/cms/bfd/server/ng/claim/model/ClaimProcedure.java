@@ -45,6 +45,8 @@ public class ClaimProcedure {
   @JoinColumn(name = "clm_uniq_id")
   private Claim claim;
 
+  private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
+
   Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     if (procedureCode.isEmpty()) {
       return Optional.empty();
@@ -58,15 +60,14 @@ public class ClaimProcedure {
                 new Coding()
                     .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_PROCEDURE_TYPE)
                     .setCode(code)));
-    if (procedureDate.isAfter(LocalDate.of(2000, 1, 1))) {
+    if (procedureDate.isAfter(DEFAULT_PROCEDURE_DATE)) {
       procedure.setDate(DateUtil.toDate(procedureDate));
     }
     procedure.setProcedure(
-        new CodeableConcept()
-            .addCoding(
-                new Coding()
-                    .setSystem(icdIndicator.getProcedureSystem())
-                    .setCode(procedureCode.get())));
+        new CodeableConcept(
+            new Coding()
+                .setSystem(icdIndicator.getProcedureSystem())
+                .setCode(procedureCode.get())));
 
     return Optional.of(procedure);
   }
@@ -78,17 +79,13 @@ public class ClaimProcedure {
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(claimProcedureId.getRowNumber());
     diagnosis.addType(
-        new CodeableConcept()
-            .addCoding(
-                new Coding()
-                    .setSystem(diagnosisType.getSystem())
-                    .setCode(diagnosisType.getFhirCode())));
+        new CodeableConcept(
+            new Coding()
+                .setSystem(diagnosisType.getSystem())
+                .setCode(diagnosisType.getFhirCode())));
     diagnosis.setDiagnosis(
-        new CodeableConcept()
-            .addCoding(
-                new Coding()
-                    .setSystem(icdIndicator.getDiagnosisSytem())
-                    .setCode(diagnosisCode.get())));
+        new CodeableConcept(
+            new Coding().setSystem(icdIndicator.getDiagnosisSytem()).setCode(diagnosisCode.get())));
 
     return Optional.of(diagnosis);
   }
