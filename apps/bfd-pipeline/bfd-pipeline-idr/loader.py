@@ -4,7 +4,7 @@ from constants import DEFAULT_DATE
 from timer import Timer
 import psycopg
 from model import T
-
+import os
 
 temp_table_timer = Timer("temp_table")
 copy_timer = Timer("copy")
@@ -17,6 +17,12 @@ def print_timers():
     copy_timer.print_results()
     insert_timer.print_results()
     commit_timer.print_results()
+
+
+def get_connection_string():
+    port = os.environ.get("BFD_DB_PORT") or "5432"
+    dbname = os.environ.get("BFD_DB_NAME") or "idr"
+    return f"host={os.environ["BFD_DB_ENDPOINT"]} port={port} dbname={dbname} user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}"
 
 
 class PostgresLoader:

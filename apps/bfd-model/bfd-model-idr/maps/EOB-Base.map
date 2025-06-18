@@ -244,7 +244,6 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
   } "Add CLM_INSTNL_MDCR_COINS_DAY_CNT";
   institutionalComponents.CLM_INSTNL_NCVRD_DAY_CNT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_INSTNL_NCVRD_DAY_CNT") "Add codeable concept";
-
     amtUsed -> tgtBBElement.used = cast(amtUsed,'unsignedInt') "set amtUsed";
   } "Add CLM_INSTNL_NCVRD_DAY_CNT";
   
