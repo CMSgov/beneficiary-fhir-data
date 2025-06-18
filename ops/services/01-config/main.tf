@@ -80,7 +80,7 @@ locals {
     local.ephemeral_vals
   ) : local.parent_ssm_config
   # TODO: Remove
-  ng_env_config = {
+  ng_env_config = !var.greenfield ? {
     for k, v in local.untemplated_env_config
     # At this point, replace all ${env}/$env with the actual environment name so that the SSM
     # parameter contains the name of its environment as expected
@@ -89,7 +89,7 @@ locals {
       is_sensitive = v.is_sensitive
       source       = v.source
     }
-  }
+  } : {}
   # TODO: Remove merge() when ng_env_config is removed
   env_config = merge({
     for k, v in local.untemplated_env_config
@@ -125,7 +125,7 @@ data "sops_external" "this" {
 }
 
 resource "aws_ssm_parameter" "this" {
-  for_each = !var.greenfield ? local.env_config : merge(local.env_config, { for k, v in local.env_config : trimprefix(k, "/ng") => v })
+  for_each = local.env_config
 
   name           = each.key
   tier           = "Intelligent-Tiering"

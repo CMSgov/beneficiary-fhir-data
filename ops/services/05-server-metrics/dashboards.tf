@@ -5,11 +5,13 @@ locals {
   # hoisted into SSM configuration
   partner_client_ssl_regexs = {
     internal_client_ssl = {
+      sandbox  = ".*bluebutton-backend.*test.*"
       prod_sbx = ".*bluebutton-backend.*test.*"
       prod     = ".*bluebutton-backend.*test.*"
       test     = ".*bluebutton-backend.*test.*"
     }
     ab2d_client_ssl = {
+      sandbox  = ".*ab2d-sbx-client.*"
       prod_sbx = ".*ab2d-sbx-client.*"
       prod     = ".*ab2d-prod-client.*"
     }
@@ -17,17 +19,20 @@ locals {
       prod = ".*ab2d-prod-validation-client.*"
     }
     bcda_client_ssl = {
+      sandbox  = ".*bcda-sbx-client.*"
       prod_sbx = ".*bcda-sbx-client.*"
       prod     = ".*bcda-prod-client.*"
     }
     dpc_client_ssl = {
+      sandbox  = ".*dpc-prod-sbx-client.*"
       prod_sbx = ".*dpc-prod-sbx-client.*"
       # jq requires escaped characters be escaped with 2 backslashes
       prod = ".*dpc\\\\.prod\\\\.client.*"
     }
     bb_client_ssl = {
-      prod_sbx = ".*BlueButton.*"
-      prod     = ".*BlueButton.*"
+      sandbox  = ".*BlueButton Root CA.*"
+      prod_sbx = ".*BlueButton Root CA.*"
+      prod     = ".*BlueButton Root CA.*"
     }
   }
 
