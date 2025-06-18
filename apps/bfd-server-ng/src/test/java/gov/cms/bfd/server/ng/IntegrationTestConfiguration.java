@@ -34,6 +34,7 @@ public class IntegrationTestConfiguration {
             .waitingFor(Wait.forListeningPort())
             .withInitScript(new ClassPathResource("bfd.sql").getPath());
     container.start();
+    runPython(container, "uv", "sync");
     runPython(container, "uv", "run", "load_synthetic.py", "./sample_data");
     runPython(container, "uv", "run", "pipeline.py", "synthetic");
 
