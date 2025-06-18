@@ -66,9 +66,6 @@ def main():
             get_connection_string(),
         )
 
-def get_connection_string():
-    return f"host={os.environ["BFD_DB_ENDPOINT"]} dbname=idr user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}"
-
 def extract_and_load(
     cls: type[T],
     data_extractor: Extractor,

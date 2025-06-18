@@ -23,7 +23,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidPartACompositeId() {
-    String validCoverageId = "part-a-1";
+    String validCoverageId = "part-a-405764107";
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -33,7 +33,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidPartBCompositeId() {
-    String validCoverageId = "part-b-1";
+    String validCoverageId = "part-b-405764107";
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -43,7 +43,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidCompositeId() {
-    String validCoverageId = "part-a-1";
+    String validCoverageId = "part-a-181968400";
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");

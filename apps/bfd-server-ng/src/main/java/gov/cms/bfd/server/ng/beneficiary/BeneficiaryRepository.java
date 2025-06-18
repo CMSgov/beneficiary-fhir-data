@@ -120,7 +120,7 @@ public class BeneficiaryRepository {
               SELECT b.xrefSk
               FROM Beneficiary b
               WHERE b.beneSk = :beneSk
-              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
             """,
             Long.class)
         .setParameter("beneSk", beneSk)
