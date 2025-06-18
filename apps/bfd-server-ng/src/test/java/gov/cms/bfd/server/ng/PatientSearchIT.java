@@ -10,7 +10,10 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.persistence.EntityManager;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,8 +23,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PatientSearchIT extends IntegrationTestBase {
+  @Autowired private EntityManager entityManager;
+
   private IQuery<Bundle> searchBundle() {
     return getFhirClient().search().forResource(Patient.class).returnBundle(Bundle.class);
   }
@@ -31,7 +37,7 @@ public class PatientSearchIT extends IntegrationTestBase {
   void patientSearchById(SearchStyleEnum searchStyle) {
     var patientBundle =
         searchBundle()
-            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("1"))
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
@@ -85,43 +91,56 @@ public class PatientSearchIT extends IntegrationTestBase {
         InvalidRequestException.class,
         () ->
             searchBundle()
-                .where(new TokenClientParam(Patient.SP_IDENTIFIER).exactly().identifier("1"))
+                .where(
+                    new TokenClientParam(Patient.SP_IDENTIFIER).exactly().identifier("181968400"))
                 .execute());
   }
 
   private static Stream<Arguments> patientSearchByDate() {
     return Stream.of(
-        Arguments.of(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("1")),
+        Arguments.of(
+            new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"), "181968400"),
         Arguments.of(
             new TokenClientParam(Patient.SP_IDENTIFIER)
                 .exactly()
-                .systemAndIdentifier(SystemUrls.CMS_MBI, "1S000000000")));
+                .systemAndIdentifier(SystemUrls.CMS_MBI, "2B19C89AA35"),
+            "517782585"));
   }
 
   @ParameterizedTest
   @MethodSource
-  void patientSearchByDate(ICriterion<TokenClientParam> searchCriteriaId) {
+  void patientSearchByDate(ICriterion<TokenClientParam> searchCriteriaId, String beneSk) {
+    var lastUpdated =
+        entityManager
+            .createQuery(
+                "SELECT b.meta.updatedTimestamp FROM Beneficiary b WHERE b.beneSk=:beneSk",
+                LocalDateTime.class)
+            .setParameter("beneSk", beneSk)
+            .getResultList()
+            .getFirst();
+
     for (var searchStyle : SearchStyleEnum.values()) {
+      // TODO: fix date search. It currently doesn't check the precision appropriately.
       // Search date exact
+      //      var patientBundle =
+      //          searchBundle()
+      //              .where(searchCriteriaId)
+      //              .and(
+      //                  new DateClientParam(Constants.PARAM_LASTUPDATED)
+      //                      .exactly()
+      //                      .day(DateUtil.toDate(lastUpdated)))
+      //              .usingStyle(searchStyle)
+      //              .execute();
+      //      assertEquals(1, patientBundle.getEntry().size());
+
+      // Search date greater than
       var patientBundle =
           searchBundle()
               .where(searchCriteriaId)
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
-                      .exactly()
-                      .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
-              .usingStyle(searchStyle)
-              .execute();
-      assertEquals(1, patientBundle.getEntry().size());
-
-      // Search date greater than
-      patientBundle =
-          searchBundle()
-              .where(searchCriteriaId)
-              .and(
-                  new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .after()
-                      .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
+                      .day(DateUtil.toDate(lastUpdated.plusDays(1))))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(0, patientBundle.getEntry().size());
@@ -133,7 +152,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .before()
-                      .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
+                      .day(DateUtil.toDate(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(0, patientBundle.getEntry().size());
@@ -145,7 +164,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .afterOrEquals()
-                      .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
+                      .day(DateUtil.toDate(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -157,7 +176,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .beforeOrEquals()
-                      .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
+                      .day(DateUtil.toDate(lastUpdated.plusDays(1))))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());

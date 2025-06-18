@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.DateTimeType;
 /** Date utility methods. */
 public class DateUtil {
 
+  private DateUtil() {}
+
   /**
    * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
    *

@@ -1,7 +1,4 @@
-DROP TABLE IF EXISTS idr.beneficiary;
-DROP TABLE IF EXISTS idr.beneficiary_history;
-DROP TABLE IF EXISTS idr.load_progress;
-DROP SCHEMA IF EXISTS idr;
+DROP SCHEMA IF EXISTS idr CASCADE;
 
 CREATE SCHEMA idr;
 CREATE TABLE idr.beneficiary(
@@ -173,9 +170,13 @@ CREATE TABLE idr.claim (
     clm_pmt_amt NUMERIC,
     clm_ltst_clm_ind VARCHAR(1),
     clm_atndg_prvdr_npi_num VARCHAR(10),
+    clm_atndg_prvdr_last_name VARCHAR(60),
     clm_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_prvdr_last_name VARCHAR(60),
     clm_othr_prvdr_npi_num VARCHAR(10),
+    clm_othr_prvdr_last_name VARCHAR(60),
     clm_rndrg_prvdr_npi_num VARCHAR(10),
+    clm_rndrg_prvdr_last_name VARCHAR(60),
     prvdr_blg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,
@@ -184,7 +185,9 @@ CREATE TABLE idr.claim (
     clm_blg_prvdr_oscar_num VARCHAR(20),
     clm_idr_ld_dt DATE,
     clm_nrln_ric_cd VARCHAR(1),
-    bfd_created_ts TIMESTAMPTZ NOT NULL
+    idr_updt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_date_signature (
@@ -250,6 +253,7 @@ CREATE TABLE idr.claim_procedure (
     clm_prod_type_cd VARCHAR(1),
     clm_poa_ind VARCHAR(1),
     clm_prcdr_prfrm_dt DATE,
+    bfd_row_num INT NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_prod_type_cd, clm_val_sqnc_num)
 );
@@ -284,6 +288,7 @@ CREATE TABLE idr.claim_line (
 CREATE TABLE idr.claim_line_institutional (
     clm_uniq_id BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
+    clm_ansi_sgntr_sk BIGINT,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),
     clm_line_instnl_rate_amt NUMERIC,

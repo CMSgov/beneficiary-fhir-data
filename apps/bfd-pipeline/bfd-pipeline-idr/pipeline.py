@@ -1,7 +1,6 @@
 import logging
 import sys
-import os
-from loader import PostgresLoader
+from loader import PostgresLoader, get_connection_string
 import loader
 from model import (
     T,
@@ -50,6 +49,7 @@ def main():
             pg_local,
         )
     elif mode == "synthetic":
+        pg_connection = get_connection_string()
         run_pipeline(
             PostgresExtractor(
                 connection_string=get_connection_string(),
@@ -58,6 +58,7 @@ def main():
             get_connection_string(),
         )
     else:
+        pg_connection = get_connection_string()
         run_pipeline(
             SnowflakeExtractor(
                 batch_size=100_000,
