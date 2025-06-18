@@ -47,8 +47,8 @@ locals {
   rds_scale_in_cooldown                   = nonsensitive(local.ssm_config["/bfd/database/scaling/cooldown/scale_in"])
   rds_scale_out_cooldown                  = nonsensitive(local.ssm_config["/bfd/database/scaling/cooldown/scale_out"])
   rds_snapshot_identifier                 = one(data.aws_db_cluster_snapshot.main[*].id)
-  rds_master_password                     = local.rds_snapshot_identifier != null ? lookup(local.ssm_config, "/bfd/database/rds_master_password", null) : null
-  rds_master_username                     = local.rds_snapshot_identifier != null ? nonsensitive(lookup(local.ssm_config, "/bfd/database/rds_master_username", sensitive(null))) : null
+  rds_master_password                     = lookup(local.ssm_config, "/bfd/database/rds_master_password", null)
+  rds_master_username                     = nonsensitive(lookup(local.ssm_config, "/bfd/database/rds_master_username", sensitive(null)))
 
   db_cluster_parameter_group_file = fileexists("${path.module}/db-cluster-parameters/${local.env}.yaml") ? "${path.module}/db-cluster-parameters/${local.env}.yaml" : "${path.module}/db-cluster-parameters/${local.rds_aurora_family}.yaml"
   db_node_parameter_group_file    = fileexists("${path.module}/db-node-parameters/${local.env}.yaml") ? "${path.module}/db-node-parameters/${local.env}.yaml" : "${path.module}/db-node-parameters/${local.rds_aurora_family}.yaml"
@@ -195,10 +195,10 @@ resource "aws_rds_cluster" "this" {
     interpreter = ["/bin/bash", "-c"]
   }
 
+  # Ignore all changes to these properties as the above local-exec manages them. Yes, this makes is
+  # so that manual changes to these values are ignored, but setting them via Terraform does not work
+  # properly anyways
   lifecycle {
-    # Ignore all changes to these properties as the above local-exec manages them. Yes, this makes
-    # is so that manual changes to these values are ignored, but setting them via Terraform does not
-    # work properly anyways
     ignore_changes = [
       monitoring_interval,
       monitoring_role_arn,
@@ -240,8 +240,12 @@ resource "aws_rds_cluster_instance" "writer" {
   instance_class               = local.rds_instance_class
   preferred_maintenance_window = aws_rds_cluster.this.preferred_maintenance_window
   publicly_accessible          = false
-  monitoring_interval          = !var.greenfield ? local.monitoring_interval : null
   tags                         = { Layer = "data" }
+
+  lifecycle {
+    # monitoring_interval is inherited from the cluster
+    ignore_changes = [monitoring_interval]
+  }
 }
 
 resource "aws_appautoscaling_target" "dynamic_replicas" {
