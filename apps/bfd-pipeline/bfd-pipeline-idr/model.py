@@ -23,6 +23,12 @@ def transform_default_string(value: str | None) -> str:
     return value
 
 
+def transform_empty_string(value: str | None) -> str:
+    if value is None:
+        return ""
+    return value.strip()
+
+
 def transform_null_float(value: float | None) -> float:
     if value is None:
         return 0.0
@@ -34,6 +40,7 @@ BATCH_TIMESTAMP = "batch_timestamp"
 UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
+DERIVED = "derived"
 
 
 class IdrBaseModel(BaseModel):
@@ -102,11 +109,15 @@ class IdrBaseModel(BaseModel):
 
     @classmethod
     def column_aliases(cls) -> list[str]:
-        return [cls._format_column_alias(key) for key in cls.model_fields.keys()]
+        return [cls._format_column_alias(key) for key in cls.columns_raw()]
 
     @classmethod
     def columns_raw(cls) -> list[str]:
-        return [key for key in cls.model_fields.keys()]
+        return [
+            key
+            for key in cls.model_fields.keys()
+            if cls._extract_meta(key, DERIVED) != True
+        ]
 
     @classmethod
     def insert_keys(cls) -> list[str]:
@@ -407,10 +418,14 @@ class IdrClaim(IdrBaseModel):
     clm_cntrctr_num: str
     clm_pmt_amt: float
     clm_ltst_clm_ind: str
-    clm_atndg_prvdr_npi_num: str
-    clm_oprtg_prvdr_npi_num: str
-    clm_othr_prvdr_npi_num: str
-    clm_rndrg_prvdr_npi_num: str
+    clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_atndg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_oprtg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_othr_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_blg_prvdr_npi_num: str
     clm_disp_cd: str
     clm_sbmt_chrg_amt: float
@@ -420,6 +435,9 @@ class IdrClaim(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {BATCH_TIMESTAMP: True}]
     clm_nrln_ric_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)
     ]
 
     @staticmethod
@@ -487,7 +505,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     dgns_drg_cd: int
     clm_mdcr_instnl_mco_pd_sw: str
     clm_admsn_src_cd: str
-    clm_fi_actn_cd: str
+    clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_lrd_use_cnt: int
     clm_hipps_uncompd_care_amt: float
     clm_instnl_mdcr_coins_day_cnt: int
@@ -606,10 +624,18 @@ class IdrClaimLine(IdrBaseModel):
         """
 
 
+def transform_default_hipps_code(value: str | None) -> str:
+    if value is None or value == "00000":
+        return ""
+    else:
+        return value
+
+
 class IdrClaimLineInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
-    clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
+    clm_ansi_sgntr_sk: int
     clm_ddctbl_coinsrnc_cd: str
     clm_line_instnl_rate_amt: float
     clm_line_instnl_adjstd_amt: float
@@ -634,8 +660,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_num_sk = {line}.clm_num_sk AND
-                {clm}.clm_from_dt = {line}.clm_from_dt
+                {clm}.clm_num_sk = {line}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause()}
             {{ORDER_BY}}
         """
@@ -643,10 +668,18 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 class IdrClaimAnsiSignature(IdrBaseModel):
     clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True}]
-    clm_1_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_2_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_3_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_4_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_1_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
+    clm_2_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
+    clm_3_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
+    clm_4_rev_cntr_ansi_rsn_cd: Annotated[
+        str, BeforeValidator(transform_default_string)
+    ]
 
     @staticmethod
     def table() -> str:
@@ -664,12 +697,13 @@ class IdrClaimProcedure(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_prod_type_cd: Annotated[str, {PRIMARY_KEY: True}]
-    clm_prcdr_cd: str
-    clm_dgns_prcdr_icd_ind: str
-    clm_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_poa_ind: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_dgns_prcdr_icd_ind: Annotated[str, BeforeValidator(transform_empty_string)]
+    clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcdr_prfrm_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
+    bfd_row_num: Annotated[int, {DERIVED: True}]
 
     @staticmethod
     def table() -> str:
@@ -680,7 +714,7 @@ class IdrClaimProcedure(IdrBaseModel):
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
-            SELECT {{COLUMNS}}
+            SELECT {{COLUMNS}}, ROW_NUMBER() OVER (PARTITION BY clm_uniq_id) AS bfd_row_num
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND

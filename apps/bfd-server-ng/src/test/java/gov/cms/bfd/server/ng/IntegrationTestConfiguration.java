@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.ng;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -9,20 +13,52 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 @TestConfiguration
 public class IntegrationTestConfiguration {
+  @Value("${project.basedir}")
+  private String baseDir;
+
   // Container lifecycle is managed by Spring,
   // so the resource closing warning is not applicable here
   @SuppressWarnings("resource")
   @Bean
   @ServiceConnection
-  public PostgreSQLContainer<?> postgres() {
+  public PostgreSQLContainer<?> postgres() throws IOException, InterruptedException {
     // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
     // context
     var databaseImage = System.getProperty("its.testcontainer.db.image");
-    return new PostgreSQLContainer<>(databaseImage)
-        .withDatabaseName("testdb")
-        .withUsername("bfdtest")
-        .withPassword("bfdtest")
-        .waitingFor(Wait.forListeningPort())
-        .withInitScript(new ClassPathResource("bfd.sql").getPath());
+
+    var container =
+        new PostgreSQLContainer<>(databaseImage)
+            .withDatabaseName("testdb")
+            .withUsername("bfdtest")
+            .withPassword("bfdtest")
+            .waitingFor(Wait.forListeningPort())
+            .withInitScript(new ClassPathResource("bfd.sql").getPath());
+    container.start();
+    runPython(container, "uv", "sync");
+    runPython(container, "uv", "run", "load_synthetic.py", "./sample_data");
+    runPython(container, "uv", "run", "pipeline.py", "synthetic");
+
+    return container;
+  }
+
+  private void runPython(PostgreSQLContainer<?> container, String... args)
+      throws IOException, InterruptedException {
+    ProcessBuilder processBuilder = new ProcessBuilder(args);
+    processBuilder.redirectErrorStream(true);
+    var env = processBuilder.environment();
+    env.put("BFD_DB_ENDPOINT", container.getHost());
+    env.put("BFD_DB_PORT", container.getMappedPort(5432).toString());
+    env.put("BFD_DB_USERNAME", container.getUsername());
+    env.put("BFD_DB_PASSWORD", container.getPassword());
+    env.put("BFD_DB_NAME", container.getDatabaseName());
+
+    processBuilder.directory(
+        new File(Paths.get(baseDir, "../bfd-pipeline/bfd-pipeline-idr").toString()));
+    var process = processBuilder.start();
+    var code = process.waitFor();
+    if (code > 0) {
+      var out = new String(process.getInputStream().readAllBytes());
+      throw new RuntimeException(out);
+    }
   }
 }

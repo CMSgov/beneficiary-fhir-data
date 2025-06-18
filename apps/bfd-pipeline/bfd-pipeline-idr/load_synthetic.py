@@ -1,7 +1,8 @@
 import csv
 import psycopg
-import os
 import typing
+import sys
+from loader import get_connection_string
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE.csv", "table": "v2_mdcr_bene"},
@@ -40,9 +41,12 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str):
 
 
 if __name__ == "__main__":
+    baseDir = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else "../../bfd-model/bfd-model-idr/sample-data/generator/out"
+    )
     load_from_csv(
-        psycopg.connect(
-            f"host={os.environ["BFD_DB_ENDPOINT"]} dbname=idr user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}"
-        ),
-        "../../bfd-model/bfd-model-idr/sample-data/generator/out",
+        psycopg.connect(get_connection_string()),
+        baseDir,
     )

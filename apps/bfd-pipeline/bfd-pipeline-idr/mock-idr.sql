@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS cms_vdm_view_mdcr_prd.v2_mdcr_bene;
-DROP TABLE IF EXISTS cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry;
-DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd;
+DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
 
 CREATE SCHEMA cms_vdm_view_mdcr_prd;
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
@@ -144,16 +142,21 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_pmt_amt NUMERIC,
     clm_ltst_clm_ind VARCHAR(1),
     clm_atndg_prvdr_npi_num VARCHAR(10),
+    clm_atndg_prvdr_last_name VARCHAR(60),
     clm_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_prvdr_last_name VARCHAR(60),
     clm_othr_prvdr_npi_num VARCHAR(10),
+    clm_othr_prvdr_last_name VARCHAR(60),
     clm_rndrg_prvdr_npi_num VARCHAR(10),
+    clm_rndrg_prvdr_last_name VARCHAR(60),
     prvdr_blg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,
     clm_blood_pt_frnsh_qty INT,
     clm_nch_prmry_pyr_cd VARCHAR(1),
     clm_blg_prvdr_oscar_num VARCHAR(20),
-    clm_idr_ld_dt DATE NOT NULL
+    clm_idr_ld_dt DATE NOT NULL,
+    idr_updt_ts TIMESTAMPTZ
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
@@ -275,7 +278,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     clm_ansi_sgntr_sk BIGINT,
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
-    clm_from_dt DATE NOT NULL,
     clm_line_num INT NOT NULL,
     clm_rev_apc_hipps_cd VARCHAR(5),
     clm_ddctbl_coinsrnc_cd VARCHAR(1),

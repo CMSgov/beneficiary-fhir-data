@@ -6,7 +6,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[GET]=[
     "url" : "http://localhost/v3/fhir/Patient?_id=999"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T07:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -22,7 +22,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[GET_WITH_SEARCH]=[
     "url" : "http://localhost/v3/fhir/Patient/_search?_id=999"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T07:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -38,7 +38,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[POST]=[
     "url" : "http://localhost/v3/fhir/Patient/_search"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T07:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -51,16 +51,16 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
   "entry" : [ {
     "resource" : {
       "address" : [ {
-        "city" : "RICHMOND",
-        "line" : [ "100 MAIN ST" ],
-        "postalCode" : "22473",
-        "state" : "VA"
+        "city" : "Mobile",
+        "line" : [ "1970 S University Blvd" ],
+        "postalCode" : "36609",
+        "state" : "AL"
       } ],
-      "birthDate" : "1960-01-01",
+      "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
           "coding" : [ {
-            "code" : "en",
+            "code" : "es",
             "system" : "urn:ietf:bcp:47"
           } ]
         }
@@ -72,25 +72,25 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
         "extension" : [ {
           "url" : "ombCategory",
           "valueCoding" : {
-            "code" : "2106-3",
-            "display" : "White",
+            "code" : "2054-5",
+            "display" : "Black or African American",
             "system" : "urn:oid:2.16.840.1.113883.6.238"
           }
         }, {
           "url" : "text",
-          "valueCode" : "White"
+          "valueCode" : "Black or African American"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
       "gender" : "female",
-      "id" : "1",
+      "id" : "181968400",
       "meta" : {
-        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
       },
       "name" : [ {
-        "family" : "NORRIS",
-        "given" : [ "CHUCK", "R" ]
+        "family" : "Erdapfel",
+        "given" : [ "Bluey", "Caroline" ]
       } ],
       "resourceType" : "Patient"
     }
@@ -98,10 +98,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=1"
+    "url" : "http://localhost/v3/fhir/Patient?_id=181968400"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -114,16 +114,16 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
   "entry" : [ {
     "resource" : {
       "address" : [ {
-        "city" : "RICHMOND",
-        "line" : [ "100 MAIN ST" ],
-        "postalCode" : "22473",
-        "state" : "VA"
+        "city" : "Mobile",
+        "line" : [ "1970 S University Blvd" ],
+        "postalCode" : "36609",
+        "state" : "AL"
       } ],
-      "birthDate" : "1960-01-01",
+      "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
           "coding" : [ {
-            "code" : "en",
+            "code" : "es",
             "system" : "urn:ietf:bcp:47"
           } ]
         }
@@ -135,25 +135,25 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
         "extension" : [ {
           "url" : "ombCategory",
           "valueCoding" : {
-            "code" : "2106-3",
-            "display" : "White",
+            "code" : "2054-5",
+            "display" : "Black or African American",
             "system" : "urn:oid:2.16.840.1.113883.6.238"
           }
         }, {
           "url" : "text",
-          "valueCode" : "White"
+          "valueCode" : "Black or African American"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
       "gender" : "female",
-      "id" : "1",
+      "id" : "181968400",
       "meta" : {
-        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
       },
       "name" : [ {
-        "family" : "NORRIS",
-        "given" : [ "CHUCK", "R" ]
+        "family" : "Erdapfel",
+        "given" : [ "Bluey", "Caroline" ]
       } ],
       "resourceType" : "Patient"
     }
@@ -161,10 +161,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=1"
+    "url" : "http://localhost/v3/fhir/Patient/_search?_id=181968400"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -177,16 +177,16 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
   "entry" : [ {
     "resource" : {
       "address" : [ {
-        "city" : "RICHMOND",
-        "line" : [ "100 MAIN ST" ],
-        "postalCode" : "22473",
-        "state" : "VA"
+        "city" : "Mobile",
+        "line" : [ "1970 S University Blvd" ],
+        "postalCode" : "36609",
+        "state" : "AL"
       } ],
-      "birthDate" : "1960-01-01",
+      "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
           "coding" : [ {
-            "code" : "en",
+            "code" : "es",
             "system" : "urn:ietf:bcp:47"
           } ]
         }
@@ -198,25 +198,25 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
         "extension" : [ {
           "url" : "ombCategory",
           "valueCoding" : {
-            "code" : "2106-3",
-            "display" : "White",
+            "code" : "2054-5",
+            "display" : "Black or African American",
             "system" : "urn:oid:2.16.840.1.113883.6.238"
           }
         }, {
           "url" : "text",
-          "valueCode" : "White"
+          "valueCode" : "Black or African American"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
       "gender" : "female",
-      "id" : "1",
+      "id" : "181968400",
       "meta" : {
-        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
       },
       "name" : [ {
-        "family" : "NORRIS",
-        "given" : [ "CHUCK", "R" ]
+        "family" : "Erdapfel",
+        "given" : [ "Bluey", "Caroline" ]
       } ],
       "resourceType" : "Patient"
     }
@@ -227,7 +227,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
     "url" : "http://localhost/v3/fhir/Patient/_search"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -243,7 +243,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifierEmpty[GET]=[
     "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T07:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -259,7 +259,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifierEmpty[GET_WITH_SE
     "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T07:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -275,7 +275,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifierEmpty[POST]=[
     "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C999"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T07:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -288,46 +288,46 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
   "entry" : [ {
     "resource" : {
       "address" : [ {
-        "city" : "RICHMOND",
-        "line" : [ "100 MAIN ST" ],
-        "postalCode" : "22473",
-        "state" : "VA"
+        "city" : "Lisbon",
+        "line" : [ "14152 ND-27" ],
+        "postalCode" : "58054",
+        "state" : "ND"
       } ],
-      "birthDate" : "1960-01-01",
+      "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
           "coding" : [ {
-            "code" : "en",
+            "code" : "unknown",
             "system" : "urn:ietf:bcp:47"
           } ]
         }
       } ],
       "extension" : [ {
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248152002"
+        "valueCode" : "248153007"
       }, {
         "extension" : [ {
           "url" : "ombCategory",
           "valueCoding" : {
-            "code" : "2106-3",
-            "display" : "White",
+            "code" : "2028-9",
+            "display" : "Asian",
             "system" : "urn:oid:2.16.840.1.113883.6.238"
           }
         }, {
           "url" : "text",
-          "valueCode" : "White"
+          "valueCode" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
-      "gender" : "female",
-      "id" : "1",
+      "gender" : "male",
+      "id" : "517782585",
       "meta" : {
-        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
       },
       "name" : [ {
-        "family" : "NORRIS",
-        "given" : [ "CHUCK", "R" ]
+        "family" : "Heeler",
+        "given" : [ "Alex", "Joey" ]
       } ],
       "resourceType" : "Patient"
     }
@@ -335,10 +335,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C1S000000000"
+    "url" : "http://localhost/v3/fhir/Patient?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA35"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -351,46 +351,46 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
   "entry" : [ {
     "resource" : {
       "address" : [ {
-        "city" : "RICHMOND",
-        "line" : [ "100 MAIN ST" ],
-        "postalCode" : "22473",
-        "state" : "VA"
+        "city" : "Lisbon",
+        "line" : [ "14152 ND-27" ],
+        "postalCode" : "58054",
+        "state" : "ND"
       } ],
-      "birthDate" : "1960-01-01",
+      "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
           "coding" : [ {
-            "code" : "en",
+            "code" : "unknown",
             "system" : "urn:ietf:bcp:47"
           } ]
         }
       } ],
       "extension" : [ {
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248152002"
+        "valueCode" : "248153007"
       }, {
         "extension" : [ {
           "url" : "ombCategory",
           "valueCoding" : {
-            "code" : "2106-3",
-            "display" : "White",
+            "code" : "2028-9",
+            "display" : "Asian",
             "system" : "urn:oid:2.16.840.1.113883.6.238"
           }
         }, {
           "url" : "text",
-          "valueCode" : "White"
+          "valueCode" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
-      "gender" : "female",
-      "id" : "1",
+      "gender" : "male",
+      "id" : "517782585",
       "meta" : {
-        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
       },
       "name" : [ {
-        "family" : "NORRIS",
-        "given" : [ "CHUCK", "R" ]
+        "family" : "Heeler",
+        "given" : [ "Alex", "Joey" ]
       } ],
       "resourceType" : "Patient"
     }
@@ -398,10 +398,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C1S000000000"
+    "url" : "http://localhost/v3/fhir/Patient/_search?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-mbi%7C2B19C89AA35"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"
@@ -414,46 +414,46 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
   "entry" : [ {
     "resource" : {
       "address" : [ {
-        "city" : "RICHMOND",
-        "line" : [ "100 MAIN ST" ],
-        "postalCode" : "22473",
-        "state" : "VA"
+        "city" : "Lisbon",
+        "line" : [ "14152 ND-27" ],
+        "postalCode" : "58054",
+        "state" : "ND"
       } ],
-      "birthDate" : "1960-01-01",
+      "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
           "coding" : [ {
-            "code" : "en",
+            "code" : "unknown",
             "system" : "urn:ietf:bcp:47"
           } ]
         }
       } ],
       "extension" : [ {
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-        "valueCode" : "248152002"
+        "valueCode" : "248153007"
       }, {
         "extension" : [ {
           "url" : "ombCategory",
           "valueCoding" : {
-            "code" : "2106-3",
-            "display" : "White",
+            "code" : "2028-9",
+            "display" : "Asian",
             "system" : "urn:oid:2.16.840.1.113883.6.238"
           }
         }, {
           "url" : "text",
-          "valueCode" : "White"
+          "valueCode" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
-      "gender" : "female",
-      "id" : "1",
+      "gender" : "male",
+      "id" : "517782585",
       "meta" : {
-        "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
       },
       "name" : [ {
-        "family" : "NORRIS",
-        "given" : [ "CHUCK", "R" ]
+        "family" : "Heeler",
+        "given" : [ "Alex", "Joey" ]
       } ],
       "resourceType" : "Patient"
     }
@@ -464,7 +464,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
     "url" : "http://localhost/v3/fhir/Patient/_search"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00"
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
   },
   "resourceType" : "Bundle",
   "type" : "searchset"

@@ -1,7 +1,6 @@
 import logging
 import sys
-import os
-from loader import PostgresLoader
+from loader import PostgresLoader, get_connection_string
 import loader
 from model import (
     T,
@@ -40,7 +39,6 @@ def init_logger():
 def main():
     init_logger()
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    pg_connection = f"host={os.environ["BFD_DB_ENDPOINT"]} dbname=idr user={os.environ["BFD_DB_USERNAME"]} password={os.environ["BFD_DB_PASSWORD"]}"
     if mode == "local":
         pg_local = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
         run_pipeline(
@@ -51,6 +49,7 @@ def main():
             pg_local,
         )
     elif mode == "synthetic":
+        pg_connection = get_connection_string()
         run_pipeline(
             PostgresExtractor(
                 connection_string=pg_connection,
@@ -59,6 +58,7 @@ def main():
             pg_connection,
         )
     else:
+        pg_connection = get_connection_string()
         run_pipeline(
             SnowflakeExtractor(
                 batch_size=100_000,
