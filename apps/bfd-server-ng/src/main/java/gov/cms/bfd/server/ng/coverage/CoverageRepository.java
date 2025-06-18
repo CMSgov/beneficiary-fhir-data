@@ -39,7 +39,7 @@ public class CoverageRepository {
 
     String jpqlFormat =
         """
-            SELECT NEW gov.cms.bfd.server.ng.coverage.CoverageDetails(
+            SELECT NEW gov.cms.bfd.server.ng.coverage.model.CoverageDetails(
                 b, tp, bs, be, ber
             )
             FROM Beneficiary b

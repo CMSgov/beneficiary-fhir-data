@@ -1,7 +1,7 @@
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
 {
   "beneficiary" : {
-    "reference" : "Patient/1"
+    "reference" : "Patient/405764107"
   },
   "class" : [ {
     "type" : {
@@ -40,7 +40,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   } ],
-  "id" : "part-a-1",
+  "id" : "part-a-405764107",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -49,10 +49,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
         "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
       } ]
     },
-    "value" : "1S000000000"
+    "value" : "8Z73WV0QC20"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
   },
   "payor" : [ {
@@ -66,7 +66,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
     } ]
   },
   "resourceType" : "Coverage",
-  "subscriberId" : "1S000000000",
+  "subscriberId" : "8Z73WV0QC20",
   "type" : {
     "coding" : [ {
       "code" : "1",
@@ -81,7 +81,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
 {
   "beneficiary" : {
-    "reference" : "Patient/1"
+    "reference" : "Patient/405764107"
   },
   "class" : [ {
     "type" : {
@@ -120,7 +120,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   } ],
-  "id" : "part-b-1",
+  "id" : "part-b-405764107",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -129,10 +129,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
         "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
       } ]
     },
-    "value" : "1S000000000"
+    "value" : "8Z73WV0QC20"
   } ],
   "meta" : {
-    "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
   },
   "payor" : [ {
@@ -146,7 +146,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
     } ]
   },
   "resourceType" : "Coverage",
-  "subscriberId" : "1S000000000",
+  "subscriberId" : "8Z73WV0QC20",
   "type" : {
     "coding" : [ {
       "code" : "121",

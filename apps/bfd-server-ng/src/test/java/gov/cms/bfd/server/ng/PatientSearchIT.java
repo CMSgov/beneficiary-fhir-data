@@ -11,9 +11,8 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.EntityManager;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -65,7 +64,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(Patient.SP_IDENTIFIER)
                     .exactly()
-                    .systemAndIdentifier(SystemUrls.CMS_MBI, "1S000000000"))
+                    .systemAndIdentifier(SystemUrls.CMS_MBI, "2B19C89AA35"))
             .usingStyle(searchStyle)
             .execute();
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
@@ -114,7 +113,7 @@ public class PatientSearchIT extends IntegrationTestBase {
         entityManager
             .createQuery(
                 "SELECT b.meta.updatedTimestamp FROM Beneficiary b WHERE b.beneSk=:beneSk",
-                LocalDateTime.class)
+                ZonedDateTime.class)
             .setParameter("beneSk", beneSk)
             .getResultList()
             .getFirst();
