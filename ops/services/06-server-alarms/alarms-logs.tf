@@ -73,8 +73,8 @@ resource "aws_cloudwatch_metric_alarm" "server_query_logging_listener_warning" {
   metric_name = "query-logging-listener/count/warning"
   namespace   = local.namespace
 
-  # NOTE: alarm should always be a low severity notification
-  alarm_actions = local.logs_warning_arn
+  # TODO: Re-enable when query logging listener errors are addressed
+  # alarm_actions = local.logs_warning_arn
 
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
@@ -93,7 +93,8 @@ resource "aws_cloudwatch_metric_alarm" "samhsa_mismatch_error" {
   metric_name = "samhsa-mismatch/count/error"
   namespace   = local.namespace
 
-  alarm_actions = local.logs_warning_arn
+  # TODO: Re-enable when SAMHSA mismatch errors are fixed
+  # alarm_actions = local.logs_warning_arn
 
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
