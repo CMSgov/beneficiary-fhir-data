@@ -114,7 +114,7 @@ public enum ClaimAdmissionSourceCode {
   Y("Y", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
   /** Z - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
   Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
-  /** NA */
+  /** NA. */
   NA("", "NO DESCRIPTION AVAILABLE");
   private final String code;
   private final String display;

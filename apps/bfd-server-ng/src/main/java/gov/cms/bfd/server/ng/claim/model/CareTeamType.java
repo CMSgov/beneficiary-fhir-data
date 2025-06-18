@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SequenceGenerator;
 import gov.cms.bfd.server.ng.SystemUrls;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -11,8 +12,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-
-import java.util.Optional;
 
 @AllArgsConstructor
 enum CareTeamType {

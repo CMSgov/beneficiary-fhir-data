@@ -6,7 +6,6 @@ import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class CareTeam {

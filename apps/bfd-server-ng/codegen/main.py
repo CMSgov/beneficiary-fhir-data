@@ -1,5 +1,6 @@
 import json
 import re
+import html
 
 
 def gen_enum(fsh_output_file: str, int_codes=False):
@@ -30,7 +31,7 @@ def get_enum_val(concept, int_codes):
         else:
             code_fmt = f'"{code}"'
         punct = "" if concept["display"].endswith(".") else "."
-        javadoc = f"/**\n{code} - {concept['display']}{punct}\n*/"
+        javadoc = html.escape(f"/**\n{code} - {concept['display']}{punct}\n*/")
         return f"{javadoc}\n{prefix}{code}({code_fmt},\"{concept['display']}\")"
 
 
