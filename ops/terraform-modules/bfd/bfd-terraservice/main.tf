@@ -6,8 +6,8 @@ locals {
   service      = var.service
   github_token = coalesce(data.external.github_token.result.github_token, "invalid")
 
-  env        = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
-  parent_env = terraform.workspace
+  parent_env = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
+  env        = terraform.workspace
 
   # There are no tags from which we can divine the environment a VPC is associated. Fortunately, we
   # know the name of our VPCs, and they should _never_ change, so it's OK to just check the name of
@@ -22,7 +22,7 @@ locals {
     "bfd-sandbox-east-prod" = "sandbox"
     "bfd-east-prod"         = "prod"
   }
-  env_vpc = one([for v in data.aws_vpc.main : v if local.vpcs_to_env[v.tags["Name"]] == local.env])
+  env_vpc = one([for v in data.aws_vpc.main : v if local.vpcs_to_env[v.tags["Name"]] == local.parent_env])
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
@@ -46,7 +46,7 @@ locals {
 
   platform_key_alias = var.greenfield ? "alias/bfd-platform-cmk" : "alias/bfd-mgmt-cmk"
   platform_key_arn   = one(data.aws_kms_key.platform[*].arn)
-  env_key_alias      = "alias/bfd-${local.env}-cmk"
+  env_key_alias      = "alias/bfd-${local.parent_env}-cmk"
   env_key_arn        = one(data.aws_kms_key.env[*].arn)
 
   # OIT/CMS Cloud configured Security Groups that exist only in the legacy account
