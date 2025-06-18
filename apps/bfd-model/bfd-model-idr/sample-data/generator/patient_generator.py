@@ -4,11 +4,11 @@ import datetime
 import pandas as pd
 from dateutil.parser import parse
 from faker import Faker
-from patient_generator_util import PatientGeneratorUtil
+from generator_util import GeneratorUtil
 
 fake = Faker()
 
-patients_to_generate = 80000
+patients_to_generate = 15
 available_given_names = [
     "Alex",
     "Frankie",
@@ -26,7 +26,7 @@ available_given_names = [
 ]
 available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "Sheep"]
 
-generator = PatientGeneratorUtil()
+generator = GeneratorUtil()
 
 for i in range(patients_to_generate):
     if i > 0 and i % 10000 == 0:
@@ -67,6 +67,8 @@ for i in range(patients_to_generate):
 
     num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
     generator.handle_mbis(patient, num_mbis)
+    generator.generate_coverages(patient)
+
 
     for idx in range(0, random.randint(0, 2)):
         if idx == 0:

@@ -41,9 +41,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.logging.log4j.util.Strings;
@@ -106,18 +108,18 @@ public class SamhsaUtil {
   /**
    * Diagnosis column portions. All diagnosis columns will contain one of these values in the name.
    */
-  public static final String DIAG_COLUMN_PORTION[] = {"diag", "dgns", "rsn_visit"};
+  public static final String[] DIAG_COLUMN_PORTION = {"diag", "dgns", "rsn_visit"};
 
   /**
    * Procedure column portions. All procedure columns will contain one of these values in the name.
    */
-  public static final String PROC_COLUMN_PORTION[] = {"prcdr", "proc"};
+  public static final String[] PROC_COLUMN_PORTION = {"prcdr", "proc_code"};
 
   /** HCPCS column portions. All HCPCS columns will contain one of these values in the name. */
-  public static final String HCPCS_COLUMN_PORTION[] = {"hcpc", "hcpcs", "hipps"};
+  public static final String[] HCPCS_COLUMN_PORTION = {"hcpc", "hipps", "idr_proc_code"};
 
   /** DRG column portions. All DRG columns will contain one of these values in the name. */
-  public static final String DRG_COLUMN_PORTION[] = {"drg"};
+  public static final String[] DRG_COLUMN_PORTION = {"drg"};
 
   /** Map of the SAMHSA code entries, with the entry's system as the key. */
   private static Map<String, List<SamhsaEntry>> samhsaMap = new HashMap<>();
@@ -125,7 +127,7 @@ public class SamhsaUtil {
   /** Instance of this class. Will be a singleton. */
   private static SamhsaUtil samhsaUtil;
 
-  /** The file from which SAMHSA entries are pulled. Must be in the resources folder. */
+  /** The file from which SAMHSA entries are pulled. Must be in the `resources` folder. */
   private static final String SAMHSA_LIST_RESOURCE = "security_labels.yml";
 
   private static final String[] PRCDR_SYSTEMS = {
@@ -140,6 +142,15 @@ public class SamhsaUtil {
   private static final String[] HCPCS_SYSTEMS = {
     "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", "http://www.ama-assn.org/go/cpt"
   };
+
+  private static final Map<String[], String[]> COLUMN_PORTION_TO_SYSTEMS = new HashMap<>();
+
+  static {
+    COLUMN_PORTION_TO_SYSTEMS.put(DIAG_COLUMN_PORTION, DGNS_SYSTEMS);
+    COLUMN_PORTION_TO_SYSTEMS.put(PROC_COLUMN_PORTION, PRCDR_SYSTEMS);
+    COLUMN_PORTION_TO_SYSTEMS.put(HCPCS_COLUMN_PORTION, HCPCS_SYSTEMS);
+    COLUMN_PORTION_TO_SYSTEMS.put(DRG_COLUMN_PORTION, DRG_SYSTEMS);
+  }
 
   /**
    * Creates a stream from a file.
@@ -177,7 +188,7 @@ public class SamhsaUtil {
   }
 
   /**
-   * Gets an input stream from a file in the resources folder.
+   * Gets an input stream from a file in the `resources` folder.
    *
    * @throws IOException Exception thrown when the resource cannot be loaded.
    */
@@ -217,7 +228,7 @@ public class SamhsaUtil {
    * @param tableEntry The tableEntry object for this table.
    * @param dates If present, contains the active dates for this claim.
    * @param datesMap Contains previously fetched claim dates for this claim id. This is useful if a
-   *     claim has more than one lineitem.
+   *     claim has more than one line item.
    * @param nonCodeFields Fields that are not Samhsa codes. This will be skipped during iteration.
    * @param entityManager The entity manager.
    * @return true if a SAMHSA tag should be created.
@@ -237,7 +248,7 @@ public class SamhsaUtil {
         continue;
       }
       String code = (String) claim[entry.getValue()];
-      // having a continue here instead of a nested block reduces cognitive complexity.
+      // having a `continue` here instead of a nested block reduces cognitive complexity.
       if (code == null) {
         continue;
       }
@@ -304,8 +315,7 @@ public class SamhsaUtil {
         entry.getEndDate().equalsIgnoreCase("Active")
             ? LocalDate.MAX
             : LocalDate.parse(entry.getEndDate());
-    CodeDateRange result = new CodeDateRange(startDate, endDate);
-    return result;
+    return new CodeDateRange(startDate, endDate);
   }
 
   private record CodeDateRange(LocalDate startDate, LocalDate endDate) {}
@@ -333,19 +343,19 @@ public class SamhsaUtil {
    * @return A list of systems that the column may belong to.
    */
   public static String[] getSystemsForColumn(String columnName) {
-    if (columnMatchesCodeType(columnName, DIAG_COLUMN_PORTION)) {
-      return DGNS_SYSTEMS;
+    // Use HashSet to avoid duplicate systems in the result and order doesn't matter.
+    Set<String> systems = new HashSet<>();
+
+    // Loop over all defined column name patterns
+    // adding their associated code systems when matching (e.g., "diag", "proc")
+    for (Map.Entry<String[], String[]> entry : COLUMN_PORTION_TO_SYSTEMS.entrySet()) {
+      if (columnMatchesCodeType(columnName, entry.getKey())) {
+        Collections.addAll(systems, entry.getValue());
+      }
     }
-    if (columnMatchesCodeType(columnName, PROC_COLUMN_PORTION)) {
-      return PRCDR_SYSTEMS;
-    }
-    if (columnMatchesCodeType(columnName, HCPCS_COLUMN_PORTION)) {
-      return HCPCS_SYSTEMS;
-    }
-    if (columnMatchesCodeType(columnName, DRG_COLUMN_PORTION)) {
-      return DRG_SYSTEMS;
-    }
-    return new String[] {};
+
+    // Convert the set to an array and return.
+    return systems.toArray(new String[0]);
   }
 
   /**

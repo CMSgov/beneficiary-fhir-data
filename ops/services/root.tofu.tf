@@ -2,8 +2,14 @@
 # _all_ Terraservices, so be careful!
 
 locals {
-  established_envs = ["test", "prod-sbx", "prod"]
-  parent_env       = terraform.workspace != "default" ? coalesce(var.parent_env, one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))])) : "ignore"
+  established_envs = !var.greenfield ? ["test", "prod-sbx", "prod"] : ["test", "sandbox", "prod"]
+  parent_env = coalesce(
+    var.parent_env,
+    try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "invalid-workspace"),
+    "invalid-parent-env"
+  )
+
+  _canary_exists = module.terraservice.canary
 }
 
 variable "greenfield" {
@@ -59,21 +65,7 @@ terraform {
     region         = var.region
     dynamodb_table = !var.greenfield ? "bfd-tf-table" : null
     encrypt        = true
-    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-${local.parent_env}-tf-state"
+    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-${local.parent_env}-cmk"
     use_lockfile   = var.greenfield
-  }
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.91"
-    }
-    # A necessary evil. Early static evaluation within required_providers is not supported in
-    # OpenTofu as of 1.10.0, so it is impossible to dynamically set the providers per-Terraservice
-    # while using a common root tofu.tf. Fortunately, only a single Terraservice (config) requires a
-    # provider other than the aws provider
-    sops = {
-      source  = "carlpett/sops"
-      version = "1.2.0"
-    }
   }
 }

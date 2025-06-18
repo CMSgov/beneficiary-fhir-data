@@ -16,7 +16,6 @@
                 "id": "ProcedureComponent",
                 "path": "ProcedureComponent",
                 "label": "Procedure Info for IDR. Ignore in DD Generation",
-                "definition": "ProcedureComponent definition.",
                 "min": 1,
                 "max": "1"
             },
@@ -24,7 +23,6 @@
                 "id": "ProcedureComponent.CLM_VAL_SQNC_NUM",
                 "path": "ProcedureComponent.CLM_VAL_SQNC_NUM",
                 "label": "Procedure Sequence Number",
-                "definition": "This field represents the procedure sequence number.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -37,7 +35,6 @@
                 "id": "ProcedureComponent.CLM_PRCDR_PRFRM_DT",
                 "path": "ProcedureComponent.CLM_PRCDR_PRFRM_DT",
                 "label": "Procedure Performed Date",
-                "definition": "The date the procedure was performed.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -50,7 +47,6 @@
                 "id": "ProcedureComponent.CLM_PRCDR_CD",
                 "path": "ProcedureComponent.CLM_PRCDR_CD",
                 "label": "Claim Procedure Code",
-                "definition": "The procedure code for the procedure.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -63,7 +59,6 @@
                 "id": "ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND",
                 "path": "ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND",
                 "label": "Diagnosis Procedure ICD indicator",
-                "definition": "This field indicates the ICD version of the procedure codes. Spaces or 9 for ICD-9, 0 for ICD-10-PCS.",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -72,7 +67,6 @@
                     }
                 ]
             }
-            
         ]
     }
 }

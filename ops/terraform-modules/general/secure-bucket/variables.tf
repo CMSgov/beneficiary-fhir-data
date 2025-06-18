@@ -24,3 +24,20 @@ variable "bucket_kms_key_arn" {
   nullable    = false
   description = "ARN of the KMS Key that will be used as the Bucket Key. Objects must be uploaded using this key exclusively."
 }
+
+variable "tags" {
+  default     = {}
+  type        = map(string)
+  description = "Additional tags to attach to bucket resource."
+}
+
+variable "ssm_param_name" {
+  type        = string
+  nullable    = true
+  default     = null
+  description = <<-EOF
+  Name of SSM parameter storing the name of the created bucket. Useful in contexts where the bucket
+  is created using a bucket prefix instead of a static name. If null, no parameter is created.
+  Defaults to null.
+  EOF
+}

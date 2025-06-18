@@ -1,13 +1,16 @@
-variable "environment_name" {
-  description = "The solution's environment name. Generally, `terraform.workspace`"
-  type        = string
-  validation {
-    // NOTE: validations can only refer to this scope, i.e. `var.environment_name` is valid but `local.established_envs` is not
-    // Simple validation ensures that the environment is either one of the established environments or ends with a combined
-    // suffix of "-" and an established environment, e.g. `prod-sbx`, `2554-test`, `2554-ii-prod-sbx` are valid, `-prod`, `2554--test` are not
-    condition     = one([for x in ["test", "prod-sbx", "prod"] : x if can(regex("^${x}$$|^([a-z0-9]+[a-z0-9-])+([^--])-${x}$$", var.environment_name))]) != null
-    error_message = "Invalid environment/workspace name. https://github.com/CMSgov/beneficiary-fhir-data/wiki/Environments#ephemeral-environments for more details."
-  }
+variable "greenfield" {
+  default     = false
+  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
+}
+
+variable "lookup_kms_keys" {
+  default     = true
+  description = <<-EOF
+  Toggles whether or not this module does data lookups for the platform and current env KMS keys.
+  If false, the KMS-related outputs will all be null. Set to false for services that create the keys
+  or are otherwise applied prior to the keys existing
+  EOF
+  nullable    = false
 }
 
 variable "relative_module_root" {

@@ -1,7 +1,0 @@
-*
-!.gitignore
-!.sops.yaml
-!test.sops.yaml
-!prod.sops.yaml
-!prod-sbx.sops.yaml
-!ephemeral.yaml

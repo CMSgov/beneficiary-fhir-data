@@ -7,10 +7,12 @@ import json
 import sys
 import subprocess
 import pandas as pd
+from generator_util import GeneratorUtil
 from pathlib import Path
 from dateutil.parser import parse
 from datetime import date, datetime, timedelta
 
+generator = GeneratorUtil()
 
 def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_line_instnl,clm_dcmtn):
     Path("out").mkdir(exist_ok=True)
@@ -181,16 +183,16 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     claim['CLM']['CLM_OBSLT_DT'] = '9999-12-31'
     claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     claim['CLM']['BENE_SK'] = bene_sk
-    claim['CLM']['CLM_DISP_CD'] = random.choice(code_systems['CLM_DISP_CD'])
-    claim['CLM']['CLM_QUERY_CD'] = random.choice(code_systems['CLM_QUERY_CD'])
+    claim['CLM']['CLM_DISP_CD'] = random.choice(generator.code_systems['CLM_DISP_CD'])
+    claim['CLM']['CLM_QUERY_CD'] = random.choice(generator.code_systems['CLM_QUERY_CD'])
 
-    tob_code = random.choice(code_systems['CLM_BILL_FREQ_CD'])
+    tob_code = random.choice(generator.code_systems['CLM_BILL_FREQ_CD'])
     claim['CLM']['CLM_BILL_FAC_TYPE_CD'] = tob_code[0]
     claim['CLM']['CLM_BILL_CLSFCTN_CD'] = tob_code[1]
     claim['CLM']['CLM_BILL_FREQ_CD'] = tob_code[2]
 
-    claim['CLM']['CLM_CNTRCTR_NUM'] = random.choice(code_systems['CLM_CNTRCTR_NUM'])
-    claim['CLM']['CLM_NCH_PRMRY_PYR_CD'] = random.choice(code_systems['CLM_NCH_PRMRY_PYR_CD'])
+    claim['CLM']['CLM_CNTRCTR_NUM'] = random.choice(generator.code_systems['CLM_CNTRCTR_NUM'])
+    claim['CLM']['CLM_NCH_PRMRY_PYR_CD'] = random.choice(generator.code_systems['CLM_NCH_PRMRY_PYR_CD'])
 
     clm_finl_actn_ind = 'N'
     if(clm_type_cd in (10,20,30,40,50,60,61,62,63,71,72,81,82)):
@@ -299,11 +301,11 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
         institutional_parts['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
 
-        institutional_parts['CLM_FI_ACTN_CD'] = random.choice(code_systems['CLM_FI_ACTN_CD'])
-        institutional_parts['CLM_ADMSN_TYPE_CD'] = random.choice(code_systems['CLM_ADMSN_TYPE_CD'])
-        institutional_parts['BENE_PTNT_STUS_CD'] = random.choice(code_systems['BENE_PTNT_STUS_CD'])
-        institutional_parts['CLM_MDCR_INSTNL_MCO_PD_SW'] = random.choice(code_systems['CLM_MDCR_INSTNL_MCO_PD_SW'])
-        institutional_parts['CLM_ADMSN_SRC_CD'] = random.choice(code_systems['CLM_ADMSN_SRC_CD'])
+        institutional_parts['CLM_FI_ACTN_CD'] = random.choice(generator.code_systems['CLM_FI_ACTN_CD'])
+        institutional_parts['CLM_ADMSN_TYPE_CD'] = random.choice(generator.code_systems['CLM_ADMSN_TYPE_CD'])
+        institutional_parts['BENE_PTNT_STUS_CD'] = random.choice(generator.code_systems['BENE_PTNT_STUS_CD'])
+        institutional_parts['CLM_MDCR_INSTNL_MCO_PD_SW'] = random.choice(generator.code_systems['CLM_MDCR_INSTNL_MCO_PD_SW'])
+        institutional_parts['CLM_ADMSN_SRC_CD'] = random.choice(generator.code_systems['CLM_ADMSN_SRC_CD'])
         institutional_parts['DGNS_DRG_CD'] = random.randint(0,42)
         institutional_parts['CLM_INSTNL_CVRD_DAY_CNT'] = random.randint(0,10)
         institutional_parts['CLM_MDCR_IP_LRD_USE_CNT'] = random.randint(0,10)
@@ -325,7 +327,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
         #We'll throw in a non-payment code on occasion 
         if(random.choice([0,10])>1):
-            institutional_parts['CLM_MDCR_NPMT_RSN_CD'] = random.choice(code_systems['CLM_MDCR_NPMT_RSN_CD'])
+            institutional_parts['CLM_MDCR_NPMT_RSN_CD'] = random.choice(generator.code_systems['CLM_MDCR_NPMT_RSN_CD'])
         claim['CLM_INSTNL'] = institutional_parts
 
 
@@ -361,7 +363,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
             claim_line['CLM_LINE_NDC_QTY'] = round(random.uniform(1,1000),2)
             claim_line['CLM_LINE_NDC_QTY_QLFYR_CD'] = 'ML'
         claim_line['CLM_LINE_SRVC_UNIT_QTY'] = round(random.uniform(0,5),2)
-        claim_line['CLM_LINE_REV_CTR_CD'] = random.choice(code_systems['CLM_REV_CNTR_CD'])
+        claim_line['CLM_LINE_REV_CTR_CD'] = random.choice(generator.code_systems['CLM_REV_CNTR_CD'])
         claim_line['CLM_LINE_BENE_PMT_AMT'] = round(random.uniform(0,5),2)
         claim_line['CLM_LINE_BENE_PD_AMT'] = round(random.uniform(0,5),2)
         claim_line['CLM_LINE_ALOWD_CHRG_AMT'] = round(random.uniform(0,5),2)
@@ -375,7 +377,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
 
         claim_line_inst['CLM_LINE_INSTNL_ADJSTD_AMT'] = round(random.uniform(0,1500),2)
         claim_line_inst['CLM_LINE_INSTNL_RDCD_AMT'] = round(random.uniform(0,1500),2)
-        claim_line_inst['CLM_DDCTBL_COINSRNC_CD'] = random.choice(code_systems['CLM_DDCTBL_COINSRNC_CD'])
+        claim_line_inst['CLM_DDCTBL_COINSRNC_CD'] = random.choice(generator.code_systems['CLM_DDCTBL_COINSRNC_CD'])
         claim_line_inst['CLM_LINE_INSTNL_RATE_AMT'] = round(random.uniform(0,15),2)
         claim_line_inst['CLM_LINE_INSTNL_MSP1_PD_AMT'] = round(random.uniform(0,15),2)
         claim_line_inst['CLM_LINE_INSTNL_MSP2_PD_AMT'] = round(random.uniform(0,2),2)
@@ -465,6 +467,7 @@ def gen_pac_version_of_claim(claim):
 
     return pac_claim
 
+''' 
 def pull_code_systems():
     code_systems = {}
     relative_path = "../../sushi/fsh-generated/resources"
@@ -485,7 +488,7 @@ def pull_code_systems():
         except json.JSONDecodeError:
             print(f"Error: Invalid JSON format in file: {full_path}") 
     return code_systems
-    
+'''
 
 def main():
     parser = argparse.ArgumentParser(description='Generate Synthetic Data for Ingestion by the BFD v3 pipeline.')
@@ -551,5 +554,4 @@ def main():
     save_output_files(CLM,CLM_LINE,CLM_VAL,CLM_DT_SGNTR,CLM_PROD,CLM_INSTNL,CLM_LINE_INSTNL,CLM_DCMTN)
     
 if __name__ == "__main__":
-    code_systems = pull_code_systems()
     main() 

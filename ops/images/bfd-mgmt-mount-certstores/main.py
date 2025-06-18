@@ -118,7 +118,8 @@ def main(
         Name=f"/bfd/{bfd_env}/server/sensitive/test_client_cert", WithDecryption=True
     )["Parameter"].get("Value", None)
     key = ssm.get_parameter(
-        Name=f"/bfd/{bfd_env}/server/sensitive/test_client_key", WithDecryption=True
+        Name=f"/bfd/{bfd_env}/server/sensitive/test_client_key",  # gitleaks:allow
+        WithDecryption=True,
     )["Parameter"].get("Value", None)
     if not cert or not key:
         raise ValueError("Failed to download healthcheck certificate and/or key from SSM.")

@@ -15,3 +15,4 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_NCVRD_THRU_DT "Noncovered Stay Through Date" "The ending date of the beneficiary's non-covered stay."
 * #CLM_MDCR_EXHSTD_DT "Medicare Benefits Exhausted Date" "The last date for which the beneficiary has Medicare coverage."
 * #CLM_PPS_IND_CD "Claim PPS Indicator Code" "The code indicating whether or not: (1) the claim is from the prospective payment system (PPS), and/or (2) the beneficiary is a deemed insured MQGE (Medicare Qualified Government Employee)"
+* #CLM_NCH_PRMRY_PYR_CD "NCH Primary Payer Code" "Code system for NCH primary payer code"

@@ -1,0 +1,22 @@
+/bfd/platform/network/nonsensitive/route53/zones_list_json: |-
+  [
+    "root"
+  ]
+/bfd/platform/network/sensitive/route53/zone/root/domain: ENC[AES256_GCM,data:NqF4jL/a219kP1zQEQnBHx/f,iv:V5uqNePEZ41XgRhYFz0yb/PmxHfQYoqvHY91vwFLTbw=,tag:fbFBHvB94Zaqm6ZeZ9UgBw==,type:str]
+/bfd/platform/network/sensitive/route53/zone/root/comment: ENC[AES256_GCM,data:FSuN0VvQjEPb9UAdveNqGp4GvKGanCN3cbDnzON7zazGtLT017+AjIPJcCvxJRqQ513vGGEqXqoPeYPsbESxl9KBQeo3FhOM7ir/63ph,iv:hYd3Ss6L4Cpct/9O2QKsEdVTmlm1WPp7aQdQbBD3OVA=,tag:uGuO3r0F8CgygmIEBLPVlw==,type:str]
+#ENC[AES256_GCM,data:Pn2iduLxKPoJBETNs7AgJ/9z19d9iaOLmANbOhnxguKnFA1EceLU8DSsfGBIAM+SyA9Vby1BeEg=,iv:kcUNqWYe8AcGT+0QOgXZvlRwbw6L4nIJgsjvE4X5av4=,tag:dRjHl9oHB+eHZSbsPL+zag==,type:comment]
+/bfd/platform/network/sensitive/route53/zone/root/internal_vpcs_list_json: ENC[AES256_GCM,data:ad/8C4ogfkGUAgVdUtZcHc8MvTzIDb+3Y+hmsqZC8bazkxeCz18+wnTOVGIvfiui2BSvY9P/+l/+g+d7vxO+tQaE0asezpG7znsWArVzAAAMWxhvLb4NAGNW0ha+qBvOw2pnMgPvUAxVbuII0qU=,iv:ycY/wYkhw0PK2fc92d6Gn4rngmOgM1K3smQ7zPnmwNU=,tag:yKXwCLs71Iped0A6O9iv9g==,type:str]
+#ENC[AES256_GCM,data:hql66QUWH5yjYx7VQppdaowdeGjLcw2n4OlvE066Klycp7FCuiWAH6+IgGceKP0QCJR1Yqe7I0eayPxORTsNFgUUDijZL+EgSg==,iv:qjVtyebpcAfWqLEJpmxs2W7xg1p+qtxsY5pv9HiRHzs=,tag:Sia3gjy3hp7fDdsonNw1pQ==,type:comment]
+/bfd/platform/network/sensitive/route53/zone/root/external_vpcs_list_json: ENC[AES256_GCM,data:d2TFCHLNAtmCItIVA547vMhDd0U=,iv:ghN2f2NfPhKsyI+SN6oirj93vCsXGrwWXWszFS3dPf4=,tag:lrkC+jvAHbnHJ87Dedqpvg==,type:str]
+sops:
+  kms:
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      created_at: "2025-05-30T12:43:15Z"
+      enc: AQICAHjxly34ZBDoNlpGiKxZCgGefcvFT75wuI0miwFqykz7tQEDfyvFDA1mpW/IHYbsqOwHAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMJderfAUNjBsjyiW4AgEQgDuuO17SSWzeWvJsKlbnRXpfZPXQFTML1SFcqWyZRqWjY6xv887rFzbL6OiWwNq1ShiiGeHhxeulc3NpYA==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-mgmt-config-cmk
+      created_at: "2025-05-30T12:44:10Z"
+      enc: AQICAHje54t884PQ3I3HmEfbyeDxeth8IxFtXCHA9cZvNPo2hQEAqQFvKJRgKu6sydo96tP0AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMIvwlyUZwlWvmbdSEAgEQgDum0Q8hV3gFoDfB+7+d9cjS6Uz28+zZo9N83BH5G6zzAck/r2PY0rWv79XibPhCKinS2WPK7pYMLN/WVw==
+      aws_profile: ""
+  unencrypted_regex: /nonsensitive/
+  version: 3.10.2

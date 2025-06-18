@@ -51,7 +51,8 @@ data "aws_iam_policy_document" "cwl_destination_policy_doc" {
     principals {
       type = "AWS"
       identifiers = [
-        data.aws_ssm_parameter.bb2_acct.value
+        data.aws_ssm_parameter.bb2_account_id.value,
+        data.aws_ssm_parameter.bb2_legacy_account_id.value
       ]
     }
     actions = [
@@ -67,6 +68,10 @@ resource "aws_cloudwatch_log_destination_policy" "cwl_destination_policy" {
   access_policy    = data.aws_iam_policy_document.cwl_destination_policy_doc.json
 }
 
-data "aws_ssm_parameter" "bb2_acct" {
-  name = "/bfd/${local.env}/sensitive/insights/bb2_acct"
+data "aws_ssm_parameter" "bb2_account_id" {
+  name = "/bb2/${local.env}/common/sensitive/account_id"
+}
+
+data "aws_ssm_parameter" "bb2_legacy_account_id" {
+  name = "/bb2/${local.env}/common/sensitive/legacy_account_id"
 }
