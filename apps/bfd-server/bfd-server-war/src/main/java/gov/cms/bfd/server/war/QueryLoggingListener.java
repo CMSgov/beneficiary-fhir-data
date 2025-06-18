@@ -177,9 +177,29 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     /** Represents the query for EOB by bene id (SNF). */
     EOBS_BY_BENE_ID_SNF("eobs_by_bene_id_snf", (s -> s.contains(" from ccw.snf_claims "))),
     /** Represents the query for partially adjudicated claims (fiss). */
-    FISS_CLAIM("partially_adjudicated_fiss", s -> s.contains("from rda.fiss")),
+    FISS_CLAIMS("partially_adjudicated_fiss", s -> s.contains("from rda.fiss_claims")),
+    /** Represents the query for fiss diagnosis codes (fiss). */
+    FISS_DIAGNOSIS_CODES("fiss_diagnosis_codes", s -> s.contains("from rda.fiss_diagnosis_codes")),
+    /** Represents the query for FISS audit trails. */
+    FISS_AUDIT_TRAILS("fiss_audit_trails", s -> s.contains("from rda.fiss_audit_trails")),
+    /** Represents the query for FISS payers. */
+    FISS_PAYERS("fiss_payers", s -> s.contains("from rda.fiss_payers")),
+    /** Represents the query for FISS procedure codes. */
+    FISS_PROC_CODES("fiss_proc_codes", s -> s.contains("from rda.fiss_proc_codes")),
+    /** Represents the query for FISS revenue lines. */
+    FISS_REVENUE_LINES("fiss_revenue_lines", s -> s.contains("from rda.fiss_revenue_lines")),
     /** Represents the query for partially adjudicated claims (mcs). */
-    MCS_CLAIM("partially_adjudicated_mcs", s -> s.contains("from rda.mcs")),
+    MCS_CLAIMS("partially_adjudicated_mcs", s -> s.contains("from rda.mcs_claims")),
+    /** Represents the query for mcs diagnosis codes (mcs). */
+    MCS_DIAGNOSIS_CODES("mcs_diagnosis_codes", s -> s.contains("from rda.mcs_diagnosis_codes")),
+    /** Represents the query for MCS adjustments. */
+    MCS_ADJUSTMENTS("mcs_adjustments", s -> s.contains("from rda.mcs_adjustments")),
+    /** Represents the query for MCS audits. */
+    MCS_AUDITS("mcs_audits", s -> s.contains("from rda.mcs_audits")),
+    /** Represents the query for MCS details. */
+    MCS_DETAILS("mcs_details", s -> s.contains("from rda.mcs_details")),
+    /** Represents the query for MCS locations. */
+    MCS_LOCATIONS("mcs_locations", s -> s.contains("from rda.mcs_locations")),
     /** Represents the query for mbi cache lookup. */
     MBI_CACHE("mbi_cache_lookup", s -> s.contains("from rda.mbi_cache")),
     /** Represents the query for loaded batches. */
