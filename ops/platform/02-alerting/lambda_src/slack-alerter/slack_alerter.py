@@ -4,11 +4,13 @@ from functools import singledispatch
 from typing import Any, Union
 from urllib.error import URLError
 from urllib.request import Request, urlopen
+
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.parser import envelopes
 from aws_lambda_powertools.utilities.parser.models import SnsNotificationModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from pydantic import BaseModel, Field, TypeAdapter
+
 TOPIC_TO_WEBHOOK_MAP = TypeAdapter(dict[str, str]).validate_json(
     os.environ.get("TOPIC_TO_WEBHOOK_MAP", default="{}")
 )
@@ -17,19 +19,21 @@ TOPIC_TO_CHANNEL_MAP = TypeAdapter(dict[str, str]).validate_json(
 )
 logger = Logger()
 
+
 def slack_escape_str(str_to_escape: str) -> str:
     return str_to_escape.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+
 class CloudWatchAlarmAlertTriggerModel(BaseModel):
-    metric_name: str = Field(validation_alias="MetricName")
+    metric_name: str | None = Field(validation_alias="MetricName", default=None)
+
 
 class CloudWatchAlarmAlertModel(BaseModel):
     alarm_name: str = Field(validation_alias="AlarmName")
     alarm_description: str = Field(validation_alias="AlarmDescription")
     new_state_reason: str = Field(validation_alias="NewStateReason")
-    trigger: CloudWatchAlarmAlertTriggerModel | None = Field(
-        validation_alias="Trigger", default=None
-    )
+    trigger: CloudWatchAlarmAlertTriggerModel = Field(validation_alias="Trigger")
+
 
 class EventBridgeAlertModel(BaseModel):
     source: str
@@ -39,10 +43,13 @@ class EventBridgeAlertModel(BaseModel):
     region: str
     resources: list[str]
 
+
 Alert = Union[CloudWatchAlarmAlertModel, EventBridgeAlertModel]
+
 
 @singledispatch
 def as_slack_message(alert: Alert) -> dict[str, Any]: ...
+
 
 @as_slack_message.register
 def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
@@ -51,7 +58,7 @@ def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
     alarm_reason = slack_escape_str(alert.new_state_reason)
     alarm_metric = (
         slack_escape_str(alert.trigger.metric_name)
-        if alert.trigger is not None
+        if alert.trigger.metric_name is not None
         else slack_escape_str("N/A (computed metric)")
     )
     return {
@@ -73,6 +80,7 @@ def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
             },
         ]
     }
+
 
 @as_slack_message.register
 def handle_eventbridge_event(alert: EventBridgeAlertModel) -> dict[str, Any]:
@@ -96,9 +104,14 @@ def handle_eventbridge_event(alert: EventBridgeAlertModel) -> dict[str, Any]:
         ]
     }
 
+
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[str, Any], context: LambdaContext) -> None:
-    sns_messages = envelopes.SqsEnvelope().parse(data=event, model=SnsNotificationModel)
+    sns_messages = (
+        msg
+        for msg in envelopes.SqsEnvelope().parse(data=event, model=SnsNotificationModel)
+        if msg is not None
+    )
     for sns_notif in sns_messages:
         topic_arn = sns_notif.TopicArn
         topic_name = topic_arn.split(":")[-1]

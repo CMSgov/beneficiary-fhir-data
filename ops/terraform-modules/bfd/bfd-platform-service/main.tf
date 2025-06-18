@@ -9,7 +9,7 @@ locals {
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
-    ["${root}/platform/common", "${root}/platform/${local.service}"]
+    ["/${root}/platform/common", "/${root}/platform/${local.service}"]
   ])
   ssm_flattened_data = {
     names = flatten(

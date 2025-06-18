@@ -56,6 +56,8 @@ resource "aws_cloudwatch_log_group" "run_locust" {
 }
 
 resource "aws_lambda_function" "run_locust" {
+  depends_on = [aws_iam_role_policy_attachment.run_locust]
+
   function_name = local.run_locust_lambda_full_name
   description   = "Lambda to run the Locust regression suite against the ${local.env} BFD Server"
   tags          = { Name = local.run_locust_lambda_full_name }
@@ -84,6 +86,7 @@ resource "aws_lambda_function" "run_locust" {
     security_group_ids = [aws_security_group.run_locust.id]
     subnet_ids         = local.app_subnets[*].id
   }
+  replace_security_groups_on_destroy = true
 
   role = aws_iam_role.run_locust.arn
 }

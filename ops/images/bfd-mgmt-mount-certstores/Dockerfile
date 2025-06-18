@@ -1,7 +1,7 @@
 ARG base_version
 ARG registry_uri
 
-FROM ${registry_uri}/bfd-mgmt-base-python:${base_version} AS deps
+FROM ${registry_uri}/bfd-platform-base-python:${base_version} AS deps
 # Enable copy mode to support bind mount caching.
 ENV UV_LINK_MODE=copy
 # Change the working directory to the `app` directory

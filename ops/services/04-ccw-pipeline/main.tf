@@ -71,8 +71,8 @@ module "bucket_ccw" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? "bfd-${local.env}-etl-${local.account_id}" : null
-  bucket_prefix      = var.greenfield ? local.name_prefix : null
+  bucket_name        = !var.greenfield ? "bfd-${local.env}-etl-${local.account_id}" : (!local.is_ephemeral_env ? local.name_prefix : null)
+  bucket_prefix      = local.is_ephemeral_env ? local.name_prefix : null
   force_destroy      = local.is_ephemeral_env
 
   ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"

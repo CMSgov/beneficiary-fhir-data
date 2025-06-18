@@ -101,6 +101,7 @@ resource "aws_lambda_function" "verifier" {
     security_group_ids = [aws_security_group.verifier.id]
     subnet_ids         = local.app_subnets[*].id
   }
+  replace_security_groups_on_destroy = true
 }
 
 resource "aws_security_group" "verifier" {

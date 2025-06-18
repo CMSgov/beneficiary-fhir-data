@@ -280,6 +280,8 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   memory_size      = 5120
   timeout          = 450
 
+  reserved_concurrent_executions = 1
+
   tags = {
     Name = local.outbound_lambda_full_name
   }
