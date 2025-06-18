@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 
 @Embeddable
-public class BillablePeriod {
+class BillablePeriod {
   @Column(name = "clm_from_dt")
   private LocalDate claimFromDate;
 

@@ -756,7 +756,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "servicedDate" : "2021-09-26"
   } ],
   "meta" : {
-    "lastUpdated" : "2025-06-16T22:42:49.143+00:00",
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
     "source" : "NationalClaimsHistory",
     "tag" : [ {

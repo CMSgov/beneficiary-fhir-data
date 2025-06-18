@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
 @AllArgsConstructor
-public enum CarinSupportingInfoCategory {
+enum CarinSupportingInfoCategory {
   ACTIVE_CARE_FROM_DATE("admissionperiod"),
   ADMISSION_TYPE_CODE("admtype"),
   SUBMISSION_DATE("clmrecvddate"),

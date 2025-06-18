@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-public class NchPrimaryPayorCode {
+class NchPrimaryPayorCode {
   @Column(name = "clm_nch_prmry_pyr_cd")
   private String nchPrimaryPayorCode;
 

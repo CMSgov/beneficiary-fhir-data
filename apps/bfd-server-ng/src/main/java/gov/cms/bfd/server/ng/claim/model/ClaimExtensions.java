@@ -6,7 +6,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Extension;
 
 @Embeddable
-public class ClaimExtensions {
+class ClaimExtensions {
   @Embedded private ClaimContractorNumber claimContractorNumber;
   @Embedded private ClaimRecordTypeCode claimRecordTypeCode;
   @Embedded private ClaimDispositionCode claimDispositionCode;

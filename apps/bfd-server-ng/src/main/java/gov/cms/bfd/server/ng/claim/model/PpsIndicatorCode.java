@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @AllArgsConstructor
-public enum PpsIndicatorCode {
+enum PpsIndicatorCode {
   PPS("2", "PPS bill; claim contains PPS indicator"),
   NOT_PPS("unknown", "Not a PPS bill");
 

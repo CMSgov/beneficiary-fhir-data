@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum IcdIndicator {
-  DEFAULT(" ", SystemUrls.CMS_ICD_9, SystemUrls.ICD_9_CM),
+  DEFAULT("", SystemUrls.CMS_ICD_9, SystemUrls.ICD_9_CM),
   ICD_9("9", SystemUrls.CMS_ICD_9, SystemUrls.ICD_9_CM),
   ICD_10("0", SystemUrls.CMS_ICD_10, SystemUrls.ICD_10_CM);
 

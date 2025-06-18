@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class TypeOfBillCode {
+class TypeOfBillCode {
   @Column(name = "clm_bill_fac_type_cd")
   private String facilityTypeCode;
 

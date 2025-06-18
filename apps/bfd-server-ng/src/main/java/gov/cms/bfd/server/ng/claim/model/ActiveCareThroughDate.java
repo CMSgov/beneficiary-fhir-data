@@ -4,12 +4,11 @@ import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class ActiveCareThroughDate {
+class ActiveCareThroughDate {
   @Column(name = "clm_actv_care_thru_dt")
   private LocalDate activeCareThroughDate;
 

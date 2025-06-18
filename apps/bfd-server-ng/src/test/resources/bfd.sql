@@ -170,9 +170,13 @@ CREATE TABLE idr.claim (
     clm_pmt_amt NUMERIC,
     clm_ltst_clm_ind VARCHAR(1),
     clm_atndg_prvdr_npi_num VARCHAR(10),
+    clm_atndg_prvdr_last_name VARCHAR(60),
     clm_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_prvdr_last_name VARCHAR(60),
     clm_othr_prvdr_npi_num VARCHAR(10),
+    clm_othr_prvdr_last_name VARCHAR(60),
     clm_rndrg_prvdr_npi_num VARCHAR(10),
+    clm_rndrg_prvdr_last_name VARCHAR(60),
     prvdr_blg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,
@@ -313,7 +317,6 @@ HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
 
 -- required to refresh view with CONCURRENTLY
 CREATE UNIQUE INDEX ON idr.overshare_mbis (bene_mbi_id);
-
 DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
 
 CREATE SCHEMA cms_vdm_view_mdcr_prd;
@@ -458,9 +461,13 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_pmt_amt NUMERIC,
     clm_ltst_clm_ind VARCHAR(1),
     clm_atndg_prvdr_npi_num VARCHAR(10),
+    clm_atndg_prvdr_last_name VARCHAR(60),
     clm_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_prvdr_last_name VARCHAR(60),
     clm_othr_prvdr_npi_num VARCHAR(10),
+    clm_othr_prvdr_last_name VARCHAR(60),
     clm_rndrg_prvdr_npi_num VARCHAR(10),
+    clm_rndrg_prvdr_last_name VARCHAR(60),
     prvdr_blg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,

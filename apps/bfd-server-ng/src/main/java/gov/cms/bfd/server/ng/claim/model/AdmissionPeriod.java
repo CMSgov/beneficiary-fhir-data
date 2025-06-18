@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Period;
 
 @Embeddable
-public class AdmissionPeriod {
+class AdmissionPeriod {
   @Column(name = "clm_actv_care_from_dt")
   private LocalDate claimActiveCareFromDate;
 

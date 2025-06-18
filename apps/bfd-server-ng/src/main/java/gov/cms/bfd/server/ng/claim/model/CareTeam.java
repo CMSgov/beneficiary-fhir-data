@@ -9,31 +9,51 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class CareTeam {
+class CareTeam {
   @Column(name = "clm_atndg_prvdr_npi_num")
   private Optional<String> attendingProviderNpiNumber;
+
+  // TODO: last names should be sourced from NPPES in the future
+  @Column(name = "clm_atndg_prvdr_last_name")
+  private Optional<String> attendingProviderLastName;
 
   @Column(name = "clm_oprtg_prvdr_npi_num")
   private Optional<String> operatingProviderNpiNumber;
 
+  @Column(name = "clm_oprtg_prvdr_last_name")
+  private Optional<String> operatingProviderLastName;
+
   @Column(name = "clm_othr_prvdr_npi_num")
   private Optional<String> otherProviderNpiNumber;
+
+  @Column(name = "clm_othr_prvdr_last_name")
+  private Optional<String> otherProviderLastName;
 
   @Column(name = "clm_rndrg_prvdr_npi_num")
   private Optional<String> renderingProviderNpiNumber;
 
-  List<CareTeamType.CareTeamComponents> toFhir(ExplanationOfBenefit eob) {
+  @Column(name = "clm_rndrg_prvdr_last_name")
+  private Optional<String> renderingProviderLastName;
+
+  List<CareTeamType.CareTeamComponents> toFhir() {
     var sequenceGenerator = new SequenceGenerator();
     var components =
         Stream.of(
             attendingProviderNpiNumber.map(
-                npi -> CareTeamType.ATTENDING.toFhir(sequenceGenerator, eob, npi)),
+                npi ->
+                    CareTeamType.ATTENDING.toFhir(
+                        sequenceGenerator, npi, attendingProviderLastName)),
             operatingProviderNpiNumber.map(
-                npi -> CareTeamType.OPERATING.toFhir(sequenceGenerator, eob, npi)),
+                npi ->
+                    CareTeamType.OPERATING.toFhir(
+                        sequenceGenerator, npi, operatingProviderLastName)),
             otherProviderNpiNumber.map(
-                npi -> CareTeamType.RENDERING.toFhir(sequenceGenerator, eob, npi)),
+                npi ->
+                    CareTeamType.RENDERING.toFhir(sequenceGenerator, npi, otherProviderLastName)),
             renderingProviderNpiNumber.map(
-                npi -> CareTeamType.RENDERING.toFhir(sequenceGenerator, eob, npi)));
+                npi ->
+                    CareTeamType.RENDERING.toFhir(
+                        sequenceGenerator, npi, renderingProviderLastName)));
 
     return components.flatMap(Optional::stream).toList();
   }

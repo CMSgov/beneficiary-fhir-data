@@ -5,7 +5,7 @@ import jakarta.persistence.Embeddable;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class AdjudicationCharge {
+class AdjudicationCharge {
   @Column(name = "clm_sbmt_chrg_amt")
   private float submittedChargeAmount;
 

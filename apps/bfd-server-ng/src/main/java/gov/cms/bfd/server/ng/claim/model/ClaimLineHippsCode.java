@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 
 @Embeddable
-public class ClaimLineHippsCode {
+class ClaimLineHippsCode {
   @Column(name = "clm_rev_apc_hipps_cd")
   private Optional<String> hippsCode;
 

@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
 @Embeddable
-public class ClaimLineHcpcsModifierCode {
+class ClaimLineHcpcsModifierCode {
   @Column(name = "hcpcs_1_mdfr_cd")
   private Optional<String> hcpcsModifierCode1;
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 
 @Embeddable
-public class ClaimLineHcpcsCode {
+class ClaimLineHcpcsCode {
 
   @Column(name = "clm_line_hcpcs_cd")
   private Optional<String> hcpcsCode;

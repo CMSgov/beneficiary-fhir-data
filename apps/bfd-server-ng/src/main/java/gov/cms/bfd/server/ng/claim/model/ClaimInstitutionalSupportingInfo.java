@@ -7,7 +7,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class ClaimInstitutionalSupportingInfo {
+class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_admsn_src_cd")
   private ClaimAdmissionSourceCode claimAdmissionSourceCode;
 

@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class NoncoveredThroughDate {
+class NoncoveredThroughDate {
   @Column(name = "clm_ncvrd_thru_dt")
   private LocalDate noncoveredThroughDate;
 

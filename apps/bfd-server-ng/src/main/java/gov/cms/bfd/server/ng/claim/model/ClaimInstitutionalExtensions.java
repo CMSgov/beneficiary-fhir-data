@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
 @Embeddable
-public class ClaimInstitutionalExtensions {
+class ClaimInstitutionalExtensions {
   @Embedded private ClaimNonpaymentReasonCode claimNonpaymentReasonCode;
   @Embedded private ClaimFinalActionCode claimFinalActionCode;
 

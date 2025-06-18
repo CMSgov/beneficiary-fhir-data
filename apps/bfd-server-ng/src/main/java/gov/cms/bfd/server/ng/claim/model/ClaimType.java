@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Coding;
 
 @Getter
 @AllArgsConstructor
-public enum ClaimType {
+enum ClaimType {
   PHARMACY("pharmacy"),
   INSTITUTIONAL("institutional"),
   PROFESSIONAL("professional");

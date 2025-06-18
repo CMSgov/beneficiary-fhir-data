@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Entity
 @Table(name = "claim_value", schema = "idr")
-public class ClaimValue {
+class ClaimValue {
   @EmbeddedId private ClaimValueId claimValueId;
 
   @Column(name = "clm_val_cd")

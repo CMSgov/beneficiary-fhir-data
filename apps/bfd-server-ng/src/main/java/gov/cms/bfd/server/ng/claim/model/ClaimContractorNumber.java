@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 @Embeddable
-public class ClaimContractorNumber {
+class ClaimContractorNumber {
   @Column(name = "clm_cntrctr_num")
   private String claimContractorNumber;
 

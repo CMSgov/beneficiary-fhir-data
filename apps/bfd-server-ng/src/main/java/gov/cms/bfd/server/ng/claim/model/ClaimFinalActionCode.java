@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-public class ClaimFinalActionCode {
+class ClaimFinalActionCode {
   @Column(name = "clm_fi_actn_cd")
   private Optional<String> finalActionCode;
 

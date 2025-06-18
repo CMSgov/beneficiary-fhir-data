@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.SystemUrls;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 
-public class OrganizationFactory {
+class OrganizationFactory {
   private OrganizationFactory() {}
 
   static Organization toFhir() {

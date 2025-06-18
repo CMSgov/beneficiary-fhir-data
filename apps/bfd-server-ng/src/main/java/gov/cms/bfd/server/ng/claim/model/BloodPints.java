@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 
 @Embeddable
-public class BloodPints {
+class BloodPints {
   @Column(name = "clm_blood_pt_frnsh_qty")
   private int bloodPints;
 

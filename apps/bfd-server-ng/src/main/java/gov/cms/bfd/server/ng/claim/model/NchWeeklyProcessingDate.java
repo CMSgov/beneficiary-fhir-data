@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class NchWeeklyProcessingDate {
+class NchWeeklyProcessingDate {
   @Column(name = "clm_nch_wkly_proc_dt")
   private LocalDate weeklyProcessingDate;
 

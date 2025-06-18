@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-public class ClaimDispositionCode {
+class ClaimDispositionCode {
   @Column(name = "clm_disp_cd")
   private String claimDispositionCode;
 

@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-public class ClaimNonpaymentReasonCode {
+class ClaimNonpaymentReasonCode {
   @Column(name = "clm_mdcr_npmt_rsn_cd")
   private Optional<String> nonpaymentReasonCode;
 

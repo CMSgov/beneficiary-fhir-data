@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 
 @Embeddable
-public class Identifiers {
+class Identifiers {
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;
 

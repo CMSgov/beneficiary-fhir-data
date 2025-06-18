@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Organization;
 
 @Embeddable
-public class BillingProvider {
+class BillingProvider {
   @Column(name = "prvdr_blg_prvdr_npi_num")
   private String billingNpiNumber;
 

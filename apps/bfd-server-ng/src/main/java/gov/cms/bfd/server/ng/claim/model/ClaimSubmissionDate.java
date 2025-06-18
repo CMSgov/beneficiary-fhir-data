@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class ClaimSubmissionDate {
+class ClaimSubmissionDate {
   @Column(name = "clm_submsn_dt")
   private LocalDate claimSubmissionDate;
 

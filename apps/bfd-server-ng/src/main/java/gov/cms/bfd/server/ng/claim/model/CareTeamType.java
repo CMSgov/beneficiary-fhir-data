@@ -6,13 +6,16 @@ import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 
+import java.util.Optional;
+
 @AllArgsConstructor
-public enum CareTeamType {
+enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
@@ -22,7 +25,7 @@ public enum CareTeamType {
   private final String roleDisplay;
 
   CareTeamComponents toFhir(
-      SequenceGenerator sequenceGenerator, ExplanationOfBenefit eob, String value) {
+      SequenceGenerator sequenceGenerator, String value, Optional<String> familyName) {
     var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
     practitioner.setId("careteam-provider-" + sequence);
@@ -37,7 +40,7 @@ public enum CareTeamType {
                     new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("NPI")))
             .setSystem(SystemUrls.NPI)
             .setValue(value));
-    // practitioner.addName(new HumanName().setFamily(family));
+    familyName.ifPresent(n -> practitioner.addName(new HumanName().setFamily(n)));
 
     var component =
         new ExplanationOfBenefit.CareTeamComponent()

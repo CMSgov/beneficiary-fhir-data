@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable;
 import java.time.LocalDateTime;
 
 @Embeddable
-public class Meta {
+class Meta {
   @Column(name = "bfd_updated_ts", nullable = false)
   private LocalDateTime updatedTimestamp;
 

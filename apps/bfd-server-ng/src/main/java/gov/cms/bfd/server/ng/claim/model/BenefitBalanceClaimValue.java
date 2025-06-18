@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-public class BenefitBalanceClaimValue {
+class BenefitBalanceClaimValue {
   private BenefitBalanceClaimValue() {}
 
   static List<ExplanationOfBenefit.BenefitComponent> toFhir(List<ClaimValue> claimValues) {

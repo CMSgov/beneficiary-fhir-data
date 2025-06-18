@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-public class BenefitBalance {
+class BenefitBalance {
   @Column(name = "clm_mdcr_ddctbl_amt")
   private double deductibleAmount;
 

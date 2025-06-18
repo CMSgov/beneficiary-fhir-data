@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 
-public class ClaimProcessDate {
+class ClaimProcessDate {
   @Column(name = "clm_cms_proc_dt")
   private LocalDate claimProcessDate;
 

@@ -22,13 +22,16 @@ def get_enum_val(concept, int_codes):
     if re.match("\\d", code[0]):
         prefix = "_"
     if code == "~":
-        return f'NA("","{concept['display']}")'
+        javadoc = f"/**\nNA.\n*/"
+        return f'{javadoc}\nNA("","{concept['display']}")'
     else:
         if int_codes:
             code_fmt = code
         else:
             code_fmt = f'"{code}"'
-        return f"{prefix}{code}({code_fmt},\"{concept['display']}\")"
+        punct = "" if concept["display"].endswith(".") else "."
+        javadoc = f"/**\n{code} - {concept['display']}{punct}\n*/"
+        return f"{javadoc}\n{prefix}{code}({code_fmt},\"{concept['display']}\")"
 
 
 if __name__ == "__main__":
@@ -40,3 +43,4 @@ if __name__ == "__main__":
     gen_enum("CodeSystem-Supporting-Information.json")
     gen_enum("CodeSystem-CLM-ADMSN-SRC-CD.json")
     gen_enum("CodeSystem-BENE-PTNT-STUS-CD.json")
+    gen_enum("CodeSystem-CLM-ADMSN-TYPE-CD.json")

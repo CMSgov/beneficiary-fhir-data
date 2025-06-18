@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 @Embeddable
-public class ClaimRecordTypeCode {
+class ClaimRecordTypeCode {
   @Column(name = "clm_nrln_ric_cd")
   private String claimRecordType;
 

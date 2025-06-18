@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-public class SupportingInfoFactory {
+class SupportingInfoFactory {
   private final SequenceGenerator sequenceGenerator;
 
   public SupportingInfoFactory() {

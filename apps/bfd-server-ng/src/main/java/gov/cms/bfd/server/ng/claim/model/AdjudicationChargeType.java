@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Getter
 @AllArgsConstructor
-public enum AdjudicationChargeType {
+enum AdjudicationChargeType {
   NONCOVERED_CHARGE_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "noncovered",

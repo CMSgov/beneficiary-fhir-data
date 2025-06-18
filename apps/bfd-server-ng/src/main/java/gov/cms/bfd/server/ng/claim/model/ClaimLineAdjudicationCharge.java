@@ -6,7 +6,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class ClaimLineAdjudicationCharge {
+class ClaimLineAdjudicationCharge {
   @Column(name = "clm_line_ncvrd_chrg_amt")
   private double noncoveredChargeAmount;
 

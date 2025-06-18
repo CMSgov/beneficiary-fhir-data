@@ -124,7 +124,7 @@ public class Claim {
 
     claimLines.stream().map(ClaimLine::toFhir).forEach(eob::addItem);
     careTeam
-        .toFhir(eob)
+        .toFhir()
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());

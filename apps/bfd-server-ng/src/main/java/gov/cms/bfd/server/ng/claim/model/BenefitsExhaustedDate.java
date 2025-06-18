@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class BenefitsExhaustedDate {
+class BenefitsExhaustedDate {
   @Column(name = "clm_mdcr_exhstd_dt")
   private LocalDate benefitsExhaustedDate;
 

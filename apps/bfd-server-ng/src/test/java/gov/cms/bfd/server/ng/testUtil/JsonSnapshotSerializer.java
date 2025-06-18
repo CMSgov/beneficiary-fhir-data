@@ -16,6 +16,7 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
   private static final Pattern UUID_REGEX =
       Pattern.compile(
           "\"id\"\\s*:\\s*\"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"");
+  private static final Pattern LAST_UPDATED_REGEX = Pattern.compile("\"lastUpdated\":\\s*\".*\"");
 
   @Override
   public String getOutputFormat() {
@@ -48,6 +49,11 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
     json = LOCALHOST_REGEX.matcher(json).replaceAll("http://localhost");
     // Generated UUIDs are random
     json = UUID_REGEX.matcher(json).replaceAll("\"id\" : \"{uuid}\"");
+    // lastUpdated gets reset whenever we recreate the test data
+    json =
+        LAST_UPDATED_REGEX
+            .matcher(json)
+            .replaceAll("\"lastUpdated\": \"9999-12-31T00:00:00.000+00:00\"");
 
     // Take the HAPI FHIR output and serialize it using a serialization format that will sort keys
     // in order.

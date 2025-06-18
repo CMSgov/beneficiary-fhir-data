@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class ClaimLineNdc {
+class ClaimLineNdc {
   @Column(name = "clm_line_ndc_cd")
   private Optional<String> ndcCode;
 

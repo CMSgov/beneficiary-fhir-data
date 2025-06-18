@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class DiagnosisDrgCode {
+class DiagnosisDrgCode {
   @Column(name = "dgns_drg_cd")
   private String diagnosisDrgCode;
 

@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.Coding;
 
 @Getter
 @AllArgsConstructor
-public enum ClaimSubtype {
+enum ClaimSubtype {
   INPATIENT("inpatient"),
   OUTPATIENT("outpatient");
 

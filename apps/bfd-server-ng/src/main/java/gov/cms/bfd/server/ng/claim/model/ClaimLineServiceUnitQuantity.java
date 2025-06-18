@@ -5,7 +5,7 @@ import jakarta.persistence.Embeddable;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 
 @Embeddable
-public class ClaimLineServiceUnitQuantity {
+class ClaimLineServiceUnitQuantity {
   @Column(name = "clm_line_srvc_unit_qty")
   private double serviceUnitQuantity;
 
