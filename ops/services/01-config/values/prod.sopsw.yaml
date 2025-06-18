@@ -99,7 +99,7 @@
 /bfd/${env}/database/nonsensitive/rds_master_username: bfduser
 /bfd/${env}/database/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
 /bfd/${env}/database/nonsensitive/rds_security_group: bfd-${env}-aurora-cluster
-/bfd/${env}/database/nonsensitive/rds_instance_class: db.r6i.12xlarge
+/bfd/${env}/database/nonsensitive/rds_instance_class: db.r8g.12xlarge
 /bfd/${env}/database/nonsensitive/scaling/min_nodes: 1
 /bfd/${env}/database/nonsensitive/scaling/max_nodes: 3
 /bfd/${env}/database/nonsensitive/scaling/cpu_target: 50
