@@ -1,0 +1,158 @@
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
+{
+  "beneficiary" : {
+    "reference" : "Patient/1"
+  },
+  "class" : [ {
+    "type" : {
+      "coding" : [ {
+        "code" : "plan",
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+      } ]
+    },
+    "value" : "Part A"
+  } ],
+  "contained" : [ {
+    "active" : true,
+    "contact" : [ {
+      "purpose" : {
+        "coding" : [ {
+          "code" : "PATINF",
+          "display" : "Patient",
+          "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+        } ]
+      },
+      "telecom" : [ {
+        "system" : "phone",
+        "value" : "1-800-633-4227"
+      }, {
+        "system" : "phone",
+        "value" : "TTY: 1-877-486-2048"
+      }, {
+        "system" : "url",
+        "value" : "www.medicare.gov"
+      } ]
+    } ],
+    "id" : "cms-org",
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+    },
+    "name" : "Centers for Medicare and Medicaid Services",
+    "resourceType" : "Organization"
+  } ],
+  "id" : "part-a-1",
+  "identifier" : [ {
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "type" : {
+      "coding" : [ {
+        "code" : "MB",
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      } ]
+    },
+    "value" : "1S000000000"
+  } ],
+  "meta" : {
+    "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+  },
+  "payor" : [ {
+    "reference" : "#cms-org"
+  } ],
+  "relationship" : {
+    "coding" : [ {
+      "code" : "self",
+      "display" : "Self",
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+    } ]
+  },
+  "resourceType" : "Coverage",
+  "subscriberId" : "1S000000000",
+  "type" : {
+    "coding" : [ {
+      "code" : "1",
+      "display" : "MEDICARE",
+      "system" : "https://nahdo.org/sopt"
+    } ]
+  }
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
+{
+  "beneficiary" : {
+    "reference" : "Patient/1"
+  },
+  "class" : [ {
+    "type" : {
+      "coding" : [ {
+        "code" : "plan",
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+      } ]
+    },
+    "value" : "Part B"
+  } ],
+  "contained" : [ {
+    "active" : true,
+    "contact" : [ {
+      "purpose" : {
+        "coding" : [ {
+          "code" : "PATINF",
+          "display" : "Patient",
+          "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+        } ]
+      },
+      "telecom" : [ {
+        "system" : "phone",
+        "value" : "1-800-633-4227"
+      }, {
+        "system" : "phone",
+        "value" : "TTY: 1-877-486-2048"
+      }, {
+        "system" : "url",
+        "value" : "www.medicare.gov"
+      } ]
+    } ],
+    "id" : "cms-org",
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+    },
+    "name" : "Centers for Medicare and Medicaid Services",
+    "resourceType" : "Organization"
+  } ],
+  "id" : "part-b-1",
+  "identifier" : [ {
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "type" : {
+      "coding" : [ {
+        "code" : "MB",
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      } ]
+    },
+    "value" : "1S000000000"
+  } ],
+  "meta" : {
+    "lastUpdated" : "2024-01-01T00:00:00.000+00:00",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+  },
+  "payor" : [ {
+    "reference" : "#cms-org"
+  } ],
+  "relationship" : {
+    "coding" : [ {
+      "code" : "self",
+      "display" : "Self",
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+    } ]
+  },
+  "resourceType" : "Coverage",
+  "subscriberId" : "1S000000000",
+  "type" : {
+    "coding" : [ {
+      "code" : "121",
+      "display" : "MEDICARE FFS",
+      "system" : "https://nahdo.org/sopt"
+    } ]
+  }
+}
+]

@@ -21,7 +21,26 @@ public class CoverageReadIT extends IntegrationTestBase {
     return getFhirClient().read().resource(Coverage.class);
   }
 
-  
+  @Test
+  void coverageReadValidPartACompositeId() {
+    String validCoverageId = "part-a-1";
+
+    var coverage = coverageRead().withId(validCoverageId).execute();
+    assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
+    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
+    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+  }
+
+  @Test
+  void coverageReadValidPartBCompositeId() {
+    String validCoverageId = "part-b-1";
+
+    var coverage = coverageRead().withId(validCoverageId).execute();
+    assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
+    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
+    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+  }
+
   @Test
   void coverageReadValidCompositeId() {
     String validCoverageId = "part-a-1";
@@ -41,13 +60,9 @@ public class CoverageReadIT extends IntegrationTestBase {
         "Should throw ResourceNotFoundException for a validly formatted ID that doesn't map to a resource.");
   }
 
-  /**
-   * Test reading a Coverage resource where the bene_sk part of the ID does not correspond to any
-   * existing Beneficiary.
-   */
   @Test
   void coverageReadBeneSkNotFound() {
-    String nonExistentBeneSkId = "part-a-9999999"; // Assuming bene_sk 9999999 does not exist
+    String nonExistentBeneSkId = "part-a-9999999";
 
     assertThrows(
         ResourceNotFoundException.class,
@@ -56,28 +71,14 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(
-      strings = {
-        "part-a", // Missing bene_sk
-        "-12345", // Missing part identifier
-        "part-a-abc", // Invalid bene_sk (not a number)
-        "foo-12345", // Invalid part prefix "foo"
-        "part-e-12345" // Invalid part "part-e" (if not in CoveragePart enum)
-      })
+  @ValueSource(strings = {"part-a", "-12345", "part-a-abc", "foo-12345", "part-e-12345"})
   void coverageReadInvalidIdFormatBadRequest_UsingHapiClient(String invalidId) {
-    // These formats should be rejected by your server-side CoverageCompositeId.parse()
-    // The HAPI client might let some of these through if they are not blank.
     assertThrows(
         InvalidRequestException.class,
         () -> coverageRead().withId(invalidId).execute(),
         "Should throw InvalidRequestException from server for ID: " + invalidId);
   }
 
-  /**
-   * Test reading a Coverage resource with an ID that is syntactically valid (matches pattern) but
-   * uses a CoveragePart that is not supported by the FFS endpoint (e.g., Part C or D, assuming your
-   * FhirInputConverter or Handler throws InvalidRequestException for these).
-   */
   @Test
   void coverageReadUnsupportedValidPartBadRequest() {
     String unsupportedPartId = "part-c-1";
@@ -88,11 +89,11 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @EmptySource // Provides "" for the ID, resulting in GET /Coverage/
+  @EmptySource
   void coverageReadEmptyIdSegmentResultsInServerError_WithRestAssured(String id) {
     RestAssured.given()
         .when()
-        .get(getServerUrl() + "/Coverage/" + id) // Sends GET /Coverage/ (if id is "")
+        .get(getServerUrl() + "/Coverage/" + id)
         .then()
         .statusCode(400)
         .body(
