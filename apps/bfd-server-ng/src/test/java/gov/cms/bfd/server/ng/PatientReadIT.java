@@ -19,14 +19,14 @@ public class PatientReadIT extends IntegrationTestBase {
 
   @Test
   void patientReadValidLong() {
-    var patient = patientRead().withId(1L).execute();
+    var patient = patientRead().withId(181968400L).execute();
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadValidString() {
-    var patient = patientRead().withId("1").execute();
+    var patient = patientRead().withId("181968400").execute();
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
