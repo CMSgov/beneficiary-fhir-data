@@ -66,28 +66,6 @@ public enum CoveragePart {
                     "Unrecognized or unsupported coverage part identifier prefix provided."));
   }
 
-  //  /**
-  //   * Finds a {@link CoveragePart} enum constant by its single character code (e.g., "A", "B").
-  //   *
-  //   * @param code The single character code. Must not be null.
-  //   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
-  //   *     Optional#empty()} if not found.
-  //   */
-  //  public static Optional<CoveragePart> forCode(String code) {
-  //    if (code == null || code.length() != 1) {
-  //      throw new IllegalArgumentException(
-  //          "Input code must be a single non-null character for CoveragePart.forCode(). Received:
-  // "
-  //              + (code == null ? "null" : "'" + code + "'"));
-  //    }
-  //    for (CoveragePart part : values()) {
-  //      if (part.getStandardCode().equals(code)) {
-  //        return Optional.of(part);
-  //      }
-  //    }
-  //    return Optional.empty();
-  //  }
-
   /**
    * Creates TypeCode.
    *

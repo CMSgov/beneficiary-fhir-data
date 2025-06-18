@@ -1,14 +1,11 @@
-package gov.cms.bfd.server.ng.coverage;
+package gov.cms.bfd.server.ng.coverage.model;
 
-import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryEntitlement;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryEntitlementReason;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryThirdParty;
 import gov.cms.bfd.server.ng.input.CoveragePart;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -71,27 +68,12 @@ public class CoverageDetails {
 
     var coverage = beneficiary.toFhirCoverage(fullFhirId, partEnumInstance);
 
-    // Populate Period, Status (derived from period), and Buy-in Extension
     this.getThirdPartyDetails()
         .ifPresent(
             currentThirdParty -> {
-              Optional<LocalDate> benefitPeriodStartDate =
-                  Optional.ofNullable(currentThirdParty.getBenefitRangeBeginDate());
-              Optional<LocalDate> benefitPeriodEndDate =
-                  Optional.ofNullable(currentThirdParty.getBenefitRangeEndDate());
-
-              benefitPeriodStartDate.ifPresent(
-                  startDate -> {
-                    Period period = new Period().setStartElement(DateUtil.toFhirDate(startDate));
-                    benefitPeriodEndDate
-                        .filter(endDate -> endDate.isBefore(IdrConstants.DEFAULT_DATE))
-                        .ifPresent(
-                            validEndDate ->
-                                period.setEndElement(DateUtil.toFhirDate(validEndDate)));
-
-                    coverage.setPeriod(period);
-                    coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
-                  });
+              Optional<Period> fhirPeriodOpt = currentThirdParty.createFhirPeriod();
+              fhirPeriodOpt.ifPresent(coverage::setPeriod);
+              coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
             });
 
     // Aggregate all extensions from the constituent parts

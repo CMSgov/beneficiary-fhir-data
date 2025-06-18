@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.coverage;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
+import gov.cms.bfd.server.ng.coverage.model.CoverageDetails;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.Optional;

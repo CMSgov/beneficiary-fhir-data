@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.coverage;
 
+import gov.cms.bfd.server.ng.coverage.model.CoverageDetails;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import jakarta.persistence.EntityManager;

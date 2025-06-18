@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
-import gov.cms.bfd.server.ng.coverage.MedicareStatusCodeType;
+import gov.cms.bfd.server.ng.coverage.model.MedicareStatusCodeType;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;

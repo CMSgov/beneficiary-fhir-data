@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.coverage;
+package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.IdrConstants;
 import java.util.Arrays;
