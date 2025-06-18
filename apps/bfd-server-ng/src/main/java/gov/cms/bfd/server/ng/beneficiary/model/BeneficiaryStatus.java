@@ -1,9 +1,16 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.coverage.MedicareStatusCodeType;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 
 /** Entity representing Beneficiary Status. */
 @Entity
@@ -35,4 +42,53 @@ public class BeneficiaryStatus {
 
   @Column(name = "bfd_updated_ts")
   private ZonedDateTime bfdUpdatedTimestamp;
+
+  /**
+   * create create Medicare Status Extension.
+   *
+   * @return optional extension
+   */
+  public List<Extension> toFhirExtensions() {
+    List<Extension> extensions = new ArrayList<>();
+
+    Optional.ofNullable(this.getMedicareStatusCode())
+        .filter(code -> !code.isBlank())
+        .ifPresent(
+            validStatusCode -> {
+              extensions.add(
+                  new Extension(SystemUrls.EXT_BENE_MDCR_STUS_CD_URL)
+                      .setValue(
+                          new Coding(SystemUrls.SYS_BENE_MDCR_STUS_CD, validStatusCode, null)));
+
+              MedicareStatusCodeType.fromCode(this.medicareStatusCode)
+                  .ifPresent(
+                      statusCodeType -> {
+                        Optional.ofNullable(statusCodeType.getEsrdIndicator())
+                            .filter(indicator -> !indicator.isBlank())
+                            .ifPresent(
+                                validIndicator ->
+                                    extensions.add(
+                                        new Extension(SystemUrls.EXT_BENE_ESRD_STUS_ID_URL)
+                                            .setValue(
+                                                new Coding(
+                                                    SystemUrls.SYS_BENE_ESRD_STUS_ID,
+                                                    validIndicator,
+                                                    null))));
+
+                        Optional.ofNullable(statusCodeType.getDisabilityIndicator())
+                            .filter(indicator -> !indicator.isBlank())
+                            .ifPresent(
+                                validIndicator ->
+                                    extensions.add(
+                                        new Extension(SystemUrls.EXT_BENE_DSBLD_STUS_ID_URL)
+                                            .setValue(
+                                                new Coding(
+                                                    SystemUrls.SYS_BENE_DSBLD_STUS_ID,
+                                                    validIndicator,
+                                                    null))));
+                      });
+            });
+
+    return extensions;
+  }
 }

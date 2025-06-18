@@ -9,8 +9,10 @@ import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryThirdParty;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -67,7 +69,7 @@ public class CoverageDetails {
    */
   public Coverage toFhir(String fullFhirId, CoveragePart partEnumInstance) {
 
-    Coverage coverage = beneficiary.toFhirCoverage(fullFhirId, partEnumInstance);
+    var coverage = beneficiary.toFhirCoverage(fullFhirId, partEnumInstance);
 
     // Populate Period, Status (derived from period), and Buy-in Extension
     this.getThirdPartyDetails()
@@ -92,11 +94,21 @@ public class CoverageDetails {
                   });
             });
 
-    List<Extension> allExtensions = CoverageExtensionFactory.createAllExtensions(this);
+    // Aggregate all extensions from the constituent parts
+    List<Extension> allExtensions =
+        Stream.of(
+                this.thirdPartyDetails.map(BeneficiaryThirdParty::toFhirExtensions),
+                this.currentStatus.map(BeneficiaryStatus::toFhirExtensions),
+                this.partEntitlement.map(BeneficiaryEntitlement::toFhirExtensions),
+                this.currentEntitlementReason.map(BeneficiaryEntitlementReason::toFhirExtensions))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .flatMap(Collection::stream)
+            .toList();
+
     if (!allExtensions.isEmpty()) {
       coverage.setExtension(allExtensions);
     }
-
     return coverage;
   }
 }

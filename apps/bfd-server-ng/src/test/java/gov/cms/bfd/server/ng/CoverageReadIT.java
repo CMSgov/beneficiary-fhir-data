@@ -21,13 +21,12 @@ public class CoverageReadIT extends IntegrationTestBase {
     return getFhirClient().read().resource(Coverage.class);
   }
 
-  //  Check with Austin  "idr.beneficiary_entitlement" does not exist
-
+  
   @Test
   void coverageReadValidCompositeId() {
     String validCoverageId = "part-a-1";
 
-    Coverage coverage = coverageRead().withId(validCoverageId).execute();
+    var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
   }

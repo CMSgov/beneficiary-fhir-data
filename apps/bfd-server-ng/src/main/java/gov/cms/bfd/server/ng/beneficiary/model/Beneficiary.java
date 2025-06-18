@@ -82,7 +82,7 @@ public class Beneficiary {
    * @return A partially populated FHIR Coverage object.
    */
   public Coverage toFhirCoverage(String fullCompositeId, CoveragePart coveragePart) {
-    Coverage coverage = new Coverage();
+    var coverage = new Coverage();
 
     coverage.setId(fullCompositeId);
 
