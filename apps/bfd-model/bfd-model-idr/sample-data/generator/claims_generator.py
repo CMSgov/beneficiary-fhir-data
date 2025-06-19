@@ -344,7 +344,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line_inst['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
         claim_line_inst['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
         claim_line_inst['CLM_NUM_SK'] = claim['CLM']['CLM_TYPE_CD']
-        claim_line_inst['CLM_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
 
         claim_line['CLM_LINE_HCPCS_CD'] = random.choice(proc_codes_cpt_hcpcs)
         num_mods = random.randint(0,5)
