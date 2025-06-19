@@ -36,9 +36,12 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str):
 
                 cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
                 cols_str = ",".join(cols)
+                full_table = f'cms_vdm_view_mdcr_prd.{table["table"]}'
                 with conn.cursor() as cur:
+                    # Clear out any previous data
+                    cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignores
                     with cur.copy(
-                        f"COPY cms_vdm_view_mdcr_prd.{table["table"]} ({cols_str}) FROM STDIN"  # type: ignore
+                        f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
                     ) as copy:
                         for row in reader:
                             copy.write_row([row[c] if row[c] else None for c in cols])
