@@ -126,6 +126,7 @@ resource "aws_lb_target_group" "this" {
     port                = local.server_port
     protocol            = "HTTP"
     path                = "/v3/fhir/metadata"
+    matcher             = "200,401"
   }
 }
 
