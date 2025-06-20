@@ -46,6 +46,12 @@ copy:
   - /bfd/${env}/server/sensitive/test_client_key
   - /bfd/${env}/server/sensitive/test_client_samhsa_cert
   - /bfd/${env}/server/sensitive/test_client_samhsa_key
+  - /bfd/${env}/server-ng/sensitive/lb/host_cert
+  - /bfd/${env}/server-ng/sensitive/lb/host_cert_key
+  - /bfd/${env}/server-ng/nonsensitive/heathcheck/testing_bene_id
+  - /bfd/${env}/server-ng/nonsensitive/client_certificates # copy all client_certificates recursively
+  - /bfd/${env}/server-ng/sensitive/db/username
+  - /bfd/${env}/server-ng/sensitive/db/password
 # "values" defines a key-value map exactly the same as the typical seed environment ".sops.yaml"
 # configuration format. Takes precedence over any copied SSM parameters
 values:
@@ -108,8 +114,6 @@ values:
   /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
   /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
   /bfd/${env}/server/nonsensitive/lb_is_public: false
-  /bfd/${env}/server/nonsensitive/lb_vpc_peerings_json: >-
-    []
   /bfd/${env}/server/nonsensitive/db/auth_type: UNDEFINED
   /bfd/${env}/server/nonsensitive/db/data_source_type: AWS_WRAPPER
   /bfd/${env}/server/nonsensitive/db/hikari/max_pool_size: 80 # vcpus * 5
@@ -127,6 +131,28 @@ values:
   /bfd/${env}/server/nonsensitive/db/wrapper/host_selector_strategy: leastConnections
   /bfd/${env}/server/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
   /bfd/${env}/server/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
+  /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 1
+  /bfd/${env}/server-ng/nonsensitive/ecs/capacity/max: 3
+  /bfd/${env}/server-ng/nonsensitive/ecs/resources/cpu: 4096
+  /bfd/${env}/server-ng/nonsensitive/ecs/resources/memory: 8192
+  /bfd/${env}/server-ng/nonsensitive/lb_is_public: false
+  /bfd/${env}/server-ng/nonsensitive/db/auth_type: UNDEFINED
+  /bfd/${env}/server-ng/nonsensitive/db/data_source_type: AWS_WRAPPER
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/max_pool_size: 80 # vcpus * 5
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/min_idle_connections: 20
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/idle_timeout_ms: 900000 # 15 minutes
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/init_fail_timeout_ms: -1
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/connection_timeout_ms: 1500 # 1.5 seconds
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/keepalive_timeout_ms: 180000 # 3 minutes
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/validation_timeout_ms: 1000 # 1 second
+  /bfd/${env}/server-ng/nonsensitive/db/hikari/max_connection_lifetime_ms: 1800000 # 30 minutes
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/use_custom_preset: "true"
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/base_preset: E
+  # Plugin list is in sorted order, do not reorder or AWS JDBC Wrapper behavior could change
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/plugins_csv: "singleNodeHostOverride,initialConnection,auroraConnectionTracker,failover2,efm2"
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/host_selector_strategy: leastConnections
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
   /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
   /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
   /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: UNDEFINED
