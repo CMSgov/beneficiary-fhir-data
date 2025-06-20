@@ -6,10 +6,13 @@ import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,6 +24,12 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 @ConfigurationProperties(prefix = "bfd")
 public class Configuration {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
+
+  /**
+   * Identifier for the local Spring profile indicating that the server is being run on a local
+   * machine.
+   */
+  public static final String LOCAL_PROFILE = "local";
 
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
@@ -46,6 +55,9 @@ public class Configuration {
   private Sensitive sensitive = new Sensitive();
   private Nonsensitive nonsensitive = new Nonsensitive();
 
+  @Getter(lazy = true)
+  private final Map<String, String> clientCertsToAliases = getClientCertsToAliasesInternal();
+
   /**
    * Creates a new {@link AwsWrapperDataSourceFactory}.
    *
@@ -62,6 +74,15 @@ public class Configuration {
 
   boolean useRds() {
     return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
+  }
+
+  private Map<String, String> getClientCertsToAliasesInternal() {
+    Map<String, String> newMap = new HashMap<>();
+    for (Map.Entry<String, String> entry : nonsensitive.clientCertificates.entrySet()) {
+      newMap.put(StringUtils.deleteWhitespace(entry.getValue()), entry.getKey());
+    }
+
+    return newMap;
   }
 
   private JdbcConnectionDetails getJdbcConfiguration() {
@@ -195,5 +216,7 @@ public class Configuration {
         private long instanceStateMonitorRefreshRateMs = Duration.ofSeconds(5).toMillis();
       }
     }
+
+    private final Map<String, String> clientCertificates = new HashMap<>();
   }
 }
