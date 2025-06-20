@@ -19,6 +19,10 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.CLM_NCVRD_THRU_DT as ncvrdToDt -> tgt then addNCStayToDate(src, tgt) "Add processing date";
     src.CLM_MDCR_EXHSTD_DT as mdcrExhaustDt -> tgt then addBenefitsExhaustedDate(src, tgt) "Add benefits exhausted date";
     src.CLM_NCH_PRMRY_PYR_CD as prmryPyrCode -> tgt then addPrimaryPayer(src, tgt) "Add primary payer code";
+    src.CLM_QLFY_STAY_FROM_DT as fromDt -> tgt then addQlfyStayFromDate(src, tgt) "Add processing date";
+    src.CLM_QLFY_STAY_THRU_DT as toDt -> tgt then addQlfyStayToDate(src, tgt) "Add processing date";
+    src.CLM_HHA_LUP_IND_CD as lupIndCd -> tgt then addLupa(src, tgt) "Add LUPA Indicator Code";
+    src.CLM_HHA_RFRL_CD as rfrlCode -> tgt then addRfRl(src, tgt) "Add HHA referral code";
 
 }
 //timingPeriod
@@ -105,6 +109,26 @@ group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneE
     } "Add CC";
 }
 //code
+group addLupa(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_HHA_LUP_IND_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_HHA_LUP_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD",val) "Add coding";
+    } "Add CC";
+}
+//code
+group addRfRl(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_HHA_RFRL_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_HHA_RFRL_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD",val) "Add coding";
+    } "Add CC";
+}
+//code
 group addMCOPdSw(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
@@ -168,6 +192,21 @@ group addNCStayToDate(source src: SupportingInfoComponent, target tgt: BackboneE
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NCVRD_THRU_DT") "Add Coding";
     } "Add category";
     src.CLM_NCVRD_THRU_DT as val -> tgt.timing = cast(val, 'date') "add value";
+}
+group addQlfyStayFromDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_QLFY_STAY_FROM_DT") "Add Coding";
+    } "Add category";
+    src.CLM_QLFY_STAY_FROM_DT as val -> tgt.timing = cast(val, 'date') "Add value";
+}
+//timingDate
+group addQlfyStayToDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_QLFY_STAY_THRU_DT") "Add Coding";
+    } "Add category";
+    src.CLM_QLFY_STAY_THRU_DT as val -> tgt.timing = cast(val, 'date') "add value";
 }
 //timingDate
 group addBenefitsExhaustedDate(source src: SupportingInfoComponent, target tgt: BackboneElement){

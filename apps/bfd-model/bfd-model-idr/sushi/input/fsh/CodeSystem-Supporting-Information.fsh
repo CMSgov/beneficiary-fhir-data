@@ -16,3 +16,7 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_MDCR_EXHSTD_DT "Medicare Benefits Exhausted Date" "The last date for which the beneficiary has Medicare coverage."
 * #CLM_PPS_IND_CD "Claim PPS Indicator Code" "The code indicating whether or not: (1) the claim is from the prospective payment system (PPS), and/or (2) the beneficiary is a deemed insured MQGE (Medicare Qualified Government Employee)"
 * #CLM_NCH_PRMRY_PYR_CD "NCH Primary Payer Code" "Code system for NCH primary payer code"
+* #CLM_QLFY_STAY_FROM_DT "Qualified Stay From Date" "The beginning date of the beneficiary's qualifying Medicare stay."
+* #CLM_QLFY_STAY_THRU_DT "Qualified Stay Through Date" "The ending date of the beneficiary's qualifying Medicare stay."
+* #CLM_HHA_LUP_IND_CD "Claim Lupa Indicator Code" "The code used to identify those Home Health PPS claims that have 4 visits or less in a 60-day episode."
+* #CLM_HHA_RFRL_CD "Claim Referral Code" "The code used to identify the means by which the beneficiary was referred for Home Health services."

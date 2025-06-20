@@ -258,6 +258,54 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT",
+                "label": "Outpatient Beneficiary Payment Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT",
+                "label": "Hospice Period Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT",
+                "label": "Claim Total Visit Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD",
+                "label": "Claim Current Status Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]

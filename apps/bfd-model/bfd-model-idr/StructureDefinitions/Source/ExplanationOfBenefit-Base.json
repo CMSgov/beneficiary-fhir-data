@@ -525,6 +525,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_PRVDR_PMT_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_PRVDR_PMT_AMT",
+                "label": "Provider Payment Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
