@@ -33,7 +33,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidPartBCompositeId() {
-    String validCoverageId = "part-b-405764107";
+    String validCoverageId = "part-a-405764107";
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -42,8 +42,19 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @Test
+  void coverageReadForNonCurrentEffectiveBeneficiaryIdShouldBeNotFound() {
+
+    String nonCurrentEffectiveBeneId = "part-a-181968400";
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(nonCurrentEffectiveBeneId).execute(),
+        "Should throw ResourceNotFoundException for Coverage ID 'part-a-405764107' "
+            + "because the beneficiary record is not the current effective version.");
+  }
+
+  @Test
   void coverageReadValidCompositeId() {
-    String validCoverageId = "part-b-405764107";
+    String validCoverageId = "part-a-405764107";
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");

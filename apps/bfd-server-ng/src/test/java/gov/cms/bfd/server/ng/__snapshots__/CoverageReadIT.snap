@@ -40,6 +40,19 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   } ],
+  "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+    "valueCoding" : {
+      "code" : "P",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+    "valueCoding" : {
+      "code" : "Y",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+    }
+  } ],
   "id" : "part-a-405764107",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
@@ -90,7 +103,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
         "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
       } ]
     },
-    "value" : "Part B"
+    "value" : "Part A"
   } ],
   "contained" : [ {
     "active" : true,
@@ -120,7 +133,20 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   } ],
-  "id" : "part-b-405764107",
+  "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+    "valueCoding" : {
+      "code" : "P",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+    "valueCoding" : {
+      "code" : "Y",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+    }
+  } ],
+  "id" : "part-a-405764107",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -149,8 +175,8 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
   "subscriberId" : "8Z73WV0QC20",
   "type" : {
     "coding" : [ {
-      "code" : "121",
-      "display" : "MEDICARE FFS",
+      "code" : "1",
+      "display" : "MEDICARE",
       "system" : "https://nahdo.org/sopt"
     } ]
   }
