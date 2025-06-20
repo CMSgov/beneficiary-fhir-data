@@ -45,6 +45,7 @@ locals {
     "bfd-db-migrator",
     "bfd-pipeline-app",
     "bfd-server",
+    "bfd-server-ng"
   ])
 }
 
