@@ -140,11 +140,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_TYPE_CD as typeCd where(typeCd >= 2000 and typeCd < 3000) -> tgt then {
       //Bifurcate by if it's institutional or professional. 
       src.institutionalComponents as instComponents -> tgt then {
-        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
+        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
       } "Set institutional outcome";
 
       //We will add the professional "array" here.
-    } "Complete additional outcomes"
+    } "Complete additional outcomes";
     
     //When we get to carrier/DME, we'll do the same with MCS/VIPS status. 
 

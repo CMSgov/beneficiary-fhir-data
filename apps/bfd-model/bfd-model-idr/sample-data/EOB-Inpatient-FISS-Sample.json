@@ -3,7 +3,7 @@
     "lastUpdated": "2025-01-07T03:02:28.000000Z",
     "CLM_FINL_ACTN_IND":"N",
     "CLM_BENE_XREF_EFCTV_SK":"12345",
-    "CLM_TYPE_CD": 1011,
+    "CLM_TYPE_CD": 2011,
     "CLM_UNIQ_ID": "NON-UNIQUE-ID-HERE-2",
     "CLM_CNTL_NUM": "DOOPITY-DOOP-DOOP",
     "CLM_FROM_DT": "2025-01-03",
@@ -34,7 +34,7 @@
         {"ROW_NUM":"4","BENE_PTNT_STUS_CD":"06"},
         {"ROW_NUM":"5","DGNS_DRG_CD":"460"},
         {"ROW_NUM":"6","CLM_BLOOD_PT_FRNSH_QTY":"15"},
-        {"ROW_NUM":"7","CLM_MDCR_INSTNL_MCO_PD_SW":"N"},
+        {"ROW_NUM":"7","CLM_MDCR_INSTNL_MCO_PD_SW":"0"},
         {"ROW_NUM":"9","CLM_ADMSN_SRC_CD":"2"}, 
         {"ROW_NUM":"10","TYPE_OF_BILL_CD":"0123"},
         {"ROW_NUM":"11","CLM_NCH_PRMRY_PYR_CD":"Z"}
