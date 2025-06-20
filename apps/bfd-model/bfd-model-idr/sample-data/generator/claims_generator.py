@@ -299,12 +299,6 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
                         'CLM_VAL_SQNC_NUM':3}
         claim['CLM_VAL'].append(clm_val_ime)
 
-
-    #CHECKPOINT outpatient. 
-    #Max diagnosis - outpatient - 25 - same for all institutional. 
-
-
-
     #Add procedures
     claim['CLM_PROD'] = []
     if(clm_type_cd in (10,20,30,40,50,60,61,62,63,64)):
