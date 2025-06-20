@@ -48,6 +48,7 @@ copy:
   - /bfd/${env}/server/sensitive/test_client_samhsa_key
   - /bfd/${env}/server-ng/sensitive/lb/host_cert
   - /bfd/${env}/server-ng/sensitive/lb/host_cert_key
+  - /bfd/${env}/server-ng/sensitive/test_client_cert
   - /bfd/${env}/server-ng/nonsensitive/heathcheck/testing_bene_id
   - /bfd/${env}/server-ng/nonsensitive/client_certificates # copy all client_certificates recursively
   - /bfd/${env}/server-ng/sensitive/db/username
