@@ -16,6 +16,7 @@ locals {
   server_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
   server_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   server_protocol                     = "tcp"
+  server_healthcheck_client_cert      = replace(urlencode(trimspace(nonsensitive(local.ssm_config["/bfd/${local.service}/test_client_cert"]))), "+", "%20")
   server_healthcheck_bene_id          = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
   server_healthcheck_uri              = "http://localhost:${local.server_port}/v3/fhir/metadata"
 }
@@ -163,11 +164,11 @@ resource "aws_ecs_task_definition" "server" {
           },
         ]
         healthCheck = {
-          command     = ["CMD-SHELL", "curl --silent --output /dev/null --fail '${local.server_healthcheck_uri}' || exit 1"]
+          command     = ["CMD-SHELL", "curl --silent --output /dev/null --fail -H 'X-Amzn-Mtls-Clientcert: ${local.server_healthcheck_client_cert}' '${local.server_healthcheck_uri}' || exit 1"]
           interval    = 10
           timeout     = 10
           retries     = 6
-          startPeriod = 60
+          startPeriod = 25
         }
         logConfiguration = {
           logDriver = "awsfirelens"
