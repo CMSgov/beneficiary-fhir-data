@@ -38,14 +38,36 @@ locals {
 # Legacy has a single Bucket, but Greenfield will have a bucket per-environment, per-consumer
 # TODO: Make this Terraservice more useful
 module "bucket_insights_bfd" {
-  for_each = var.greenfield ? toset(local.partners) : toset([]) 
-  source = "../../terraform-modules/general/secure-bucket"
+  for_each = var.greenfield ? toset(local.partners) : toset([])
+  source   = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
   bucket_prefix      = "bfd-${local.env}-insights-${each.key}"
   force_destroy      = local.is_ephemeral_env
 
-  ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
+  ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bfd-${local.env}-insights-${each.key}"
+}
+
+resource "aws_s3_object" "bfd_bucket_prefixes" {
+  for_each = var.greenfield ? merge(
+    {
+      for partner in local.partners : "${partner}-workgroups" => {
+        partner = partner
+        prefix  = "workgroups/"
+      }
+    },
+    {
+      for partner in local.partners : "${partner}-databases" => {
+        partner = partner
+        prefix  = "databases/"
+      }
+    }
+  ) : {}
+
+  bucket       = module.bucket_insights_bfd[each.value.partner].bucket.bucket
+  key          = each.value.prefix
+  content      = ""
+  content_type = "application/octet-stream"
 }
 
 resource "aws_athena_workgroup" "this" {
