@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import gov.cms.bfd.server.ng.DateUtil;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Represents a boundary condition for a DateTime filter.
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @param bound boundary DateTime
  * @param boundType Denotes if the bound is inclusive or exclusive
  */
-public record DateTimeBound(LocalDateTime bound, DateTimeBoundType boundType) {
+public record DateTimeBound(ZonedDateTime bound, DateTimeBoundType boundType) {
   /**
    * Creates a new {@link DateTimeBound} from a {@link DateParam}.
    *
@@ -18,7 +18,7 @@ public record DateTimeBound(LocalDateTime bound, DateTimeBoundType boundType) {
    */
   public DateTimeBound(DateParam dateParam) {
     this(
-        DateUtil.toLocalDateTime(dateParam.getValue()),
+        DateUtil.toZonedDateTime(dateParam.getValue()),
         DateTimeBoundType.fromPrefix(dateParam.getPrefix()));
   }
 }

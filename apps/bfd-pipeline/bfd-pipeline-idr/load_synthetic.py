@@ -17,6 +17,10 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_LINE_INSTNL.csv", "table": "v2_mdcr_clm_line_instnl"},
     {"csv_name": "SYNTHETIC_CLM_ANSI_SGNTR.csv", "table": "v2_mdcr_clm_ansi_sgntr"},
     {"csv_name": "SYNTHETIC_CLM_PROD.csv", "table": "v2_mdcr_clm_prod"},
+    {"csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT.csv", "table": "v2_mdcr_bene_mdcr_entlmt"},
+    {"csv_name": "SYNTHETIC_BENE_MDCR_RSN.csv", "table": "v2_mdcr_bene_mdcr_entlmt_rsn"},
+    {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
+    {"csv_name": "SYNTHETIC_BENE_MDCR_TP.csv", "table": "v2_mdcr_bene_tp"},
 ]
 
 
