@@ -6,23 +6,16 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /** FHIR server for V3 operations. */
+@RequiredArgsConstructor
 @Component
 @WebServlet(urlPatterns = {"/v3/fhir*"})
 public class V3Server extends RestfulServer {
   private final List<IResourceProvider> resourceProviders;
-
-  /**
-   * Creates a new {@link V3Server}.
-   *
-   * @param resourceProviders FHIR resource providers
-   */
-  public V3Server(List<IResourceProvider> resourceProviders) {
-    super();
-    this.resourceProviders = resourceProviders;
-  }
+  private final Configuration configuration;
 
   @Override
   public void initialize() {
@@ -39,7 +32,7 @@ public class V3Server extends RestfulServer {
 
     this.setFhirContext(FhirContext.forR4());
     this.registerProviders(resourceProviders);
-
+    this.registerInterceptor(new AuthenticationInterceptor(configuration));
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();
     this.registerInterceptor(openApiInterceptor);
   }
