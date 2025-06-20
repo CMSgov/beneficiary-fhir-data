@@ -28,7 +28,6 @@ dependencies = [
     { name = "psycopg" },
     { name = "pydantic" },
     { name = "snowflake-connector-python" },
-    { name = "xlsxwriter" },
 ]
 
 [package.dev-dependencies]
@@ -44,7 +43,6 @@ requires-dist = [
     { name = "psycopg", specifier = ">=3.2.9" },
     { name = "pydantic", specifier = ">=2.11.5" },
     { name = "snowflake-connector-python", specifier = ">=3.15.0" },
-    { name = "xlsxwriter", specifier = ">=3.2.5" },
 ]
 
 [package.metadata.requires-dev]
@@ -617,13 +615,4 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/e1/0122853035b40b3f333bbb25f1939fc1045e21dd518f7f0922b60c156f7c/wrapt-1.17.2-cp313-cp313t-win32.whl", hash = "sha256:13e6afb7fe71fe7485a4550a8844cc9ffbe263c0f1a1eea569bc7091d4898555", size = 37986, upload-time = "2025-01-14T10:35:00.498Z" },
     { url = "https://files.pythonhosted.org/packages/09/5e/1655cf481e079c1f22d0cabdd4e51733679932718dc23bf2db175f329b76/wrapt-1.17.2-cp313-cp313t-win_amd64.whl", hash = "sha256:eaf675418ed6b3b31c7a989fd007fa7c3be66ce14e5c3b27336383604c9da85c", size = 40750, upload-time = "2025-01-14T10:35:03.378Z" },
     { url = "https://files.pythonhosted.org/packages/2d/82/f56956041adef78f849db6b289b282e72b55ab8045a75abad81898c28d19/wrapt-1.17.2-py3-none-any.whl", hash = "sha256:b18f2d1533a71f069c7f82d524a52599053d4c7166e9dd374ae2136b7f40f7c8", size = 23594, upload-time = "2025-01-14T10:35:44.018Z" },
-]
-
-[[package]]
-name = "xlsxwriter"
-version = "3.2.5"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a7/47/7704bac42ac6fe1710ae099b70e6a1e68ed173ef14792b647808c357da43/xlsxwriter-3.2.5.tar.gz", hash = "sha256:7e88469d607cdc920151c0ab3ce9cf1a83992d4b7bc730c5ffdd1a12115a7dbe", size = 213306, upload-time = "2025-06-17T08:59:14.619Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/34/a22e6664211f0c8879521328000bdcae9bf6dbafa94a923e531f6d5b3f73/xlsxwriter-3.2.5-py3-none-any.whl", hash = "sha256:4f4824234e1eaf9d95df9a8fe974585ff91d0f5e3d3f12ace5b71e443c1c6abd", size = 172347, upload-time = "2025-06-17T08:59:13.453Z" },
 ]
