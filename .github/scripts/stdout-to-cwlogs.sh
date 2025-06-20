@@ -6,14 +6,15 @@
 # Usage:
 #   echo "Log message 1" | ./stdout_to_cwlogs.sh "log_group" "log_stream"
 #   tofu plan -no-color | ./stdout_to_cwlogs.sh "log_group" "log_stream"
+#   CLOUDWATCH_LOG_GROUP="..." CLOUDWATCH_LOG_STREAM="..." tofu plan -no-color | ./stdout_to_cwlogs.sh
 
 set -Eeou pipefail
 
-log_group="$1"
-readonly log_group
+cloudwatch_log_group="${1:-$CLOUDWATCH_LOG_GROUP}"
+readonly cloudwatch_log_group
 
-log_stream="$2"
-readonly log_stream
+cloudwatch_log_stream="${2:-$CLOUDWATCH_LOG_STREAM}"
+readonly cloudwatch_log_stream
 
 event_buffer=""
 current_time=0
@@ -33,8 +34,8 @@ log_events() {
     map(select(.message != "" and .message != null))'
   )"
   if [[ $aws_log_events != "[]" ]]; then
-    aws logs put-log-events --log-group-name "$log_group" \
-      --log-stream-name "$log_stream" \
+    aws logs put-log-events --log-group-name "$cloudwatch_log_group" \
+      --log-stream-name "$cloudwatch_log_stream" \
       --log-events "$aws_log_events"
   fi
   event_buffer=""
@@ -53,7 +54,6 @@ while IFS= read -r line; do
   current_time=$(gdate +%s%3N)
   # Append current time and line to event_buffer with \x1E (record separator) for timestamp-message
   # split, and \x1D (group separator) to separate individual events for later JSON parsing
-  log_event=$(printf "%s\x1E%s\x1D" "$current_time" "$line")
   log_event=$(printf "%s\x1E%s\x1D" "$current_time" "$line")
   event_buffer+="$log_event"
 
