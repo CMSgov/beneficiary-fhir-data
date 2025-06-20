@@ -38,34 +38,14 @@ locals {
 # Legacy has a single Bucket, but Greenfield will have a bucket per-environment, per-consumer
 # TODO: Make this Terraservice more useful
 module "bucket_insights_bfd" {
-  count  = !var.greenfield ? 0 : 1
+  for_each = var.greenfield ? toset(local.partners) : toset([]) 
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_prefix      = "bfd-${local.env}-insights-bfd"
+  bucket_prefix      = "bfd-${local.env}-insights-${each.key}"
   force_destroy      = local.is_ephemeral_env
 
   ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
-}
-
-resource "aws_s3_object" "env_prefixes" {
-  for_each = var.greenfield ? merge(
-    {
-      for partner in local.partners : "${partner}-streams" => {
-        key = "${partner}/streams/"
-      }
-    },
-    {
-      for partner in local.partners : "${partner}-results" => {
-        key = "${partner}/results/"
-      }
-    }
-  ) : {}
-
-  bucket       = module.bucket_insights_bfd[0].bucket.id
-  key          = each.value.key
-  content      = ""
-  content_type = "application/octet-stream"
 }
 
 resource "aws_athena_workgroup" "this" {
@@ -77,7 +57,7 @@ resource "aws_athena_workgroup" "this" {
     publish_cloudwatch_metrics_enabled = true
 
     result_configuration {
-      output_location = "s3://${module.bucket_insights_bfd[0].bucket.bucket}/${each.key}/results/"
+      output_location = "s3://${module.bucket_insights_bfd[each.key].bucket.bucket}/results/"
 
       encryption_configuration {
         encryption_option = "SSE_KMS"
@@ -87,69 +67,4 @@ resource "aws_athena_workgroup" "this" {
   }
 
   state = "ENABLED"
-}
-
-resource "aws_glue_catalog_database" "this" {
-  for_each = var.greenfield ? {
-    for partner in local.partners : partner => {
-      name = "${local.env}-${partner}"
-    }
-  } : {}
-
-  name = each.value.name
-}
-
-resource "aws_glue_crawler" "this" {
-  for_each      = var.greenfield ? toset(local.partners) : toset([])
-  name          = "bfd-${local.env}-${each.key}-crawler"
-  role          = aws_iam_role.this.arn
-  database_name = aws_glue_catalog_database.this[each.key].name
-  #table_prefix 
-
-  s3_target {
-    path = "s3://${module.bucket_insights_bfd[0].bucket.bucket}/${each.key}/streams/"
-  }
-
-  configuration = jsonencode({
-    Version = "1.0",
-    CrawlerOutput = {
-      Tables = {
-        AddOrUpdateBehavior = "MergeNewColumns"
-      },
-      Partitions = {
-        AddOrUpdateBehavior = "InheritFromTable"
-      }
-    }
-  })
-
-  schema_change_policy {
-    delete_behavior = "LOG"
-    update_behavior = "UPDATE_IN_DATABASE"
-  }
-
-  recrawl_policy {
-    recrawl_behavior = "CRAWL_EVERYTHING"
-  }
-
-  schedule = "cron(0/15 * * * ? *)"
-}
-
-resource "aws_iam_role" "this" {
-  name = "bfd-insights-glue-crawler-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Service = "glue.amazonaws.com"
-      },
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "this" {
-  role       = aws_iam_role.this.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
 }
