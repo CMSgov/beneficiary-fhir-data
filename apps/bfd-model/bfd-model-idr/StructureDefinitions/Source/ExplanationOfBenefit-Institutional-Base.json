@@ -294,6 +294,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD",
+                "label": "Claim Current Status Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]

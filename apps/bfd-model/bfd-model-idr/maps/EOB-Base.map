@@ -134,8 +134,19 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     tgtRef.reference = "#provider-org" "Set reference to contained provider org";
    
     //Partial for PAC data, complete for adjudicated. Of note, we do this by source. So even if final action on PAC source, still "partial"
-    src.CLM_SRC_ID as sourceSk -> tgt.outcome = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#REMITTANCE-OUTCOME','code') "set outcome";
+    src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 2000) -> tgt.outcome = "partial" "Add phase 1 outcome";
+    //Check on 1000-2000 phases w/ the CLM_CRNT_STUS_CD. We can 
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 2000 and typeCd < 3000) -> tgt then {
+      //Bifurcate by if it's institutional or professional. 
+      src.institutionalComponents as instComponents -> tgt then {
+        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
+      } "Set institutional outcome";
 
+      //We will add the professional "array" here.
+    } "Complete additional outcomes"
+    
+    //When we get to carrier/DME, we'll do the same with MCS/VIPS status. 
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
 
@@ -176,17 +187,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalItems(src, instlTgt) "add institutional components";
 
-    src.CLM_TYPE_CD as claimType where (claimType = 60 or claimType = 61 or claimType = 62 or claimType = 63 or claimType = 64 or claimType = 1011 or claimType = 2011 or claimType = 1041 or claimType = 2041 ) -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
+    
+    //skeleton translation provided. Will transition to NRLN_RIC_CD/RIC_CD once it is profiled by the IDR for FISS/MCS. 
+    src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
-        src -> tgtReference.display = "Part A" "Add temp coverage placeholder";
-      } "Add reference for coverage";
-    } "Add insurance coverage";
-
-    src.CLM_TYPE_CD as claimType where (claimType = '40' or claimType = '1012' or claimType = '1013' or claimType = '1014' or claimType = '1022' or claimType = '1023' or claimType = '1034' or claimType = '1071' or claimType = '1072' or claimType = '1073' or claimType = '1074' or claimType = '1075' or claimType = '1076' or claimType = '1077' or claimType = '1083' or claimType = '1085' or claimType = '1087' or claimType = '1089' or claimType = '2012' or claimType = '2013' or claimType = '2014' or claimType = '2022' or claimType = '2023' or claimType = '2034' or claimType = '2071' or claimType = '2072' or claimType = '2073' or claimType = '2074' or claimType = '2075' or claimType = '2076' or claimType = '2077' or claimType = '2083' or claimType = '2085' or claimType = '2087' or claimType = '2089') -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
-      src -> tgtBBElement.focal = true "Add focal";
-      src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
-        src -> tgtReference.display = "Part B" "Add temp coverage placeholder";
+        claimType -> tgtReference.display = translate(claimType,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_TO_COVERAGE_PART','code') "Add temp coverage placeholder";
       } "Add reference for coverage";
     } "Add insurance coverage";
 

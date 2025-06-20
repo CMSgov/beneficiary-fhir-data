@@ -1459,8 +1459,6 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_HOSPC_PRD_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_HOSPC_PRD_CNT').used
-
-
 - inputPath: SupportingInfoComponent.CLM_HHA_LUP_IND_CD
   appliesTo:
     - HHA
@@ -1487,3 +1485,15 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_HHA_TOT_VISIT_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_HHA_TOT_VISIT_CNT').used
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD
+  appliesTo:
+    - Inpatient
+    - SNF
+    - Hospice
+    - HHA
+    - Outpatient
+  sources:
+    - FISS
+  sourceView: V2_MDCR_CLM_FISS
+  sourceColumn: CLM_CRNT_STUS_CD
+  fhirPath: ExplanationOfBenefit.outcome
