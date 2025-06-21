@@ -54,8 +54,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp (
     bene_tp_type_cd VARCHAR(1) NOT NULL,
     bene_rng_bgn_dt DATE NOT NULL,
     bene_rng_end_dt DATE NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, bene_tp_type_cd, idr_trans_efctv_ts)
 );
@@ -65,8 +67,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus (
     bene_mdcr_stus_cd VARCHAR(2) NOT NULL,
     mdcr_stus_bgn_dt DATE NOT NULL,
     mdcr_stus_end_dt DATE NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, mdcr_stus_bgn_dt, mdcr_stus_end_dt, idr_trans_efctv_ts)
 );
@@ -78,8 +82,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt (
     bene_mdcr_entlmt_type_cd VARCHAR(1),
     bene_mdcr_entlmt_stus_cd VARCHAR(1),
     bene_mdcr_enrlmt_rsn_cd VARCHAR(1),
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, bene_mdcr_entlmt_type_cd, idr_trans_efctv_ts)
 );
@@ -89,8 +95,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn (
     bene_rng_bgn_dt DATE NOT NULL,
     bene_rng_end_dt DATE NOT NULL,
     bene_mdcr_entlmt_rsn_cd VARCHAR(1),
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, idr_trans_efctv_ts)
 );

@@ -35,6 +35,12 @@ def transform_null_float(value: float | None) -> float:
     return value
 
 
+def transform_null_int(value: int | None) -> float:
+    if value is None:
+        return 0
+    return value
+
+
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 UPDATE_TIMESTAMP = "update_timestamp"
@@ -235,6 +241,8 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_ltst_trans_flg: str
+    idr_insrt_ts: datetime
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
     idr_updt_ts: Annotated[
@@ -260,6 +268,8 @@ class IdrBeneficiaryStatus(IdrBaseModel):
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_ltst_trans_flg: str
+    idr_insrt_ts: datetime
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
     idr_updt_ts: Annotated[
@@ -287,6 +297,8 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_stus_cd: str
     bene_mdcr_enrlmt_rsn_cd: str
+    idr_ltst_trans_flg: str
+    idr_insrt_ts: datetime
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
     idr_updt_ts: Annotated[
@@ -312,6 +324,8 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
+    idr_ltst_trans_flg: str
+    idr_insrt_ts: datetime
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
     idr_trans_obslt_ts: datetime
     idr_updt_ts: Annotated[
@@ -429,7 +443,7 @@ class IdrClaim(IdrBaseModel):
     prvdr_blg_prvdr_npi_num: str
     clm_disp_cd: str
     clm_sbmt_chrg_amt: float
-    clm_blood_pt_frnsh_qty: int
+    clm_blood_pt_frnsh_qty: Annotated[int, BeforeValidator(transform_null_int)]
     clm_nch_prmry_pyr_cd: str
     clm_blg_prvdr_oscar_num: str
     clm_idr_ld_dt: Annotated[date, {BATCH_TIMESTAMP: True}]
@@ -467,11 +481,11 @@ class IdrClaimDateSignature(IdrBaseModel):
     clm_actv_care_from_dt: date
     clm_dschrg_dt: date
     clm_submsn_dt: date
-    clm_ncvrd_from_dt: date
-    clm_ncvrd_thru_dt: date
-    clm_actv_care_thru_dt: date
-    clm_mdcr_exhstd_dt: date
-    clm_nch_wkly_proc_dt: date
+    clm_ncvrd_from_dt: Annotated[date, BeforeValidator(transform_null_date)]
+    clm_ncvrd_thru_dt: Annotated[date, BeforeValidator(transform_null_date)]
+    clm_actv_care_thru_dt: Annotated[date, BeforeValidator(transform_null_date)]
+    clm_mdcr_exhstd_dt: Annotated[date, BeforeValidator(transform_null_date)]
+    clm_nch_wkly_proc_dt: Annotated[date, BeforeValidator(transform_null_date)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
     @staticmethod
@@ -522,10 +536,12 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_pps_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_mdcr_ip_pps_cptl_tot_amt: float
     clm_instnl_cvrd_day_cnt: float
-    clm_mdcr_instnl_prmry_pyr_amt: float
+    clm_mdcr_instnl_prmry_pyr_amt: Annotated[
+        float, BeforeValidator(transform_null_float)
+    ]
     clm_instnl_prfnl_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_mdcr_ip_bene_ddctbl_amt: float
-    clm_instnl_drg_outlier_amt: float
+    clm_mdcr_ip_bene_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_drg_outlier_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
 
     @staticmethod
@@ -701,7 +717,7 @@ class IdrClaimProcedure(IdrBaseModel):
     clm_dgns_prcdr_icd_ind: Annotated[str, BeforeValidator(transform_empty_string)]
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcdr_prfrm_dt: date
+    clm_prcdr_prfrm_dt: Annotated[date, BeforeValidator(transform_null_date)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, BATCH_TIMESTAMP: True}]
     bfd_row_num: Annotated[int, {DERIVED: True}]
 

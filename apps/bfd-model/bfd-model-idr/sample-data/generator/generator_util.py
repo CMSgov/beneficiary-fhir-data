@@ -150,20 +150,21 @@ class GeneratorUtil():
             mdcr_stus_cd = random.choice(self.code_systems['BENE_MDCR_STUS_CD'])
 
         medicare_start_date = self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']
+        medicare_end_date = '9999-12-31'
+        if(random.randint(0,10)>8):
+            end_dt=datetime.date.today().strftime("%Y-%m-%d")
         #STUS
         stus_row = {"BENE_SK":patient['BENE_SK'],
                     'IDR_LTST_TRANS_FLG':'Y',
                     'BENE_MDCR_STUS_CD': mdcr_stus_cd,
+                    'MDCR_STUS_BGN_DT': medicare_start_date,
+                    'MDCR_STUS_END_DT': medicare_end_date,
                     "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
                     }
         self.mdcr_stus.append(stus_row)    
-        
-        bene_rng_end_dt = ''
-        if(random.randint(0,10)>8):
-            bene_rng_end_dt=datetime.date.today().strftime("%Y-%m-%d")
         
         buy_in_cd = random.choice(self.code_systems['BENE_BUYIN_CD'])
 
@@ -174,7 +175,9 @@ class GeneratorUtil():
                     "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",                        
                     "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
-                    'BENE_MDCR_ENTLMT_RSN_CD': entitlement_reason
+                    'BENE_MDCR_ENTLMT_RSN_CD': entitlement_reason,
+                    'BENE_RNG_BGN_DT': medicare_start_date,
+                    'BENE_RNG_END_DT': medicare_end_date
                 }
         self.mdcr_rsn.append(rsn_row)
         for coverage_type in ['A','B']:
@@ -190,11 +193,8 @@ class GeneratorUtil():
                         "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                         'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
                         'BENE_RNG_BGN_DT': medicare_start_date,
+                        'BENE_RNG_END_DT': medicare_end_date
             }
-            if(len(bene_rng_end_dt)):
-                entlmt_row['BENE_RNG_END_DT']=bene_rng_end_dt
-            else:
-                entlmt_row['BENE_RNG_END_DT']='9999-12-31'
             self.mdcr_entlmt.append(entlmt_row)
             #TP
             if(random.randint(0,10)==10):
@@ -205,6 +205,8 @@ class GeneratorUtil():
                             "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                             "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                             'IDR_TRANS_OBSLT_TS':'9999-12-31T00:00:00.000000+0000',
+                            'BENE_RNG_BGN_DT':medicare_start_date,
+                            'BENE_RNG_END_DT': medicare_end_date,
                             'BENE_BUYIN_CD': buy_in_cd
                 }
                 self.mdcr_tp.append(tp_row)
