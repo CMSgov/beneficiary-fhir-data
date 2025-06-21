@@ -1,11 +1,20 @@
 package gov.cms.bfd.server.ng.eob;
 
+import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -32,5 +41,33 @@ public class EobResourceProvider implements IResourceProvider {
   public ExplanationOfBenefit find(@IdParam final IdType fhirId) {
     var eob = eobHandler.find(FhirInputConverter.toLong(fhirId));
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
+  }
+
+  @Search
+  public Bundle searchByPatient(
+      @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
+      @Count final Integer count,
+      @OptionalParam(name = "service-date") DateRangeParam serviceDate,
+      @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
+          final DateRangeParam lastUpdated,
+      @OptionalParam(name = "startIndex") @Count NumberParam startIndex) {
+    return eobHandler.searchByBene(
+        FhirInputConverter.toLong(patient),
+        Optional.ofNullable(count),
+        FhirInputConverter.toDateTimeRange(serviceDate),
+        FhirInputConverter.toDateTimeRange(lastUpdated),
+        FhirInputConverter.toIntOptional(startIndex));
+  }
+
+  @Search
+  public Bundle searchById(
+      @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final IdType fhirId,
+      @OptionalParam(name = "service-date") DateRangeParam serviceDate,
+      @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
+          final DateRangeParam lastUpdated) {
+    return eobHandler.searchById(
+        FhirInputConverter.toLong(fhirId),
+        FhirInputConverter.toDateTimeRange(serviceDate),
+        FhirInputConverter.toDateTimeRange(lastUpdated));
   }
 }

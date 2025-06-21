@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -27,9 +28,6 @@ public class Claim {
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 
-  @Column(name = "bene_sk")
-  private long beneSk;
-
   @Column(name = "clm_type_cd")
   private ClaimTypeCode claimTypeCode;
 
@@ -50,6 +48,10 @@ public class Claim {
   @Embedded private CareTeam careTeam;
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
+
+  @OneToOne
+  @JoinColumn(name = "bene_sk")
+  private Beneficiary beneficiary;
 
   @OneToOne
   @JoinColumn(name = "clm_dt_sgntr_sk")

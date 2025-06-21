@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -30,7 +31,7 @@ public enum ClaimDiagnosisType {
    * @param idrCode database code
    * @return diagnosis type
    */
-  public static ClaimDiagnosisType fromIdrCode(String idrCode) {
-    return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst().get();
+  public static Optional<ClaimDiagnosisType> tryFromIdrCode(String idrCode) {
+    return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
 }

@@ -3,8 +3,10 @@ package gov.cms.bfd.server.ng.eob;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.PatientReferenceFactory;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -27,11 +29,50 @@ public class EobHandler {
    * @return patient
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId) {
-    var claim = claimRepository.findById(fhirId);
+    return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange());
+  }
+
+  public Bundle searchByBene(
+      Long beneSk,
+      Optional<Integer> count,
+      DateTimeRange serviceDate,
+      DateTimeRange lastUpdated,
+      Optional<Integer> startIndex) {
+    var beneXrefSk = beneficiaryRepository.getXrefBeneSk(beneSk);
+    if (beneXrefSk.isEmpty()) {
+      return new Bundle();
+    }
+    var eobs =
+        claimRepository.findByBeneXrefSk(
+            beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex);
+    var fhir =
+        eobs.stream()
+            .map(
+                e ->
+                    new Bundle.BundleEntryComponent()
+                        .setResource(
+                            e.toFhir()
+                                .setPatient(PatientReferenceFactory.toFhir(beneXrefSk.get()))))
+            .toList();
+    return new Bundle().setEntry(fhir);
+  }
+
+  public Bundle searchById(
+      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
+    var bundle = new Bundle();
+    searchByIdInner(claimUniqueId, serviceDate, lastUpdated)
+        .ifPresent(e -> bundle.addEntry(new Bundle.BundleEntryComponent().setResource(e)));
+    return bundle;
+  }
+
+  private Optional<ExplanationOfBenefit> searchByIdInner(
+      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
+    var claim = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
 
     return claim.map(
         c -> {
-          var beneXrefSk = beneficiaryRepository.getXrefBeneSk(c.getBeneSk()).get();
+          var beneXrefSk =
+              beneficiaryRepository.getXrefBeneSk(c.getBeneficiary().getBeneSk()).get();
           var eob = c.toFhir();
           eob.setPatient(PatientReferenceFactory.toFhir(beneXrefSk));
           return eob;
