@@ -20,49 +20,52 @@ import org.apache.commons.lang3.StringUtils;
 @Interceptor
 public class AuthenticationInterceptor {
   private static final String MISSING_INVALID_HEADER_MSG = "Missing or invalid certificate header.";
+  private static final String LEAF_CERT_HEADER = "X-Amzn-Mtls-Clientcert";
 
   private final Configuration configuration;
 
   /**
-   * TODO.
+   * Interceptor that authenticates the incoming request based upon the certificate provided in the
+   * {@value #LEAF_CERT_HEADER} header.
    *
-   * @param theRequestDetails TODO
-   * @param theRequest TODO
-   * @param theResponse TODO
-   * @return TODO
-   * @throws AuthenticationException TODO
+   * <p>This method is invoked at the {@link Pointcut#SERVER_INCOMING_REQUEST_POST_PROCESSED} point.
+   * It performs authentication based on the URL-encoded client certificate provided in the {@value
+   * #LEAF_CERT_HEADER} header. If the certificate is missing or invalid, an {@link
+   * AuthenticationException} is thrown.
+   *
+   * @param requestDetails the details of the incoming request, including information about the
+   *     resource and operation
+   * @param request the HTTP servlet request object containing client-specific data such as headers
+   * @param response the HTTP servlet response object that can be used to send a response back to
+   *     the client if needed
+   * @return true to allow the request to proceed; false to prevent the request from being processed
+   *     further
+   * @throws AuthenticationException if the {@value #LEAF_CERT_HEADER} header is missing or contains
+   *     an invalid or unauthorized certificate
    */
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-  public boolean incomingRequestPostProcessed(
-      RequestDetails theRequestDetails,
-      HttpServletRequest theRequest,
-      HttpServletResponse theResponse)
+  public boolean authenticateClientCertificate(
+      RequestDetails requestDetails, HttpServletRequest request, HttpServletResponse response)
       throws AuthenticationException {
-    final var rawLeafCert = theRequest.getHeader("X-Amzn-Mtls-Clientcert");
-    System.out.printf("Received raw cert: %s%n", rawLeafCert);
+    final var rawLeafCert = request.getHeader(LEAF_CERT_HEADER);
     if (rawLeafCert == null) {
       throw new AuthenticationException(MISSING_INVALID_HEADER_MSG);
     }
 
+    final var clientCertsToAliases = configuration.getClientCertsToAliases();
     // We need to replace these characters with their URL-encoding counterparts because AWS
     // considers them "safe" and therefore does not encode them when sending the leaf certificate
     // from the client certificate in the header. So, when we try to URL Decode them, they get lost.
     final var encodedLeafCert =
         rawLeafCert.replace("+", "%2b").replace("=", "%3d").replace("/", "%2f");
-    System.out.printf("Received encoded cert: %s%n", encodedLeafCert);
-
-    final var clientCertsToAliases = configuration.getClientCertsToAliases();
     final var leafCert =
         StringUtils.deleteWhitespace(URLDecoder.decode(encodedLeafCert, StandardCharsets.UTF_8));
-    System.out.printf("Received decoded cert: %s%n", leafCert);
 
-    String certAlias = clientCertsToAliases.getOrDefault(leafCert, null);
+    final var certAlias = clientCertsToAliases.getOrDefault(leafCert, null);
     if (certAlias == null) {
       throw new AuthenticationException(MISSING_INVALID_HEADER_MSG);
     }
 
-    System.out.printf("Matched certificate %s%n", certAlias);
-    // Return true to allow the request to proceed
     return true;
   }
 }
