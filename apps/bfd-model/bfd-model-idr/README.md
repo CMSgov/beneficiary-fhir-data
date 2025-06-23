@@ -22,17 +22,16 @@ brew install npm
 npm install -g fsh-sushi yaml fhirpath
 ```
 
-#### Install xlsxwriter + pandas  (via uv)
+#### Install packages  (via uv)
 ```sh
 # Check if uv is installed
 uv --version
 
 # If not then install
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
 
-```sh
-uv add xlsxwriter pandas 
+# Install dependencies 
+uv sync
 ```
 
 ### Create FHIR files with synthetic data
