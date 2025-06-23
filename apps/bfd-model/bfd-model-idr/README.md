@@ -1,4 +1,4 @@
-Welcome to the README!
+### Welcome to the README!
 
 This file will be extended, but for this step, we're consolidating multiple steps into a single script. 
 
@@ -6,17 +6,41 @@ Downloading the FHIR validator is necessary to run the following scripts, along 
 
 To download the FHIR Validator:
 https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+  - place the jar file in the `beneficiary-fhir-data/apps/bfd-model/bfd-model-idr` directory
+  - ensure the name file name is `validator_cli.jar`
 
-Install sushi + fhirpath.js + yaml + xlsxwriter (via pip)
+#### Install sushi + fhirpath.js + yaml
 ```sh
-npm install -g fsh-sushi yaml fhirpath
-pip install xlsxwriter pandas 
+# Check if npm is installed
+npm --version
+
+# If not then install
+brew install npm
 ```
 
+```sh
+npm install -g fsh-sushi yaml fhirpath
+```
+
+#### Install packages  (via uv)
+```sh
+# Check if uv is installed
+uv --version
+
+# If not then install
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+```sh
+# Install dependencies 
+uv sync
+```
+
+### Create FHIR files with synthetic data
 
 EOB Institutional Inpatient:
 ```sh
-python compile_resources.py \
+uv run compile_resources.py \
     -m maps/EOB-Base.map \
     -i sample-data/EOB-Base-Sample.json \
     -o outputs/ExplanationOfBenefit.json \
@@ -25,7 +49,7 @@ python compile_resources.py \
 ```
 Patient:
 ```sh
-python compile_resources.py \
+uv run compile_resources.py \
     -m maps/patient.map \
     -i sample-data/Bene.json \
     -o outputs/Patient.json \
@@ -34,7 +58,7 @@ python compile_resources.py \
 ```
 Coverage (part A/B):
 ```sh
-python compile_resources.py \
+uv run compile_resources.py \
     -m maps/Coverage-Base.map \
     -i sample-data/Coverage-FFS-Sample.json \
     -o outputs/Coverage-FFS.json \
@@ -53,7 +77,7 @@ pass along --test to run conformance tests
 To generate synthetic claims data, the claims_generator.py script is used. As of 5/22/25, it will only generate inpatient institutional claims and their PAC equivalent claim type codes. 
 To utilize it:
 ```sh
-python claims_generator.py \
+uv run claims_generator.py \
     --sushi \
     --benes <bene_filename.csv>
 ```
