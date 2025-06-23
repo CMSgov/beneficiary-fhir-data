@@ -1,0 +1,27 @@
+/bfd/platform/network/nonsensitive/route53/zones_list_json: |-
+  [
+    "root"
+  ]
+/bfd/platform/network/sensitive/route53/zone/root/domain: ENC[AES256_GCM,data:Z5txe/SfuIcaJZTV5T0nxS/d,iv:V5uqNePEZ41XgRhYFz0yb/PmxHfQYoqvHY91vwFLTbw=,tag:op1pKjj0RYb9cHxgcSENNQ==,type:str]
+/bfd/platform/network/sensitive/route53/zone/root/comment: ENC[AES256_GCM,data:BzPgAUFnke+APqKB3n5v14leWOU0WbLmFwlDjlV+4bw7SMdeev+GJPdH8+etOEdV2zG0Df6xtwP4q6qFJnHKDcA1zCl/f7gCn1ePPleL,iv:hYd3Ss6L4Cpct/9O2QKsEdVTmlm1WPp7aQdQbBD3OVA=,tag:1wgN447wsS2poE0ejjpP/Q==,type:str]
+#ENC[AES256_GCM,data:FI5R1GJQUB6sFwEg6J/rPohxE+jf6SYRlLn/FdcURhzpv/Yz3JB7UL5BtwBiyz+llwZ3pofNQto=,iv:kcUNqWYe8AcGT+0QOgXZvlRwbw6L4nIJgsjvE4X5av4=,tag:PRfCReKcqOPthWnyAMhBUg==,type:comment]
+/bfd/platform/network/sensitive/route53/zone/root/internal_vpcs_list_json: ENC[AES256_GCM,data:QOjKjxkzLePuf2MIrzu7lps6F9zY5aR6Cebk+Ad1qU0qSqjDEI8nddqXltumM6nCKiBcMiSFuwE=,iv:0XDlXgf5/ghomBbHABXPW9N2o4XxoryPTNA7HighFuA=,tag:YCtFkNJiS43O99BBLKSCFA==,type:str]
+#ENC[AES256_GCM,data:INy6oQmm8QGJ5PXMrRGYN+Pu5VmbB1F5mgiFm2Lp7UqDgm93E7fklr0vDQBYD8jPzFw2ANLKZrWaJT8ZLORKUQuT/67L4B2laQ==,iv:qjVtyebpcAfWqLEJpmxs2W7xg1p+qtxsY5pv9HiRHzs=,tag:H4YCA6AGUzS2iiGzVBRWrQ==,type:comment]
+#ENC[AES256_GCM,data:K6e7sRa37kq1YmRCH4pW1y6yxVA5Rf1EaIYqjhT1c2Q8S3PZapO9tsoDK08K4RKJdW+eS76xSw==,iv:NFLC9D74aqW4qs1VKTXAxNk+aAT2IpzUKRYbowsYKcU=,tag:OhQanSlvX5H8bKdcf7fbyQ==,type:comment]
+/bfd/platform/network/sensitive/route53/zone/root/external_vpcs_list_json: ENC[AES256_GCM,data:/+Xj,iv:3O1KzN9OWVv+BgHEzU2gcrpP0Q1c0Mb5ugWQo6002BI=,tag:kvw9kUFXRjJOf4eIO/FFbA==,type:str]
+sops:
+  kms:
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-mgmt-config-cmk
+      created_at: "2025-06-16T18:39:56Z"
+      enc: AQICAHje54t884PQ3I3HmEfbyeDxeth8IxFtXCHA9cZvNPo2hQHPEXVyrJuDRtg1OtVF2KPuAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM4A8g7SmdVfWwo/XqAgEQgDsOzD6kQd7qxqTSdpQQiio+5JVaib8QfGrdXid+5UdvYvBExleHOBNYR9lpko2aou4AswKUws2Z+TGnfg==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      created_at: "2025-06-16T18:26:40Z"
+      enc: AQICAHhfOyfG21CaEsyppnyWH5WGgx5DhYc4Ue0JLa+mNx8TlwGFUKs60Gy5jQcgCwW6h+A8AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMoGhgCaspO+TCOEYFAgEQgDse/nCj+sp+pSxqhPOEBGztJ3u1Q1zy0J2BOWpuYcl/uplPnrYQTnPOKdM8FpkJuGKXN6SJvfQ9skakGA==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/bfd-platform-cmk
+      created_at: "2025-06-16T18:31:22Z"
+      enc: AQICAHiUQJFGKP8gsiLp3u7hZwa9ETwwJmmjpmZLPLYGrqKCcAFrfmHLdibQUUGIorbiLIHKAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMUpTUbz9JXXSk6CZSAgEQgDt7csVKhVSq5ZPjMVpsJeGxn6PuAphyvoBf6f0ts1XLQTdOdmlG9c6qpju7L5XxFTmAeTmC8E3IIRLxkw==
+      aws_profile: ""
+  unencrypted_regex: /nonsensitive/
+  version: 3.10.2

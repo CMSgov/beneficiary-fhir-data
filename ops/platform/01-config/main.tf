@@ -96,7 +96,7 @@ data "sops_external" "account" {
 }
 
 resource "aws_ssm_parameter" "this" {
-  for_each = merge(local.platform_ssm_config, { for k, v in local.platform_ssm_config : "/ng${k}" => v })
+  for_each = !var.greenfield ? merge(local.platform_ssm_config, { for k, v in local.platform_ssm_config : "/ng${k}" => v }) : local.platform_ssm_config
 
   name           = each.key
   tier           = "Intelligent-Tiering"

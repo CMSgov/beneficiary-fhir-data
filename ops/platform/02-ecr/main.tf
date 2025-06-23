@@ -64,6 +64,27 @@ resource "aws_ecr_repository" "this" {
   }
 }
 
+data "aws_iam_policy_document" "this" {
+  statement {
+    sid = "AllowAWSLambdaECRImageRetrieval"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_ecr_repository_policy" "name" {
+  for_each = local.ecr_container_repositories
+
+  policy     = data.aws_iam_policy_document.this.json
+  repository = aws_ecr_repository.this[each.key].name
+}
+
 resource "aws_ecr_lifecycle_policy" "this" {
   for_each = local.ecr_container_repositories
 

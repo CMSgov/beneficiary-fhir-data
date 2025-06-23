@@ -85,6 +85,7 @@ resource "aws_lambda_function" "ccw_runner" {
     security_group_ids = [aws_security_group.ccw_runner.id]
     subnet_ids         = local.app_subnets[*].id
   }
+  replace_security_groups_on_destroy = true
 
   role = aws_iam_role.ccw_runner.arn
 }

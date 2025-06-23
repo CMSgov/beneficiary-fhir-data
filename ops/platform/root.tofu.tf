@@ -13,7 +13,7 @@ locals {
 }
 
 variable "greenfield" {
-  default     = false
+  default     = true
   description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
 }
 
