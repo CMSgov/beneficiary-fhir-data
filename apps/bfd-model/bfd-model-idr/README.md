@@ -51,7 +51,7 @@ Patient:
 ```sh
 uv run compile_resources.py \
     -m maps/patient.map \
-    -i sample-data/Bene.json \
+    -i sample-data/Beneficiary-Sample.json \
     -o outputs/Patient.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
     --test
@@ -95,7 +95,20 @@ SYNTHETIC_CLM.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
 
-
+To generate synthetic patient data, the patient_generator.py script is used.
+To utilize it:
+```sh
+uv run patient_generator.py \
+    --sushi \
+    --benes <bene_filename.csv>
+```
+The files output will be in the outputs folder:
+SYNTHETIC_BENE_HSTRY.csv
+SYNTHETIC_BENE_MBI_ID.csv
+SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv
+SYNTHETIC_BENE_MDCR_ENTLMT.csv
+SYNTHETIC_BENE_MDCR_STUS.csv
+SYNTHETIC_BENE.csv
 
 Data Dictionary Notes:
 Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition. 
