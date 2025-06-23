@@ -29,7 +29,9 @@ uv --version
 
 # If not then install
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
+```sh
 # Install dependencies 
 uv sync
 ```
