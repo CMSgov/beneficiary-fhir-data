@@ -83,12 +83,11 @@ public class Claim {
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
-   * @param beneXrefSk bene xref sk
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir(Long beneXrefSk) {
+  public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
-    eob.setPatient(PatientReferenceFactory.toFhir(beneXrefSk));
+    eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());

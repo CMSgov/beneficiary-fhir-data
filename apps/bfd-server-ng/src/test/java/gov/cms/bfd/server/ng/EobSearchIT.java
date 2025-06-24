@@ -65,11 +65,25 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier("181968400"))
+                    .identifier("405764107"))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(2, eobBundle.getEntry().size());
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByPatientHistorical(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier("181968400"))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(0, eobBundle.getEntry().size());
   }
 
   @ParameterizedTest
@@ -80,7 +94,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier("181968400"))
+                    .identifier("405764107"))
             .count(1)
             .offset(offset)
             .execute();
@@ -90,11 +104,11 @@ public class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchByDate() {
-    var beneSk = "181968400";
+    var beneSk = "405764107";
     var lastUpdated =
         entityManager
             .createQuery(
-                "SELECT c.meta.updatedTimestamp FROM Claim c WHERE c.beneficiary.beneSk = :beneSk",
+                "SELECT c.meta.updatedTimestamp FROM Claim c WHERE c.beneficiary.xrefSk = :beneSk",
                 ZonedDateTime.class)
             .setParameter("beneSk", beneSk)
             .getResultList()

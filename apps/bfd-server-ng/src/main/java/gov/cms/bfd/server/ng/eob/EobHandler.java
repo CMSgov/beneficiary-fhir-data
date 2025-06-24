@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.eob;
 import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
+import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -49,14 +50,15 @@ public class EobHandler {
       DateTimeRange lastUpdated,
       Optional<Integer> startIndex) {
     var beneXrefSk = beneficiaryRepository.getXrefBeneSk(beneSk);
-    if (beneXrefSk.isEmpty()) {
+    // Don't return data for historical beneSks
+    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
       return new Bundle();
     }
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex);
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(e -> e.toFhir(beneXrefSk.get())), claimRepository::claimLastUpdated);
+        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
   }
 
   /**
@@ -77,11 +79,6 @@ public class EobHandler {
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
     var claim = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
 
-    return claim.map(
-        c -> {
-          var beneXrefSk =
-              beneficiaryRepository.getXrefBeneSk(c.getBeneficiary().getBeneSk()).get();
-          return c.toFhir(beneXrefSk);
-        });
+    return claim.map(Claim::toFhir);
   }
 }
