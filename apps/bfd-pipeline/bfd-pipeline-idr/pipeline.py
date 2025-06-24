@@ -52,10 +52,10 @@ def main():
         pg_connection = get_connection_string()
         run_pipeline(
             PostgresExtractor(
-                connection_string=pg_connection,
+                connection_string=get_connection_string(),
                 batch_size=100_000,
             ),
-            pg_connection,
+            get_connection_string(),
         )
     else:
         pg_connection = get_connection_string()
@@ -63,9 +63,8 @@ def main():
             SnowflakeExtractor(
                 batch_size=100_000,
             ),
-            pg_connection,
+            get_connection_string(),
         )
-
 
 def extract_and_load(
     cls: type[T],

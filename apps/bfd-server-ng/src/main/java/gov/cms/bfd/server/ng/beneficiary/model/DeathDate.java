@@ -8,6 +8,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.TimeZone;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 /** Beneficiary death date. */
@@ -26,7 +27,9 @@ public class DeathDate {
       return deathDate.map(
           d ->
               new DateTimeType(
-                  DateUtil.toDate(d), TemporalPrecisionEnum.DAY, DateUtil.TIME_ZONE_UTC));
+                  DateUtil.toDate(d),
+                  TemporalPrecisionEnum.DAY,
+                  TimeZone.getTimeZone(DateUtil.ZONE_ID_UTC)));
     } else {
       return Optional.empty();
     }

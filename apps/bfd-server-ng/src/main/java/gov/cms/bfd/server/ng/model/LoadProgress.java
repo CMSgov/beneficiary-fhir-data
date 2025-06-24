@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /** Table that tracks the IDR load progress for each table. */
 @Entity
@@ -18,8 +18,8 @@ public class LoadProgress {
   String lastId;
 
   @Column(name = "last_ts")
-  LocalDateTime lastTimestamp;
+  ZonedDateTime lastTimestamp;
 
   @Column(name = "batch_completion_ts")
-  LocalDateTime batchCompletionTimestamp;
+  ZonedDateTime batchCompletionTimestamp;
 }
