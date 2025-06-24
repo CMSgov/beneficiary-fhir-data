@@ -13,13 +13,12 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.revenue = create('CodeableConcept') as tgtRevenue then addRevenue(src,tgtRevenue) "add revenue";
     src -> tgt.modifier = create('CodeableConcept') as tgtModifier then addModifier(src,tgtModifier) "add revenue";
 
-    //Have to repeat this 5 times because of the flat format. 
-    src.CLM_1_REV_CNTR_ANSI_RSN_CD as adjReason1 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason(adjReason1, tgtAdjudication) "Add adjudication reason";
-    src.CLM_2_REV_CNTR_ANSI_RSN_CD as adjReason2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason(adjReason2, tgtAdjudication) "Add adjudication reason";
-    src.CLM_3_REV_CNTR_ANSI_RSN_CD as adjReason3 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason(adjReason3, tgtAdjudication) "Add adjudication reason";
-    src.CLM_4_REV_CNTR_ANSI_RSN_CD as adjReason4 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason(adjReason4, tgtAdjudication) "Add adjudication reason";
-    src.CLM_5_REV_CNTR_ANSI_RSN_CD as adjReason5 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason(adjReason5, tgtAdjudication) "Add adjudication reason";
-
+    //Have to repeat this 4 times because of the flat format. 
+    src.CLM_1_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason1(src, tgtAdjudication) "Add adjudication reasons";
+    src.CLM_2_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason2(src, tgtAdjudication) "Add adjudication reasons";
+    src.CLM_3_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason3(src, tgtAdjudication) "Add adjudication reasons";
+    src.CLM_4_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason4(src, tgtAdjudication) "Add adjudication reasons";
+    
     //Line item adjudication charge amounts.
     src.CLM_LINE_NCVRD_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationNonCoveredAmount(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_ALOWD_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationEligibleAmount(amt, tgtAdjudication) "Add amount";
@@ -37,6 +36,54 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
     
     src.CLM_LINE_INSTNL_REV_CTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
+
+
+    //These fields never ended up getting mapped in v2. We should actively seek feedback on their placement. They appeared to all show up in extension in v1, anyway.
+    src.CLM_REV_DSCNT_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addAdjudicationRevCenterDiscountCode(inputCode, tgtExtension) "Add discount code";
+    src.CLM_OTAF_ONE_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addOTAFCode(inputCode, tgtExtension) "Add  code";
+    src.CLM_REV_PACKG_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPackgCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_REV_PMT_MTHD_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMthdCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_REV_CNTR_STUS_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addCntrStusCd(inputCode, tgtExtension) "Add  code";
+
+
+}
+
+//This is new, seek feedback. 
+group addAdjudicationRevCenterDiscountCode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+//"One" here in extension but not the CodeSystem is intentional. 
+group addOTAFCode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addPackgCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addMthdCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PMT-MTHD-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addCntrStusCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
 }
 
 group addMoney(source src: String, target tgt: Money){
@@ -44,9 +91,55 @@ group addMoney(source src: String, target tgt: Money){
     src as amt -> tgt.value = cast(amt, "decimal") "Set amount";
 }
 
-group addAdjudicationReason(source src: String, target tgt: BackboneElement){
+
+//In the IDR, they use surrogate keys. We map them here. In sample data generation, this corresponds to CLM_ANSI_SGNTR_SK. 
+//We're only going to populate these with valid ANSI group codes. 
+group addAdjudicationReason1(source src: LineItemComponent, target tgt: BackboneElement){
     src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
-    src as inputReason -> tgt.reason = cc("https://x12.org/codes/claim-adjustment-reason-codes",inputReason) "Add Reason Code";
+    src.CLM_1_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_1_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+group addAdjudicationReason2(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_2_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_2_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+group addAdjudicationReason3(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_3_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_3_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+group addAdjudicationReason4(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_4_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_4_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
 }
 
 //CLM_LINE_NCVRD_CHRG_AMT
