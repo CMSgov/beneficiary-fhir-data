@@ -350,12 +350,12 @@ class IdrBeneficiaryXref(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_xref_sk: int
     bene_kill_cred_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_insrt_ts: date
+    idr_insrt_ts: datetime
     idr_updt_ts: Annotated[datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date)]
-    src_rec_ctre_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    src_rec_ctre_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
 
     @staticmethod
-        def table():
+    def table():
             return "idr.beneficiary_xref"
 
     @staticmethod

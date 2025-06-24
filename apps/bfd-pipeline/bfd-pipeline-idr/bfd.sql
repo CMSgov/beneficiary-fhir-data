@@ -146,7 +146,7 @@ CREATE TABLE idr.beneficiary_xref (
     src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
 );
 
 CREATE TABLE idr.contract_pbp_number (

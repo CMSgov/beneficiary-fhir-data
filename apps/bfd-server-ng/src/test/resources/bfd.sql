@@ -427,6 +427,17 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
     idr_updt_ts TIMESTAMPTZ
 );
 
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref (
+    bene_hicn_num VARCHAR(11),
+    bene_sk BIGINT NOT NULL,
+    bene_xref_sk BIGINT NOT NULL,
+    bene_kill_cred_cd VARCHAR(1) NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+);
+
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
     cntrct_pbp_sk BIGINT NOT NULL,
     cntrct_drug_plan_ind_cd VARCHAR(1),
