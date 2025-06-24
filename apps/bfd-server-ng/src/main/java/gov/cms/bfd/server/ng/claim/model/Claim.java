@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -73,6 +74,10 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private List<ClaimProcedure> claimProcedures;
 
+  private Optional<ClaimInstitutional> getClaimInstitutional() {
+    return Optional.ofNullable(claimInstitutional);
+  }
+
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
@@ -97,10 +102,10 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
-
+    var institutional = getClaimInstitutional();
     Stream.of(
             claimExtensions.toFhir(),
-            claimInstitutional.getExtensions().toFhir(),
+            institutional.map(i -> i.getExtensions().toFhir()).orElse(List.of()),
             List.of(claimDateSignature.getClaimProcessDate().toFhir()))
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
@@ -127,7 +132,9 @@ public class Claim {
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
-            claimInstitutional.getSupportingInfo().toFhir(supportingInfoFactory))
+            institutional
+                .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
+                .orElse(List.of()))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
@@ -139,9 +146,13 @@ public class Claim {
               eob.addCareTeam(c.careTeam());
               eob.addContained(c.practitioner());
             });
-    eob.addAdjudication(claimInstitutional.getPpsDrgWeight().toFhir());
-    eob.addBenefitBalance(
-        benefitBalance.toFhir(claimInstitutional.getBenefitBalanceInstitutional(), claimValues));
+    institutional.ifPresent(
+        i -> {
+          eob.addAdjudication(i.getPpsDrgWeight().toFhir());
+          eob.addBenefitBalance(
+              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), claimValues));
+        });
+
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     eob.addAdjudication(adjudicationCharge.toFhir());
     return eob;

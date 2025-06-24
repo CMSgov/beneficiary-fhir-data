@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class EobSearchIT extends IntegrationTestBase {
@@ -67,8 +68,24 @@ public class EobSearchIT extends IntegrationTestBase {
                     .identifier("181968400"))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(1, eobBundle.getEntry().size());
+    assertEquals(2, eobBundle.getEntry().size());
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1})
+  void eobSearchByPatientLimitOffset(int offset) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier("181968400"))
+            .count(1)
+            .offset(offset)
+            .execute();
+    assertEquals(1, eobBundle.getEntry().size());
+    expect.scenario("offset" + offset).serializer("fhir+json").toMatchSnapshot(eobBundle);
   }
 
   @Test
@@ -92,7 +109,7 @@ public class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(1, eobBundle.getEntry().size());
+    assertEquals(2, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()

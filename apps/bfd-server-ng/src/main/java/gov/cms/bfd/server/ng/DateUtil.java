@@ -42,6 +42,25 @@ public class DateUtil {
   /**
    * Converts the {@link ZonedDateTime} to a {@link Date} object with the same date and time info.
    *
+   * <p>Converts a LocalDate to a FHIR DateTimeType with DAY precision. The underlying instant is
+   * midnight UTC of the given LocalDate.
+   *
+   * @param localDate The LocalDate to convert.
+   * @return A FHIR DateTimeType with DAY precision, or null if input is null.
+   */
+  public static DateTimeType toFhirDate(LocalDate localDate) {
+    if (localDate == null) {
+      return null;
+    }
+    Date utilDate = toDate(localDate);
+    DateTimeType fhirDate = new DateTimeType(utilDate);
+    fhirDate.setPrecision(TemporalPrecisionEnum.DAY);
+    return fhirDate;
+  }
+
+  /**
+   * Converts the {@link ZonedDateTime} to a {@link Date} object with the same date and time info.
+   *
    * @param zonedDateTime local datetime instance
    * @return date instance
    */

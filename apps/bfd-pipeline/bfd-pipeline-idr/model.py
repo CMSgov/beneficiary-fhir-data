@@ -478,7 +478,7 @@ class IdrClaim(IdrBaseModel):
 class IdrClaimDateSignature(IdrBaseModel):
     clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_SGNTR}]
     clm_cms_proc_dt: date
-    clm_actv_care_from_dt: date
+    clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_date)]
     clm_dschrg_dt: date
     clm_submsn_dt: date
     clm_ncvrd_from_dt: Annotated[date, BeforeValidator(transform_null_date)]

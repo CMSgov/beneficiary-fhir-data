@@ -16,7 +16,7 @@ public record DateTimeBound(ZonedDateTime bound, DateTimeBoundType boundType) {
   /**
    * Creates a new {@link DateTimeBound} from a {@link DateParam}.
    *
-   * @param dateParam FHIR date param
+   * @param date FHIR date param
    */
   public DateTimeBound(Date date, ParamPrefixEnum prefix) {
     this(DateUtil.toZonedDateTime(date), DateTimeBoundType.fromPrefix(prefix));

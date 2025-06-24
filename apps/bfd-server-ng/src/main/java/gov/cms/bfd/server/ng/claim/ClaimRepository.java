@@ -21,6 +21,8 @@ public class ClaimRepository {
    * Search for a claim by its ID.
    *
    * @param claimUniqueId claim ID
+   * @param claimThroughDate claim through date
+   * @param lastUpdated last updated
    * @return claim
    */
   public Optional<Claim> findById(

@@ -25,7 +25,7 @@ uv run ./pipeline.py local
 Run tests
 
 ```sh
-uv run pytest
+TESTCONTAINERS_RYUK_DISABLED=true uv run pytest
 ```
 
 ## Running against Snowflake data
