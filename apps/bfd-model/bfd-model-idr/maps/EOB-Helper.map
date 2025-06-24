@@ -40,6 +40,30 @@ conceptmap "ClM_TYPE_CD" {
   s:1011 = t:"institutional"
   s:2011 = t:"institutional"
 }
+conceptmap "CLM_TYPE_TO_COVERAGE_PART" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:1 = t:"Part D"
+  s:2 = t:"Part D"
+  s:3 = t:"Part D"
+  s:4 = t:"Part D"
+  s:10 = t:"Part B"
+  s:20 = t:"Part A"
+  s:30 = t:"Part A"
+  s:40 = t:"Part B"
+  s:50 = t:"Part A"
+  s:60 = t:"Part A"
+  s:61 = t:"Part A"
+  s:62 = t:"Part A"
+  s:63 = t:"Part A"
+  s:71 = t:"Part B"
+  s:72 = t:"Part B"
+  s:81 = t:"Part B"
+  s:82 = t:"Part B"
+  s:1011 = t:"Part A"
+  s:2011 = t:"Part A"
+}
 
 conceptmap "profile_metadata" {
   prefix s = "https://hl7.org/fhir/string"
@@ -49,7 +73,7 @@ conceptmap "profile_metadata" {
   s:2 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
   s:3 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
   s:4 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
-  s:10 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:10 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"
   s:20 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
   s:30 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
   s:40 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"
@@ -66,36 +90,11 @@ conceptmap "profile_metadata" {
   s:2011 = t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
 }
 
-conceptmap "ClM_TYPE_CD_RAW" {
-  prefix s = "https://hl7.org/fhir/string"
-  prefix t = "http://terminology.hl7.org/CodeSystem/claim-type"
-
-  s:1 = t:"pharmacy"
-  s:2 = t:"pharmacy"
-  s:3 = t:"pharmacy"
-  s:4 = t:"pharmacy"
-  s:10 = t:"HHA Claim"
-  s:20 = t:"Non swing bed (SNF)"
-  s:20 = t:"Swing bed SNF claim"
-  s:40 = t:"Hospital Outpatient claim"
-  s:50 = t:"Hospice claim"
-  s:60 = t:"Inpatient"
-  s:61 = t:"Inpatient"
-  s:62 = t:"Inpatient"
-  s:63 = t:"Inpatient"
-  s:71 = t:"Local carrier non-durable medical equipment, prosthetics, orthotics, and supplies (DMEPOS) claim"
-  s:72 = t:"Local carrier DMEPOS claim"
-  s:81 = t:"Durable medical equipment regional carrier (DMERC); non-DMEPOS claim"
-  s:82 = t:"DMERC; DMEPOS claim"
-  s:1011 = t:"011X MEDICARE SS HOSPITAL INPATIENT (PART A) - PHASE 1"
-  s:2011 = t:"011X MEDICARE SS HOSPITAL INPATIENT (PART A)"
-}
-
 conceptmap "subtype" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType"
 
-  s:10 = t:"inpatient"
+  s:10 = t:"outpatient"
   s:20 = t:"inpatient"
   s:30 = t:"inpatient"
   s:40 = t:"outpatient"
@@ -131,6 +130,22 @@ conceptmap "ADJUDICATION-STATUS" {
   s:"21000" = t:"PartiallyAdjudicated"
   s:"22000" = t:"PartiallyAdjudicated"
   s:"23000" = t:"PartiallyAdjudicated"
+}
+
+conceptmap "CLM-CRNT-STUS-CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"A" = t:"queued"
+  s:"F" = t:"partial"
+  s:"I" = t:"partial"
+  s:"S" = t:"partial"
+  s:"M" = t:"partial"
+  s:"P" = t:"complete"
+  s:"R" = t:"complete"
+  s:"D" = t:"complete"
+  s:"T" = t:"partial"
+  s:"U" = t:"complete"
 }
 
 conceptmap "REMITTANCE-OUTCOME" {
@@ -176,6 +191,7 @@ conceptmap "C4BB_DIAGTYPE" {
   s:"1" = t:"externalcauseofinjury"
   s:"D" = t:"other"
   s:"E" = t:"externalcauseofinjury"
+  s:"R" = t:"patientreasonforvisit"
 }
 
 conceptmap "C4BB-SupportingInfo-Categories" {

@@ -134,8 +134,19 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     tgtRef.reference = "#provider-org" "Set reference to contained provider org";
    
     //Partial for PAC data, complete for adjudicated. Of note, we do this by source. So even if final action on PAC source, still "partial"
-    src.CLM_SRC_ID as sourceSk -> tgt.outcome = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#REMITTANCE-OUTCOME','code') "set outcome";
+    src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 2000) -> tgt.outcome = "partial" "Add phase 1 outcome";
+    //Check on 1000-2000 phases w/ the CLM_CRNT_STUS_CD. We can 
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 2000 and typeCd < 3000) -> tgt then {
+      //Bifurcate by if it's institutional or professional. 
+      src.institutionalComponents as instComponents -> tgt then {
+        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
+      } "Set institutional outcome";
 
+      //We will add the professional "array" here.
+    } "Complete additional outcomes";
+    
+    //When we get to carrier/DME, we'll do the same with MCS/VIPS status. 
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
 
@@ -176,10 +187,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalItems(src, instlTgt) "add institutional components";
 
-    src.CLM_TYPE_CD as claimType where (claimType = 60 or claimType = 61 or claimType = 62 or claimType = 63 or claimType = 64 or claimType = 1011 or claimType = 2011 or claimType = 1041 or claimType = 2041 ) -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
+    
+    //skeleton translation provided. Will transition to NRLN_RIC_CD/RIC_CD once it is profiled by the IDR for FISS/MCS. 
+    src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
-        src -> tgtReference.display = "Part A" "Add temp coverage placeholder";
+        claimType -> tgtReference.display = translate(claimType,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_TO_COVERAGE_PART','code') "Add temp coverage placeholder";
       } "Add reference for coverage";
     } "Add insurance coverage";
 
@@ -229,6 +242,7 @@ group addInstitutionalItems (source src: ExplanationOfBenefitBase, target tgt: B
   src -> tgt.benefitBalance = create('BackboneElement') as tgtBB then addInstitutionalBenefitBalance(src,tgtBB) "Add benefit balance";
 }
 
+//Because of the way that a BenefitBalance is structured, there will inherently be some redundancy in what is populated with elements that are not strictly institutional.
 group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, target tgt: BackboneElement){
   src.institutionalComponents as institutionalComponents -> tgt then {
     src -> tgt.category = cc("http://terminology.hl7.org/CodeSystem/ex-benefitcategory","1") "Create Base CC";
@@ -246,6 +260,16 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
     src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_INSTNL_NCVRD_DAY_CNT") "Add codeable concept";
     amtUsed -> tgtBBElement.used = cast(amtUsed,'unsignedInt') "set amtUsed";
   } "Add CLM_INSTNL_NCVRD_DAY_CNT";
+
+  institutionalComponents.CLM_MDCR_HOSPC_PRD_CNT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_HOSPC_PRD_CNT") "Add codeable concept";
+    amtUsed -> tgtBBElement.used = cast(amtUsed,'unsignedInt') "set amtUsed";
+  } "Add CLM_MDCR_HOSPC_PRD_CNT";
+
+  institutionalComponents.CLM_MDCR_HHA_TOT_VISIT_CNT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_HHA_TOT_VISIT_CNT") "Add codeable concept";
+    amtUsed -> tgtBBElement.used = cast(amtUsed,'unsignedInt') "set amtUsed";
+  } "Add CLM_MDCR_HHA_TOT_VISIT_CNT";
   
   //CLM_INSTNL_CVRD_DAY_CNT - Utilization Day Count
   institutionalComponents.CLM_INSTNL_CVRD_DAY_CNT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
@@ -319,6 +343,12 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
     src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(uncompdCareAmt, tgtMoney) "Add Money";
   } "Add non payment reason";
 
+  //CLM_MDCR_INSTNL_BENE_PD_AMT - Claim PPS Capital Disproportionate Share Amount
+  institutionalComponents.CLM_MDCR_INSTNL_BENE_PD_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_MDCR_INSTNL_BENE_PD_AMT") "Add codeable concept";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
+  } "Add CLM_MDCR_INSTNL_BENE_PD_AMT";
+
   //for all practical purposes, these will only be present on institutional claims. 
   src.CLM_OPRTNL_DSPRTNT_AMT as amt -> tgt.financial = create('BackboneElement') as tgtBBElement then {
     src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_OPRTNL_DSPRTNT_AMT") "Add url";
@@ -356,6 +386,11 @@ group addInstitutionalBenefitBalance (source src: ExplanationOfBenefitBase, targ
     src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_NCVRD_CHRG_AMT";
 
+  src.CLM_PRVDR_PMT_AMT as amtUsed -> tgt.financial = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.type = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance","CLM_PRVDR_PMT_AMT") "Add CC";
+    src -> tgtBBElement.used = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
+  } "Add CLM_PRVDR_PMT_AMT";
+
   } "Add wrapper for institutional components";
 }
 
@@ -365,7 +400,7 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
     src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#HL7_DIAGTYPE','coding') "set coding";
   } "Set type";
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E") -> tgt.type = create('CodeableConcept') as tgtCC then {
+  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E" or dTypeCode = "R") -> tgt.type = create('CodeableConcept') as tgtCC then {
     src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_DIAGTYPE','coding') "set coding";
   } "Set type";
 
