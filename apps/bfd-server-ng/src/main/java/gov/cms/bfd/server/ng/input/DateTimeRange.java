@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import gov.cms.bfd.server.ng.DateUtil;
+
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -47,6 +50,14 @@ public record DateTimeRange(
    */
   public Optional<ZonedDateTime> getUpperBoundDateTime() {
     return upperBound.map(DateTimeBound::bound);
+  }
+
+  public Optional<LocalDate> getLowerBoundDate() {
+    return getLowerBoundDateTime().map(ZonedDateTime::toLocalDate);
+  }
+
+  public Optional<LocalDate> getUpperBoundDate() {
+    return getUpperBoundDateTime().map(ZonedDateTime::toLocalDate);
   }
 
   /**

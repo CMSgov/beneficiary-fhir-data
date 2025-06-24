@@ -7,6 +7,8 @@ import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.persistence.TypedQuery;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,37 +26,27 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
-                SELECT c
-                FROM Claim c
-                JOIN c.claimLines cl
-                JOIN c.claimDateSignature cds
-                JOIN c.claimProcedures cp
-                LEFT JOIN c.claimInstitutional ci
-                LEFT JOIN cl.claimLineInstitutional cli
-                LEFT JOIN cli.ansiSignature as
-                LEFT JOIN c.claimValues cv
-                WHERE c.claimUniqueId = :claimUniqueId
-                  AND ((cast(:claimThroughDateLowerBound AS LocalDateTime)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
-                  AND ((cast(:claimThroughDateUpperBound AS LocalDateTime)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
-                  AND ((cast(:lastUpdatedLowerBound AS LocalDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
-                  AND ((cast(:lastUpdatedUpperBound AS LocalDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
-                """,
-                claimThroughDate.getLowerBoundSqlOperator(),
-                claimThroughDate.getUpperBoundSqlOperator(),
-                lastUpdated.getLowerBoundSqlOperator(),
-                lastUpdated.getUpperBoundSqlOperator()),
-            Claim.class)
+    return withDateParams(
+            entityManager.createQuery(
+                String.format(
+                    """
+                    SELECT c
+                    FROM Claim c
+                    JOIN c.claimLines cl
+                    JOIN c.claimDateSignature cds
+                    JOIN c.claimProcedures cp
+                    LEFT JOIN c.claimInstitutional ci
+                    LEFT JOIN cl.claimLineInstitutional cli
+                    LEFT JOIN cli.ansiSignature as
+                    LEFT JOIN c.claimValues cv
+                    WHERE c.claimUniqueId = :claimUniqueId
+                    %s
+                    """,
+                    getDateFilters(claimThroughDate, lastUpdated)),
+                Claim.class),
+            claimThroughDate,
+            lastUpdated)
         .setParameter("claimUniqueId", claimUniqueId)
-        .setParameter(
-            "claimThroughDateLowerBound", claimThroughDate.getLowerBoundDateTime().orElse(null))
-        .setParameter(
-            "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDateTime().orElse(null))
-        .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
-        .setParameter("lastUpdatedUpperBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .getResultList()
         .stream()
         .findFirst();
@@ -66,38 +58,28 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
-                SELECT c
-                FROM Claim c
-                JOIN c.claimLines cl
-                JOIN c.claimDateSignature cds
-                JOIN c.claimProcedures cp
-                LEFT JOIN c.claimInstitutional ci
-                LEFT JOIN cl.claimLineInstitutional cli
-                LEFT JOIN cli.ansiSignature as
-                LEFT JOIN c.claimValues cv
-                WHERE c.beneficiary.xrefSk = :beneSk
-                  AND ((cast(:claimThroughDateLowerBound AS LocalDateTime)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
-                  AND ((cast(:claimThroughDateUpperBound AS LocalDateTime)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
-                  AND ((cast(:lastUpdatedLowerBound AS LocalDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
-                  AND ((cast(:lastUpdatedUpperBound AS LocalDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
-                ORDER BY c.claimUniqueId
-                """,
-                claimThroughDate.getLowerBoundSqlOperator(),
-                claimThroughDate.getUpperBoundSqlOperator(),
-                lastUpdated.getLowerBoundSqlOperator(),
-                lastUpdated.getUpperBoundSqlOperator()),
-            Claim.class)
+    return withDateParams(
+            entityManager.createQuery(
+                String.format(
+                    """
+                    SELECT c
+                    FROM Claim c
+                    JOIN c.claimLines cl
+                    JOIN c.claimDateSignature cds
+                    JOIN c.claimProcedures cp
+                    LEFT JOIN c.claimInstitutional ci
+                    LEFT JOIN cl.claimLineInstitutional cli
+                    LEFT JOIN cli.ansiSignature as
+                    LEFT JOIN c.claimValues cv
+                    WHERE c.beneficiary.xrefSk = :beneSk
+                    %s
+                    ORDER BY c.claimUniqueId
+                    """,
+                    getDateFilters(claimThroughDate, lastUpdated)),
+                Claim.class),
+            claimThroughDate,
+            lastUpdated)
         .setParameter("beneSk", beneSk)
-        .setParameter(
-            "claimThroughDateLowerBound", claimThroughDate.getLowerBoundDateTime().orElse(null))
-        .setParameter(
-            "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDateTime().orElse(null))
-        .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
-        .setParameter("lastUpdatedUpperBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .setMaxResults(limit.orElse(5000))
         .setFirstResult(offset.orElse(0))
         .getResultList();
@@ -121,5 +103,30 @@ public class ClaimRepository {
         .stream()
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
+  }
+
+  private String getDateFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+    return String.format(
+        """
+        AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
+        AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
+        AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
+        AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
+        """,
+        claimThroughDate.getLowerBoundSqlOperator(),
+        claimThroughDate.getUpperBoundSqlOperator(),
+        lastUpdated.getLowerBoundSqlOperator(),
+        lastUpdated.getUpperBoundSqlOperator());
+  }
+
+  private <T> TypedQuery<T> withDateParams(
+      TypedQuery<T> query, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+    return query
+        .setParameter(
+            "claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate().orElse(null))
+        .setParameter(
+            "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate().orElse(null))
+        .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
+        .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null));
   }
 }
