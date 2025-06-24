@@ -1,10 +1,11 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
-import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +20,6 @@ public class BeneficiaryRepository {
 
   // TODO: this has not yet been thoroughly tested with edge cases.
   // It will likely need some adjustments.
-
-  /** ZonedDateTime. */
-  public static final ZonedDateTime ZONED_DATE_TIME_MIN_PRACTICAL_UTC =
-      ZonedDateTime.of(1, 1, 1, 0, 0, 0, 0, IdrConstants.ZONE_ID_UTC);
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -150,7 +147,7 @@ public class BeneficiaryRepository {
         .getResultList()
         .stream()
         .findFirst()
-        .orElse(ZONED_DATE_TIME_MIN_PRACTICAL_UTC);
+        .orElse(ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC));
   }
 
   private Optional<Beneficiary> searchBeneficiary(

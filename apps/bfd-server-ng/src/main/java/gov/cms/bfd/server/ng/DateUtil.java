@@ -2,12 +2,19 @@ package gov.cms.bfd.server.ng;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 /** Date utility methods. */
 public class DateUtil {
+
+  /**
+   * UTC {@link ZoneId}. UTC should be used for all datetime conversions to/from an instant
+   * represented by {@link Date}.
+   */
+  public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
   private DateUtil() {}
 
@@ -18,7 +25,7 @@ public class DateUtil {
    * @return date instance
    */
   public static Date toDate(LocalDate localDate) {
-    return Date.from(localDate.atStartOfDay(IdrConstants.ZONE_ID_UTC).toInstant());
+    return Date.from(localDate.atStartOfDay(ZONE_ID_UTC).toInstant());
   }
 
   /**
@@ -56,6 +63,6 @@ public class DateUtil {
    * @return local datetime
    */
   public static ZonedDateTime toZonedDateTime(Date date) {
-    return date.toInstant().atZone(IdrConstants.ZONE_ID_UTC);
+    return date.toInstant().atZone(ZONE_ID_UTC);
   }
 }

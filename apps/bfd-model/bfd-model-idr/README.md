@@ -98,9 +98,7 @@ These files represent the schema of the tables the information is sourced from, 
 To generate synthetic patient data, the patient_generator.py script is used.
 To utilize it:
 ```sh
-uv run patient_generator.py \
-    --sushi \
-    --benes <bene_filename.csv>
+uv run patient_generator.py
 ```
 The files output will be in the outputs folder:
 SYNTHETIC_BENE_HSTRY.csv
