@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Embeddable

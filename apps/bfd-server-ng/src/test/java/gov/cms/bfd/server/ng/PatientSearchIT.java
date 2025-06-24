@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
