@@ -41,7 +41,7 @@ public class PatientHandler {
   public Bundle searchByLogicalId(final Long fhirId, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
-    return FhirUtil.singleOrDefaultBundle(
+    return FhirUtil.bundleOrDefault(
         beneficiary.map(Beneficiary::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
@@ -55,7 +55,7 @@ public class PatientHandler {
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
 
-    return FhirUtil.singleOrDefaultBundle(
+    return FhirUtil.bundleOrDefault(
         beneficiary.map(Beneficiary::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
   }
 

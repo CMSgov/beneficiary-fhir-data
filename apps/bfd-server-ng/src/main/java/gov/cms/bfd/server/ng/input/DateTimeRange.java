@@ -50,10 +50,20 @@ public record DateTimeRange(
     return upperBound.map(DateTimeBound::bound);
   }
 
+  /**
+   * Returns the lower date.
+   *
+   * @return datetime
+   */
   public Optional<LocalDate> getLowerBoundDate() {
     return getLowerBoundDateTime().map(ZonedDateTime::toLocalDate);
   }
 
+  /**
+   * Returns the upper date.
+   *
+   * @return datetime
+   */
   public Optional<LocalDate> getUpperBoundDate() {
     return getUpperBoundDateTime().map(ZonedDateTime::toLocalDate);
   }

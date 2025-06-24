@@ -81,6 +81,7 @@ public class Claim {
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
+   * @param beneXrefSk bene xref sk
    * @return ExplanationOfBenefit
    */
   public ExplanationOfBenefit toFhir(Long beneXrefSk) {

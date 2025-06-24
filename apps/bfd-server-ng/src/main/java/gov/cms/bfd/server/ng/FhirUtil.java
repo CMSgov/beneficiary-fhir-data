@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -48,15 +49,34 @@ public class FhirUtil {
     }
   }
 
-  public static Bundle singleOrDefaultBundle(
-      Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
-    if (resource.isEmpty()) {
-      return defaultBundle(batchLastUpdated);
-    }
-    return resource.map(FhirUtil::singleBundle).orElseGet(() -> defaultBundle(batchLastUpdated));
+  public static Bundle bundleOrDefault(
+      Stream<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
+    return bundleOrDefault(resources.toList(), batchLastUpdated);
   }
 
-  public static Bundle getBundle(Stream<Resource> resources) {
+  /**
+   * Returns a bundle with a single resource, or the default bundle if no entries are present.
+   *
+   * @param resources
+   * @param batchLastUpdated
+   * @return
+   */
+  public static Bundle bundleOrDefault(
+      List<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
+    if (resources.isEmpty()) {
+      return defaultBundle(batchLastUpdated);
+    }
+    return getBundle(resources.stream());
+  }
+
+  public static Bundle bundleOrDefault(
+      Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
+    return resource
+        .map(value -> bundleOrDefault(List.of(value), batchLastUpdated))
+        .orElseGet(() -> defaultBundle(batchLastUpdated));
+  }
+
+  private static Bundle getBundle(Stream<Resource> resources) {
     return new Bundle()
         .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
   }
@@ -64,13 +84,6 @@ public class FhirUtil {
   private static Bundle defaultBundle(Supplier<ZonedDateTime> batchLastUpdated) {
     var bundle = new Bundle();
     bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
-    return bundle;
-  }
-
-  private static Bundle singleBundle(Resource resource) {
-    var lastUpdated = resource.getMeta().getLastUpdated();
-    var bundle = getBundle(Stream.of(resource));
-    bundle.setMeta(new Meta().setLastUpdated(lastUpdated));
     return bundle;
   }
 }

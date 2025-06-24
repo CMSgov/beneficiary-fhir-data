@@ -53,6 +53,16 @@ public class ClaimRepository {
         .findFirst();
   }
 
+  /**
+   * Returns claims for the given beneficiary.
+   *
+   * @param beneSk bene sk
+   * @param claimThroughDate claim through date
+   * @param lastUpdated last updated
+   * @param limit limit
+   * @param offset offset
+   * @return claims
+   */
   public List<Claim> findByBeneXrefSk(
       long beneSk,
       DateTimeRange claimThroughDate,

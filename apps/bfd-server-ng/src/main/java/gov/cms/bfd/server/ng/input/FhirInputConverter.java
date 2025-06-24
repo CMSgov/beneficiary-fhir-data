@@ -46,6 +46,12 @@ public class FhirInputConverter {
     }
   }
 
+  /**
+   * Converts an {@link NumberParam} to an {@link Optional<Integer>}.
+   *
+   * @param numberParam number param
+   * @return int value
+   */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
     if (numberParam == null) {
       return Optional.empty();
@@ -57,6 +63,13 @@ public class FhirInputConverter {
     }
   }
 
+  /**
+   * Converts a {@link ReferenceParam} to a numeric ID type.
+   *
+   * @param reference reference
+   * @param validResourceType name of the resource that belongs to the ID
+   * @return ID
+   */
   public static Long toLong(@Nullable ReferenceParam reference, String validResourceType) {
     if (reference == null) {
       throw new InvalidRequestException("Reference is missing");

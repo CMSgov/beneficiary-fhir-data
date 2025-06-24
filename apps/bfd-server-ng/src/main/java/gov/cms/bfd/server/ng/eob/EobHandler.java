@@ -45,13 +45,14 @@ public class EobHandler {
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex);
-    return FhirUtil.getBundle(eobs.stream().map(e -> e.toFhir(beneXrefSk.get())));
+    return FhirUtil.bundleOrDefault(
+        eobs.stream().map(e -> e.toFhir(beneXrefSk.get())), claimRepository::claimLastUpdated);
   }
 
   public Bundle searchById(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
     var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
-    return FhirUtil.singleOrDefaultBundle(eob.map(e -> e), claimRepository::claimLastUpdated);
+    return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
