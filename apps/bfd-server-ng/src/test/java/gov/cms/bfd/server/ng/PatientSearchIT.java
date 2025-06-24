@@ -118,8 +118,6 @@ public class PatientSearchIT extends IntegrationTestBase {
             .getFirst();
 
     for (var searchStyle : SearchStyleEnum.values()) {
-      // TODO: fix date search. It currently doesn't check the precision appropriately.
-      //  Search date exact
       var patientBundle =
           searchBundle()
               .where(searchCriteriaId)

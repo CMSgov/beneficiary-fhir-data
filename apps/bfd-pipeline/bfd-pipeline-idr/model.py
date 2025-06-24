@@ -424,7 +424,7 @@ class IdrClaim(IdrBaseModel):
     clm_bill_freq_cd: str
     clm_finl_actn_ind: str
     clm_src_id: str
-    clm_query_cd: str
+    clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_coinsrnc_amt: float
     clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ncvrd_chrg_amt: float
@@ -441,10 +441,10 @@ class IdrClaim(IdrBaseModel):
     clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_blg_prvdr_npi_num: str
-    clm_disp_cd: str
+    clm_disp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmt_chrg_amt: float
     clm_blood_pt_frnsh_qty: Annotated[int, BeforeValidator(transform_null_int)]
-    clm_nch_prmry_pyr_cd: str
+    clm_nch_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_blg_prvdr_oscar_num: str
     clm_idr_ld_dt: Annotated[date, {BATCH_TIMESTAMP: True}]
     clm_nrln_ric_cd: Annotated[

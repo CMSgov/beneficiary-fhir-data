@@ -1,8 +1,15 @@
 package gov.cms.bfd.server.ng;
 
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Resource;
 
 /** FHIR-related utility methods. */
 public class FhirUtil {
@@ -39,5 +46,31 @@ public class FhirUtil {
     } else {
       return SystemUrls.CMS_HCPCS;
     }
+  }
+
+  public static Bundle singleOrDefaultBundle(
+      Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
+    if (resource.isEmpty()) {
+      return defaultBundle(batchLastUpdated);
+    }
+    return resource.map(FhirUtil::singleBundle).orElseGet(() -> defaultBundle(batchLastUpdated));
+  }
+
+  public static Bundle getBundle(Stream<Resource> resources) {
+    return new Bundle()
+        .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
+  }
+
+  private static Bundle defaultBundle(Supplier<ZonedDateTime> batchLastUpdated) {
+    var bundle = new Bundle();
+    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
+    return bundle;
+  }
+
+  private static Bundle singleBundle(Resource resource) {
+    var lastUpdated = resource.getMeta().getLastUpdated();
+    var bundle = getBundle(Stream.of(resource));
+    bundle.setMeta(new Meta().setLastUpdated(lastUpdated));
+    return bundle;
   }
 }

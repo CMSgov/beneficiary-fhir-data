@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.eob;
 
+import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.model.PatientReferenceFactory;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -45,24 +45,13 @@ public class EobHandler {
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex);
-    var fhir =
-        eobs.stream()
-            .map(
-                e ->
-                    new Bundle.BundleEntryComponent()
-                        .setResource(
-                            e.toFhir()
-                                .setPatient(PatientReferenceFactory.toFhir(beneXrefSk.get()))))
-            .toList();
-    return new Bundle().setEntry(fhir);
+    return FhirUtil.getBundle(eobs.stream().map(e -> e.toFhir(beneXrefSk.get())));
   }
 
   public Bundle searchById(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var bundle = new Bundle();
-    searchByIdInner(claimUniqueId, serviceDate, lastUpdated)
-        .ifPresent(e -> bundle.addEntry(new Bundle.BundleEntryComponent().setResource(e)));
-    return bundle;
+    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
+    return FhirUtil.singleOrDefaultBundle(eob.map(e -> e), claimRepository::claimLastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
@@ -73,9 +62,7 @@ public class EobHandler {
         c -> {
           var beneXrefSk =
               beneficiaryRepository.getXrefBeneSk(c.getBeneficiary().getBeneSk()).get();
-          var eob = c.toFhir();
-          eob.setPatient(PatientReferenceFactory.toFhir(beneXrefSk));
-          return eob;
+          return c.toFhir(beneXrefSk);
         });
   }
 }
