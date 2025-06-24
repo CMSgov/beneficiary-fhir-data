@@ -389,7 +389,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         if(clm_type_cd==10):
             if(random.choice([0,1])):
                 institutional_parts['CLM_HHA_LUP_IND_CD'] = 'L'
-            institutional_parts['CLM_HHA_RFRL_CD'] = random.choice(code_systems['CLM_HHA_RFRL_CD'])
+            institutional_parts['CLM_HHA_RFRL_CD'] = random.choice(generator.code_systems['CLM_HHA_RFRL_CD'])
             institutional_parts['CLM_MDCR_HHA_TOT_VISIT_CNT'] = round(random.uniform(0,25),2)
 
         if(clm_type_cd==40):
@@ -455,11 +455,11 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line_inst['CLM_LINE_INSTNL_REV_CTR_DT'] = claim['CLM']['CLM_FROM_DT']
 
         #In contrast to v2 DD this appears to populated in many.
-        claim_line_inst['CLM_REV_DSCNT_IND_CD'] = random.choice(code_systems['CLM_REV_DSCNT_IND_CD'])
-        claim_line_inst['CLM_OTAF_ONE_IND_CD'] = random.choice(code_systems['CLM_OTAF_ONE_IND_CD'])
-        claim_line_inst['CLM_REV_PACKG_IND_CD'] = random.choice(code_systems['CLM_REV_PACKG_IND_CD'])
-        claim_line_inst['CLM_REV_PMT_MTHD_CD'] = random.choice(code_systems['CLM_REV_PMT_MTHD_CD'])
-        claim_line_inst['CLM_REV_CNTR_STUS_CD'] = random.choice(code_systems['CLM_REV_CNTR_STUS_CD'])
+        claim_line_inst['CLM_REV_DSCNT_IND_CD'] = random.choice(generator.code_systems['CLM_REV_DSCNT_IND_CD'])
+        claim_line_inst['CLM_OTAF_ONE_IND_CD'] = random.choice(generator.code_systems['CLM_OTAF_IND_CD'])
+        claim_line_inst['CLM_REV_PACKG_IND_CD'] = random.choice(generator.code_systems['CLM_REV_PACKG_IND_CD'])
+        claim_line_inst['CLM_REV_PMT_MTHD_CD'] = random.choice(generator.code_systems['CLM_REV_PMT_MTHD_CD'])
+        claim_line_inst['CLM_REV_CNTR_STUS_CD'] = random.choice(generator.code_systems['CLM_REV_CNTR_STUS_CD'])
         claim_line_inst['CLM_ANSI_SGNTR_SK'] = random.choice(['8585','1','4365','1508','5555','9204','6857','5816','11978'])
 
         claim_line['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
