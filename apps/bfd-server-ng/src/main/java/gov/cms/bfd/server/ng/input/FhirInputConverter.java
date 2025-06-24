@@ -1,13 +1,11 @@
 package gov.cms.bfd.server.ng.input;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Optional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
 import org.jetbrains.annotations.Nullable;

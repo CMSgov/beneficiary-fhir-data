@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import gov.cms.bfd.server.ng.DateUtil;
-
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;

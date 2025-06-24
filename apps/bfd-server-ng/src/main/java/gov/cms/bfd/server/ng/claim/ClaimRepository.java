@@ -4,11 +4,10 @@ import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.persistence.TypedQuery;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
