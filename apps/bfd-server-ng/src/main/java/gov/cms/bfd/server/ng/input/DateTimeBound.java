@@ -1,8 +1,13 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import gov.cms.bfd.server.ng.DateUtil;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 /**
  * Represents a boundary condition for a DateTime filter.
@@ -16,9 +21,7 @@ public record DateTimeBound(ZonedDateTime bound, DateTimeBoundType boundType) {
    *
    * @param dateParam FHIR date param
    */
-  public DateTimeBound(DateParam dateParam) {
-    this(
-        DateUtil.toZonedDateTime(dateParam.getValue()),
-        DateTimeBoundType.fromPrefix(dateParam.getPrefix()));
+  public DateTimeBound(Date date, ParamPrefixEnum prefix) {
+    this(DateUtil.toZonedDateTime(date), DateTimeBoundType.fromPrefix(prefix));
   }
 }

@@ -49,7 +49,6 @@ public class ClaimLine {
   private Claim claim;
 
   ExplanationOfBenefit.ItemComponent toFhir() {
-
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(claimLineId.getClaimLineNumber());
     var institutional = getClaimLineInstitutional();

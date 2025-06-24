@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -25,8 +26,10 @@ public record DateTimeRange(
    */
   public DateTimeRange(DateRangeParam dateRangeParam) {
     this(
-        Optional.ofNullable(dateRangeParam.getLowerBound()).map(DateTimeBound::new),
-        Optional.ofNullable(dateRangeParam.getUpperBound()).map(DateTimeBound::new));
+        Optional.ofNullable(dateRangeParam.getLowerBoundAsInstant())
+            .map(i -> new DateTimeBound(i, dateRangeParam.getLowerBound().getPrefix())),
+        Optional.ofNullable(dateRangeParam.getUpperBoundAsInstant())
+            .map(i -> new DateTimeBound(i, dateRangeParam.getUpperBound().getPrefix())));
   }
 
   /**

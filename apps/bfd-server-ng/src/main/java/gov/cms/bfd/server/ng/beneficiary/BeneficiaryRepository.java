@@ -147,7 +147,7 @@ public class BeneficiaryRepository {
         .getResultList()
         .stream()
         .findFirst()
-        .orElse(ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC));
+        .orElse(DateUtil.MIN_DATETIME);
   }
 
   private Optional<Beneficiary> searchBeneficiary(
@@ -158,10 +158,10 @@ public class BeneficiaryRepository {
                 """
                 SELECT b
                 FROM Beneficiary b
-                WHERE b.%s = :id
+                WHERE b.%s = :%s
                   AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                   AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
                 """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
