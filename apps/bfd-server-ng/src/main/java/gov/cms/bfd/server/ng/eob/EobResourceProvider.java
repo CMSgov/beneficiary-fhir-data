@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
 /** FHIR endpoints for the ExplanationOfBenefit resource. */
@@ -34,7 +33,7 @@ public class EobResourceProvider implements IResourceProvider {
   }
 
   /**
-   * Returns a {@link Patient} by their {@link IdType}.
+   * Returns a {@link ExplanationOfBenefit} by its ID.
    *
    * @param fhirId FHIR ID
    * @return patient
@@ -45,6 +44,16 @@ public class EobResourceProvider implements IResourceProvider {
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
+  /**
+   * Search for claims data by bene.
+   *
+   * @param patient patient
+   * @param count record count
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @param startIndex start index
+   * @return bundle
+   */
   @Search
   public Bundle searchByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
@@ -62,6 +71,14 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toIntOptional(startIndex));
   }
 
+  /**
+   * Search for claims data by FHIR ID.
+   *
+   * @param fhirId FHIR ID
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @return bundle
+   */
   @Search
   public Bundle searchById(
       @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final IdType fhirId,

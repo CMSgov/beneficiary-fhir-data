@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.Nullable;
 
 /** Claim table. */
 @Entity
@@ -58,6 +59,7 @@ public class Claim {
   @JoinColumn(name = "clm_dt_sgntr_sk")
   private ClaimDateSignature claimDateSignature;
 
+  @Nullable
   @OneToOne
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;

@@ -9,10 +9,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /** Repository for querying beneficiary information. */
-@Component
+@Repository
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private EntityManager entityManager;
@@ -134,14 +134,14 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT MAX(p.batchCompletionTimestamp)
-              FROM LoadProgress p
-              WHERE p.tableName IN (
-                "idr.beneficiary",
-                "idr.beneficiary_history",
-                "idr.beneficiary_mbi_id"
-              )
-              """,
+            SELECT MAX(p.batchCompletionTimestamp)
+            FROM LoadProgress p
+            WHERE p.tableName IN (
+              "idr.beneficiary",
+              "idr.beneficiary_history",
+              "idr.beneficiary_mbi_id"
+            )
+            """,
             ZonedDateTime.class)
         .getResultList()
         .stream()
@@ -157,10 +157,10 @@ public class BeneficiaryRepository {
                 """
                 SELECT b
                 FROM Beneficiary b
-                WHERE b.%s = :%s
+                WHERE b.%s = :id
                   AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                   AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.mbi)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
                 """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),

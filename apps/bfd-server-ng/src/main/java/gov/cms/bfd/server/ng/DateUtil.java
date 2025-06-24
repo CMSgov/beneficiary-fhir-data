@@ -17,12 +17,6 @@ public class DateUtil {
    */
   public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
-  /**
-   * UTC {@link ZoneId}. UTC should be used for all datetime conversions to/from an instant
-   * represented by {@link java.util.Date}.
-   */
-  public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
-
   /** Minimum possible {@link ZonedDateTime}. */
   public static final ZonedDateTime MIN_DATETIME =
       ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC);

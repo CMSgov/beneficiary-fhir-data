@@ -9,10 +9,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /** Repository methods for claims. */
-@Component
+@Repository
 @AllArgsConstructor
 public class ClaimRepository {
   private EntityManager entityManager;

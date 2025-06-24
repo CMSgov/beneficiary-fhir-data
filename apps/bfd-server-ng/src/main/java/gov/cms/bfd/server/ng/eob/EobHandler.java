@@ -32,6 +32,16 @@ public class EobHandler {
     return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange());
   }
 
+  /**
+   * Search for claims data by bene.
+   *
+   * @param beneSk bene sk
+   * @param count record count
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @param startIndex start index
+   * @return bundle
+   */
   public Bundle searchByBene(
       Long beneSk,
       Optional<Integer> count,
@@ -49,6 +59,14 @@ public class EobHandler {
         eobs.stream().map(e -> e.toFhir(beneXrefSk.get())), claimRepository::claimLastUpdated);
   }
 
+  /**
+   * Search for claims data by claim ID.
+   *
+   * @param claimUniqueId claim ID
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @return bundle
+   */
   public Bundle searchById(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
     var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);

@@ -47,7 +47,7 @@ public class FhirInputConverter {
   }
 
   /**
-   * Converts an {@link NumberParam} to an {@link Optional<Integer>}.
+   * Converts an {@link NumberParam} to an optional int.
    *
    * @param numberParam number param
    * @return int value

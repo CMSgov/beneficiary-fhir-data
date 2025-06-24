@@ -49,17 +49,26 @@ public class FhirUtil {
     }
   }
 
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
+   *
+   * @param resources resources
+   * @param batchLastUpdated last
+   * @return bundle
+   */
   public static Bundle bundleOrDefault(
       Stream<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
     return bundleOrDefault(resources.toList(), batchLastUpdated);
   }
 
   /**
-   * Returns a bundle with a single resource, or the default bundle if no entries are present.
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
    *
-   * @param resources
-   * @param batchLastUpdated
-   * @return
+   * @param resources resources
+   * @param batchLastUpdated last
+   * @return bundle
    */
   public static Bundle bundleOrDefault(
       List<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
@@ -69,6 +78,14 @@ public class FhirUtil {
     return getBundle(resources.stream());
   }
 
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
+   *
+   * @param resource resource
+   * @param batchLastUpdated last
+   * @return bundle
+   */
   public static Bundle bundleOrDefault(
       Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
     return resource
