@@ -3,6 +3,8 @@ locals {
 
   region = data.aws_region.current.name
 
+  latest_version = try(jsondecode(data.http.latest_bfd_release.response_body).tag_name, null)
+
   service      = var.service
   github_token = coalesce(data.external.github_token.result.github_token, "invalid")
 
