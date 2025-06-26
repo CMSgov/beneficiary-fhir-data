@@ -7,9 +7,9 @@ locals {
   log_router_repository_default = !var.greenfield ? "bfd-mgmt-server-fluent-bit" : "bfd-platform-server-fluent-bit"
   log_router_repository_name    = coalesce(var.log_router_repository_override, local.log_router_repository_default)
   server_repository_name        = coalesce(var.server_repository_override, "bfd-server")
-  certstores_version            = coalesce(var.certstores_version_override, local.latest_bfd_release)
-  log_router_version            = coalesce(var.log_router_version_override, local.latest_bfd_release)
-  server_version                = coalesce(var.server_version_override, local.latest_bfd_release)
+  certstores_version            = coalesce(var.certstores_version_override, local.bfd_version)
+  log_router_version            = coalesce(var.log_router_version_override, local.bfd_version)
+  server_version                = coalesce(var.server_version_override, local.bfd_version)
 
   server_truststore_path              = "/data/${local.truststore_filename}"
   server_keystore_path                = "/data/${local.keystore_filename}"

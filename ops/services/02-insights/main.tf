@@ -23,7 +23,7 @@ locals {
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
-  latest_bfd_release       = module.terraservice.latest_bfd_release
+  bfd_version              = module.terraservice.bfd_version
   ssm_config               = module.terraservice.ssm_config
   env_key_alias            = module.terraservice.env_key_alias
   env_key_arn              = module.terraservice.env_key_arn
