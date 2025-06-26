@@ -1,16 +1,27 @@
-data "aws_caller_identity" "current" {}
-
-data "aws_kms_key" "bucket_cmk" {
-  key_id = "alias/bfd-insights-bb2-cmk"
-}
-
-data "aws_s3_bucket" "main" {
-  bucket = "bfd-insights-bb2-${local.account_id}"
+module "terraservice" {
+  source               = "../../../terraform-modules/bfd/bfd-terraservice"
+  greenfield           = var.greenfield
+  service              = local.service
+  relative_module_root = "ops/services/02-insights-bb2"
 }
 
 locals {
-  account_id = data.aws_caller_identity.current.account_id
+  env                 = module.terraservice.env
+  insights_bucket_env = var.insights_env != "" ? var.insights_env : local.env
+  bucket_param        = "/bfd/${local.insights_bucket_env}/insights/nonsensitive/bfd-insights-${var.project}"
+  env_key_alias       = module.terraservice.env_key_alias
+  account_id          = data.aws_caller_identity.current.account_id
 }
+
+data "aws_caller_identity" "current" {}
+
+/*data "aws_kms_key" "bucket_cmk" {
+  key_id = "alias/bfd-insights-bb2-cmk"
+}*/
+
+/*data "aws_s3_bucket" "main" {
+  bucket = "bfd-insights-bb2-${local.account_id}"
+}*/
 
 # Glue crawler
 resource "aws_glue_crawler" "glue_crawler" {
@@ -20,7 +31,7 @@ resource "aws_glue_crawler" "glue_crawler" {
   schedule      = var.glue_crawler_schedule
 
   s3_target {
-    path = "s3://${data.aws_s3_bucket.main.id}/databases/${var.project}/events-${var.name}"
+    path = "s3://${data.aws_s3_bucket.bucket.id}/databases/events-${var.name}"
   }
 
   configuration = jsonencode({

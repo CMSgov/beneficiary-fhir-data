@@ -1,9 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_kms_key" "bucket_cmk" {
-  key_id = "alias/bfd-insights-bb2-cmk"
-}
-
 locals {
   account_id               = data.aws_caller_identity.current.account_id
   lambda_role_arn          = "arn:aws:iam::${local.account_id}:role/service-role/${var.role}"

@@ -1,51 +1,51 @@
+module "terraservice" {
+  source               = "../../../terraform-modules/bfd/bfd-terraservice"
+  greenfield           = var.greenfield
+  service              = local.service
+  relative_module_root = "ops/services/02-insights-bb2"
+}
+
 locals {
-  tags       = { business = "OEDA", application = "bfd-insights", project = "bb2" }
-  project    = "bb2"
-  database   = "bb2"
-  table      = "events"
-  partitions = [{ name = "dt", type = "string", comment = "Approximate delivery time" }]
+  service               = "insights-bb2"
+  env                   = module.terraservice.env
+  insights_bucket_env   = var.insights_env != "" ? var.insights_env : local.env
+  default_tags          = module.terraservice.default_tags
+  tags                  = { business = "OEDA", application = "bfd-insights", project = "bb2" }
+  project               = "bb2"
+  database              = "bb2"
+  table                 = "events"
+  partitions            = [{ name = "dt", type = "string", comment = "Approximate delivery time" }]
+  bucket_param          = "/bfd/${local.insights_bucket_env}/insights/nonsensitive/bfd-insights-${local.project}"
+  moderate_bucket_param = "/bfd/${local.insights_bucket_env}/insights/nonsensitive/bfd-insights-moderate"
+  env_key_alias         = module.terraservice.env_key_alias
+  env_key_arn           = module.terraservice.env_key_arn
 }
 
 data "aws_caller_identity" "current" {}
 
+data "aws_ssm_parameter" "bucket_name_param" {
+  name = local.bucket_param
+}
 
-## Bucket for the project's data
+data "aws_ssm_parameter" "moderate_bucket_name_param" {
+  name = local.moderate_bucket_param
+}
 
-module "bucket" {
-  source         = "../../../modules/bucket"
-  name           = local.project
-  sensitivity    = "moderate"
-  tags           = local.tags
-  cross_accounts = var.bb2_cross_accounts
+data "aws_s3_bucket" "bucket" {
+  bucket = data.aws_ssm_parameter.bucket_name_param.value
 }
 
 data "aws_s3_bucket" "moderate_bucket" {
-  bucket = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
+  bucket = data.aws_ssm_parameter.moderate_bucket_name_param.value
 }
-
-data "aws_kms_alias" "moderate_cmk" {
-  name = "alias/bfd-insights-moderate-cmk"
-}
-
-
-## Athena workgroup
-
-module "workgroup" {
-  source     = "../../../modules/workgroup"
-  bucket     = module.bucket.id
-  bucket_cmk = module.bucket.bucket_cmk
-  name       = local.database
-  tags       = local.tags
-}
-
 
 ## Database for the project
 
 module "database" {
-  source     = "../../../modules/database"
+  source     = "../../../terraform-modules/bfd/bfd-insights/database"
   database   = local.database
-  bucket     = module.bucket.id
-  bucket_cmk = module.bucket.bucket_cmk
+  bucket     = data.aws_s3_bucket.bucket.id
+  bucket_cmk = local.env_key_alias
   tags       = local.tags
 }
 
@@ -63,12 +63,12 @@ locals {
 }
 
 module "bb2_events" {
-  source      = "../../../modules/table"
+  source      = "../../../terraform-modules/bfd/bfd-insights/table"
   database    = module.database.name # adds a dependency
   table       = local.table
   description = "Raw BB2 events"
-  bucket      = module.bucket.id
-  bucket_cmk  = module.bucket.bucket_cmk
+  bucket      = data.aws_s3_bucket.bucket.id
+  bucket_cmk  = local.env_key_alias
   owner       = "bb2"
   tags        = local.tags
   partitions  = local.partitions
@@ -77,11 +77,11 @@ module "bb2_events" {
 
 
 module "firehose" {
-  source          = "../../../modules/firehose"
+  source          = "../../../terraform-modules/bfd/bfd-insights/firehose"
   stream          = local.table
   database        = local.database
-  bucket          = module.bucket.id
-  bucket_cmk      = module.bucket.bucket_cmk
+  bucket          = data.aws_s3_bucket.bucket.id
+  bucket_cmk      = local.env_key_alias
   buffer_interval = 60
   tags            = local.tags
 }
@@ -89,13 +89,13 @@ module "firehose" {
 ## Glue setup
 
 module "glue_jobs" {
-  source  = "../../../modules/jobs"
+  source  = "../../../terraform-modules/bfd/bfd-insights/jobs"
   project = local.project
   tags    = local.tags
 
   # Setup access to both the bb2 and common moderate bucket
   buckets = [
-    { bucket = module.bucket.arn, cmk = module.bucket.bucket_cmk_arn },
-    { bucket = data.aws_s3_bucket.moderate_bucket.arn, cmk = data.aws_kms_alias.moderate_cmk.arn }
+    { bucket = data.aws_s3_bucket.bucket.arn, cmk = local.env_key_arn },
+    { bucket = data.aws_s3_bucket.moderate_bucket.arn, cmk = local.env_key_arn }
   ]
 }
