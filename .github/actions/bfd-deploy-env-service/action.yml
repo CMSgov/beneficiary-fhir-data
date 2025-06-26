@@ -1,0 +1,85 @@
+name: "Deploy Environment Terraservice"
+description: "Composite action to deploy an environment-specific BFD Terraservice"
+inputs:
+  bfd-env:
+    description: "The BFD environment to deploy the given service to"
+    required: true
+  service-path:
+    description: "The path to the Terraservice relative to the root of the repository"
+    required: true
+  cw-log-group:
+    description: >-
+      Name of CloudWatch Log Group to submit OpenTofu logs to; will be created if necessary
+    required: true
+  cw-log-stream:
+    description: >-
+      Name of CloudWatch Log Stream to submit OpenTofu logs to; will be created if necessary
+    required: true
+  tofu-vars-json:
+    description: "JSON object map of variables to their values"
+    required: false
+    default: "{}"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup OpenTofu and shell environment
+      id: setup-tofu
+      uses: ./.github/actions/bfd-setup-tofu
+      with:
+        service-path: ${{ input.service-path }}
+        cw-log-group: ${{ inputs.cw-log-group }}
+        cw-log-stream: ${{ inputs.cw-log-stream }}
+        tofu-vars-json: ${{ inputs.tofu-vars-json }}
+
+    - name: Get parent environment
+      id: get-parent-env
+      run: |
+        parent_env="$(echo "${{ inputs.bfd-env }}" | grep -Pv '(prod|sandbox|test)$')"
+
+        echo "parent-env=$parent_env" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: OpenTofu init
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        tofu --version
+
+        # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
+        # available for anyone logged in with a GitHub account to view, and so this information must
+        # be protected. Instead of logging to stdout, all potentially sensitive OpenTofu log output
+        # is instead logged to CloudWatch
+        tofu workspace select default 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        tofu init \
+          -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
+          -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "tofu init for \"${{ inputs.bfd-env }}\" completed"
+        tofu workspace select "${{ inputs.bfd-env }}" \
+          -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
+          -or-create \
+          -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "Selected workspace \"${{ inputs.bfd-env }}\""
+      shell: bash
+
+    - name: Generate OpenTofu plan
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        echo "Generating OpenTofu plan for ${{ inputs.service-path }}..." |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT") # Log to GHA logs and CW
+        tofu plan ${{ steps.setup-tofu.outputs.tf-vars-args }} -no-color \
+          -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "Plan generated for ${{ inputs.service-path }} successfully" |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+      shell: bash
+
+    - name: Apply env service
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        echo "Applying OpenTofu plan for ${{ inputs.service-path }}..." |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+        tofu apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "OpenTofu plan for ${{ inputs.service-path }} applied" |
+          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+      shell: bash
