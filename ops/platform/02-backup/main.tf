@@ -23,7 +23,7 @@ resource "aws_backup_plan" "main" {
   name = "bfd-weekly"
 
   rule {
-    rule_name         = "weekly90"
+    rule_name         = "weekly35"
     target_vault_name = data.aws_backup_vault.main.name
     schedule          = "cron(0 3 ? * SAT *)"
 
@@ -50,6 +50,6 @@ resource "aws_backup_selection" "main" {
   selection_tag {
     type  = "STRINGEQUALS"
     key   = "bfd_backup"
-    value = "weekly90"
+    value = "weekly35"
   }
 }
