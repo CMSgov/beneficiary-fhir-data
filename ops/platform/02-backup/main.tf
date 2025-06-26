@@ -20,7 +20,7 @@ module "terraservice" {
 }
 
 resource "aws_backup_plan" "main" {
-  name = "bfd-weekly"
+  name = "bfd-daily-weekly"
 
   rule {
     rule_name         = "weekly35"
@@ -38,18 +38,27 @@ resource "aws_backup_plan" "main" {
       }
     }
   }
+  rule {
+    rule_name         = "daily3"
+    target_vault_name = data.aws_backup_vault.main.name
+    schedule          = "cron(0 1 * * ? *)"
 
+    lifecycle {
+      delete_after = 3
+    }
+  }
   tags = { layer = "data" }
 }
 
+
 resource "aws_backup_selection" "main" {
   iam_role_arn = data.aws_iam_role.backup.arn
-  name         = "bfd-weekly-backup-selection"
+  name         = "bfd-daily-weekly-backup-selection"
   plan_id      = aws_backup_plan.main.id
 
   selection_tag {
     type  = "STRINGEQUALS"
     key   = "bfd_backup"
-    value = "weekly35"
+    value = "daily3_weekly35"
   }
 }
