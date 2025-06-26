@@ -37,14 +37,15 @@ output "default_tags" {
     service        = var.service
     Terraform      = true
     tf_module_root = var.relative_module_root
+    bfd_version    = local.bfd_version
   })
   sensitive = false
 }
 
-output "latest_bfd_release" {
-  description = "This is the latest CMSgov/beneficiary-fhir-data release. Excludes Pre-Releases."
+output "bfd_version" {
+  description = "The BFD version that is being deployed. Corresponds to the most recent tag of the checked-out repository"
   sensitive   = false
-  value       = try(jsondecode(data.http.latest_bfd_release.response_body).tag_name, null)
+  value       = local.bfd_version
 }
 
 output "ssm_config" {
