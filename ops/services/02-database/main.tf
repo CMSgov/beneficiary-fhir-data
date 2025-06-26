@@ -149,7 +149,7 @@ resource "aws_rds_cluster" "this" {
   # if deletion_protection_override is null, use the default value for the environment, otherwise use the override
   deletion_protection = !local.is_ephemeral_env
 
-  tags = { "cpm backup" = local.is_ephemeral_env ? "" : "Weekly", "Layer" = "data" }
+  tags = { "AWS_Backup" = local.is_ephemeral_env ? "" : "d15_w90", "Layer" = "data" }
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password
