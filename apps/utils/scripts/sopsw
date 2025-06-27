@@ -46,7 +46,7 @@ prepare_temp_file() {
 
   aws_account_id="$(aws sts get-caller-identity --query 'Account' --output text)"
 
-  ACCOUNT_ID="$aws_account_id" envsubst '$ACCOUNT_ID' < <(yq '. * {"sops": {"lastmodified": "1970-01-01T00:00:00Z", "mac": ""}}' <"$sops_file") >"$tmp_sops_file"
+  yq '. * {"sops": {"lastmodified": "1970-01-01T00:00:00Z", "mac": ""}}' <"$sops_file" | ACCOUNT_ID="$aws_account_id" envsubst '$ACCOUNT_ID' >"$tmp_sops_file"
   EDITOR="$SCRIPT_DIR/sopsw -R" sops --ignore-mac "$tmp_sops_file"
 }
 
