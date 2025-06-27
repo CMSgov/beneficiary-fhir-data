@@ -26,7 +26,7 @@ runs:
       id: setup-tofu
       uses: ./.github/actions/bfd-setup-tofu
       with:
-        service-path: ${{ input.service-path }}
+        service-path: ${{ inputs.service-path }}
         cw-log-group: ${{ inputs.cw-log-group }}
         cw-log-stream: ${{ inputs.cw-log-stream }}
         tofu-vars-json: ${{ inputs.tofu-vars-json }}
