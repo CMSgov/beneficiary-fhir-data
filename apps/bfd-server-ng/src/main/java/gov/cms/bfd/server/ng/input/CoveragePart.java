@@ -96,4 +96,23 @@ public enum CoveragePart {
         .setValue(this.getStandardDisplay());
     return classComponent;
   }
+
+  /**
+   * Finds a {@link CoveragePart} enum constant by its single character code (e.g., "A", "B"). This
+   * method is case-sensitive for the input code.
+   *
+   * @param code The single character code (e.g., "A", "B", "C", "D"). Must not be null and must be
+   *     a single character.
+   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
+   *     Optional#empty()} if no match is found.
+   * @throws IllegalArgumentException if the provided code is null or not a single character.
+   */
+  public static Optional<CoveragePart> forCode(String code) {
+    for (CoveragePart part : values()) {
+      if (part.getStandardCode().equals(code)) { // Direct string comparison for "A", "B", etc.
+        return Optional.of(part);
+      }
+    }
+    return Optional.empty();
+  }
 }

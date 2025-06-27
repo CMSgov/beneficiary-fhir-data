@@ -104,6 +104,20 @@ public class BeneficiaryRepository {
   }
 
   /**
+   * Retrieves a {@link Beneficiary} record by its ID and last updated timestamp.
+   *
+   * @param beneSk bene surrogate key
+   * @param lastUpdatedRange last updated search range
+   * @param partTypeCode Part type
+   * @return beneficiary record
+   */
+  public Optional<Beneficiary> searchCurrentBeneficiary(
+      long beneSk, String partTypeCode, DateTimeRange lastUpdatedRange) {
+    return searchCurrentBeneficiary(
+        "beneSk", String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
+  }
+
+  /**
    * Retrieves the xrefSk from the beneSk.
    *
    * @param beneSk original beneSk
@@ -167,6 +181,40 @@ public class BeneficiaryRepository {
                 lastUpdatedRange.getUpperBoundSqlOperator()),
             Beneficiary.class)
         .setParameter("id", idColumnValue)
+        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+        .getResultList()
+        .stream()
+        .findFirst();
+  }
+
+  private Optional<Beneficiary> searchCurrentBeneficiary(
+      String idColumnName,
+      String idColumnValue,
+      String partTypeCode,
+      DateTimeRange lastUpdatedRange) {
+    return entityManager
+        .createQuery(
+            String.format(
+                """
+                            SELECT b
+                            FROM Beneficiary b
+                            JOIN b.beneficiaryThirdParties tp
+                            JOIN b.beneficiaryEntitlements be
+                            WHERE b.%s = :id
+                              AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+                              AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                              AND b.beneSk = b.xrefSk
+                              AND tp.id.thirdPartyTypeCode = :partTypeCode
+                              AND be.id.medicareEntitlementTypeCode = :partTypeCode
+                            """,
+                idColumnName,
+                lastUpdatedRange.getLowerBoundSqlOperator(),
+                lastUpdatedRange.getUpperBoundSqlOperator()),
+            Beneficiary.class)
+        .setParameter("id", idColumnValue)
+        .setParameter("partTypeCode", partTypeCode)
         .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
         .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()
