@@ -87,6 +87,19 @@ runs:
         echo "aws logs tail --since 1h --follow '${{ inputs.cw-log-group }}'"
       shell: bash
 
+    - name: Check if tofu is installed
+      id: check-tofu-installed
+      run: |
+        is_tofu_installed="$(
+          if [[ -x "$(command -v tofu)" ]]; then
+            echo "true"
+          else
+            echo "false"
+          fi
+        )"
+        echo "is-tofu-installed=$is_tofu_installed" >> $GITHUB_OUTPUT
+      shell: bash
+
     # Maps a given JSON object string of variable names to values, i.e.:
     # {
     #   "var1": "val1",
@@ -108,6 +121,7 @@ runs:
       shell: bash
 
     - name: Get OpenTofu Version
+      if: steps.check-tfvm-installed.outputs.is-tofu-installed == 'false'
       id: get-opentofu-version
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
@@ -137,6 +151,7 @@ runs:
       shell: bash
 
     - name: Setup OpenTofu
+      if: steps.check-tfvm-installed.outputs.is-tofu-installed == 'false'
       uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.0.5
       with:
         tofu_version: ${{ steps.get-opentofu-version.outputs.tofu-version }}
