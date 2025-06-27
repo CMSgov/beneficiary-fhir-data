@@ -68,21 +68,17 @@ runs:
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
-        echo "Generating OpenTofu plan for ${{ inputs.service-path }}..." |
-          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT") # Log to GHA logs and CW
+        echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
         tofu plan ${{ steps.setup-tofu.outputs.tf-vars-args }} -no-color \
           -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
-        echo "Plan generated for ${{ inputs.service-path }} successfully" |
-          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+        echo "Plan generated for ${{ inputs.service-path }} successfully"
       shell: bash
 
     - name: Apply env service
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
-        echo "Applying OpenTofu plan for ${{ inputs.service-path }}..." |
-          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+        echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
         tofu apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
-        echo "OpenTofu plan for ${{ inputs.service-path }} applied" |
-          tee >(bash -c "$STDOUT_TO_CWLOGS_SCRIPT")
+        echo "OpenTofu plan for ${{ inputs.service-path }} applied"
       shell: bash
