@@ -34,7 +34,7 @@ runs:
     - name: Get parent environment
       id: get-parent-env
       run: |
-        parent_env="$(echo "${{ inputs.bfd-env }}" | grep -Pv '(prod|sandbox|test)$')"
+        parent_env="$(echo "${{ inputs.bfd-env }}" | grep -Po '(prod|sandbox|test)$')"
 
         echo "parent-env=$parent_env" >> $GITHUB_OUTPUT
       shell: bash
