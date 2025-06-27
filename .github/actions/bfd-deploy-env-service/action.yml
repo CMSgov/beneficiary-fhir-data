@@ -47,7 +47,7 @@ runs:
 
         # Select the default workspace unconditionally in the (unlikely) case that the workspace is
         # set to something at all. This ensures we can init any backend
-        tofu workspace select default -no-color 2>&1 >/dev/null || true
+        tofu workspace select default -no-color &>/dev/null || true
 
         # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
         # available for anyone logged in with a GitHub account to view, and so this information must
@@ -57,10 +57,8 @@ runs:
           -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.bfd-env }}\" completed"
-        tofu workspace select "${{ inputs.bfd-env }}" \
-          -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
-          -or-create \
-          -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        tofu workspace -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" -no-color \
+          select -or-create "${{ inputs.bfd-env }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Selected workspace \"${{ inputs.bfd-env }}\""
       shell: bash
 
