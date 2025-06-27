@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
@@ -119,21 +118,19 @@ public class PatientSearchIT extends IntegrationTestBase {
             .getFirst();
 
     for (var searchStyle : SearchStyleEnum.values()) {
-      // TODO: fix date search. It currently doesn't check the precision appropriately.
-      // Search date exact
-      //      var patientBundle =
-      //          searchBundle()
-      //              .where(searchCriteriaId)
-      //              .and(
-      //                  new DateClientParam(Constants.PARAM_LASTUPDATED)
-      //                      .exactly()
-      //                      .day(DateUtil.toDate(lastUpdated)))
-      //              .usingStyle(searchStyle)
-      //              .execute();
-      //      assertEquals(1, patientBundle.getEntry().size());
+      var patientBundle =
+          searchBundle()
+              .where(searchCriteriaId)
+              .and(
+                  new DateClientParam(Constants.PARAM_LASTUPDATED)
+                      .exactly()
+                      .day(DateUtil.toDate(lastUpdated)))
+              .usingStyle(searchStyle)
+              .execute();
+      assertEquals(1, patientBundle.getEntry().size());
 
       // Search date greater than
-      var patientBundle =
+      patientBundle =
           searchBundle()
               .where(searchCriteriaId)
               .and(
@@ -151,7 +148,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .before()
-                      .day(DateUtil.toDate(lastUpdated)))
+                      .millis(DateUtil.toDate(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(0, patientBundle.getEntry().size());
@@ -163,7 +160,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .afterOrEquals()
-                      .day(DateUtil.toDate(lastUpdated)))
+                      .millis(DateUtil.toDate(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -175,7 +172,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .beforeOrEquals()
-                      .day(DateUtil.toDate(lastUpdated.plusDays(1))))
+                      .millis(DateUtil.toDate(lastUpdated.plusDays(1))))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -216,7 +213,7 @@ public class PatientSearchIT extends IntegrationTestBase {
                 .where(
                     new DateClientParam(Constants.PARAM_LASTUPDATED)
                         .afterOrEquals()
-                        .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
+                        .day(DateUtil.toDate(ZonedDateTime.parse("2024-01-01T00:00:00Z"))))
                 .execute());
   }
 }

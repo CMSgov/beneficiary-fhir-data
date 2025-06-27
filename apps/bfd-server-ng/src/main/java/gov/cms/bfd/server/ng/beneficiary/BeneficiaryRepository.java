@@ -5,15 +5,14 @@ import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /** Repository for querying beneficiary information. */
-@Component
+@Repository
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private EntityManager entityManager;
@@ -135,19 +134,19 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT MAX(p.batchCompletionTimestamp)
-              FROM LoadProgress p
-              WHERE p.tableName IN (
-                "idr.beneficiary",
-                "idr.beneficiary_history",
-                "idr.beneficiary_mbi_id"
-              )
-              """,
+            SELECT MAX(p.batchCompletionTimestamp)
+            FROM LoadProgress p
+            WHERE p.tableName IN (
+              "idr.beneficiary",
+              "idr.beneficiary_history",
+              "idr.beneficiary_mbi_id"
+            )
+            """,
             ZonedDateTime.class)
         .getResultList()
         .stream()
         .findFirst()
-        .orElse(ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC));
+        .orElse(DateUtil.MIN_DATETIME);
   }
 
   private Optional<Beneficiary> searchBeneficiary(

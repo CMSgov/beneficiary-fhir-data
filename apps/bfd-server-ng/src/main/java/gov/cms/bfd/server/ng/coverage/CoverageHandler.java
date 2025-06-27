@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.coverage;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.coverage.model.CoverageDetails;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Coverage;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Handler methods for the Coverage resource. This is called after the FHIR inputs from the resource
@@ -18,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class CoverageHandler {
-
-  private final BeneficiaryRepository beneficiaryRepository;
-
   private final CoverageRepository coverageRepository;
 
   /**
@@ -32,7 +27,6 @@ public class CoverageHandler {
    * @return An {@link Optional} containing the {@link Coverage} resource if found, otherwise empty.
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
-  @Transactional(readOnly = true)
   public Optional<Coverage> readCoverage(
       final CoverageCompositeId coverageCompositeId, final String compositeId) {
 

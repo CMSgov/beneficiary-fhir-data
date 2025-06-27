@@ -40,6 +40,10 @@ public class ClaimLine {
   @OneToOne
   private ClaimLineInstitutional claimLineInstitutional;
 
+  private Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
+    return Optional.ofNullable(claimLineInstitutional);
+  }
+
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
   private Claim claim;
@@ -47,26 +51,31 @@ public class ClaimLine {
   ExplanationOfBenefit.ItemComponent toFhir() {
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(claimLineId.getClaimLineNumber());
+    var institutional = getClaimLineInstitutional();
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
-    claimLineInstitutional.getHippsCode().toFhir().ifPresent(productOrService::addCoding);
+    institutional.flatMap(i -> i.getHippsCode().toFhir()).ifPresent(productOrService::addCoding);
+
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     ndc.toFhir().ifPresent(line::addDetail);
     line.setQuantity(serviceUnitQuantity.toFhir());
 
-    var revenueCoding = revenueCenterCode.toFhir();
-    revenueCoding.addCoding(claimLineInstitutional.getDeductibleCoinsuranceCode().toFhir());
+    var revenueCoding =
+        revenueCenterCode.toFhir(
+            institutional.map(ClaimLineInstitutional::getDeductibleCoinsuranceCode));
     line.setRevenue(revenueCoding);
     line.addModifier(hcpcsModifierCode.toFhir());
+    institutional
+        .map(ClaimLineInstitutional::getRevenueCenterDate)
+        .ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
     Stream.of(
-            claimLineInstitutional.getAnsiSignature().map(ClaimAnsiSignature::toFhir),
+            institutional.flatMap(c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
             Optional.of(adjudicationCharge.toFhir()),
-            Optional.of(claimLineInstitutional.getAdjudicationCharge().toFhir()))
+            getClaimLineInstitutional().map(c -> c.getAdjudicationCharge().toFhir()))
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
-    line.setServiced(new DateType(DateUtil.toDate(claimLineInstitutional.getRevenueCenterDate())));
 
     return line;
   }

@@ -1,8 +1,12 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +44,42 @@ public class FhirInputConverter {
     } catch (NumberFormatException ex) {
       throw new InvalidRequestException("ID is not a valid number");
     }
+  }
+
+  /**
+   * Converts an {@link NumberParam} to an optional int.
+   *
+   * @param numberParam number param
+   * @return int value
+   */
+  public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
+    if (numberParam == null) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(numberParam.getValue().intValueExact());
+    } catch (ArithmeticException ex) {
+      throw new InvalidRequestException("Numeric input was not in a valid format");
+    }
+  }
+
+  /**
+   * Converts a {@link ReferenceParam} to a numeric ID type.
+   *
+   * @param reference reference
+   * @param validResourceType name of the resource that belongs to the ID
+   * @return ID
+   */
+  public static Long toLong(@Nullable ReferenceParam reference, String validResourceType) {
+    if (reference == null) {
+      throw new InvalidRequestException("Reference is missing");
+    }
+    var resourceType = reference.getResourceType();
+    if (!StringUtils.isBlank(resourceType) && !resourceType.equals(validResourceType)) {
+      throw new InvalidRequestException("Invalid resource type");
+    }
+
+    return reference.getIdPartAsLong();
   }
 
   /**
