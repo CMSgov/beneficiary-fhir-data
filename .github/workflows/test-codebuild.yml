@@ -1,0 +1,11 @@
+name: 'Testing CodeBuild'
+on:
+  push:
+    branches:
+      - 'alessio/BFD-4085__new-deploy-pipeline'
+jobs:
+  Hello-World-Job:
+    runs-on:
+      - codebuild-bfd-non-prod-platform-lambda-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - run: echo "Hello World"
