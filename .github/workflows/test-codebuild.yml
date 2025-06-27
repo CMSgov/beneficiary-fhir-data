@@ -1,8 +1,10 @@
-name: 'Testing CodeBuild'
+name: "Testing CodeBuild"
 on:
   push:
     branches:
-      - 'alessio/BFD-4085__new-deploy-pipeline'
+      - "alessio/BFD-4085__new-deploy-pipeline"
+env:
+  ACCOUNT_ID: ${{ secrets.NON_PROD_ACCOUNT_ID }}
 jobs:
   Hello-World-Job:
     runs-on:
@@ -14,4 +16,17 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.ref_name }}
-
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
+          role-session-name: test-codebuild-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: us-east-1
+      - name: Setup OpenTofu and shell environment
+        id: setup-tofu
+        uses: ./.github/actions/bfd-setup-tofu
+        with:
+          service-path: ops/services/01-config
+          cw-log-group: /bfd/github_actions/tofu
+          cw-log-stream: test-${{ github.run_id }}-${{ github.run_attempt }}
+          tofu-vars-json: "{}"
