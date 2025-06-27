@@ -57,8 +57,10 @@ runs:
           -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.bfd-env }}\" completed"
-        tofu workspace -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" -no-color \
-          select -or-create "${{ inputs.bfd-env }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        tofu workspace select \
+          -no-color \
+          -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
+          -or-create "${{ inputs.bfd-env }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Selected workspace \"${{ inputs.bfd-env }}\""
       shell: bash
 

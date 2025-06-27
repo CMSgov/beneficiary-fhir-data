@@ -49,8 +49,10 @@ runs:
           -var account_type="${{ inputs.account-type }}" \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.account-type }}\" completed"
-        tofu workspace -var account_type="${{ inputs.account-type }}" -no-color \
-          select -or-create "${{ inputs.account-type }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        tofu workspace select \
+          -no-color \
+          -var account_type="${{ inputs.account-type }}" \
+          -or-create "${{ inputs.account-type }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Selected workspace \"${{ inputs.account-type }}\""
       shell: bash
 
