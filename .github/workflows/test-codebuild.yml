@@ -27,19 +27,10 @@ jobs:
           aws-region: us-east-1
       - name: Test applying config
         id: test-config-apply
-        # uses: ./.github/actions/bfd-deploy-env-service
-        uses: ./.github/actions/bfd-setup-tofu
+        uses: ./.github/actions/bfd-deploy-env-service
         with:
-          # bfd-env: 4033-test
+          bfd-env: 4033-test
           service-path: ops/services/01-config
           cw-log-group: /bfd/github_actions/tofu
           cw-log-stream: test-${{ github.run_id }}-${{ github.run_attempt }}
           tofu-vars-json: "{}"
-
-      - name: Test sopsw
-        run: |
-          cd "${{ github.workspace }}/ops/services/01-config"
-
-          bash -c 'scripts/sopsw -h' 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
-          bash -c 'scripts/sopsw -c values/test.sopsw.yaml' 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
-          scripts/sopsw -c values/test.sopsw.yaml 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
