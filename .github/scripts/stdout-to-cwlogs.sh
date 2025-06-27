@@ -51,7 +51,7 @@ trap 'cleanup' SIGTERM
 trap 'cleanup' SIGINT
 
 while IFS= read -r line; do
-  current_time=$(gdate +%s%3N)
+  current_time=$(date +%s%3N)
   # Append current time and line to event_buffer with \x1E (record separator) for timestamp-message
   # split, and \x1D (group separator) to separate individual events for later JSON parsing
   log_event=$(printf "%s\x1E%s\x1D" "$current_time" "$line")
