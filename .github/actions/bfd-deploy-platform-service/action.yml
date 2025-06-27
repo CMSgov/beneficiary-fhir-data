@@ -39,7 +39,7 @@ runs:
 
         # Select the default workspace unconditionally in the (unlikely) case that the workspace is
         # set to something at all. This ensures we can init any backend
-        tofu workspace select default -no-color 2>&1 >/dev/null || true
+        tofu workspace select default -no-color &>/dev/null || true
 
         # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
         # available for anyone logged in with a GitHub account to view, and so this information must
@@ -49,10 +49,8 @@ runs:
           -var account_type="${{ inputs.account-type }}" \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.account-type }}\" completed"
-        tofu workspace select "${{ inputs.account-type }}" \
-          -var account_type="${{ inputs.account-type }}" \
-          -or-create \
-          -no-color
+        tofu workspace -var account_type="${{ inputs.account-type }}" -no-color \
+          select -or-create "${{ inputs.account-type }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Selected workspace \"${{ inputs.account-type }}\""
       shell: bash
 
