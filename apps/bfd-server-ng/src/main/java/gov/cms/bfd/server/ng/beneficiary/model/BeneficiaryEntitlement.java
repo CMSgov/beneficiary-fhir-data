@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +16,7 @@ import org.hl7.fhir.r4.model.Extension;
 @Table(name = "beneficiary_entitlement", schema = "idr")
 public class BeneficiaryEntitlement {
 
-  @Id
-  @Column(name = "bene_sk")
-  private Long beneSk;
-
-  @Column(name = "bene_rng_bgn_dt")
-  private LocalDate benefitRangeBeginDate;
-
-  @Column(name = "bene_rng_end_dt")
-  private LocalDate benefitRangeEndDate;
-
-  @Column(name = "bene_mdcr_entlmt_type_cd")
-  private String medicareEntitlementTypeCode;
+  @EmbeddedId private BeneficiaryEntitlementId id;
 
   @Column(name = "bene_mdcr_enrlmt_rsn_cd")
   private String medicareEnrollmentReasonCode;

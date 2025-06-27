@@ -5,15 +5,24 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Main entity representing the beneficiary table. */
@@ -45,6 +54,22 @@ public class Beneficiary {
   @Embedded private Meta meta;
   @Embedded private DeathDate deathDate;
   @Embedded private Identity identity;
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bene_sk")
+  private Set<BeneficiaryEntitlement> beneficiaryEntitlements;
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bene_sk")
+  private Set<BeneficiaryThirdParty> beneficiaryThirdParties;
+
+  @OneToOne
+  @JoinColumn(name = "bene_sk")
+  private BeneficiaryStatus beneficiaryStatus;
+
+  @OneToOne
+  @JoinColumn(name = "bene_sk")
+  private BeneficiaryEntitlementReason beneficiaryEntitlementReason;
 
   /**
    * Transforms the beneficiary record to its FHIR representation.
@@ -102,6 +127,31 @@ public class Beneficiary {
 
     coverage.setType(coveragePart.toFhirTypeCode());
     coverage.addClass_(coveragePart.toFhirClassComponent());
+    List<Extension> allExtensions = new ArrayList<>();
+
+    AtomicReference<List<Extension>> tpExtension = new AtomicReference<>(new ArrayList<>());
+    this.getBeneficiaryThirdParties().stream()
+        .forEach(
+            tp -> {
+              Optional<Period> fhirPeriodOpt = tp.createFhirPeriod();
+              fhirPeriodOpt.ifPresent(coverage::setPeriod);
+              coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+              tpExtension.set(tp.toFhirExtensions());
+            });
+    allExtensions.addAll(tpExtension.get());
+    AtomicReference<List<Extension>> entExtension = new AtomicReference<>(new ArrayList<>());
+    this.getBeneficiaryEntitlements().stream()
+        .forEach(
+            ent -> {
+              entExtension.set(ent.toFhirExtensions());
+            });
+    allExtensions.addAll(entExtension.get());
+    allExtensions.addAll(this.getBeneficiaryStatus().toFhirExtensions());
+    allExtensions.addAll(this.beneficiaryEntitlementReason.toFhirExtensions());
+
+    if (!allExtensions.isEmpty()) {
+      coverage.setExtension(allExtensions);
+    }
     return coverage;
   }
 }

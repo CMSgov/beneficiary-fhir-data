@@ -20,18 +20,8 @@ import org.hl7.fhir.r4.model.Period;
 @Table(name = "beneficiary_third_party", schema = "idr")
 public class BeneficiaryThirdParty {
 
-  @Id
-  @Column(name = "bene_sk")
-  private Long beneSk;
-
-  @Column(name = "bene_rng_bgn_dt")
-  private LocalDate benefitRangeBeginDate;
-
-  @Column(name = "bene_rng_end_dt")
-  private LocalDate benefitRangeEndDate;
-
-  @Column(name = "bene_tp_type_cd")
-  private String thirdPartyTypeCode;
+  /** The composite primary key for this entity, encapsulating all key fields. */
+  @EmbeddedId private BeneficiaryThirdPartyId id;
 
   @Column(name = "bene_buyin_cd")
   private String buyInCode;
@@ -56,8 +46,8 @@ public class BeneficiaryThirdParty {
    *     no period can be constructed (e.g., no start date).
    */
   public Optional<Period> createFhirPeriod() {
-    Optional<LocalDate> optStartDate = Optional.ofNullable(this.getBenefitRangeBeginDate());
-    Optional<LocalDate> optEndDate = Optional.ofNullable(this.getBenefitRangeEndDate());
+    Optional<LocalDate> optStartDate = Optional.ofNullable(this.getId().getBenefitRangeBeginDate());
+    Optional<LocalDate> optEndDate = Optional.ofNullable(this.getId().getBenefitRangeEndDate());
 
     return optStartDate.map(
         startDate -> {
