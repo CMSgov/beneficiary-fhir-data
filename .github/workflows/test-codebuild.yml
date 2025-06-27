@@ -25,10 +25,11 @@ jobs:
           role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
           role-session-name: test-codebuild-${{ github.run_id }}-${{ github.run_attempt }}
           aws-region: us-east-1
-      - name: Setup OpenTofu and shell environment
-        id: setup-tofu
-        uses: ./.github/actions/bfd-setup-tofu
+      - name: Test applying config
+        id: test-config-apply
+        uses: ./.github/actions/bfd-deploy-env-service
         with:
+          bfd-env: 4033-test
           service-path: ops/services/01-config
           cw-log-group: /bfd/github_actions/tofu
           cw-log-stream: test-${{ github.run_id }}-${{ github.run_attempt }}
