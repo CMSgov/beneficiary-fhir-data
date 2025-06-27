@@ -5,6 +5,9 @@ on:
       - "alessio/BFD-4085__new-deploy-pipeline"
 env:
   ACCOUNT_ID: ${{ secrets.NON_PROD_ACCOUNT_ID }}
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
 jobs:
   Hello-World-Job:
     runs-on:
