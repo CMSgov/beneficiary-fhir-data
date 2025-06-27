@@ -9,3 +9,9 @@ jobs:
       - codebuild-bfd-non-prod-platform-lambda-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - run: echo "Hello World"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
