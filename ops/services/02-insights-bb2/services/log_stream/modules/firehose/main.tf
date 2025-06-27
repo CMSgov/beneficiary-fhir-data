@@ -1,17 +1,28 @@
-data "aws_caller_identity" "current" {}
-
-data "aws_kms_key" "bucket_cmk" {
-  key_id = "alias/bfd-insights-bb2-cmk"
-}
-
-data "aws_s3_bucket" "main" {
-  bucket = "bfd-insights-bb2-${local.account_id}"
+module "terraservice" {
+  source               = "../../../terraform-modules/bfd/bfd-terraservice"
+  greenfield           = var.greenfield
+  service              = local.service
+  relative_module_root = "ops/services/02-insights-bb2"
 }
 
 locals {
-  full_name  = "bfd-insights-${var.project}-${var.name}"
-  account_id = data.aws_caller_identity.current.account_id
-  table      = var.table_name
+  env                 = module.terraservice.env
+  insights_bucket_env = var.insights_env != "" ? var.insights_env : local.env
+  bucket_param        = "/bfd/${local.insights_bucket_env}/insights/nonsensitive/bfd-insights-${var.project}"
+  env_key_alias       = module.terraservice.env_key_alias
+  full_name           = "bfd-insights-${var.project}-${var.name}"
+  account_id          = data.aws_caller_identity.current.account_id
+  table               = var.table_name
+}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_ssm_parameter" "bucket_name_param" {
+  name = local.bucket_param
+}
+
+data "aws_s3_bucket" "bucket" {
+  bucket = data.aws_ssm_parameter.bucket_name_param.value
 }
 
 # Firehose delivery stream
@@ -20,13 +31,13 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis_firehose_stream" {
   destination = "extended_s3"
 
   extended_s3_configuration {
-    bucket_arn          = data.aws_s3_bucket.main.arn
+    bucket_arn          = data.aws_s3_bucket.bucket.arn
     buffering_interval  = var.firehose_s3_buffer_interval
     buffering_size      = var.firehose_s3_buffer_size
     compression_format  = "GZIP"
-    error_output_prefix = "databases/${var.project}/events_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
-    kms_key_arn         = data.aws_kms_key.bucket_cmk.arn
-    prefix              = "databases/${var.project}/events-${var.name}/dt=!{timestamp:YYYY/MM/dd/HH}/"
+    error_output_prefix = "databases/events_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
+    kms_key_arn         = local.env_key_alias
+    prefix              = "databases/events-${var.name}/dt=!{timestamp:YYYY/MM/dd/HH}/"
     role_arn            = "arn:aws:iam::${local.account_id}:role/bfd-insights-${var.project}-events"
     s3_backup_mode      = "Disabled"
 

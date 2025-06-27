@@ -34,7 +34,7 @@ module "firehose" {
 }
 
 module "cwl_destination" {
-  source = "./modules/cwl_destination"
+  source        = "./modules/cwl_destination"
   firehose_name = "${local.env}-perf-mon"
   project       = local.project
   region        = local.region
