@@ -4,10 +4,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.9"
     }
-    sops = {
-      source  = "carlpett/sops"
-      version = "~> 1.2.0"
-    }
   }
 }
 
@@ -38,11 +34,10 @@ locals {
 
   parent_yaml_file        = "${path.module}/values/${local.parent_env}.sopsw.yaml"
   raw_sops_parent_yaml    = file(local.parent_yaml_file)
-  valid_sops_parent_yaml  = data.external.valid_sops_yaml.result.valid_sops
-  enc_parent_data         = yamldecode(local.valid_sops_parent_yaml)
+  enc_parent_data         = yamldecode(local.raw_sops_parent_yaml)
   sops_nonsensitive_regex = local.enc_parent_data.sops.unencrypted_regex
 
-  decrypted_parent_data = yamldecode(data.sops_external.this.raw)
+  decrypted_parent_data = yamldecode(data.external.decrypted_sops.result.decrypted_sops)
   parent_ssm_config = {
     for key, val in nonsensitive(local.decrypted_parent_data)
     : key => {
@@ -103,25 +98,16 @@ locals {
   }, local.ng_env_config)
 }
 
-data "external" "valid_sops_yaml" {
-  # sops (not sopsw, our custom wrapper) cannot decrypt the YAML until the KMS key ARNs include the
-  # Account ID and the sops metadata block includes valid "lastmodified" and "mac" properties. We
-  # need to use sopsw's "-c/--cat" function to construct a valid sops file so that it can be
-  # consumed by the sops provider
+data "external" "decrypted_sops" {
   program = [
     "bash",
     "-c",
     # Allows us to pipe to yq so that sopsw does not need to emit JSON to work with this external
     # data source
     <<-EOF
-    ${path.module}/scripts/sopsw -c ${local.parent_yaml_file} | yq -o=json '{"valid_sops": (. | tostring)}'
+    ${path.module}/scripts/sopsw -d ${local.parent_yaml_file} | yq -o=json '{"decrypted_sops": (. | tostring)}'
     EOF
   ]
-}
-
-data "sops_external" "this" {
-  source     = local.valid_sops_parent_yaml
-  input_type = "yaml"
 }
 
 resource "aws_ssm_parameter" "this" {
