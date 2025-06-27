@@ -36,7 +36,7 @@ log_events() {
   if [[ $aws_log_events != "[]" ]]; then
     aws logs put-log-events --log-group-name "$cloudwatch_log_group" \
       --log-stream-name "$cloudwatch_log_stream" \
-      --log-events "$aws_log_events"
+      --log-events "$aws_log_events" 1>/dev/null
   fi
   event_buffer=""
   last_echo_time=$current_time
