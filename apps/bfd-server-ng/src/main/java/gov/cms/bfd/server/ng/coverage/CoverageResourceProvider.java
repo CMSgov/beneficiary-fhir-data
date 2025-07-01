@@ -62,9 +62,7 @@ public class CoverageResourceProvider implements IResourceProvider {
     CoverageCompositeId compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
 
     return coverageHandler.searchByCoverageId(
-        compositeId,
-        coverageId.getIdPart(),
-        FhirInputConverter.toDateTimeRange(lastUpdated));
+        compositeId, coverageId.getIdPart(), FhirInputConverter.toDateTimeRange(lastUpdated));
   }
 
   /**
@@ -85,9 +83,7 @@ public class CoverageResourceProvider implements IResourceProvider {
           "Beneficiary search parameter must be a Patient reference.");
     }
 
-    Long beneSk =
-        FhirInputConverter.toLong(
-            new IdType(beneficiaryParam.getValue()));
+    Long beneSk = FhirInputConverter.toLong(new IdType(beneficiaryParam.getValue()));
 
     return coverageHandler.searchByBeneficiary(
         beneSk, FhirInputConverter.toDateTimeRange(lastUpdated));
