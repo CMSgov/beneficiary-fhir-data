@@ -333,6 +333,7 @@ CREATE TABLE idr.claim_ansi_signature (
 
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS
 SELECT bene_mbi_id FROM idr.beneficiary
+WHERE bene_xref_efctv_sk != 0
 GROUP BY bene_mbi_id
 HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
 
