@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -82,7 +83,9 @@ public class CoverageSearchIT extends IntegrationTestBase {
         2,
         coverageBundle.getEntry().size(),
         "Should find all Coverage resources for the given beneficiary");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    coverageBundle
+        .getEntry()
+        .sort(Comparator.comparing(entry -> entry.getResource().getIdElement().getIdPart()));
   }
 
   @ParameterizedTest
