@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Period;
 @Table(name = "beneficiary_third_party", schema = "idr")
 public class BeneficiaryThirdParty {
 
-  /** The composite primary key for this entity, encapsulating all key fields. */
   @EmbeddedId private BeneficiaryThirdPartyId id;
 
   @Column(name = "bene_buyin_cd")

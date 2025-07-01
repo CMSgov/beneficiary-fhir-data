@@ -6,15 +6,10 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Getter;
 
-/**
- * Represents the composite primary key for the {@link BeneficiaryThirdParty} entity. It must be
- * serializable and implement equals() and hashCode().
- */
+/** Represents the composite primary key for the {@link BeneficiaryThirdParty} entity. */
 @Embeddable
 @Getter
 public class BeneficiaryThirdPartyId implements Serializable {
-
-  //    private static final long serialVersionUID = 1L; // Good practice for Serializable classes
 
   @Column(name = "bene_sk")
   private Long beneSk;

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.coverage;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
+import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryThirdParty;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
@@ -10,13 +11,15 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Handler methods for the Coverage resource. This is called after the FHIR inputs from the resource
@@ -37,7 +40,6 @@ public class CoverageHandler {
    * @return An {@link Optional} containing the {@link Coverage} resource if found, otherwise empty.
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
-  @Transactional(readOnly = true)
   public Optional<Coverage> readCoverage(
       final CoverageCompositeId coverageCompositeId, final String compositeId) {
 
@@ -48,19 +50,17 @@ public class CoverageHandler {
             new DateTimeRange());
 
     return beneficiaryOpt.map(
-        beneficiary -> beneficiary.toFhirCoverage(compositeId, coverageCompositeId.coveragePart()));
+        beneficiary -> toFhir(beneficiary, coverageCompositeId.coveragePart(), compositeId));
   }
 
   /**
-   * Searches for Coverage resources based on the parsed composite ID and lastUpdated range. Since
-   * _id should be unique, this will typically return a bundle with 0 or 1 entry.
+   * Searches for Coverage resources based on the parsed composite ID and lastUpdated range.
    *
    * @param parsedCoverageId The parsed composite ID (guaranteed Part A or B by provider).
    * @param compositeId original full ID string from the request, used for setting Coverage.id.
    * @param lastUpdated The date range for _lastUpdated filter.
    * @return A Bundle of Coverage resources.
    */
-  @Transactional(readOnly = true)
   public Bundle searchByCoverageId(
       CoverageCompositeId parsedCoverageId, final String compositeId, DateTimeRange lastUpdated) {
 
@@ -72,9 +72,7 @@ public class CoverageHandler {
 
     var coverages =
         beneficiaryOpt
-            .map(
-                beneficiary ->
-                    beneficiary.toFhirCoverage(compositeId, parsedCoverageId.coveragePart()))
+            .map(beneficiary -> toFhir(beneficiary, parsedCoverageId.coveragePart(), compositeId))
             .stream()
             .collect(Collectors.toList());
 
@@ -83,14 +81,13 @@ public class CoverageHandler {
   }
 
   /**
-   * Searches for all Coverage resources (typically Part A and Part B FFS) associated with a given
-   * beneficiary SK, optionally filtered by _lastUpdated.
+   * Searches for all Coverage resources associated with a given beneficiary SK, optionally filtered
+   * by _lastUpdated.
    *
    * @param beneSk The beneficiary surrogate key.
    * @param lastUpdated The date range for _lastUpdated filter.
    * @return A Bundle of Coverage resources.
    */
-  @Transactional(readOnly = true)
   public Bundle searchByBeneficiary(Long beneSk, DateTimeRange lastUpdated) {
 
     var coverages = new ArrayList<>();
@@ -100,16 +97,58 @@ public class CoverageHandler {
             .filter(b -> b.getBeneSk() == b.getXrefSk());
 
     beneficiaryOpt.ifPresent(
-        beneficiaryDetail -> {
-          for (BeneficiaryThirdParty tp : beneficiaryDetail.getBeneficiaryThirdParties()) {
+        beneficiary -> {
+          for (BeneficiaryThirdParty tp : beneficiary.getBeneficiaryThirdParties()) {
             coverages.add(
-                beneficiaryDetail.toFhirCoverage(
-                    String.valueOf(beneSk),
-                    CoveragePart.forCode(tp.getId().getThirdPartyTypeCode()).get()));
+                toFhir(
+                    beneficiary,
+                    CoveragePart.forCode(tp.getId().getThirdPartyTypeCode()).get(),
+                    String.valueOf(beneSk)));
           }
         });
 
     return FhirUtil.bundleOrDefault(
         (List<Resource>) (List<?>) coverages, beneficiaryRepository::beneficiaryLastUpdated);
+  }
+
+  /**
+   * Orchestrates the complete transformation of a Beneficiary and its related data into a FHIR
+   * Coverage resource.
+   *
+   * @param beneficiary The current effective Beneficiary object.
+   * @param coveragePart The {@link CoveragePart} enum instance (e.g., PART_A, PART_B).
+   * @param coverageId The complete ID for the FHIR Coverage resource.
+   * @return A populated FHIR Coverage object.
+   */
+  private Coverage toFhir(Beneficiary beneficiary, CoveragePart coveragePart, String coverageId) {
+
+    Coverage coverage = beneficiary.toFhirCoverage(coverageId, coveragePart);
+
+    List<Extension> allExtensions = new ArrayList<>();
+
+    AtomicReference<List<Extension>> tpExtension = new AtomicReference<>(new ArrayList<>());
+    beneficiary.getBeneficiaryThirdParties().stream()
+        .forEach(
+            tp -> {
+              Optional<Period> fhirPeriodOpt = tp.createFhirPeriod();
+              fhirPeriodOpt.ifPresent(coverage::setPeriod);
+              coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+              tpExtension.set(tp.toFhirExtensions());
+            });
+    allExtensions.addAll(tpExtension.get());
+    AtomicReference<List<Extension>> entExtension = new AtomicReference<>(new ArrayList<>());
+    beneficiary.getBeneficiaryEntitlements().stream()
+        .forEach(
+            ent -> {
+              entExtension.set(ent.toFhirExtensions());
+            });
+    allExtensions.addAll(entExtension.get());
+    allExtensions.addAll(beneficiary.getBeneficiaryStatus().toFhirExtensions());
+    allExtensions.addAll(beneficiary.getBeneficiaryEntitlementReason().toFhirExtensions());
+
+    if (!allExtensions.isEmpty()) {
+      coverage.setExtension(allExtensions);
+    }
+    return coverage;
   }
 }

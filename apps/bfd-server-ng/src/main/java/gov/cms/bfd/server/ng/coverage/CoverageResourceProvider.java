@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,8 +30,7 @@ public class CoverageResourceProvider implements IResourceProvider {
   }
 
   /**
-   * Handles the FHIR read operation for a Coverage resource by its ID. The ID format is expected to
-   * be {part}-{bene_sk}.
+   * Reads Coverage resource by its ID. The ID format is expected to be {part}-{bene_sk}.
    *
    * @param coverageId The FHIR ID, which includes the composite ID {part}-{bene_sk}.
    * @return The requested {@link Coverage} resource.
@@ -41,7 +39,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
-    CoverageCompositeId compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
+    var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
     var coverage = coverageHandler.readCoverage(compositeId, coverageId.getIdPart());
     return coverage.orElseThrow(() -> new ResourceNotFoundException(coverageId));
   }
@@ -59,7 +57,7 @@ public class CoverageResourceProvider implements IResourceProvider {
       @RequiredParam(name = Coverage.SP_RES_ID) final IdType coverageId,
       @OptionalParam(name = Coverage.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
 
-    CoverageCompositeId compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
+    var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
 
     return coverageHandler.searchByCoverageId(
         compositeId, coverageId.getIdPart(), FhirInputConverter.toDateTimeRange(lastUpdated));
@@ -77,13 +75,7 @@ public class CoverageResourceProvider implements IResourceProvider {
       @RequiredParam(name = Coverage.SP_BENEFICIARY) final ReferenceParam beneficiaryParam,
       @OptionalParam(name = Coverage.SP_RES_LAST_UPDATED) final DateRangeParam lastUpdated) {
 
-    if (beneficiaryParam.getResourceType() != null
-        && !"Patient".equals(beneficiaryParam.getResourceType())) {
-      throw new InvalidRequestException(
-          "Beneficiary search parameter must be a Patient reference.");
-    }
-
-    Long beneSk = FhirInputConverter.toLong(new IdType(beneficiaryParam.getValue()));
+    var beneSk = FhirInputConverter.toLong(new IdType(beneficiaryParam.getValue()));
 
     return coverageHandler.searchByBeneficiary(
         beneSk, FhirInputConverter.toDateTimeRange(lastUpdated));
