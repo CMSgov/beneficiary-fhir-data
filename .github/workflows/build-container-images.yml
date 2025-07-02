@@ -256,7 +256,7 @@ jobs:
           push: false
           build-args: |
             base_version=${{ needs.compute-matrix-and-version.outputs.base-images-version }}
-          tags: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
+          tags: ${{ matrix.image.name }}:${{ inputs.versionTag }}
           # AWS Lambda does not support multi-platform images, something that is enabled by default
           # by this Action via the "provenance" flag. Until AWS Lambda supports this feature
           # properly, we must explicitly disable provenance and specify the platform directly.
