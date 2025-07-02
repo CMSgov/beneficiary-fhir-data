@@ -246,6 +246,11 @@ jobs:
           name: base-images
           path: ./base-images
 
+      - name: Delete base image artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: base-images
+
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
         env:
