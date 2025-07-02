@@ -1,4 +1,4 @@
-ARG base_version
+ARG base_version=latest
 
 # Image is expected to exist locally prior to build. Operators will need to pull the image from ECR
 # first before building
