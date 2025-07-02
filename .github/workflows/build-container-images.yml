@@ -214,11 +214,27 @@ jobs:
   build-images:
     if: needs.compute-matrix-and-version.outputs.matrix != '[]'
     needs: [compute-matrix-and-version, pull-base-images]
+    services:
+      registry:
+        image: registry:3
+        ports:
+          - 5000:5000
     strategy:
       matrix:
         image: ${{ fromJson(needs.compute-matrix-and-version.outputs.matrix) }}
     runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref_name }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
       - name: Mkdir ./base-images
         run: |
           mkdir -p ./base-images
@@ -230,9 +246,6 @@ jobs:
           name: base-images
           path: ./base-images
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
         env:
@@ -242,14 +255,10 @@ jobs:
           for image in "${images[@]}"
           do
             docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
+
+            docker push "${image}:${BASE_IMAGES_VERSION}" "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
           done
         working-directory: ./base-images
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ inputs.branch || github.ref_name }}
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
@@ -258,6 +267,8 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: false
+          build-contexts: |
+            bfd-platform-base-python:${{ needs.compute-matrix-and-version.outputs.base-images-version }}=docker-image://localhost:5000/bfd-platform-base-python:${{ needs.compute-matrix-and-version.outputs.base-images-version }}
           build-args: |
             base_version=${{ needs.compute-matrix-and-version.outputs.base-images-version }}
           tags: ${{ matrix.image.name }}:${{ inputs.versionTag }}
