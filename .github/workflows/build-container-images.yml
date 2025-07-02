@@ -243,6 +243,7 @@ jobs:
           do
             docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
           done
+          docker image ls -a
         working-directory: ./base-images
 
       - name: Checkout
