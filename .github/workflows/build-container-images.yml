@@ -95,7 +95,7 @@ env:
   BASE_IMAGES: |
     [
       "bfd-platform-base-java",
-      "bfd-mgmt-base-python"
+      "bfd-platform-base-python"
     ]
 
 defaults:
