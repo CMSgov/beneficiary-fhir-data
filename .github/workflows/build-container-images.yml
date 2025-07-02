@@ -228,6 +228,8 @@ jobs:
 
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
+        env:
+          BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
         run: |
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
