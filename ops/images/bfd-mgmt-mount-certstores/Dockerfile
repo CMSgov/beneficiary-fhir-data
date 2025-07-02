@@ -1,7 +1,8 @@
 ARG base_version
-ARG registry_uri
 
-FROM ${registry_uri}/bfd-platform-base-python:${base_version} AS deps
+# Image is expected to exist locally prior to build. Operators will need to pull the image from ECR
+# first before building
+FROM bfd-platform-base-python:${base_version} AS deps
 # Enable copy mode to support bind mount caching.
 ENV UV_LINK_MODE=copy
 # Change the working directory to the `app` directory
