@@ -1384,23 +1384,14 @@
             <properties>
                 <jib.skip>false</jib.skip>
                 <jib.goal>build</jib.goal>
-                <jib.namespace>${env.ECR_REPOSITORY_NAMESPACE}/</jib.namespace>
-                <!-- Ensure that the base image is pulled from ECR on release -->
-                <jib.from>${jib.namespace}bfd-mgmt-base-java:${project.version}</jib.from>
                 <maven.build.cache.enabled>true</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <apidocgen.skip>false</apidocgen.skip>
-                <bfdOps.skip>false</bfdOps.skip>
+                <bfdOps.skip>true</bfdOps.skip>
             </properties>
-            <distributionManagement>
-                <repository>
-                    <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
-                    <url>${env.CA_REPOSITORY_ENDPOINT}</url>
-                </repository>
-            </distributionManagement>
         </profile>
     </profiles>
 
