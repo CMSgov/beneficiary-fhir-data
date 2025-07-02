@@ -169,6 +169,8 @@ jobs:
     needs: compute-matrix-and-version
     runs-on:
       - codebuild-bfd-non-prod-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+    outputs:
+      registry: ${{ steps.ecr-login.outputs.registry }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -230,11 +232,13 @@ jobs:
         if: ${{ !inputs.skipBasePull }}
         env:
           BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
+          REGISTRY: ${{ needs.pull-base-images.outputs.registry }}
         run: |
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
             docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
+            docker tag "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" "${image}:${BASE_IMAGES_VERSION}"
           done
         working-directory: ./base-images
 
@@ -248,7 +252,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
-      - name: Build and Push
+      - name: Build image
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.image.dockerfile }}
