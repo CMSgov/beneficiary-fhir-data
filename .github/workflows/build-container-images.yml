@@ -181,6 +181,10 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Mkdir ./base-images
+        run: |
+          mkdir -p ./base-images
+
       - name: Pull base images
         env:
           REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -211,6 +215,10 @@ jobs:
         image: ${{ fromJson(needs.compute-matrix-and-version.outputs.matrix) }}
     runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
+      - name: Mkdir ./base-images
+        run: |
+          mkdir -p ./base-images
+
       - name: Download base image artifacts
         if: ${{ !inputs.skipBasePull }}
         uses: actions/download-artifact@v4
