@@ -223,6 +223,8 @@ jobs:
       matrix:
         image: ${{ fromJson(needs.compute-matrix-and-version.outputs.matrix) }}
     runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    env:
+      BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -253,8 +255,6 @@ jobs:
 
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
-        env:
-          BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
         run: |
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
@@ -265,6 +265,19 @@ jobs:
             docker push "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
           done
         working-directory: ./base-images
+
+      - name: Generate build-contexts
+        id: gen-build-contexts
+        run: |
+          build_contexts=""
+
+          readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            build_contexts+="$(printf "%s%n" "${image}:${BASE_IMAGES_VERSION}=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")"
+          done
+
+          echo "build-contexts=$build_contexts" >> "$GITHUB_OUTPUT"
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
