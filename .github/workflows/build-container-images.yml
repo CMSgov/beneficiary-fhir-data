@@ -168,7 +168,7 @@ jobs:
     if: ${{ !inputs.skipBasePull && needs.compute-matrix-and-version.outputs.matrix != '[]' }}
     needs: compute-matrix-and-version
     runs-on:
-      - codebuild-bfd-non-prod-platform-small-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-bfd-non-prod-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
