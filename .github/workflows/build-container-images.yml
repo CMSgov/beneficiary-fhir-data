@@ -230,6 +230,9 @@ jobs:
           name: base-images
           path: ./base-images
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
         env:
@@ -247,9 +250,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
