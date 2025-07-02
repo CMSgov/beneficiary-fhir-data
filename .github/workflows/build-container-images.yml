@@ -262,7 +262,7 @@ jobs:
             docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
 
             docker tag "${image}:${BASE_IMAGES_VERSION}" "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
-            docker push --all-tags "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
+            docker push "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
           done
         working-directory: ./base-images
 
