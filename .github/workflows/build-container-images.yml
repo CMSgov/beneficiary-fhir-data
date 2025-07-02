@@ -232,7 +232,7 @@ jobs:
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
-            docker load --input "${image}_${BFD_RELEASE}.tar.gz"
+            docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
           done
         working-directory: ./base-images
 
