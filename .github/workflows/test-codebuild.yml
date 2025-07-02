@@ -1,8 +1,6 @@
 name: "Testing CodeBuild"
 on:
-  push:
-    branches:
-      - "alessio/BFD-4085__new-deploy-pipeline"
+  - workflow_dispatch
 env:
   AWS_ACCOUNT_ID: ${{ secrets.NON_PROD_ACCOUNT_ID }}
 permissions:
