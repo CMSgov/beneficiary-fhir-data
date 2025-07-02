@@ -24,6 +24,16 @@ on:
         default: "*"
         type: string
         required: true
+      tagLatest:
+        description: Tags all images with the "latest" tag before upload; assumes immutable ECR
+        type: boolean
+        default: false
+      skipBasePull:
+        description: >-
+          If true, skips pulling base images. Use when building only base images to significantly
+          speed up build time
+        type: boolean
+        default: false
       baseImagesVersion:
         description: >-
           Version string tag for the Base Images that will be used to build application images.
@@ -57,6 +67,16 @@ on:
         default: "*"
         type: string
         required: true
+      tagLatest:
+        description: Tags all images with the "latest" tag before upload; assumes immutable ECR
+        type: boolean
+        default: false
+      skipBasePull:
+        description: >-
+          If true, skips pulling base images. Use when building only base images to significantly
+          speed up build time
+        type: boolean
+        default: false
       baseImagesVersion:
         description: >-
           Version string tag for the Base Images that will be used to build application images.
@@ -70,6 +90,13 @@ permissions:
 
 env:
   AWS_REGION: ${{ inputs.awsRegion }}
+  NON_PROD_ACCOUNT_ID: ${{ secrets.NON_PROD_ACCOUNT_ID }}
+  PROD_ACCOUNT_ID: ${{ secrets.PROD_ACCOUNT_ID }}
+  BASE_IMAGES: |
+    [
+      "bfd-platform-base-java",
+      "bfd-mgmt-base-python"
+    ]
 
 defaults:
   run:
@@ -82,7 +109,15 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       base-images-version: ${{ inputs.baseImagesVersion || steps.determine-latest-release.outputs.release }}
     steps:
+      - name: Validate Inputs
+        run: |
+          echo "Validating inputs to ensure they conform to expected formats..."
+          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Determine latest release version
         if: inputs.baseImagesVersion == ''
@@ -129,18 +164,69 @@ jobs:
           addInclude: "false"
           inputFile: ".github/workflows/build_container_images_matrix.json"
 
+  pull-base-images:
+    if: ${{ !inputs.skipBasePull && needs.compute-matrix-and-version.outputs.matrix != '[]' }}
+    needs: compute-matrix-and-version
+    runs-on:
+      - codebuild-bfd-non-prod-platform-small-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
+          role-session-name: build-container-images-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull base images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker pull "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
+            docker save "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" | gzip > "${image}_${BASE_IMAGES_VERSION}.tar.gz"
+          done
+        working-directory: ./base-images
+
+      - name: Upload base image artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-image
+          path: base-images/*.tar.gz
+          retention-days: 1
+
   build-images:
     if: needs.compute-matrix-and-version.outputs.matrix != '[]'
-    needs: compute-matrix-and-version
+    needs: [compute-matrix-and-version, pull-base-images]
     strategy:
       matrix:
         image: ${{ fromJson(needs.compute-matrix-and-version.outputs.matrix) }}
     runs-on: ${{ matrix.image.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
-      - name: Validate Inputs
+      - name: Download base image artifacts
+        if: ${{ !inputs.skipBasePull }}
+        uses: actions/download-artifact@v4
+        with:
+          name: base-images
+          path: ./base-images
+
+      - name: Load base images
+        if: ${{ !inputs.skipBasePull }}
         run: |
-          echo "Validating inputs to ensure they conform to expected formats..."
-          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+          readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker load --input "${image}_${BFD_RELEASE}.tar.gz"
+          done
+        working-directory: ./base-images
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -148,41 +234,17 @@ jobs:
           fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: build-images
-          aws-region: ${{ inputs.awsRegion }}
-
-      - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registries: ${{ secrets.AWS_ACCOUNT_ID }}
-
-      - name: Login to Amazon ECR Public
-        id: login-ecr-public
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
-
-      - name: Get ECR Registry Namespace
-        run: |
-          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
-          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
-          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
-          push: true
+          push: false
           build-args: |
-            registry_uri=${{ env.ECR_REPOSITORY_NAMESPACE }}
             base_version=${{ needs.compute-matrix-and-version.outputs.base-images-version }}
           tags: ${{ env.ECR_REPOSITORY_NAMESPACE }}/${{ matrix.image.name }}:${{ inputs.versionTag }}
           # AWS Lambda does not support multi-platform images, something that is enabled by default
