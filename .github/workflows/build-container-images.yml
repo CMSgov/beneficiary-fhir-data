@@ -169,8 +169,6 @@ jobs:
     needs: compute-matrix-and-version
     runs-on:
       - codebuild-bfd-non-prod-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
-    outputs:
-      registry: ${{ steps.ecr-login.outputs.registry }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -198,7 +196,11 @@ jobs:
           for image in "${images[@]}"
           do
             docker pull "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
-            docker save "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" | gzip > "${image}_${BASE_IMAGES_VERSION}.tar.gz"
+
+            docker tag "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" "${image}:${BASE_IMAGES_VERSION}"
+            docker rmi "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
+
+            docker save "${image}:${BASE_IMAGES_VERSION}" | gzip > "${image}_${BASE_IMAGES_VERSION}.tar.gz"
           done
         working-directory: ./base-images
 
@@ -232,13 +234,11 @@ jobs:
         if: ${{ !inputs.skipBasePull }}
         env:
           BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
-          REGISTRY: ${{ needs.pull-base-images.outputs.registry }}
         run: |
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
             docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
-            docker tag "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" "${image}:${BASE_IMAGES_VERSION}"
           done
         working-directory: ./base-images
 
