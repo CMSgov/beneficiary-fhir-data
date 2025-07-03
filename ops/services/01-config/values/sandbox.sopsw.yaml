@@ -65,7 +65,7 @@
 /bfd/${env}/database/nonsensitive/rds_cluster_identifier: bfd-${env}-aurora-cluster
 /bfd/${env}/database/nonsensitive/rds_security_group: bfd-${env}-aurora-cluster
 /bfd/${env}/database/nonsensitive/rds_instance_class: db.r8g.2xlarge
-/bfd/${env}/database/nonsensitive/scaling/min_nodes: 1
+/bfd/${env}/database/nonsensitive/scaling/min_nodes: 0
 /bfd/${env}/database/nonsensitive/scaling/max_nodes: 3
 /bfd/${env}/database/nonsensitive/scaling/cpu_target: 50
 /bfd/${env}/database/nonsensitive/scaling/cooldown/scale_in: 300
