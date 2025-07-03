@@ -99,7 +99,6 @@ env:
     ]
   ACCOUNT_ROLE_MAP: |
     {
-      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
       "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
     }
 defaults:
@@ -330,8 +329,9 @@ jobs:
       - name: Get role ARN
         id: get-role-arn
         run: |
-          role_arn="$(jq -r --arg account_type="${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+          role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
 
+          echo "::add-mask::$role_arn"
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download all image artifacts
