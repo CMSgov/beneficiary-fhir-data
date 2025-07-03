@@ -165,12 +165,14 @@ jobs:
           inputFile: ".github/workflows/build_container_images_matrix.json"
 
   pull-base-images:
-    if: ${{ !inputs.skipBasePull && needs.compute-matrix-and-version.outputs.matrix != '[]' }}
+    if: needs.compute-matrix-and-version.outputs.matrix != '[]'
     needs: compute-matrix-and-version
-    runs-on:
-      - codebuild-bfd-non-prod-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+    # This step is a no-op if "skipBasePull" is true, so we don't want to launch a codebuild runner
+    # if we don't need to
+    runs-on: ${{ !inputs.skipBasePull && format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt)  || 'ubuntu24.04' }}
     steps:
       - name: Configure AWS credentials
+        if: ${{ !inputs.skipBasePull }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
@@ -178,14 +180,17 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
+        if: ${{ !inputs.skipBasePull }}
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Mkdir ./base-images
+        if: ${{ !inputs.skipBasePull }}
         run: |
           mkdir -p ./base-images
 
       - name: Pull base images
+        if: ${{ !inputs.skipBasePull }}
         env:
           REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
@@ -205,6 +210,7 @@ jobs:
         working-directory: ./base-images
 
       - name: Upload base image artifacts
+        if: ${{ !inputs.skipBasePull }}
         uses: actions/upload-artifact@v4
         with:
           name: base-images
