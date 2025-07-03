@@ -97,7 +97,11 @@ env:
       "bfd-platform-base-java",
       "bfd-platform-base-python"
     ]
-
+  ACCOUNT_ROLE_MAP: |
+    {
+      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
+      "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+    }
 defaults:
   run:
     shell: bash
@@ -184,11 +188,6 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Mkdir ./base-images
-        if: ${{ !inputs.skipBasePull }}
-        run: |
-          mkdir -p ./base-images
-
       - name: Pull base images
         if: ${{ !inputs.skipBasePull }}
         env:
@@ -205,16 +204,15 @@ jobs:
             docker tag "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" "${image}:${BASE_IMAGES_VERSION}"
             docker rmi "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
 
-            docker save "${image}:${BASE_IMAGES_VERSION}" | gzip > "${image}_${BASE_IMAGES_VERSION}.tar.gz"
+            docker save "${image}:${BASE_IMAGES_VERSION}" > "${{ runner.temp }}/${image}_${BASE_IMAGES_VERSION}.tar"
           done
-        working-directory: ./base-images
 
       - name: Upload base image artifacts
         if: ${{ !inputs.skipBasePull }}
         uses: actions/upload-artifact@v4
         with:
           name: base-images
-          path: base-images/*.tar.gz
+          path: ${{ runner.temp }}/*.tar
           retention-days: 1
 
   build-images:
@@ -243,17 +241,12 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Mkdir ./base-images
-        if: ${{ !inputs.skipBasePull }}
-        run: |
-          mkdir -p ./base-images
-
       - name: Download base image artifacts
         if: ${{ !inputs.skipBasePull }}
         uses: actions/download-artifact@v4
         with:
           name: base-images
-          path: ./base-images
+          path: ${{ runner.temp }}
 
       - name: Delete base image artifacts
         if: ${{ !inputs.skipBasePull }}
@@ -267,12 +260,12 @@ jobs:
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
-            docker load --input "${image}_${BASE_IMAGES_VERSION}.tar.gz"
+            docker load --input "${image}_${BASE_IMAGES_VERSION}.tar"
 
             docker tag "${image}:${BASE_IMAGES_VERSION}" "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
             docker push "localhost:5000/${image}:${BASE_IMAGES_VERSION}"
           done
-        working-directory: ./base-images
+        working-directory: ${{ runner.temp }}
 
       - name: Generate build-contexts
         if: ${{ !inputs.skipBasePull }}
@@ -314,5 +307,77 @@ jobs:
           platforms: ${{ matrix.image.platform }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=docker,dest=${{ runner.temp }}/${{ matrix.image.name }}.tar
         env:
           DOCKER_BUILDKIT: 1
+
+      - name: Upload image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image.name }}
+          path: ${{ runner.temp }}/*.tar
+          retention-days: 1
+
+  push-images:
+    if: needs.compute-matrix-and-version.outputs.matrix != '[]'
+    needs: [compute-matrix-and-version, pull-base-images, build-images]
+    strategy:
+      matrix:
+        # account: ["prod", "non-prod"]
+        account: ["non-prod"]
+    runs-on: codebuild-bfd-${{ matrix.account }}-small-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Get role ARN
+        id: get-role-arn
+        run: |
+          role_arn="$(jq -r --arg account_type="${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Download all image artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}
+          merge-multiple: true
+
+      - name: Delete all image artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: '*'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: build-container-images-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push jib images
+        env:
+          TAG: ${{ inputs.versionTag }}
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          PUSH_LATEST: ${{ inputs.tagLatest }}
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          for image_filename in ./*.tar
+          do
+            docker load --input "$image_filename"
+
+            image="$(basename "$image_filename")"
+            docker tag "$image:$TAG" "$REGISTRY/$image:$TAG"
+            if [[ $PUSH_LATEST == "true" ]]; then
+              # Remove the "latest" tag from the existing latest image
+              aws ecr batch-delete-image --repository-name "$image" --image-ids imageTag=latest
+              # Tag the new release image as "latest"
+              docker tag "$image:$TAG" "$REGISTRY/$image:latest"
+            fi
+
+            docker push --all-tags "$image:$TAG"
+          done
+        working-directory: ${{ runner.temp }}
+
