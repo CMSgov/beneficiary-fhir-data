@@ -23,7 +23,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidPartACompositeId() {
-    String validCoverageId = "part-a-405764107";
+    var validCoverageId = "part-a-405764107";
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");

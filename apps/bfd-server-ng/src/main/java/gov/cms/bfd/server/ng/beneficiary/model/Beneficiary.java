@@ -5,11 +5,16 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Organization;
@@ -46,6 +51,22 @@ public class Beneficiary {
   @Embedded private DeathDate deathDate;
   @Embedded private Identity identity;
 
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private Set<BeneficiaryEntitlement> beneficiaryEntitlements;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private Set<BeneficiaryThirdParty> beneficiaryThirdParties;
+
+  @OneToOne
+  @JoinColumn(name = "bene_sk")
+  private BeneficiaryStatus beneficiaryStatus;
+
+  @OneToOne
+  @JoinColumn(name = "bene_sk")
+  private BeneficiaryEntitlementReason beneficiaryEntitlementReason;
+
   /**
    * Transforms the beneficiary record to its FHIR representation.
    *
@@ -74,8 +95,7 @@ public class Beneficiary {
 
   /**
    * Creates an initial, partially populated FHIR Coverage resource using data directly available on
-   * this Beneficiary entity. Further enrichment with part-specific details and status/reason codes
-   * will be done by the handler.
+   * this Beneficiary entity. Further enrichment with Extensions will be done by the handler.
    *
    * @param fullCompositeId The full ID for the Coverage resource.
    * @param coveragePart the coverage Part
