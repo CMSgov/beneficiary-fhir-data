@@ -301,7 +301,7 @@ jobs:
           # Not obvious, but the only way to emit a newline is by, literally, using a newline.
           # See https://github.com/orgs/community/discussions/26263#discussioncomment-3251069
           build-contexts: |-
-            ${{ join(fromJson(steps.gen-build-contexts.outputs.build-contexts), '
+            ${{ join(fromJson(steps.gen-build-contexts.outputs.build-contexts || '[]'), '
             ') }}
           build-args: |
             base_version=${{ needs.compute-matrix-and-version.outputs.base-images-version }}
