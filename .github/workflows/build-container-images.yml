@@ -169,7 +169,7 @@ jobs:
     needs: compute-matrix-and-version
     # This step is a no-op if "skipBasePull" is true, so we don't want to launch a codebuild runner
     # if we don't need to
-    runs-on: ${{ !inputs.skipBasePull && format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt)  || 'ubuntu24.04' }}
+    runs-on: ${{ !inputs.skipBasePull && format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt)  || 'ubuntu-24.04' }}
     steps:
       - name: Configure AWS credentials
         if: ${{ !inputs.skipBasePull }}
