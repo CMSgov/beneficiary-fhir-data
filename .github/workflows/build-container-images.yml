@@ -269,16 +269,18 @@ jobs:
       - name: Generate build-contexts
         id: gen-build-contexts
         run: |
-          build_contexts=""
+          build_contexts=()
 
           readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
-            build_contexts+="$(printf "%s%n" "${image}:${BASE_IMAGES_VERSION}=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")"
-            build_contexts+="$(printf "%s%n" "${image}:latest=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")"
+            build_contexts+=("${image}:${BASE_IMAGES_VERSION}=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")
+            build_contexts+=("${image}:latest=docker-image://localhost:5000/${image}:${BASE_IMAGES_VERSION}")
           done
 
-          echo "build-contexts=$build_contexts" >> "$GITHUB_OUTPUT"
+          build_contexts_json="$(jq -c -n '$ARGS.positional' --args "${build_contexts[@]}")"
+
+          echo "build-contexts=$build_contexts_json" >> "$GITHUB_OUTPUT"
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
@@ -287,8 +289,11 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
           push: false
-          build-contexts: |
-            ${{ steps.gen-build-contexts.outputs.build-contexts }}
+          # Not obvious, but the only way to emit a newline is by, literally, using a newline.
+          # See https://github.com/orgs/community/discussions/26263#discussioncomment-3251069
+          build-contexts: |-
+            ${{ join(fromJson(steps.gen-build-contexts.outputs.build-contexts), '
+            ') }}
           build-args: |
             base_version=${{ needs.compute-matrix-and-version.outputs.base-images-version }}
           tags: ${{ matrix.image.name }}:${{ inputs.versionTag }}
