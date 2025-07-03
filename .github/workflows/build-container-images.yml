@@ -244,6 +244,7 @@ jobs:
           driver-opts: network=host
 
       - name: Mkdir ./base-images
+        if: ${{ !inputs.skipBasePull }}
         run: |
           mkdir -p ./base-images
 
@@ -255,6 +256,7 @@ jobs:
           path: ./base-images
 
       - name: Delete base image artifacts
+        if: ${{ !inputs.skipBasePull }}
         uses: GeekyEggo/delete-artifact@v5.1.0
         with:
           name: base-images
@@ -273,6 +275,7 @@ jobs:
         working-directory: ./base-images
 
       - name: Generate build-contexts
+        if: ${{ !inputs.skipBasePull }}
         id: gen-build-contexts
         run: |
           build_contexts=()
