@@ -314,7 +314,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.image.name }}
-          path: ${{ runner.temp }}/*.tar
+          path: ${{ runner.temp }}/${{ matrix.image.name }}.tar
           retention-days: 1
 
   push-images:
