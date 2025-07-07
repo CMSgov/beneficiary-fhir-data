@@ -375,9 +375,11 @@ jobs:
               aws ecr batch-delete-image --repository-name "$image" --image-ids imageTag=latest
               # Tag the new release image as "latest"
               docker tag "$image:$TAG" "$REGISTRY/$image:latest"
+              # Push "latest" tag
+              docker push "$REGISTRY/$image:latest"
             fi
 
-            docker push --all-tags "$REGISTRY/$image:$TAG"
+            docker push "$REGISTRY/$image:$TAG"
           done
         working-directory: ${{ runner.temp }}
 
