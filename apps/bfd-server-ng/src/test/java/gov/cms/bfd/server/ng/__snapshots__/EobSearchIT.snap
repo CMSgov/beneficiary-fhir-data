@@ -6905,7 +6905,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "sequence" : 4,
         "timingPeriod" : {
           "end" : "2021-10-03",
-          "start" : "2021-09-27T00:00:00+00:00"
+          "start" : "2021-09-27"
         }
       }, {
         "category" : {
@@ -8551,7 +8551,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "sequence" : 4,
         "timingPeriod" : {
           "end" : "2021-10-03",
-          "start" : "2021-09-27T00:00:00+00:00"
+          "start" : "2021-09-27"
         }
       }, {
         "category" : {
@@ -10197,7 +10197,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "sequence" : 4,
         "timingPeriod" : {
           "end" : "2021-10-03",
-          "start" : "2021-09-27T00:00:00+00:00"
+          "start" : "2021-09-27"
         }
       }, {
         "category" : {
