@@ -368,7 +368,7 @@ jobs:
           do
             docker load --input "$image_filename"
 
-            image="$(basename "$image_filename")"
+            image="$(basename "$image_filename" .tar)"
             docker tag "$image:$TAG" "$REGISTRY/$image:$TAG"
             if [[ $PUSH_LATEST == "true" ]]; then
               # Remove the "latest" tag from the existing latest image
