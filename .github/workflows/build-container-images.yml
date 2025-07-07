@@ -99,8 +99,10 @@ env:
     ]
   ACCOUNT_ROLE_MAP: |
     {
+      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
       "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
     }
+
 defaults:
   run:
     shell: bash
@@ -322,8 +324,7 @@ jobs:
     needs: [compute-matrix-and-version, pull-base-images, build-images]
     strategy:
       matrix:
-        # account: ["prod", "non-prod"]
-        account: ["non-prod"]
+        account: ["prod", "non-prod"]
     runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Get role ARN
