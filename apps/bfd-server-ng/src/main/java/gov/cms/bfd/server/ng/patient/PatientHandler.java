@@ -42,7 +42,7 @@ public class PatientHandler {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(Beneficiary::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   /**
@@ -56,7 +56,7 @@ public class PatientHandler {
     var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
 
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(Beneficiary::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
