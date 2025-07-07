@@ -377,7 +377,7 @@ jobs:
               docker tag "$image:$TAG" "$REGISTRY/$image:latest"
             fi
 
-            docker push --all-tags "$image:$TAG"
+            docker push --all-tags "$REGISTRY/$image:$TAG"
           done
         working-directory: ${{ runner.temp }}
 
