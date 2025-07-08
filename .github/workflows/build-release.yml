@@ -117,6 +117,7 @@ jobs:
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
       imagesCsv: "bfd-platform-base-java, bfd-platform-base-python"
       cleanupImageArtifacts: false # Keep the built images around so that they can be used for Jib
+      skipBasePull: true # We're building the base images, so don't pull them
     secrets: inherit
 
   run-mvn-release:
