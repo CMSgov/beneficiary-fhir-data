@@ -144,7 +144,7 @@ jobs:
       - name: Retrieve base java image
         uses: actions/download-artifact@v4
         with:
-          name: bfd-platform-base-java
+          pattern: '*bfd-platform-base-java*'
           path: ${{ runner.temp }}
 
       - name: Load base image into Docker
