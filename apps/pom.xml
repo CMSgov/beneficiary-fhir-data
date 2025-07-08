@@ -1383,7 +1383,6 @@
             <id>perform-release</id>
             <properties>
                 <jib.skip>false</jib.skip>
-                <jib.goal>build</jib.goal>
                 <maven.build.cache.enabled>true</maven.build.cache.enabled>
                 <!-- Source jars are large and we don't need to publish them. -->
                 <maven.source.skip>true</maven.source.skip>
