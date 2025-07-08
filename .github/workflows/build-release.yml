@@ -249,6 +249,9 @@ jobs:
       matrix:
         account: ["prod", "non-prod"]
     runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+    env:
+      BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
+      BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
     steps:
       - name: Get role ARN
         id: get-role-arn
