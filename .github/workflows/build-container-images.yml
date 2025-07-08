@@ -34,6 +34,12 @@ on:
           speed up build time
         type: boolean
         default: false
+      cleanupImageArtifacts:
+        description: >-
+          If true, the built Image GitHub Artifacts will be immediately deleted once pushed to ECR.
+          Defaults to true
+        type: boolean
+        default: true
       baseImagesVersion:
         description: >-
           Version string tag for the Base Images that will be used to build application images.
@@ -77,6 +83,12 @@ on:
           speed up build time
         type: boolean
         default: false
+      cleanupImageArtifacts:
+        description: >-
+          If true, the built Image GitHub Artifacts will be immediately deleted once pushed to ECR.
+          Defaults to true
+        type: boolean
+        default: true
       baseImagesVersion:
         description: >-
           Version string tag for the Base Images that will be used to build application images.
@@ -342,6 +354,7 @@ jobs:
           merge-multiple: true
 
       - name: Delete all image artifacts
+        if: ${{ inputs.cleanupImageArtifacts }}
         uses: GeekyEggo/delete-artifact@v5.1.0
         with:
           name: '*'
