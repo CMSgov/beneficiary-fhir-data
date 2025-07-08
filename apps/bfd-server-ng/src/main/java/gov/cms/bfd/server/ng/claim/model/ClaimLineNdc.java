@@ -26,8 +26,7 @@ class ClaimLineNdc {
     var detail = new ExplanationOfBenefit.DetailComponent();
     detail.setSequence(1);
     detail.setProductOrService(
-        new CodeableConcept(
-            new Coding().setSystem(SystemUrls.NDC).setCode(String.valueOf(ndcCode))));
+        new CodeableConcept(new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode.get())));
     ndcQuantityQualifierCode.ifPresent(c -> detail.setQuantity(c.toFhir(ndcQuantity)));
     return Optional.of(detail);
   }
