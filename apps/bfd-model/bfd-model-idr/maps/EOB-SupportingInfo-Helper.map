@@ -24,6 +24,10 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.CLM_HHA_LUP_IND_CD as lupIndCd -> tgt then addLupa(src, tgt) "Add LUPA Indicator Code";
     src.CLM_HHA_RFRL_CD as rfrlCode -> tgt then addRfRl(src, tgt) "Add HHA referral code";
 
+    src.CLM_LINE_HCT_HGB_TYPE_CD as typeCd where typeCd != '~' -> tgt.value = create('Reference') as tgtReference then{
+        src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-",rowNum) "Add observation num";
+     } "Add reference";
+     
 }
 //timingPeriod
 group addAdmissionPeriod(source src: SupportingInfoComponent, target tgt: BackboneElement){

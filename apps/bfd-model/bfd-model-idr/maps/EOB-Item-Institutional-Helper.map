@@ -33,10 +33,11 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_RDCD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReducedAmt(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_MSP1_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP1(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_MSP2_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP2(amt, tgtAdjudication) "Add amount";
-    src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
-    
-    src.CLM_LINE_INSTNL_REV_CTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
+    src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCoinsuranceAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_MDCR_COINSRNC_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCoinsuranceAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_BENE_PRMRY_PYR_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addBenePrmyAmt(amt, tgtAdjudication) "Add amount";
 
+    src.CLM_LINE_INSTNL_REV_CTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
 
     //These fields never ended up getting mapped in v2. We should actively seek feedback on their placement. They appeared to all show up in extension in v1, anyway.
     src.CLM_REV_DSCNT_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addAdjudicationRevCenterDiscountCode(inputCode, tgtExtension) "Add discount code";
@@ -45,7 +46,34 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_REV_PMT_MTHD_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMthdCd(inputCode, tgtExtension) "Add  code";
     src.CLM_REV_CNTR_STUS_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addCntrStusCd(inputCode, tgtExtension) "Add  code";
 
+    //These are generally on professional claims 
+    src.CLM_LINE_ANSTHSA_UNIT_CNT as anesthesiaCnt -> tgt.extension = create('Extension') as tgtExtension then addAnesthesia(anesthesiaCnt, tgtExtension) "Add anesthesia unit counts";
+    src.CLM_LINE_RX_NUM as rxNum -> tgt.extension = create('Extension') as tgtExtension then addClaimLineRxNum(rxNum, tgtExtension) "Add rx num";
 
+
+    src.CLM_POS_CD as placeCode -> tgt.location = create('CodeableConcept') as tgtCC then{
+        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+            tgtCoding.code=placeCode "Add system and code";
+        } "Add coding";
+    } "Add location codeable concept";
+    
+    src.CLM_LINE_FROM_DT as profFromDate where profFromDate>'2015-01-01' -> tgt.serviced = create('Period') as tgtPeriod then{
+        profFromDate -> tgtPeriod.start = profFromDate "add start";
+        src.CLM_LINE_THRU_DT as profThruDate -> tgtPeriod.end = profThruDate "add end";
+    } "Add serviced period";
+
+    //Note, it's not mapped in FML, but diagnosisSequence shall be mapped to the correct diagnosis code in relation to CLM_LINE_DGNS_CD
+
+}
+
+group addAnesthesia(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT" "Add extension url";
+    src as inputCount -> tgt.value = cast(inputCount, "decimal") "Set line anesthesia count";
+}
+group addClaimLineRxNum(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM" "Add extension url";
+    src as inputNum -> tgt.valueString = inputNum "Set claim line RX Num";
 }
 
 //This is new, seek feedback. 
@@ -255,6 +283,22 @@ group addAdjudicationRateAmt(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add coding 1";
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RATE_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineCoinsuranceAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "coinsurance") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_MDCR_COINSRNC_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addBenePrmyAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "priorpayerpaid") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_BENE_PRMRY_PYR_PD_AMT") "Add coding 2";
     } "add category";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }

@@ -296,6 +296,42 @@
                         "code": "date"
                     }
                 ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM",
+                "path": "SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM",
+                "label": "HCT/HGB Test Result Value",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD",
+                "path": "SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD",
+                "label": "HCT/HGB Test Type",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_CARR_CLNCL_LAB_NUM",
+                "path": "SupportingInfoComponent.CLM_LINE_CARR_CLNCL_LAB_NUM",
+                "label": "CLIA Lab Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]
