@@ -388,6 +388,7 @@ jobs:
 
   cleanup-artifacts:
     if: ${{ !cancelled() && !inputs.cleanupImageArtifacts }}
+    needs: push-images
     runs-on: ubuntu-24.04
     steps:
       - name: Delete all image artifacts

@@ -298,9 +298,20 @@ jobs:
           done
         working-directory: ${{ runner.temp }}
 
+  cleanup-artifacts:
+    if: ${{ !cancelled() }}
+    needs: push-jib-images
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete all image artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: '*'
+          failOnError: false
+
   build-other-images:
     uses: ./.github/workflows/build-container-images.yml
-    needs: [compute-version-strings, run-mvn-release]
+    needs: [compute-version-strings, run-mvn-release, cleanup-artifacts]
     permissions:
       contents: read
       id-token: write
@@ -387,14 +398,3 @@ jobs:
           tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
           name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
-
-  cleanup-artifacts:
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Delete all image artifacts
-        uses: GeekyEggo/delete-artifact@v5.1.0
-        with:
-          name: '*'
-          failOnError: false
-
