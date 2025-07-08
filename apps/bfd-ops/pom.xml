@@ -23,18 +23,6 @@
     </properties>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <configuration>
-                        <!-- We do want to publish this project to CodeArtifact. -->
-                        <skip>false</skip>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <!-- Copies contents of the ops directory prior to assembly. -->
             <!-- We have to use antrun for this because resource and assembly plugins preserve symlinks. -->

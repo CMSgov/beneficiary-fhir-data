@@ -153,14 +153,6 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <configuration>
-                        <!-- We do want to publish this project to CodeArtifact. -->
-                        <skip>false</skip>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${maven.assembly.plugin.version}</version>
                     <configuration>
