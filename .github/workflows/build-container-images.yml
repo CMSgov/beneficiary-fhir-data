@@ -357,7 +357,7 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Push jib images
+      - name: Push built image(s)
         env:
           TAG: ${{ inputs.versionTag }}
           REGISTRY: ${{ steps.ecr-login.outputs.registry }}
