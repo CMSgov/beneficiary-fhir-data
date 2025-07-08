@@ -24,7 +24,7 @@ def psql_url():
         conn.execute(open("./bfd.sql", "r").read())  # type: ignore
         conn.commit()
 
-        load_from_csv(conn, "./sample_data")
+        load_from_csv(conn, "./test_samples1")
 
         yield psql_url
 

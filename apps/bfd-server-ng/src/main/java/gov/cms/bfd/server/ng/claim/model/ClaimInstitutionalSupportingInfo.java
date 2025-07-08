@@ -4,12 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_admsn_src_cd")
-  private ClaimAdmissionSourceCode claimAdmissionSourceCode;
+  private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;
 
   @Column(name = "bene_ptnt_stus_cd")
   private PatientStatusCode patientStatusCode;
@@ -24,11 +26,13 @@ class ClaimInstitutionalSupportingInfo {
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return List.of(
-        claimAdmissionSourceCode.toFhir(supportingInfoFactory),
-        patientStatusCode.toFhir(supportingInfoFactory),
-        claimAdmissionTypeCode.toFhir(supportingInfoFactory),
-        mcoPaidSwitch.toFhir(supportingInfoFactory),
-        diagnosisDrgCode.toFhir(supportingInfoFactory));
+    return Stream.of(
+            claimAdmissionSourceCode.map(c -> c.toFhir(supportingInfoFactory)),
+            Optional.of(patientStatusCode.toFhir(supportingInfoFactory)),
+            Optional.of(claimAdmissionTypeCode.toFhir(supportingInfoFactory)),
+            Optional.of(mcoPaidSwitch.toFhir(supportingInfoFactory)),
+            Optional.of(diagnosisDrgCode.toFhir(supportingInfoFactory)))
+        .flatMap(Optional::stream)
+        .toList();
   }
 }

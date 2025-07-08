@@ -1,8 +1,16 @@
 package gov.cms.bfd.server.ng;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Resource;
 
 /** FHIR-related utility methods. */
 public class FhirUtil {
@@ -39,5 +47,60 @@ public class FhirUtil {
     } else {
       return SystemUrls.CMS_HCPCS;
     }
+  }
+
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
+   *
+   * @param resources resources
+   * @param batchLastUpdated last
+   * @return bundle
+   */
+  public static Bundle bundleOrDefault(
+      Stream<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
+    return bundleOrDefault(resources.toList(), batchLastUpdated);
+  }
+
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
+   *
+   * @param resources resources
+   * @param batchLastUpdated last
+   * @return bundle
+   */
+  public static Bundle bundleOrDefault(
+      List<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
+    if (resources.isEmpty()) {
+      return defaultBundle(batchLastUpdated);
+    }
+    return getBundle(resources.stream());
+  }
+
+  /**
+   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
+   * empty.
+   *
+   * @param resource resource
+   * @param batchLastUpdated last
+   * @return bundle
+   */
+  public static Bundle bundleOrDefault(
+      Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
+    return resource
+        .map(value -> bundleOrDefault(List.of(value), batchLastUpdated))
+        .orElseGet(() -> defaultBundle(batchLastUpdated));
+  }
+
+  private static Bundle getBundle(Stream<Resource> resources) {
+    return new Bundle()
+        .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
+  }
+
+  private static Bundle defaultBundle(Supplier<ZonedDateTime> batchLastUpdated) {
+    var bundle = new Bundle();
+    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
+    return bundle;
   }
 }

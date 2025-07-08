@@ -5,15 +5,14 @@ import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /** Repository for querying beneficiary information. */
-@Component
+@Repository
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private EntityManager entityManager;
@@ -105,6 +104,20 @@ public class BeneficiaryRepository {
   }
 
   /**
+   * Retrieves a {@link Beneficiary} record by its ID and last updated timestamp.
+   *
+   * @param beneSk bene surrogate key
+   * @param lastUpdatedRange last updated search range
+   * @param partTypeCode Part type
+   * @return beneficiary record
+   */
+  public Optional<Beneficiary> searchCurrentBeneficiary(
+      long beneSk, String partTypeCode, DateTimeRange lastUpdatedRange) {
+    return searchCurrentBeneficiary(
+        "beneSk", String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
+  }
+
+  /**
    * Retrieves the xrefSk from the beneSk.
    *
    * @param beneSk original beneSk
@@ -135,19 +148,19 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT MAX(p.batchCompletionTimestamp)
-              FROM LoadProgress p
-              WHERE p.tableName IN (
-                "idr.beneficiary",
-                "idr.beneficiary_history",
-                "idr.beneficiary_mbi_id"
-              )
-              """,
+            SELECT MAX(p.batchCompletionTimestamp)
+            FROM LoadProgress p
+            WHERE p.tableName IN (
+              "idr.beneficiary",
+              "idr.beneficiary_history",
+              "idr.beneficiary_mbi_id"
+            )
+            """,
             ZonedDateTime.class)
         .getResultList()
         .stream()
         .findFirst()
-        .orElse(ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC));
+        .orElse(DateUtil.MIN_DATETIME);
   }
 
   private Optional<Beneficiary> searchBeneficiary(
@@ -168,6 +181,40 @@ public class BeneficiaryRepository {
                 lastUpdatedRange.getUpperBoundSqlOperator()),
             Beneficiary.class)
         .setParameter("id", idColumnValue)
+        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+        .getResultList()
+        .stream()
+        .findFirst();
+  }
+
+  private Optional<Beneficiary> searchCurrentBeneficiary(
+      String idColumnName,
+      String idColumnValue,
+      String partTypeCode,
+      DateTimeRange lastUpdatedRange) {
+    return entityManager
+        .createQuery(
+            String.format(
+                """
+                            SELECT b
+                            FROM Beneficiary b
+                            JOIN b.beneficiaryThirdParties tp
+                            JOIN b.beneficiaryEntitlements be
+                            WHERE b.%s = :id
+                              AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+                              AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                              AND b.beneSk = b.xrefSk
+                              AND tp.id.thirdPartyTypeCode = :partTypeCode
+                              AND be.id.medicareEntitlementTypeCode = :partTypeCode
+                            """,
+                idColumnName,
+                lastUpdatedRange.getLowerBoundSqlOperator(),
+                lastUpdatedRange.getUpperBoundSqlOperator()),
+            Beneficiary.class)
+        .setParameter("id", idColumnValue)
+        .setParameter("partTypeCode", partTypeCode)
         .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
         .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()

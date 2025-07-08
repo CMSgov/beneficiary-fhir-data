@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -16,6 +17,10 @@ public class DateUtil {
    */
   public static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
+  /** Minimum possible {@link ZonedDateTime}. */
+  public static final ZonedDateTime MIN_DATETIME =
+      ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC);
+
   private DateUtil() {}
 
   /**
@@ -29,7 +34,9 @@ public class DateUtil {
   }
 
   /**
-   * Converts a LocalDate to a FHIR DateTimeType with DAY precision. The underlying instant is
+   * Converts the {@link ZonedDateTime} to a {@link Date} object with the same date and time info.
+   *
+   * <p>Converts a LocalDate to a FHIR DateTimeType with DAY precision. The underlying instant is
    * midnight UTC of the given LocalDate.
    *
    * @param localDate The LocalDate to convert.
