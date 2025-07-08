@@ -266,6 +266,7 @@ jobs:
         uses: GeekyEggo/delete-artifact@v5.1.0
         with:
           name: base-images
+          failOnError: false
 
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
@@ -358,6 +359,7 @@ jobs:
         uses: GeekyEggo/delete-artifact@v5.1.0
         with:
           name: '*'
+          failOnError: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

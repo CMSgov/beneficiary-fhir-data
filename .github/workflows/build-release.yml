@@ -151,6 +151,7 @@ jobs:
         uses: GeekyEggo/delete-artifact@v5.1.0
         with:
           name: '*'
+          failOnError: false
 
       - name: Load base image into Docker
         run: |
@@ -267,6 +268,7 @@ jobs:
         uses: GeekyEggo/delete-artifact@v5.1.0
         with:
           name: jib-images
+          failOnError: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
