@@ -147,12 +147,6 @@ jobs:
           name: bfd-platform-base-java
           path: ${{ runner.temp }}
 
-      - name: Delete unnecessary image Artifacts
-        uses: GeekyEggo/delete-artifact@v5.1.0
-        with:
-          name: '*'
-          failOnError: false
-
       - name: Load base image into Docker
         run: |
           docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
@@ -266,12 +260,6 @@ jobs:
         with:
           name: jib-images
           path: ${{ runner.temp }}
-
-      - name: Delete jib image artifacts
-        uses: GeekyEggo/delete-artifact@v5.1.0
-        with:
-          name: jib-images
-          failOnError: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -399,3 +387,14 @@ jobs:
           tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
           name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
+
+  cleanup-artifacts:
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete all image artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: '*'
+          failOnError: false
+

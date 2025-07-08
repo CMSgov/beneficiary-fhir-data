@@ -321,7 +321,7 @@ jobs:
       - name: Upload image as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.image.name }}
+          name: build-images.${{ matrix.image.name }}
           path: ${{ runner.temp }}/${{ matrix.image.name }}.tar
           retention-days: 1
 
@@ -341,24 +341,12 @@ jobs:
           echo "::add-mask::$role_arn"
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
-      - name: Delete base-images artifact
-        uses: GeekyEggo/delete-artifact@v5.1.0
-        with:
-          name: base-images
-          failOnError: false
-
       - name: Download all built image artifacts
         uses: actions/download-artifact@v4
         with:
+          pattern: build-images.*
           path: ${{ runner.temp }}
           merge-multiple: true
-
-      - name: Delete all image artifacts
-        if: ${{ inputs.cleanupImageArtifacts }}
-        uses: GeekyEggo/delete-artifact@v5.1.0
-        with:
-          name: '*'
-          failOnError: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -397,4 +385,14 @@ jobs:
             docker push "$REGISTRY/$image:$TAG"
           done
         working-directory: ${{ runner.temp }}
+
+  cleanup-artifacts:
+    if: ${{ !cancelled() && !inputs.cleanupImageArtifacts }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete all image artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: '*'
+          failOnError: false
 
