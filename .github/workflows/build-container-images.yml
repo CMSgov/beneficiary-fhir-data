@@ -261,13 +261,6 @@ jobs:
           name: base-images
           path: ${{ runner.temp }}
 
-      - name: Delete base image artifacts
-        if: ${{ !inputs.skipBasePull }}
-        uses: GeekyEggo/delete-artifact@v5.1.0
-        with:
-          name: base-images
-          failOnError: false
-
       - name: Load base images
         if: ${{ !inputs.skipBasePull }}
         run: |
@@ -348,7 +341,13 @@ jobs:
           echo "::add-mask::$role_arn"
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
-      - name: Download all image artifacts
+      - name: Delete base-images artifact
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: base-images
+          failOnError: false
+
+      - name: Download all built image artifacts
         uses: actions/download-artifact@v4
         with:
           path: ${{ runner.temp }}
