@@ -387,7 +387,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
   cleanup-artifacts:
-    if: ${{ !cancelled() && !inputs.cleanupImageArtifacts }}
+    if: ${{ !cancelled() && inputs.cleanupImageArtifacts }}
     needs: push-images
     runs-on: ubuntu-24.04
     steps:
