@@ -216,7 +216,7 @@
         <!-- May not work properly with Podman due to
         https://github.com/GoogleContainerTools/jib/issues/4134; use suggested override above in
         that case -->
-        <jib.from>docker://bfd-mgmt-base-java:${project.version}</jib.from>
+        <jib.from>docker://bfd-platform-base-java:${project.version}</jib.from>
         <!--
           The goal to use with the jib plugin.   Override on command line to change behavior:
           dockerBuild: build on local docker only
