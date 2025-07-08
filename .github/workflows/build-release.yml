@@ -52,8 +52,7 @@ env:
     [
       "bfd-server",
       "bfd-pipeline-app",
-      "bfd-db-migrator",
-      "bfd-server-ng"
+      "bfd-db-migrator"
     ]
   ACCOUNT_ROLE_MAP: |
     {
