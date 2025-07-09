@@ -39,7 +39,11 @@ jobs:
     strategy:
       matrix:
         context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
-    runs-on: codebuild-bfd-${{ inputs.account-type }}-platform-${{ matrix.context.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+    # Need to specify the custom label "service" or parallel builds will hang due to the workflow
+    # event being swallowed by the single runner
+    runs-on:
+      - codebuild-bfd-${{ inputs.account-type }}-platform-${{ matrix.context.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+        service:${{ matrix.context.service }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
