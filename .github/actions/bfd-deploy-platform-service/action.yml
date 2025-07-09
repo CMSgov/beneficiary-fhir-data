@@ -15,6 +15,12 @@ inputs:
     description: >-
       Name of CloudWatch Log Stream to submit OpenTofu logs to; will be created if necessary
     required: true
+  skip-apply:
+    description: >-
+      Skip the apply of the given Terraservice. Useful for logging the plan without making any
+      modifications
+    default: "false" # Composite Action inputs must be strings
+    required: false
   tofu-vars-json:
     description: "JSON object map of variables to their values"
     required: false
@@ -67,6 +73,7 @@ runs:
       shell: bash
 
     - name: Apply Terraservice
+      if: ${{ inputs.skip-apply != 'true' }}
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
