@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -73,11 +72,10 @@ public class CoverageHandler {
     var coverages =
         beneficiaryOpt
             .map(beneficiary -> toFhir(beneficiary, parsedCoverageId.coveragePart(), compositeId))
-            .stream()
-            .collect(Collectors.toList());
+            .stream();
 
     return FhirUtil.bundleOrDefault(
-        (List<Resource>) (List<?>) coverages, beneficiaryRepository::beneficiaryLastUpdated);
+        coverages.map(c -> c), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   /**
@@ -92,9 +90,7 @@ public class CoverageHandler {
 
     var coverages = new ArrayList<>();
     var beneficiaryOpt =
-        beneficiaryRepository
-            .findById(beneSk, lastUpdated)
-            .filter(b -> b.getBeneSk() == b.getXrefSk());
+        beneficiaryRepository.findById(beneSk, lastUpdated).filter(b -> !b.isMergedBeneficiary());
 
     beneficiaryOpt.ifPresent(
         beneficiary -> {

@@ -1,79 +1,11 @@
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 {
-  "address" : [ {
-    "city" : "Mobile",
-    "line" : [ "1970 S University Blvd" ],
-    "postalCode" : "36609",
-    "state" : "AL"
-  } ],
-  "birthDate" : "1967-03-19",
-  "communication" : [ {
-    "language" : {
-      "coding" : [ {
-        "code" : "es",
-        "system" : "urn:ietf:bcp:47"
-      } ]
-    }
-  } ],
-  "extension" : [ {
-    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-    "valueCode" : "248152002"
-  }, {
-    "extension" : [ {
-      "url" : "ombCategory",
-      "valueCoding" : {
-        "code" : "2054-5",
-        "display" : "Black or African American",
-        "system" : "urn:oid:2.16.840.1.113883.6.238"
-      }
-    }, {
-      "url" : "text",
-      "valueCode" : "Black or African American"
-    } ],
-    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-  } ],
-  "gender" : "female",
   "id" : "181968400",
-  "identifier" : [ {
-    "period" : {
-      "end" : "2020-04-21T00:00:00+00:00",
-      "start" : "2020-04-21T00:00:00+00:00"
-    },
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "8Z73WV0QC20"
-  }, {
-    "period" : {
-      "end" : "2020-04-21T00:00:00+00:00",
-      "start" : "2020-04-21T00:00:00+00:00"
-    },
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "8Z73WV0QC20"
-  } ],
   "link" : [ {
     "other" : {
       "id" : "405764107"
     },
     "type" : "replaced-by"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
-  },
-  "name" : [ {
-    "family" : "Erdapfel",
-    "given" : [ "Bluey", "Caroline" ]
   } ],
   "resourceType" : "Patient"
 }
@@ -82,80 +14,12 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
 {
-  "address" : [ {
-    "city" : "Mobile",
-    "line" : [ "1970 S University Blvd" ],
-    "postalCode" : "36609",
-    "state" : "AL"
-  } ],
-  "birthDate" : "1967-03-19",
-  "communication" : [ {
-    "language" : {
-      "coding" : [ {
-        "code" : "es",
-        "system" : "urn:ietf:bcp:47"
-      } ]
-    }
-  } ],
-  "extension" : [ {
-    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-    "valueCode" : "248152002"
-  }, {
-    "extension" : [ {
-      "url" : "ombCategory",
-      "valueCoding" : {
-        "code" : "2054-5",
-        "display" : "Black or African American",
-        "system" : "urn:oid:2.16.840.1.113883.6.238"
-      }
-    }, {
-      "url" : "text",
-      "valueCode" : "Black or African American"
-    } ],
-    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-  } ],
-  "gender" : "female",
   "id" : "181968400",
-  "identifier" : [ {
-    "period" : {
-      "end" : "2020-04-21T00:00:00+00:00",
-      "start" : "2020-04-21T00:00:00+00:00"
-    },
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "8Z73WV0QC20"
-  }, {
-    "period" : {
-      "end" : "2020-04-21T00:00:00+00:00",
-      "start" : "2020-04-21T00:00:00+00:00"
-    },
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "8Z73WV0QC20"
-  } ],
   "link" : [ {
     "other" : {
       "id" : "405764107"
     },
     "type" : "replaced-by"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
-  },
-  "name" : [ {
-    "family" : "Erdapfel",
-    "given" : [ "Bluey", "Caroline" ]
   } ],
   "resourceType" : "Patient"
 }

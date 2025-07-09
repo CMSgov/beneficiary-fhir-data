@@ -64,7 +64,9 @@ public class PatientHandler {
     var patient = beneficiary.toFhir();
 
     for (var id : identities) {
-      id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+      if (!beneficiary.isMergedBeneficiary()) {
+        id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+      }
       id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
     }
 
