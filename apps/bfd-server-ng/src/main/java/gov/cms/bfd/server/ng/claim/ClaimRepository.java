@@ -111,9 +111,13 @@ public class ClaimRepository {
             query.setParameter("sourceIds", sourceIds);
           }
         });
-    withDateParams(query, claimThroughDate, lastUpdated);
 
-    return query.setMaxResults(limit.orElse(5000)).setFirstResult(offset.orElse(0)).getResultList();
+    TypedQuery<Claim> finalQuery = withDateParams(query, claimThroughDate, lastUpdated);
+
+    return finalQuery
+        .setMaxResults(limit.orElse(5000))
+        .setFirstResult(offset.orElse(0))
+        .getResultList();
   }
 
   /**
