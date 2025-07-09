@@ -3,7 +3,8 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadMergedBene=[
   "id" : "181968400",
   "link" : [ {
     "other" : {
-      "id" : "405764107"
+      "display" : "405764107",
+      "reference" : "Patient/405764107"
     },
     "type" : "replaced-by"
   } ],

@@ -53,7 +53,8 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET]=[
       "id" : "181968400",
       "link" : [ {
         "other" : {
-          "id" : "405764107"
+          "display" : "405764107",
+          "reference" : "Patient/405764107"
         },
         "type" : "replaced-by"
       } ],
@@ -81,7 +82,8 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET_WITH_SEARC
       "id" : "181968400",
       "link" : [ {
         "other" : {
-          "id" : "405764107"
+          "display" : "405764107",
+          "reference" : "Patient/405764107"
         },
         "type" : "replaced-by"
       } ],
@@ -109,7 +111,8 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
       "id" : "181968400",
       "link" : [ {
         "other" : {
-          "id" : "405764107"
+          "display" : "405764107",
+          "reference" : "Patient/405764107"
         },
         "type" : "replaced-by"
       } ],

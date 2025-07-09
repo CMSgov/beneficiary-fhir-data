@@ -118,7 +118,8 @@ public class PatientIdentity {
     var link = new Patient.PatientLinkComponent();
     link.setType(linkType);
     var reference = new Reference();
-    reference.setId(beneSk);
+    reference.setReference("Patient/" + beneSk);
+    reference.setDisplay(beneSk);
     link.setOther(reference);
     return link;
   }
