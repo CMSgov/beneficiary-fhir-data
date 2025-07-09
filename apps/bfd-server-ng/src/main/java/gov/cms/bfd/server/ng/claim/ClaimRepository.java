@@ -162,24 +162,6 @@ public class ClaimRepository {
   }
 
   /**
-   * Generates the JPQL snippet for filtering by the _tag's adjudication status. This translates a
-   *
-   * @param tag tag code like "Adjudicated" into a list of ClaimSourceIds.
-   * @return The JPQL "IN" clause string, or an empty string if no tag filter is applied.
-   */
-  private String getTagFilter(Optional<TokenParam> tag) {
-    // This JPQL condition checks if the :sourceIds parameter is NULL.
-    // If it is, the entire condition evaluates to TRUE and is ignored by the WHERE clause.
-    // If it's not NULL, it applies the IN clause.
-    // This assumes your Claim entity has a field 'claimSourceId' which maps to a String or Enum
-    // type.
-    if (tag.isPresent()) {
-      return " AND ( c.claimSourceId IN (:sourceIds)) ";
-    }
-    return "";
-  }
-
-  /**
    * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
    * enum values.
    *
