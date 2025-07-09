@@ -35,6 +35,7 @@ env:
 
 jobs:
   deploy-layer:
+    if: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] != fromJson('[]') }}
     strategy:
       matrix:
         context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
