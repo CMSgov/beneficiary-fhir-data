@@ -5,7 +5,9 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.IdrConstants;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
 import org.jetbrains.annotations.Nullable;
@@ -119,5 +121,37 @@ public class FhirInputConverter {
     String rawCompositeIdStr = coverageId.getIdPart();
 
     return CoverageCompositeId.parse(rawCompositeIdStr);
+  }
+
+  /**
+   * Validates an optional _tag {@link TokenParam} if it represents an adjudication status.
+   *
+   * <p>If the tag is present, this method checks that its value is one of "PartiallyAdjudicated" or
+   * "Adjudicated" (case-insensitive).
+   *
+   * @param tag The _tag {@link TokenParam} from the FHIR request, which can be null.
+   * @return An {@link Optional} containing the validated adjudication status string if the tag was
+   *     present and valid. Returns an empty Optional if the tag was not provided.
+   * @throws InvalidRequestException if the tag is present but its value is blank or unsupported.
+   */
+  public static String validateTag(@Nullable TokenParam tag) {
+
+    // A set of all supported adjudication status codes for efficient, case-insensitive lookup.
+    Set<String> SUPPORTED_ADJUDICATION_STATUSES =
+        Set.of(
+            IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
+            IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
+
+    // Now, validate the non-blank value.
+    if (tag != null && !SUPPORTED_ADJUDICATION_STATUSES.contains(tag.getValue().toUpperCase())) {
+      throw new InvalidRequestException(
+          "Unsupported _tag value for adjudication status. Supported values are '"
+              + IdrConstants.ADJUDICATION_STATUS_PARTIAL
+              + "' and '"
+              + IdrConstants.ADJUDICATION_STATUS_FINAL
+              + "'.");
+    }
+
+    return "";
   }
 }
