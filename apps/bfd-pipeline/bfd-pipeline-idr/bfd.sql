@@ -32,6 +32,8 @@ CREATE TABLE idr.beneficiary(
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
+CREATE INDEX ON idr.beneficiary(bene_mbi_id);
+
 CREATE TABLE idr.beneficiary_history(
     bene_sk BIGINT NOT NULL,
     bene_xref_efctv_sk BIGINT NOT NULL,
@@ -197,6 +199,8 @@ CREATE TABLE idr.claim (
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
+
+CREATE INDEX on idr.claim(bene_sk);
 
 CREATE TABLE idr.claim_date_signature (
     clm_dt_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
