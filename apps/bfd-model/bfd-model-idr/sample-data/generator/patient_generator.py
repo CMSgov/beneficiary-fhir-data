@@ -2,11 +2,21 @@ import random
 import copy
 import datetime
 import pandas as pd
+import argparse
+import csv
+import subprocess
+import sys
 from dateutil.parser import parse
 from faker import Faker
 from generator_util import GeneratorUtil
 
 fake = Faker()
+
+# Command line argument parsing
+parser = argparse.ArgumentParser(description='Generate synthetic patient data')
+parser.add_argument('--benes', type=str, help='Path to CSV file containing beneficiary data')
+parser.add_argument('--claims', action='store_true', help='Automatically generate claims after patient generation using the generated SYNTHETIC_BENE.csv file')
+args = parser.parse_args()
 
 patients_to_generate = 15
 available_given_names = [
@@ -28,45 +38,140 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 
 generator = GeneratorUtil()
 
+# Load CSV data if provided
+csv_data = None
+if args.benes:
+    try:
+        csv_data = pd.read_csv(args.benes)
+        print(f"Loaded {len(csv_data)} rows from CSV file: {args.benes}")
+
+        patients_to_generate = len(csv_data)
+    except Exception as e:
+        print(f"Error loading CSV file: {e}")
+        print("Falling back to random generation")
+        csv_data = None
+
 for i in range(patients_to_generate):
     if i > 0 and i % 10000 == 0:
         print("10000 done")
 
     patient = generator.create_base_patient()
-    patient["BENE_1ST_NAME"] = random.choice(available_given_names)
-    if random.randint(0, 1):
-        patient["BENE_MIDL_NAME"] = random.choice(available_given_names)
-    patient["BENE_LAST_NAME"] = random.choice(available_family_names)
-
-    dob = generator.fake.date_of_birth(minimum_age=45)
-    patient["BENE_BRTH_DT"] = str(dob)
-
-    if random.randint(0, 10) < 2:
-        # death!
-        death_date = generator.fake.date_between_dates(
-            datetime.date(year=2020, month=1, day=1), datetime.date.today()
-        )
-        patient["BENE_DEATH_DT"] = str(death_date)
-        if random.randint(0, 1) == 1:
-            patient["BENE_VRFY_DEATH_DAY_SW"] = "Y"
+    
+    # Use CSV data if available, otherwise use random generation
+    if csv_data is not None and i < len(csv_data):
+        row = csv_data.iloc[i]
+        
+        # Use CSV data for populated fields, random for empty ones
+        patient["BENE_1ST_NAME"] = row.get("BENE_1ST_NAME") if pd.notna(row.get("BENE_1ST_NAME")) else random.choice(available_given_names)
+        
+        if pd.notna(row.get("BENE_MIDL_NAME")):
+            patient["BENE_MIDL_NAME"] = row["BENE_MIDL_NAME"]
+        elif random.randint(0, 1):
+            patient["BENE_MIDL_NAME"] = random.choice(available_given_names)
+            
+        patient["BENE_LAST_NAME"] = row.get("BENE_LAST_NAME") if pd.notna(row.get("BENE_LAST_NAME")) else random.choice(available_family_names)
+        
+        # Handle birth date
+        if pd.notna(row.get("BENE_BRTH_DT")):
+            patient["BENE_BRTH_DT"] = str(row["BENE_BRTH_DT"])
         else:
-            patient["BENE_VRFY_DEATH_DAY_SW"] = "N"
+            dob = generator.fake.date_of_birth(minimum_age=45)
+            patient["BENE_BRTH_DT"] = str(dob)
+        
+        # Handle death date
+        if pd.notna(row.get("BENE_DEATH_DT")):
+            patient["BENE_DEATH_DT"] = str(row["BENE_DEATH_DT"])
+            if pd.notna(row.get("BENE_VRFY_DEATH_DAY_SW")):
+                patient["BENE_VRFY_DEATH_DAY_SW"] = str(row["BENE_VRFY_DEATH_DAY_SW"])
+            else:
+                patient["BENE_VRFY_DEATH_DAY_SW"] = "Y" if random.randint(0, 1) == 1 else "N"
+        else:
+            if random.randint(0, 10) < 2:
+                # death!
+                death_date = generator.fake.date_between_dates(
+                    datetime.date(year=2020, month=1, day=1), datetime.date.today()
+                )
+                patient["BENE_DEATH_DT"] = str(death_date)
+                if random.randint(0, 1) == 1:
+                    patient["BENE_VRFY_DEATH_DAY_SW"] = "Y"
+                else:
+                    patient["BENE_VRFY_DEATH_DAY_SW"] = "N"
+            else:
+                patient["BENE_DEATH_DT"] = None
+                patient["BENE_VRFY_DEATH_DAY_SW"] = "~"
+        
+        # Handle sex code
+        if pd.notna(row.get("BENE_SEX_CD")):
+            patient["BENE_SEX_CD"] = str(int(row["BENE_SEX_CD"]))
+        else:
+            patient["BENE_SEX_CD"] = str(random.randint(1, 2))
+        
+        # Handle race code
+        if pd.notna(row.get("BENE_RACE_CD")):
+            patient["BENE_RACE_CD"] = str(int(row["BENE_RACE_CD"]))
+        else:
+            patient["BENE_RACE_CD"] = random.choice(
+                ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+            )
+        
+        # Handle beneficiary SK
+        if pd.notna(row.get("BENE_SK")):
+            pt_bene_sk = int(row["BENE_SK"])
+            if pt_bene_sk in generator.used_bene_sk:
+                pt_bene_sk = generator.gen_bene_sk()
+        else:
+            pt_bene_sk = generator.gen_bene_sk()
+        
+        patient["BENE_SK"] = str(pt_bene_sk)
+        patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
+        generator.used_bene_sk.append(pt_bene_sk)
+        
+        # Handle MBI - use CSV MBI if provided, otherwise generate random number
+        if pd.notna(row.get("BENE_MBI_ID")):
+            custom_mbi = str(row["BENE_MBI_ID"])
+            num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
+            generator.handle_mbis(patient, num_mbis, custom_first_mbi=custom_mbi)
+        else:
+            num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
+            generator.handle_mbis(patient, num_mbis)
+    
     else:
-        patient["BENE_DEATH_DT"] = None
-        patient["BENE_VRFY_DEATH_DAY_SW"] = "~"
+        # Original random generation logic
+        patient["BENE_1ST_NAME"] = random.choice(available_given_names)
+        if random.randint(0, 1):
+            patient["BENE_MIDL_NAME"] = random.choice(available_given_names)
+        patient["BENE_LAST_NAME"] = random.choice(available_family_names)
 
-    patient["BENE_SEX_CD"] = str(random.randint(1, 2))
-    patient["BENE_RACE_CD"] = random.choice(
-        ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
-    )
+        dob = generator.fake.date_of_birth(minimum_age=45)
+        patient["BENE_BRTH_DT"] = str(dob)
 
-    pt_bene_sk = generator.gen_bene_sk()
-    patient["BENE_SK"] = str(pt_bene_sk)
-    patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
-    generator.used_bene_sk.append(pt_bene_sk)
+        if random.randint(0, 10) < 2:
+            # death!
+            death_date = generator.fake.date_between_dates(
+                datetime.date(year=2020, month=1, day=1), datetime.date.today()
+            )
+            patient["BENE_DEATH_DT"] = str(death_date)
+            if random.randint(0, 1) == 1:
+                patient["BENE_VRFY_DEATH_DAY_SW"] = "Y"
+            else:
+                patient["BENE_VRFY_DEATH_DAY_SW"] = "N"
+        else:
+            patient["BENE_DEATH_DT"] = None
+            patient["BENE_VRFY_DEATH_DAY_SW"] = "~"
 
-    num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
-    generator.handle_mbis(patient, num_mbis)
+        patient["BENE_SEX_CD"] = str(random.randint(1, 2))
+        patient["BENE_RACE_CD"] = random.choice(
+            ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+        )
+
+        pt_bene_sk = generator.gen_bene_sk()
+        patient["BENE_SK"] = str(pt_bene_sk)
+        patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
+        generator.used_bene_sk.append(pt_bene_sk)
+
+        num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
+        generator.handle_mbis(patient, num_mbis)
+
     generator.generate_coverages(patient)
 
 
@@ -85,3 +190,28 @@ for i in range(patients_to_generate):
     generator.bene_table.append(patient)
 
 generator.save_output_files()
+
+# If --claims flag is provided, automatically call claims_generator.py
+if args.claims:
+    print("Generating claims for the created beneficiaries...")
+    try:
+        # Call claims_generator.py with the generated SYNTHETIC_BENE.csv file
+        result = subprocess.run([
+            sys.executable, 'claims_generator.py', 
+            '--benes', 'out/SYNTHETIC_BENE.csv'
+        ], check=True, capture_output=True, text=True)
+        
+        print("Claims generation completed successfully!")
+        if result.stdout:
+            print("Claims generator output:")
+            print(result.stdout)
+            
+    except subprocess.CalledProcessError as e:
+        print(f"Error running claims generator: {e}")
+        if e.stderr:
+            print("Error output:")
+            print(e.stderr)
+        sys.exit(1)
+    except FileNotFoundError:
+        print("Error: claims_generator.py not found in the current directory")
+        sys.exit(1)

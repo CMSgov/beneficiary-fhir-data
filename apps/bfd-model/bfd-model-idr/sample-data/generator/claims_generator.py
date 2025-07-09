@@ -36,7 +36,7 @@ def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_
     df = pd.json_normalize(clm_fiss)
     df.to_csv('out/SYNTHETIC_CLM_FISS.csv', index=False)
 
-claims_to_generate_per_person = 5
+claims_to_generate_per_person = 7
 
 fiss_clm_type_cds = [1011,1041,1012,1013,1014,1022,1023,1034,1071,1072,1073,1074,1075,1076,1077,1083,1085,1087,1089,1032,1033,1081,1082,1021,1018,2011,2041,2012,2013,2014,2022,2023,2034,2071,2072,2073,2074,2075,2076,2077,2083,2085,2087,2089,2032,2033,2081,2082,2021,2018]
 institutional_claim_types = [10,20,30,40,50,60,61,62,63,64]+fiss_clm_type_cds
@@ -186,8 +186,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
     claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
-    #clm_type_cd = 60
-    clm_type_cd = random.choice([10,20,30,40,50,60])
+    clm_type_cd = 60
+    #clm_type_cd = random.choice([10,20,30,40,50,60])
     claim['CLM']['CLM_TYPE_CD'] = clm_type_cd
 
     clm_src_id = -1
@@ -487,6 +487,21 @@ def gen_pac_version_of_claim(claim):
 
     if(pac_claim['CLM']['CLM_TYPE_CD'] in (60,61,62,63,64)):
         pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1011,2011,1041,2041],weights=[.48,.48,.02,.02])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 40):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1013,2013,1071,2071],weights=[.48,.48,.02,.02])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 10):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1032,2032,1033,2033],weights=[.48,.48,.02,.02])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 20):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choice([1021,2021])
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 30):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1018,2018])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 50):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1081,2081,1082,2082],weights=[.48,.48,.02,.02])[0]
     
     if('CLM_BLOOD_PT_FRNSH_QTY' in pac_claim['CLM']):
         pac_claim['CLM'].pop('CLM_BLOOD_PT_FRNSH_QTY')
@@ -611,7 +626,7 @@ def main():
 
     bene_sk_list = [-1]
     if(args.benes):
-        df = pd.read_csv(args.benes)  # Replace with your actual filename
+        df = pd.read_csv(args.benes)
         bene_sk_list = df['BENE_SK'].unique()
 
     CLM = []
