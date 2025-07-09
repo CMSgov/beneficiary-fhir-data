@@ -72,6 +72,6 @@ jobs:
           bfd-env: ${{ inputs.bfd-env }}
           service-path: ops/services/${{ matrix.context.layer }}-${{ matrix.context.service }}
           cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
-          cw-log-stream: config-${{ github.run_id }}-${{ github.run_attempt }}
+          cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
 
