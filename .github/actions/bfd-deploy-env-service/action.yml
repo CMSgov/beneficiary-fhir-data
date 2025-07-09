@@ -61,6 +61,7 @@ runs:
         # is instead logged to CloudWatch
         tofu init \
           -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
+          -reconfigure \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.bfd-env }}\" completed"
         tofu workspace select \

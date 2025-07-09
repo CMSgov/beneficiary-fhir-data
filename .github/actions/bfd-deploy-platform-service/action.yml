@@ -53,6 +53,7 @@ runs:
         # is instead logged to CloudWatch
         tofu init \
           -var account_type="${{ inputs.account-type }}" \
+          -reconfigure \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.account-type }}\" completed"
         tofu workspace select \
