@@ -54,7 +54,7 @@ public class FhirUtil {
    * empty.
    *
    * @param resources resources
-   * @param batchLastUpdated last
+   * @param batchLastUpdated last updated
    * @return bundle
    */
   public static Bundle bundleOrDefault(
@@ -67,7 +67,7 @@ public class FhirUtil {
    * empty.
    *
    * @param resources resources
-   * @param batchLastUpdated last
+   * @param batchLastUpdated last updated
    * @return bundle
    */
   public static Bundle bundleOrDefault(
@@ -83,7 +83,7 @@ public class FhirUtil {
    * empty.
    *
    * @param resource resource
-   * @param batchLastUpdated last
+   * @param batchLastUpdated last updated
    * @return bundle
    */
   public static Bundle bundleOrDefault(
@@ -98,7 +98,13 @@ public class FhirUtil {
         .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
   }
 
-  private static Bundle defaultBundle(Supplier<ZonedDateTime> batchLastUpdated) {
+  /**
+   * Returns a default bundle.
+   *
+   * @param batchLastUpdated last updated
+   * @return bundle
+   */
+  public static Bundle defaultBundle(Supplier<ZonedDateTime> batchLastUpdated) {
     var bundle = new Bundle();
     bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
     return bundle;
