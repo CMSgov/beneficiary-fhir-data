@@ -35,6 +35,19 @@ public class PatientSearchIT extends IntegrationTestBase {
   void patientSearchById(SearchStyleEnum searchStyle) {
     var patientBundle =
         searchBundle()
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("405764107"))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(1, patientBundle.getEntry().size());
+
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdMergedBene(SearchStyleEnum searchStyle) {
+    var patientBundle =
+        searchBundle()
             .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"))
             .usingStyle(searchStyle)
             .execute();
@@ -90,14 +103,14 @@ public class PatientSearchIT extends IntegrationTestBase {
         () ->
             searchBundle()
                 .where(
-                    new TokenClientParam(Patient.SP_IDENTIFIER).exactly().identifier("181968400"))
+                    new TokenClientParam(Patient.SP_IDENTIFIER).exactly().identifier("405764107"))
                 .execute());
   }
 
   private static Stream<Arguments> patientSearchByDate() {
     return Stream.of(
         Arguments.of(
-            new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"), "181968400"),
+            new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("405764107"), "405764107"),
         Arguments.of(
             new TokenClientParam(Patient.SP_IDENTIFIER)
                 .exactly()

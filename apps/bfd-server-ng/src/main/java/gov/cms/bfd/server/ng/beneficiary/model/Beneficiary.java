@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,6 +46,9 @@ public class Beneficiary {
   @Column(name = "cntct_lang_cd")
   private LanguageCode languageCode;
 
+  @Column(name = "idr_trans_obslt_ts")
+  private ZonedDateTime obsoleteTimestamp;
+
   @Embedded private Name beneficiaryName;
   @Embedded private Address address;
   @Embedded private Meta meta;
@@ -68,6 +72,15 @@ public class Beneficiary {
   private BeneficiaryEntitlementReason beneficiaryEntitlementReason;
 
   /**
+   * Determines if this beneficiary has been merged into another.
+   *
+   * @return whether the beneficiary is merged
+   */
+  public boolean isMergedBeneficiary() {
+    return beneSk != xrefSk;
+  }
+
+  /**
    * Transforms the beneficiary record to its FHIR representation.
    *
    * @return patient record
@@ -75,6 +88,11 @@ public class Beneficiary {
   public Patient toFhir() {
     var patient = new Patient();
     patient.setId(String.valueOf(beneSk));
+
+    // Only return a skeleton resource for merged beneficiaries
+    if (isMergedBeneficiary()) {
+      return patient;
+    }
 
     patient.setName(List.of(beneficiaryName.toFhir()));
     patient.setBirthDate(DateUtil.toDate(birthDate));
