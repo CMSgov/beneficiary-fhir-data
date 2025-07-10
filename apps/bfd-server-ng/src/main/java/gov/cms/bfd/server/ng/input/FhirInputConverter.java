@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import java.util.List;
 import java.util.Optional;
@@ -147,10 +148,10 @@ public class FhirInputConverter {
 
     String systemFromTag = tag.get().getSystem();
 
-    if (systemFromTag != null && !systemFromTag.equals(IdrConstants.SYS_ADJUDICATION_STATUS)) {
+    if (systemFromTag != null && !systemFromTag.equals(SystemUrls.SYS_ADJUDICATION_STATUS)) {
       throw new InvalidRequestException(
           "Unsupported system for _tag adjudication status. Expected system '"
-              + IdrConstants.SYS_ADJUDICATION_STATUS
+              + SystemUrls.SYS_ADJUDICATION_STATUS
               + "'.");
     }
 
