@@ -1,0 +1,213 @@
+---
+name: "Deploy Environment Services"
+on:
+  workflow_dispatch:
+    inputs:
+      bfd-env:
+        description: The BFD environment to deploy services to
+        required: true
+      services:
+        description: Comma-separated list of services to deploy
+        default: >-
+          config,
+          cluster,
+          database,
+          eft,
+          locust,
+          migrator,
+          ccw-pipeline,
+          npi-pipeline,
+          rda-pipeline,
+          server,
+          ccw-pipeline-metrics,
+          rda-pipeline-metrics,
+          server-metrics,
+          ccw-pipeline-alarms,
+          rda-pipeline-alarms,
+          server-alarms
+        required: true
+      aws-region:
+        description: >-
+          Override the AWS Region
+        default: us-east-1
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
+      skip-applies:
+        description: >-
+          If true, skips the apply step for each Terraservice such that only the plans are generated
+        default: false
+        required: false
+        type: boolean
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+
+env:
+  DEPLOY_JOBS_MATRIX_JSON: |
+    {
+      "01": [
+        { "layer": "01", "service": "config", "runner": "lambda" }
+      ],
+      "02": [
+        { "layer": "02", "service": "cluster", "runner": "lambda" },
+        { "layer": "02", "service": "database", "runner": "small" }
+      ],
+      "03": [
+        { "layer": "03", "service": "locust", "runner": "lambda" },
+        { "layer": "03", "service": "migrator", "runner": "small" }
+      ],
+      "04": [
+        { "layer": "04", "service": "ccw-pipeline", "runner": "lambda" },
+        { "layer": "04", "service": "npi-pipeline", "runner": "lambda" },
+        { "layer": "04", "service": "rda-pipeline", "runner": "lambda" },
+        { "layer": "04", "service": "server", "runner": "lambda" }
+      ],
+      "05": [
+        { "layer": "05", "service": "ccw-pipeline-metrics", "runner": "lambda" },
+        { "layer": "05", "service": "rda-pipeline-metrics", "runner": "lambda" },
+        { "layer": "05", "service": "server-metrics", "runner": "lambda" }
+      ],
+      "06": [
+        { "layer": "06", "service": "ccw-pipeline-alarms", "runner": "lambda" },
+        { "layer": "06", "service": "rda-pipeline-alarms", "runner": "lambda" },
+        { "layer": "06", "service": "server-alarms", "runner": "lambda" }
+      ]
+    }
+  PARENT_ENV_ACCOUNT_MAP: |
+    {
+      "test": "non-prod",
+      "sandbox": "prod",
+      "prod": "prod"
+    }
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      account-type: ${{ steps.get-account-type.outputs.account-type }}
+      deploy-jobs-matrix-json: ${{ steps.get-deploy-jobs-matrix-json.outputs.deploy-jobs-matrix-json }}
+    steps:
+      - name: Get account type from parent env
+        id: get-account-type
+        run: |
+          parent_env="$(echo "${{ inputs.bfd-env }}" | grep -Po '(prod|sandbox|test)$')"
+          account_type="$(jq -r --arg parent_env "$parent_env" '.[$parent_env]' <<<"$PARENT_ENV_ACCOUNT_MAP")"
+
+          echo "account-type=$account_type" >> "$GITHUB_OUTPUT"
+
+      - name: Get filtered deploy jobs matrix JSON as output
+        id: get-deploy-jobs-matrix-json
+        env:
+          SERVICES: ${{ inputs.services }}
+        run: |
+          deploy_jobs_matrix_json="$(
+            jq -c --arg services "$SERVICES" '
+              # Convert the CSV list of services into an array
+              ($services | split(",") | map(gsub("^\\s+|\\s+$"; ""))) as $filterServices
+              | to_entries
+              | map(
+                  .value |= map(select(.service | IN($filterServices[])))
+                )
+              | from_entries
+            ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
+          )"
+
+          echo "deploy-jobs-matrix-json=$deploy_jobs_matrix_json" >> "$GITHUB_OUTPUT"
+
+  deploy-layer-01:
+    uses: ./.github/workflows/_deploy-env-service-layer.yml
+    needs: [setup]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      layer-level: '01'
+      bfd-env: ${{ inputs.bfd-env }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+    secrets: inherit
+
+  deploy-layer-02:
+    uses: ./.github/workflows/_deploy-env-service-layer.yml
+    needs: [setup, deploy-layer-01]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      layer-level: '02'
+      bfd-env: ${{ inputs.bfd-env }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+    secrets: inherit
+
+  deploy-layer-03:
+    uses: ./.github/workflows/_deploy-env-service-layer.yml
+    needs: [setup, deploy-layer-02]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      layer-level: '03'
+      bfd-env: ${{ inputs.bfd-env }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+    secrets: inherit
+
+  deploy-layer-04:
+    uses: ./.github/workflows/_deploy-env-service-layer.yml
+    needs: [setup, deploy-layer-03]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      layer-level: '04'
+      bfd-env: ${{ inputs.bfd-env }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+    secrets: inherit
+
+  deploy-layer-05:
+    uses: ./.github/workflows/_deploy-env-service-layer.yml
+    needs: [setup, deploy-layer-04]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      layer-level: '05'
+      bfd-env: ${{ inputs.bfd-env }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+    secrets: inherit
+
+  deploy-layer-06:
+    uses: ./.github/workflows/_deploy-env-service-layer.yml
+    needs: [setup, deploy-layer-05]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      layer-level: '06'
+      bfd-env: ${{ inputs.bfd-env }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+    secrets: inherit

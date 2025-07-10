@@ -1,44 +1,65 @@
 #!/bin/bash
-# Helper script intended to be used in GHA steps which may log _dynamic_ sensitive data and are thus
-# unable to be masked using GHA's built-in _static_ masking. By piping the stdout from the command
-# that emits sensitive log output to this script the log output can instead be logged to CloudWatch.
-# Requires the Log Group and Log Stream to exist prior to use, as well as a valid AWS session with
-# permission to PutLogEvents to the Log Group and Stream.
-# Environment Variables:
-#   CLOUDWATCH_LOG_GROUP: The Log Group to log to
-#   CLOUDWATCH_LOG_STREAM: The Log Stream to log to
-# Usage Notes:
-#   If this script is used in GHA, the companion Composite Action "await-cw-logging" should be
-#   appended to the end of the Workflow/Action as an "always" step to ensure that orphaned
-#   background AWS PutLogEvents processes are able to complete without being cleaned up
+# This script reads log events from stdin, buffers them temporarily, and uploads them to AWS
+# CloudWatch Logs in batches every second, on exit, and on SIGTERM/SIGINT to avoid being throttled.
+# The script will send the buffered log messages to the specified CloudWatch log group ($log_group)
+# and log stream ($log_stream). They must exist prior to this script being invoked.
+# Usage:
+#   echo "Log message 1" | ./stdout_to_cwlogs.sh "log_group" "log_stream"
+#   tofu plan -no-color | ./stdout_to_cwlogs.sh "log_group" "log_stream"
+#   CLOUDWATCH_LOG_GROUP="..." CLOUDWATCH_LOG_STREAM="..." tofu plan -no-color | ./stdout_to_cwlogs.sh
 
-set -eou pipefail
+set -Eeou pipefail
 
-# Ensure that the CLOUDWATCH_LOG_GROUP environment variable is set
-trimmed_log_group="$(echo "$CLOUDWATCH_LOG_GROUP" | tr -d '[:space:]')"
-if [[ -z $trimmed_log_group ]]; then
-  echo "CLOUDWATCH_LOG_GROUP must not be an empty string or whitespace"
-  exit 1
-fi
+cloudwatch_log_group="${1:-$CLOUDWATCH_LOG_GROUP}"
+readonly cloudwatch_log_group
 
-# Ensure that the CLOUDWATCH_LOG_STREAM environment variable is set
-trimmed_log_stream="$(echo "$CLOUDWATCH_LOG_STREAM" | tr -d '[:space:]')"
-if [[ -z $trimmed_log_stream ]]; then
-  echo "CLOUDWATCH_LOG_STREAM must not be an empty string or whitespace"
-  exit 1
-fi
+cloudwatch_log_stream="${2:-$CLOUDWATCH_LOG_STREAM}"
+readonly cloudwatch_log_stream
 
-while read -r line; do
-  log_event="$(
-    jq -n \
-      --arg unix_ts "$(date +%s%3N)" \
-      --arg line "$line" \
-      '[{ "timestamp": ($unix_ts | tonumber), "message": ($line | tostring) }]'
+event_buffer=""
+current_time=0
+last_echo_time=0
+
+log_events() {
+  aws_log_events="$(
+    echo "$event_buffer" | jq -R 'split("\u001D") |
+    map(select(. != "")) |
+    map(
+      split("\u001E") |
+        {
+          "timestamp": (.[0] | tonumber),
+          "message": (.[1] | tostring)
+        }
+    ) |
+    map(select(.message != "" and .message != null))'
   )"
-  # Runs in a background subshell to avoid slowing down the process that is piping to this script
-  # while trying to put the log output to CloudWatch. Errors are ignored and all output is
-  # redirected to /dev/null
-  (aws logs put-log-events --log-group-name "$trimmed_log_group" \
-    --log-stream-name "$trimmed_log_stream" \
-    --log-events "$log_event" &>/dev/null || true) &
+  if [[ $aws_log_events != "[]" ]]; then
+    aws logs put-log-events --log-group-name "$cloudwatch_log_group" \
+      --log-stream-name "$cloudwatch_log_stream" \
+      --log-events "$aws_log_events" 1>/dev/null
+  fi
+  event_buffer=""
+  last_echo_time=$current_time
+}
+
+cleanup() {
+  log_events
+  exit
+}
+
+trap 'cleanup' SIGTERM
+trap 'cleanup' SIGINT
+
+while IFS= read -r line; do
+  current_time=$(date +%s%3N)
+  # Append current time and line to event_buffer with \x1E (record separator) for timestamp-message
+  # split, and \x1D (group separator) to separate individual events for later JSON parsing
+  log_event=$(printf "%s\x1E%s\x1D" "$current_time" "$line")
+  event_buffer+="$log_event"
+
+  if (((current_time - last_echo_time) >= 1000)); then
+    log_events
+  fi
 done
+
+cleanup
