@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.input;
 
-import static java.util.Optional.empty;
-
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -62,7 +60,7 @@ public class FhirInputConverter {
    */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
     if (numberParam == null) {
-      return empty();
+      return Optional.empty();
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
