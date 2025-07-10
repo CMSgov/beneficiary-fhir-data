@@ -120,7 +120,7 @@ jobs:
     secrets: inherit
 
   run-mvn-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     needs: [compute-version-strings, build-base-images]
     env:
       BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
