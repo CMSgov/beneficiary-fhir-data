@@ -305,7 +305,7 @@ jobs:
             docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:$BFD_RELEASE"
             if [[ $PUSH_LATEST == "true" ]]; then
               # Remove the "latest" tag from the existing latest image
-              aws ecr batch-delete-image --repository-name "$IMAGE" --image-ids imageTag=latest
+              aws ecr batch-delete-image --repository-name "$image" --image-ids imageTag=latest &>/dev/null || true
               # Tag the new release image as "latest"
               docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:latest"
               # Push "latest" tag
