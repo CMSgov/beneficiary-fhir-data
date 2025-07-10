@@ -87,6 +87,7 @@ public class Claim {
    */
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
+    eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
