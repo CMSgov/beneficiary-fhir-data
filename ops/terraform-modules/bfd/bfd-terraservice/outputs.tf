@@ -43,7 +43,6 @@ output "default_tags" {
     service        = var.service
     Terraform      = true
     tf_module_root = var.relative_module_root
-    bfd_version    = local.bfd_version
   })
   sensitive = false
 }
