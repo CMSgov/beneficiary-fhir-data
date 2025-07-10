@@ -19,9 +19,13 @@ module "terraservice" {
 locals {
   service = "bootstrap"
 
-  region       = module.terraservice.region
-  account_id   = module.terraservice.account_id
-  default_tags = module.terraservice.default_tags
+  env = "platform"
+
+  region               = module.terraservice.region
+  account_id           = module.terraservice.account_id
+  default_tags         = module.terraservice.default_tags
+  iam_path             = module.terraservice.default_iam_path
+  permissions_boundary = module.terraservice.default_permissions_boundary_arn
 
   envs_per_acc = {
     non-prod = ["test", "platform"]
