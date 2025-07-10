@@ -429,7 +429,7 @@ class IdrClaim(IdrBaseModel):
     clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ncvrd_chrg_amt: float
     clm_mdcr_ddctbl_amt: float
-    clm_cntrctr_num: str
+    clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_amt: float
     clm_ltst_clm_ind: str
     clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
@@ -515,7 +515,7 @@ class IdrClaimDateSignature(IdrBaseModel):
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_admsn_type_cd: str
-    bene_ptnt_stus_cd: str
+    bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
     clm_mdcr_instnl_mco_pd_sw: str
     clm_admsn_src_cd: str

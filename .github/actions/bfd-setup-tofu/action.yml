@@ -1,0 +1,157 @@
+name: "Setup OpenTofu"
+description: >-
+  Composite action to setup OpenTofu such that it can be used on a runner and logging can be sent to
+  CloudWatch
+inputs:
+  service-path:
+    description: "The path to the Terraservice relative to the root of the repository"
+    required: true
+  cw-log-group:
+    description: >-
+      Name of CloudWatch Log Group to submit OpenTofu logs to; will be created if necessary
+    required: true
+  cw-log-stream:
+    description: >-
+      Name of CloudWatch Log Stream to submit OpenTofu logs to; will be created if necessary
+    required: true
+  tofu-vars-json:
+    description: "JSON object map of variables to their values"
+    required: false
+    default: "{}"
+runs:
+  using: "composite"
+  steps:
+    # This step is necessary as it seems that some objects (like "github" or "inputs") are
+    # unavailable when the top-level "env" is evaluated for Composite Actions
+    - name: Setup environment
+      run: |
+        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/.github/scripts/stdout-to-cwlogs.sh" \
+          >> $GITHUB_ENV
+        # Necessary for the "stdout-to-cwlogs.sh" script
+        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cw-log-group }}" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_STREAM=${{ inputs.cw-log-stream }}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Validate inputs
+      run: |
+        if [[ ! -d "${{ github.workspace }}/${{ inputs.service-path }}" ]]; then
+          echo "Directory '${{ inputs.service-path }}' does not exist; has the BFD repo been" \
+            "checked-out?"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Create Log Group if needed
+      run: |
+        # Attempt to create the Log Group, swallowing any error code that is returned and also
+        # capture the stderr output so that it can be checked
+        create_log_group_stderr="$(
+          aws logs create-log-group \
+            --log-group-name "${{ inputs.cw-log-group }}" 2>&1 >/dev/null || true
+        )"
+
+        # If there was an error message logged by create-log-group and that error was not
+        # indicating that the Log Group already exists (which is fine), then log that there was an
+        # unrecoverable error and exit
+        if [[
+          -n $create_log_group_stderr &&
+          $create_log_group_stderr != *"ResourceAlreadyExistsException"* ]] \
+          ; then
+          echo "Unrecoverable error occurred when trying to create Log Group" \
+            "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'"
+          echo "$create_log_group_stderr"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Create Log Stream if needed
+      run: |
+        create_log_stream_stderr="$(
+          aws logs create-log-stream --log-group-name "${{ inputs.cw-log-group }}" \
+            --log-stream-name "${{ inputs.cw-log-stream }}" 2>&1 >/dev/null || true
+        )"
+
+        if [[
+          -n $create_log_stream_stderr &&
+          $create_log_stream_stderr != *"ResourceAlreadyExistsException"* ]] \
+          ; then
+          echo "Unrecoverable error occurred when trying to create Log Stream" \
+            "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'"
+          echo "$create_log_stream_stderr"
+          exit 1
+        fi
+
+        echo "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'" \
+          "created or exists already"
+        echo "Tail the Log Stream to view OpenTofu output in realtime:"
+        echo "aws logs tail --since 1h --follow '${{ inputs.cw-log-group }}'"
+      shell: bash
+
+    - name: Check if tofu is installed
+      id: check-tofu-installed
+      run: |
+        is_tofu_installed="$(
+          if [[ -x "$(command -v tofu)" ]]; then
+            echo "true"
+          else
+            echo "false"
+          fi
+        )"
+        echo "is-tofu-installed=$is_tofu_installed" >> $GITHUB_OUTPUT
+      shell: bash
+
+    # Maps a given JSON object string of variable names to values, i.e.:
+    # {
+    #   "var1": "val1",
+    #   "var2": 123,
+    #   "var3": true
+    # }
+    # into a space-delimited argument list that the OpenTofu CLI understands:
+    # -var=var1=val1 -var=var2=123 -var=var3=true
+    - name: Generate OpenTofu vars args
+      id: gen-tf-vars-args
+      run: |
+        tf_vars_args="$(
+          echo "${{ inputs.tofu-vars-json }}" | jq -r 'to_entries |
+            map(select(.value != null and .value != "")) |
+            map("\"-var=" + .key + "=" + (.value | tostring)+ "\"") |
+            join(" ")'
+        )"
+        echo "tf-vars-args=$tf_vars_args" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Get OpenTofu Version
+      if: steps.check-tfvm-installed.outputs.is-tofu-installed == 'false'
+      id: get-opentofu-version
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        found_file=""
+        current_dir="$PWD"
+
+        # Walk up the directory tree from current working directory
+        while [[ "$current_dir" != "/" && -z "$found_file" ]]; do
+          if [[ -f "$current_dir/.opentofu-version" ]]; then
+            tofu_version="$(head -n 1 "$current_dir/.opentofu-version")"
+            found_file="$current_dir/.opentofu-version"
+          fi
+
+          # Move to parent directory
+          current_dir="$(dirname "$current_dir")"
+        done
+
+        if [[ -n "$found_file" ]]; then
+          echo "Found .opentofu-version file at $found_file specifying version: $tofu_version"
+        else
+          echo ".opentofu-version file not found."
+          exit 1
+        fi
+
+        echo "tofu-version=$tofu_version" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Setup OpenTofu
+      if: steps.check-tfvm-installed.outputs.is-tofu-installed == 'false'
+      uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.0.5
+      with:
+        tofu_version: ${{ steps.get-opentofu-version.outputs.tofu-version }}

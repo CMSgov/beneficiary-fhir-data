@@ -12,10 +12,10 @@ partners_regex_json="${3}"
 readonly partners_regex_json
 
 # Reads the partners regex json object's keys into a bash array
-IFS=$'\n' read -r -d '' -a partners < <(
+readarray -t partners <<<"$(
   set -o pipefail
   jq -r 'keys[]' <<<"${partners_regex_json}" && printf '\0'
-)
+)"
 
 client_ssls=()
 for partner in "${partners[@]}"; do
@@ -23,10 +23,10 @@ for partner in "${partners[@]}"; do
   applicable_dimension=$(
     aws cloudwatch list-metrics --namespace "${metric_namespace}" --metric-name "${metric_name}" \
       | jq -c "[
-        .Metrics[] 
-          | .Dimensions[] 
-          | select(.Name == \"client_ssl\") 
-          | select(.Value | test(\"${partner_regex}\")) 
+        .Metrics[]
+          | .Dimensions[]
+          | select(.Name == \"client_ssl\")
+          | select(.Value | test(\"${partner_regex}\"))
           | .Value
       ][0]"
   )
@@ -37,7 +37,7 @@ for partner in "${partners[@]}"; do
 
   partner_client_ssl=$(
     jq -c "{
-      ${partner}: . 
+      ${partner}: .
     }" <<<"${applicable_dimension}"
   )
   client_ssls+=("${partner_client_ssl}")

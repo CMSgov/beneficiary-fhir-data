@@ -175,6 +175,7 @@ public class BeneficiaryRepository {
                   AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                   AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                   AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                ORDER BY b.obsoleteTimestamp DESC
                 """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
@@ -197,18 +198,19 @@ public class BeneficiaryRepository {
         .createQuery(
             String.format(
                 """
-                            SELECT b
-                            FROM Beneficiary b
-                            JOIN b.beneficiaryThirdParties tp
-                            JOIN b.beneficiaryEntitlements be
-                            WHERE b.%s = :id
-                              AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-                              AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
-                              AND b.beneSk = b.xrefSk
-                              AND tp.id.thirdPartyTypeCode = :partTypeCode
-                              AND be.id.medicareEntitlementTypeCode = :partTypeCode
-                            """,
+                  SELECT b
+                  FROM Beneficiary b
+                  JOIN b.beneficiaryThirdParties tp
+                  JOIN b.beneficiaryEntitlements be
+                  WHERE b.%s = :id
+                    AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+                    AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                    AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                    AND b.beneSk = b.xrefSk
+                    AND tp.id.thirdPartyTypeCode = :partTypeCode
+                    AND be.id.medicareEntitlementTypeCode = :partTypeCode
+                  ORDER BY b.obsoleteTimestamp DESC
+                  """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
                 lastUpdatedRange.getUpperBoundSqlOperator()),

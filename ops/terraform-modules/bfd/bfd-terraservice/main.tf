@@ -3,8 +3,9 @@ locals {
 
   region = data.aws_region.current.name
 
-  service      = var.service
-  github_token = coalesce(data.external.github_token.result.github_token, "invalid")
+  bfd_version = data.external.bfd_version.result.bfd_version
+
+  service = var.service
 
   parent_env = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
   env        = terraform.workspace
@@ -111,16 +112,8 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
-data "external" "github_token" {
-  program = ["${path.module}/scripts/get_github_token.sh"]
-}
-
-data "http" "latest_bfd_release" {
-  url = "https://api.github.com/repos/CMSgov/beneficiary-fhir-data/releases/latest"
-
-  request_headers = local.github_token != "invalid" ? {
-    Authorization = "Bearer ${local.github_token}"
-  } : {}
+data "external" "bfd_version" {
+  program = ["${path.module}/scripts/get_bfd_version.sh"]
 }
 
 data "aws_ssm_parameters_by_path" "params" {
