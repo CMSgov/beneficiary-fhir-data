@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
@@ -8,7 +7,6 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -64,7 +62,7 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @param limit limit
    * @param offset offset
-   * @param tag tag
+   * @param queryParameterValue queryParameterValue
    * @return claims
    */
   public List<Claim> findByBeneXrefSk(
@@ -73,9 +71,7 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset,
-      Optional<TokenParam> tag) {
-
-    Optional<List<ClaimSourceId>> queryParameterValue = getSourceIdsForTagCode(tag);
+      Optional<List<ClaimSourceId>> queryParameterValue) {
 
     StringBuilder jpqlBuilder =
         new StringBuilder(
@@ -163,31 +159,5 @@ public class ClaimRepository {
             "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate().orElse(null))
         .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null));
-  }
-
-  /**
-   * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
-   * enum values.
-   *
-   * @param tag The code from the _tag parameter.
-   * @return A list of matching ClaimSourceId enums.
-   */
-  private Optional<List<ClaimSourceId>> getSourceIdsForTagCode(Optional<TokenParam> tag) {
-
-    String tagCode = null;
-    List<ClaimSourceId> matchingSources = new ArrayList<>();
-
-    if (!tag.isEmpty()) {
-      tagCode = tag.get().getValue();
-
-      for (ClaimSourceId sourceId : ClaimSourceId.values()) {
-        // Check if the sourceId's adjudicationStatus optional contains the requested code
-        if (sourceId.getAdjudicationStatus().isPresent()
-            && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(tagCode)) {
-          matchingSources.add(sourceId);
-        }
-      }
-    }
-    return Optional.of(matchingSources);
   }
 }
