@@ -26,4 +26,8 @@ public class IdrConstants {
 
   /** The code for fully adjudicated claims. */
   public static final String ADJUDICATION_STATUS_FINAL = "Adjudicated";
+
+  /** The URL for your adjudication status code system. */
+  public static final String SYS_ADJUDICATION_STATUS =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
 }

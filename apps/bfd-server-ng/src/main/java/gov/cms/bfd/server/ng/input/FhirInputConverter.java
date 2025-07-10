@@ -1,13 +1,19 @@
 package gov.cms.bfd.server.ng.input;
 
+import static java.util.Optional.empty;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
 import org.jetbrains.annotations.Nullable;
@@ -56,7 +62,7 @@ public class FhirInputConverter {
    */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
     if (numberParam == null) {
-      return Optional.empty();
+      return empty();
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
@@ -124,26 +130,35 @@ public class FhirInputConverter {
   }
 
   /**
-   * Validates an optional _tag {@link TokenParam} if it represents an adjudication status.
+   * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
+   * enum values.
    *
-   * <p>If the tag is present, this method checks that its value is one of "PartiallyAdjudicated" or
-   * "Adjudicated" (case-insensitive).
-   *
-   * @param tag The _tag {@link TokenParam} from the FHIR request, which can be null.
-   * @return An {@link Optional} containing the validated adjudication status string if the tag was
-   *     present and valid. Returns an empty Optional if the tag was not provided.
-   * @throws InvalidRequestException if the tag is present but its value is blank or unsupported.
+   * @param tag The code from the _tag parameter.
+   * @return A list of matching ClaimSourceId enums.
    */
-  public static String validateTag(@Nullable TokenParam tag) {
+  public static Optional<List<ClaimSourceId>> getSourceIdsForTagCode(Optional<TokenParam> tag) {
 
-    // A set of all supported adjudication status codes for efficient, case-insensitive lookup.
     Set<String> SUPPORTED_ADJUDICATION_STATUSES =
         Set.of(
             IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
             IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
 
-    // Now, validate the non-blank value.
-    if (tag != null && !SUPPORTED_ADJUDICATION_STATUSES.contains(tag.getValue().toUpperCase())) {
+    if (tag.isEmpty()) {
+      return Optional.empty();
+    }
+
+    String systemFromTag = tag.get().getSystem();
+
+    if (systemFromTag != null && !systemFromTag.equals(IdrConstants.SYS_ADJUDICATION_STATUS)) {
+      throw new InvalidRequestException(
+          "Unsupported system for _tag adjudication status. Expected system '"
+              + IdrConstants.SYS_ADJUDICATION_STATUS
+              + "'.");
+    }
+
+    String statusValue = tag.get().getValue();
+
+    if (!SUPPORTED_ADJUDICATION_STATUSES.contains(statusValue.toUpperCase())) {
       throw new InvalidRequestException(
           "Unsupported _tag value for adjudication status. Supported values are '"
               + IdrConstants.ADJUDICATION_STATUS_PARTIAL
@@ -151,7 +166,14 @@ public class FhirInputConverter {
               + IdrConstants.ADJUDICATION_STATUS_FINAL
               + "'.");
     }
+    List<ClaimSourceId> matchingSources =
+        Stream.of(ClaimSourceId.values())
+            .filter(
+                sourceId ->
+                    sourceId.getAdjudicationStatus().isPresent()
+                        && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
+            .collect(Collectors.toList());
 
-    return "";
+    return Optional.of(matchingSources);
   }
 }
