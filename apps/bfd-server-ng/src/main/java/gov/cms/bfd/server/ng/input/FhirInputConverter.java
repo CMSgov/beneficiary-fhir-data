@@ -62,7 +62,7 @@ public class FhirInputConverter {
    */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
     if (numberParam == null) {
-      return Optional.empty();
+      return empty();
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
