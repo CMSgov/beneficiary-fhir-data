@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -79,6 +80,46 @@ public class BeneficiaryRepository {
             PatientIdentity.class)
         .setParameter("beneSk", beneSk)
         .getResultList();
+  }
+
+  public List<PatientIdentity> getPatientIdentitiesByMbi(String mbi) {
+    var beneficiariesFromMbi = searchBeneficiaryNoRange("identity.mbi", mbi).stream().toList();
+    var beneCount = (int) beneficiariesFromMbi.stream().map(Beneficiary::getXrefSk).distinct().count();
+
+    if (beneCount == 0) {
+      var beneHistory = searchBeneficiaryHistory("identity.mbi", mbi);
+      var beneXrefSK = beneHistory.stream().filter(bene -> bene.getBeneXrefSk() != 0L).distinct().toList();
+      if (beneXrefSK.size() == 1) {
+        var beneficiaries = searchBeneficiaryNoRange("xrefSk", beneXrefSK.stream().findFirst().toString());
+
+        return beneficiaries.stream().flatMap(bene -> searchBeneficiaryAndHistory(bene.getBeneXrefSk()).stream()).toList();
+      }
+      else {
+        return Collections.emptyList();
+      }
+    }
+    else if (beneCount == 1) {
+      if (beneficiariesFromMbi.stream().map(Beneficiary::getBeneXrefSk).anyMatch(beneXrefSk -> beneXrefSk == 0L)) {
+          var beneHistory = searchBeneficiaryHistory("identity.xrefSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneSk()));
+      }
+      else if (beneficiariesFromMbi.getFirst().getBeneXrefSk() == beneficiariesFromMbi.getFirst().getBeneSk()) {
+        var beneficiaries = searchBeneficiaryNoRange("xrefSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneXrefSk()));
+
+        return beneficiaries.stream().flatMap(bene -> searchBeneficiaryAndHistory(bene.getBeneXrefSk()).stream()).toList();
+      }
+      else {
+
+      }
+    }
+    else {
+      if (beneficiariesFromMbi.stream().filter(bene -> bene.getBeneXrefSk() != 0L).count() == 1) {
+
+      }
+      else {
+        return Collections.emptyList();
+      }
+    }
+      return List.of();
   }
 
   /**
@@ -221,4 +262,135 @@ public class BeneficiaryRepository {
         .stream()
         .findFirst();
   }
+
+  private Optional<Beneficiary> searchBeneficiaryNoRange(
+          String idColumnName, String idColumnValue) {
+    return entityManager
+        .createQuery(
+              String.format(
+                """
+                SELECT b
+                FROM Beneficiary b
+                WHERE b.%s = :id
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                """,
+                idColumnName),
+            Beneficiary.class)
+          .setParameter("id", idColumnValue)
+          .getResultList()
+          .stream()
+          .findFirst();
+  }
+
+  private Optional<Beneficiary> searchBeneficiaryHistory(
+          String idColumnName, String idColumnValue) {
+    return entityManager
+            .createQuery(
+                    String.format(
+                            """
+                            SELECT b
+                            FROM Beneficiary b
+                            JOIN BeneficiaryHistory bh
+                              ON b.xrefSk = bh.xrefSk
+                            WHERE b.%s = :id
+                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                            """,
+                            idColumnName),
+                    Beneficiary.class)
+            .setParameter("id", idColumnValue)
+            .getResultList()
+            .stream()
+            .findFirst();
+  }
+
+  private List<PatientIdentity> searchBeneficiaryAndHistory(long beneXrefSk) {
+    return entityManager
+            .createQuery(
+                """
+                WITH allBeneInfo AS (
+                  SELECT
+                    b.beneSk beneSk,
+                    b.beneXrefSk beneXrefSk,
+                    b.identity.mbi mbi,
+                    mbiId.effectiveDate effectiveDate,
+                    mbiId.obsoleteDate obsoleteDate
+                  FROM Beneficiary b
+                  JOIN BeneficiaryXref bx
+                    ON b.beneXrefSk = bx.beneXrefSk and b.beneSK = bx.beneSK
+                  LEFT JOIN BeneficiaryMbiId mbiId
+                    ON b.identity.mbi = mbiId.mbi
+                    AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                  WHERE b.beneXrefSk = :beneXrefSk
+                  AND bx.beneKillCred != 1
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                  UNION
+                  SELECT
+                    bh.beneSk beneSk,
+                    bh.beneXrefSk beneXrefSk,
+                    bh.mbi mbi,
+                    mbiId.effectiveDate effectiveDate,
+                    mbiId.obsoleteDate obsoleteDate
+                  FROM Beneficiary b
+                  JOIN BeneficiaryHistory bh
+                    ON b.beneSK = bh.beneSK
+                  LEFT JOIN BeneficiaryMbiId mbiId
+                    ON b.identity.mbi = mbiId.mbi
+                    AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                  WHERE b.beneXrefSk = :beneXrefSk
+                )
+                SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY abi.beneXrefSk) rowId, abi.beneXrefSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
+                FROM allBeneInfo abi
+                GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
+                """,
+                PatientIdentity.class
+            )
+            .setParameter("beneXrefSk", beneXrefSk)
+            .getResultList();
+  }
+
+  private List<PatientIdentity> searchBeneficiaryXref(long beneXrefSk) {
+    return entityManager
+            .createQuery(
+                    """
+                    WITH allBeneInfo AS (
+                      SELECT
+                        b.beneSk beneSk,
+                        b.beneXrefSk beneXrefSk,
+                        b.identity.mbi mbi,
+                        mbiId.effectiveDate effectiveDate,
+                        mbiId.obsoleteDate obsoleteDate
+                      FROM Beneficiary b
+                      JOIN BeneficiaryXref bx
+                        ON b.beneXrefSk = bx.beneXrefSk and b.beneSK = bx.beneSK
+                      LEFT JOIN BeneficiaryMbiId mbiId
+                        ON b.identity.mbi = mbiId.mbi
+                        AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                      WHERE b.beneXrefSk = :beneXrefSk
+                      AND bx.beneKillCred != 1
+                      AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                      UNION
+                      SELECT
+                        bh.beneSk beneSk,
+                        bh.beneXrefSk beneXrefSk,
+                        bh.mbi mbi,
+                        mbiId.effectiveDate effectiveDate,
+                        mbiId.obsoleteDate obsoleteDate
+                      FROM Beneficiary b
+                      JOIN BeneficiaryHistory bh
+                        ON b.beneSK = bh.beneSK
+                      LEFT JOIN BeneficiaryMbiId mbiId
+                        ON b.identity.mbi = mbiId.mbi
+                        AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                      WHERE b.beneXrefSk = :beneXrefSk
+                    )
+                    SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY abi.beneXrefSk) rowId, abi.beneXrefSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
+                    FROM allBeneInfo abi
+                    GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
+                    """,
+                    PatientIdentity.class
+            )
+            .setParameter("beneXrefSk", beneXrefSk)
+            .getResultList();
+  }
 }
+

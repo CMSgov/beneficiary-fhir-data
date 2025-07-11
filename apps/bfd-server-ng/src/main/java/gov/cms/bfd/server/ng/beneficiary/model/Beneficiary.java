@@ -30,6 +30,9 @@ public class Beneficiary {
   @Column(name = "bene_sk")
   private long beneSk;
 
+  @Column(name = "bene_xref_efctv_sk")
+  private long beneXrefSk;
+
   @Column(name = "bene_xref_efctv_sk_computed")
   private long xrefSk;
 
