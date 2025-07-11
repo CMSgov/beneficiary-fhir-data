@@ -61,7 +61,7 @@ public class ClaimProcedure {
                     .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_PROCEDURE_TYPE)
                     .setCode(code)));
     if (procedureDate.isAfter(DEFAULT_PROCEDURE_DATE)) {
-      procedure.setDate(DateUtil.toDate(procedureDate));
+      procedure.setDateElement(DateUtil.toFhirDate(procedureDate));
     }
     procedure.setProcedure(
         new CodeableConcept(

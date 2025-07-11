@@ -5,6 +5,8 @@ import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -152,9 +154,9 @@ public class BeneficiaryRepository {
    * @param partTypeCode Part type
    * @return beneficiary record
    */
-  public Optional<Beneficiary> searchCurrentBeneficiary(
-      long beneSk, String partTypeCode, DateTimeRange lastUpdatedRange) {
-    return searchCurrentBeneficiary(
+  public Optional<Beneficiary> searchBeneficiaryWithCoverage(
+      long beneSk, Optional<String> partTypeCode, DateTimeRange lastUpdatedRange) {
+    return searchBeneficiaryWithCoverage(
         "beneSk", String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
   }
 
@@ -216,6 +218,7 @@ public class BeneficiaryRepository {
                   AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                   AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                   AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                ORDER BY b.obsoleteTimestamp DESC
                 """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
@@ -229,33 +232,45 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
-  private Optional<Beneficiary> searchCurrentBeneficiary(
+  private Optional<Beneficiary> searchBeneficiaryWithCoverage(
       String idColumnName,
       String idColumnValue,
-      String partTypeCode,
+      Optional<String> partTypeCode,
       DateTimeRange lastUpdatedRange) {
+    // UTC -12 is "Anywhere on Earth time", sometimes used to specify deadlines in the absence of a
+    // specific time zone.
+    // https://en.wikipedia.org/wiki/Anywhere_on_Earth
+    var currentDate = OffsetDateTime.now(ZoneOffset.ofHours(-12)).toLocalDate();
     return entityManager
         .createQuery(
             String.format(
                 """
-                            SELECT b
-                            FROM Beneficiary b
-                            JOIN b.beneficiaryThirdParties tp
-                            JOIN b.beneficiaryEntitlements be
-                            WHERE b.%s = :id
-                              AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-                              AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
-                              AND b.beneSk = b.xrefSk
-                              AND tp.id.thirdPartyTypeCode = :partTypeCode
-                              AND be.id.medicareEntitlementTypeCode = :partTypeCode
-                            """,
+                  SELECT b
+                  FROM Beneficiary b
+                  LEFT JOIN b.beneficiaryThirdParties tp ON
+                    (:partTypeCode IS NULL OR tp.id.thirdPartyTypeCode = :partTypeCode)
+                    AND tp.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE
+                    AND tp.id.benefitRangeBeginDate <= :referenceDate
+                    AND tp.id.benefitRangeEndDate >= :referenceDate
+                  LEFT JOIN b.beneficiaryEntitlements be ON
+                    (:partTypeCode IS NULL OR be.id.medicareEntitlementTypeCode = :partTypeCode)
+                    AND be.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE
+                    AND be.id.benefitRangeBeginDate <= :referenceDate
+                    AND be.id.benefitRangeEndDate >= :referenceDate
+                  WHERE b.%s = :id
+                    AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
+                    AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                    AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                    AND b.beneSk = b.xrefSk
+                  ORDER BY b.obsoleteTimestamp DESC
+                  """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
                 lastUpdatedRange.getUpperBoundSqlOperator()),
             Beneficiary.class)
         .setParameter("id", idColumnValue)
-        .setParameter("partTypeCode", partTypeCode)
+        .setParameter("referenceDate", currentDate)
+        .setParameter("partTypeCode", partTypeCode.orElse(null))
         .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
         .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()

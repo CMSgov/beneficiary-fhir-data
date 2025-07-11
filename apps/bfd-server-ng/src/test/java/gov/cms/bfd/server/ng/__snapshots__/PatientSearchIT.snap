@@ -46,6 +46,93 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[POST]=[
 ]
 
 
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "id" : "181968400",
+      "link" : [ {
+        "other" : {
+          "display" : "405764107",
+          "reference" : "Patient/405764107"
+        },
+        "type" : "replaced-by"
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient?_id=181968400"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET_WITH_SEARCH]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "id" : "181968400",
+      "link" : [ {
+        "other" : {
+          "display" : "405764107",
+          "reference" : "Patient/405764107"
+        },
+        "type" : "replaced-by"
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient/_search?_id=181968400"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "id" : "181968400",
+      "link" : [ {
+        "other" : {
+          "display" : "405764107",
+          "reference" : "Patient/405764107"
+        },
+        "type" : "replaced-by"
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
 {
   "entry" : [ {
@@ -83,7 +170,21 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
       "gender" : "female",
-      "id" : "181968400",
+      "id" : "405764107",
+      "identifier" : [ {
+        "period" : {
+          "end" : "2020-05-25T00:00:00+00:00",
+          "start" : "2020-04-21T00:00:00+00:00"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -98,7 +199,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=181968400"
+    "url" : "http://localhost/v3/fhir/Patient?_id=405764107"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -146,7 +247,21 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
       "gender" : "female",
-      "id" : "181968400",
+      "id" : "405764107",
+      "identifier" : [ {
+        "period" : {
+          "end" : "2020-05-25T00:00:00+00:00",
+          "start" : "2020-04-21T00:00:00+00:00"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -161,7 +276,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=181968400"
+    "url" : "http://localhost/v3/fhir/Patient/_search?_id=405764107"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -209,7 +324,21 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
       "gender" : "female",
-      "id" : "181968400",
+      "id" : "405764107",
+      "identifier" : [ {
+        "period" : {
+          "end" : "2020-05-25T00:00:00+00:00",
+          "start" : "2020-04-21T00:00:00+00:00"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -321,6 +450,16 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
       } ],
       "gender" : "male",
       "id" : "517782585",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "2B19C89AA35"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -384,6 +523,16 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
       } ],
       "gender" : "male",
       "id" : "517782585",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "2B19C89AA35"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -447,6 +596,16 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
       } ],
       "gender" : "male",
       "id" : "517782585",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "2B19C89AA35"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]

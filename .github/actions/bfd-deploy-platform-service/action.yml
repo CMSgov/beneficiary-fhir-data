@@ -1,0 +1,84 @@
+name: "Deploy Platform Terraservice"
+description: "Composite action to deploy an account-specific Terraservice"
+inputs:
+  account-type:
+    description: "The account type to deploy the given service to"
+    required: false
+  service-path:
+    description: "The path to the Terraservice relative to the root of the repository"
+    required: true
+  cw-log-group:
+    description: >-
+      Name of CloudWatch Log Group to submit OpenTofu logs to; will be created if necessary
+    required: true
+  cw-log-stream:
+    description: >-
+      Name of CloudWatch Log Stream to submit OpenTofu logs to; will be created if necessary
+    required: true
+  skip-apply:
+    description: >-
+      Skip the apply of the given Terraservice. Useful for logging the plan without making any
+      modifications
+    default: "false" # Composite Action inputs must be strings
+    required: false
+  tofu-vars-json:
+    description: "JSON object map of variables to their values"
+    required: false
+    default: "{}"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup OpenTofu and shell environment
+      id: setup-tofu
+      uses: ./.github/actions/bfd-setup-tofu
+      with:
+        service-path: ${{ inputs.service-path }}
+        cw-log-group: ${{ inputs.cw-log-group }}
+        cw-log-stream: ${{ inputs.cw-log-stream }}
+        tofu-vars-json: ${{ inputs.tofu-vars-json }}
+
+    - name: OpenTofu init
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        tofu --version
+
+        # Select the default workspace unconditionally in the (unlikely) case that the workspace is
+        # set to something at all. This ensures we can init any backend
+        tofu workspace select default -no-color &>/dev/null || true
+
+        # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
+        # available for anyone logged in with a GitHub account to view, and so this information must
+        # be protected. Instead of logging to stdout, all potentially sensitive OpenTofu log output
+        # is instead logged to CloudWatch
+        tofu init \
+          -var account_type="${{ inputs.account-type }}" \
+          -reconfigure \
+          -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "tofu init for \"${{ inputs.account-type }}\" completed"
+        tofu workspace select \
+          -no-color \
+          -var account_type="${{ inputs.account-type }}" \
+          -or-create "${{ inputs.account-type }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "Selected workspace \"${{ inputs.account-type }}\""
+      shell: bash
+
+    - name: Generate OpenTofu plan
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
+        tofu plan ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }} -no-color \
+          -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "Plan generated for ${{ inputs.service-path }} successfully"
+      shell: bash
+
+    - name: Apply Terraservice
+      if: ${{ inputs.skip-apply != 'true' }}
+      run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
+        echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
+        tofu apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        echo "OpenTofu plan for ${{ inputs.service-path }} applied"
+      shell: bash

@@ -21,10 +21,9 @@ class BillablePeriod {
   private String claimQueryCode;
 
   Period toFhir() {
-    var period =
-        new Period()
-            .setStart(DateUtil.toDate(claimFromDate))
-            .setEnd(DateUtil.toDate(claimThroughDate));
+    var period = new Period();
+    period.setStartElement(DateUtil.toFhirDate(claimFromDate));
+    period.setEndElement(DateUtil.toFhirDate(claimThroughDate));
     period.addExtension(
         new Extension()
             .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE)

@@ -451,7 +451,7 @@ class IdrClaim(IdrBaseModel):
     clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ncvrd_chrg_amt: float
     clm_mdcr_ddctbl_amt: float
-    clm_cntrctr_num: str
+    clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_amt: float
     clm_ltst_clm_ind: str
     clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
@@ -537,13 +537,16 @@ class IdrClaimDateSignature(IdrBaseModel):
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_admsn_type_cd: str
-    bene_ptnt_stus_cd: str
+    bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
     clm_mdcr_instnl_mco_pd_sw: str
     clm_admsn_src_cd: str
     clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_lrd_use_cnt: int
     clm_hipps_uncompd_care_amt: float
+    clm_hha_rfrl_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_hha_lup_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_mdcr_hha_tot_visit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_instnl_mdcr_coins_day_cnt: int
     clm_instnl_ncvrd_day_cnt: float
     clm_instnl_per_diem_amt: float
@@ -673,6 +676,11 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
+    clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rev_dscnt_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rev_packg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rev_cntr_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rev_pmt_mthd_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_ansi_sgntr_sk: Annotated[int, BeforeValidator(transform_null_int)]
     clm_ddctbl_coinsrnc_cd: str
     clm_line_instnl_rate_amt: float
