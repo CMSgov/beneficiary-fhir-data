@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryHistory;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
@@ -102,7 +103,7 @@ public class BeneficiaryRepository {
     }
     else if (beneCount == 1) {
       if (beneficiariesFromMbi.stream().map(Beneficiary::getBeneXrefSk).anyMatch(beneXrefSk -> beneXrefSk == 0L)) {
-          var beneHistory = searchBeneficiaryHistory("identity.xrefSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneSk()));
+          var beneHistory = searchBeneficiaryHistory("beneSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneSk()));
       }
       else if (beneficiariesFromMbi.getFirst().getBeneXrefSk() == beneficiariesFromMbi.getFirst().getBeneSk()) {
         var beneficiaries = searchBeneficiaryNoRange("xrefSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneXrefSk()));
@@ -297,25 +298,22 @@ public class BeneficiaryRepository {
           .findFirst();
   }
 
-  private Optional<Beneficiary> searchBeneficiaryHistory(
+  private List<BeneficiaryHistory> searchBeneficiaryHistory(
           String idColumnName, String idColumnValue) {
     return entityManager
             .createQuery(
                     String.format(
-                            """
-                            SELECT b
-                            FROM Beneficiary b
-                            JOIN BeneficiaryHistory bh
-                              ON b.xrefSk = bh.xrefSk
-                            WHERE b.%s = :id
-                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
-                            """,
-                            idColumnName),
-                    Beneficiary.class)
+                    """
+                    SELECT bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
+                    FROM BeneficiaryHistory bh
+                    WHERE bh.%s = :id
+                      AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                    GROUP BY bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
+                    """,
+                    idColumnName),
+            BeneficiaryHistory.class)
             .setParameter("id", idColumnValue)
-            .getResultList()
-            .stream()
-            .findFirst();
+            .getResultList();
   }
 
   private List<PatientIdentity> searchBeneficiaryAndHistory(long beneXrefSk) {
