@@ -212,6 +212,35 @@ public class EobSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
+  void eobSearchBySystemUrlTag(SearchStyleEnum searchStyle) {
+    String beneficiaryId = "405764107";
+    String tagSystem = SystemUrls.SYS_ADJUDICATION_STATUS;
+    String tagCode = "Adjudicated";
+
+    Bundle eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(beneficiaryId))
+            .and(
+                new TokenClientParam(Constants.PARAM_TAG)
+                    .exactly()
+                    .systemAndCode(tagSystem, tagCode))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+
+    expect
+        .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")
+        .serializer("fhir+json")
+        .toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
   void eobSearchByTagEmpty(SearchStyleEnum searchStyle) {
     String beneficiaryId = "405764107";
     String validTagWithNoMatches = IdrConstants.ADJUDICATION_STATUS_PARTIAL;
@@ -238,7 +267,13 @@ public class EobSearchIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"invalidStatus", "in-progress", "test"})
+  @ValueSource(
+      strings = {
+        "invalidStatus",
+        "in-progress",
+        "test",
+        "https://bluebutton.cms.gov/fhir/CodeSystem/test"
+      })
   void eobSearchByInvalidTagBadRequest(String invalidTag) {
     String beneficiaryId = "405764107";
 

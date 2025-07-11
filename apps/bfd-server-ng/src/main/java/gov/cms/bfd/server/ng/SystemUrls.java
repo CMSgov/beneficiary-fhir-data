@@ -214,6 +214,10 @@ public class SystemUrls {
   public static final String PROFILE_US_CORE_PRACTITIONER_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0";
 
+  /** The URL for your adjudication status code system. */
+  public static final String SYS_ADJUDICATION_STATUS =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
+
   // Hl7 Code Systems
 
   /**

@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
@@ -8,7 +7,6 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -64,7 +62,7 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @param limit limit
    * @param offset offset
-   * @param tag tag
+   * @param queryParameterValue queryParameterValue
    * @return claims
    */
   public List<Claim> findByBeneXrefSk(
@@ -73,48 +71,35 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset,
-      Optional<TokenParam> tag) {
+      Optional<List<ClaimSourceId>> queryParameterValue) {
 
-    Optional<List<ClaimSourceId>> queryParameterValue = getSourceIdsForTagCode(tag);
+    return withTagParams(
+            withDateParams(
+                entityManager.createQuery(
+                    String.format(
+                        """
+                                        SELECT c
 
-    StringBuilder jpqlBuilder =
-        new StringBuilder(
-            """
-            SELECT c
-            FROM Claim c
-            JOIN c.claimLines cl
-            JOIN c.claimDateSignature cds
-            JOIN c.claimProcedures cp
-            LEFT JOIN c.claimInstitutional ci
-            LEFT JOIN cl.claimLineInstitutional cli
-            LEFT JOIN cli.ansiSignature as
-            LEFT JOIN c.claimValues cv
-            WHERE c.beneficiary.xrefSk = :beneSk
-            """);
-
-    jpqlBuilder.append(getDateFilters(claimThroughDate, lastUpdated));
-
-    if (queryParameterValue.isPresent() && !queryParameterValue.get().isEmpty()) {
-      jpqlBuilder.append(" AND c.claimSourceId IN :sourceIds");
-    }
-
-    // Add the final ordering.
-    jpqlBuilder.append(" ORDER BY c.claimUniqueId");
-
-    TypedQuery<Claim> query = entityManager.createQuery(jpqlBuilder.toString(), Claim.class);
-
-    query.setParameter("beneSk", beneSk);
-
-    queryParameterValue.ifPresent(
-        sourceIds -> {
-          if (!sourceIds.isEmpty()) {
-            query.setParameter("sourceIds", sourceIds);
-          }
-        });
-
-    TypedQuery<Claim> finalQuery = withDateParams(query, claimThroughDate, lastUpdated);
-
-    return finalQuery
+                                        FROM Claim c
+                                        JOIN c.claimLines cl
+                                        JOIN c.claimDateSignature cds
+                                        JOIN c.claimProcedures cp
+                                        LEFT JOIN c.claimInstitutional ci
+                                        LEFT JOIN cl.claimLineInstitutional cli
+                                        LEFT JOIN cli.ansiSignature as
+                                        LEFT JOIN c.claimValues cv
+                                        WHERE c.beneficiary.xrefSk = :beneSk
+                                        %s
+                                        %s
+                                        ORDER BY c.claimUniqueId
+                                        """,
+                        getDateFilters(claimThroughDate, lastUpdated),
+                        getTagFilter(queryParameterValue)),
+                    Claim.class),
+                claimThroughDate,
+                lastUpdated),
+            queryParameterValue)
+        .setParameter("beneSk", beneSk)
         .setMaxResults(limit.orElse(5000))
         .setFirstResult(offset.orElse(0))
         .getResultList();
@@ -165,29 +150,22 @@ public class ClaimRepository {
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null));
   }
 
-  /**
-   * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
-   * enum values.
-   *
-   * @param tag The code from the _tag parameter.
-   * @return A list of matching ClaimSourceId enums.
-   */
-  private Optional<List<ClaimSourceId>> getSourceIdsForTagCode(Optional<TokenParam> tag) {
+  private <T> TypedQuery<T> withTagParams(
+      TypedQuery<T> query, Optional<List<ClaimSourceId>> queryParameterValue) {
 
-    String tagCode = null;
-    List<ClaimSourceId> matchingSources = new ArrayList<>();
+    queryParameterValue.ifPresent(
+        sourceIds -> {
+          if (!sourceIds.isEmpty()) {
+            query.setParameter("sourceIds", sourceIds);
+          }
+        });
+    return query;
+  }
 
-    if (!tag.isEmpty()) {
-      tagCode = tag.get().getValue();
-
-      for (ClaimSourceId sourceId : ClaimSourceId.values()) {
-        // Check if the sourceId's adjudicationStatus optional contains the requested code
-        if (sourceId.getAdjudicationStatus().isPresent()
-            && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(tagCode)) {
-          matchingSources.add(sourceId);
-        }
-      }
+  private String getTagFilter(Optional<List<ClaimSourceId>> tag) {
+    if (tag.isPresent()) {
+      return " AND ( c.claimSourceId IN (:sourceIds)) ";
     }
-    return Optional.of(matchingSources);
+    return "";
   }
 }
