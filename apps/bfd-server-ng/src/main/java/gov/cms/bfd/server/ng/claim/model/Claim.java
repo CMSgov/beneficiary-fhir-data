@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -53,7 +54,7 @@ public class Claim {
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
-  private Beneficiary beneficiary;
+  private BeneficiarySimple beneficiary;
 
   @OneToOne
   @JoinColumn(name = "clm_dt_sgntr_sk")
@@ -66,15 +67,15 @@ public class Claim {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimLine> claimLines;
+  private Set<ClaimLine> claimLines;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimValue> claimValues;
+  private Set<ClaimValue> claimValues;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimProcedure> claimProcedures;
+  private Set<ClaimProcedure> claimProcedures;
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);

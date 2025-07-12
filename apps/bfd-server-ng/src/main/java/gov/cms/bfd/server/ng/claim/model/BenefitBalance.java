@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,7 +24,7 @@ class BenefitBalance {
   private double noncoveredChargeAmount;
 
   ExplanationOfBenefit.BenefitBalanceComponent toFhir(
-      BenefitBalanceInstitutional benefitBalanceInstitutional, List<ClaimValue> claimValues) {
+      BenefitBalanceInstitutional benefitBalanceInstitutional, Set<ClaimValue> claimValues) {
     return new ExplanationOfBenefit.BenefitBalanceComponent()
         .setCategory(
             new CodeableConcept(

@@ -40,7 +40,7 @@ public class CoverageHandler {
             Optional.of(coverageCompositeId.coveragePart().getStandardCode()),
             new DateTimeRange());
 
-    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhirCoverage(coverageCompositeId));
+    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
   }
 
   /**
