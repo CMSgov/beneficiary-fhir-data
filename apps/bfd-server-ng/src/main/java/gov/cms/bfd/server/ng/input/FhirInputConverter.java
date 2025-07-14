@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.input;
 
-import static java.util.Optional.empty;
-
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -14,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
@@ -64,7 +61,7 @@ public class FhirInputConverter {
    */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
     if (numberParam == null) {
-      return empty();
+      return Optional.empty();
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
@@ -168,14 +165,13 @@ public class FhirInputConverter {
               + IdrConstants.ADJUDICATION_STATUS_FINAL
               + "'.");
     }
-    List<ClaimSourceId> matchingSources = new ArrayList<>();
-    matchingSources =
+    List<ClaimSourceId> matchingSources =
         Stream.of(ClaimSourceId.values())
             .filter(
                 sourceId ->
                     sourceId.getAdjudicationStatus().isPresent()
                         && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
-            .collect(Collectors.toList());
+            .toList();
 
     return matchingSources;
   }
