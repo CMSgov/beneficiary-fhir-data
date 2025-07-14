@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
+import static java.util.Optional.empty;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -8,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +64,7 @@ public class FhirInputConverter {
    */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
     if (numberParam == null) {
-      return Optional.empty();
+      return empty();
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
@@ -135,18 +138,18 @@ public class FhirInputConverter {
    * @param tag The code from the _tag parameter.
    * @return A list of matching ClaimSourceId enums.
    */
-  public static Optional<List<ClaimSourceId>> getSourceIdsForTagCode(Optional<TokenParam> tag) {
+  public static List<ClaimSourceId> getSourceIdsForTagCode(@Nullable TokenParam tag) {
 
     Set<String> SUPPORTED_ADJUDICATION_STATUSES =
         Set.of(
             IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
             IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
 
-    if (tag.isEmpty()) {
-      return Optional.empty();
+    if (tag == null) {
+      return new ArrayList<>();
     }
 
-    String systemFromTag = tag.get().getSystem();
+    var systemFromTag = tag.getSystem();
 
     if (systemFromTag != null && !systemFromTag.equals(SystemUrls.SYS_ADJUDICATION_STATUS)) {
       throw new InvalidRequestException(
@@ -155,7 +158,7 @@ public class FhirInputConverter {
               + "'.");
     }
 
-    String statusValue = tag.get().getValue();
+    var statusValue = tag.getValue();
 
     if (!SUPPORTED_ADJUDICATION_STATUSES.contains(statusValue.toUpperCase())) {
       throw new InvalidRequestException(
@@ -165,7 +168,8 @@ public class FhirInputConverter {
               + IdrConstants.ADJUDICATION_STATUS_FINAL
               + "'.");
     }
-    List<ClaimSourceId> matchingSources =
+    List<ClaimSourceId> matchingSources = new ArrayList<>();
+    matchingSources =
         Stream.of(ClaimSourceId.values())
             .filter(
                 sourceId ->
@@ -173,6 +177,6 @@ public class FhirInputConverter {
                         && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
             .collect(Collectors.toList());
 
-    return Optional.of(matchingSources);
+    return matchingSources;
   }
 }

@@ -62,7 +62,7 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @param limit limit
    * @param offset offset
-   * @param queryParameterValue queryParameterValue
+   * @param sourceIds claim sourceIds
    * @return claims
    */
   public List<Claim> findByBeneXrefSk(
@@ -71,34 +71,33 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset,
-      Optional<List<ClaimSourceId>> queryParameterValue) {
+      List<ClaimSourceId> sourceIds) {
 
     return withTagParams(
             withDateParams(
                 entityManager.createQuery(
                     String.format(
                         """
-                                        SELECT c
+                        SELECT c
 
-                                        FROM Claim c
-                                        JOIN c.claimLines cl
-                                        JOIN c.claimDateSignature cds
-                                        JOIN c.claimProcedures cp
-                                        LEFT JOIN c.claimInstitutional ci
-                                        LEFT JOIN cl.claimLineInstitutional cli
-                                        LEFT JOIN cli.ansiSignature as
-                                        LEFT JOIN c.claimValues cv
-                                        WHERE c.beneficiary.xrefSk = :beneSk
-                                        %s
-                                        %s
-                                        ORDER BY c.claimUniqueId
-                                        """,
-                        getDateFilters(claimThroughDate, lastUpdated),
-                        getTagFilter(queryParameterValue)),
+                        FROM Claim c
+                        JOIN c.claimLines cl
+                        JOIN c.claimDateSignature cds
+                        JOIN c.claimProcedures cp
+                        LEFT JOIN c.claimInstitutional ci
+                        LEFT JOIN cl.claimLineInstitutional cli
+                        LEFT JOIN cli.ansiSignature as
+                        LEFT JOIN c.claimValues cv
+                        WHERE c.beneficiary.xrefSk = :beneSk
+                        %s
+                        %s
+                        ORDER BY c.claimUniqueId
+                        """,
+                        getTagFilter(), getDateFilters(claimThroughDate, lastUpdated)),
                     Claim.class),
                 claimThroughDate,
                 lastUpdated),
-            queryParameterValue)
+            sourceIds)
         .setParameter("beneSk", beneSk)
         .setMaxResults(limit.orElse(5000))
         .setFirstResult(offset.orElse(0))
@@ -150,22 +149,13 @@ public class ClaimRepository {
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null));
   }
 
-  private <T> TypedQuery<T> withTagParams(
-      TypedQuery<T> query, Optional<List<ClaimSourceId>> queryParameterValue) {
+  private <T> TypedQuery<T> withTagParams(TypedQuery<T> query, List<ClaimSourceId> sourceIds) {
 
-    queryParameterValue.ifPresent(
-        sourceIds -> {
-          if (!sourceIds.isEmpty()) {
-            query.setParameter("sourceIds", sourceIds);
-          }
-        });
-    return query;
+    query.setParameter("hasSourceIds", !sourceIds.isEmpty());
+    return query.setParameter("sourceIds", sourceIds);
   }
 
-  private String getTagFilter(Optional<List<ClaimSourceId>> tag) {
-    if (tag.isPresent()) {
-      return " AND ( c.claimSourceId IN (:sourceIds)) ";
-    }
-    return "";
+  private String getTagFilter() {
+    return " AND (:hasSourceIds = false OR c.claimSourceId IN :sourceIds)";
   }
 }

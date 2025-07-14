@@ -52,7 +52,7 @@ public class EobHandler {
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       Optional<Integer> startIndex,
-      Optional<List<ClaimSourceId>> sourceIds) {
+      List<ClaimSourceId> sourceIds) {
     var beneXrefSk = beneficiaryRepository.getXrefBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {

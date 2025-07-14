@@ -69,8 +69,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag) {
 
-    Optional<List<ClaimSourceId>> sourceIds =
-        FhirInputConverter.getSourceIdsForTagCode(Optional.ofNullable(tag));
+    List<ClaimSourceId> sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
 
     return eobHandler.searchByBene(
         FhirInputConverter.toLong(patient, "Patient"),
