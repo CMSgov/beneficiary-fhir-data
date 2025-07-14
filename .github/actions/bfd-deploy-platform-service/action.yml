@@ -43,15 +43,11 @@ runs:
 
         tofu --version
 
-        # Select the default workspace unconditionally in the (unlikely) case that the workspace is
-        # set to something at all. This ensures we can init any backend
-        tofu workspace select default -no-color &>/dev/null || true
-
         # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
         # available for anyone logged in with a GitHub account to view, and so this information must
         # be protected. Instead of logging to stdout, all potentially sensitive OpenTofu log output
         # is instead logged to CloudWatch
-        tofu init \
+        TF_WORKSPACE=default tofu init \
           -var account_type="${{ inputs.account-type }}" \
           -reconfigure \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
