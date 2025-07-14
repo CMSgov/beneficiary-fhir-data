@@ -1451,8 +1451,8 @@ public enum ClaimLineRevenueCenterCode {
    * @param code database code
    * @return revenue center code
    */
-  public static ClaimLineRevenueCenterCode fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+  public static Optional<ClaimLineRevenueCenterCode> tryFromCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
   CodeableConcept toFhir(Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode) {
