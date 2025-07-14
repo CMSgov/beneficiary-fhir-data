@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -86,44 +88,56 @@ public class BeneficiaryRepository {
   }
 
   public List<PatientIdentity> getPatientIdentitiesByMbi(String mbi) {
-    var beneficiariesFromMbi = searchBeneficiaryNoRange("identity.mbi", mbi).stream().toList();
-    var beneCount = (int) beneficiariesFromMbi.stream().map(Beneficiary::getXrefSk).distinct().count();
+    List<Beneficiary> beneficiariesFromMbi = searchBeneficiaryNoRange("identity.mbi", mbi);
 
-    if (beneCount == 0) {
-      var beneHistory = searchBeneficiaryHistory("identity.mbi", mbi);
-      var beneXrefSK = beneHistory.stream().filter(bene -> bene.getBeneXrefSk() != 0L).distinct().toList();
-      if (beneXrefSK.size() == 1) {
-        var beneficiaries = searchBeneficiaryNoRange("xrefSk", beneXrefSK.stream().findFirst().toString());
+    if (beneficiariesFromMbi.isEmpty()) {
+      // Try to find a matching history entry
+      List<Long> validXrefSk = searchBeneficiaryHistory("mbi", mbi).stream()
+              .map(BeneficiaryHistory::getBeneXrefSk)
+              .filter(sk -> sk != 0L)
+              .distinct()
+              .toList();
 
-        return beneficiaries.stream().flatMap(bene -> searchBeneficiaryAndHistory(bene.getBeneXrefSk()).stream()).toList();
-      }
-      else {
+      if (validXrefSk.size() == 1) {
+        return searchBeneficiaryAndHistory(validXrefSk.getFirst());
+      } else {
         return Collections.emptyList();
       }
     }
-    else if (beneCount == 1) {
-      if (beneficiariesFromMbi.stream().map(Beneficiary::getBeneXrefSk).anyMatch(beneXrefSk -> beneXrefSk == 0L)) {
-          var beneHistory = searchBeneficiaryHistory("beneSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneSk()));
-      }
-      else if (beneficiariesFromMbi.getFirst().getBeneXrefSk() == beneficiariesFromMbi.getFirst().getBeneSk()) {
-        var beneficiaries = searchBeneficiaryNoRange("xrefSk", String.valueOf(beneficiariesFromMbi.getFirst().getBeneXrefSk()));
 
-        return beneficiaries.stream().flatMap(bene -> searchBeneficiaryAndHistory(bene.getBeneXrefSk()).stream()).toList();
-      }
-      else {
+    // There is at least one current Beneficiary
+    if (beneficiariesFromMbi.size() == 1 ) {
+      long beneSk = beneficiariesFromMbi.getFirst().getBeneSk();
+      long xrefSk = beneficiariesFromMbi.getFirst().getXrefSk();
 
+      // Case: xrefSk is 0 (invalid or incomplete), fallback to historical lookup
+      if (xrefSk == 0L) {
+        return getBeneficiaryHistoryIdentities("beneSk", String.valueOf(beneSk));
       }
+
+      // Case: same value for beneSk and xrefSk
+      if (xrefSk == beneSk) {
+        return searchBeneficiaryAndHistory(xrefSk);
+      }
+
+      // Case: standard xref lookup
+      return getValidBeneficiaryHistory(beneSk, xrefSk);
     }
-    else {
-      if (beneficiariesFromMbi.stream().filter(bene -> bene.getBeneXrefSk() != 0L).count() == 1) {
 
-      }
-      else {
-        return Collections.emptyList();
-      }
+    // Multiple xrefSk entries, see if exactly one is valid
+    List<Long> validXrefs = beneficiariesFromMbi.stream()
+            .map(Beneficiary::getXrefSk)
+            .filter(sk -> sk != 0L)
+            .distinct()
+            .toList();
+
+    if (validXrefs.size() == 1) {
+      return searchBeneficiaryAndHistory(validXrefs.getFirst());
     }
-      return List.of();
+
+    return Collections.emptyList();
   }
+
 
   /**
    * Retrieves a {@link Beneficiary} record by its ID and last updated timestamp.
@@ -279,7 +293,7 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
-  private Optional<Beneficiary> searchBeneficiaryNoRange(
+  private List<Beneficiary> searchBeneficiaryNoRange(
           String idColumnName, String idColumnValue) {
     return entityManager
         .createQuery(
@@ -293,9 +307,7 @@ public class BeneficiaryRepository {
                 idColumnName),
             Beneficiary.class)
           .setParameter("id", idColumnValue)
-          .getResultList()
-          .stream()
-          .findFirst();
+          .getResultList();
   }
 
   private List<BeneficiaryHistory> searchBeneficiaryHistory(
@@ -312,6 +324,57 @@ public class BeneficiaryRepository {
                     """,
                     idColumnName),
             BeneficiaryHistory.class)
+            .setParameter("id", idColumnValue)
+            .getResultList();
+  }
+
+  private List<PatientIdentity> getValidBeneficiaryHistory(long beneSk, long beneXrefSk) {
+    return entityManager
+            .createQuery(
+                    """
+                    SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bh.beneXrefSk) rowId, bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi)
+                    FROM BeneficiaryHistory bh
+                    WHERE bh.beneSk IN (
+                        SELECT b.beneSk
+                        FROM Beneficiary b
+                        WHERE b.beneXrefSk = :beneXrefSk
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM BeneficiaryXref bx
+                        WHERE bx.beneSk = bh.beneSk
+                          AND bx.beneXrefSk = bh.beneXrefSk
+                          AND bx.beneKillCred = '1'
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM BeneficiaryXref bx_init
+                        WHERE bx_init.beneSk = :beneSk
+                          AND bx_init.beneXrefSk = :beneXrefSk
+                          AND bx_init.beneKillCred = '1'
+                    )
+                    GROUP BY bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
+                    """,
+                    PatientIdentity.class)
+            .setParameter("beneSk", beneSk)
+            .setParameter("beneXrefSk", beneXrefSk)
+            .getResultList();
+  }
+
+  private List<PatientIdentity> getBeneficiaryHistoryIdentities(
+          String idColumnName, String idColumnValue) {
+    return entityManager
+            .createQuery(
+                    String.format(
+                            """
+                            SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bh.beneXrefSk) rowId, bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi)
+                            FROM BeneficiaryHistory bh
+                            WHERE bh.%s = :id
+                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                            GROUP BY bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
+                            """,
+                            idColumnName),
+                    PatientIdentity.class)
             .setParameter("id", idColumnValue)
             .getResultList();
   }
