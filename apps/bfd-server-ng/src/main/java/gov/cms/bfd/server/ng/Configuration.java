@@ -63,7 +63,7 @@ public class Configuration {
    * @return boolean
    */
   public static boolean canProfileBypassAuth(String profile) {
-    return !ALLOWED_LOCAL_PROFILES.contains(profile.toLowerCase());
+    return ALLOWED_LOCAL_PROFILES.contains(profile.toLowerCase());
   }
 
   /**
