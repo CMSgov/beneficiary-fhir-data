@@ -116,8 +116,8 @@ public class ClaimRepository {
         .orElse(DateUtil.MIN_DATETIME);
   }
 
-    private String getClaimTables() {
-        return """
+  private String getClaimTables() {
+    return """
     SELECT c
     FROM Claim c
     JOIN FETCH c.beneficiary b
@@ -129,7 +129,7 @@ public class ClaimRepository {
     LEFT JOIN FETCH cli.ansiSignature a
     LEFT JOIN FETCH c.claimValues cv
     """;
-    }
+  }
 
   private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
     return String.format(
