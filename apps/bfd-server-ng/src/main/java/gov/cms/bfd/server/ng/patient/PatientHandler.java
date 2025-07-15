@@ -60,7 +60,8 @@ public class PatientHandler {
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
-    var identities = beneficiaryRepository.getPatientIdentities(beneficiary.getBeneSk());
+    var identities =
+        beneficiaryRepository.getPatientIdentitiesByMbi(beneficiary.getIdentity().getMbi());
     var patient = beneficiary.toFhir();
 
     for (var id : identities) {
