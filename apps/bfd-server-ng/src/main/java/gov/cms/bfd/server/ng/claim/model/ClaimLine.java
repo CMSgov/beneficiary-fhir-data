@@ -25,7 +25,7 @@ public class ClaimLine {
   @EmbeddedId private ClaimLineId claimLineId;
 
   @Column(name = "clm_line_rev_ctr_cd")
-  private ClaimLineRevenueCenterCode revenueCenterCode;
+  private Optional<ClaimLineRevenueCenterCode> revenueCenterCode;
 
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
@@ -60,10 +60,13 @@ public class ClaimLine {
     ndc.toFhir().ifPresent(line::addDetail);
     line.setQuantity(serviceUnitQuantity.toFhir());
 
-    var revenueCoding =
-        revenueCenterCode.toFhir(
-            institutional.map(ClaimLineInstitutional::getDeductibleCoinsuranceCode));
-    line.setRevenue(revenueCoding);
+    revenueCenterCode.ifPresent(
+        c -> {
+          var revenueCoding =
+              c.toFhir(institutional.map(ClaimLineInstitutional::getDeductibleCoinsuranceCode));
+          line.setRevenue(revenueCoding);
+        });
+
     line.addModifier(hcpcsModifierCode.toFhir());
     institutional
         .map(ClaimLineInstitutional::getRevenueCenterDate)

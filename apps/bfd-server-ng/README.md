@@ -80,6 +80,14 @@ export BFD_LOCAL_DB_HOST=host
 mvn spring-boot:run
 ```
 
+### Profiling SQL queries
+
+The `sqlprofile` profile can be used to log SQL queries and output metrics.
+
+```sh
+mvn spring-boot run -Dspring-boot.run.profiles=local,sqlprofile
+```
+
 ## Swagger
 
 The Swagger UI is available at `/v3/fhir/swagger-ui`

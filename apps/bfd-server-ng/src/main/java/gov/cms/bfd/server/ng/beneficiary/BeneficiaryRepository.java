@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.beneficiary;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryHistory;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
@@ -168,7 +169,7 @@ public class BeneficiaryRepository {
    * @param partTypeCode Part type
    * @return beneficiary record
    */
-  public Optional<Beneficiary> searchBeneficiaryWithCoverage(
+  public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, Optional<String> partTypeCode, DateTimeRange lastUpdatedRange) {
     return searchBeneficiaryWithCoverage(
         "beneSk", String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
@@ -246,7 +247,7 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
-  private Optional<Beneficiary> searchBeneficiaryWithCoverage(
+  private Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       String idColumnName,
       String idColumnValue,
       Optional<String> partTypeCode,
@@ -260,28 +261,29 @@ public class BeneficiaryRepository {
             String.format(
                 """
                   SELECT b
-                  FROM Beneficiary b
-                  LEFT JOIN b.beneficiaryThirdParties tp ON
-                    (:partTypeCode IS NULL OR tp.id.thirdPartyTypeCode = :partTypeCode)
-                    AND tp.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE
-                    AND tp.id.benefitRangeBeginDate <= :referenceDate
-                    AND tp.id.benefitRangeEndDate >= :referenceDate
-                  LEFT JOIN b.beneficiaryEntitlements be ON
-                    (:partTypeCode IS NULL OR be.id.medicareEntitlementTypeCode = :partTypeCode)
-                    AND be.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE
-                    AND be.id.benefitRangeBeginDate <= :referenceDate
-                    AND be.id.benefitRangeEndDate >= :referenceDate
+                  FROM BeneficiaryCoverage b
+                  LEFT JOIN FETCH b.beneficiaryStatus bs
+                  LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
+                  LEFT JOIN FETCH b.beneficiaryThirdParties tp
+                  LEFT JOIN FETCH b.beneficiaryEntitlements be
                   WHERE b.%s = :id
                     AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                     AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                     AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
                     AND b.beneSk = b.xrefSk
+                    AND (:partTypeCode IS NULL OR tp IS NULL OR tp.id.thirdPartyTypeCode = :partTypeCode)
+                    AND (tp IS NULL OR tp.id.benefitRangeBeginDate <= :referenceDate)
+                    AND (tp IS NULL OR tp.id.benefitRangeEndDate >= :referenceDate)
+                    AND (:partTypeCode IS NULL OR be IS NULL OR be.id.medicareEntitlementTypeCode = :partTypeCode)
+                    AND (be IS NULL OR be.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE)
+                    AND (be IS NULL OR be.id.benefitRangeBeginDate <= :referenceDate)
+                    AND (be IS NULL OR be.id.benefitRangeEndDate >= :referenceDate)
                   ORDER BY b.obsoleteTimestamp DESC
                   """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
                 lastUpdatedRange.getUpperBoundSqlOperator()),
-            Beneficiary.class)
+            BeneficiaryCoverage.class)
         .setParameter("id", idColumnValue)
         .setParameter("referenceDate", currentDate)
         .setParameter("partTypeCode", partTypeCode.orElse(null))

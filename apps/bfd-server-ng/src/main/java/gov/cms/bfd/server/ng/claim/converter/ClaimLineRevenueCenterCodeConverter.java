@@ -3,19 +3,21 @@ package gov.cms.bfd.server.ng.claim.converter;
 import gov.cms.bfd.server.ng.claim.model.ClaimLineRevenueCenterCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import java.util.Optional;
 
 /** Database code converter. */
 @Converter(autoApply = true)
 public class ClaimLineRevenueCenterCodeConverter
-    implements AttributeConverter<ClaimLineRevenueCenterCode, String> {
+    implements AttributeConverter<Optional<ClaimLineRevenueCenterCode>, String> {
   @Override
-  public String convertToDatabaseColumn(ClaimLineRevenueCenterCode claimLineRevenueCenterCode) {
+  public String convertToDatabaseColumn(
+      Optional<ClaimLineRevenueCenterCode> claimLineRevenueCenterCode) {
     // This is a read-only API so this method will never actually persist anything to the database.
-    return claimLineRevenueCenterCode.getCode();
+    return claimLineRevenueCenterCode.map(ClaimLineRevenueCenterCode::getCode).orElse("");
   }
 
   @Override
-  public ClaimLineRevenueCenterCode convertToEntityAttribute(String code) {
-    return ClaimLineRevenueCenterCode.fromCode(code);
+  public Optional<ClaimLineRevenueCenterCode> convertToEntityAttribute(String code) {
+    return ClaimLineRevenueCenterCode.tryFromCode(code);
   }
 }

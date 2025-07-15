@@ -34,19 +34,11 @@ public class ClaimRepository {
             entityManager.createQuery(
                 String.format(
                     """
-                    SELECT c
-                    FROM Claim c
-                    JOIN c.claimLines cl
-                    JOIN c.claimDateSignature cds
-                    JOIN c.claimProcedures cp
-                    LEFT JOIN c.claimInstitutional ci
-                    LEFT JOIN cl.claimLineInstitutional cli
-                    LEFT JOIN cli.ansiSignature as
-                    LEFT JOIN c.claimValues cv
+                    %s
                     WHERE c.claimUniqueId = :claimUniqueId
                     %s
                     """,
-                    getDateFilters(claimThroughDate, lastUpdated)),
+                    getClaimTables(), getDateFilters(claimThroughDate, lastUpdated)),
                 Claim.class),
             claimThroughDate,
             lastUpdated)
@@ -79,18 +71,12 @@ public class ClaimRepository {
 
     StringBuilder jpqlBuilder =
         new StringBuilder(
-            """
-            SELECT c
-            FROM Claim c
-            JOIN c.claimLines cl
-            JOIN c.claimDateSignature cds
-            JOIN c.claimProcedures cp
-            LEFT JOIN c.claimInstitutional ci
-            LEFT JOIN cl.claimLineInstitutional cli
-            LEFT JOIN cli.ansiSignature as
-            LEFT JOIN c.claimValues cv
-            WHERE c.beneficiary.xrefSk = :beneSk
-            """);
+            String.format(
+                """
+                %s
+                WHERE b.xrefSk = :beneSk
+                """,
+                getClaimTables()));
 
     jpqlBuilder.append(getDateFilters(claimThroughDate, lastUpdated));
 
@@ -138,6 +124,21 @@ public class ClaimRepository {
         .stream()
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
+  }
+
+  private String getClaimTables() {
+    return """
+    SELECT c
+    FROM Claim c
+    JOIN FETCH c.beneficiary b
+    JOIN FETCH c.claimDateSignature AS cds
+    JOIN FETCH c.claimLines AS cl
+    JOIN FETCH c.claimProcedures cp
+    LEFT JOIN FETCH c.claimInstitutional ci
+    LEFT JOIN FETCH cl.claimLineInstitutional cli
+    LEFT JOIN FETCH cli.ansiSignature a
+    LEFT JOIN FETCH c.claimValues cv
+    """;
   }
 
   private String getDateFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
