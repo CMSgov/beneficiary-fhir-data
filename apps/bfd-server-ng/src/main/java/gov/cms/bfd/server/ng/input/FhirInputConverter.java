@@ -165,7 +165,7 @@ public class FhirInputConverter {
               + IdrConstants.ADJUDICATION_STATUS_FINAL
               + "'.");
     }
-    List<ClaimSourceId> matchingSources =
+    var matchingSources =
         Stream.of(ClaimSourceId.values())
             .filter(
                 sourceId ->

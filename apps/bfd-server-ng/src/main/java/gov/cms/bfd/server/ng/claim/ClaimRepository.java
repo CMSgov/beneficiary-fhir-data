@@ -71,21 +71,11 @@ public class ClaimRepository {
             entityManager.createQuery(
                 String.format(
                     """
-                        SELECT c
-
-                        FROM Claim c
-                        JOIN c.claimLines cl
-                        JOIN c.claimDateSignature cds
-                        JOIN c.claimProcedures cp
-                        LEFT JOIN c.claimInstitutional ci
-                        LEFT JOIN cl.claimLineInstitutional cli
-                        LEFT JOIN cli.ansiSignature as
-                        LEFT JOIN c.claimValues cv
-                        WHERE c.beneficiary.xrefSk = :beneSk
                         %s
-                        ORDER BY c.claimUniqueId
+                        WHERE b.xrefSk = :beneSk
+                        %s
                         """,
-                    getFilters(claimThroughDate, lastUpdated)),
+                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
                 Claim.class),
             claimThroughDate,
             lastUpdated,

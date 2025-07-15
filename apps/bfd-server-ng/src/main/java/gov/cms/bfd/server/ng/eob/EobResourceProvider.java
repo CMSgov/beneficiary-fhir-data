@@ -13,9 +13,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -69,7 +67,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag) {
 
-    List<ClaimSourceId> sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
+    var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
 
     return eobHandler.searchByBene(
         FhirInputConverter.toLong(patient, "Patient"),
