@@ -48,4 +48,13 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
     throw new InvalidRequestException(
         "Invalid Coverage ID format. Expected pattern like 'part-a-123'.");
   }
+
+  /**
+   * Returns the full ID as a string.
+   *
+   * @return ID
+   */
+  public String fullId() {
+    return coveragePart.getStandardSystem() + "-" + beneSk;
+  }
 }

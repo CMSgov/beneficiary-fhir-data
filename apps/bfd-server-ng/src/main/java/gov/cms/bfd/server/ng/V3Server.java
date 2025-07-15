@@ -36,7 +36,7 @@ public class V3Server extends RestfulServer {
     this.setFhirContext(FhirContext.forR4());
     this.registerProviders(resourceProviders);
     if (!Arrays.stream(environment.getActiveProfiles())
-        .allMatch(profile -> profile.equalsIgnoreCase(Configuration.LOCAL_PROFILE))) {
+        .allMatch(Configuration::canProfileBypassAuth)) {
       this.registerInterceptor(new AuthenticationInterceptor(configuration));
     }
     OpenApiInterceptor openApiInterceptor = new OpenApiInterceptor();

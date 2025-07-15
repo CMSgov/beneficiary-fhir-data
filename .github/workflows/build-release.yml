@@ -117,10 +117,11 @@ jobs:
       imagesCsv: "bfd-platform-base-java, bfd-platform-base-python"
       cleanupImageArtifacts: false # Keep the built images around so that they can be used for Jib
       skipBasePull: true # We're building the base images, so don't pull them
+      tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
     secrets: inherit
 
   run-mvn-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     needs: [compute-version-strings, build-base-images]
     env:
       BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
@@ -338,6 +339,7 @@ jobs:
         bfd-platform-pipeline-ccw-runner
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
+      tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
     secrets: inherit
 
   create-gh-release:

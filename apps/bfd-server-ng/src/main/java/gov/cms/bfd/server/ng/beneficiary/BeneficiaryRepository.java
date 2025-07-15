@@ -2,9 +2,12 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -111,9 +114,9 @@ public class BeneficiaryRepository {
    * @param partTypeCode Part type
    * @return beneficiary record
    */
-  public Optional<Beneficiary> searchCurrentBeneficiary(
-      long beneSk, String partTypeCode, DateTimeRange lastUpdatedRange) {
-    return searchCurrentBeneficiary(
+  public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
+      long beneSk, Optional<String> partTypeCode, DateTimeRange lastUpdatedRange) {
+    return searchBeneficiaryWithCoverage(
         "beneSk", String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
   }
 
@@ -189,34 +192,46 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
-  private Optional<Beneficiary> searchCurrentBeneficiary(
+  private Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       String idColumnName,
       String idColumnValue,
-      String partTypeCode,
+      Optional<String> partTypeCode,
       DateTimeRange lastUpdatedRange) {
+    // UTC -12 is "Anywhere on Earth time", sometimes used to specify deadlines in the absence of a
+    // specific time zone.
+    // https://en.wikipedia.org/wiki/Anywhere_on_Earth
+    var currentDate = OffsetDateTime.now(ZoneOffset.ofHours(-12)).toLocalDate();
     return entityManager
         .createQuery(
             String.format(
                 """
                   SELECT b
-                  FROM Beneficiary b
-                  JOIN b.beneficiaryThirdParties tp
-                  JOIN b.beneficiaryEntitlements be
+                  FROM BeneficiaryCoverage b
+                  LEFT JOIN FETCH b.beneficiaryStatus bs
+                  LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
+                  LEFT JOIN FETCH b.beneficiaryThirdParties tp
+                  LEFT JOIN FETCH b.beneficiaryEntitlements be
                   WHERE b.%s = :id
                     AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                     AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                     AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
                     AND b.beneSk = b.xrefSk
-                    AND tp.id.thirdPartyTypeCode = :partTypeCode
-                    AND be.id.medicareEntitlementTypeCode = :partTypeCode
+                    AND (:partTypeCode IS NULL OR tp IS NULL OR tp.id.thirdPartyTypeCode = :partTypeCode)
+                    AND (tp IS NULL OR tp.id.benefitRangeBeginDate <= :referenceDate)
+                    AND (tp IS NULL OR tp.id.benefitRangeEndDate >= :referenceDate)
+                    AND (:partTypeCode IS NULL OR be IS NULL OR be.id.medicareEntitlementTypeCode = :partTypeCode)
+                    AND (be IS NULL OR be.idrTransObsoleteTimestamp >= gov.cms.bfd.server.ng.IdrConstants.DEFAULT_ZONED_DATE)
+                    AND (be IS NULL OR be.id.benefitRangeBeginDate <= :referenceDate)
+                    AND (be IS NULL OR be.id.benefitRangeEndDate >= :referenceDate)
                   ORDER BY b.obsoleteTimestamp DESC
                   """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
                 lastUpdatedRange.getUpperBoundSqlOperator()),
-            Beneficiary.class)
+            BeneficiaryCoverage.class)
         .setParameter("id", idColumnValue)
-        .setParameter("partTypeCode", partTypeCode)
+        .setParameter("referenceDate", currentDate)
+        .setParameter("partTypeCode", partTypeCode.orElse(null))
         .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
         .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
         .getResultList()

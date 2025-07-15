@@ -66,7 +66,7 @@
         <!-- The version of Java that we'll use for everything. -->
         <javaSourceVersion>21</javaSourceVersion>
 
-        <project.build.outputTimestamp>2025-07-10T16:06:22Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-07-10T16:42:30Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -185,8 +185,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -226,7 +226,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
@@ -248,10 +248,10 @@
         <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
-        <maven-core.version>3.9.6</maven-core.version>
+        <maven-core.version>3.9.8</maven-core.version>
         <maven.jacoco.plugin.version>0.8.12</maven.jacoco.plugin.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
-        <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
+        <maven-plugin-api.version>3.9.8</maven-plugin-api.version>
         <maven.plugin.version>3.10.2</maven.plugin.version>
         <build.helper.maven.plugin.version>3.6.0</build.helper.maven.plugin.version>
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
