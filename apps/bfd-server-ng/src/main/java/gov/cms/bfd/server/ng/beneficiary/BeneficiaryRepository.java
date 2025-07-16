@@ -383,7 +383,7 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-                WITH allBeneInfo AS (
+                WITH beneAndHistory AS (
                   SELECT
                     b.beneSk beneSk,
                     b.beneXrefSk beneXrefSk,
@@ -414,9 +414,9 @@ public class BeneficiaryRepository {
                     AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                   WHERE b.beneXrefSk = :beneXrefSk
                 )
-                SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY abi.beneXrefSk) rowId, abi.beneXrefSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
-                FROM allBeneInfo abi
-                GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
+                SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bah.beneXrefSk) rowId, bah.beneSk, bah.xrefSk, bah.mbi, bah.effectiveDate, bah.obsoleteDate)
+                FROM beneAndHistory bah
+                GROUP BY bah.beneSk, bah.xrefSk, bah.mbi, bah.effectiveDate, bah.obsoleteDate
                 """,
             PatientIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)
