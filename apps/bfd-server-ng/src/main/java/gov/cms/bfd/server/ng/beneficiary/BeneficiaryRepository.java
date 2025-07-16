@@ -2,8 +2,8 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryHistory;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryCoverage;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryHistory;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
