@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -137,14 +137,14 @@ public class FhirInputConverter {
    */
   public static List<ClaimSourceId> getSourceIdsForTagCode(@Nullable TokenParam tag) {
 
+    if (tag == null) {
+      return Collections.emptyList();
+    }
+
     Set<String> SUPPORTED_ADJUDICATION_STATUSES =
         Set.of(
             IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
             IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
-
-    if (tag == null) {
-      return new ArrayList<>();
-    }
 
     var systemFromTag = tag.getSystem();
 
@@ -165,14 +165,11 @@ public class FhirInputConverter {
               + IdrConstants.ADJUDICATION_STATUS_FINAL
               + "'.");
     }
-    var matchingSources =
-        Stream.of(ClaimSourceId.values())
-            .filter(
-                sourceId ->
-                    sourceId.getAdjudicationStatus().isPresent()
-                        && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
-            .toList();
-
-    return matchingSources;
+    return Stream.of(ClaimSourceId.values())
+        .filter(
+            sourceId ->
+                sourceId.getAdjudicationStatus().isPresent()
+                    && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
+        .toList();
   }
 }
