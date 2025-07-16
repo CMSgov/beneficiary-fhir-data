@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
@@ -30,7 +29,7 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    return withDateParams(
+    return withParams(
             entityManager.createQuery(
                 String.format(
                     """
@@ -38,10 +37,11 @@ public class ClaimRepository {
                     WHERE c.claimUniqueId = :claimUniqueId
                     %s
                     """,
-                    getClaimTables(), getDateFilters(claimThroughDate, lastUpdated)),
+                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
                 Claim.class),
             claimThroughDate,
-            lastUpdated)
+            lastUpdated,
+            new ArrayList<>())
         .setParameter("claimUniqueId", claimUniqueId)
         .getResultList()
         .stream()
@@ -56,7 +56,7 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @param limit limit
    * @param offset offset
-   * @param tag tag
+   * @param sourceIds claim sourceIds
    * @return claims
    */
   public List<Claim> findByBeneXrefSk(
@@ -65,42 +65,22 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset,
-      Optional<TokenParam> tag) {
+      List<ClaimSourceId> sourceIds) {
 
-    Optional<List<ClaimSourceId>> queryParameterValue = getSourceIdsForTagCode(tag);
-
-    StringBuilder jpqlBuilder =
-        new StringBuilder(
-            String.format(
-                """
-                %s
-                WHERE b.xrefSk = :beneSk
-                """,
-                getClaimTables()));
-
-    jpqlBuilder.append(getDateFilters(claimThroughDate, lastUpdated));
-
-    if (queryParameterValue.isPresent() && !queryParameterValue.get().isEmpty()) {
-      jpqlBuilder.append(" AND c.claimSourceId IN :sourceIds");
-    }
-
-    // Add the final ordering.
-    jpqlBuilder.append(" ORDER BY c.claimUniqueId");
-
-    TypedQuery<Claim> query = entityManager.createQuery(jpqlBuilder.toString(), Claim.class);
-
-    query.setParameter("beneSk", beneSk);
-
-    queryParameterValue.ifPresent(
-        sourceIds -> {
-          if (!sourceIds.isEmpty()) {
-            query.setParameter("sourceIds", sourceIds);
-          }
-        });
-
-    TypedQuery<Claim> finalQuery = withDateParams(query, claimThroughDate, lastUpdated);
-
-    return finalQuery
+    return withParams(
+            entityManager.createQuery(
+                String.format(
+                    """
+                        %s
+                        WHERE b.xrefSk = :beneSk
+                        %s
+                        """,
+                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                Claim.class),
+            claimThroughDate,
+            lastUpdated,
+            sourceIds)
+        .setParameter("beneSk", beneSk)
         .setMaxResults(limit.orElse(5000))
         .setFirstResult(offset.orElse(0))
         .getResultList();
@@ -141,13 +121,14 @@ public class ClaimRepository {
     """;
   }
 
-  private String getDateFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+  private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
     return String.format(
         """
         AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
         AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
         AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
         AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
+        AND (:hasSourceIds = false OR c.claimSourceId IN :sourceIds)
         """,
         claimThroughDate.getLowerBoundSqlOperator(),
         claimThroughDate.getUpperBoundSqlOperator(),
@@ -155,40 +136,19 @@ public class ClaimRepository {
         lastUpdated.getUpperBoundSqlOperator());
   }
 
-  private <T> TypedQuery<T> withDateParams(
-      TypedQuery<T> query, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+  private <T> TypedQuery<T> withParams(
+      TypedQuery<T> query,
+      DateTimeRange claimThroughDate,
+      DateTimeRange lastUpdated,
+      List<ClaimSourceId> sourceIds) {
     return query
         .setParameter(
             "claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate().orElse(null))
         .setParameter(
             "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate().orElse(null))
         .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
-        .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null));
-  }
-
-  /**
-   * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
-   * enum values.
-   *
-   * @param tag The code from the _tag parameter.
-   * @return A list of matching ClaimSourceId enums.
-   */
-  private Optional<List<ClaimSourceId>> getSourceIdsForTagCode(Optional<TokenParam> tag) {
-
-    String tagCode = null;
-    List<ClaimSourceId> matchingSources = new ArrayList<>();
-
-    if (!tag.isEmpty()) {
-      tagCode = tag.get().getValue();
-
-      for (ClaimSourceId sourceId : ClaimSourceId.values()) {
-        // Check if the sourceId's adjudicationStatus optional contains the requested code
-        if (sourceId.getAdjudicationStatus().isPresent()
-            && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(tagCode)) {
-          matchingSources.add(sourceId);
-        }
-      }
-    }
-    return Optional.of(matchingSources);
+        .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
+        .setParameter("hasSourceIds", !sourceIds.isEmpty())
+        .setParameter("sourceIds", sourceIds);
   }
 }

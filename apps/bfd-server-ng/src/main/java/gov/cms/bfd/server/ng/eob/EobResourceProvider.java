@@ -67,8 +67,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag) {
 
-    // Validate the tag
-    FhirInputConverter.validateTag(tag);
+    var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
 
     return eobHandler.searchByBene(
         FhirInputConverter.toLong(patient, "Patient"),
@@ -76,7 +75,7 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
         FhirInputConverter.toIntOptional(startIndex),
-        Optional.ofNullable(tag));
+        sourceIds);
   }
 
   /**
