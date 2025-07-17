@@ -37,10 +37,10 @@ class TypeOfBillCode {
                 .addCoding(
                     new Coding()
                         .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_BILL_CLASSIFICATION_CODE)
-                        .setCode(billClassificationCode))
+                        .setCode(facilityTypeCode + billClassificationCode))
                 .addCoding(
                     new Coding()
                         .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_BILL_FREQUENCY_CODE)
-                        .setCode(billFrequencyCode)));
+                        .setCode(facilityTypeCode + billClassificationCode + billFrequencyCode)));
   }
 }
