@@ -23,6 +23,9 @@ public abstract class BeneficiaryBase {
   @Column(name = "bene_xref_efctv_sk_computed")
   protected long xrefSk;
 
+  @Column(name = "bene_xref_efctv_sk")
+  private long beneXrefSk;
+
   @Column(name = "bene_brth_dt")
   protected LocalDate birthDate;
 
