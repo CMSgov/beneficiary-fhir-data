@@ -54,3 +54,16 @@ def get_regression_bene_mbis(uri: str, table_sample_pct=None) -> List[str]:
     """
     bene_query = "SELECT bene_mbi_id FROM idr.beneficiary limit 1000"
     return [str(r[0]) for r in _execute(uri, bene_query)]
+
+
+def get_regression_claim_ids(uri: str, table_sample_pct=None) -> List[str]:
+    """Retrieves a random list list of clam Ids
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+    """
+    claim_query = "SELECT clm_uniq_id from idr.claim limit 1000"
+    return [str(r[0]) for r in _execute(uri, claim_query)]
