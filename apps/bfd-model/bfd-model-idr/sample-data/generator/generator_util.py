@@ -92,10 +92,11 @@ class GeneratorUtil():
     def set_timestamps(self, patient, min_date):
         max_date = datetime.datetime.now() - datetime.timedelta(days=1)
         efctv_ts = self.fake.date_time_between_dates(min_date, max_date)
+        insrt_ts = self.fake.date_time_between_dates(efctv_ts, max_date)
+        updt_ts = self.fake.date_time_between_dates(insrt_ts, max_date)
         patient["IDR_TRANS_EFCTV_TS"] = str(efctv_ts)
-        patient["IDR_UPDT_TS"] = str(
-            self.fake.date_time_between_dates(efctv_ts, max_date)
-        )
+        patient["IDR_INSRT_TS"] = str(insrt_ts)
+        patient["IDR_UPDT_TS"] = str(updt_ts)
         patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
     def create_base_patient(self):
@@ -151,8 +152,6 @@ class GeneratorUtil():
 
         medicare_start_date = self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']
         medicare_end_date = '9999-12-31'
-        if(random.randint(0,10)>8):
-            end_dt=datetime.date.today().strftime("%Y-%m-%d")
         #STUS
         stus_row = {"BENE_SK":patient['BENE_SK'],
                     'IDR_LTST_TRANS_FLG':'Y',
@@ -210,7 +209,6 @@ class GeneratorUtil():
                             'BENE_BUYIN_CD': buy_in_cd
                 }
                 self.mdcr_tp.append(tp_row)
-            
 
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
@@ -240,6 +238,7 @@ class GeneratorUtil():
                 "GEO_USPS_STATE_CD",
                 "CNTCT_LANG_CD",
                 "IDR_TRANS_EFCTV_TS",
+                "IDR_INSRT_TS",
                 "IDR_UPDT_TS",
                 "IDR_TRANS_OBSLT_TS",
             ]
@@ -254,6 +253,7 @@ class GeneratorUtil():
                     "BENE_XREF_EFCTV_SK",
                     "BENE_MBI_ID",
                     "IDR_TRANS_EFCTV_TS",
+                    "IDR_INSRT_TS",
                     "IDR_UPDT_TS",
                     "IDR_TRANS_OBSLT_TS",
                 ]
@@ -268,6 +268,7 @@ class GeneratorUtil():
                 "BENE_MBI_EFCTV_DT",
                 "BENE_MBI_OBSLT_DT",
                 "IDR_TRANS_EFCTV_TS",
+                "IDR_INSRT_TS",
                 "IDR_UPDT_TS",
                 "IDR_TRANS_OBSLT_TS",
             ]

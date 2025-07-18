@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "psycopg>=3.2.9",
-    "pydantic>=2.11.5",
-    "snowflake-connector-python>=3.15.0",
+    "pydantic>=2.11.7",
+    "snowflake-connector-python>=3.16.0",
 ]
 
 [dependency-groups]

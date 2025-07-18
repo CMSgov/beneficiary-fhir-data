@@ -1,7 +1,10 @@
 import csv
-import psycopg
-import typing
 import sys
+import typing
+from pathlib import Path
+
+import psycopg
+
 from loader import get_connection_string
 
 tables = [
@@ -27,19 +30,19 @@ tables = [
 ]
 
 
-def load_from_csv(conn: psycopg.Connection, src_folder: str):
+def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
     for table in tables:
-        file = f"{src_folder}/{table["csv_name"]}"
+        file = f"{src_folder}/{table['csv_name']}"
         try:
-            with open(file, "r") as f:
+            with Path(file).open() as f:
                 reader = csv.DictReader(f)
 
                 cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
                 cols_str = ",".join(cols)
-                full_table = f'cms_vdm_view_mdcr_prd.{table["table"]}'
+                full_table = f"cms_vdm_view_mdcr_prd.{table['table']}"
                 with conn.cursor() as cur:
                     # Clear out any previous data
-                    cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignores
+                    cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
                     with cur.copy(
                         f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
                     ) as copy:

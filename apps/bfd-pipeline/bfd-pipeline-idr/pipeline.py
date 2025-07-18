@@ -1,9 +1,11 @@
 import logging
 import sys
-from loader import PostgresLoader, get_connection_string
+
+import extractor
 import loader
+from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
+from loader import PostgresLoader, get_connection_string
 from model import (
-    T,
     IdrBeneficiary,
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
@@ -19,16 +21,14 @@ from model import (
     IdrClaimLineInstitutional,
     IdrClaimProcedure,
     IdrClaimValue,
-    IdrContractPbpNumber,
-    IdrElectionPeriodUsage,
+    LoadProgress,
+    T,
 )
-from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
-import extractor
 
 logger = logging.getLogger(__name__)
 
 
-def init_logger():
+def init_logger() -> None:
     logger.setLevel(logging.INFO)
     console_handler = logging.StreamHandler()
     formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
@@ -36,7 +36,7 @@ def init_logger():
     logger.addHandler(console_handler)
 
 
-def main():
+def main() -> None:
     init_logger()
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
@@ -65,27 +65,37 @@ def main():
         )
 
 
+def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
+    return PostgresExtractor(connection_string, batch_size=1).extract_single(
+        LoadProgress,
+        LoadProgress.fetch_query(False),
+        {LoadProgress.query_placeholder(): table_name},
+    )
+
+
 def extract_and_load(
     cls: type[T],
     data_extractor: Extractor,
     connection_string: str,
-):
+) -> PostgresLoader:
+    logger.info("loading %s", cls.table())
+    progress = get_progress(connection_string, cls.table())
     data_iter = data_extractor.extract_idr_data(
         cls,
-        connection_string,
+        progress,
     )
 
     loader = PostgresLoader(connection_string)
-    loader.load(data_iter, cls)
+    loader.load(data_iter, cls, progress)
     return loader
 
 
-def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]):
+def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]) -> None:
     for c in cls:
         extract_and_load(c, data_extractor, connection_string)
 
 
-def run_pipeline(data_extractor: Extractor, connection_string: str):
+def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
     logger.info("load start")
 
     load_all(
@@ -93,7 +103,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         connection_string,
         IdrBeneficiaryHistory,
         IdrBeneficiaryMbiId,
-        IdrBeneficiary,
     )
 
     bene_loader = extract_and_load(
@@ -110,8 +119,9 @@ def run_pipeline(data_extractor: Extractor, connection_string: str):
         IdrBeneficiaryThirdParty,
         IdrBeneficiaryEntitlement,
         IdrBeneficiaryEntitlementReason,
-        IdrContractPbpNumber,
-        IdrElectionPeriodUsage,
+        # Ignore for now, we'll likely source these elsewhere when we load contract data
+        # IdrContractPbpNumber,
+        # IdrElectionPeriodUsage,
         IdrClaim,
         IdrClaimInstitutional,
         IdrClaimDateSignature,

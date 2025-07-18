@@ -25,6 +25,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
     cntct_lang_cd VARCHAR(3),
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ
 );
 
@@ -34,6 +35,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_mbi_id VARCHAR(11),
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
@@ -44,6 +46,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id (
     bene_mbi_obslt_dt DATE,
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
 );
@@ -113,6 +116,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
     bene_enrlmt_efctv_dt DATE,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ
 );
 
@@ -146,6 +150,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_blood_lblty_amt NUMERIC,
     clm_ncvrd_chrg_amt NUMERIC,
     clm_mdcr_ddctbl_amt NUMERIC,
+    clm_prvdr_pmt_amt NUMERIC,
     clm_cntrctr_num VARCHAR(5),
     clm_pmt_amt NUMERIC,
     clm_ltst_clm_ind VARCHAR(1),
@@ -164,6 +169,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_nch_prmry_pyr_cd VARCHAR(1),
     clm_blg_prvdr_oscar_num VARCHAR(20),
     clm_idr_ld_dt DATE NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ
 );
 
@@ -173,6 +179,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_nrln_ric_cd VARCHAR(1),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
@@ -203,6 +211,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
     clm_mdcr_ip_pps_cptl_ime_amt NUMERIC,
     clm_mdcr_ip_pps_outlier_amt NUMERIC,
     clm_mdcr_ip_pps_cptl_hrmls_amt NUMERIC,
+    clm_mdcr_instnl_bene_pd_amt NUMERIC,
+    clm_mdcr_hospc_prd_cnt INT,
     clm_pps_ind_cd VARCHAR(1),
     clm_mdcr_ip_pps_cptl_tot_amt NUMERIC,
     clm_instnl_cvrd_day_cnt NUMERIC,
@@ -210,6 +220,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
     clm_instnl_prfnl_amt NUMERIC,
     clm_mdcr_ip_bene_ddctbl_amt NUMERIC,
     clm_instnl_drg_outlier_amt NUMERIC,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
@@ -223,7 +235,11 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr (
     clm_ncvrd_thru_dt DATE,
     clm_actv_care_thru_dt DATE,
     clm_mdcr_exhstd_dt DATE,
-    clm_nch_wkly_proc_dt DATE
+    clm_nch_wkly_proc_dt DATE,
+    clm_qlfy_stay_from_dt DATE,
+    clm_qlfy_stay_thru_dt DATE,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (
@@ -234,6 +250,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (
     clm_val_sqnc_num INT,
     clm_val_cd VARCHAR(2),
     clm_val_amt NUMERIC,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_val_sqnc_num)
 );
 
@@ -249,6 +267,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
     clm_prod_type_cd VARCHAR(1),
     clm_poa_ind VARCHAR(1),
     clm_prcdr_prfrm_dt DATE,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_prod_type_cd, clm_val_sqnc_num)
 );
 
@@ -280,6 +300,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     hcpcs_3_mdfr_cd VARCHAR(2),
     hcpcs_4_mdfr_cd VARCHAR(2),
     hcpcs_5_mdfr_cd VARCHAR(2),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
 
@@ -303,6 +325,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     clm_line_instnl_msp1_pd_amt NUMERIC,
     clm_line_instnl_msp2_pd_amt NUMERIC,
     clm_line_instnl_rev_ctr_dt DATE,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
 
@@ -311,5 +335,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (
     clm_1_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_3_rev_cntr_ansi_rsn_cd VARCHAR(3),
-    clm_4_rev_cntr_ansi_rsn_cd VARCHAR(3)
+    clm_4_rev_cntr_ansi_rsn_cd VARCHAR(3),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ
 );
