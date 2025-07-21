@@ -60,9 +60,7 @@ public class PatientHandler {
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
-    var identities =
-        beneficiaryRepository.getPatientIdentities(
-            beneficiary.getBeneSk(), beneficiary.getXrefSk());
+    var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getBeneSk(), beneficiary.getXrefSk());
     var patient = beneficiary.toFhir();
 
     for (var id : identities) {
