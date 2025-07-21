@@ -139,9 +139,9 @@ CREATE TABLE idr.beneficiary_election_period_usage (
 );
 
 CREATE TABLE idr.beneficiary_xref (
-    bene_hicn_num VARCHAR(11) NOT NULL,
     bene_sk BIGINT NOT NULL,
     bene_xref_sk BIGINT NOT NULL,
+    bene_hicn_num VARCHAR(11) NOT NULL,
     bene_kill_cred_cd VARCHAR(1) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,

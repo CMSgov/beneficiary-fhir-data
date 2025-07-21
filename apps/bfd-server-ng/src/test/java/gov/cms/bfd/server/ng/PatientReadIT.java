@@ -33,7 +33,21 @@ public class PatientReadIT extends IntegrationTestBase {
 
   @Test
   void patientReadMergedBene() {
-    var patient = patientRead().withId("181968400").execute();
+    var patient = patientRead().withId("792872340").execute();
+    assertFalse(patient.isEmpty());
+    expect.serializer("fhir+json").toMatchSnapshot(patient);
+  }
+
+  @Test
+  void patientReadUnMergedWithHistoricKillCredit() {
+    var patient = patientRead().withId("178083966").execute();
+    assertFalse(patient.isEmpty());
+    expect.serializer("fhir+json").toMatchSnapshot(patient);
+  }
+
+  @Test
+  void patientReadMergedWithKillCredit() {
+    var patient = patientRead().withId("878934873").execute();
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }

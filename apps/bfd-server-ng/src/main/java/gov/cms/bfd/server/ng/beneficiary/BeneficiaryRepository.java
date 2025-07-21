@@ -10,8 +10,8 @@ import jakarta.persistence.EntityManager;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -86,57 +86,23 @@ public class BeneficiaryRepository {
         .getResultList();
   }
 
-  public List<PatientIdentity> getPatientIdentitiesByMbi(String mbi) {
-    List<Beneficiary> beneficiariesFromMbi = searchBeneficiaryNoRange("identity.mbi", mbi);
+  /**
+   * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
+   *
+   * @param beneSk beneficiary bene_sk
+   * @param xrefSk beneficiary bene_xref_efctv_sk_computed
+   * @return list of patient Identities
+   */
+  public List<PatientIdentity> getPatientIdentities(Long beneSk, Long xrefSk) {
+    //    List<Beneficiary> beneficiariesFromMbi = searchBeneficiaryNoRange("identity.mbi", mbi);
 
-    if (beneficiariesFromMbi.isEmpty()) {
-      // Try to find a matching history entry
-      List<Long> validXrefSk =
-          searchBeneficiaryHistory("mbi", mbi).stream()
-              .map(BeneficiaryHistory::getBeneXrefSk)
-              .filter(sk -> sk != 0L)
-              .distinct()
-              .toList();
-
-      if (validXrefSk.size() == 1) {
-        return getBeneficiaryAndHistoryIdentities(validXrefSk.getFirst());
-      } else {
-        return Collections.emptyList();
-      }
+    // Case: same value for beneSk and xrefSk
+    if (Objects.equals(xrefSk, beneSk)) {
+      return getBeneficiaryAndHistoryIdentities(xrefSk);
     }
 
-    // There is at least one current Beneficiary
-    if (beneficiariesFromMbi.size() == 1) {
-      long beneSk = beneficiariesFromMbi.getFirst().getBeneSk();
-      long xrefSk = beneficiariesFromMbi.getFirst().getXrefSk();
-
-      // Case: xrefSk is 0 (invalid or incomplete), fallback to historical lookup
-      if (xrefSk == 0L) {
-        return getBeneficiaryHistoryIdentities("beneSk", String.valueOf(beneSk));
-      }
-
-      // Case: same value for beneSk and xrefSk
-      if (xrefSk == beneSk) {
-        return getBeneficiaryAndHistoryIdentities(xrefSk);
-      }
-
-      // Case: standard xref lookup
-      return getValidBeneficiaryHistoryIdentities(beneSk, xrefSk);
-    }
-
-    // Multiple xrefSk entries, see if exactly one is valid
-    List<Long> validXrefs =
-        beneficiariesFromMbi.stream()
-            .map(Beneficiary::getXrefSk)
-            .filter(sk -> sk != 0L)
-            .distinct()
-            .toList();
-
-    if (validXrefs.size() == 1) {
-      return getBeneficiaryAndHistoryIdentities(validXrefs.getFirst());
-    }
-
-    return Collections.emptyList();
+    // Case: standard xref lookup
+    return getValidBeneficiaryHistoryIdentities(beneSk, xrefSk);
   }
 
   /**
@@ -185,10 +151,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT b.xrefSk
-              FROM Beneficiary b
-              WHERE b.beneSk = :beneSk
-              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+              SELECT bene.xrefSk
+              FROM Beneficiary bene
+              WHERE bene.beneSk = :beneSk
+              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
             """,
             Long.class)
         .setParameter("beneSk", beneSk)
@@ -227,13 +193,13 @@ public class BeneficiaryRepository {
         .createQuery(
             String.format(
                 """
-                SELECT b
-                FROM Beneficiary b
-                WHERE b.%s = :id
-                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
-                ORDER BY b.obsoleteTimestamp DESC
+                SELECT bene
+                FROM Beneficiary bene
+                WHERE bene.%s = :id
+                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :lowerBound)
+                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :upperBound)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
+                ORDER BY bene.obsoleteTimestamp DESC
                 """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
@@ -332,18 +298,17 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-                    SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bh.beneXrefSk) rowId, bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi)
-                    FROM BeneficiaryHistory bh
-                    WHERE bh.beneSk IN (
-                        SELECT b.beneSk
-                        FROM Beneficiary b
-                        WHERE b.beneXrefSk = :beneXrefSk
-                    )
+                    SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bene.beneSk) rowId, bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate)
+                    FROM Beneficiary bene
+                    LEFT JOIN BeneficiaryMbiId mbiId
+                      ON bene.identity.mbi = mbiId.mbi
+                      AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+                    WHERE bene.beneXrefSk = :beneXrefSk
                     AND NOT EXISTS (
                         SELECT 1
                         FROM BeneficiaryXref bx
-                        WHERE bx.beneSk = bh.beneSk
-                          AND bx.beneXrefSk = bh.beneXrefSk
+                        WHERE bx.beneSk = bene.beneSk
+                          AND bx.beneXrefSk = bene.beneXrefSk
                           AND bx.beneKillCred = '1'
                     )
                     AND NOT EXISTS (
@@ -353,7 +318,7 @@ public class BeneficiaryRepository {
                           AND bx_init.beneXrefSk = :beneXrefSk
                           AND bx_init.beneKillCred = '1'
                     )
-                    GROUP BY bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
+                    GROUP BY bene.beneSk, bene.beneXrefSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate
                     """,
             PatientIdentity.class)
         .setParameter("beneSk", beneSk)
@@ -361,23 +326,25 @@ public class BeneficiaryRepository {
         .getResultList();
   }
 
-  private List<PatientIdentity> getBeneficiaryHistoryIdentities(
-      String idColumnName, String idColumnValue) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
-                            SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bh.beneXrefSk) rowId, bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi)
-                            FROM BeneficiaryHistory bh
-                            WHERE bh.%s = :id
-                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
-                            GROUP BY bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
-                            """,
-                idColumnName),
-            PatientIdentity.class)
-        .setParameter("id", idColumnValue)
-        .getResultList();
-  }
+  //  private List<PatientIdentity> getBeneficiaryHistoryIdentities(String idColumnName, String
+  // idColumnValue) {
+  //    return entityManager
+  //        .createQuery(
+  //            String.format(
+  //                """
+  //                            SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY
+  // bh.beneXrefSk) rowId, bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi)
+  //                            FROM BeneficiaryHistory bh
+  //                            WHERE bh.%s = :id
+  //                              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi =
+  // b.identity.mbi)
+  //                            GROUP BY bh.beneSk, bh.beneXrefSk, bh.xrefSk, bh.mbi
+  //                            """,
+  //                idColumnName),
+  //            PatientIdentity.class)
+  //        .setParameter("id", idColumnValue)
+  //        .getResultList();
+  //  }
 
   private List<PatientIdentity> getBeneficiaryAndHistoryIdentities(long beneXrefSk) {
     return entityManager
@@ -385,20 +352,20 @@ public class BeneficiaryRepository {
             """
                 WITH beneAndHistory AS (
                   SELECT
-                    b.beneSk beneSk,
-                    b.beneXrefSk beneXrefSk,
-                    b.identity.mbi mbi,
+                    bene.beneSk beneSk,
+                    bene.beneXrefSk beneXrefSk,
+                    bene.identity.mbi mbi,
                     mbiId.effectiveDate effectiveDate,
                     mbiId.obsoleteDate obsoleteDate
-                  FROM Beneficiary b
-                  JOIN BeneficiaryXref bx
-                    ON b.beneXrefSk = bx.beneXrefSk and b.beneSK = bx.beneSK
+                  FROM Beneficiary bene
+                  LEFT JOIN BeneficiaryXref bx
+                    ON bene.beneXrefSk = bx.beneXrefSk and bene.beneSk = bx.beneSk
                   LEFT JOIN BeneficiaryMbiId mbiId
-                    ON b.identity.mbi = mbiId.mbi
+                    ON bene.identity.mbi = mbiId.mbi
                     AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-                  WHERE b.beneXrefSk = :beneXrefSk
-                  AND bx.beneKillCred != 1
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+                  WHERE bene.beneXrefSk = :beneXrefSk
+                  AND (bx.beneKillCred IS NULL or bx.beneKillCred != '1')
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
                   UNION
                   SELECT
                     bh.beneSk beneSk,
@@ -408,15 +375,15 @@ public class BeneficiaryRepository {
                     mbiId.obsoleteDate obsoleteDate
                   FROM Beneficiary b
                   JOIN BeneficiaryHistory bh
-                    ON b.beneSK = bh.beneSK
+                    ON b.beneSk = bh.beneSk
                   LEFT JOIN BeneficiaryMbiId mbiId
                     ON b.identity.mbi = mbiId.mbi
                     AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                   WHERE b.beneXrefSk = :beneXrefSk
                 )
-                SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bah.beneXrefSk) rowId, bah.beneSk, bah.xrefSk, bah.mbi, bah.effectiveDate, bah.obsoleteDate)
+                SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bah.beneSk) rowId, bah.beneSk, bah.beneXrefSk, bah.mbi, bah.effectiveDate, bah.obsoleteDate)
                 FROM beneAndHistory bah
-                GROUP BY bah.beneSk, bah.xrefSk, bah.mbi, bah.effectiveDate, bah.obsoleteDate
+                GROUP BY bah.beneSk, bah.beneXrefSk, bah.mbi, bah.effectiveDate, bah.obsoleteDate
                 """,
             PatientIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)

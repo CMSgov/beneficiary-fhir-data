@@ -185,6 +185,13 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
         },
         "value" : "8Z73WV0QC20"
       } ],
+      "link" : [ {
+        "other" : {
+          "display" : "181968400",
+          "reference" : "Patient/181968400"
+        },
+        "type" : "replaces"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -262,6 +269,13 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
         },
         "value" : "8Z73WV0QC20"
       } ],
+      "link" : [ {
+        "other" : {
+          "display" : "181968400",
+          "reference" : "Patient/181968400"
+        },
+        "type" : "replaces"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -338,6 +352,13 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
           } ]
         },
         "value" : "8Z73WV0QC20"
+      } ],
+      "link" : [ {
+        "other" : {
+          "display" : "181968400",
+          "reference" : "Patient/181968400"
+        },
+        "type" : "replaces"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
