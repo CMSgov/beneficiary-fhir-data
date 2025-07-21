@@ -1,11 +1,12 @@
 package gov.cms.bfd.server.ng.eob;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -42,7 +43,7 @@ public class EobHandler {
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
-   * @param tag The tag to filter
+   * @param sourceIds sourceIds
    * @return bundle
    */
   public Bundle searchByBene(
@@ -51,7 +52,7 @@ public class EobHandler {
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       Optional<Integer> startIndex,
-      Optional<TokenParam> tag) {
+      List<ClaimSourceId> sourceIds) {
     var beneXrefSk = beneficiaryRepository.getXrefBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
@@ -59,7 +60,7 @@ public class EobHandler {
     }
     var eobs =
         claimRepository.findByBeneXrefSk(
-            beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, tag);
+            beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
     return FhirUtil.bundleOrDefault(
         eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
   }
