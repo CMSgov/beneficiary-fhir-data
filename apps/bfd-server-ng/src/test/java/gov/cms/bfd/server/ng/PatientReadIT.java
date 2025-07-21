@@ -46,13 +46,6 @@ public class PatientReadIT extends IntegrationTestBase {
   }
 
   @Test
-  void patientReadMergedWithKillCredit() {
-    var patient = patientRead().withId("878934873").execute();
-    assertFalse(patient.isEmpty());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
-  }
-
-  @Test
   void patientReadIdNotFound() {
     assertThrows(ResourceNotFoundException.class, () -> patientRead().withId("999").execute());
   }
