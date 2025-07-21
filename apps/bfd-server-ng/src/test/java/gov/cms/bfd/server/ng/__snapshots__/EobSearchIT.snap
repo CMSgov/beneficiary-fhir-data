@@ -897,10 +897,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -1962,10 +1962,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -3027,10 +3027,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -4092,10 +4092,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -5158,10 +5158,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -6224,10 +6224,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -6889,10 +6889,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -7867,10 +7867,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -8532,10 +8532,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -9510,10 +9510,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -10175,10 +10175,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -11153,10 +11153,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -11818,10 +11818,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -12796,10 +12796,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -13461,10 +13461,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -14439,10 +14439,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -15104,10 +15104,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -16130,10 +16130,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -16795,10 +16795,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -17773,10 +17773,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -18438,10 +18438,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -19416,10 +19416,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
@@ -20081,10 +20081,10 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "code" : "3",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
           }, {
-            "code" : "3",
+            "code" : "33",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
           }, {
-            "code" : "X",
+            "code" : "33X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
