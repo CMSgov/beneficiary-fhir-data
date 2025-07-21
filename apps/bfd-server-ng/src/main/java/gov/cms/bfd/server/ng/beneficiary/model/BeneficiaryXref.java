@@ -20,21 +20,7 @@ public class BeneficiaryXref {
   @Column(name = "bene_xref_sk")
   private long beneXrefSk;
 
-  @Column(name = "bene_hicn_num")
-  private String beneHicnNum;
-
   @Column(name = "bene_kill_cred_cd")
   private String beneKillCred;
 
-  @Column(name = "idr_updt_ts")
-  private ZonedDateTime idrUpdateTimestamp;
-
-  @Column(name = "src_rec_ctre_ts")
-  private ZonedDateTime srcRecCtreTimestamp;
-
-  @Column(name = "bfd_created_ts")
-  private ZonedDateTime bfdCreatedTimestamp;
-
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
 }

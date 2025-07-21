@@ -20,108 +20,42 @@ import org.springframework.stereotype.Repository;
 public class BeneficiaryRepository {
   private EntityManager entityManager;
 
-  // TODO: this has not yet been thoroughly tested with edge cases.
-  // It will likely need some adjustments.
-
-  /**
-   * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
-   *
-   * @param beneSk bene surrogate key
-   * @return list of identities
-   */
-  // This query has a few phases:
-  // 1. Pull MBI information for the current bene_sk/mbi pair
-  //
-  // 2. Pull MBI information for historical bene_sk/mbi pairs (these must be two distinct steps
-  // because there may not be a history record for the current MBI)
-  //
-  // 3. Use GROUP BY to filter out duplicates. There's additional info in these tables besides just
-  // historical identity information, so there could be any number of duplicates relative to the
-  // small amount of information we're pulling.
-  //
-  // NOTE - it would be simpler to do the WHERE NOT EXISTS on OvershareMBI after the UNION, but
-  // that doesn't appear to be supported by the JQL parser.
-  public List<PatientIdentity> getPatientIdentities(long beneSk) {
-    return entityManager
-        .createQuery(
-            """
-              WITH allBeneInfo AS (
-                SELECT
-                  bene.beneSk beneSk,
-                  bene.xrefSk xrefSk,
-                  bene.identity.mbi mbi,
-                  mbiId.effectiveDate effectiveDate,
-                  mbiId.obsoleteDate obsoleteDate
-                FROM
-                  Beneficiary bene
-                  LEFT JOIN BeneficiaryMbiId mbiId
-                    ON bene.identity.mbi = mbiId.mbi
-                    AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-                WHERE bene.beneSk = :beneSk
-                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
-                UNION
-                SELECT
-                  beneHistory.beneSk beneSk,
-                  beneHistory.xrefSk xrefSk,
-                  beneHistory.mbi mbi,
-                  mbiId.effectiveDate effectiveDate,
-                  mbiId.obsoleteDate obsoleteDate
-                FROM Beneficiary bene
-                JOIN BeneficiaryHistory beneHistory
-                  ON beneHistory.xrefSk = bene.xrefSk
-                LEFT JOIN BeneficiaryMbiId mbiId
-                  ON mbiId.mbi = beneHistory.mbi
-                  AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-                WHERE bene.beneSk = :beneSk
-                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
-              )
-              SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
-              FROM allBeneInfo abi
-              GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
-            """,
-            PatientIdentity.class)
-        .setParameter("beneSk", beneSk)
-        .getResultList();
-  }
-
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
    * Beneficiary records with kill credit switch set to "1" or overshare mbi are filtered out
    *
-   * @param beneSk bene surrogate key
    * @param beneXrefSk computed bene surrogate key
    * @return list of patient identities representing all active identities connected to the bene
    *     record
    */
-  public List<PatientIdentity> getValidBeneficiaryIdentities(long beneSk, long beneXrefSk) {
+  public List<PatientIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
     return entityManager
         .createQuery(
             """
-                            SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bene.beneSk) rowId, bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate)
-                            FROM Beneficiary bene
-                            LEFT JOIN BeneficiaryMbiId mbiId
-                              ON bene.identity.mbi = mbiId.mbi
-                              AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-                            WHERE bene.xrefSk = :beneXrefSk
-                            AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
-                            AND NOT EXISTS (
-                                SELECT 1
-                                FROM BeneficiaryXref bx
-                                WHERE bx.beneSk = bene.beneSk
-                                  AND bx.beneXrefSk = bene.xrefSk
-                                  AND bx.beneKillCred = '1'
-                            )
-                            AND NOT EXISTS (
-                                SELECT 1
-                                FROM BeneficiaryXref bx_init
-                                WHERE bx_init.beneSk = :beneSk
-                                  AND bx_init.beneXrefSk = :beneXrefSk
-                                  AND bx_init.beneKillCred = '1'
-                            )
-                            GROUP BY bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate
-                            """,
+            SELECT new PatientIdentity(
+                ROW_NUMBER() OVER (ORDER BY bene.beneSk) rowId,
+                bene.beneSk,
+                bene.xrefSk,
+                bene.identity.mbi,
+                mbiId.effectiveDate,
+                mbiId.obsoleteDate
+              )
+            FROM Beneficiary bene
+            LEFT JOIN BeneficiaryMbiId mbiId
+              ON bene.identity.mbi = mbiId.mbi
+              AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+            WHERE bene.xrefSk = :beneXrefSk
+            AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
+            AND NOT EXISTS (
+                SELECT 1
+                FROM BeneficiaryXref bx
+                WHERE bx.beneSk = bene.beneSk
+                  AND bx.beneXrefSk = bene.xrefSk
+                  AND bx.beneKillCred = '1'
+            )
+            GROUP BY bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate
+            """,
             PatientIdentity.class)
-        .setParameter("beneSk", beneSk)
         .setParameter("beneXrefSk", beneXrefSk)
         .getResultList();
   }
