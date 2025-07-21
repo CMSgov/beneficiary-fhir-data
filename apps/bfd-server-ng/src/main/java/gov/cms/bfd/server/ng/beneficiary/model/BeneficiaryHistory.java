@@ -5,19 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Optional;
-import lombok.Getter;
 
 /** Entity representing the beneficiary history table. */
 @Entity
-@Getter
 @Table(name = "beneficiary_history", schema = "idr")
 public class BeneficiaryHistory {
   @Id
   @Column(name = "bene_sk")
   private long beneSk;
-
-  @Column(name = "bene_xref_efctv_sk")
-  private long beneXrefSk;
 
   @Column(name = "bene_xref_efctv_sk_computed")
   private long xrefSk;
