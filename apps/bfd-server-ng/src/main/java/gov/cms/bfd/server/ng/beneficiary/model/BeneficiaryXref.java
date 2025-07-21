@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
 import lombok.Getter;
 
 /** Entity representing the beneficiary XREF table. */
@@ -22,5 +21,4 @@ public class BeneficiaryXref {
 
   @Column(name = "bene_kill_cred_cd")
   private String beneKillCred;
-
 }
