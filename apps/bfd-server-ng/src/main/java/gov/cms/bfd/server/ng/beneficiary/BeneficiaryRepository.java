@@ -108,7 +108,7 @@ public class BeneficiaryRepository {
                                 SELECT 1
                                 FROM BeneficiaryXref bx
                                 WHERE bx.beneSk = bene.beneSk
-                                  AND bx.beneXrefSk = bene.beneXrefSk
+                                  AND bx.beneXrefSk = bene.xrefSk
                                   AND bx.beneKillCred = '1'
                             )
                             AND NOT EXISTS (
