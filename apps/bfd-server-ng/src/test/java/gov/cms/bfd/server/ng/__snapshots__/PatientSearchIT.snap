@@ -133,72 +133,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
 ]
 
 
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedWithKillCredit[GET]=[
-{
-  "entry" : [ {
-    "resource" : {
-      "id" : "878934873",
-      "resourceType" : "Patient"
-    }
-  } ],
-  "id" : "{uuid}",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=878934873"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedWithKillCredit[GET_WITH_SEARCH]=[
-{
-  "entry" : [ {
-    "resource" : {
-      "id" : "878934873",
-      "resourceType" : "Patient"
-    }
-  } ],
-  "id" : "{uuid}",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=878934873"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedWithKillCredit[POST]=[
-{
-  "entry" : [ {
-    "resource" : {
-      "id" : "878934873",
-      "resourceType" : "Patient"
-    }
-  } ],
-  "id" : "{uuid}",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
-}
-]
-
-
 gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillCredit[GET]=[
 {
   "entry" : [ {
@@ -787,6 +721,19 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
         },
         "value" : "2B19C89AA35"
       } ],
+      "link" : [ {
+        "other" : {
+          "display" : "121212121",
+          "reference" : "Patient/121212121"
+        },
+        "type" : "replaces"
+      }, {
+        "other" : {
+          "display" : "848484848",
+          "reference" : "Patient/848484848"
+        },
+        "type" : "replaces"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -860,6 +807,19 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
         },
         "value" : "2B19C89AA35"
       } ],
+      "link" : [ {
+        "other" : {
+          "display" : "121212121",
+          "reference" : "Patient/121212121"
+        },
+        "type" : "replaces"
+      }, {
+        "other" : {
+          "display" : "848484848",
+          "reference" : "Patient/848484848"
+        },
+        "type" : "replaces"
+      } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -932,6 +892,19 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
           } ]
         },
         "value" : "2B19C89AA35"
+      } ],
+      "link" : [ {
+        "other" : {
+          "display" : "121212121",
+          "reference" : "Patient/121212121"
+        },
+        "type" : "replaces"
+      }, {
+        "other" : {
+          "display" : "848484848",
+          "reference" : "Patient/848484848"
+        },
+        "type" : "replaces"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
