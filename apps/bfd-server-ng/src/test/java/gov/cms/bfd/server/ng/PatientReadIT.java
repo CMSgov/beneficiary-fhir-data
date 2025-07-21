@@ -50,7 +50,6 @@ public class PatientReadIT extends IntegrationTestBase {
     assertEquals(Patient.LinkType.REPLACEDBY, link.getType(), "Link type should be REPLACEDBY");
     assertEquals("178083966", other.getDisplay(), "Link display should be '178083966'");
 
-
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 

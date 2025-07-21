@@ -53,26 +53,26 @@ public class PatientSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    var patients = patientBundle.getEntry().stream()
+    var patients =
+        patientBundle.getEntry().stream()
             .map(Bundle.BundleEntryComponent::getResource)
             .filter(Patient.class::isInstance)
-            .map(Patient.class::cast).toList();
+            .map(Patient.class::cast)
+            .toList();
 
     assertEquals(1, patientBundle.getEntry().size());
     assertTrue(
-            patients.stream()
-                    .flatMap(patient -> patient.getLink().stream())
-                    .allMatch(link -> Patient.LinkType.REPLACEDBY.equals(link.getType())),
-            "Expected all Patient.link.type values to be 'replaced by'"
-    );
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .allMatch(link -> Patient.LinkType.REPLACEDBY.equals(link.getType())),
+        "Expected all Patient.link.type values to be 'replaced by'");
 
     assertTrue(
-            patients.stream()
-                    .flatMap(patient -> patient.getLink().stream())
-                    .map(link -> link.getOther().getDisplay())
-                    .anyMatch("178083966"::equals),
-            "Expected one link with display '178083966'"
-    );
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .map(link -> link.getOther().getDisplay())
+            .anyMatch("178083966"::equals),
+        "Expected one link with display '178083966'");
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
   }
 
@@ -85,26 +85,26 @@ public class PatientSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    var patients = patientBundle.getEntry().stream()
+    var patients =
+        patientBundle.getEntry().stream()
             .map(Bundle.BundleEntryComponent::getResource)
             .filter(Patient.class::isInstance)
-            .map(Patient.class::cast).toList();
+            .map(Patient.class::cast)
+            .toList();
 
     assertEquals(1, patientBundle.getEntry().size());
     assertTrue(
-            patients.stream()
-                    .flatMap(patient -> patient.getLink().stream())
-                    .allMatch(link -> Patient.LinkType.REPLACES.equals(link.getType())),
-            "Expected all Patient.link.type values to be 'replaces'"
-    );
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .allMatch(link -> Patient.LinkType.REPLACES.equals(link.getType())),
+        "Expected all Patient.link.type values to be 'replaces'");
 
     assertTrue(
-            patients.stream()
-                    .flatMap(patient -> patient.getLink().stream())
-                    .map(link -> link.getOther().getDisplay())
-                    .anyMatch("792872340"::equals),
-            "Expected one link with display '792872340'"
-    );
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .map(link -> link.getOther().getDisplay())
+            .anyMatch("792872340"::equals),
+        "Expected one link with display '792872340'");
 
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
   }
