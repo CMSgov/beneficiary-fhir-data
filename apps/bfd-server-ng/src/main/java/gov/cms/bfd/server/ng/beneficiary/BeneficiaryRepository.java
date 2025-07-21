@@ -84,16 +84,26 @@ public class BeneficiaryRepository {
         .getResultList();
   }
 
+  /**
+   * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
+   * Beneficiary records with kill credit switch set to "1" or overshare mbi are filtered out
+   *
+   * @param beneSk bene surrogate key
+   * @param beneXrefSk computed bene surrogate key
+   * @return list of patient identities representing all active identities connected to the bene
+   *     record
+   */
   public List<PatientIdentity> getValidBeneficiaryIdentities(long beneSk, long beneXrefSk) {
     return entityManager
-            .createQuery(
-                    """
+        .createQuery(
+            """
                             SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY bene.beneSk) rowId, bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate)
                             FROM Beneficiary bene
                             LEFT JOIN BeneficiaryMbiId mbiId
                               ON bene.identity.mbi = mbiId.mbi
                               AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
                             WHERE bene.xrefSk = :beneXrefSk
+                            AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
                             AND NOT EXISTS (
                                 SELECT 1
                                 FROM BeneficiaryXref bx
@@ -110,10 +120,10 @@ public class BeneficiaryRepository {
                             )
                             GROUP BY bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate
                             """,
-                    PatientIdentity.class)
-            .setParameter("beneSk", beneSk)
-            .setParameter("beneXrefSk", beneXrefSk)
-            .getResultList();
+            PatientIdentity.class)
+        .setParameter("beneSk", beneSk)
+        .setParameter("beneXrefSk", beneXrefSk)
+        .getResultList();
   }
 
   /**

@@ -48,7 +48,33 @@ public class PatientSearchIT extends IntegrationTestBase {
   void patientSearchByIdMergedBene(SearchStyleEnum searchStyle) {
     var patientBundle =
         searchBundle()
-            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"))
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("792872340"))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(1, patientBundle.getEntry().size());
+
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdUnMergedWithHistoricKillCredit(SearchStyleEnum searchStyle) {
+    var patientBundle =
+        searchBundle()
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("178083966"))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(1, patientBundle.getEntry().size());
+
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdMergedWithKillCredit(SearchStyleEnum searchStyle) {
+    var patientBundle =
+        searchBundle()
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("878934873"))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
