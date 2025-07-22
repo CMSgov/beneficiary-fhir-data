@@ -847,10 +847,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "code" : "3",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
       }, {
-        "code" : "3",
+        "code" : "33",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
       }, {
-        "code" : "X",
+        "code" : "33X",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
@@ -1898,10 +1898,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "code" : "3",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
       }, {
-        "code" : "3",
+        "code" : "33",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
       }, {
-        "code" : "X",
+        "code" : "33X",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },

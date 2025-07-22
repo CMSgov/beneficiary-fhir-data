@@ -13,6 +13,7 @@ from model import (
     IdrBeneficiaryMbiId,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
+    IdrBeneficiaryXref,
     IdrClaim,
     IdrClaimAnsiSignature,
     IdrClaimDateSignature,
@@ -119,6 +120,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrBeneficiaryThirdParty,
         IdrBeneficiaryEntitlement,
         IdrBeneficiaryEntitlementReason,
+        IdrBeneficiaryXref,
         # Ignore for now, we'll likely source these elsewhere when we load contract data
         # IdrContractPbpNumber,
         # IdrElectionPeriodUsage,
