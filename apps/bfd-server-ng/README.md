@@ -94,6 +94,10 @@ The Swagger UI is available at `/v3/fhir/swagger-ui`
 
 ## Tests
 
+Note that certain Postgres environment variables can interfere with the database connection in the tests, namely `PGSSLMODE`.
+
+You'll probably want to unset these when running the tests from the terminal.
+
 ### Regenerating snapshots
 
 Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).

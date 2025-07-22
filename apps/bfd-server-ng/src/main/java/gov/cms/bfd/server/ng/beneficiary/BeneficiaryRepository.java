@@ -20,67 +20,43 @@ import org.springframework.stereotype.Repository;
 public class BeneficiaryRepository {
   private EntityManager entityManager;
 
-  // TODO: this has not yet been thoroughly tested with edge cases.
-  // It will likely need some adjustments.
-
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
+   * Beneficiary records with kill credit switch set to "1" or overshare mbi are filtered out
    *
-   * @param beneSk bene surrogate key
-   * @return list of identities
+   * @param beneXrefSk computed bene surrogate key
+   * @return list of patient identities representing all active identities connected to the bene
+   *     record
    */
-  // This query has a few phases:
-  // 1. Pull MBI information for the current bene_sk/mbi pair
-  //
-  // 2. Pull MBI information for historical bene_sk/mbi pairs (these must be two distinct steps
-  // because there may not be a history record for the current MBI)
-  //
-  // 3. Use GROUP BY to filter out duplicates. There's additional info in these tables besides just
-  // historical identity information, so there could be any number of duplicates relative to the
-  // small amount of information we're pulling.
-  //
-  // NOTE - it would be simpler to do the WHERE NOT EXISTS on OvershareMBI after the UNION, but
-  // that doesn't appear to be supported by the JQL parser.
-  public List<PatientIdentity> getPatientIdentities(long beneSk) {
+  public List<PatientIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
     return entityManager
         .createQuery(
             """
-              WITH allBeneInfo AS (
-                SELECT
-                  bene.beneSk beneSk,
-                  bene.xrefSk xrefSk,
-                  bene.identity.mbi mbi,
-                  mbiId.effectiveDate effectiveDate,
-                  mbiId.obsoleteDate obsoleteDate
-                FROM
-                  Beneficiary bene
-                  LEFT JOIN BeneficiaryMbiId mbiId
-                    ON bene.identity.mbi = mbiId.mbi
-                    AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-                WHERE bene.beneSk = :beneSk
-                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
-                UNION
-                SELECT
-                  beneHistory.beneSk beneSk,
-                  beneHistory.xrefSk xrefSk,
-                  beneHistory.mbi mbi,
-                  mbiId.effectiveDate effectiveDate,
-                  mbiId.obsoleteDate obsoleteDate
-                FROM Beneficiary bene
-                JOIN BeneficiaryHistory beneHistory
-                  ON beneHistory.xrefSk = bene.xrefSk
-                LEFT JOIN BeneficiaryMbiId mbiId
-                  ON mbiId.mbi = beneHistory.mbi
-                  AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-                WHERE bene.beneSk = :beneSk
-                AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
+            SELECT new PatientIdentity(
+                ROW_NUMBER() OVER (ORDER BY bene.beneSk) rowId,
+                bene.beneSk,
+                bene.xrefSk,
+                bene.identity.mbi,
+                mbiId.effectiveDate,
+                mbiId.obsoleteDate
               )
-              SELECT new PatientIdentity(ROW_NUMBER() OVER (ORDER BY abi.beneSk) rowId, abi.beneSk, abi.xrefSk, abi.mbi, abi.effectiveDate, abi.obsoleteDate)
-              FROM allBeneInfo abi
-              GROUP BY abi.beneSk, abi.mbi, abi.xrefSk, abi.effectiveDate, abi.obsoleteDate
+            FROM Beneficiary bene
+            LEFT JOIN BeneficiaryMbiId mbiId
+              ON bene.identity.mbi = mbiId.mbi
+              AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
+            WHERE bene.xrefSk = :beneXrefSk
+            AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
+            AND NOT EXISTS (
+                SELECT 1
+                FROM BeneficiaryXref bx
+                WHERE bx.beneSk = bene.beneSk
+                  AND bx.beneXrefSk = bene.xrefSk
+                  AND bx.beneKillCred = '1'
+            )
+            GROUP BY bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate
             """,
             PatientIdentity.class)
-        .setParameter("beneSk", beneSk)
+        .setParameter("beneXrefSk", beneXrefSk)
         .getResultList();
   }
 
@@ -130,10 +106,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT b.xrefSk
-              FROM Beneficiary b
-              WHERE b.beneSk = :beneSk
-              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
+              SELECT bene.xrefSk
+              FROM Beneficiary bene
+              WHERE bene.beneSk = :beneSk
+              AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
             """,
             Long.class)
         .setParameter("beneSk", beneSk)
@@ -172,13 +148,13 @@ public class BeneficiaryRepository {
         .createQuery(
             String.format(
                 """
-                SELECT b
-                FROM Beneficiary b
-                WHERE b.%s = :id
-                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
-                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
-                ORDER BY b.obsoleteTimestamp DESC
+                SELECT bene
+                FROM Beneficiary bene
+                WHERE bene.%s = :id
+                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :lowerBound)
+                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :upperBound)
+                  AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = bene.identity.mbi)
+                ORDER BY bene.obsoleteTimestamp DESC
                 """,
                 idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),

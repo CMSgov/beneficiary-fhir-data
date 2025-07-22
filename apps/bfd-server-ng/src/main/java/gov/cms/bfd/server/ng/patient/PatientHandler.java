@@ -60,13 +60,17 @@ public class PatientHandler {
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
-    var identities = beneficiaryRepository.getPatientIdentities(beneficiary.getBeneSk());
+    var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getXrefSk());
     var patient = beneficiary.toFhir();
 
     for (var id : identities) {
-      if (!beneficiary.isMergedBeneficiary()) {
+      // check for merged bene and if mbi identifier has already been added to the patient
+      if (!beneficiary.isMergedBeneficiary()
+          && patient.getIdentifier().stream()
+              .noneMatch(identifier -> identifier.getValue().equals(id.mbi.orElse(null)))) {
         id.toFhirIdentifier().ifPresent(patient::addIdentifier);
       }
+
       id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
     }
 

@@ -138,6 +138,19 @@ CREATE TABLE idr.beneficiary_election_period_usage (
     PRIMARY KEY(bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt)
 );
 
+CREATE TABLE idr.beneficiary_xref (
+    bene_sk BIGINT NOT NULL,
+    bene_xref_sk BIGINT NOT NULL,
+    bene_hicn_num VARCHAR(11) NOT NULL,
+    bene_kill_cred_cd VARCHAR(1) NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+);
+
 CREATE TABLE idr.contract_pbp_number (
     cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
     cntrct_drug_plan_ind_cd VARCHAR(1) NOT NULL,
@@ -332,6 +345,7 @@ CREATE TABLE idr.claim_ansi_signature (
 
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
 SELECT bene_mbi_id FROM idr.beneficiary
+WHERE bene_xref_efctv_sk != 0
 GROUP BY bene_mbi_id
 HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
 
