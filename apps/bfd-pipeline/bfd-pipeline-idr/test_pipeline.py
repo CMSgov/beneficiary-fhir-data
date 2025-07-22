@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import cast
 
 import psycopg
@@ -67,7 +67,7 @@ class TestPipeline:
             SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s
             WHERE bene_sk = 53965935
             """,
-            {"timestamp": datetime.now(timezone.utc)},
+            {"timestamp": datetime.now(UTC)},
         )
         conn.commit()
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
@@ -100,33 +100,33 @@ class TestPipeline:
         cur = conn.execute("select * from idr.claim order by clm_uniq_id")
         assert cur.rowcount == 150
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 99283365695
+        assert rows[0]["clm_uniq_id"] == 74294264116
         assert rows[0]["clm_nrln_ric_cd"] == "V"
 
         cur = conn.execute("select * from idr.claim_institutional order by clm_uniq_id")
         assert cur.rowcount == 150
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 99283365695
+        assert rows[0]["clm_uniq_id"] == 74294264116
 
         cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
         assert cur.rowcount == 150
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_dt_sgntr_sk"] == 21539345781
+        assert rows[0]["clm_dt_sgntr_sk"] == 5123224512
 
         cur = conn.execute("select * from idr.claim_value order by clm_uniq_id")
-        assert cur.rowcount == 176
+        assert cur.rowcount == 136
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 99283365695
+        assert rows[0]["clm_uniq_id"] == 191283812055
 
         cur = conn.execute("select * from idr.claim_line order by clm_uniq_id")
-        assert cur.rowcount == 1188
+        assert cur.rowcount == 1160
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 99283365695
+        assert rows[0]["clm_uniq_id"] == 74294264116
 
         cur = conn.execute("select * from idr.claim_line_institutional order by clm_uniq_id")
-        assert cur.rowcount == 1188
+        assert cur.rowcount == 1160
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 99283365695
+        assert rows[0]["clm_uniq_id"] == 74294264116
 
         cur = conn.execute("select * from idr.claim_ansi_signature order by clm_ansi_sgntr_sk")
         assert cur.rowcount == 12072
@@ -134,9 +134,9 @@ class TestPipeline:
         assert rows[0]["clm_ansi_sgntr_sk"] == 0
 
         cur = conn.execute("select * from idr.claim_procedure order by clm_uniq_id, bfd_row_num")
-        assert cur.rowcount == 1918
+        assert cur.rowcount == 2020
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 99283365695
+        assert rows[0]["clm_uniq_id"] == 74294264116
         assert rows[0]["bfd_row_num"] == 1
 
         # TODO: add these back when contract data is added

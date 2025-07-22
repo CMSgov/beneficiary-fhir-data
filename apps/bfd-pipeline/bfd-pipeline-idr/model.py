@@ -81,9 +81,7 @@ class IdrBaseModel(BaseModel):
 
     @classmethod
     def unique_key(cls) -> list[str]:
-        return [
-            key for key in cls.model_fields.keys() if cls._extract_meta(key, PRIMARY_KEY) == True
-        ]
+        return [key for key in cls.model_fields if cls._extract_meta(key, PRIMARY_KEY)]
 
     @classmethod
     def batch_timestamp_col(cls, is_historical: bool) -> str | None:
@@ -870,4 +868,5 @@ class LoadProgress(IdrBaseModel):
         """
 
     def is_historical(self) -> bool:
-        return self.last_ts <= datetime(2021, 1, 1, tzinfo=UTC)
+        # 2021-4-18 is the most recent date where idr_insrt_ts could be null in claims data
+        return self.last_ts <= datetime(2021, 4, 19, tzinfo=UTC)

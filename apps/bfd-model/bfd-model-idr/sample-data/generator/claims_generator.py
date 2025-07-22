@@ -12,8 +12,10 @@ from generator_util import GeneratorUtil
 from pathlib import Path
 from dateutil.parser import parse
 from datetime import date, datetime, timedelta
+from faker import Faker
 
 generator = GeneratorUtil()
+faker = Faker()
 
 def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_line_instnl,clm_dcmtn,clm_fiss):
     Path("out").mkdir(exist_ok=True)
@@ -172,8 +174,6 @@ def add_diagnoses(clm_type_cd=-1):
                                'CLM_PROD_TYPE_CD':'D'}
             diagnosis_list.append(diagnosis)
 
-    for diagnosis in diagnosis_list:
-        add_meta_timestamps(diagnosis)
     return diagnosis_list
 
 
@@ -182,15 +182,13 @@ def gen_procedure_icd10pcs():
     procedure['CLM_PROD_TYPE_CD'] = 'S'
     procedure['CLM_PRCDR_CD'] = random.choice(available_procedure_codes_icd10_pcs)
     procedure['CLM_DGNS_PRCDR_ICD_IND'] = '0'
-    add_meta_timestamps(procedure)
     return procedure
 
 
-def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today())):
+def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today())):
     claim = {'CLM':{},'CLM_LINE':[],'CLM_DT_SGNTR':{},'CLM_LINE_INSTNL':[], 'CLM_DCMTN':{}}
     clm_dt_sgntr = {}
     clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
-    add_meta_timestamps(clm_dt_sgntr)
     claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
     #clm_type_cd = 60
@@ -203,7 +201,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     elif(clm_type_cd in fiss_clm_type_cds):
         clm_src_id = 21000
     claim['CLM']['CLM_SRC_ID'] = clm_src_id
-    claim['CLM']['CLM_FROM_DT'] = random_date(minDate, maxDate)
+    claim['CLM']['CLM_FROM_DT'] = random_date(min_date, max_date)
     claim['CLM']['CLM_THRU_DT'] = gen_thru_dt(claim['CLM']['CLM_FROM_DT'])
 
 
@@ -216,7 +214,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     
     claim['CLM']['CLM_NUM_SK'] = 1
     claim['CLM']['CLM_EFCTV_DT'] = str(date.today())
-    claim['CLM']['CLM_IDR_LD_DT'] = str(date.today())
+    claim['CLM']['CLM_IDR_LD_DT'] = random_date(claim['CLM']['CLM_FROM_DT'], max_date)
     claim['CLM']['CLM_OBSLT_DT'] = '9999-12-31'
     claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     claim['CLM']['BENE_SK'] = bene_sk
@@ -231,7 +229,8 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
     claim['CLM']['CLM_CNTRCTR_NUM'] = random.choice(generator.code_systems['CLM_CNTRCTR_NUM'])
     claim['CLM']['CLM_NCH_PRMRY_PYR_CD'] = random.choice(generator.code_systems['CLM_NCH_PRMRY_PYR_CD'])
     
-    add_meta_timestamps(claim['CLM'])
+    add_meta_timestamps(claim['CLM'], claim['CLM'], max_date)
+    add_meta_timestamps(clm_dt_sgntr, claim['CLM'], max_date)
 
     clm_finl_actn_ind = 'N'
     if(clm_type_cd in (10,20,30,40,50,60,61,62,63,71,72,81,82)):
@@ -267,7 +266,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim['CLM_DCMTN']['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
         claim['CLM_DCMTN']['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
         claim['CLM_DCMTN']['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
-    add_meta_timestamps(claim['CLM_DCMTN'])
+    add_meta_timestamps(claim['CLM_DCMTN'], claim['CLM'], max_date)
 
     #provider elements:
     if((clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in fiss_clm_type_cds):
@@ -311,7 +310,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
                         'CLM_VAL_SQNC_NUM':3}
         claim['CLM_VAL'].append(clm_val_ime)
         for clm_val in claim['CLM_VAL']:
-            add_meta_timestamps(clm_val)
+            add_meta_timestamps(clm_val, claim['CLM'], max_date)
 
     #Add procedures
     claim['CLM_PROD'] = []
@@ -325,6 +324,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
             procedure['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
             procedure['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
             procedure['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
+            add_meta_timestamps(procedure, claim['CLM'], max_date)
             claim['CLM_PROD'].append(procedure)
 
     #add diagnoses
@@ -335,6 +335,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         diagnosis['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
         diagnosis['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
         claim['CLM_PROD'].append(diagnosis)
+        add_meta_timestamps(diagnosis, claim['CLM'], max_date)
 
     #clm_dt_sgntr info
     if(clm_type_cd in (10,20,30,50,60,61,62,63,64)):
@@ -397,7 +398,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         institutional_parts['CLM_MDCR_IP_PPS_CPTL_TOT_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_MDCR_IP_BENE_DDCTBL_AMT'] = round(random.uniform(0,25),2)
         institutional_parts['CLM_PPS_IND_CD'] = random.choice(['','2'])
-        add_meta_timestamps(institutional_parts)
+        add_meta_timestamps(institutional_parts, claim['CLM'], max_date)
 
         if(clm_type_cd==10):
             if(random.choice([0,1])):
@@ -459,7 +460,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line['CLM_LINE_PRVDR_PMT_AMT'] = round(random.uniform(0,1500),2)
         claim_line['CLM_LINE_NCVRD_CHRG_AMT'] = round(random.uniform(0,1500),2)
         
-        add_meta_timestamps(claim_line)
+        add_meta_timestamps(claim_line, claim['CLM'], max_date)
 
         claim_line_inst['CLM_LINE_INSTNL_ADJSTD_AMT'] = round(random.uniform(0,1500),2)
         claim_line_inst['CLM_LINE_INSTNL_RDCD_AMT'] = round(random.uniform(0,1500),2)
@@ -476,7 +477,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
         claim_line_inst['CLM_REV_PMT_MTHD_CD'] = random.choice(generator.code_systems['CLM_REV_PMT_MTHD_CD'])
         claim_line_inst['CLM_REV_CNTR_STUS_CD'] = random.choice(generator.code_systems['CLM_REV_CNTR_STUS_CD'])
         claim_line_inst['CLM_ANSI_SGNTR_SK'] = random.choice(['8585','1','4365','1508','5555','9204','6857','5816','11978'])
-        add_meta_timestamps(claim_line_inst)
+        add_meta_timestamps(claim_line_inst, claim['CLM'], max_date)
 
         claim_line['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
         claim_line['CLM_LINE_NUM'] = line
@@ -489,7 +490,7 @@ def gen_claim(bene_sk = '-1', minDate = '2018-01-01', maxDate = str(date.today()
 
 
 
-def gen_pac_version_of_claim(claim):
+def gen_pac_version_of_claim(claim, max_date):
     #note the fields to delete
     '''
     Generating a Synthetic PAC claim is done in a rather naive way. 
@@ -514,7 +515,7 @@ def gen_pac_version_of_claim(claim):
     pac_claim['CLM_FISS']['CLM_NUM_SK'] = pac_claim['CLM']['CLM_NUM_SK']
     pac_claim['CLM_FISS']['CLM_TYPE_CD']  = pac_claim['CLM']['CLM_TYPE_CD']
     pac_claim['CLM_FISS']['CLM_CRNT_STUS_CD']  = random.choice(['A','F','I','S','M','P','R','D','T','U'])
-    add_meta_timestamps(pac_claim['CLM_FISS'])
+    add_meta_timestamps(pac_claim['CLM_FISS'], claim['CLM'], max_date)
 
 
     for i in range(len(pac_claim['CLM_LINE'])):
@@ -588,10 +589,13 @@ def gen_pac_version_of_claim(claim):
 
     return pac_claim
 
-def add_meta_timestamps(obj):
-    has_insrt_ts = random.random() > 0.2
-    obj['IDR_INSRT_TS'] = datetime.today() if has_insrt_ts else None
-    obj['IDR_UPDT_TS'] = datetime.today() if has_insrt_ts and random.random() > 0.8 else None
+def add_meta_timestamps(obj, clm, max_date):
+    if date.fromisoformat(clm['CLM_IDR_LD_DT']) < date(2021, 4, 19): 
+        has_insrt_ts = random.random() > 0.5
+    else:
+        has_insrt_ts = True
+    obj['IDR_INSRT_TS'] = faker.date_time_between_dates(datetime.fromisoformat(clm['CLM_IDR_LD_DT']), datetime.fromisoformat(max_date)) if has_insrt_ts else None
+    obj['IDR_UPDT_TS'] = faker.date_time_between_dates(obj['IDR_INSRT_TS'], datetime.fromisoformat(max_date)) if has_insrt_ts and random.random() > 0.8 else None
 
 ''' 
 def pull_code_systems():
@@ -646,12 +650,13 @@ def main():
     CLM_DCMTN = []
     CLM_FISS = []
     pt_complete = 0
+    max_date = str(date.today())
     for pt_bene_sk in bene_sk_list:
         if((pt_complete)%1000 == 0 and pt_complete>0):
             print(f"Completed {pt_complete} patients with {claims_to_generate_per_person} claims per patient.")
         for i in range(claims_to_generate_per_person):
             clm_from_dt_min = '2018-01-01'
-            claim = gen_claim(bene_sk = pt_bene_sk,minDate = clm_from_dt_min)
+            claim = gen_claim(bene_sk = pt_bene_sk, min_date = clm_from_dt_min, max_date=max_date)
             CLM.append(claim['CLM'])
             for line in claim['CLM_LINE']:
                 CLM_LINE.append(line)
@@ -665,7 +670,7 @@ def main():
                 CLM_LINE_INSTNL.append(line)
             CLM_DCMTN.append(claim['CLM_DCMTN'])
             if(random.choice([0,1])):
-                pac_claim = gen_pac_version_of_claim(claim)
+                pac_claim = gen_pac_version_of_claim(claim, max_date)
                 CLM.append(pac_claim['CLM'])
                 for line in pac_claim['CLM_LINE']:
                     CLM_LINE.append(line)
