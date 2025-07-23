@@ -196,7 +196,7 @@ generator.save_output_files()
 
 # If --claims flag is provided, automatically call claims_generator.py
 if args.claims:
-    print("Generating claims for the created beneficiaries...")
+    print("Generating claims for generated benes")
     try:
         # Call claims_generator.py with the generated SYNTHETIC_BENE.csv file
         result = subprocess.run([
@@ -214,7 +214,4 @@ if args.claims:
         if e.stderr:
             print("Error output:")
             print(e.stderr)
-        sys.exit(1)
-    except FileNotFoundError:
-        print("Error: claims_generator.py not found in the current directory")
         sys.exit(1)

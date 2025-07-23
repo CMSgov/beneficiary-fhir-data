@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import json
 import subprocess
+import sys
 from dateutil.parser import parse
 from faker import Faker
 from pathlib import Path
@@ -36,8 +37,7 @@ class GeneratorUtil():
         
         # Check if the resources directory exists, if not run sushi build
         if not os.path.exists(relative_path):
-            print(f"Resources directory not found at {relative_path}")
-            print("Running 'sushi build' in ../../sushi directory...")
+            print("Running sushi build")
             try:
                 sushi_dir = "../../sushi"
                 result = subprocess.run(['sushi', 'build'], cwd=sushi_dir, capture_output=True, text=True)
@@ -45,14 +45,10 @@ class GeneratorUtil():
                     print("Sushi build completed successfully")
                 else:
                     print(f"Sushi build failed with error: {result.stderr}")
-                    print("Continuing with empty code systems...")
-                    self.code_systems = code_systems
-                    return
+                    sys.exit(1)
             except Exception as e:
                 print(f"Error running sushi build: {e}")
-                print("Continuing with empty code systems...")
-                self.code_systems = code_systems
-                return
+                sys.exit(1)
         
         try:
             for file in os.listdir(relative_path):
@@ -73,7 +69,7 @@ class GeneratorUtil():
                     print(f"Error: Invalid JSON format in file: {full_path}") 
         except FileNotFoundError:
             print(f"Error: Resources directory not found at path: {relative_path}")
-            print("Continuing with empty code systems...")
+            sys.exit(1)
         
         self.code_systems = code_systems 
 
