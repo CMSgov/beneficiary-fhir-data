@@ -13,7 +13,7 @@ CREATE TABLE idr.beneficiary(
     bene_brth_dt DATE NOT NULL,
     bene_death_dt DATE NOT NULL,
     bene_vrfy_death_day_sw VARCHAR(1) NOT NULL,
-    bene_sex_cd VARCHAR(1) NOT NULL ,
+    bene_sex_cd VARCHAR(1) NOT NULL,
     bene_race_cd VARCHAR(2) NOT NULL,
     geo_usps_state_cd VARCHAR(2) NOT NULL,
     geo_zip5_cd VARCHAR(5) NOT NULL,
@@ -27,6 +27,7 @@ CREATE TABLE idr.beneficiary(
     cntct_lang_cd VARCHAR(3) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
@@ -42,6 +43,7 @@ CREATE TABLE idr.beneficiary_history(
     bene_mbi_id VARCHAR(11) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
@@ -54,6 +56,7 @@ CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_obslt_dt DATE NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
@@ -189,6 +192,7 @@ CREATE TABLE idr.claim (
     clm_blood_lblty_amt NUMERIC NOT NULL,
     clm_ncvrd_chrg_amt NUMERIC NOT NULL,
     clm_mdcr_ddctbl_amt NUMERIC NOT NULL,
+    clm_prvdr_pmt_amt NUMERIC NOT NULL,
     clm_cntrctr_num VARCHAR(5) NOT NULL,
     clm_pmt_amt NUMERIC NOT NULL,
     clm_ltst_clm_ind VARCHAR(1) NOT NULL,
@@ -208,6 +212,7 @@ CREATE TABLE idr.claim (
     clm_blg_prvdr_oscar_num VARCHAR(20) NOT NULL,
     clm_idr_ld_dt DATE NOT NULL,
     clm_nrln_ric_cd VARCHAR(1) NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
@@ -226,7 +231,12 @@ CREATE TABLE idr.claim_date_signature (
     clm_actv_care_thru_dt DATE NOT NULL,
     clm_mdcr_exhstd_dt DATE NOT NULL,
     clm_nch_wkly_proc_dt DATE NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL
+    clm_qlfy_stay_from_dt DATE NOT NULL,
+    clm_qlfy_stay_thru_dt DATE NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_institutional (
@@ -253,6 +263,8 @@ CREATE TABLE idr.claim_institutional (
     clm_mdcr_ip_pps_cptl_ime_amt NUMERIC NOT NULL,
     clm_mdcr_ip_pps_outlier_amt NUMERIC NOT NULL,
     clm_mdcr_ip_pps_cptl_hrmls_amt NUMERIC NOT NULL,
+    clm_mdcr_instnl_bene_pd_amt NUMERIC NOT NULL,
+    clm_mdcr_hospc_prd_cnt INT NOT NULL,
     clm_pps_ind_cd VARCHAR(1) NOT NULL,
     clm_mdcr_ip_pps_cptl_tot_amt NUMERIC NOT NULL,
     clm_instnl_cvrd_day_cnt NUMERIC NOT NULL,
@@ -260,7 +272,10 @@ CREATE TABLE idr.claim_institutional (
     clm_instnl_prfnl_amt NUMERIC NOT NULL,
     clm_mdcr_ip_bene_ddctbl_amt NUMERIC NOT NULL,
     clm_instnl_drg_outlier_amt NUMERIC NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_value (
@@ -268,7 +283,10 @@ CREATE TABLE idr.claim_value (
     clm_val_sqnc_num INT NOT NULL,
     clm_val_cd VARCHAR(2) NOT NULL,
     clm_val_amt NUMERIC NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
 );
 
@@ -281,8 +299,11 @@ CREATE TABLE idr.claim_procedure (
     clm_prod_type_cd VARCHAR(1) NOT NULL,
     clm_poa_ind VARCHAR(1) NOT NULL,
     clm_prcdr_prfrm_dt DATE NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     bfd_row_num INT NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_prod_type_cd, clm_val_sqnc_num)
 );
 
@@ -309,7 +330,10 @@ CREATE TABLE idr.claim_line (
     hcpcs_3_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_4_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_5_mdfr_cd VARCHAR(2) NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
@@ -330,7 +354,10 @@ CREATE TABLE idr.claim_line_institutional (
     clm_line_instnl_msp1_pd_amt NUMERIC NOT NULL,
     clm_line_instnl_msp2_pd_amt NUMERIC NOT NULL,
     clm_line_instnl_rev_ctr_dt DATE NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
@@ -340,7 +367,10 @@ CREATE TABLE idr.claim_ansi_signature (
     clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3) NOT NULL,
     clm_3_rev_cntr_ansi_rsn_cd VARCHAR(3) NOT NULL,
     clm_4_rev_cntr_ansi_rsn_cd VARCHAR(3) NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
