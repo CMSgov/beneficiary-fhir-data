@@ -284,7 +284,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_cvrd_pd_amt NUMERIC,
     clm_line_blood_ddctbl_amt NUMERIC,
     clm_line_mdcr_ddctbl_amt NUMERIC,
-    -- SAMHSA (HCPCS)
+    -- SAMHSA (HCPCS/CPT)
     clm_line_hcpcs_cd VARCHAR(5),
     clm_line_ndc_cd VARCHAR(11),
     clm_line_ndc_qty NUMERIC,
