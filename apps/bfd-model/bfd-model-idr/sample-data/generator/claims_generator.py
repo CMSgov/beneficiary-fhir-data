@@ -506,6 +506,7 @@ def gen_pac_version_of_claim(claim):
     if('CLM_BLOOD_PT_FRNSH_QTY' in pac_claim['CLM']):
         pac_claim['CLM'].pop('CLM_BLOOD_PT_FRNSH_QTY')
     pac_claim['CLM']['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
+    pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
     pac_claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     pac_claim['CLM_FISS'] = {}
     pac_claim['CLM_FISS']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
@@ -537,7 +538,6 @@ def gen_pac_version_of_claim(claim):
         pac_claim['CLM_PROD'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
         pac_claim['CLM_PROD'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
         pac_claim['CLM_PROD'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
-    pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
     if('CLM_MDCR_EXHSTD_DT' in pac_claim['CLM_DT_SGNTR']):
         pac_claim['CLM_DT_SGNTR'].pop('CLM_MDCR_EXHSTD_DT')
     if('CLM_NCVRD_FROM_DT' in pac_claim['CLM_DT_SGNTR']):

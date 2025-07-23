@@ -114,7 +114,6 @@ for i in range(patients_to_generate):
                 ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
             )
         
-        # Handle beneficiary SK
         if pd.notna(row.get("BENE_SK")):
             pt_bene_sk = int(row["BENE_SK"])
             if pt_bene_sk in generator.used_bene_sk:
@@ -126,7 +125,6 @@ for i in range(patients_to_generate):
         patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
         generator.used_bene_sk.append(pt_bene_sk)
         
-        # Handle MBI - use CSV MBI if provided, otherwise generate random number
         if pd.notna(row.get("BENE_MBI_ID")):
             custom_mbi = str(row["BENE_MBI_ID"])
             num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
@@ -185,6 +183,11 @@ for i in range(patients_to_generate):
         generator.set_timestamps(
             prior_patient, datetime.date(year=2017, month=5, day=20)
         )
+        
+        # Override the obsolete timestamp to be in the past year instead of future
+        past_year_date = datetime.date.today() - datetime.timedelta(days=random.randint(30, 365))
+        prior_patient["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
+        
         generator.bene_table.append(prior_patient)
 
     generator.bene_table.append(patient)
