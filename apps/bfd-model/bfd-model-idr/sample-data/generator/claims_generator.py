@@ -580,34 +580,9 @@ def gen_pac_version_of_claim(claim):
     pac_claim['CLM']['CLM_SRC_ID']=21000 #FISS
 
     if('CLM_DCMTN' in pac_claim):
-        #if('CLM_NRLN_RIC_CD' in pac_claim['CLM_DCMTN']):
-            #pac_claim['CLM']['CLM_RIC_CD'] = pac_claim['CLM_DCMTN']['CLM_NRLN_RIC_CD']
         pac_claim.pop('CLM_DCMTN')
 
     return pac_claim
-
-''' 
-def pull_code_systems():
-    code_systems = {}
-    relative_path = "../../sushi/fsh-generated/resources"
-    for file in os.listdir(relative_path):
-        if('.json' not in file or 'CodeSystem' not in file):
-            continue
-        full_path = relative_path+"/"+file
-        try:
-            with open(full_path, 'r') as file:
-                data = json.load(file)
-                concepts = []
-                for i in data['concept']:
-                    #print(i['code'])
-                    concepts.append(i['code'])
-                code_systems[data['name']] = concepts
-        except FileNotFoundError:
-            print(f"Error: File not found at path: {full_path}")
-        except json.JSONDecodeError:
-            print(f"Error: Invalid JSON format in file: {full_path}") 
-    return code_systems
-'''
 
 def main():
     parser = argparse.ArgumentParser(description='Generate Synthetic Data for Ingestion by the BFD v3 pipeline.')
