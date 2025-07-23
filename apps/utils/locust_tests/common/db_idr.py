@@ -43,6 +43,30 @@ def get_regression_bene_sks(uri: str, table_sample_pct=None) -> List[str]:
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
+def get_regression_current_part_a_bene_sks(uri: str, table_sample_pct=None) -> List[str]:
+    """Retrieves a random list of beneficiary IDs
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+    """
+    bene_query = "SELECT b. bene_sk FROM idr.beneficiary  b join idr.beneficiary_third_party tp on b.bene_sk = tp.bene_sk where b. bene_sk = b. bene_xref_efctv_sk and tp.bene_tp_type_cd  = 'A' limit 1000"
+    return [str(r[0]) for r in _execute(uri, bene_query)]
+
+def get_regression_current_part_b_bene_sks(uri: str, table_sample_pct=None) -> List[str]:
+    """Retrieves a random list of beneficiary IDs
+
+    Args:
+        uri (str): Database URI
+
+    Returns:
+        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+    """
+    bene_query = "SELECT b. bene_sk FROM idr.beneficiary  b join idr.beneficiary_third_party tp on b.bene_sk = tp.bene_sk where b. bene_sk = b. bene_xref_efctv_sk and tp.bene_tp_type_cd  = 'B' limit 1000"
+    return [str(r[0]) for r in _execute(uri, bene_query)]
+
 def get_regression_bene_mbis(uri: str, table_sample_pct=None) -> List[str]:
     """Retrieves a random list list of MBIs
 

@@ -8,6 +8,8 @@ from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 
 master_bene_sks: Collection[str] = []
+master_bene_sks_part_a: Collection[str] = []
+master_bene_sks_part_b: Collection[str] = []
 master_bene_mbis: Collection[str] = []
 master_claim_ids: Collection[str] = []
 
@@ -28,6 +30,20 @@ def _(environment: Environment, **kwargs):
         environment.parsed_options,
         db_idr.get_regression_bene_sks,
         data_type_name="bene_ids",
+    )
+
+    global master_bene_sks_part_a
+    master_bene_sks_part_a = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db_idr.get_regression_current_part_a_bene_sks,
+        data_type_name="bene_ids_part_a",
+    )
+
+    global master_bene_sks_part_b
+    master_bene_sks_part_b = data.load_from_parsed_opts(
+        environment.parsed_options,
+        db_idr.get_regression_current_part_b_bene_sks,
+        data_type_name="bene_ids_part_b",
     )
 
     global master_bene_mbis
@@ -60,7 +76,15 @@ class RegressionV3User(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        print(f"DEBUG: Loaded {len(master_bene_sks)} bene_sks.")
+        print(f"DEBUG: Loaded {len(master_bene_sks_part_a)} master_bene_sks_part_a.")
+        print(f"DEBUG: Loaded {len(master_bene_sks_part_b)} master_bene_sks_part_b.")
+        print(f"DEBUG: Loaded {len(master_bene_mbis)} bene_mbis.")
+        print(f"DEBUG: Loaded {len(master_claim_ids)} claim_ids.")
+
         self.bene_sks = itertools.cycle(list(master_bene_sks))
+        self.bene_sks_part_a = itertools.cycle(list(master_bene_sks_part_a))
+        self.bene_sks_part_b = itertools.cycle(list(master_bene_sks_part_b))
         self.bene_mbis = itertools.cycle(list(master_bene_mbis))
         self.claim_ids = itertools.cycle(list(master_claim_ids))
 
@@ -145,18 +169,34 @@ class RegressionV3User(BFDUserBase):
     # Coverage Endpoint Tests
     # ==========================================================
 
-    @tag("coverage45678", "coverage_read_id")
+    @tag("coverage", "coverage_read_id_part_a")
     @task
     def coverage_read_id_part_a(self):
-        """Coverage45678 read by composite ID for Part A"""
-        bene_sk = next(self.bene_sks)
-        coverage_id = f"part-a-{bene_sk}"
+        """Coverage read by composite ID for Part A"""
+        coverage_id = f"part-a-{next(self.bene_sks_part_a)}"
+
+        print(f"DEBUG: Attempting Coverage read with coverage_id: {coverage_id}")
         self.run_task_by_parameters(
             base_path=f"/v3/fhir/Coverage/{coverage_id}",
             params={
                 "_format": "application/fhir+json",
             },
-            name="/v3/fhir/Coverage read45678",
+            name="/v3/fhir/Coverage read part A",
+        )
+
+    @tag("coverage", "coverage_read_id_part_b")
+    @task
+    def coverage_read_id_part_b(self):
+        """Coverage read by composite ID for Part B"""
+        coverage_id = f"part-b-{next(self.bene_sks_part_b)}"
+
+        print(f"DEBUG: Attempting Coverage read with coverage_id: {coverage_id}")
+        self.run_task_by_parameters(
+            base_path=f"/v3/fhir/Coverage/{coverage_id}",
+            params={
+                "_format": "application/fhir+json",
+            },
+            name="/v3/fhir/Coverage read Part B",
         )
 
     @tag("coverage", "coverage_search_id")
@@ -198,21 +238,40 @@ class RegressionV3User(BFDUserBase):
             name="/v3/fhir/Coverage search by beneficiary (POST)",
         )
 
-    # ==========================================================
-    # ExplanationOfBenefit (EOB) Endpoint Tests
-    # ==========================================================
+
+    @tag("coverage", "coverage_search_last_updated")
+    @task
+    def coverage_search_last_updated(self):
+        """Coverage search by beneficiary with _lastUpdated filter."""
+        self.run_task_by_parameters(
+            base_path="/v3/fhir/Coverage",
+            params={
+                "beneficiary": f"Patient/{next(self.bene_sks)}",
+                "_format": "application/fhir+json",
+            } | self.LAST_UPDATED_FILTER,
+            name="/v3/fhir/Coverage search by beneficiary with last updated",
+        )
+
+#     ==========================================================
+#     ExplanationOfBenefit (EOB) Endpoint Tests
+#     ==========================================================
 
     @tag("eob", "eob_read")
     @task
     def eob_read(self):
         """ExplanationOfBenefit read by its unique claim ID."""
-        claim_id = next(self.claim_ids)
 
+        print(f"DEBUG: Attempting EOB read with claim_id: {next(self.claim_ids)}")
+
+        print(f"DEBUG: EOB Read Requesting URL: {self.host}/v3/fhir/ExplanationOfBenefit/{next(self.claim_ids)}")
         self.run_task_by_parameters(
-            base_path=f"/v3/fhir/ExplanationOfBenefit/{claim_id}",
-            params={"_format": "application/fhir+json"},
+            base_path=f"/v3/fhir/ExplanationOfBenefit/{next(self.claim_ids)}",
+            params={
+            "_format": "application/fhir+json"
+            },
             name="/v3/fhir/ExplanationOfBenefit read",
         )
+
 
     @tag("eob", "eob_search_id")
     @task
