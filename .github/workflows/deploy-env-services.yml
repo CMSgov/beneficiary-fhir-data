@@ -46,6 +46,52 @@ on:
           Defaults to the selected branch/tag
         default: ""
         required: false
+  workflow_call:
+    inputs:
+      bfd-env:
+        type: string
+        description: The BFD environment to deploy services to
+        required: true
+      services:
+        type: string
+        description: Comma-separated list of services to deploy
+        default: >-
+          config,
+          cluster,
+          database,
+          locust,
+          migrator,
+          ccw-pipeline,
+          npi-pipeline,
+          rda-pipeline,
+          server,
+          ccw-pipeline-metrics,
+          rda-pipeline-metrics,
+          server-metrics,
+          ccw-pipeline-alarms,
+          rda-pipeline-alarms,
+          server-alarms
+        required: false
+      aws-region:
+        type: string
+        description: >-
+          Override the AWS Region
+        default: us-east-1
+        required: false
+      skip-applies:
+        type: boolean
+        description: >-
+          If true, skips the apply step for each Terraservice such that only the plans are generated
+        default: false
+        required: false
+      git-ref:
+        type: string
+        description: >-
+          The Git reference (branch, tag, commit, etc.) to use for deploy.
+          Defaults to the selected branch/tag
+        default: ""
+        required: false
+
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
