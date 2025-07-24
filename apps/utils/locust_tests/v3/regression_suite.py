@@ -1,5 +1,7 @@
 import itertools
-from typing import Collection
+from collections.abc import Collection
+from typing import Any, ClassVar
+
 from locust import events, tag, task
 from locust.env import Environment
 
@@ -12,24 +14,22 @@ master_bene_mbis: Collection[str] = []
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs):
+def _(environment: Environment) -> None:
     if (
-        is_distributed(environment)
-        and is_locust_master(environment)
-        or not environment.parsed_options
-    ):
+        is_distributed(environment) and is_locust_master(environment)
+    ) or not environment.parsed_options:
         return
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global master_bene_sks
+    global master_bene_sks  # noqa: PLW0603
     master_bene_sks = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_sks,
         data_type_name="bene_ids",
     )
 
-    global master_bene_mbis
+    global master_bene_mbis  # noqa: PLW0603
     master_bene_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_mbis,
@@ -47,17 +47,17 @@ class RegressionV3User(BFDUserBase):
 
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = False
-    BENE_LAST_UPDATED = {"_lastUpdated": "gt2020-05-05"}
+    BENE_LAST_UPDATED: ClassVar = {"_lastUpdated": "gt2020-05-05"}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.bene_sks = itertools.cycle(list(master_bene_sks))
         self.bene_mbis = itertools.cycle(list(master_bene_mbis))
 
     @tag("patient", "patient_read_id")
     @task
-    def patient_read_id(self):
-        """Patient search by ID"""
+    def patient_read_id(self) -> None:
+        """Patient search by ID."""
         self.run_task_by_parameters(
             base_path=f"/v3/fhir/Patient/{next(self.bene_sks)}",
             params={
@@ -68,8 +68,8 @@ class RegressionV3User(BFDUserBase):
 
     @tag("patient", "patient_search_id")
     @task
-    def patient_search_id(self):
-        """Patient search by ID"""
+    def patient_search_id(self) -> None:
+        """Patient search by ID."""
         self.run_task_by_parameters(
             base_path="/v3/fhir/Patient",
             params={
@@ -81,8 +81,8 @@ class RegressionV3User(BFDUserBase):
 
     @tag("patient", "patient_search_id_post")
     @task
-    def patient_search_id_post(self):
-        """Patient search by ID"""
+    def patient_search_id_post(self) -> None:
+        """Patient search by ID."""
         self.run_task_by_parameters(
             base_path="/v3/fhir/Patient/_search",
             body={
@@ -93,8 +93,8 @@ class RegressionV3User(BFDUserBase):
 
     @tag("patient", "patient_search_mbi")
     @task
-    def patient_search_mbi(self):
-        """Patient search by ID"""
+    def patient_search_mbi(self) -> None:
+        """Patient search by ID."""
         self.run_task_by_parameters(
             base_path="/v3/fhir/Patient",
             params={
@@ -106,8 +106,8 @@ class RegressionV3User(BFDUserBase):
 
     @tag("patient", "patient_search_mbi_last_updated")
     @task
-    def patient_search_mbi_last_updated(self):
-        """Patient search by ID"""
+    def patient_search_mbi_last_updated(self) -> None:
+        """Patient search by ID."""
         self.run_task_by_parameters(
             base_path="/v3/fhir/Patient",
             params={
@@ -120,8 +120,8 @@ class RegressionV3User(BFDUserBase):
 
     @tag("patient", "patient_search_mbi_post")
     @task
-    def patient_search_mbi_post(self):
-        """Patient search by ID"""
+    def patient_search_mbi_post(self) -> None:
+        """Patient search by ID."""
         self.run_task_by_parameters(
             base_path="/v3/fhir/Patient/_search",
             body={
