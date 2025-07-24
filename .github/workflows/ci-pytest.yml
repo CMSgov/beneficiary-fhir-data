@@ -26,6 +26,12 @@ jobs:
               testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
               pythonVersion: "3.13",
             },
+            {
+              projectName: "idr-pipeline",
+              projectRoot: "bfd-pipeline/bfd-pipeline-idr",
+              testsRoot: "bfd-pipeline/bfd-pipeline-idr/tests",
+              pythonVersion: "3.13"
+            }
           ]
       fail-fast: false
     steps:
@@ -46,4 +52,5 @@ jobs:
           cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
           uv python install
           uv sync
+          uv run ruff check
           uv run pytest ${{ github.workspace }}/${{ matrix.projects.testsRoot }}
