@@ -372,7 +372,8 @@ jobs:
         bfd-platform-run-locust,
         bfd-platform-eft-sftp-outbound-transfer-lambda,
         bfd-platform-pipeline-ccw-manifests-verifier-lambda,
-        bfd-platform-pipeline-ccw-runner
+        bfd-platform-pipeline-ccw-runner,
+        bfd-platform-codebuild-runner
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
       tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
