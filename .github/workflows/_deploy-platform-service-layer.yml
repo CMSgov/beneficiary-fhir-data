@@ -1,0 +1,75 @@
+# Not intended for use outside of the "Deploy Platform Services" Workflow. This is defined just
+# to make things a little DRYer
+
+name: "Deploy Platform Service Layer"
+
+on:
+  workflow_call:
+    inputs:
+      account-type:
+        type: string
+        required: true
+      matrix-json:
+        type: string
+        required: true
+      layer-level:
+        type: string
+        required: true
+      aws-region:
+        type: string
+        required: true
+      skip-applies:
+        type: boolean
+        required: true
+      git-ref:
+        type: string
+        required: false
+
+env:
+  ACCOUNT_ROLE_MAP: |
+    {
+      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
+      "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+    }
+  DEFAULT_LOG_GROUP: /bfd/platform/github_actions/deploy_platform_services/tofu
+
+jobs:
+  deploy-layer:
+    if: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] != fromJson('[]') }}
+    strategy:
+      matrix:
+        context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
+    runs-on:
+      - codebuild-bfd-${{ inputs.account-type }}-platform-${{ matrix.context.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+        service:${{ matrix.context.service }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.git-ref || github.ref }}
+
+      - name: Get role ARN
+        id: get-role-arn
+        run: |
+          role_arn="$(jq -r --arg account_type "${{ inputs.account-type }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: deploy-${{ matrix.context.layer }}-${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Deploy ${{ matrix.context.service }}
+        uses: ./.github/actions/bfd-deploy-platform-service
+        with:
+          account-type: ${{ inputs.account-type }}
+          service-path: ops/services/${{ matrix.context.layer }}-${{ matrix.context.service }}
+          cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
+          cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
+          skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
+
