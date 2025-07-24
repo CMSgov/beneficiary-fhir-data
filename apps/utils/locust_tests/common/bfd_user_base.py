@@ -27,7 +27,7 @@ Also overriden by the value of --stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener
-def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:
+def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
     custom_args.register_custom_args(parser)
 
 
