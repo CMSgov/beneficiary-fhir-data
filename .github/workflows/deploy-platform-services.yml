@@ -86,12 +86,12 @@ env:
         { "layer": "000", "service": "bootstrap", "runner": "lambda" }
       ],
       "01": [
-        { "layer": "01", "service": "config", "runner": "lambda" },
+        { "layer": "01", "service": "config", "runner": "lambda" }
       ],
       "02": [
         { "layer": "02", "service": "alerting", "runner": "lambda" },
-        { "layer": "02", "service": "backup", "runner": "lambda" }
-        { "layer": "02", "service": "ecr", "runner": "lambda" }
+        { "layer": "02", "service": "backup", "runner": "lambda" },
+        { "layer": "02", "service": "ecr", "runner": "lambda" },
         { "layer": "02", "service": "network", "runner": "lambda" }
       ]
     }
