@@ -25,7 +25,7 @@ jobs:
               projectName: "sftp-outbound-transfer-lambda",
               projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
               uvCommand: "uv sync",
-              pytestCommand: "uv run pytest ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
+              pytestCommand: "uv run pytest ${{ github.workspace }}/ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
               pythonVersion: "3.13",
             },
             {
@@ -39,7 +39,7 @@ jobs:
               projectName: "idr-pipeline",
               projectRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
               uvCommand: "uv sync",
-              pytestCommand: "uv run pytest apps/bfd-pipeline/bfd-pipeline-idr",
+              pytestCommand: "uv run pytest ${{ github.workspace }}/apps/bfd-pipeline/bfd-pipeline-idr",
               pythonVersion: "3.13"
             }
           ]
