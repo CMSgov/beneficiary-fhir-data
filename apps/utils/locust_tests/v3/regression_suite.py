@@ -79,11 +79,11 @@ class RegressionV3User(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        logger.info(f"DEBUG: Loaded {len(master_bene_sks)} bene_sks.")
-        logger.info(f"DEBUG: Loaded {len(master_bene_sks_part_a)} master_bene_sks_part_a.")
-        logger.info(f"DEBUG: Loaded {len(master_bene_sks_part_b)} master_bene_sks_part_b.")
-        logger.info(f"DEBUG: Loaded {len(master_bene_mbis)} bene_mbis.")
-        logger.info(f"DEBUG: Loaded {len(master_claim_ids)} claim_ids.")
+        logger.info(f"Loaded {len(master_bene_sks)} bene_sks.")
+        logger.info(f"Loaded {len(master_bene_sks_part_a)} bene_sks_part_a.")
+        logger.info(f"Loaded {len(master_bene_sks_part_b)} bene_sks_part_b.")
+        logger.info(f"Loaded {len(master_bene_mbis)} bene_mbis.")
+        logger.info(f"Loaded {len(master_claim_ids)} claim_ids.")
 
         self.bene_sks = itertools.cycle(list(master_bene_sks))
         self.bene_sks_part_a = itertools.cycle(list(master_bene_sks_part_a))
