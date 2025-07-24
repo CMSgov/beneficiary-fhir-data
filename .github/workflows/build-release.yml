@@ -77,6 +77,13 @@ on:
           character ('-'), indicating a pre-release.
         default: false
         required: false
+    outputs:
+      bfd_release:
+        description: The BFD release version that corresponds to the Git tag and GitHub release
+        value: ${{ jobs.compute-version-strings.outputs.bfd_release }}
+      bfd_dev_version:
+        description: The BFD snapshot development version that corresponds to the next release version
+        value: ${{ jobs.compute-version-strings.outputs.bfd_dev_version }}
 
 
 permissions:
