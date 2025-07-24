@@ -37,9 +37,6 @@ jobs:
   build-release:
     # if: ${{ github.ref_name == github.event.repository.default_branch }}
     uses: ./.github/workflows/build-release.yml
-    permissions:
-      contents: read
-      id-token: write
     with:
       releaseVersion: ${{ inputs.release-version }}
       developmentVersion: ${{ inputs.development-version }}
@@ -49,9 +46,6 @@ jobs:
   deploy-platform:
     uses: ./.github/workflows/deploy-platform-services.yml
     needs: [build-release]
-    permissions:
-      contents: read
-      id-token: write
     strategy:
       matrix:
         account-type: ["prod", "non-prod"]
@@ -64,9 +58,6 @@ jobs:
   deploy-to-test:
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-platform]
-    permissions:
-      contents: read
-      id-token: write
     with:
       bfd-env: test
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
@@ -76,9 +67,6 @@ jobs:
   deploy-to-sandbox:
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-to-test]
-    permissions:
-      contents: read
-      id-token: write
     with:
       bfd-env: sandbox
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
@@ -88,9 +76,6 @@ jobs:
   deploy-to-prod:
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-to-sandbox]
-    permissions:
-      contents: read
-      id-token: write
     with:
       bfd-env: prod
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
