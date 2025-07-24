@@ -25,18 +25,21 @@ jobs:
               projectName: "sftp-outbound-transfer-lambda",
               projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
               testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
+              uvCommand: "uv sync",
               pythonVersion: "3.13",
             },
             {
               projectName: "locust",
               projectRoot: "apps/utils/locust_tests",
               testsRoot: "apps/utils/locust_tests",
+              uvCommand: "uv sync --group lambda-run-locust",
               pythonVersion: "3.13"
             },
             {
               projectName: "idr-pipeline",
               projectRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
               testsRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
+              uvCommand: "uv sync",
               pythonVersion: "3.13"
             }
           ]
@@ -58,7 +61,7 @@ jobs:
           echo "Testing ${{ matrix.projects.projectName }}"
           cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
           uv python install
-          uv sync
+          ${{ matrix.projects.uvCommand }}
           # check linting
           uv run ruff check
           # check formatting
