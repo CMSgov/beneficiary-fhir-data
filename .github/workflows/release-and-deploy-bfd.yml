@@ -1,0 +1,94 @@
+---
+name: "Release and Deploy BFD"
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: >-
+          Override the release version. Default to promoting the current
+          X.Y.Z-SNAPSHOT to X.Y.Z when empty.
+        required: false
+        default: ""
+      development-version:
+        description: >-
+          Override the next development iteration version.
+          Default to X.(Y+1).0-SNAPSHOT of the release version X.Y.Z when empty.
+        required: false
+        default: ""
+      aws-region:
+        description: >-
+          Override the AWS Region
+        default: us-east-1
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-release:
+    if: ${{ github.ref_name == github.event.repository.default_branch }}
+    uses: ./.github/workflows/build-release.yml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      releaseVersion: ${{ inputs.release-version }}
+      developmentVersion: ${{ inputs.development-version }}
+      awsRegion: ${{ inputs.aws-region }}
+    secrets: inherit
+
+  deploy-platform:
+    uses: ./.github/workflows/deploy-platform-services.yml
+    needs: [build-release]
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      matrix:
+        account-type: ["prod", "non-prod"]
+    with:
+      account-type: ${{ matrix.account-type }}
+      git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+    secrets: inherit
+
+  deploy-to-test:
+    uses: ./.github/workflows/deploy-env-services.yml
+    needs: [build-release, deploy-platform]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      bfd-env: test
+      git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+    secrets: inherit
+
+  deploy-to-sandbox:
+    uses: ./.github/workflows/deploy-env-services.yml
+    needs: [build-release, deploy-to-test]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      bfd-env: sandbox
+      git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+    secrets: inherit
+
+  deploy-to-prod:
+    uses: ./.github/workflows/deploy-env-services.yml
+    needs: [build-release, deploy-to-sandbox]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      bfd-env: prod
+      git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+    secrets: inherit
