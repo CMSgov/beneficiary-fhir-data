@@ -53,8 +53,10 @@ jobs:
           cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
           uv python install
           uv sync
-          # check formatting/linting
+          # check linting
           uv run ruff check
+          # check formatting
+          uv run ruff format --check
           # check types
           uv run pyright .
           # tests
