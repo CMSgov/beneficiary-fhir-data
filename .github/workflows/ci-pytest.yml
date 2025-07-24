@@ -6,6 +6,7 @@ on:
       - "**/*.py"
       - "**/*requirement*.txt"
       - "**/uv.lock"
+      - ".github/workflows/ci-pytest.yml"
 
   merge_group:
 
