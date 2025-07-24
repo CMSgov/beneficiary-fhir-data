@@ -24,7 +24,6 @@ dev = [
   "types-gevent>=25.4.0.20250516",
   "uv>=0.7.8",
   "pyright>=1.1.403",
-  "pytest>=8.3.5",
 ]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
