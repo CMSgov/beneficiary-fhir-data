@@ -35,7 +35,7 @@ defaults:
 
 jobs:
   build-release:
-    if: ${{ github.ref_name == github.event.repository.default_branch }}
+    # if: ${{ github.ref_name == github.event.repository.default_branch }}
     uses: ./.github/workflows/build-release.yml
     permissions:
       contents: read
@@ -58,6 +58,7 @@ jobs:
     with:
       account-type: ${{ matrix.account-type }}
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+      skip-applies: true
     secrets: inherit
 
   deploy-to-test:
@@ -69,6 +70,7 @@ jobs:
     with:
       bfd-env: test
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+      skip-applies: true
     secrets: inherit
 
   deploy-to-sandbox:
@@ -80,6 +82,7 @@ jobs:
     with:
       bfd-env: sandbox
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+      skip-applies: true
     secrets: inherit
 
   deploy-to-prod:
@@ -91,4 +94,5 @@ jobs:
     with:
       bfd-env: prod
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
+      skip-applies: true
     secrets: inherit
