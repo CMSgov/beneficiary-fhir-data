@@ -3,6 +3,8 @@ from typing import Collection
 from locust import events, tag, task
 from locust.env import Environment
 
+import logging
+
 from common import data, db_idr
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
@@ -60,6 +62,7 @@ def _(environment: Environment, **kwargs):
         data_type_name="claim_ids",
     )
 
+logger = logging.getLogger(__name__)
 
 class RegressionV3User(BFDUserBase):
     """Regression test suite for V3 BFD Server endpoints.
@@ -76,11 +79,11 @@ class RegressionV3User(BFDUserBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(f"DEBUG: Loaded {len(master_bene_sks)} bene_sks.")
-        print(f"DEBUG: Loaded {len(master_bene_sks_part_a)} master_bene_sks_part_a.")
-        print(f"DEBUG: Loaded {len(master_bene_sks_part_b)} master_bene_sks_part_b.")
-        print(f"DEBUG: Loaded {len(master_bene_mbis)} bene_mbis.")
-        print(f"DEBUG: Loaded {len(master_claim_ids)} claim_ids.")
+        logger.info(f"DEBUG: Loaded {len(master_bene_sks)} bene_sks.")
+        logger.info(f"DEBUG: Loaded {len(master_bene_sks_part_a)} master_bene_sks_part_a.")
+        logger.info(f"DEBUG: Loaded {len(master_bene_sks_part_b)} master_bene_sks_part_b.")
+        logger.info(f"DEBUG: Loaded {len(master_bene_mbis)} bene_mbis.")
+        logger.info(f"DEBUG: Loaded {len(master_claim_ids)} claim_ids.")
 
         self.bene_sks = itertools.cycle(list(master_bene_sks))
         self.bene_sks_part_a = itertools.cycle(list(master_bene_sks_part_a))
@@ -152,7 +155,7 @@ class RegressionV3User(BFDUserBase):
             name="/v3/fhir/Patient search by mbi with last updated",
         )
 
-    @tag("patient123", "patient_search_mbi_post")
+    @tag("patient", "patient_search_mbi_post")
     @task
     def patient_search_mbi_post(self):
         """Patient search by ID"""
@@ -175,7 +178,6 @@ class RegressionV3User(BFDUserBase):
         """Coverage read by composite ID for Part A"""
         coverage_id = f"part-a-{next(self.bene_sks_part_a)}"
 
-        print(f"DEBUG: Attempting Coverage read with coverage_id: {coverage_id}")
         self.run_task_by_parameters(
             base_path=f"/v3/fhir/Coverage/{coverage_id}",
             params={
@@ -190,7 +192,6 @@ class RegressionV3User(BFDUserBase):
         """Coverage read by composite ID for Part B"""
         coverage_id = f"part-b-{next(self.bene_sks_part_b)}"
 
-        print(f"DEBUG: Attempting Coverage read with coverage_id: {coverage_id}")
         self.run_task_by_parameters(
             base_path=f"/v3/fhir/Coverage/{coverage_id}",
             params={
@@ -261,9 +262,6 @@ class RegressionV3User(BFDUserBase):
     def eob_read(self):
         """ExplanationOfBenefit read by its unique claim ID."""
 
-        print(f"DEBUG: Attempting EOB read with claim_id: {next(self.claim_ids)}")
-
-        print(f"DEBUG: EOB Read Requesting URL: {self.host}/v3/fhir/ExplanationOfBenefit/{next(self.claim_ids)}")
         self.run_task_by_parameters(
             base_path=f"/v3/fhir/ExplanationOfBenefit/{next(self.claim_ids)}",
             params={
