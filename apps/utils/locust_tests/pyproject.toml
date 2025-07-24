@@ -19,14 +19,18 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "ruff>=0.11.10",
-  "types-boto3[essential]>=1.38.19",
+  "ruff>=0.11.11",
+  "types-boto3[essential,ssm]>=1.38.19",
   "types-gevent>=25.4.0.20250516",
-  "uv>=0.7.5",
+  "uv>=0.7.8",
 ]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
+
+[tool.ruff]
+# Set the maximum line length to 100.
+line-length = 100
 
 [tool.ruff.lint]
 select = [
@@ -60,6 +64,8 @@ select = [
   "FURB",
   "RUF",
 ]
+# Don't require docstrings
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
@@ -68,10 +74,6 @@ convention = "pep257"
 quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
-
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
 
 [tool.locust]
 # Specify locust test parameters here or on the command line
@@ -101,6 +103,8 @@ line-length = 100
 profile = "isort"
 
 [tool.pyright]
+venvPath = "."
+venv = ".venv"
 typeCheckingMode = "strict"
 # Compromising between practicality and strictness here by enabling strict type checking and
 # selectively disabling rules that are, realistically, not possible to fully resolve in a project

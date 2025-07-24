@@ -28,6 +28,12 @@ jobs:
               pythonVersion: "3.13",
             },
             {
+              projectName: "locust",
+              projectRoot: "apps/utils/locust_tests",
+              testsRoot: "apps/utils/locust_tests",
+              pythonVersion: "3.13"
+            },
+            {
               projectName: "idr-pipeline",
               projectRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
               testsRoot: "apps/bfd-pipeline/bfd-pipeline-idr",

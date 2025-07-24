@@ -1,12 +1,11 @@
-"""Set up Locust tests from the configuration.
-"""
+"""Set up Locust tests from the configuration."""
 
 from locust.env import Environment
 from locust.runners import DistributedRunner, MasterRunner, WorkerRunner
 
 
 def is_locust_worker(env: Environment) -> bool:
-    """Returns whether or not the current Locust Runner (or thread) is a worker.
+    """Return whether or not the current Locust Runner (or thread) is a worker.
     A worker runs Tasks provided by the "master" Locust Runner/thread.
 
     Args:
@@ -19,7 +18,7 @@ def is_locust_worker(env: Environment) -> bool:
 
 
 def is_locust_master(env: Environment) -> bool:
-    """Returns whether or not the current Locust Runner (or thread) is the "master".
+    """Return whether or not the current Locust Runner (or thread) is the "master".
     The "master" does not run any Tasks, however it does orchestrate test running for workers.
 
     Args:
@@ -32,7 +31,7 @@ def is_locust_master(env: Environment) -> bool:
 
 
 def is_distributed(env: Environment) -> bool:
-    """Returns whether or not Locust is running in distributed mode.
+    """Return whether or not Locust is running in distributed mode.
 
     Args:
         env (Environment): Locust environment
