@@ -12,7 +12,6 @@ on:
           config,
           cluster,
           database,
-          eft,
           locust,
           migrator,
           ccw-pipeline,
