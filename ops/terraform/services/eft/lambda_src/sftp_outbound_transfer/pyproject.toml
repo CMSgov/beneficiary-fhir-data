@@ -12,6 +12,7 @@ dependencies = [
 [dependency-groups]
 dev = [
   "pytest",
+  "ruff",
   "boto3-stubs[sns,ssm]"
 ]
 
