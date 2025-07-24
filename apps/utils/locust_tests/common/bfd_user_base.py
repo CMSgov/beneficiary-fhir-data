@@ -27,12 +27,12 @@ Also overriden by the value of --stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener
-def _(parser: LocustArgumentParser) -> None:
+def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:
     custom_args.register_custom_args(parser)
 
 
 @events.init.add_listener
-def _(environment: Environment) -> None:
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
@@ -44,7 +44,7 @@ def _(environment: Environment) -> None:
 
 
 @events.quitting.add_listener
-def _(environment: Environment) -> None:
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
     """Run one-time teardown tasks after the tests have completed.
 
     Args:
