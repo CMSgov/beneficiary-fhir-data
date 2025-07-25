@@ -52,5 +52,11 @@
     "dockerfile": "ops/services/04-ccw-pipeline/lambda-src/ccw-runner/Dockerfile",
     "contextDir": "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
     "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-platform-codebuild-runner",
+    "dockerfile": "ops/images/bfd-platform-codebuild-runner/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-codebuild-runner",
+    "platform": "linux/arm64"
   }
 ]

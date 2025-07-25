@@ -27,7 +27,9 @@ data "aws_iam_policy_document" "github_actions_iam" {
       "iam:UntagPolicy*",
       "iam:AssumeRolePolicy*",
       "iam:UpdateRole*",
-      "iam:PassRole"
+      "iam:PassRole",
+      "iam:ListAccountAliases",
+      "iam:*OpenID*"
     ]
     resources = ["*"]
   }
