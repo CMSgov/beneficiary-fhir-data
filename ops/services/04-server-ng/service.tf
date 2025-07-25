@@ -82,7 +82,12 @@ resource "aws_ecs_task_definition" "server" {
 
   volume {
     configure_at_launch = false
-    name                = "certstores"
+    name                = "tmp_log_router"
+  }
+
+  volume {
+    configure_at_launch = false
+    name                = "tmp_${local.service}"
   }
 
   container_definitions = jsonencode(
@@ -127,8 +132,15 @@ resource "aws_ecs_task_definition" "server" {
             mode                  = "non-blocking"
           }
         }
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_log_router"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
-        mountPoints    = []
         portMappings   = []
         systemControls = []
         volumesFrom    = []
@@ -185,9 +197,16 @@ resource "aws_ecs_task_definition" "server" {
           },
         ]
         stopTimeout = 120 # Allow enough time for server to gracefully stop on spot termination.
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_${local.service}"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
         dependsOn      = []
-        mountPoints    = []
         systemControls = []
         volumesFrom    = []
       },

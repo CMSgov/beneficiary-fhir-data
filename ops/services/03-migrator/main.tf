@@ -78,6 +78,11 @@ resource "aws_ecs_task_definition" "this" {
     operating_system_family = "LINUX"
   }
 
+  volume {
+    configure_at_launch = false
+    name                = "tmp"
+  }
+
   container_definitions = jsonencode(
     [
       {
@@ -126,8 +131,15 @@ resource "aws_ecs_task_definition" "this" {
             mode                  = "non-blocking"
           }
         }
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
-        mountPoints    = []
         portMappings   = []
         systemControls = []
         volumesFrom    = []
