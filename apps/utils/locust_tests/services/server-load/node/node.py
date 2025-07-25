@@ -1,7 +1,7 @@
 """A lambda function that coordinates running a Locust worker node in a swarm of many Locust
-workers all communicating with a single Locust master, the "controller"."""
+workers all communicating with a single Locust master, the "controller".
+"""
 
-import datetime
 import functools
 import os
 import subprocess
@@ -9,8 +9,11 @@ import sys
 import urllib.parse
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 import boto3
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 
 sys.path.append("..")  # Allows for module imports from sibling directories
@@ -39,9 +42,9 @@ region = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 sqs_queue_name = os.environ.get("SQS_QUEUE_NAME", "bfd-test-server-load")
 asg_name = os.environ.get("ASG_NAME", "")
 # Default dangerous variables to values that will not cause any issues
-coasting_time = int(os.environ.get("COASTING_TIME", 0))
-warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
-stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
+coasting_time = int(os.environ.get("COASTING_TIME", "0"))
+warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", "0"))
+stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", "true"))
 
 boto_config = Config(region_name=region)
 ssm_client = boto3.client("ssm", config=boto_config)
@@ -52,24 +55,19 @@ queue = sqs.get_queue_by_name(QueueName=sqs_queue_name)
 
 @dataclass
 class InvokeEvent:
-    """
-    Values contained in the event object passed to the handler function on invocation.
-    """
+    """Values contained in the event object passed to the handler function on invocation."""
 
     host: str
     controller_ip: str
     locust_port: int
 
 
-def handler(event, context):
-    """
-    Handles execution of a worker node.
-    """
-
+def handler(event: dict[str, Any], _context: LambdaContext) -> None:
+    """Handle execution of a worker node."""
     try:
         invoke_event = InvokeEvent(**event)
     except TypeError as ex:
-        print(f"Message body missing required keys: {str(ex)}")
+        print(f"Message body missing required keys: {ex!s}")
         return
 
     try:
@@ -104,7 +102,7 @@ def handler(event, context):
         return
 
     cert_path = "/tmp/bfd_test_cert.pem"
-    with open(cert_path, "w", encoding="utf-8") as file:
+    with Path(cert_path).open("w", encoding="utf-8") as file:
         file.write(cert_key + cert)
 
     password = urllib.parse.quote(raw_password)
@@ -125,7 +123,7 @@ def handler(event, context):
     process = subprocess.Popen(
         [
             "locust",
-            f"--locustfile={os.path.join(locust_tests_dir, 'high_volume_suite.py')}",
+            f"--locustfile={Path(locust_tests_dir) / 'high_volume_suite.py'}",
             f"--host={invoke_event.host}",
             f"--database-connection-string={db_dsn}",
             f"--client-cert-path={cert_path}",
@@ -133,7 +131,7 @@ def handler(event, context):
             f"--master-host={invoke_event.controller_ip}",
             f"--master-port={invoke_event.locust_port}",
             "--headless",
-            "--only-summary"
+            "--only-summary",
         ],
         cwd=locust_tests_dir,
         stderr=subprocess.STDOUT,

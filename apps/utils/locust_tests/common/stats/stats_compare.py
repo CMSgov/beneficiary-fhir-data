@@ -1,15 +1,16 @@
 """Members of this file/module are related to the comparison and subsequent validation
 of performance statistics against a previous set of statistics or an average of all
-previous statistics"""
+previous statistics.
+"""
+
 import functools
 import itertools
 import json
 import logging
 from dataclasses import asdict, dataclass
 from enum import StrEnum
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-from locust.env import Environment
+from pathlib import Path
+from typing import Any
 
 from common.stats.aggregated_stats import AggregatedStats, FinalCompareResult, TaskStats
 from common.stats.stats_config import StatsComparisonType, StatsConfiguration
@@ -17,14 +18,14 @@ from common.stats.stats_loaders import StatsLoader
 
 
 class StatBetterIf(StrEnum):
-    """Enum representing whether a given stat is better if its value is smaller or larger"""
+    """Enum representing whether a given stat is better if its value is smaller or larger."""
 
     SMALLER = "SMALLER"
     LARGER = "LARGER"
 
 
 class StatCompareResult(StrEnum):
-    """Enum representing the result of a particular stat comparison"""
+    """Enum representing the result of a particular stat comparison."""
 
     PASS = "PASS"
     WARNING = "WARNING"
@@ -34,7 +35,8 @@ class StatCompareResult(StrEnum):
 @dataclass
 class StatsComparisonMetadata:
     """Dataclass representing how a given stat should be compared against a baseline value of the
-    same stat"""
+    same stat.
+    """
 
     name: str
     """Name of the stat"""
@@ -54,18 +56,20 @@ class StatsComparisonMetadata:
 @dataclass
 class AllComparisonMetadata:
     """Dataclass representing comparison metadata defining how stats are compared for both
-    aggregated totals stats and individual tasks' stats"""
+    aggregated totals stats and individual tasks' stats.
+    """
 
-    totals: List[StatsComparisonMetadata]
+    totals: list[StatsComparisonMetadata]
     """List of metadata about each stat for aggregated totals"""
-    tasks: List[StatsComparisonMetadata]
+    tasks: list[StatsComparisonMetadata]
     """List of metadata about each stat for each invidividual task"""
 
 
 @dataclass
 class StatComparison:
     """Dataclass representing the result of a comparison between the baseline/previous value of a
-    TaskStats stat and the current value of said stat"""
+    TaskStats stat and the current value of said stat.
+    """
 
     stat: str
     """The name of the stat"""
@@ -74,11 +78,11 @@ class StatComparison:
 	times worse than the previous run or average of all runs. A value of 100 means no change (i.e.
 	current stat is 100% of a previous snapshot of the same stat), whereas values lower than 100
 	generally indicate positive change and values greater than 100 indicate negative change"""
-    baseline: Union[float, int]
+    baseline: float | int
     """The value of the stat that the stat's current value is being compared against"""
-    current: Union[float, int]
+    current: float | int
     """The value of the stat from the current test run"""
-    threshold: Optional[float]
+    threshold: float | None
     """The percentage threshold that the comparison exceeded. Either will be the warning percentage
     threshold or the failure percentage threshold"""
     result: StatCompareResult
@@ -90,8 +94,8 @@ def do_stats_comparison(
     stats_metadata_path: str,
     stats: AggregatedStats,
 ) -> FinalCompareResult:
-    """Compares the current run's stats (totals and all tasks) against a user-configured baseline,
-    logging the result
+    """Compare the current run's stats (totals and all tasks) against a user-configured baseline,
+    logging the result.
 
     Args:
         environment (Environment): The Locust environment
@@ -116,7 +120,7 @@ def do_stats_comparison(
         logger.error(
             "%s stats were unable to be loaded from %s due to: %s",
             str(stats_config.stats_compare.value),
-            str(stats_config.stats_store.value),
+            str(stats_config.stats_store.value if stats_config.stats_store else ""),
             str(ex),
         )
         return FinalCompareResult.FAILED
@@ -135,7 +139,7 @@ def do_stats_comparison(
         if stats_config.stats_compare == StatsComparisonType.PREVIOUS
         else f"average (last {stats_config.stats_compare_load_limit})",
         stats_config.stats_compare_tag,
-        stats_config.stats_store.value,
+        stats_config.stats_store.value if stats_config.stats_store else None,
     )
     all_comparisons_meta = _load_stats_comparison_metadata(stats_metadata_path)
     totals_exceeded_results, tasks_exceeded_results = validate_aggregated_stats(
@@ -146,7 +150,7 @@ def do_stats_comparison(
     # to appear in the logged JSON. The default JSON dumper does not have any built-in logic
     # for simply ignoring nulls, so we must remove them from the dictionary when converting
     # a StatComparison to a dict
-    def ignore_nulls_factory(data_class):
+    def ignore_nulls_factory(data_class: list[tuple[str, Any]]) -> dict[str, Any]:
         return {k: v for (k, v) in data_class if v is not None}
 
     logger.info(
@@ -212,10 +216,10 @@ def do_stats_comparison(
 def get_stats_compare_results(
     previous: TaskStats,
     current: TaskStats,
-    stats_compare_metadata: List[StatsComparisonMetadata],
-) -> List[StatComparison]:
+    stats_compare_metadata: list[StatsComparisonMetadata],
+) -> list[StatComparison]:
     """Get the comparison results between two TaskStats instances by comparing each of their stat
-    fields
+    fields.
 
     Args:
         previous (TaskStats): The TaskStats to compare against
@@ -233,10 +237,10 @@ def get_stats_compare_results(
 
 def validate_aggregated_stats(
     previous: AggregatedStats, current: AggregatedStats, all_comparisons_meta: AllComparisonMetadata
-) -> Tuple[List[StatComparison], Dict[str, List[StatComparison]]]:
-    """Validates and compares the given AggregatedStats instances against each other, checking each
+) -> tuple[list[StatComparison], dict[str, list[StatComparison]]]:
+    """Validate and compare the given AggregatedStats instances against each other, checking each
     of their common TaskStats and returning a dictionary of the name of those tasks that exceed the
-    given threshold to the actual stats that failed
+    given threshold to the actual stats that failed.
 
     Args:
             previous (AggregatedStats): A previous run or average of all previous runs that will
@@ -273,7 +277,7 @@ def validate_aggregated_stats(
 
 
 def _load_stats_comparison_metadata(path: str) -> AllComparisonMetadata:
-    with open(path, encoding="utf-8") as json_file:
+    with Path(path).open(encoding="utf-8") as json_file:
         as_json = json.load(json_file)
         return AllComparisonMetadata(
             totals=[StatsComparisonMetadata(**meta_dict) for meta_dict in as_json["totals"]],
@@ -283,8 +287,8 @@ def _load_stats_comparison_metadata(path: str) -> AllComparisonMetadata:
 
 def _compare_stat(
     name: str,
-    prev_value: Union[int, float],
-    cur_value: Union[int, float],
+    prev_value: int | float,
+    cur_value: int | float,
     metadata: StatsComparisonMetadata,
 ) -> StatComparison:
     dividend = prev_value if metadata.better_if == StatBetterIf.LARGER else cur_value
@@ -311,10 +315,10 @@ def _compare_stat(
 
 
 def _compute_results_list(
-    prev_stats: Dict[str, Any],
-    cur_stats: Dict[str, Any],
-    comparisons_metadata: List[StatsComparisonMetadata],
-) -> List[StatComparison]:
+    prev_stats: dict[str, Any],
+    cur_stats: dict[str, Any],
+    comparisons_metadata: list[StatsComparisonMetadata],
+) -> list[StatComparison]:
     # Uses list comprehension to compute the relative percent "worseness" of a given stat in the
     # dict when comparing a previous run of the given stats versus the current run.
     comparison_meta_by_name = {
@@ -326,7 +330,7 @@ def _compute_results_list(
     ]
 
 
-def _safe_division(dividend: Union[float, int], divisor: Union[float, int]) -> float:
+def _safe_division(dividend: float | int, divisor: float | int) -> float:
     # Often some fields will be 0 (such as the failure stats), and dividing by 0 results
     # in an error. So, we can check first if the divisor is 0 before dividing to ensure we don't
     # raise an error unexpectedly when comparing stats

@@ -1,13 +1,13 @@
 """Create a URL path from a base path and query parameters."""
-from typing import List, Mapping, Optional, Union
+
+from collections.abc import Mapping
 from urllib.parse import urlencode
 
 
-def create_url_path(
-    path: str, query_params: Optional[Mapping[str, Union[str, int, List]]] = None
-) -> str:
-    """Creates a query path from a base path (i.e. /v2/fhir/Coverage) and a dictionary of query
-    parameters."""
+def create_url_path(path: str, query_params: Mapping[str, str | int | list] | None = None) -> str:
+    """Create a query path from a base path (i.e. /v2/fhir/Coverage) and a dictionary of query
+    parameters.
+    """
     if not query_params:
         return path
 

@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 """Utility module for executing database queries."""
 
 import logging
-from typing import Dict, List, Optional
-
+import os
 
 import psycopg
-import os
 
 LIMIT = 100000
 """Global limit on the number of records to return"""
@@ -20,22 +17,20 @@ consistent data"""
 logger = logging.getLogger()
 
 
-def _execute(uri: str, query: str) -> List:
-    """
-    Execute a PSQL select statement and return its results
-    """
+def _execute(uri: str, query: str) -> list:
+    """Execute a PSQL select statement and return its results."""
     if uri == "":
-        uri = f"user={os.environ["PGUSER"]} password={os.environ["PGPASSWORD"]} host={os.environ["PGHOST"]} dbname={os.environ["PGDATABASE"]}"
+        uri = f"user={os.environ['PGUSER']} password={os.environ['PGPASSWORD']} \
+            host={os.environ['PGHOST']} dbname={os.environ['PGDATABASE']}"
     conn = None
     results = []
     try:
-        with psycopg.connect(uri) as conn:
-            with conn.cursor() as cursor:
-                # The execute method here uses additional type validation to prevent SQL injections,
-                # but this unfortunately doesn't support templated strings like we're using here,
-                # so we have to bypass the type check
-                cursor.execute(query)  # type: ignore
-                results = cursor.fetchall()
+        with psycopg.connect(uri) as conn, conn.cursor() as cursor:
+            # The execute method here uses additional type validation to prevent SQL injections,
+            # but this unfortunately doesn't support templated strings like we're using here,
+            # so we have to bypass the type check
+            cursor.execute(query)  # type: ignore
+            results = cursor.fetchall()
     except Exception as ex:
         logger.error("Error creating database connection: %s", ex)
     finally:
@@ -59,60 +54,61 @@ def _get_regression_query(select_query: str) -> str:
     )
 
 
-def get_regression_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
-    """Retrieves a list of beneficiary IDs within the range of 20,000 contiguous synthetic
-    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+def get_regression_bene_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+    """Retrieve a list of beneficiary IDs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
     Args:
         uri (str): Database URI
 
     Returns:
-        List[str]: A list of synthetic beneficiary IDs used for the regression suites
+        list[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
     bene_query = _get_regression_query('SELECT "bene_id" FROM ccw.beneficiaries')
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_regression_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
-    """Retrieves a list of hashed MBIs within the range of 20,000 contiguous synthetic
-    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+def get_regression_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+    """Retrieve a list of hashed MBIs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
     Args:
         uri (str): Database URI
 
     Returns:
-        List[str]: A list of synthetic hashed MBIs used for the regression suites
+        list[str]: A list of synthetic hashed MBIs used for the regression suites
     """
     mbi_query = _get_regression_query('SELECT "mbi_hash" FROM ccw.beneficiaries')
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_regression_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
-    """Retrieves a list of MBIs within the range of 20,000 contiguous synthetic
-    beneficiaries that exist in each environment. Returned list is sorted in ascending order
+def get_regression_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+    """Retrieve a list of MBIs within the range of 20,000 contiguous synthetic
+    beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
     Args:
         uri (str): Database URI
 
     Returns:
-        List[str]: A list of synthetic MBIs used for the regression suites
+        list[str]: A list of synthetic MBIs used for the regression suites
     """
     mbi_query = _get_regression_query('SELECT "mbi_num" FROM ccw.beneficiaries')
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
 def get_regression_contract_ids(
-    uri: str, table_sample_pct: Optional[float] = None
-) -> List[Dict[str, str]]:
-    """Retrieves a list of contract IDs within the range of 20,000 contiguous synthetic
+    uri: str,
+    table_sample_pct: float | None = None,  # noqa: ARG001
+) -> list[dict[str, str]]:
+    """Retrieve a list of contract IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order, and
-    any empty values are excluded
+    any empty values are excluded.
 
     Args:
         uri (str): Database URI
 
     Returns:
-        List[Dict[str, str]]: A list of dicts with 3 keys, "id", "month", and "year", corresponding
+        list[Dict[str, str]]: A list of dicts with 3 keys, "id", "month", and "year", corresponding
         to the contract ID, the contract month, and contract year, respectively
     """
     contract_id_query = _get_regression_query(
@@ -130,8 +126,8 @@ def get_regression_contract_ids(
     ]
 
 
-def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
-    """Returns a list of MBI hashes within the set of static, synthetic PAC data
+def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+    """Return a list of MBI hashes within the set of static, synthetic PAC data.
 
     Args:
         uri (str): The database connection string
@@ -145,8 +141,8 @@ def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: Optional[float] =
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
-def get_regression_pac_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List[str]:
-    """Returns a list of MBI within the set of static, synthetic PAC data
+def get_regression_pac_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+    """Return a list of MBI within the set of static, synthetic PAC data.
 
     Args:
         uri (str): The database connection string
@@ -160,11 +156,8 @@ def get_regression_pac_mbis(uri: str, table_sample_pct: Optional[float] = None) 
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
-def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
-    """
-    Return a list of bene IDs from the adjudicated beneficiary table
-    """
-
+def get_bene_ids(uri: str, table_sample_pct: float | None = None) -> list:
+    """Return a list of bene IDs from the adjudicated beneficiary table."""
     if table_sample_pct is None:
         table_sample_text = ""
     else:
@@ -175,11 +168,8 @@ def get_bene_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
-    """
-    Return a list of unique hashed MBIs from the adjudicated beneficiary table
-    """
-
+def get_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list:
+    """Return a list of unique hashed MBIs from the adjudicated beneficiary table."""
     if table_sample_pct is None:
         table_sample_text = ""
     else:
@@ -200,11 +190,8 @@ def get_hashed_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
-    """
-    Return a list of unique MBIs from the adjudicated beneficiary table
-    """
-
+def get_mbis(uri: str, table_sample_pct: float | None = None) -> list:
+    """Return a list of unique MBIs from the adjudicated beneficiary table."""
     if table_sample_pct is None:
         table_sample_text = ""
     else:
@@ -225,12 +212,11 @@ def get_mbis(uri: str, table_sample_pct: Optional[float] = None) -> List:
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List:
+def get_contract_ids(uri: str, table_sample_pct: float | None = None) -> list:
     """
     Return a list of contract id / reference year pairs from the beneficiary
-    table
+    table.
     """
-
     if table_sample_pct is None:
         table_sample_text = ""
     else:
@@ -255,15 +241,17 @@ def get_contract_ids(uri: str, table_sample_pct: Optional[float] = None) -> List
     return [contract for contract in unfiltered_contracts if contract["id"]]
 
 
-def get_pac_mbis(uri: str) -> List:
+def get_pac_mbis(uri: str) -> list:
     """
     Return a list of unique MBIs that represent a diverse set of FISS and MCS
     claims over a range of claim statuses.
 
-    We anticipate that fields will have a mixture of blank vs non-blank values based on the status codes received.
+    We anticipate that fields will have a mixture of blank vs non-blank values based on the status
+    codes received.
 
-    By selecting MBIs that are related to claims with varying status codes, we can get a good mixture of claim data
-    elements, better testing our FHIR transformers' ability to correctly render them.
+    By selecting MBIs that are related to claims with varying status codes, we can get a good
+    mixture of claim data elements, better testing our FHIR transformers' ability to
+    correctly render them.
     """
     per_status_max = int(LIMIT / 40)  # Based on ~40 distinct status values between FISS/MCS
 
@@ -363,7 +351,7 @@ def get_pac_mbis(uri: str) -> List:
 
 
 def get_pac_mbis_smoketest(uri: str) -> list[str]:
-    """Gets the top LIMIT MBI from the rda table's MBI cache for use with the PACA smoketests
+    """Get the top LIMIT MBI from the rda table's MBI cache for use with the PACA smoketests.
 
     Args:
         uri (str): The database connection string

@@ -3,6 +3,7 @@ This module acts as the single controller in the server-load service architectur
 is responsible for managing the Locust master process and orchestrating the many Locust workers
 (Lambdas).
 """
+
 import functools
 import json
 import os
@@ -11,6 +12,12 @@ import sys
 import time
 import urllib.parse
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from types_boto3_lambda.type_defs import InvocationResponseTypeDef
+else:
+    InvocationResponseTypeDef = object
 
 import boto3
 from botocore.config import Config
@@ -43,18 +50,18 @@ region = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 locust_tags = os.environ.get("LOCUST_TAGS", "")
 locust_exclude_tags = os.environ.get("LOCUST_EXCLUDE_TAGS", "")
 # Default dangerous variables to values that will not cause any issues
-initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", 0))
-node_spawn_time = int(os.environ.get("NODE_SPAWN_TIME", 10))
-max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", 0))
-max_users = int(os.environ.get("MAX_SPAWNED_USERS", 0))
-user_spawn_rate = int(os.environ.get("USER_SPAWN_RATE", 1))
-runtime_limit = int(os.environ.get("TEST_RUNTIME_LIMIT", 0))
-coasting_time = int(os.environ.get("COASTING_TIME", 0))
-warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", 0))
-stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", True))
-stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", True))
+initial_worker_nodes = int(os.environ.get("INITIAL_WORKER_NODES", "0"))
+node_spawn_time = int(os.environ.get("NODE_SPAWN_TIME", "10"))
+max_spawned_nodes = int(os.environ.get("MAX_SPAWNED_NODES", "0"))
+max_users = int(os.environ.get("MAX_SPAWNED_USERS", "0"))
+user_spawn_rate = int(os.environ.get("USER_SPAWN_RATE", "1"))
+runtime_limit = int(os.environ.get("TEST_RUNTIME_LIMIT", "0"))
+coasting_time = int(os.environ.get("COASTING_TIME", "0"))
+warm_instance_target = int(os.environ.get("WARM_INSTANCE_TARGET", "0"))
+stop_on_scaling = to_bool(os.environ.get("STOP_ON_SCALING", "true"))
+stop_on_node_limit = to_bool(os.environ.get("STOP_ON_NODE_LIMIT", "true"))
 controller_host_ip = os.environ.get("CONTROLLER_HOST_IP", "")
-controller_host_port = os.environ.get("CONTROLLER_HOST_PORT", 5557)
+controller_host_port = int(os.environ.get("CONTROLLER_HOST_PORT", "5557"))
 
 boto_config = Config(region_name=region)
 
@@ -64,12 +71,14 @@ sqs = boto3.resource("sqs", config=boto_config)
 lambda_client = boto3.client("lambda", config=boto_config)
 
 
-def _start_node(controller_ip: str, host: str, locust_port: int):
-    """
-    Invokes the lambda function that runs a Locust worker node process.
-    """
+def _start_node(
+    controller_ip: str, host: str, locust_port: int
+) -> InvocationResponseTypeDef | None:
+    """Invoke the lambda function that runs a Locust worker node process."""
     print(f"Starting node with host:{host}, controller_ip:{controller_ip}")
-    payload_json = json.dumps({"controller_ip": controller_ip, "host": host, "locust_port": locust_port})
+    payload_json = json.dumps(
+        {"controller_ip": controller_ip, "host": host, "locust_port": locust_port}
+    )
 
     response = lambda_client.invoke(
         FunctionName=node_lambda_name,
@@ -78,15 +87,14 @@ def _start_node(controller_ip: str, host: str, locust_port: int):
     )
     if response["StatusCode"] != 202:
         print(
-            f"An error occurred while trying to start the '{node_lambda_name}' function:"
-            f"{response.FunctionError}"
+            f"An error occurred while trying to start the '{node_lambda_name}' function:{response}"
         )
         return None
 
     return response
 
 
-def _main():
+def _main() -> None:
     try:
         cluster_id = get_ssm_parameter(
             ssm_client=ssm_client,
@@ -145,12 +153,17 @@ def _main():
         print(f"Running tasks with an annotated @tag including any of the following: {locust_tags}")
 
     if locust_exclude_tags:
-        print(f"Skipping tasks with an annotated @tag including any of the following: {locust_exclude_tags}")
+        print(
+            f"Skipping tasks with an annotated @tag including any of the following: \
+                {locust_exclude_tags}"
+        )
 
     spawn_count = 0
-    for _ in range(0, initial_worker_nodes):
+    for _ in range(initial_worker_nodes):
         print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-        _start_node(controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port)
+        _start_node(
+            controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port
+        )
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")
 
@@ -194,7 +207,11 @@ def _main():
         if spawn_count < max_spawned_nodes:
             if datetime.now() >= next_node_spawn:
                 print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
-                _start_node(controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port)
+                _start_node(
+                    controller_ip=controller_host_ip,
+                    host=test_host,
+                    locust_port=controller_host_port,
+                )
                 spawn_count += 1
                 print(f"Worker node #{spawn_count} spawned successfully")
 

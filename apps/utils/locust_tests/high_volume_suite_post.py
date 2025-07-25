@@ -1,16 +1,12 @@
 """High Volume Load test suite for BFD Server endpoints."""
+
 import inspect
 import random
 import sys
+from collections.abc import Callable, Collection
 from typing import (
-    Callable,
-    Collection,
-    Dict,
-    List,
-    Optional,
+    Any,
     Protocol,
-    Set,
-    Type,
     TypeVar,
 )
 
@@ -22,26 +18,24 @@ from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
 
-TaskT = TypeVar("TaskT", Callable[..., None], Type["TaskSet"])
+TaskT = TypeVar("TaskT", Callable[..., None], type["TaskSet"])
 MASTER_BENE_IDS: Collection[str] = []
-MASTER_CONTRACT_DATA: Collection[Dict[str, str]] = []
+MASTER_CONTRACT_DATA: Collection[dict[str, str]] = []
 MASTER_MBIS: Collection[str] = []
-TAGS: Set[str] = set()
-EXCLUDE_TAGS: Set[str] = set()
+TAGS: set[str] = set()
+EXCLUDE_TAGS: set[str] = set()
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs):
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
     if (
-        is_distributed(environment)
-        and is_locust_master(environment)
-        or not environment.parsed_options
-    ):
+        is_distributed(environment) and is_locust_master(environment)
+    ) or not environment.parsed_options:
         return
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global MASTER_BENE_IDS
+    global MASTER_BENE_IDS  # noqa: PLW0603
     MASTER_BENE_IDS = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_bene_ids,
@@ -49,21 +43,21 @@ def _(environment: Environment, **kwargs):
         data_type_name="bene_ids",
     )
 
-    global TAGS
+    global TAGS  # noqa: PLW0603
     TAGS = (
         set(environment.parsed_options.locust_tags.split())
         if hasattr(environment.parsed_options, "locust_tags")
         else set()
     )
 
-    global EXCLUDE_TAGS
+    global EXCLUDE_TAGS  # noqa: PLW0603
     EXCLUDE_TAGS = (
         set(environment.parsed_options.locust_exclude_tags.split())
         if hasattr(environment.parsed_options, "locust_exclude_tags")
         else set()
     )
 
-    global MASTER_CONTRACT_DATA
+    global MASTER_CONTRACT_DATA  # noqa: PLW0603
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_contract_ids,
@@ -71,7 +65,7 @@ def _(environment: Environment, **kwargs):
         data_type_name="contract_data",
     )
 
-    global MASTER_MBIS
+    global MASTER_MBIS  # noqa: PLW0603
     MASTER_MBIS = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_mbis,
@@ -85,7 +79,7 @@ class TestLoadShape(UserInitAwareLoadShape):
 
 
 class TaskHolder(Protocol[TaskT]):
-    tasks: List[TaskT]
+    tasks: list[TaskT]
 
 
 class HighVolumeTaskSet(TaskSet):
@@ -112,8 +106,8 @@ EOB_TAG = "eob"
 class EobTaskSet(HighVolumeTaskSet):
     @tag("eob_test_id_count_type_pde_v1", "v1")
     @task
-    def eob_test_id_count_type_pde_v1(self):
-        """Explanation of Benefit search by ID, type PDE, paginated"""
+    def eob_test_id_count_type_pde_v1(self) -> None:
+        """Explanation of Benefit search by ID, type PDE, paginated."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit/_search",
             body={
@@ -126,8 +120,8 @@ class EobTaskSet(HighVolumeTaskSet):
 
     @tag("eob_test_id_last_updated_count_v1", "v1")
     @task
-    def eob_test_id_last_updated_count_v1(self):
-        """Explanation of Benefit search by ID, last updated, paginated"""
+    def eob_test_id_last_updated_count_v1(self) -> None:
+        """Explanation of Benefit search by ID, last updated, paginated."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit/_search",
             body={
@@ -140,8 +134,8 @@ class EobTaskSet(HighVolumeTaskSet):
 
     @tag("eob_test_id_include_tax_number_last_updated_v1", "v1")
     @task
-    def eob_test_id_include_tax_number_last_updated_v1(self):
-        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
+    def eob_test_id_include_tax_number_last_updated_v1(self) -> None:
+        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit/_search",
             body={
@@ -149,13 +143,13 @@ class EobTaskSet(HighVolumeTaskSet):
                 "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v1/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",
+            name="/v1/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",  # noqa: E501
         )
 
     @tag("eob_test_id_last_updated_v1", "v1")
     @task
-    def eob_test_id_last_updated_v1(self):
-        """Explanation of Benefit search by ID, Last Updated"""
+    def eob_test_id_last_updated_v1(self) -> None:
+        """Explanation of Benefit search by ID, Last Updated."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit/_search",
             body={
@@ -167,8 +161,8 @@ class EobTaskSet(HighVolumeTaskSet):
 
     @tag("eob_test_id_v1", "v1")
     @task
-    def eob_test_id_v1(self):
-        """Explanation of Benefit search by ID"""
+    def eob_test_id_v1(self) -> None:
+        """Explanation of Benefit search by ID."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/ExplanationOfBenefit/_search",
             body={
@@ -179,8 +173,8 @@ class EobTaskSet(HighVolumeTaskSet):
 
     @tag("eob_test_id", "v2")
     @task
-    def eob_test_id(self):
-        """Explanation of Benefit search by ID"""
+    def eob_test_id(self) -> None:
+        """Explanation of Benefit search by ID."""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit/_search",
             body={
@@ -191,8 +185,8 @@ class EobTaskSet(HighVolumeTaskSet):
 
     @tag("eob_test_id_count", "v2")
     @task
-    def eob_test_id_count(self):
-        """Explanation of Benefit search by ID, Paginated"""
+    def eob_test_id_count(self) -> None:
+        """Explanation of Benefit search by ID, Paginated."""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit/_search",
             body={
@@ -204,8 +198,8 @@ class EobTaskSet(HighVolumeTaskSet):
 
     @tag("eob_test_id_include_tax_number_last_updated", "v2")
     @task
-    def eob_test_id_include_tax_number_last_updated(self):
-        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers"""
+    def eob_test_id_include_tax_number_last_updated(self) -> None:
+        """Explanation of Benefit search by ID, Last Updated, Include Tax Numbers."""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/ExplanationOfBenefit/_search",
             body={
@@ -213,8 +207,9 @@ class EobTaskSet(HighVolumeTaskSet):
                 "patient": self.user.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v2/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",
+            name="/v2/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",  # noqa: E501
         )
+
 
 PATIENT_TAG = "patient"
 
@@ -224,27 +219,24 @@ PATIENT_TAG = "patient"
 class PatientTaskSet(HighVolumeTaskSet):
     @tag("patient_test_coverage_contract_v1", "v1")
     @task
-    def patient_test_coverage_contract_v1(self):
-        """Patient search by coverage contract (all pages)"""
-
+    def patient_test_coverage_contract_v1(self) -> None:
+        """Patient search by coverage contract (all pages)."""
         contract = self.user.contract_data.pop()
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient/_search",
             body={
-                    "_id": self.user.bene_ids.pop(),
-                    "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                    "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
-                    "_count": "25",
+                "_id": self.user.bene_ids.pop(),
+                "_has:Coverage.extension": f"https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract['id']}",
+                "_has:Coverage.rfrncyr": f"https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract['year']}",
+                "_count": "25",
             },
             name="/v1/fhir/Patient search by coverage contract (all pages)",
-    )
-
+        )
 
     @tag("patient_test_mbi_v1", "v1")
     @task
-    def patient_test_mbi_v1(self):
-        """Patient search by ID, Last Updated, include MBI, include Address"""
-
+    def patient_test_mbi_v1(self) -> None:
+        """Patient search by ID, Last Updated, include MBI, include Address."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient/_search",
             body={
@@ -256,8 +248,8 @@ class PatientTaskSet(HighVolumeTaskSet):
 
     @tag("patient_test_id_last_updated_include_mbi_include_address_v1", "v1")
     @task
-    def patient_test_id_last_updated_include_mbi_include_address_v1(self):
-        """Patient search by ID, Last Updated, include MBI, include Address"""
+    def patient_test_id_last_updated_include_mbi_include_address_v1(self) -> None:
+        """Patient search by ID, Last Updated, include MBI, include Address."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient/_search",
             body={
@@ -271,41 +263,37 @@ class PatientTaskSet(HighVolumeTaskSet):
 
     @tag("patient_test_id_v1", "v1")
     @task
-    def patient_test_id_v1(self):
-        """Patient search by ID"""
-
+    def patient_test_id_v1(self) -> None:
+        """Patient search by ID."""
         self.user.run_task_by_parameters(
             base_path="/v1/fhir/Patient/_search",
             body={
                 "_id": self.user.bene_ids.pop(),
                 "_lastUpdated": f"gt{self.user.last_updated}",
             },
-            name="/v1/fhir/Patient/id"
+            name="/v1/fhir/Patient/id",
         )
 
     @tag("patient_test_coverage_contract", "v2")
     @task
-    def patient_test_coverage_contract(self):
-        """Patient search by Coverage Contract, paginated"""
-
+    def patient_test_coverage_contract(self) -> None:
+        """Patient search by Coverage Contract, paginated."""
         contract = self.user.contract_data.pop()
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient/_search",
             body={
                 "_id": self.user.bene_ids.pop(),
-                "_has:Coverage.extension": f'https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract["id"]}',
-                "_has:Coverage.rfrncyr": f'https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract["year"]}',
+                "_has:Coverage.extension": f"https://bluebutton.cms.gov/resources/variables/ptdcntrct01|{contract['id']}",
+                "_has:Coverage.rfrncyr": f"https://bluebutton.cms.gov/resources/variables/rfrnc_yr|{contract['year']}",
                 "_count": "25",
             },
             name="/v2/fhir/Patient search by coverage contract (all pages)",
         )
 
-
     @tag("patient_test_mbi", "v2")
     @task
-    def patient_test_mbi(self):
-        """Patient search by MBI, include identifiers"""
-
+    def patient_test_mbi(self) -> None:
+        """Patient search by MBI, include identifiers."""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient/_search",
             body={
@@ -315,10 +303,11 @@ class PatientTaskSet(HighVolumeTaskSet):
             },
             name="/v2/fhir/Patient_search search by mbi new try",
         )
+
     @tag("patient_test_id_include_mbi_last_updated", "v2")
     @task
-    def patient_test_id_include_mbi_last_updated(self):
-        """Patient search by ID with last updated, include MBI"""
+    def patient_test_id_include_mbi_last_updated(self) -> None:
+        """Patient search by ID with last updated, include MBI."""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient/_search",
             body={
@@ -331,8 +320,8 @@ class PatientTaskSet(HighVolumeTaskSet):
 
     @tag("patient_test_id", "v2")
     @task
-    def patient_test_id(self):
-        """Patient search by ID"""
+    def patient_test_id(self) -> None:
+        """Patient search by ID."""
         self.user.run_task_by_parameters(
             base_path="/v2/fhir/Patient/_search",
             body={
@@ -354,11 +343,11 @@ class HighVolumeUser(BFDUserBase):
 
     @staticmethod
     def filter_tasks_by_tags(
-        task_holder: Type[TaskHolder],
-        tags: Set[str],
-        exclude_tags: Set[str],
-        checked: Optional[Dict[TaskT, bool]] = None,
-    ):
+        task_holder: type[TaskHolder],
+        tags: set[str],
+        exclude_tags: set[str],
+        checked: dict[TaskT, bool] | None = None,
+    ) -> list[Any]:
         """
         Recursively remove any tasks/TaskSets from a TaskSet/User that
         shouldn't be executed according to the tag options
@@ -366,49 +355,49 @@ class HighVolumeUser(BFDUserBase):
         :param tags: The set of tasks by @tag to include in the final list
         :param exclude_tags: The set of tasks by @tag to exclude from the final list
         :param checked: The running score of tasks which have or have not been processed
-        :return: A list of filtered tasks to execute
+        :return: A list of filtered tasks to execute.
         """
         filtered_tasks = []
         if checked is None:
             checked = {}
-        for task in task_holder.tasks:
-            if task in checked:
-                if checked[task]:
-                    filtered_tasks.append(task)
+        for cur_task in task_holder.tasks:  # type: ignore
+            if cur_task in checked:
+                if checked[cur_task]:
+                    filtered_tasks.append(cur_task)
                 continue
             passing = True
-            if hasattr(task, "tasks"):
-                HighVolumeUser.filter_tasks_by_tags(task, tags, exclude_tags, checked)
-                passing = len(task.tasks) > 0
+            if hasattr(cur_task, "tasks"):
+                HighVolumeUser.filter_tasks_by_tags(cur_task, tags, exclude_tags, checked)
+                passing = len(cur_task.tasks) > 0
             else:
                 if len(tags) > 0:
                     passing &= (
-                        "locust_tag_set" in dir(task)
-                        and len(task.locust_tag_set.intersection(tags)) > 0
+                        "locust_tag_set" in dir(cur_task)
+                        and len(cur_task.locust_tag_set.intersection(tags)) > 0
                     )
                 if len(exclude_tags) > 0:
                     passing &= (
-                        "locust_tag_set" not in dir(task)
-                        or len(task.locust_tag_set.intersection(exclude_tags)) == 0
+                        "locust_tag_set" not in dir(cur_task)
+                        or len(cur_task.locust_tag_set.intersection(exclude_tags)) == 0
                     )
 
             if passing:
-                filtered_tasks.append(task)
-            checked[task] = passing
+                filtered_tasks.append(cur_task)
+            checked[cur_task] = passing
 
         return filtered_tasks
 
     @staticmethod
-    def get_tasks(tags: Set[str], exclude_tags: Set[str]):
+    def get_tasks(tags: set[str], exclude_tags: set[str]) -> list[Any]:
         """
-        Returns the list of runnable tasks for the given user, filterable by a list of tags or exclude_tags.
+        Return the list of runnable tasks for the given user, filterable by a list of tags
+        or exclude_tags.
         Returns all runnable tasks if neither tags or exclude_tags contain items.
 
         :param tags: The list of tags to filter tasks by
         :param exclude_tags: This list of tags to exclude tasks by
         :return: A list of tasks to run
         """
-
         # Filter out the class members without a tasks attribute
         class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
         potential_tasks = list(
@@ -425,11 +414,12 @@ class HighVolumeUser(BFDUserBase):
             tasks.extend(HighVolumeUser.filter_tasks_by_tags(task_holder, tags, exclude_tags))
         return tasks
 
-    def get_runnable_tasks(self, tags: Set[str], exclude_tags: Set[str]):
+    def get_runnable_tasks(self, tags: set[str], exclude_tags: set[str]) -> list[Any]:
         """
+        Return the list of runnable tasks.
+
         Helper method to be called via the HighVolumerUser constructor.
         Required due to python <= 3.9 not allowing direct calls to static methods.
-        Returns the list of runnable tasks.
 
         :param tags: The list of tags to filter tasks by
         :param exclude_tags: This list of tags to exclude tasks by
@@ -437,7 +427,7 @@ class HighVolumeUser(BFDUserBase):
         """
         return HighVolumeUser.get_tasks(tags, exclude_tags)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
         self.bene_ids = list(MASTER_BENE_IDS)
         self.contract_data = list(MASTER_CONTRACT_DATA)
@@ -449,9 +439,10 @@ class HighVolumeUser(BFDUserBase):
         random.shuffle(self.contract_data)
         random.shuffle(self.mbis)
 
-        # As of 01/20/2023 there is an unresolved locust issue [1] with the --tags/--exclude-tags command line options.
-        # Therefore, we have implemented custom arguments (--locust-tags/--locust-exclude-tags) to programmatically
-        # filter tasks by the given @tag(s) at runtime.
+        # As of 01/20/2023 there is an unresolved locust issue [1] with the --tags/--exclude-tags
+        # command line options.
+        # Therefore, we have implemented custom arguments (--locust-tags/--locust-exclude-tags) to
+        # programmatically filter tasks by the given @tag(s) at runtime.
         # [1] https://github.com/locustio/locust/issues/1689
 
         # Looking at this, it's not obvious why we're dynamically generating a _class_ (not an

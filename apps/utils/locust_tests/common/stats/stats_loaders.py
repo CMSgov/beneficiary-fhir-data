@@ -1,13 +1,15 @@
 """Members of this file/module are related to the loading of performance statistics
-from various data "stores" (such as from files or AWS S3)"""
+from various data "stores" (such as from files or AWS S3).
+"""
+
 import json
-import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import fields
 from functools import cmp_to_key, reduce
+from pathlib import Path
 from statistics import mean
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from gevent import monkey
 
@@ -28,9 +30,9 @@ from common.validation import ValidationResult
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 monkey.patch_all()
-import boto3
+import boto3  # noqa: E402
 
-AthenaQueryRowResult = Dict[str, List[Dict[str, str]]]
+AthenaQueryRowResult = dict[str, list[dict[str, str]]]
 """Type representing a single row result from the result of an Athena query"""
 
 TOTAL_RUNTIME_DELTA = 3.0
@@ -39,15 +41,15 @@ be compared"""
 
 
 class StatsLoader(ABC):
-    """Loads AggregatedStats depending on what type of comparison is requested"""
+    """Loads AggregatedStats depending on what type of comparison is requested."""
 
     def __init__(self, stats_config: StatsConfiguration, metadata: StatsMetadata) -> None:
         self.stats_config = stats_config
         self.metadata = metadata
 
-    def load(self) -> Optional[AggregatedStats]:
-        """Loads an AggregatedStats instance constructed based on what type of comparison is
-        required
+    def load(self) -> AggregatedStats | None:
+        """Load an AggregatedStats instance constructed based on what type of comparison is
+        required.
 
         Returns:
             AggregatedStats: An AggregatedStats instance representing the set of stats requested to
@@ -57,31 +59,29 @@ class StatsLoader(ABC):
         return self.load_average() if is_avg_compare else self.load_previous()
 
     @abstractmethod
-    def load_previous(self) -> Optional[AggregatedStats]:
-        """Loads an AggregatedStats instance constructed based on the most recent, previous test
-        suite runs' stats under the tag specified by the user
+    def load_previous(self) -> AggregatedStats | None:
+        """Load an AggregatedStats instance constructed based on the most recent, previous test
+        suite runs' stats under the tag specified by the user.
 
         Returns:
             AggregatedStats: An AggregatedStats instance representing the stats of the previous test
             suite run
         """
-        pass
 
     @abstractmethod
-    def load_average(self) -> Optional[AggregatedStats]:
-        """Loads an AggregatedStats instance constructed based on the the average of all of the
-        previous test suite runs' stats under the tag specified by the user
+    def load_average(self) -> AggregatedStats | None:
+        """Load an AggregatedStats instance constructed based on the the average of all of the
+        previous test suite runs' stats under the tag specified by the user.
 
         Returns:
             AggregatedStats: An AggregatedStats instance representing the stats of all specified
             previous test suite runs
         """
-        pass
 
     @staticmethod
     def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> "StatsLoader":
         """Construct a new concrete instance of StatsLoader that will load from the appropriate
-        store as specified in stats_config
+        store as specified in stats_config.
 
         Args:
             stats_config (StatsConfiguration): The configuration specified for storing and comparing
@@ -100,9 +100,10 @@ class StatsLoader(ABC):
 
 class StatsFileLoader(StatsLoader):
     """Child class of StatsLoader that loads aggregated task stats from the local file system
-    through JSON files"""
+    through JSON files.
+    """
 
-    def load_previous(self) -> Optional[AggregatedStats]:
+    def load_previous(self) -> AggregatedStats | None:
         # Get a list of all AggregatedStats from stats.json files under path
         stats_list = self.__load_stats_from_files()
 
@@ -119,7 +120,7 @@ class StatsFileLoader(StatsLoader):
         # Take the first item, if it exists -- this is the most recent, previous run
         return filtered_stats[0] if filtered_stats else None
 
-    def load_average(self) -> Optional[AggregatedStats]:
+    def load_average(self) -> AggregatedStats | None:
         stats_list = self.__load_stats_from_files()
         verified_stats = [
             stats
@@ -136,24 +137,22 @@ class StatsFileLoader(StatsLoader):
 
         return _get_average_all_stats(limited_stats)
 
-    def __load_stats_from_files(self, suffix: str = ".stats.json") -> List[AggregatedStats]:
+    def __load_stats_from_files(self, suffix: str = ".stats.json") -> list[AggregatedStats]:
         path = (
             self.stats_config.stats_store_file_path
             if self.stats_config and self.stats_config.stats_store_file_path
             else ""
         )
-        stats_files = [
-            os.path.join(path, file) for file in os.listdir(path) if file.endswith(suffix)
-        ]
+        stats_files = [path / file for file in Path(path).iterdir() if file.name.endswith(suffix)]
 
         aggregated_stats_list = []
         for stats_file in stats_files:
-            with open(stats_file, encoding="utf-8") as json_file:
+            with Path(stats_file).open(encoding="utf-8") as json_file:
                 aggregated_stats_list.append(AggregatedStats(**json.load(json_file)))
 
         return aggregated_stats_list
 
-    def __verify_metadata(self, loaded_metadata: StatsMetadata):
+    def __verify_metadata(self, loaded_metadata: StatsMetadata) -> bool:
         return all(
             [
                 self.stats_config.stats_compare_tag in loaded_metadata.tags,
@@ -171,17 +170,17 @@ class StatsFileLoader(StatsLoader):
 
 
 class StatsAthenaLoader(StatsLoader):
-    """Child class of StatsLoader that loads aggregated task stats from S3 via Athena"""
+    """Child class of StatsLoader that loads aggregated task stats from S3 via Athena."""
 
     def __init__(self, stats_config: StatsConfiguration, metadata: StatsMetadata) -> None:
         self.client = boto3.client("athena", region_name="us-east-1")
 
         super().__init__(stats_config, metadata)
 
-    def load_previous(self) -> Optional[AggregatedStats]:
+    def load_previous(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -189,10 +188,10 @@ class StatsAthenaLoader(StatsLoader):
         queried_stats = self.__get_stats_from_query(query)
         return queried_stats[0] if queried_stats else None
 
-    def load_average(self) -> Optional[AggregatedStats]:
+    def load_average(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
             f"WHERE {self.__get_where_clause()} "
             "ORDER BY metadata.timestamp DESC "
             f"LIMIT {self.stats_config.stats_compare_load_limit}"
@@ -201,7 +200,7 @@ class StatsAthenaLoader(StatsLoader):
         queried_stats = self.__get_stats_from_query(query)
         return _get_average_all_stats(queried_stats)
 
-    def __get_stats_from_query(self, query: str) -> List[AggregatedStats]:
+    def __get_stats_from_query(self, query: str) -> list[AggregatedStats]:
         query_result = self.__run_query(query)
         if not query_result:
             raise RuntimeError("Athena query result was empty or query failed")
@@ -209,7 +208,7 @@ class StatsAthenaLoader(StatsLoader):
         raw_json_data = self.__get_raw_json_data(query_result)
         return self.__stats_from_json_data(raw_json_data)
 
-    def __start_athena_query(self, query: str) -> Dict[str, Any]:
+    def __start_athena_query(self, query: str) -> dict[str, Any]:
         return self.client.start_query_execution(
             QueryString=query,
             QueryExecutionContext={"Database": self.stats_config.stats_store_s3_database},
@@ -223,20 +222,18 @@ class StatsAthenaLoader(StatsLoader):
             "QueryExecution"
         ]["Status"]["State"]
 
-    def __get_athena_query_result(self, query_execution_id: str) -> List[AthenaQueryRowResult]:
+    def __get_athena_query_result(self, query_execution_id: str) -> list[AthenaQueryRowResult]:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_results
         # for the structure of the returned Dict
         return self.client.get_query_results(QueryExecutionId=query_execution_id)["ResultSet"][
             "Rows"
         ]
 
-    def __run_query(
-        self, query: str, max_retries: int = 10
-    ) -> Optional[List[AthenaQueryRowResult]]:
+    def __run_query(self, query: str, max_retries: int = 10) -> list[AthenaQueryRowResult] | None:
         start_response = self.__start_athena_query(query)
         query_execution_id = start_response["QueryExecutionId"]
 
-        for try_number in range(0, max_retries - 1):
+        for try_number in range(max_retries - 1):
             # Exponentially back-off from hitting the API to ensure we don't hit the API limit
             # See https://docs.aws.amazon.com/general/latest/gr/api-retries.html
             time.sleep((2**try_number * 100.0) / 1000.0)
@@ -245,7 +242,7 @@ class StatsAthenaLoader(StatsLoader):
 
             if status == "SUCCEEDED":
                 break
-            elif status == "FAILED" or status == "CANCELLED":
+            if status == "FAILED" or status == "CANCELLED":
                 raise RuntimeError(f"Query failed to complete -- status returned was {status}")
 
         return self.__get_athena_query_result(query_execution_id)
@@ -269,8 +266,8 @@ class StatsAthenaLoader(StatsLoader):
         return " AND ".join(explicit_checks)
 
     def __get_raw_json_data(
-        self, query_result: List[Dict[str, List[Dict[str, str]]]]
-    ) -> List[Tuple[str, str]]:
+        self, query_result: list[dict[str, list[dict[str, str]]]]
+    ) -> list[tuple[str, str]]:
         # The data is returned as an array of dicts, each with a 'Data' key. These 'Data' dicts
         # values are arrays of dicts with the key being the data type and the value being the actual
         # returned result. The first 'Data' dict in the array is the column names, and subsequent
@@ -283,11 +280,11 @@ class StatsAthenaLoader(StatsLoader):
         raw_data = [item["Data"] for item in query_result[1:]]
         return [(data[0]["VarCharValue"], data[1]["VarCharValue"]) for data in raw_data]
 
-    def __stats_from_json_data(self, raw_json_data: List[Tuple[str, str]]) -> List[AggregatedStats]:
+    def __stats_from_json_data(self, raw_json_data: list[tuple[str, str]]) -> list[AggregatedStats]:
         # Deserializing from a tuple of raw JSON objects; first tuple is a raw JSON object string
         # representing the aggregated totals and second tuple is a raw JSON list of objects
         # representing the statistics for each task
-        serialized_tuples: List[Tuple[Dict[str, Any], List[Dict[str, Any]]]] = [
+        serialized_tuples: list[tuple[dict[str, Any], list[dict[str, Any]]]] = [
             (json.loads(raw_json_totals), json.loads(raw_json_tasks))
             for raw_json_totals, raw_json_tasks in raw_json_data
         ]
@@ -302,11 +299,11 @@ class StatsAthenaLoader(StatsLoader):
         ]
 
 
-def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, List[TaskStats]]:
-    tasks_by_name: Dict[str, List[TaskStats]] = {}
+def _bucket_tasks_by_name(all_stats: list[AggregatedStats]) -> dict[str, list[TaskStats]]:
+    tasks_by_name: dict[str, list[TaskStats]] = {}
     for stats in all_stats:
         for task in stats.tasks:
-            if not task.task_name in tasks_by_name:
+            if task.task_name not in tasks_by_name:
                 tasks_by_name[task.task_name] = []
 
             tasks_by_name[task.task_name].append(task)
@@ -314,7 +311,7 @@ def _bucket_tasks_by_name(all_stats: List[AggregatedStats]) -> Dict[str, List[Ta
     return tasks_by_name
 
 
-def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
+def _get_average_task_stats(all_tasks: list[TaskStats]) -> TaskStats:
     if not all_tasks:
         raise ValueError("The list of tasks to average must not be empty")
 
@@ -325,7 +322,7 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
     # dict which will be handled on its own later
     fields_to_exclude = ["task_name", "request_method", "response_time_percentiles"]
     stats_to_average = [
-        field.name for field in fields(TaskStats) if not field.name in fields_to_exclude
+        field.name for field in fields(TaskStats) if field.name not in fields_to_exclude
     ]
     # Calculate the mean automatically for every matching stat in the list of
     # all stats, and then put the mean in a dict
@@ -355,7 +352,7 @@ def _get_average_task_stats(all_tasks: List[TaskStats]) -> TaskStats:
     )
 
 
-def _get_average_all_stats(all_stats: List[AggregatedStats]) -> Optional[AggregatedStats]:
+def _get_average_all_stats(all_stats: list[AggregatedStats]) -> AggregatedStats | None:
     partitioned_task_stats = _bucket_tasks_by_name(all_stats)
     try:
         averaged_tasks = [

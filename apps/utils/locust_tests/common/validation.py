@@ -1,7 +1,8 @@
-"""Validate tests against target SLIs"""
+"""Validate tests against target SLIs."""
+
 import logging
 import time
-from enum import StrEnum, Enum
+from enum import Enum, StrEnum
 from typing import Optional
 
 import gevent
@@ -15,7 +16,7 @@ _validation_goal: Optional["ValidationGoal"] = None
 
 
 class ValidationResult(StrEnum):
-    """Enum representing the result of failure ratio and SLA validation"""
+    """Enum representing the result of failure ratio and SLA validation."""
 
     NOT_APPLICABLE = "NOT_APPLICABLE"
     """Indicates that no validation ran on the given test run"""
@@ -32,7 +33,7 @@ class ValidationGoal(Enum):
     SLA_EOB_WITH_SINCE = (100, 250, 1000)
     SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000)
     SLA_V1_BASELINE = (700, 1000, 3000)
-    SLA_V2_BASELINE = (700, 1000, 3000)
+    SLA_V2_BASELINE = (700, 1000, 3000)  # noqa: PIE796
 
     def __init__(self, sla_50: int, sla_95: int, sla_99: int) -> None:
         self.sla_50 = sla_50
@@ -41,20 +42,20 @@ class ValidationGoal(Enum):
 
 
 def set_validation_goal(validation_goal: ValidationGoal) -> None:
-    """Sets the validation goal that will be validated against once the test run is
-    complete. Should be called prior to any work being done in a Locustfile
+    """Set the validation goal that will be validated against once the test run is
+    complete. Should be called prior to any work being done in a Locustfile.
 
     Args:
         validation_goal (ValidationGoal): The validation goal to validate against
     """
-    global _validation_goal
+    global _validation_goal  # noqa: PLW0603
     _validation_goal = validation_goal
 
 
 def setup_failsafe_event(environment: Environment) -> None:
-    """Adds a listener that will add a repeating check for the global failsafe response time in
+    """Add a listener that will add a repeating check for the global failsafe response time in
     order to stop the test if the event the environment/box under test is overwhelmed and at risk
-    of crashing. Should be called during Locust's "init" event
+    of crashing. Should be called during Locust's "init" event.
 
     Args:
         environment (Environment): The current Locust environment
@@ -64,11 +65,11 @@ def setup_failsafe_event(environment: Environment) -> None:
 
 
 def check_validation_goals(environment: Environment) -> ValidationResult:
-    """Checks if either the failure ratio exceeds 0% and if any of the percentile SLAs specified by
+    """Check if either the failure ratio exceeds 0% and if any of the percentile SLAs specified by
     the validation goal are exceeded. If exceeded, a validation result indicating failure is
     returned; else a result indicating a pass is returned. This function is ignored unless it is the
     main test thread or a non-distributed test. If _validation_goal is undefined, only failure ratio
-    is checked
+    is checked.
 
     Args:
         environment (Environment): The Locust environment of the current test run
@@ -110,13 +111,13 @@ def check_validation_goals(environment: Environment) -> ValidationResult:
 
 
 def _check_global_fail(environment: Environment, fail_time_ms: int) -> None:
-    """Checks if the test response time is too long (in the event the database is being
+    """Check if the test response time is too long (in the event the database is being
     overwhelmed) and if so, we stop the test.
     """
     if not environment.runner:
         return
 
-    while not environment.runner.state in [
+    while environment.runner.state not in [
         STATE_STOPPING,
         STATE_STOPPED,
         STATE_CLEANUP,

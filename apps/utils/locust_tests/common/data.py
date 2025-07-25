@@ -3,11 +3,12 @@
 import datetime
 import logging
 from argparse import Namespace
-from typing import Any, Collection, Optional, Protocol
+from collections.abc import Collection
+from typing import Any, Protocol
 
 
 class LoadFunction(Protocol):
-    def __call__(self, uri: str, table_sample_pct: Optional[float] = None) -> Collection[Any]: ...
+    def __call__(self, uri: str, table_sample_pct: float | None = None) -> Collection[Any]: ...
 
 
 def load_from_parsed_opts(
@@ -16,9 +17,9 @@ def load_from_parsed_opts(
     use_table_sample: bool = False,
     data_type_name: str = "<unknown>",
 ) -> Collection[Any]:
-    """Loads data from the database given the database load function provided. Gets the database URI
+    """Load data from the database given the database load function provided. Gets the database URI
     and the table sampling percent from the given parsed options. Returns an empty list if database
-    URI and/or table sample percent are not set in the given parsed options
+    URI and/or table sample percent are not set in the given parsed options.
 
     Args:
         parsed_opts (Namespace): A collection of parsed options that includes the database URI and
@@ -33,7 +34,6 @@ def load_from_parsed_opts(
     Returns:
         Collection[Any]: A Collection of data returned by the load function
     """
-
     database_constr = str(parsed_opts.database_constr)
     table_sample_percent = float(parsed_opts.table_sample_percent)
     return load_from_uri(
@@ -52,24 +52,24 @@ def load_from_uri(
     table_sample_percent: float = 0.25,
     data_type_name: str = "<unknown>",
 ) -> Collection[Any]:
-    """Loads all of the data from the database, using the database connection provided."""
+    """Load all of the data from the database, using the database connection provided."""
     logger = logging.getLogger()
 
     logger.info("Collecting %s test data...", data_type_name)
     if use_table_sample:
-        logger.info(f"Table Sampling at: {table_sample_percent}")
+        logger.info("Table Sampling at %s", table_sample_percent)
         results = load_function(uri=database_constr, table_sample_pct=table_sample_percent)
     else:
         results = load_function(uri=database_constr)
 
-    logger.info(f"Loaded {len(results)} results from the database")
+    logger.info("Loaded %s results from the database", len(results))
     return results
 
 
 def get_last_updated() -> str:
-    """Gets a sample last_updated field for testing. Uses a date two weeks before when the script
-    is run."""
-
+    """Get a sample last_updated field for testing. Uses a date two weeks before when the script
+    is run.
+    """
     today = datetime.datetime.now()
     delta = datetime.timedelta(weeks=2)
     prior_date = today - delta

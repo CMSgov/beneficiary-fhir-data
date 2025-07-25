@@ -11,7 +11,13 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.11.11", "uv>=0.7.8", "pytest>=8.3.5", "testcontainers>=4.9.2"]
+dev = [
+    "ruff>=0.11.11",
+    "uv>=0.7.8",
+    "pytest>=8.3.5",
+    "testcontainers>=4.9.2",
+    "pyright>=1.1.403",
+]
 
 # [[tool.mypy.overrides]]
 # module = ["testcontainers.*"]
@@ -53,6 +59,8 @@ select = [
     "FURB",
     "RUF",
 ]
+# Don't require docstrings
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
