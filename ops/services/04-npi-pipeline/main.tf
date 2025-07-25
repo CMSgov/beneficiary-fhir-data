@@ -83,6 +83,11 @@ resource "aws_ecs_task_definition" "this" {
     operating_system_family = "LINUX"
   }
 
+  volume {
+    configure_at_launch = false
+    name                = "tmp"
+  }
+
   container_definitions = jsonencode(
     [
       {
@@ -157,8 +162,15 @@ resource "aws_ecs_task_definition" "this" {
           }
         }
         stopTimeout = 120 # Allow enough time for Pipeline to gracefully stop on spot termination.
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
-        mountPoints    = []
         portMappings   = []
         systemControls = []
         volumesFrom    = []
