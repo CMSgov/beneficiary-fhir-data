@@ -76,7 +76,7 @@ def run_command(cmd, cwd=None):
             print("Error output:",e.stderr)
         else:
             print("Error info (not necessarily stderr):",e)
-        sys.exit(1) #kill process and debug.
+        sys.exit(1)
 
 def random_date(start_date, end_date):
     start_formatted = date.fromisoformat(start_date).toordinal()
