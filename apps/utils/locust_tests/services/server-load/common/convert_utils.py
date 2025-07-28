@@ -1,11 +1,13 @@
 """This module contains utility functions related to conversions shared between node and controller
-modules"""
-from typing import Any, Optional
+modules.
+"""
+
+from typing import Any
 
 
-def to_bool(from_obj: Optional[Any]) -> bool:
-    """Converts any object with a valid string representation into a bool by checking if its string
-    representation is "true", case-insensitive
+def to_bool(from_obj: Any | None) -> bool:  # noqa: ANN401
+    """Convert any object with a valid string representation into a bool by checking if its string
+    representation is "true", case-insensitive.
 
     Args:
         from_obj (Optional[Any]): The object to convert to a bool

@@ -1,10 +1,11 @@
-"""Misc. Locust task utility functions"""
+"""Misc. Locust task utility functions."""
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 
 def params_to_str(params_dict: Mapping[str, Any]) -> str:
-    """Returns a string representation of a query parameters dict suitable for use in a task's name
+    """Return a string representation of a query parameters dict suitable for use in a task's name.
 
     Args:
         params_dict (dict[str, Any]): Dict of params used in a task's request

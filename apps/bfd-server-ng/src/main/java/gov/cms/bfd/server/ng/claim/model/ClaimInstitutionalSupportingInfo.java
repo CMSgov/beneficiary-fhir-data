@@ -14,7 +14,7 @@ class ClaimInstitutionalSupportingInfo {
   private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;
 
   @Column(name = "bene_ptnt_stus_cd")
-  private PatientStatusCode patientStatusCode;
+  private Optional<PatientStatusCode> patientStatusCode;
 
   @Column(name = "clm_admsn_type_cd")
   private ClaimAdmissionTypeCode claimAdmissionTypeCode;
@@ -28,7 +28,7 @@ class ClaimInstitutionalSupportingInfo {
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
             claimAdmissionSourceCode.map(c -> c.toFhir(supportingInfoFactory)),
-            Optional.of(patientStatusCode.toFhir(supportingInfoFactory)),
+            patientStatusCode.map(c -> c.toFhir(supportingInfoFactory)),
             Optional.of(claimAdmissionTypeCode.toFhir(supportingInfoFactory)),
             Optional.of(mcoPaidSwitch.toFhir(supportingInfoFactory)),
             Optional.of(diagnosisDrgCode.toFhir(supportingInfoFactory)))

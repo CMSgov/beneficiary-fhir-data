@@ -7,6 +7,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.AccessLevel;
@@ -25,11 +26,8 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 public class Configuration {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
 
-  /**
-   * Identifier for the local Spring profile indicating that the server is being run on a local
-   * machine.
-   */
-  public static final String LOCAL_PROFILE = "local";
+  /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
+  private static final List<String> ALLOWED_LOCAL_PROFILES = List.of("local", "sqlprofile");
 
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
@@ -57,6 +55,16 @@ public class Configuration {
 
   @Getter(lazy = true)
   private final Map<String, String> clientCertsToAliases = getClientCertsToAliasesInternal();
+
+  /**
+   * Determines if the profile requires auth.
+   *
+   * @param profile Spring profile
+   * @return boolean
+   */
+  public static boolean canProfileBypassAuth(String profile) {
+    return ALLOWED_LOCAL_PROFILES.contains(profile.toLowerCase());
+  }
 
   /**
    * Creates a new {@link AwsWrapperDataSourceFactory}.

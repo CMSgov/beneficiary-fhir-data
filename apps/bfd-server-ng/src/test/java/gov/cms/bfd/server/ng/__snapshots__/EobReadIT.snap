@@ -302,7 +302,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ]
   } ],
   "billablePeriod" : {
-    "end" : "2021-10-03T00:00:00+00:00",
+    "end" : "2021-10-03",
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
       "valueCoding" : {
@@ -310,7 +310,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       }
     } ],
-    "start" : "2021-09-26T00:00:00+00:00"
+    "start" : "2021-09-26"
   },
   "careTeam" : [ {
     "provider" : {
@@ -768,7 +768,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "reference" : "Patient/405764107"
   },
   "procedure" : [ {
-    "date" : "2021-10-03T00:00:00+00:00",
+    "date" : "2021-10-03",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "code" : "B2111ZZ",
@@ -847,10 +847,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "code" : "3",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
       }, {
-        "code" : "3",
+        "code" : "33",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
       }, {
-        "code" : "X",
+        "code" : "33X",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
@@ -864,8 +864,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "sequence" : 4,
     "timingPeriod" : {
-      "end" : "2021-10-03T00:00:00+00:00",
-      "start" : "2021-09-26T00:00:00+00:00"
+      "end" : "2021-10-03",
+      "start" : "2021-09-26"
     }
   }, {
     "category" : {
@@ -1353,7 +1353,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ]
   } ],
   "billablePeriod" : {
-    "end" : "2021-10-03T00:00:00+00:00",
+    "end" : "2021-10-03",
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
       "valueCoding" : {
@@ -1361,7 +1361,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       }
     } ],
-    "start" : "2021-09-26T00:00:00+00:00"
+    "start" : "2021-09-26"
   },
   "careTeam" : [ {
     "provider" : {
@@ -1819,7 +1819,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "reference" : "Patient/405764107"
   },
   "procedure" : [ {
-    "date" : "2021-10-03T00:00:00+00:00",
+    "date" : "2021-10-03",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "code" : "B2111ZZ",
@@ -1898,10 +1898,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "code" : "3",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
       }, {
-        "code" : "3",
+        "code" : "33",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
       }, {
-        "code" : "X",
+        "code" : "33X",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
@@ -1915,8 +1915,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "sequence" : 4,
     "timingPeriod" : {
-      "end" : "2021-10-03T00:00:00+00:00",
-      "start" : "2021-09-26T00:00:00+00:00"
+      "end" : "2021-10-03",
+      "start" : "2021-09-26"
     }
   }, {
     "category" : {

@@ -18,10 +18,10 @@ class AdmissionPeriod {
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     var supportingInfo = supportingInfoFactory.createSupportingInfo();
-    supportingInfo.setTiming(
-        new Period()
-            .setStart(DateUtil.toDate(claimActiveCareFromDate))
-            .setEnd(DateUtil.toDate(claimDischargeDate)));
+    var period = new Period();
+    period.setStartElement(DateUtil.toFhirDate(claimActiveCareFromDate));
+    period.setEndElement(DateUtil.toFhirDate(claimDischargeDate));
+    supportingInfo.setTiming(period);
     supportingInfo.setCategory(CarinSupportingInfoCategory.ACTIVE_CARE_FROM_DATE.toFhir());
     return supportingInfo;
   }

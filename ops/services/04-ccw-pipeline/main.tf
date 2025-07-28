@@ -24,7 +24,7 @@ locals {
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
-  latest_bfd_release       = module.terraservice.latest_bfd_release
+  bfd_version              = module.terraservice.bfd_version
   ssm_config               = module.terraservice.ssm_config
   env_key_arn              = module.terraservice.env_key_arn
   iam_path                 = module.terraservice.default_iam_path
@@ -38,7 +38,7 @@ locals {
   name_prefix = "bfd-${local.env}-${local.service}"
 
   pipeline_repository_name = coalesce(var.pipeline_repository_override, "bfd-pipeline-app")
-  pipeline_version         = coalesce(var.pipeline_version_override, local.latest_bfd_release)
+  pipeline_version         = coalesce(var.pipeline_version_override, local.bfd_version)
 
   db_environment        = coalesce(var.db_environment_override, local.env)
   db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"

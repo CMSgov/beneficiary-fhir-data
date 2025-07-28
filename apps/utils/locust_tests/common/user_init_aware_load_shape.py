@@ -1,7 +1,6 @@
-"""Contains implementation for UserInitAwareLoadShape"""
+"""Contains implementation for UserInitAwareLoadShape."""
 
 import logging
-from typing import Optional, Tuple
 
 from locust import LoadTestShape
 from locust.env import Environment
@@ -14,12 +13,12 @@ class UserInitAwareLoadShape(LoadTestShape):
     well as compensating for the time it takes to load data globally or per-user (but not per-task).
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.environment: Environment
         self.target_users: int
         self.target_spawn_rate: int
-        self.target_runtime: int
+        self.target_runtime: int | None
 
         self.logger = logging.getLogger()
         self.has_time_activated = False
@@ -45,16 +44,18 @@ class UserInitAwareLoadShape(LoadTestShape):
         self.target_users = self.environment.parsed_options.num_users or 1
         self.target_spawn_rate = self.environment.parsed_options.spawn_rate or 1
         self.target_runtime = self.environment.parsed_options.spawned_runtime
+
+        if self.target_runtime is None:
+            self.logger.info("--spawned-runtime not specified, tests will run indefinitely.")
+
         if self.target_runtime == 0:
             self.logger.info(
                 "--spawned-runtime is 0, test run will stop once all users have spawned."
             )
-        if self.target_runtime is None:
-            self.logger.info("--spawned-runtime not specified, tests will run indefinitely.")
 
         return True
 
-    def tick(self) -> Optional[Tuple[int, float]]:
+    def tick(self) -> tuple[int, float] | None:
         if not self.has_ticked:
             self.has_ticked = True
             is_env_setup = self.__first_tick()
@@ -87,7 +88,7 @@ class UserInitAwareLoadShape(LoadTestShape):
                 self.reset_time()
                 self.has_time_activated = True
 
-            if not self.target_runtime is None and self.get_run_time() > self.target_runtime:
+            if self.target_runtime is not None and self.get_run_time() > self.target_runtime:
                 return None
 
         self.logger.debug("Current runtime: %f", self.get_run_time())
