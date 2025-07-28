@@ -27,6 +27,13 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.CLM_LINE_HCT_HGB_TYPE_CD as typeCd where typeCd != '~' -> tgt.value = create('Reference') as tgtReference then{
         src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-",rowNum) "Add observation num";
      } "Add reference";
+     src.CLM_LINE_HCT_HGB_TYPE_CD as typeCd where typeCd != '~' -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgt.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+            src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HCT_HGB_RSLT_NUM") "Add Coding";
+        } "Add category";
+     } "set category";
+    
      
 }
 //timingPeriod

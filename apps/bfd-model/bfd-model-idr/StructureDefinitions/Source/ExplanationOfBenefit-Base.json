@@ -567,18 +567,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_NPI_NUM",
-                "path": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_NPI_NUM",
-                "label": "Billing Provider NPI Number",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Base.clm_blg_prvdr_npi_type",
                 "path": "ExplanationOfBenefit-Base.clm_blg_prvdr_npi_type",
                 "label": "Billing Provider NPI Type - Derived",

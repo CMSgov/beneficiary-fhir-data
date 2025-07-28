@@ -666,6 +666,174 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "LineItemComponent.CLM_MTUS_IND_CD",
+                "path": "LineItemComponent.CLM_MTUS_IND_CD",
+                "label": "Carrier MTUS Indicator Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_PRFNL_MTUS_CNT",
+                "path": "LineItemComponent.CLM_LINE_PRFNL_MTUS_CNT",
+                "label": "Carrier MTUS Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PRCNG_LCLTY_CD",
+                "path": "LineItemComponent.CLM_PRCNG_LCLTY_CD",
+                "label": "Line Pricing Locality Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PHYSN_ASTNT_CD",
+                "path": "LineItemComponent.CLM_PHYSN_ASTNT_CD",
+                "label": "Reduced Payment Physician Assistant Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_CARR_HPSA_SCRCTY_CD",
+                "path": "LineItemComponent.CLM_LINE_CARR_HPSA_SCRCTY_CD",
+                "label": "HPSA Scarcity Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PRMRY_PYR_CD",
+                "path": "LineItemComponent.CLM_PRMRY_PYR_CD",
+                "label": "Line Primary Payer Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_FED_TYPE_SRVC_CD",
+                "path": "LineItemComponent.CLM_FED_TYPE_SRVC_CD",
+                "label": "CMS Service Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PMT_80_100_CD",
+                "path": "LineItemComponent.CLM_PMT_80_100_CD",
+                "label": "Payment Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PRCSG_IND_CD",
+                "path": "LineItemComponent.CLM_PRCSG_IND_CD",
+                "label": "Processing Indicator Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_SRVC_DDCTBL_SW",
+                "path": "LineItemComponent.CLM_SRVC_DDCTBL_SW",
+                "label": "Service Deductible Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PRVDR_SPCLTY_CD",
+                "path": "LineItemComponent.CLM_PRVDR_SPCLTY_CD",
+                "label": "Provider Speciality Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_DMERC_SCRN_SVGS_AMT",
+                "path": "LineItemComponent.CLM_LINE_DMERC_SCRN_SVGS_AMT",
+                "label": "Screen Savings Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_SUPLR_TYPE_CD",
+                "path": "LineItemComponent.CLM_SUPLR_TYPE_CD",
+                "label": "Supplier Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_PRFNL_DME_PRICE_AMT",
+                "path": "LineItemComponent.CLM_LINE_PRFNL_DME_PRICE_AMT",
+                "label": "Purchase Price Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]
