@@ -45,12 +45,20 @@ permissions:
   contents: write # This is required for actions/checkout
 
 env:
-  # AWS Code Artifact Repository
-  CA_REPOSITORY: bfd-mgmt
-  CA_DOMAIN: bfd-mgmt
   AWS_REGION: ${{ inputs.awsRegion }}
   BFD_RELEASE_OVERRIDE: ${{ inputs.releaseVersion }}
   BFD_DEV_VERSION_OVERRIDE: ${{ inputs.developmentVersion }}
+  JIB_IMAGES: |
+    [
+      "bfd-server",
+      "bfd-pipeline-app",
+      "bfd-db-migrator"
+    ]
+  ACCOUNT_ROLE_MAP: |
+    {
+      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
+      "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+    }
 
 defaults:
   run:
@@ -64,7 +72,6 @@ jobs:
       bfd_dev_version: ${{ steps.bfd-version-strings.outputs.BFD_DEV_VERSION }}
     steps:
       - name: Checkout
-        if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -107,11 +114,14 @@ jobs:
       awsRegion: ${{ inputs.awsRegion }}
       # Build the base images prior to building the application images with jib in "run-mvn-release"
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
-      imagesCsv: "bfd-mgmt-base-java, bfd-mgmt-base-python"
+      imagesCsv: "bfd-platform-base-java, bfd-platform-base-python"
+      cleanupImageArtifacts: false # Keep the built images around so that they can be used for Jib
+      skipBasePull: true # We're building the base images, so don't pull them
+      tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
     secrets: inherit
 
   run-mvn-release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     needs: [compute-version-strings, build-base-images]
     env:
       BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
@@ -132,6 +142,17 @@ jobs:
           ref: ${{ inputs.releaseBranch || github.ref_name }}
           token: ${{ steps.generate_token.outputs.token }}
 
+      - name: Retrieve base java image
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*bfd-platform-base-java*'
+          merge-multiple: true
+          path: ${{ runner.temp }}
+
+      - name: Load base image into Docker
+        run: |
+          docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
+
       - name: Install gitleaks
         run: |
           curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
@@ -141,16 +162,6 @@ jobs:
             | wget -qi -
           sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
           sudo chmod +x /usr/bin/gitleaks
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: run-mvn-release
-          aws-region: ${{ inputs.awsRegion }}
-
-      - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -163,35 +174,12 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-      - name: Set Authorization Token
-        run: |
-          CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain "$CA_DOMAIN" --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text --region "$AWS_REGION")"
-          echo "::add-mask::$CODEARTIFACT_AUTH_TOKEN"
-          echo CODEARTIFACT_AUTH_TOKEN=$CODEARTIFACT_AUTH_TOKEN >> $GITHUB_ENV
-
-      - name: Get Repository Endpoint
-        run: |
-          CA_REPOSITORY_ENDPOINT="$(aws codeartifact get-repository-endpoint --domain "$CA_DOMAIN" --repository "$CA_REPOSITORY" --format maven --query repositoryEndpoint --output text)"
-          echo "::add-mask::$CA_REPOSITORY_ENDPOINT"
-          echo CA_REPOSITORY_ENDPOINT=$CA_REPOSITORY_ENDPOINT >> $GITHUB_ENV
-
-      - name: Get ECR Registry Namespace
-        run: |
-          ECR_REPOSITORY_NAMESPACE="$(aws ecr describe-registry --region "$AWS_REGION" | jq -r '.registryId').dkr.ecr.${AWS_REGION}.amazonaws.com"
-          echo "::add-mask::$ECR_REPOSITORY_NAMESPACE"
-          echo ECR_REPOSITORY_NAMESPACE=$ECR_REPOSITORY_NAMESPACE >> $GITHUB_ENV
-
       - name: Configure additional maven settings.xml
         run: |-
           cat <<"EOF" > ~/.m2/settings.xml
           <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
           xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <servers>
-              <server>
-                <username>aws</username>
-                <password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
-                <id>${env.CA_DOMAIN}-${env.CA_REPOSITORY}</id>
-              </server>
               <server>
                 <id>github</id>
                 <username>${env.GITHUB_ACTOR}</username>
@@ -230,10 +218,104 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
+      - name: Export jib images
+        run: |
+          readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker save "$image:$BFD_RELEASE" > "${image}.tar"
+          done
+        working-directory: ${{ runner.temp }}
+
+      - name: Upload jib image artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jib-images
+          path: ${{ runner.temp }}/*.tar
+          retention-days: 1
+
+      - name: Get bfd-server-war m2 directory
+        id: get-server-war-dir
+        run: |
+          server_war_dir="$(realpath "$(find ~/.m2 -type d -path '*/bfd-server-war/*' | head -n1)")"
+          ls "$server_war_dir"
+
+          echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Upload data dictionary and OpenApi artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*data-dictionary*
+            ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*openapi*
+          retention-days: 1
+
       - name: "Perform Exceptional Rollback"
         if: failure()
         run: mvn release:rollback
         working-directory: ./apps
+
+  push-jib-images:
+    needs: [compute-version-strings, run-mvn-release]
+    strategy:
+      matrix:
+        account: ["prod", "non-prod"]
+    runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+    env:
+      BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
+      BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
+    steps:
+      - name: Get role ARN
+        id: get-role-arn
+        run: |
+          role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Download jib image artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: jib-images
+          path: ${{ runner.temp }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push jib images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          PUSH_LATEST: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          for image_filename in ./*.tar
+          do
+            docker load --input "$image_filename"
+
+            image="$(basename "$image_filename" .tar)"
+            docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:$BFD_RELEASE"
+            if [[ $PUSH_LATEST == "true" ]]; then
+              # Remove the "latest" tag from the existing latest image
+              aws ecr batch-delete-image --repository-name "$image" --image-ids imageTag=latest &>/dev/null || true
+              # Tag the new release image as "latest"
+              docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:latest"
+              # Push "latest" tag
+              docker push "$REGISTRY/$image:latest"
+            fi
+
+            docker push "$REGISTRY/$image:$BFD_RELEASE"
+          done
+        working-directory: ${{ runner.temp }}
 
   build-other-images:
     uses: ./.github/workflows/build-container-images.yml
@@ -248,14 +330,16 @@ jobs:
       # Build other images, like Lambda images, Python applications, etc.
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
       imagesCsv: >-
-        bfd-mgmt-server-regression,
-        bfd-mgmt-mount-certstores,
-        bfd-mgmt-server-fluent-bit,
-        bfd-mgmt-run-locust,
-        bfd-mgmt-eft-sftp-outbound-transfer-lambda,
-        bfd-mgmt-pipeline-ccw-manifests-verifier-lambda,
-        bfd-mgmt-pipeline-ccw-runner
+        bfd-platform-server-regression,
+        bfd-platform-mount-certstores,
+        bfd-platform-server-fluent-bit,
+        bfd-platform-run-locust,
+        bfd-platform-eft-sftp-outbound-transfer-lambda,
+        bfd-platform-pipeline-ccw-manifests-verifier-lambda,
+        bfd-platform-pipeline-ccw-runner
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
+      cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
+      tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
     secrets: inherit
 
   create-gh-release:
@@ -266,59 +350,31 @@ jobs:
         compute-version-strings,
         build-base-images,
         run-mvn-release,
+        push-jib-images,
         build-other-images,
       ]
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Pull release artifacts
+        id: pull-release-artifacts
+        uses: actions/download-artifact@v4
         with:
-          role-to-assume: ${{ secrets.GHA_AWS_IAM_ROLE_ARN }}
-          role-session-name: create-gh-release
-          aws-region: ${{ inputs.awsRegion }}
+          name: release-artifacts
 
-      - name: Pull Release Files
-        run: |
-          readarray -t assets < <(echo "$CA_ASSETS" | jq -r -c '.[]')
-          for asset in "${assets[@]}"
-          do
-            aws codeartifact get-package-version-asset \
-              --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} \
-              --domain "$CA_DOMAIN" \
-              --repository "$CA_REPOSITORY" \
-              --asset "$asset" \
-              --package-version "$BFD_RELEASE" \
-              --package "$CA_PACKAGE" \
-              --namespace "$CA_NAMESPACE" \
-              --format maven \
-              --region "$AWS_REGION" \
-              "${asset/$CA_PACKAGE-${BFD_RELEASE}-/}" 1>/dev/null
-          done
-
-          # rename data dictionary release assets to follow historical naming conventions
-          for item in ./*data-dictionary*
-          do
-            filename=$(basename -- "$item")
-            extension="${filename##*.}"
-            filename="$(echo "${filename%.*}" | sed -E 's/^v([0-9]+.*)$/V\1/')"
-
-            mv "$item" "$filename-${BFD_RELEASE}.$extension"
-          done
-
-          mv ./openapi.yaml "openapi-${BFD_RELEASE}.yaml"
-
+      - name: Prepare artifacts
         env:
           BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
-          CA_NAMESPACE: gov.cms.bfd
-          CA_PACKAGE: bfd-server-war
-          CA_ASSETS: |
-            [
-              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v1-data-dictionary.csv",
-              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v2-data-dictionary.csv",
-              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v1-data-dictionary.json",
-              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-v2-data-dictionary.json",
-              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-data-dictionary.xlsx",
-              "bfd-server-war-${{ needs.compute-version-strings.outputs.bfd_release }}-openapi.yaml"
-            ]
+        run: |
+          # We want artifacts to be named consistently, specifically in the form of
+          # "<artifact_name>-<bfd_version>.<ext>". However, they are generated as
+          # "bfd-server-war-<bfd_version>-<artifact_name>.<ext>", so we need to do some filename
+          # manipulation here
+          for artifact_path in ./*
+          do
+            artifact="$(basename -- "$artifact_path" | sed -nE "s/bfd-server-war-$BFD_RELEASE-(.*)/\1/p")"
+            artifact_ext="${artifact#*.}"
+            artifact_name="${artifact%%.*}"
+            mv "$artifact_path" "./${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
+          done
 
       - name: Release
         uses: ncipollo/release-action@v1
@@ -330,3 +386,14 @@ jobs:
           tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
           name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
           artifacts: "*.csv,*.json,*.xlsx,*.yaml"
+
+  cleanup-artifacts:
+    if: ${{ !cancelled() }}
+    needs: [build-other-images, create-gh-release]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete all artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: '*'
+          failOnError: false

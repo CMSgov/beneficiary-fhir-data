@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -13,10 +14,13 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.Nullable;
 
 /** Claim table. */
 @Entity
@@ -26,9 +30,6 @@ public class Claim {
   @Id
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
-
-  @Column(name = "bene_sk")
-  private long beneSk;
 
   @Column(name = "clm_type_cd")
   private ClaimTypeCode claimTypeCode;
@@ -52,24 +53,33 @@ public class Claim {
   @Embedded private AdjudicationCharge adjudicationCharge;
 
   @OneToOne
+  @JoinColumn(name = "bene_sk")
+  private BeneficiarySimple beneficiary;
+
+  @OneToOne
   @JoinColumn(name = "clm_dt_sgntr_sk")
   private ClaimDateSignature claimDateSignature;
 
+  @Nullable
   @OneToOne
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimLine> claimLines;
+  private Set<ClaimLine> claimLines;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimValue> claimValues;
+  private Set<ClaimValue> claimValues;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimProcedure> claimProcedures;
+  private Set<ClaimProcedure> claimProcedures;
+
+  private Optional<ClaimInstitutional> getClaimInstitutional() {
+    return Optional.ofNullable(claimInstitutional);
+  }
 
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
@@ -78,6 +88,8 @@ public class Claim {
    */
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
+    eob.setId(String.valueOf(claimUniqueId));
+    eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
@@ -94,10 +106,10 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
-
+    var institutional = getClaimInstitutional();
     Stream.of(
             claimExtensions.toFhir(),
-            claimInstitutional.getExtensions().toFhir(),
+            institutional.map(i -> i.getExtensions().toFhir()).orElse(List.of()),
             List.of(claimDateSignature.getClaimProcessDate().toFhir()))
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
@@ -124,7 +136,9 @@ public class Claim {
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
-            claimInstitutional.getSupportingInfo().toFhir(supportingInfoFactory))
+            institutional
+                .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
+                .orElse(List.of()))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
@@ -136,9 +150,13 @@ public class Claim {
               eob.addCareTeam(c.careTeam());
               eob.addContained(c.practitioner());
             });
-    eob.addAdjudication(claimInstitutional.getPpsDrgWeight().toFhir());
-    eob.addBenefitBalance(
-        benefitBalance.toFhir(claimInstitutional.getBenefitBalanceInstitutional(), claimValues));
+    institutional.ifPresent(
+        i -> {
+          eob.addAdjudication(i.getPpsDrgWeight().toFhir());
+          eob.addBenefitBalance(
+              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), claimValues));
+        });
+
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     eob.addAdjudication(adjudicationCharge.toFhir());
     return eob;

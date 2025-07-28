@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
@@ -36,10 +36,75 @@ public class PatientSearchIT extends IntegrationTestBase {
   void patientSearchById(SearchStyleEnum searchStyle) {
     var patientBundle =
         searchBundle()
-            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"))
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("405764107"))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
+
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdMergedBene(SearchStyleEnum searchStyle) {
+    var patientBundle =
+        searchBundle()
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("792872340"))
+            .usingStyle(searchStyle)
+            .execute();
+
+    var patients =
+        patientBundle.getEntry().stream()
+            .map(Bundle.BundleEntryComponent::getResource)
+            .filter(Patient.class::isInstance)
+            .map(Patient.class::cast)
+            .toList();
+
+    assertEquals(1, patientBundle.getEntry().size());
+    assertTrue(
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .allMatch(link -> Patient.LinkType.REPLACEDBY.equals(link.getType())),
+        "Expected all Patient.link.type values to be 'replaced by'");
+
+    assertTrue(
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .map(link -> link.getOther().getDisplay())
+            .anyMatch("178083966"::equals),
+        "Expected one link with display '178083966'");
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdUnMergedWithHistoricKillCredit(SearchStyleEnum searchStyle) {
+    var patientBundle =
+        searchBundle()
+            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("178083966"))
+            .usingStyle(searchStyle)
+            .execute();
+
+    var patients =
+        patientBundle.getEntry().stream()
+            .map(Bundle.BundleEntryComponent::getResource)
+            .filter(Patient.class::isInstance)
+            .map(Patient.class::cast)
+            .toList();
+
+    assertEquals(1, patientBundle.getEntry().size());
+    assertTrue(
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .allMatch(link -> Patient.LinkType.REPLACES.equals(link.getType())),
+        "Expected all Patient.link.type values to be 'replaces'");
+
+    assertTrue(
+        patients.stream()
+            .flatMap(patient -> patient.getLink().stream())
+            .map(link -> link.getOther().getDisplay())
+            .anyMatch("792872340"::equals),
+        "Expected one link with display '792872340'");
 
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
   }
@@ -91,14 +156,14 @@ public class PatientSearchIT extends IntegrationTestBase {
         () ->
             searchBundle()
                 .where(
-                    new TokenClientParam(Patient.SP_IDENTIFIER).exactly().identifier("181968400"))
+                    new TokenClientParam(Patient.SP_IDENTIFIER).exactly().identifier("405764107"))
                 .execute());
   }
 
   private static Stream<Arguments> patientSearchByDate() {
     return Stream.of(
         Arguments.of(
-            new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("181968400"), "181968400"),
+            new TokenClientParam(Patient.SP_RES_ID).exactly().identifier("405764107"), "405764107"),
         Arguments.of(
             new TokenClientParam(Patient.SP_IDENTIFIER)
                 .exactly()
@@ -119,21 +184,19 @@ public class PatientSearchIT extends IntegrationTestBase {
             .getFirst();
 
     for (var searchStyle : SearchStyleEnum.values()) {
-      // TODO: fix date search. It currently doesn't check the precision appropriately.
-      // Search date exact
-      //      var patientBundle =
-      //          searchBundle()
-      //              .where(searchCriteriaId)
-      //              .and(
-      //                  new DateClientParam(Constants.PARAM_LASTUPDATED)
-      //                      .exactly()
-      //                      .day(DateUtil.toDate(lastUpdated)))
-      //              .usingStyle(searchStyle)
-      //              .execute();
-      //      assertEquals(1, patientBundle.getEntry().size());
+      var patientBundle =
+          searchBundle()
+              .where(searchCriteriaId)
+              .and(
+                  new DateClientParam(Constants.PARAM_LASTUPDATED)
+                      .exactly()
+                      .day(DateUtil.toDate(lastUpdated)))
+              .usingStyle(searchStyle)
+              .execute();
+      assertEquals(1, patientBundle.getEntry().size());
 
       // Search date greater than
-      var patientBundle =
+      patientBundle =
           searchBundle()
               .where(searchCriteriaId)
               .and(
@@ -151,7 +214,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .before()
-                      .day(DateUtil.toDate(lastUpdated)))
+                      .millis(DateUtil.toDate(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(0, patientBundle.getEntry().size());
@@ -163,7 +226,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .afterOrEquals()
-                      .day(DateUtil.toDate(lastUpdated)))
+                      .millis(DateUtil.toDate(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -175,7 +238,7 @@ public class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .beforeOrEquals()
-                      .day(DateUtil.toDate(lastUpdated.plusDays(1))))
+                      .millis(DateUtil.toDate(lastUpdated.plusDays(1))))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -216,7 +279,7 @@ public class PatientSearchIT extends IntegrationTestBase {
                 .where(
                     new DateClientParam(Constants.PARAM_LASTUPDATED)
                         .afterOrEquals()
-                        .day(DateUtil.toDate(LocalDate.of(2024, 1, 1))))
+                        .day(DateUtil.toDate(ZonedDateTime.parse("2024-01-01T00:00:00Z"))))
                 .execute());
   }
 }

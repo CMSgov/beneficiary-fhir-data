@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -1450,17 +1451,23 @@ public enum ClaimLineRevenueCenterCode {
    * @param code database code
    * @return revenue center code
    */
-  public static ClaimLineRevenueCenterCode fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+  public static Optional<ClaimLineRevenueCenterCode> tryFromCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
-  CodeableConcept toFhir() {
-    return new CodeableConcept()
-        .addCoding(
-            new Coding()
-                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_CODE)
-                .setCode(code)
-                .setDisplay(display))
-        .addCoding(new Coding().setSystem(SystemUrls.NUBC_REVENUE_CODES).setCode(code));
+  CodeableConcept toFhir(Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode) {
+    var codeableConcept =
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_CODE)
+                    .setCode(code)
+                    .setDisplay(display))
+            .addCoding(new Coding().setSystem(SystemUrls.NUBC_REVENUE_CODES).setCode(code));
+    deductibleCoinsuranceCode.ifPresent(
+        c -> {
+          codeableConcept.addCoding(c.toFhir());
+        });
+    return codeableConcept;
   }
 }

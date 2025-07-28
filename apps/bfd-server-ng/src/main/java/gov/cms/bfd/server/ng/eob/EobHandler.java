@@ -1,10 +1,15 @@
 package gov.cms.bfd.server.ng.eob;
 
+import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.model.PatientReferenceFactory;
+import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -27,14 +32,57 @@ public class EobHandler {
    * @return patient
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId) {
-    var claim = claimRepository.findById(fhirId);
+    return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange());
+  }
 
-    return claim.map(
-        c -> {
-          var beneXrefSk = beneficiaryRepository.getXrefBeneSk(c.getBeneSk()).get();
-          var eob = c.toFhir();
-          eob.setPatient(PatientReferenceFactory.toFhir(beneXrefSk));
-          return eob;
-        });
+  /**
+   * Search for claims data by bene.
+   *
+   * @param beneSk bene sk
+   * @param count record count
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @param startIndex start index
+   * @param sourceIds sourceIds
+   * @return bundle
+   */
+  public Bundle searchByBene(
+      Long beneSk,
+      Optional<Integer> count,
+      DateTimeRange serviceDate,
+      DateTimeRange lastUpdated,
+      Optional<Integer> startIndex,
+      List<ClaimSourceId> sourceIds) {
+    var beneXrefSk = beneficiaryRepository.getXrefBeneSk(beneSk);
+    // Don't return data for historical beneSks
+    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+      return new Bundle();
+    }
+    var eobs =
+        claimRepository.findByBeneXrefSk(
+            beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
+    return FhirUtil.bundleOrDefault(
+        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+  }
+
+  /**
+   * Search for claims data by claim ID.
+   *
+   * @param claimUniqueId claim ID
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @return bundle
+   */
+  public Bundle searchById(
+      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
+    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
+    return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
+  }
+
+  private Optional<ExplanationOfBenefit> searchByIdInner(
+      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
+    var claim = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
+
+    return claim.map(Claim::toFhir);
   }
 }

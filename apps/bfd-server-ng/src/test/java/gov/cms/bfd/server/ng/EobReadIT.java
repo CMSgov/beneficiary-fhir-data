@@ -11,9 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@EnableConfigurationProperties
 public class EobReadIT extends IntegrationTestBase {
   private IReadTyped<ExplanationOfBenefit> eobRead() {
     return getFhirClient().read().resource(ExplanationOfBenefit.class);

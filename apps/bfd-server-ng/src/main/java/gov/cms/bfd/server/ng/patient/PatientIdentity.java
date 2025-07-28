@@ -72,7 +72,7 @@ public class PatientIdentity {
     mbiEffectiveDate.ifPresent(
         e -> {
           var period = new Period().setStart(DateUtil.toDate(e));
-          mbiObsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(e)));
+          mbiObsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(o)));
           identifier.setPeriod(period);
         });
 
@@ -118,7 +118,8 @@ public class PatientIdentity {
     var link = new Patient.PatientLinkComponent();
     link.setType(linkType);
     var reference = new Reference();
-    reference.setId(beneSk);
+    reference.setReference("Patient/" + beneSk);
+    reference.setDisplay(beneSk);
     link.setOther(reference);
     return link;
   }

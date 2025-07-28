@@ -33,7 +33,7 @@ public class ClaimProcedure {
   private Optional<String> procedureCode;
 
   @Column(name = "clm_prod_type_cd")
-  private ClaimDiagnosisType diagnosisType;
+  private Optional<ClaimDiagnosisType> diagnosisType;
 
   @Column(name = "clm_poa_ind")
   private Optional<String> claimPoaIndicator;
@@ -61,7 +61,7 @@ public class ClaimProcedure {
                     .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_PROCEDURE_TYPE)
                     .setCode(code)));
     if (procedureDate.isAfter(DEFAULT_PROCEDURE_DATE)) {
-      procedure.setDate(DateUtil.toDate(procedureDate));
+      procedure.setDateElement(DateUtil.toFhirDate(procedureDate));
     }
     procedure.setProcedure(
         new CodeableConcept(
@@ -78,11 +78,12 @@ public class ClaimProcedure {
     }
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(claimProcedureId.getRowNumber());
-    diagnosis.addType(
-        new CodeableConcept(
-            new Coding()
-                .setSystem(diagnosisType.getSystem())
-                .setCode(diagnosisType.getFhirCode())));
+    diagnosisType.ifPresent(
+        d -> {
+          diagnosis.addType(
+              new CodeableConcept(new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode())));
+        });
+
     diagnosis.setDiagnosis(
         new CodeableConcept(
             new Coding().setSystem(icdIndicator.getDiagnosisSytem()).setCode(diagnosisCode.get())));

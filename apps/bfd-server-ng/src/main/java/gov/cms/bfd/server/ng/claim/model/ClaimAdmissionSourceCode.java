@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -126,8 +127,8 @@ public enum ClaimAdmissionSourceCode {
    * @param code database code
    * @return claim admission source code
    */
-  public static ClaimAdmissionSourceCode fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+  public static Optional<ClaimAdmissionSourceCode> tryFromCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

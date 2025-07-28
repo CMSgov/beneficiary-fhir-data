@@ -24,7 +24,7 @@ locals {
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
-  latest_bfd_release       = module.terraservice.latest_bfd_release
+  bfd_version              = module.terraservice.bfd_version
   ssm_config               = module.terraservice.ssm_config
   env_key_alias            = module.terraservice.env_key_alias
   env_key_arn              = module.terraservice.env_key_arn
@@ -38,7 +38,6 @@ locals {
   rds_aurora_family                       = "aurora-postgresql16"
   rds_cluster_id                          = nonsensitive(local.ssm_config["/bfd/database/rds_cluster_identifier"])
   rds_cluster_sg                          = nonsensitive(local.ssm_config["/bfd/database/rds_security_group"])
-  rds_backup_retention_period             = nonsensitive(local.ssm_config["/bfd/database/rds_backup_retention_period"])
   rds_iam_database_authentication_enabled = nonsensitive(local.ssm_config["/bfd/database/rds_iam_database_authentication_enabled"])
   rds_instance_class                      = nonsensitive(local.ssm_config["/bfd/database/rds_instance_class"])
   rds_min_reader_nodes                    = nonsensitive(local.ssm_config["/bfd/database/scaling/min_nodes"])
@@ -131,7 +130,6 @@ resource "aws_rds_cluster" "this" {
   apply_immediately           = false
 
   backtrack_window                    = 0
-  backup_retention_period             = local.rds_backup_retention_period
   cluster_identifier                  = local.rds_cluster_id
   copy_tags_to_snapshot               = true
   db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.this.name
@@ -140,7 +138,6 @@ resource "aws_rds_cluster" "this" {
   iam_database_authentication_enabled = local.rds_iam_database_authentication_enabled
   kms_key_id                          = local.env_key_arn
   port                                = 5432
-  preferred_backup_window             = "05:00-06:00"
   preferred_maintenance_window        = "fri:07:00-fri:08:00"
   skip_final_snapshot                 = true
   storage_encrypted                   = true
@@ -149,7 +146,7 @@ resource "aws_rds_cluster" "this" {
   # if deletion_protection_override is null, use the default value for the environment, otherwise use the override
   deletion_protection = !local.is_ephemeral_env
 
-  tags = { "cpm backup" = local.is_ephemeral_env ? "" : "Weekly", "Layer" = "data" }
+  tags = { "bfd_backup" = local.is_ephemeral_env ? "" : "daily3_weekly35", "Layer" = "data", "AWS_Backup" = "self_backup" }
 
   # master username and password are null when a snapshot identifier is specified (clone and ephemeral support)
   master_password     = local.rds_master_password

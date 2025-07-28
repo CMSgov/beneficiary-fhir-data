@@ -1,8 +1,19 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +54,42 @@ public class FhirInputConverter {
   }
 
   /**
+   * Converts an {@link NumberParam} to an optional int.
+   *
+   * @param numberParam number param
+   * @return int value
+   */
+  public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
+    if (numberParam == null) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(numberParam.getValue().intValueExact());
+    } catch (ArithmeticException ex) {
+      throw new InvalidRequestException("Numeric input was not in a valid format");
+    }
+  }
+
+  /**
+   * Converts a {@link ReferenceParam} to a numeric ID type.
+   *
+   * @param reference reference
+   * @param validResourceType name of the resource that belongs to the ID
+   * @return ID
+   */
+  public static Long toLong(@Nullable ReferenceParam reference, String validResourceType) {
+    if (reference == null) {
+      throw new InvalidRequestException("Reference is missing");
+    }
+    var resourceType = reference.getResourceType();
+    if (!StringUtils.isBlank(resourceType) && !resourceType.equals(validResourceType)) {
+      throw new InvalidRequestException("Invalid resource type");
+    }
+
+    return reference.getIdPartAsLong();
+  }
+
+  /**
    * Converts a {@link TokenParam} with a required system to its {@link String} value.
    *
    * @param tokenParam FHIR token
@@ -79,5 +126,50 @@ public class FhirInputConverter {
     String rawCompositeIdStr = coverageId.getIdPart();
 
     return CoverageCompositeId.parse(rawCompositeIdStr);
+  }
+
+  /**
+   * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
+   * enum values.
+   *
+   * @param tag The code from the _tag parameter.
+   * @return A list of matching ClaimSourceId enums.
+   */
+  public static List<ClaimSourceId> getSourceIdsForTagCode(@Nullable TokenParam tag) {
+
+    if (tag == null) {
+      return Collections.emptyList();
+    }
+
+    Set<String> SUPPORTED_ADJUDICATION_STATUSES =
+        Set.of(
+            IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
+            IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
+
+    var systemFromTag = tag.getSystem();
+
+    if (systemFromTag != null && !systemFromTag.equals(SystemUrls.SYS_ADJUDICATION_STATUS)) {
+      throw new InvalidRequestException(
+          "Unsupported system for _tag adjudication status. Expected system '"
+              + SystemUrls.SYS_ADJUDICATION_STATUS
+              + "'.");
+    }
+
+    var statusValue = tag.getValue();
+
+    if (!SUPPORTED_ADJUDICATION_STATUSES.contains(statusValue.toUpperCase())) {
+      throw new InvalidRequestException(
+          "Unsupported _tag value for adjudication status. Supported values are '"
+              + IdrConstants.ADJUDICATION_STATUS_PARTIAL
+              + "' and '"
+              + IdrConstants.ADJUDICATION_STATUS_FINAL
+              + "'.");
+    }
+    return Stream.of(ClaimSourceId.values())
+        .filter(
+            sourceId ->
+                sourceId.getAdjudicationStatus().isPresent()
+                    && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
+        .toList();
   }
 }

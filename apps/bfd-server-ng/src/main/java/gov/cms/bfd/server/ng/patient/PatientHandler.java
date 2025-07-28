@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.patient;
 
-import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -8,7 +8,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,8 @@ public class PatientHandler {
   public Bundle searchByLogicalId(final Long fhirId, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
-    return singleOrDefaultBundle(beneficiary);
+    return FhirUtil.bundleOrDefault(
+        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   /**
@@ -55,40 +55,25 @@ public class PatientHandler {
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
 
-    return singleOrDefaultBundle(beneficiary);
+    return FhirUtil.bundleOrDefault(
+        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
-    var identities = beneficiaryRepository.getPatientIdentities(beneficiary.getBeneSk());
+    var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getXrefSk());
     var patient = beneficiary.toFhir();
 
     for (var id : identities) {
-      id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+      // check for merged bene and if mbi identifier has already been added to the patient
+      if (!beneficiary.isMergedBeneficiary()
+          && patient.getIdentifier().stream()
+              .noneMatch(identifier -> identifier.getValue().equals(id.mbi.orElse(null)))) {
+        id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+      }
+
       id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
     }
 
     return patient;
-  }
-
-  private Bundle singleOrDefaultBundle(Optional<Beneficiary> beneficiary) {
-    if (beneficiary.isEmpty()) {
-      return defaultBundle();
-    }
-    return beneficiary.map(this::singleBundle).orElseGet(this::defaultBundle);
-  }
-
-  private Bundle defaultBundle() {
-    var lastUpdated = beneficiaryRepository.beneficiaryLastUpdated();
-    var bundle = new Bundle();
-    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(lastUpdated)));
-    return bundle;
-  }
-
-  private Bundle singleBundle(Beneficiary beneficiary) {
-    var patient = beneficiary.toFhir();
-    var lastUpdated = patient.getMeta().getLastUpdated();
-    var bundle = new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(patient));
-    bundle.setMeta(new Meta().setLastUpdated(lastUpdated));
-    return bundle;
   }
 }

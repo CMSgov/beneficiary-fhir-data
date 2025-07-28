@@ -3,8 +3,6 @@ locals {
   # AutoScaling, so we need to enable their policy fragements dynamically
   autoscaling_iam_role_arn     = one(data.aws_iam_roles.autoscaling.arns)
   rds_autoscaling_iam_role_arn = one(data.aws_iam_roles.rds_autoscaling.arns)
-  cpm_iam_role_arn             = one(data.aws_iam_roles.cpm.arns)
-
   kms_default_deletion_window_days = 30
 }
 
@@ -16,10 +14,6 @@ data "aws_iam_roles" "autoscaling" {
 data "aws_iam_roles" "rds_autoscaling" {
   name_regex  = "AWSServiceRoleForApplicationAutoScaling_RDSCluster"
   path_prefix = "/aws-service-role/rds.application-autoscaling.amazonaws.com/"
-}
-
-data "aws_iam_roles" "cpm" {
-  name_regex = "aws-cpm-assume-roleV2"
 }
 
 data "aws_iam_policy_document" "autoscaling" {

@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 /** Institutional claim line table. */
 @Getter
@@ -28,6 +29,7 @@ public class ClaimLineInstitutional {
 
   @Embedded private AdjudicationChargeInstitutional adjudicationCharge;
 
+  @Nullable
   @OneToOne
   @JoinColumn(name = "clm_ansi_sgntr_sk")
   private ClaimAnsiSignature ansiSignature;
