@@ -1,5 +1,7 @@
 import time
-from datetime import datetime, timezone, UTC
+from collections.abc import Generator
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import cast
 
 import psycopg
@@ -20,14 +22,16 @@ testcontainers_config.ryuk_disabled = True
 
 
 @pytest.fixture(scope="session", autouse=True)
-def psql_url():
+def psql_url() -> Generator[str]:
     with PostgresContainer("postgres:16", driver="") as postgres:
         psql_url = postgres.get_connection_url()
         conn = psycopg.connect(psql_url)
 
-        conn.execute(open("./mock-idr.sql", "r").read())  # type: ignore
+        with Path("./mock-idr.sql").open() as f:
+            conn.execute(f.read())  # type: ignore
         conn.commit()
-        conn.execute(open("./bfd.sql", "r").read())  # type: ignore
+        with Path("./bfd.sql").open() as f:
+            conn.execute(f.read())  # type: ignore
         conn.commit()
 
         load_from_csv(conn, "./test_samples1")
@@ -36,7 +40,7 @@ def psql_url():
 
 
 class TestPipeline:
-    def test_pipeline(self, psql_url: str):
+    def test_pipeline(self, psql_url: str) -> None:
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
         conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")

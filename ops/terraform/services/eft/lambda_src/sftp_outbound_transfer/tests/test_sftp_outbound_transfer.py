@@ -1,9 +1,7 @@
-# pylint: disable=missing-class-docstring,missing-function-docstring,missing-module-docstring
-# pylint: disable=too-many-lines,too-many-arguments,too-many-public-methods
 import calendar
 import json
 from base64 import b64encode
-from collections.abc import Callable
+from collections.abc import Generator
 from datetime import UTC, datetime
 from io import StringIO
 from typing import Any
@@ -46,10 +44,10 @@ DEFAULT_MOCK_BUCKET = "mock-bucket"
 DEFAULT_MOCK_BUCKET_ROOT_DIR = "mock_root"
 DEFAULT_MOCK_PENDING_DIR = "out"
 DEFAULT_MOCK_OBJECT_FILENAME = "file"
-DEFAULT_MOCK_OBJECT_KEY = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/{DEFAULT_MOCK_OBJECT_FILENAME}"
+DEFAULT_MOCK_OBJECT_KEY = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/{DEFAULT_MOCK_OBJECT_FILENAME}"  # noqa: E501
 DEFAULT_MOCK_BFD_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:123456789012:mock-topic"
 DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER = {
-    f"{DEFAULT_MOCK_PARTNER_NAME}": f"arn:aws:sns:us-east-1:123456789012:mock-topic-{DEFAULT_MOCK_PARTNER_NAME}"
+    f"{DEFAULT_MOCK_PARTNER_NAME}": f"arn:aws:sns:us-east-1:123456789012:mock-topic-{DEFAULT_MOCK_PARTNER_NAME}"  # noqa: E501
 }
 DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER_JSON = json.dumps(DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER)
 DEFAULT_MOCK_GLOBAL_CONFIG = GlobalSsmConfig(
@@ -86,7 +84,12 @@ PARAMIKO_PATCH_PATH = f"{MODULE_UNDER_TEST}.{paramiko.__name__}"
 
 mock_boto3_client = mock.Mock()
 mock_boto3_resource = mock.Mock()
-mock_new_topic: Callable[[str], str] = lambda topic_arn: topic_arn
+
+
+def mock_new_topic(topic_arn: str) -> str:
+    return topic_arn
+
+
 """Lambda that modifies the Topic function to return a string representing the Topic ARN passed to
 the function for use in tests so that the Topic can be discerned for a given notification and
 asserted upon"""
@@ -119,15 +122,17 @@ def generate_event(
         "Records": [
             {
                 "Sns": {
-                    "Message": json.dumps({
-                        "Records": [
-                            {
-                                "eventName": event_name,
-                                "eventTime": event_time_iso,
-                                "s3": {"object": {"key": key}},
-                            }
-                        ]
-                    })
+                    "Message": json.dumps(
+                        {
+                            "Records": [
+                                {
+                                    "eventName": event_name,
+                                    "eventTime": event_time_iso,
+                                    "s3": {"object": {"key": key}},
+                                }
+                            ]
+                        }
+                    )
                 }
             }
         ]
@@ -150,7 +155,7 @@ def generate_event(
 @mock.patch(SEND_NOTIFICATION_PATCH_PATH, new=mock_send_notification)
 class TestUpdatePipelineSlisHandler:
     @pytest.fixture(autouse=True)
-    def run_before_and_after_tests(self):
+    def run_before_and_after_tests(self) -> Generator[Any, Any, Any]:
         # Reset global/partner SSM config default return values before each test
         mock_global_ssm.from_ssm.return_value = DEFAULT_MOCK_GLOBAL_CONFIG
         mock_partner_ssm.from_ssm.return_value = DEFAULT_MOCK_PARTNER_CONFIG
@@ -172,7 +177,7 @@ class TestUpdatePipelineSlisHandler:
         mock_send_notification.reset_mock(side_effect=True, return_value=True)
 
     @pytest.mark.parametrize(
-        "event,expected_error",
+        ("event", "expected_error"),
         [
             (None, TypeError),
             ("", TypeError),
@@ -193,9 +198,9 @@ class TestUpdatePipelineSlisHandler:
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps({
-                                    "Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]
-                                })
+                                "Message": json.dumps(
+                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
+                                )
                             }
                         }
                     ]
@@ -208,15 +213,17 @@ class TestUpdatePipelineSlisHandler:
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps({
-                                    "Records": [
-                                        {
-                                            "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                            "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                            "s3": {"object": {}},
-                                        }
-                                    ]
-                                })
+                                "Message": json.dumps(
+                                    {
+                                        "Records": [
+                                            {
+                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                                "s3": {"object": {}},
+                                            }
+                                        ]
+                                    }
+                                )
                             }
                         }
                     ]
@@ -226,8 +233,10 @@ class TestUpdatePipelineSlisHandler:
         ],
     )
     def test_it_raises_exception_and_sends_notification_if_event_is_invalid(
-        self, event: Any, expected_error: type[Exception]
-    ):
+        self,
+        event: Any,  # noqa: ANN401
+        expected_error: type[Exception],
+    ) -> None:
         with pytest.raises(expected_error):
             handler(event=event, context=mock_lambda_context)
 
@@ -238,7 +247,7 @@ class TestUpdatePipelineSlisHandler:
         assert isinstance(actual_notification.details, UnknownErrorDetails)
         assert actual_notification.details.error_name == expected_error.__name__
 
-    def test_it_raises_invalid_key_error_and_sends_notification_if_event_is_invalid(self):
+    def test_it_raises_invalid_key_error_and_sends_notification_if_event_is_invalid(self) -> None:
         # Missing the root dir
         event_with_invalid_key = generate_event(
             key=f"{DEFAULT_MOCK_PARTNER_HOME_DIR}/out/{DEFAULT_MOCK_OBJECT_FILENAME}"
@@ -256,7 +265,7 @@ class TestUpdatePipelineSlisHandler:
 
     def test_it_raises_unknown_partner_error_and_sends_notification_if_global_config_is_invalid(
         self,
-    ):
+    ) -> None:
         event = generate_event()
         mock_global_ssm.from_ssm.return_value = GlobalSsmConfig(
             sftp_connect_timeout=10,
@@ -281,7 +290,9 @@ class TestUpdatePipelineSlisHandler:
         assert isinstance(actual_notification.details, TransferFailedDetails)
         assert actual_notification.details.error_name == UnknownPartnerError.__name__
 
-    def test_it_raises_invalid_partner_error_and_sends_notifications_if_event_is_invalid(self):
+    def test_it_raises_invalid_partner_error_and_sends_notifications_if_event_is_invalid(
+        self,
+    ) -> None:
         invalid_event = generate_event(
             key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/invalid/{DEFAULT_MOCK_OBJECT_FILENAME}"
         )
@@ -304,7 +315,7 @@ class TestUpdatePipelineSlisHandler:
 
     def test_it_raises_unrecognized_file_error_and_sends_notifications_if_file_is_unrecognized(
         self,
-    ):
+    ) -> None:
         invalid_event = generate_event(
             key=f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/unknown_file"
         )
@@ -325,7 +336,9 @@ class TestUpdatePipelineSlisHandler:
             for topic_arn, _ in mocked_calls
         )
 
-    def test_it_raises_sftp_connection_error_and_sends_notifications_if_connection_fails(self):
+    def test_it_raises_sftp_connection_error_and_sends_notifications_if_connection_fails(
+        self,
+    ) -> None:
         event = generate_event()
         mock_ssh_client.connect.side_effect = paramiko.SSHException()
 
@@ -360,7 +373,7 @@ class TestUpdatePipelineSlisHandler:
             == 2
         )
 
-    def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self):
+    def test_it_raises_sftp_transfer_error_and_sends_notifications_if_transfer_fails(self) -> None:
         event = generate_event()
         mock_sftp_client.putfo.side_effect = OSError()
 
@@ -395,13 +408,19 @@ class TestUpdatePipelineSlisHandler:
             == 2
         )
 
-    def test_it_executes_sftp_transfer_process_if_event_is_valid(self):
+    def test_it_executes_sftp_transfer_process_if_event_is_valid(self) -> None:
         event = generate_event()
         mock_host_keys = mock.Mock()
         mock_ssh_client.get_host_keys.return_value = mock_host_keys
-        mock_rsakey_func: Callable[[bytes], str] = lambda data: b64encode(data).decode("utf-8")
+
+        def mock_rsakey_func(data: bytes) -> str:
+            return b64encode(data).decode("utf-8")
+
         mock_paramiko.RSAKey.side_effect = mock_rsakey_func
-        mock_rsakey_privkey_func: Callable[[StringIO], str] = lambda file_obj: file_obj.getvalue()
+
+        def mock_rsakey_privkey_func(file_obj: StringIO) -> str:
+            return file_obj.getvalue()
+
         mock_paramiko.RSAKey.from_private_key.side_effect = mock_rsakey_privkey_func
         mock_s3_client = mock.Mock()
         mock_boto3_client.return_value = mock_s3_client
@@ -424,7 +443,7 @@ class TestUpdatePipelineSlisHandler:
         assert actual_s3_download_obj_key == expected_s3_download_obj_key
 
         actual_sftp_putfo_path = mock_sftp_client.putfo.call_args.kwargs["remotepath"]
-        expected_sftp_putfo_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"
+        expected_sftp_putfo_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"  # noqa: E501
         assert actual_sftp_putfo_path == expected_sftp_putfo_path
 
         actual_sftp_chmod_data = mock_sftp_client.chmod.call_args.kwargs
@@ -434,7 +453,7 @@ class TestUpdatePipelineSlisHandler:
         actual_sftp_rename_data = mock_sftp_client.rename.call_args.kwargs
         expected_sftp_rename_data = {
             "oldpath": expected_sftp_putfo_path,
-            "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",
+            "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",  # noqa: E501
         }
         assert actual_sftp_rename_data == expected_sftp_rename_data
 

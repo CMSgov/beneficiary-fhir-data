@@ -1,10 +1,11 @@
 """Members of this file/module are related to writing performance statistics to a user-specified
-data "store" (such as to file or AWS S3)"""
+data "store" (such as to file or AWS S3).
+"""
 
 import json
 import logging
-import os
 from dataclasses import asdict
+from pathlib import Path
 
 from gevent import monkey
 
@@ -15,13 +16,13 @@ from common.stats.stats_config import StatsConfiguration, StatsStorageType
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 monkey.patch_all()
-import boto3
+import boto3  # noqa: E402
 
 __s3_client = boto3.client("s3")
 
 
 def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
-    """Writes aggregated performance stats to user-specified storage
+    """Write aggregated performance stats to user-specified storage.
 
     Args:
         stats_config (StatsConfiguration): The user-specified configuration for stats-related
@@ -38,7 +39,7 @@ def write_stats(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
 
 
 def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
-    """Writes the JSON-formatted statistics to the given path
+    """Write the JSON-formatted statistics to the given path.
 
     Args:
         path (str, optional): The _parent_ path of the file to write to disk. Defaults to ''.
@@ -52,9 +53,8 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
     stats_hash = stats.metadata.hash
     stats_timestamp = stats.metadata.timestamp
     parent_path = stats_config.stats_store_file_path or "./"
-    full_path = os.path.join(parent_path, f"{stats_timestamp}-{stats_hash}.stats.json")
-    with open(
-        full_path,
+    full_path = Path(parent_path) / f"{stats_timestamp}-{stats_hash}.stats.json"
+    with full_path.open(
         mode="x",
         encoding="utf-8",
     ) as json_file:
@@ -64,8 +64,8 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
 
 
 def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
-    """Writes the JSON-formatted statistics to the given S3 bucket to a pre-determined path
-    following BFD Insights data organization standards
+    """Write the JSON-formatted statistics to the given S3 bucket to a pre-determined path
+    following BFD Insights data organization standards.
 
     Args:
         bucket (str): The S3 bucket in AWS to write the JSON to

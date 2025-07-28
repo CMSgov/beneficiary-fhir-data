@@ -4,7 +4,8 @@ import json
 import logging
 import re
 import ssl
-from typing import Any, Callable, List, Mapping, Optional, Union
+from collections.abc import Callable, Mapping
+from typing import Any
 
 from locust import FastHttpUser, events
 from locust.argument_parser import LocustArgumentParser
@@ -26,12 +27,12 @@ Also overriden by the value of --stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener
-def _(parser: LocustArgumentParser, **kwargs) -> None:
+def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
     custom_args.register_custom_args(parser)
 
 
 @events.init.add_listener
-def _(environment: Environment, **kwargs) -> None:
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
@@ -43,8 +44,8 @@ def _(environment: Environment, **kwargs) -> None:
 
 
 @events.quitting.add_listener
-def _(environment: Environment, **kwargs) -> None:
-    """Run one-time teardown tasks after the tests have completed
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+    """Run one-time teardown tasks after the tests have completed.
 
     Args:
         environment (Environment): The current Locust environment
@@ -108,14 +109,14 @@ def _(environment: Environment, **kwargs) -> None:
 
 
 def set_comparisons_metadata_path(path: str) -> None:
-    """Sets the file path used to define metadata about stat comparisons (i.e. failure and warning
+    """Set the file path used to define metadata about stat comparisons (i.e. failure and warning
     percent ratio thresholds, etc.) for a given Locustfile/test suite. Should be called in the
-    Locustfile's module scope
+    Locustfile's module scope.
 
     Args:
         path (str): Path to a JSON file describing stat comparison metadata
     """
-    global _COMPARISONS_METADATA_PATH
+    global _COMPARISONS_METADATA_PATH  # noqa: PLW0603
     _COMPARISONS_METADATA_PATH = path
 
 
@@ -134,7 +135,7 @@ class BFDUserBase(FastHttpUser):
     # Do we terminate the tests when a test runs out of data and paginated URLs?
     END_ON_NO_DATA = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 
         # Load configuration needed for making requests to the FHIR server
@@ -149,7 +150,7 @@ class BFDUserBase(FastHttpUser):
         self.has_reported_no_data = []
 
     def ssl_context_factory(self) -> ssl.SSLContext:
-        """Configures the SSLContext for FastHttpUser requests. Specifically, the context returned
+        """Configure the SSLContext for FastHttpUser requests. Specifically, the context returned
         by this method sets the PEM cert to the cert provided via configuration or the CLI.
 
         Returns:
@@ -169,7 +170,9 @@ class BFDUserBase(FastHttpUser):
             context.load_verify_locations(cafile=self.server_public_key)
         return context
 
-    def get_by_url(self, url: str, headers: Optional[Mapping[str, str]] = None, name: str = ""):
+    def get_by_url(
+        self, url: str, headers: Mapping[str, str] | None = None, name: str = ""
+    ) -> None:
         """Send one GET request and parse the response for pagination.
 
         This method extends Locust's HttpUser::client.get() method to make creating the requests
@@ -177,7 +180,6 @@ class BFDUserBase(FastHttpUser):
         opposed to part of the path, the cert and verify arguments (which will never change) are
         already set, and Cache-Control headers are automatically set to ensure caching is disabled.
         """
-
         safe_headers = {} if headers is None else headers
 
         with self.client.get(
@@ -203,10 +205,10 @@ class BFDUserBase(FastHttpUser):
     def post_by_url(
         self,
         url: str,
-        headers: Optional[dict[str, str]] = None,
-        body: Optional[dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
+        body: dict[str, str] | None = None,
         name: str = "",
-    ):
+    ) -> None:
         """Send one POST request and parse the response for pagination.
 
         This method extends Locust's HttpUser::client.post() method to make creating the requests
@@ -214,7 +216,6 @@ class BFDUserBase(FastHttpUser):
         opposed to part of the path, the cert and verify arguments (which will never change) are
         already set, and Cache-Control headers are automatically set to ensure caching is disabled.
         """
-
         safe_headers = {} if headers is None else headers
         safe_body = {} if body is None else body
 
@@ -242,10 +243,10 @@ class BFDUserBase(FastHttpUser):
     def run_task(
         self,
         url_callback: Callable,
-        headers: Optional[dict[str, str]] = None,
-        body: Optional[dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
+        body: dict[str, str] | None = None,
         name: str = "",
-    ):
+    ) -> None:
         """Figure out which URL we should query next and query the server.
 
         Note that the Data Pools (Bene ID, MBI, etc.) are limited and we don't want to grab a value
@@ -253,7 +254,6 @@ class BFDUserBase(FastHttpUser):
         especially if some future implementation does not always consume IDs before consuming the
         paginated URL Pool.
         """
-
         # First, see if we can generate a URL using the callback
         try:
             url = url_callback()
@@ -297,17 +297,16 @@ class BFDUserBase(FastHttpUser):
     def run_task_by_parameters(
         self,
         base_path: str,
-        params: Optional[Mapping[str, Union[str, int, List[Any]]]] = None,
-        headers: Optional[dict[str, str]] = None,
-        body: Optional[dict[str, str]] = None,
+        params: Mapping[str, str | int | list[Any]] | None = None,
+        headers: dict[str, str] | None = None,
+        body: dict[str, str] | None = None,
         name: str = "",
-    ):
-        """Run a task using a base path and parameters"""
-
+    ) -> None:
+        """Run a task using a base path and parameters."""
         safe_params = {} if params is None else params
         safe_headers = {} if headers is None else headers
 
-        def make_url():
+        def make_url() -> str:
             return create_url_path(base_path, safe_params)
 
         self.run_task(name=name, url_callback=make_url, headers=safe_headers, body=body)
@@ -315,9 +314,8 @@ class BFDUserBase(FastHttpUser):
     # Helper Functions
 
     @staticmethod
-    def __get_next_url(payload: str) -> Optional[str]:
-        """Parse the JSON response and return the "next" URL if it exists"""
-
+    def __get_next_url(payload: str) -> str | None:
+        """Parse the JSON response and return the "next" URL if it exists."""
         parsed_payload = json.loads(payload)
         for link in parsed_payload.get("link", {}):
             if "relation" in link and link["relation"] == "next":
