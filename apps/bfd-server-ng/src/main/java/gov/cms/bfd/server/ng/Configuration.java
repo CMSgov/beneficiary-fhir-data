@@ -37,6 +37,8 @@ public class Configuration {
           "/v3/fhir/swagger-ui/*",
           "/v3/fhir/api-docs",
           "/actuator",
+          // We can allow the basic health endpoint, but other actuator endpoints may show
+          // things we don't want to expose, so /actuator/* should not be allowed
           "/actuator/health",
           "/actuator/health/*",
           "/favicon.ico");

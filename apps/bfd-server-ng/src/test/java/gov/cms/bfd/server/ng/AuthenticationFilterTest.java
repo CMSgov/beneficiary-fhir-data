@@ -31,7 +31,14 @@ public class AuthenticationFilterTest {
   @Mock FilterChain filterChain;
 
   @ParameterizedTest
-  @ValueSource(strings = {"/favicon.ico", "/v3/fhir/swagger-ui", "/v3/fhir/swagger-ui/style.css"})
+  @ValueSource(
+      strings = {
+        "/favicon.ico",
+        "/v3/fhir/swagger-ui",
+        "/v3/fhir/swagger-ui/",
+        "/v3/fhir/swagger-ui/style.css",
+        "/actuator/health"
+      })
   void testAllowedPaths(String path) throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"aws"});
     when(request.getRequestURI()).thenReturn(path);
@@ -42,7 +49,7 @@ public class AuthenticationFilterTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/v3/fhir/Patient"})
+  @ValueSource(strings = {"/v3/fhir/Patient", "/actuator/random"})
   void testNotAllowedPaths(String path) throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"aws"});
     when(request.getRequestURI()).thenReturn(path);
