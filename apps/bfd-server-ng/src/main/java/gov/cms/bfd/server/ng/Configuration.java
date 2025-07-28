@@ -32,7 +32,14 @@ public class Configuration {
 
   /** Identifiers which URLS can bypass auth. */
   private static final List<String> BYPASS_AUTH_URLS =
-      List.of("/v3/fhir/swagger-ui", "/v3/fhir/api-docs", "/favicon.ico");
+      List.of(
+          "/v3/fhir/swagger-ui",
+          "/v3/fhir/swagger-ui/*",
+          "/v3/fhir/api-docs",
+          "/actuator",
+          "/actuator/health",
+          "/actuator/health/*",
+          "/favicon.ico");
 
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
@@ -78,7 +85,14 @@ public class Configuration {
    * @return boolean
    */
   public static boolean canUrlBypassAuth(String url) {
-    return BYPASS_AUTH_URLS.stream().anyMatch(url::startsWith);
+    return BYPASS_AUTH_URLS.stream().anyMatch(u -> validateUrlGlob(url, u));
+  }
+
+  private static boolean validateUrlGlob(String url, String glob) {
+    if (glob.endsWith("*")) {
+      return url.startsWith(glob.substring(0, glob.length() - 1));
+    }
+    return url.equals(glob) || url.equals(glob + "/");
   }
 
   /**
