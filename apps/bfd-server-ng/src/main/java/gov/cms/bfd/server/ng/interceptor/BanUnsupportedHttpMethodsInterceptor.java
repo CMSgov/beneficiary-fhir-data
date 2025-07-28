@@ -22,12 +22,12 @@ public class BanUnsupportedHttpMethodsInterceptor extends InterceptorAdapter {
 
   @Override
   public boolean incomingRequestPreProcessed(
-      HttpServletRequest theRequest, HttpServletResponse theResponse) {
-    RequestTypeEnum requestType = RequestTypeEnum.valueOf(theRequest.getMethod());
+      HttpServletRequest request, HttpServletResponse response) {
+    var requestType = RequestTypeEnum.valueOf(request.getMethod());
     if (allowedMethods.contains(requestType)) {
       return true;
     }
 
-    throw new MethodNotAllowedException("Method not supported: " + theRequest.getMethod());
+    throw new MethodNotAllowedException("Method not supported: " + request.getMethod());
   }
 }
