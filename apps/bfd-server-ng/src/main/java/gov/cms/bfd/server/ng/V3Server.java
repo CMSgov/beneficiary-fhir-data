@@ -3,12 +3,10 @@ package gov.cms.bfd.server.ng;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import gov.cms.bfd.server.ng.interceptor.AuthenticationInterceptor;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import jakarta.servlet.annotation.WebServlet;
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
@@ -39,11 +37,6 @@ public class V3Server extends RestfulServer {
     this.setFhirContext(FhirContext.forR4());
     this.registerProviders(resourceProviders);
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
-
-    if (!Arrays.stream(environment.getActiveProfiles())
-        .allMatch(Configuration::canProfileBypassAuth)) {
-      this.registerInterceptor(new AuthenticationInterceptor(configuration));
-    }
 
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
