@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
-from typing import Annotated, Optional, TypeVar
+from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
 
@@ -92,7 +92,7 @@ class IdrBaseModel(BaseModel):
         return cls._get_timestamp_col(BATCH_TIMESTAMP)
 
     @classmethod
-    def batch_timestamp_col_alias(cls, is_historical: bool) -> Optional[str]:
+    def batch_timestamp_col_alias(cls, is_historical: bool) -> str | None:
         col = cls.batch_timestamp_col(is_historical)
         if col:
             return cls._format_column_alias(col)
@@ -377,7 +377,7 @@ class IdrBeneficiaryXref(IdrBaseModel):
     src_rec_ctre_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
 
     @staticmethod
-    def table():
+    def table() -> str:
         return "idr.beneficiary_xref"
 
     @staticmethod
@@ -408,10 +408,12 @@ class IdrElectionPeriodUsage(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query() -> str:
-        # equivalent to "select distinct on", but Snowflake has different syntax for that so it's unfortunately not portable
+        # equivalent to "select distinct on", but Snowflake has different syntax for that,
+        # so it's unfortunately not portable
         return """
             WITH dupes as (
-                SELECT {COLUMNS}, ROW_NUMBER() OVER (PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
+                SELECT {COLUMNS}, ROW_NUMBER() OVER (
+                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
                 {ORDER_BY} DESC) as row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
                 {WHERE_CLAUSE}
@@ -722,7 +724,8 @@ class IdrClaimLine(IdrBaseModel):
     def _current_fetch_query() -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
-        # Note: joining on clm_uniq_id isn't strictly necessary, but it did seem to improve performance a bit
+        # Note: joining on clm_uniq_id isn't strictly necessary,
+        # but it did seem to improve performance a bit
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
@@ -741,8 +744,7 @@ class IdrClaimLine(IdrBaseModel):
 def transform_default_hipps_code(value: str | None) -> str:
     if value is None or value == "00000":
         return ""
-    else:
-        return value
+    return value
 
 
 class IdrClaimLineInstitutional(IdrBaseModel):

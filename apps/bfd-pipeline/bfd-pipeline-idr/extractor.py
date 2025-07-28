@@ -79,7 +79,8 @@ class Extractor(ABC):
                 "{WHERE_CLAUSE}",
                 f"""
                     WHERE 
-                        ({update_timestamp_col} IS NOT NULL AND {batch_timestamp_col} {op} %(timestamp)s {update_clause})
+                        ({update_timestamp_col} IS NOT NULL 
+                            AND {batch_timestamp_col} {op} %(timestamp)s {update_clause})
                         AND {batch_timestamp_col} {op} '{get_min_transaction_date()}' 
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
@@ -133,7 +134,8 @@ class SnowflakeExtractor(Extractor):
             cursor_execute_timer.stop()
 
             cursor_fetch_timer.start()
-            # fetchmany can return list[dict] or list[tuple] but we'll only use queries that return dicts
+            # fetchmany can return list[dict] or list[tuple] but we'll only use
+            # queries that return dicts
             batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
             cursor_fetch_timer.stop()
 

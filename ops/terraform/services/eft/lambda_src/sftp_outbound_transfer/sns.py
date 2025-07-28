@@ -84,15 +84,17 @@ class StatusNotification:
             case _:  # pyright: ignore [reportUnnecessaryComparison]
                 raise ValueError(
                     "Invalid details, must be one of: "
-                    + ", ".join([
-                        x.__name__
-                        for x in [
-                            FileDiscoveredDetails,
-                            TransferSuccessDetails,
-                            TransferFailedDetails,
-                            UnknownErrorDetails,
+                    + ", ".join(
+                        [
+                            x.__name__
+                            for x in [
+                                FileDiscoveredDetails,
+                                TransferSuccessDetails,
+                                TransferFailedDetails,
+                                UnknownErrorDetails,
+                            ]
                         ]
-                    ])
+                    )
                 )
 
     def as_sns_message(self) -> str:

@@ -148,6 +148,6 @@ def get_ssm_parameter(ssm_client: SSMClient, path: str, with_decrypt: bool = Fal
     try:
         response = ssm_client.get_parameter(Name=path, WithDecryption=with_decrypt)
 
-        return response["Parameter"]["Value"]
+        return response["Parameter"]["Value"]  # type: ignore
     except (KeyError, botocore.exceptions.ClientError) as exc:
         raise ValueError(f'SSM parameter "{path}" not found or empty') from exc

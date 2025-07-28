@@ -1,4 +1,4 @@
-"""Code in this file is related to defining and registering custom Locust arguments for testing"""
+"""Code in this file is related to defining and registering custom Locust arguments for testing."""
 
 from locust.argument_parser import LocustArgumentParser
 from locust.util.timespan import parse_timespan
@@ -6,7 +6,7 @@ from locust.util.timespan import parse_timespan
 from .stats.stats_config import StatsConfiguration
 
 
-def register_custom_args(parser: LocustArgumentParser):
+def register_custom_args(parser: LocustArgumentParser) -> None:
     parser.add_argument(
         "--client-cert-path",
         type=str,
@@ -62,7 +62,8 @@ def register_custom_args(parser: LocustArgumentParser):
     parser.add_argument(
         "--locust-tags",
         type=str,
-        help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
+        help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). \
+        Will run all tasks if not provided (Optional, Default: "")',
         dest="locust_tags",
         env_var="LOCUST_TAGS",
         default="",
@@ -70,7 +71,8 @@ def register_custom_args(parser: LocustArgumentParser):
     parser.add_argument(
         "--locust-exclude-tags",
         type=str,
-        help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
+        help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) \
+        (Optional, Default: "")',
         dest="locust_exclude_tags",
         env_var="LOCUST_EXCLUDE_TAGS",
         default="",
