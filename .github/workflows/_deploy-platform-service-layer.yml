@@ -1,14 +1,11 @@
-# Not intended for use outside of the "Deploy Environment Services" Workflow. This is defined just
+# Not intended for use outside of the "Deploy Platform Services" Workflow. This is defined just
 # to make things a little DRYer
 
-name: "Deploy Environment Service Layer"
+name: "Deploy Platform Service Layer"
 
 on:
   workflow_call:
     inputs:
-      bfd-env:
-        type: string
-        required: true
       account-type:
         type: string
         required: true
@@ -34,7 +31,7 @@ env:
       "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
       "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
     }
-  DEFAULT_LOG_GROUP: /bfd/${{ inputs.bfd-env }}/github_actions/deploy_env_services/tofu
+  DEFAULT_LOG_GROUP: /bfd/platform/github_actions/deploy_platform_services/tofu
 
 jobs:
   deploy-layer:
@@ -68,10 +65,10 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Deploy ${{ matrix.context.service }}
-        uses: ./.github/actions/bfd-deploy-env-service
+        uses: ./.github/actions/bfd-deploy-platform-service
         with:
-          bfd-env: ${{ inputs.bfd-env }}
-          service-path: ops/services/${{ matrix.context.layer }}-${{ matrix.context.service }}
+          account-type: ${{ inputs.account-type }}
+          service-path: ops/platform/${{ matrix.context.layer }}-${{ matrix.context.service }}
           cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
           cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
