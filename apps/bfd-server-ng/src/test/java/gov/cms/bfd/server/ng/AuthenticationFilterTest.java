@@ -72,5 +72,7 @@ public class AuthenticationFilterTest {
     filter.doFilter(request, response, filterChain);
     verify(response, never()).sendError(any(Integer.class));
     verify(response, never()).sendError(any(Integer.class), any(String.class));
+    verify(filterChain).doFilter(request, response);
+    verify(request).setAttribute("CLIENT_CERT_ALIAS", "alias");
   }
 }
