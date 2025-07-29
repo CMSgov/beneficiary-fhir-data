@@ -21,7 +21,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
     "postalCode" : "58054",
     "state" : "ND"
   } ],
-  "birthDate" : "1959-03-14",
+  "birthDate" : "2059-03-14",
   "communication" : [ {
     "language" : {
       "coding" : [ {
@@ -93,7 +93,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
     "postalCode" : "77551",
     "state" : "TX"
   } ],
-  "birthDate" : "1922-04-01",
+  "birthDate" : "2022-04-01",
   "communication" : [ {
     "language" : {
       "coding" : [ {
@@ -159,7 +159,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
     "postalCode" : "36609",
     "state" : "AL"
   } ],
-  "birthDate" : "1967-03-19",
+  "birthDate" : "2067-03-19",
   "communication" : [ {
     "language" : {
       "coding" : [ {
@@ -229,7 +229,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
     "postalCode" : "36609",
     "state" : "AL"
   } ],
-  "birthDate" : "1967-03-19",
+  "birthDate" : "2067-03-19",
   "communication" : [ {
     "language" : {
       "coding" : [ {

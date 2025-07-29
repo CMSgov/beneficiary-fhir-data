@@ -35,7 +35,6 @@ class ClaimLineAdjudicationCharge {
     return List.of(
         AdjudicationChargeType.NONCOVERED_CHARGE_AMOUNT.toFhir(noncoveredChargeAmount),
         AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhir(allowedChargeAmount),
-        AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhir(submittedChargeAmount),
         AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhir(providerPaymentAmount),
         AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhir(benePaymentAmount),
         AdjudicationChargeType.BENE_PAID_AMOUNT.toFhir(benePaidAmount),

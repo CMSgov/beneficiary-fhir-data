@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
@@ -17,9 +16,8 @@ class ClaimFinalActionCode {
             new Extension()
                 .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_FINAL_ACTION_CODE)
                 .setValue(
-                    new CodeableConcept(
-                        new Coding()
-                            .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE)
-                            .setCode(s))));
+                    new Coding()
+                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE)
+                        .setCode(s)));
   }
 }

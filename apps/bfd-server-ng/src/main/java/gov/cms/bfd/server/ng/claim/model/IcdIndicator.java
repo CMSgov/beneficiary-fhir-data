@@ -29,4 +29,19 @@ public enum IcdIndicator {
   private final String code;
   private final String procedureSystem;
   private final String diagnosisSytem;
+
+  /**
+   * Formats a raw diagnosis code string according to the rules for this specific ICD system. For
+   * ICD-10, it inserts a dot after the first 3 characters if the code is long enough. For all other
+   * systems (e.g., ICD-9), it returns the code as-is.
+   *
+   * @param rawCode The raw diagnosis code string from the database.
+   * @return The correctly formatted diagnosis code string for use in FHIR.
+   */
+  public String formatCode(String rawCode) {
+    if (this == ICD_10 && rawCode != null && rawCode.length() > 3) {
+      return rawCode.substring(0, 3) + "." + rawCode.substring(3);
+    }
+    return rawCode;
+  }
 }

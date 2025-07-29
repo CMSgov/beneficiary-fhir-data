@@ -12,10 +12,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -51,6 +54,7 @@ public class Claim {
   @Embedded private CareTeam careTeam;
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -114,10 +118,17 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    for (var procedure : claimProcedures) {
-      procedure.toFhirProcedure().ifPresent(eob::addProcedure);
-      procedure.toFhirDiagnosis().ifPresent(eob::addDiagnosis);
-    }
+    eob.setProcedure(
+        transformOptionalAndSort(
+            claimProcedures,
+            ClaimProcedure::toFhirProcedure,
+            ExplanationOfBenefit.ProcedureComponent::getSequence));
+
+    eob.setDiagnosis(
+        transformOptionalAndSort(
+            claimProcedures,
+            ClaimProcedure::toFhirDiagnosis,
+            ExplanationOfBenefit.DiagnosisComponent::getSequence));
 
     billingProvider
         .toFhir(claimTypeCode)
@@ -128,28 +139,32 @@ public class Claim {
             });
 
     var supportingInfoFactory = new SupportingInfoFactory();
-    var initialSupportingInfo =
-        List.of(
-            bloodPints.toFhir(supportingInfoFactory),
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            typeOfBillCode.toFhir(supportingInfoFactory));
-    Stream.of(
-            initialSupportingInfo,
-            claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
-            institutional
-                .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
-                .orElse(List.of()))
-        .flatMap(Collection::stream)
-        .forEach(eob::addSupportingInfo);
+    List<ExplanationOfBenefit.SupportingInformationComponent> supportingInfoList =
+        Stream.of(
+                List.of(
+                    bloodPints.toFhir(supportingInfoFactory),
+                    nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+                    typeOfBillCode.toFhir(supportingInfoFactory)),
+                claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
+                institutional
+                    .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
+                    .orElse(List.of()))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
-    claimLines.stream().map(ClaimLine::toFhir).forEach(eob::addItem);
-    careTeam
-        .toFhir()
+    eob.setSupportingInfo(supportingInfoList);
+
+    eob.setItem(
+        transformAndSort(
+            claimLines, ClaimLine::toFhir, ExplanationOfBenefit.ItemComponent::getSequence));
+
+    transformAndSort(careTeam.toFhir(), pair -> pair, pair -> pair.careTeam().getSequence())
         .forEach(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
+            sortedPair -> {
+              eob.addCareTeam(sortedPair.careTeam());
+              eob.addContained(sortedPair.practitioner());
             });
+
     institutional.ifPresent(
         i -> {
           eob.addAdjudication(i.getPpsDrgWeight().toFhir());
@@ -158,7 +173,37 @@ public class Claim {
         });
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
-    eob.addAdjudication(adjudicationCharge.toFhir());
+    eob.addTotal(adjudicationCharge.toFhir());
+    eob.setPayment(claimPaymentAmount.toFhir());
+
     return eob;
+  }
+
+  private <S, T> List<T> transformAndSort(
+      Collection<S> source,
+      java.util.function.Function<S, T> transformer,
+      java.util.function.Function<T, Integer> sequenceExtractor) {
+    if (source == null || source.isEmpty()) {
+      return new ArrayList<>();
+    }
+    return source.stream()
+        .map(transformer)
+        .sorted(Comparator.comparing(sequenceExtractor))
+        .collect(Collectors.toList());
+  }
+
+  private <S, T> List<T> transformOptionalAndSort(
+      Collection<S> source,
+      java.util.function.Function<S, Optional<T>> transformer,
+      java.util.function.Function<T, Integer> sequenceExtractor) {
+    if (source == null || source.isEmpty()) {
+      return new ArrayList<>();
+    }
+    return source.stream()
+        .map(transformer)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .sorted(Comparator.comparing(sequenceExtractor))
+        .collect(Collectors.toList());
   }
 }
