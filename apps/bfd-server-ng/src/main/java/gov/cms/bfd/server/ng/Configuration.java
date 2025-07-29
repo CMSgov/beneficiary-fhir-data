@@ -67,13 +67,6 @@ public class Configuration {
     return ALLOWED_LOCAL_PROFILES.contains(profile.toLowerCase());
   }
 
-  private static boolean validateUrlGlob(String url, String glob) {
-    if (glob.endsWith("*")) {
-      return url.startsWith(glob.substring(0, glob.length() - 1));
-    }
-    return url.equals(glob) || url.equals(glob + "/");
-  }
-
   /**
    * Creates a new {@link AwsWrapperDataSourceFactory}.
    *
