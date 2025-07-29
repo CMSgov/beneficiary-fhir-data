@@ -36,7 +36,7 @@ public class GlobalExceptionController implements ErrorController {
             .atWarn()
             .setMessage(responseMessage)
             .addKeyValue("statusCode", statusCode)
-            .addKeyValue("path", request.getRequestURI())
+            .addKeyValue("originalUri", originalUri)
             .log();
         return responseMessage;
       }

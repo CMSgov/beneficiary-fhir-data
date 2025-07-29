@@ -1,19 +1,15 @@
 package gov.cms.bfd.server.ng.filter;
 
-import gov.cms.bfd.server.ng.Configuration;
+import gov.cms.bfd.server.ng.CertificateUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.core.env.Environment;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,23 +19,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 @Component
 @RequiredArgsConstructor
+// Ensure this runs first
+@Order(1)
 @WebFilter(filterName = "AuthenticationFilter")
 public class AuthenticationFilter extends OncePerRequestFilter {
   private static final String MISSING_INVALID_HEADER_MSG = "Missing or invalid certificate header.";
-  private static final String LEAF_CERT_HEADER = "X-Amzn-Mtls-Clientcert";
 
-  private final Configuration configuration;
-  private final Environment environment;
+  private final CertificateUtil certificateUtil;
 
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
-    var path = request.getRequestURI();
-    // Some URLs like the Swagger UI shouldn't require auth
-    if (Configuration.canUrlBypassAuth(path)) {
-      return true;
-    }
-    return Arrays.stream(environment.getActiveProfiles())
-        .allMatch(Configuration::canProfileBypassAuth);
+  protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
+    return certificateUtil.canBypassAuth();
   }
 
   @Override
@@ -49,27 +39,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
       @NotNull FilterChain filterChain)
       throws IOException, ServletException {
 
-    final var rawLeafCert = request.getHeader(LEAF_CERT_HEADER);
-    if (rawLeafCert == null) {
+    final var certAlias = certificateUtil.getAliasFromCert(request);
+
+    if (certAlias.isEmpty()) {
       response.sendError(400, MISSING_INVALID_HEADER_MSG);
       return;
     }
-
-    final var clientCertsToAliases = configuration.getClientCertsToAliases();
-    // We need to replace these characters with their URL-encoding counterparts because AWS
-    // considers them "safe" and therefore does not encode them when sending the leaf certificate
-    // from the client certificate in the header. So, when we try to URL Decode them, they get lost.
-    final var encodedLeafCert =
-        rawLeafCert.replace("+", "%2b").replace("=", "%3d").replace("/", "%2f");
-    final var leafCert =
-        StringUtils.deleteWhitespace(URLDecoder.decode(encodedLeafCert, StandardCharsets.UTF_8));
-
-    final var certAlias = clientCertsToAliases.getOrDefault(leafCert, null);
-    if (certAlias == null) {
-      response.sendError(400, MISSING_INVALID_HEADER_MSG);
-      return;
-    }
-
+    certificateUtil.attachCertAliasToRequest(request, certAlias.get());
     filterChain.doFilter(request, response);
   }
 }

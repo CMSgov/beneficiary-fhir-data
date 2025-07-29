@@ -8,15 +8,17 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
  * Custom exception handling interceptor since the default one is not very customizable.
  */
+@RequiredArgsConstructor
 @Interceptor
 public class ExceptionHandlingInterceptor {
-  Logger logger = LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
 
   /**
    * Handles the server exception.
@@ -38,6 +40,7 @@ public class ExceptionHandlingInterceptor {
     if (exception.getStatusCode() < 500) {
       return true;
     }
+    // Force a default error message for any unexpected errors
     response.sendError(500, "An unexpected error occurred");
     return false;
   }

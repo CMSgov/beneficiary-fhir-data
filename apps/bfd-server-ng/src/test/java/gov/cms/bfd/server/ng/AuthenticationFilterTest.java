@@ -12,9 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -30,69 +29,46 @@ public class AuthenticationFilterTest {
   @Mock HttpServletResponse response;
   @Mock FilterChain filterChain;
 
-  @ParameterizedTest
-  @ValueSource(
-      strings = {
-        "/favicon.ico",
-        "/v3/fhir/swagger-ui",
-        "/v3/fhir/swagger-ui/",
-        "/v3/fhir/swagger-ui/style.css",
-        "/actuator/health"
-      })
-  void testAllowedPaths(String path) throws ServletException, IOException {
+  @Test
+  void testNotAllowedPaths() throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"aws"});
-    when(request.getRequestURI()).thenReturn(path);
-    var filter = new AuthenticationFilter(configuration, environment);
-    filter.doFilter(request, response, filterChain);
-    verify(response, never()).sendError(any(Integer.class));
-    verify(response, never()).sendError(any(Integer.class), any(String.class));
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {"/v3/fhir/Patient", "/actuator/random"})
-  void testNotAllowedPaths(String path) throws ServletException, IOException {
-    when(environment.getActiveProfiles()).thenReturn(new String[] {"aws"});
-    when(request.getRequestURI()).thenReturn(path);
-    var filter = new AuthenticationFilter(configuration, environment);
+    when(request.getRequestURI()).thenReturn("/v3/Fhir/Patient");
+    var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
     verify(response).sendError(400, "Missing or invalid certificate header.");
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"/v3/fhir/Patient"})
-  void testNotAllowedPathsWithInvalidCert(String path) throws ServletException, IOException {
+  @Test
+  void testNotAllowedPathsWithInvalidCert() throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"aws"});
-    when(request.getRequestURI()).thenReturn(path);
+    when(request.getRequestURI()).thenReturn("/v3/Fhir/Patient");
     when(request.getHeader("X-Amzn-Mtls-Clientcert")).thenReturn("badcert");
     when(configuration.getClientCertsToAliases()).thenReturn(Map.of("goodcert", "alias"));
     var configuration = new Configuration();
-    var filter = new AuthenticationFilter(configuration, environment);
+    var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
     verify(response).sendError(400, "Missing or invalid certificate header.");
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"/v3/fhir/Patient"})
-  void testNotAllowedPathsWithAuthDisabled(String allowedPath)
-      throws ServletException, IOException {
+  @Test
+  void testNotAllowedPathsWithAuthDisabled() throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"local"});
-    when(request.getRequestURI()).thenReturn(allowedPath);
+    when(request.getRequestURI()).thenReturn("/v3/fhir/Patient");
     var configuration = new Configuration();
-    var filter = new AuthenticationFilter(configuration, environment);
+    var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
     verify(response, never()).sendError(any(Integer.class));
     verify(response, never()).sendError(any(Integer.class), any(String.class));
     verify(filterChain).doFilter(request, response);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"/v3/fhir/Patient"})
-  void testAuthSuccess(String path) throws ServletException, IOException {
+  @Test
+  void testAuthSuccess() throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"aws"});
-    when(request.getRequestURI()).thenReturn(path);
+    when(request.getRequestURI()).thenReturn("/v3/fhir/Patient");
     when(request.getHeader("X-Amzn-Mtls-Clientcert")).thenReturn("goodcert");
     when(configuration.getClientCertsToAliases()).thenReturn(Map.of("goodcert", "alias"));
-    var filter = new AuthenticationFilter(configuration, environment);
+    var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
     verify(response, never()).sendError(any(Integer.class));
     verify(response, never()).sendError(any(Integer.class), any(String.class));

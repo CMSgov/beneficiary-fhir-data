@@ -30,19 +30,6 @@ public class Configuration {
   /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
   private static final List<String> ALLOWED_LOCAL_PROFILES = List.of("local", "sqlprofile");
 
-  /** Identifiers which URLS can bypass auth. */
-  private static final List<String> BYPASS_AUTH_URLS =
-      List.of(
-          "/v3/fhir/swagger-ui",
-          "/v3/fhir/swagger-ui/*",
-          "/v3/fhir/api-docs",
-          "/actuator",
-          // We can allow the basic health endpoint, but other actuator endpoints may show
-          // things we don't want to expose, so /actuator/* should not be allowed
-          "/actuator/health",
-          "/actuator/health/*",
-          "/favicon.ico");
-
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
   @Autowired
@@ -78,16 +65,6 @@ public class Configuration {
    */
   public static boolean canProfileBypassAuth(String profile) {
     return ALLOWED_LOCAL_PROFILES.contains(profile.toLowerCase());
-  }
-
-  /**
-   * Determines if the URL requires auth.
-   *
-   * @param url current url
-   * @return boolean
-   */
-  public static boolean canUrlBypassAuth(String url) {
-    return BYPASS_AUTH_URLS.stream().anyMatch(u -> validateUrlGlob(url, u));
   }
 
   private static boolean validateUrlGlob(String url, String glob) {
