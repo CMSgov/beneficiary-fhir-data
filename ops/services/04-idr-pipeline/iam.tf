@@ -78,6 +78,21 @@ resource "aws_iam_policy" "idr_ssm_params" {
   policy      = data.aws_iam_policy_document.idr_ssm_params.json
 }
 
+data "aws_iam_policy_document" "idr_rds" {
+  statement {
+    sid       = "AllowDescribeRDSCluster"
+    actions   = ["rds:DescribeDBClusters"]
+    resources = [data.aws_rds_cluster.main.arn]
+  }
+}
+
+resource "aws_iam_policy" "idr_rds" {
+  name        = "${local.name_prefix}-rds-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to describe RDS Cluster"
+  policy      = data.aws_iam_policy_document.idr_rds.json
+}
+
 resource "aws_iam_role" "idr_task" {
   name                  = "${local.name_prefix}-task-role"
   path                  = local.iam_path
@@ -90,6 +105,7 @@ resource "aws_iam_role" "idr_task" {
 resource "aws_iam_role_policy_attachment" "idr_task" {
   for_each = {
     kms        = aws_iam_policy.idr_kms.arn
+    rds        = aws_iam_policy.idr_rds.arn
     ssm_params = aws_iam_policy.idr_ssm_params.arn
     ecs_exec   = aws_iam_policy.idr_ecs_exec.arn
   }
