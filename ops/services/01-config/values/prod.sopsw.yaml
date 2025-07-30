@@ -118,6 +118,11 @@
 /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
+/bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/cpu: 4096
+/bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/disk_size: 21
+/bfd/${env}/idr-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/idr-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/ccw-pipeline/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/ccw-pipeline/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/ccw-pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED

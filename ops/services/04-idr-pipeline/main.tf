@@ -53,12 +53,9 @@ locals {
     "/bfd/${local.env}/${local.service}/nonsensitive/",
     "/bfd/${local.env}/common/nonsensitive/",
   ]
-  # idr_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  # idr_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
-  # idr_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
-  idr_cpu                          = 4096
-  idr_memory                       = 8192
-  idr_disk_size                    = 21
+  idr_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
+  idr_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  idr_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
   idr_capacity_provider_strategies = module.data_strategies.strategies
 }
 
@@ -96,10 +93,10 @@ resource "aws_ecs_task_definition" "idr" {
   container_definitions = jsonencode(
     [
       {
-        name      = local.service
-        image     = data.aws_ecr_image.pipeline.image_uri
-        essential = true
-        cpu       = 0
+        name       = local.service
+        image      = data.aws_ecr_image.pipeline.image_uri
+        essential  = true
+        cpu        = 0
         entryPoint = ["sleep", "infinity"]
         environment = [
           {
@@ -154,6 +151,7 @@ resource "aws_ecs_service" "idr" {
   availability_zone_rebalancing      = "ENABLED"
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  enable_execute_command             = true
   desired_count                      = 1
   enable_ecs_managed_tags            = true
   health_check_grace_period_seconds  = 0
