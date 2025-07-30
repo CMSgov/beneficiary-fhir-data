@@ -39,7 +39,7 @@ public enum IcdIndicator {
    * @return The correctly formatted diagnosis code string for use in FHIR.
    */
   public String formatCode(String rawCode) {
-    if (this == ICD_10 && rawCode != null && rawCode.length() > 3) {
+    if (this == ICD_10 && rawCode.length() > 3) {
       return rawCode.substring(0, 3) + "." + rawCode.substring(3);
     }
     return rawCode;

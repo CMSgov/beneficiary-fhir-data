@@ -383,7 +383,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
         "postalCode" : "36609",
         "state" : "AL"
       } ],
-      "birthDate" : "2067-03-19",
+      "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
           "coding" : [ {
@@ -467,7 +467,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
         "postalCode" : "36609",
         "state" : "AL"
       } ],
-      "birthDate" : "2067-03-19",
+      "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
           "coding" : [ {
@@ -551,7 +551,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
         "postalCode" : "36609",
         "state" : "AL"
       } ],
-      "birthDate" : "2067-03-19",
+      "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
           "coding" : [ {
@@ -683,7 +683,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
         "postalCode" : "58054",
         "state" : "ND"
       } ],
-      "birthDate" : "2059-03-14",
+      "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
           "coding" : [ {
@@ -769,7 +769,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
         "postalCode" : "58054",
         "state" : "ND"
       } ],
-      "birthDate" : "2059-03-14",
+      "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
           "coding" : [ {
@@ -855,7 +855,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
         "postalCode" : "58054",
         "state" : "ND"
       } ],
-      "birthDate" : "2059-03-14",
+      "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
           "coding" : [ {

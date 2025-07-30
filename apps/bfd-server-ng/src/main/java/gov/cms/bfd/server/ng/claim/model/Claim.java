@@ -118,17 +118,10 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    eob.setProcedure(
-        transformOptionalAndSort(
-            claimProcedures,
-            ClaimProcedure::toFhirProcedure,
-            ExplanationOfBenefit.ProcedureComponent::getSequence));
-
-    eob.setDiagnosis(
-        transformOptionalAndSort(
-            claimProcedures,
-            ClaimProcedure::toFhirDiagnosis,
-            ExplanationOfBenefit.DiagnosisComponent::getSequence));
+    for (var procedure : claimProcedures) {
+      procedure.toFhirProcedure().ifPresent(eob::addProcedure);
+      procedure.toFhirDiagnosis().ifPresent(eob::addDiagnosis);
+    }
 
     billingProvider
         .toFhir(claimTypeCode)
@@ -139,24 +132,21 @@ public class Claim {
             });
 
     var supportingInfoFactory = new SupportingInfoFactory();
-    List<ExplanationOfBenefit.SupportingInformationComponent> supportingInfoList =
-        Stream.of(
-                List.of(
-                    bloodPints.toFhir(supportingInfoFactory),
-                    nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                    typeOfBillCode.toFhir(supportingInfoFactory)),
-                claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
-                institutional
-                    .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
-                    .orElse(List.of()))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+    var initialSupportingInfo =
+        List.of(
+            bloodPints.toFhir(supportingInfoFactory),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+            typeOfBillCode.toFhir(supportingInfoFactory));
+    Stream.of(
+            initialSupportingInfo,
+            claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
+            institutional
+                .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
+                .orElse(List.of()))
+        .flatMap(Collection::stream)
+        .forEach(eob::addSupportingInfo);
 
-    eob.setSupportingInfo(supportingInfoList);
-
-    eob.setItem(
-        transformAndSort(
-            claimLines, ClaimLine::toFhir, ExplanationOfBenefit.ItemComponent::getSequence));
+    claimLines.stream().map(ClaimLine::toFhir).forEach(eob::addItem);
 
     transformAndSort(careTeam.toFhir(), pair -> pair, pair -> pair.careTeam().getSequence())
         .forEach(
@@ -176,7 +166,7 @@ public class Claim {
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 
-    return eob;
+    return sortedEob(eob);
   }
 
   private <S, T> List<T> transformAndSort(
@@ -192,18 +182,15 @@ public class Claim {
         .collect(Collectors.toList());
   }
 
-  private <S, T> List<T> transformOptionalAndSort(
-      Collection<S> source,
-      java.util.function.Function<S, Optional<T>> transformer,
-      java.util.function.Function<T, Integer> sequenceExtractor) {
-    if (source == null || source.isEmpty()) {
-      return new ArrayList<>();
-    }
-    return source.stream()
-        .map(transformer)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .sorted(Comparator.comparing(sequenceExtractor))
-        .collect(Collectors.toList());
+  private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {
+    eob.getProcedure()
+        .sort(Comparator.comparing(ExplanationOfBenefit.ProcedureComponent::getSequence));
+    eob.getDiagnosis()
+        .sort(Comparator.comparing(ExplanationOfBenefit.DiagnosisComponent::getSequence));
+    eob.getSupportingInfo()
+        .sort(
+            Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
+    eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
+    return eob;
   }
 }

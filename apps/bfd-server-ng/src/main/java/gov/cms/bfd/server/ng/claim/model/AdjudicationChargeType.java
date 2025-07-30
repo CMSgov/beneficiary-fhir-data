@@ -107,7 +107,7 @@ enum AdjudicationChargeType {
   private final String coding2Code;
   private final String coding2Display;
 
-  ExplanationOfBenefit.AdjudicationComponent toFhir(double value) {
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(double value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(
             new CodeableConcept()

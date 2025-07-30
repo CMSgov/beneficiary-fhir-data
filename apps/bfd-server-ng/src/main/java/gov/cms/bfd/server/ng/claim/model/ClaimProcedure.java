@@ -89,14 +89,12 @@ public class ClaimProcedure {
         new CodeableConcept(
             new Coding().setSystem(icdIndicator.getDiagnosisSytem()).setCode(formattedCode)));
 
-    this.claimPoaIndicator
-        .filter(s -> !s.trim().isEmpty() && !s.equals("~"))
-        .ifPresent(
-            poaCode -> {
-              var onAdmissionConcept = new CodeableConcept();
-              onAdmissionConcept.addCoding().setSystem(SystemUrls.POA_CODING).setCode(poaCode);
-              diagnosis.setOnAdmission(onAdmissionConcept);
-            });
+    this.claimPoaIndicator.ifPresent(
+        poaCode -> {
+          var onAdmissionConcept = new CodeableConcept();
+          onAdmissionConcept.addCoding().setSystem(SystemUrls.POA_CODING).setCode(poaCode);
+          diagnosis.setOnAdmission(onAdmissionConcept);
+        });
 
     return Optional.of(diagnosis);
   }

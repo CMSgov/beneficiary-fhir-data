@@ -33,12 +33,12 @@ class ClaimLineAdjudicationCharge {
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
-        AdjudicationChargeType.NONCOVERED_CHARGE_AMOUNT.toFhir(noncoveredChargeAmount),
-        AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhir(allowedChargeAmount),
-        AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhir(providerPaymentAmount),
-        AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhir(benePaymentAmount),
-        AdjudicationChargeType.BENE_PAID_AMOUNT.toFhir(benePaidAmount),
-        AdjudicationChargeType.COVERED_PAID_AMOUNT.toFhir(coveredPaidAmount),
-        AdjudicationChargeType.MEDICARE_DEDUCTIBLE_AMOUNT.toFhir(deductibleAmount));
+        AdjudicationChargeType.NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(noncoveredChargeAmount),
+        AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
+        AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(providerPaymentAmount),
+        AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhirAdjudication(benePaymentAmount),
+        AdjudicationChargeType.BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
+        AdjudicationChargeType.COVERED_PAID_AMOUNT.toFhirAdjudication(coveredPaidAmount),
+        AdjudicationChargeType.MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(deductibleAmount));
   }
 }
