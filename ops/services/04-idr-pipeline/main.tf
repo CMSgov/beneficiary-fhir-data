@@ -148,7 +148,7 @@ resource "aws_ecs_task_definition" "idr" {
 }
 
 resource "aws_ecs_service" "idr" {
-  depends_on = [aws_iam_role_policy_attachment.idr_service, aws_iam_role_policy_attachment.idr_execution]
+  depends_on = [aws_iam_role_policy_attachment.idr_task, aws_iam_role_policy_attachment.idr_execution]
 
   cluster                            = data.aws_ecs_cluster.main.arn
   availability_zone_rebalancing      = "ENABLED"

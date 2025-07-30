@@ -26,7 +26,7 @@ resource "aws_iam_policy" "idr_ecs_exec" {
   name        = "${local.name_prefix}-ecs-exec-policy"
   path        = local.iam_path
   description = "Permissions for the ${local.env} ${local.service} ECS task containers to use ECS Exec"
-  policy      = data.aws_iam_policy_document.ecs_exec.json
+  policy      = data.aws_iam_policy_document.idr_ecs_exec.json
 }
 
 data "aws_iam_policy_document" "idr_kms" {
