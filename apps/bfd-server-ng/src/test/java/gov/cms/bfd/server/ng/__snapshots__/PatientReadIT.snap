@@ -93,7 +93,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
     "postalCode" : "77551",
     "state" : "TX"
   } ],
-  "birthDate" : "2022-04-01",
+  "birthDate" : "1922-04-01",
   "communication" : [ {
     "language" : {
       "coding" : [ {
