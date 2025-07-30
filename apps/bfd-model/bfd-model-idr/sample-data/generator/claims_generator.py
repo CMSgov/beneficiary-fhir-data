@@ -47,6 +47,7 @@ def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_
  
 claims_to_generate_per_person = 5
 
+
 fiss_clm_type_cds = [1011,1041,1012,1013,1014,1022,1023,1034,1071,1072,1073,1074,1075,1076,1077,1083,1085,1087,1089,1032,1033,1081,1082,1021,1018,2011,2041,2012,2013,2014,2022,2023,2034,2071,2072,2073,2074,2075,2076,2077,2083,2085,2087,2089,2032,2033,2081,2082,2021,2018]
 institutional_claim_types = [10,20,30,40,50,60,61,62,63,64]+fiss_clm_type_cds
 
@@ -85,7 +86,7 @@ def run_command(cmd, cwd=None):
             print("Error output:",e.stderr)
         else:
             print("Error info (not necessarily stderr):",e)
-        sys.exit(1) #kill process and debug.
+        sys.exit(1)
 
 def random_date(start_date, end_date):
     start_formatted = date.fromisoformat(start_date).toordinal()
@@ -194,8 +195,8 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
     clm_dt_sgntr['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
     claim['CLM']['CLM_DT_SGNTR_SK'] = clm_dt_sgntr['CLM_DT_SGNTR_SK']
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
-    #clm_type_cd = 60
-    clm_type_cd = random.choice([10,20,30,40,50,60])
+    clm_type_cd = 60
+    #clm_type_cd = random.choice([10,20,30,40,50,60])
     claim['CLM']['CLM_TYPE_CD'] = clm_type_cd
 
     clm_src_id = -1
@@ -592,10 +593,26 @@ def gen_pac_version_of_claim(claim, max_date):
 
     if(pac_claim['CLM']['CLM_TYPE_CD'] in (60,61,62,63,64)):
         pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1011,2011,1041,2041],weights=[.48,.48,.02,.02])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 40):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1013,2013,1071,2071],weights=[.48,.48,.02,.02])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 10):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1032,2032,1033,2033],weights=[.48,.48,.02,.02])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 20):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choice([1021,2021])
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 30):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1018,2018])[0]
+
+    if(pac_claim['CLM']['CLM_TYPE_CD'] == 50):
+        pac_claim['CLM']['CLM_TYPE_CD'] = random.choices([1081,2081,1082,2082],weights=[.48,.48,.02,.02])[0]
     
     if('CLM_BLOOD_PT_FRNSH_QTY' in pac_claim['CLM']):
         pac_claim['CLM'].pop('CLM_BLOOD_PT_FRNSH_QTY')
     pac_claim['CLM']['CLM_DT_SGNTR_SK'] = ''.join(random.choices(string.digits, k=12))
+    pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
     pac_claim['CLM']['GEO_BENE_SK'] = ''.join(random.choices(string.digits, k=5))
     pac_claim['CLM_FISS'] = {}
     pac_claim['CLM_FISS']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
@@ -632,7 +649,6 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim['CLM_PROD'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
         pac_claim['CLM_PROD'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
         pac_claim['CLM_PROD'][i]['CLM_TYPE_CD'] = pac_claim['CLM']['CLM_TYPE_CD']
-    pac_claim['CLM_DT_SGNTR']['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
     if('CLM_MDCR_EXHSTD_DT' in pac_claim['CLM_DT_SGNTR']):
         pac_claim['CLM_DT_SGNTR'].pop('CLM_MDCR_EXHSTD_DT')
     if('CLM_NCVRD_FROM_DT' in pac_claim['CLM_DT_SGNTR']):
@@ -712,8 +728,6 @@ def gen_pac_version_of_claim(claim, max_date):
     pac_claim['CLM']['CLM_SRC_ID']=21000 #FISS
 
     if('CLM_DCMTN' in pac_claim):
-        if('CLM_NRLN_RIC_CD' in pac_claim['CLM_DCMTN']):
-            pac_claim['CLM']['CLM_RIC_CD'] = pac_claim['CLM_DCMTN']['CLM_NRLN_RIC_CD']
         pac_claim.pop('CLM_DCMTN')
 
     return pac_claim
@@ -725,29 +739,6 @@ def add_meta_timestamps(obj, clm, max_date):
         has_insrt_ts = True
     obj['IDR_INSRT_TS'] = faker.date_time_between_dates(datetime.fromisoformat(clm['CLM_IDR_LD_DT']), datetime.fromisoformat(max_date)) if has_insrt_ts else None
     obj['IDR_UPDT_TS'] = faker.date_time_between_dates(obj['IDR_INSRT_TS'], datetime.fromisoformat(max_date)) if has_insrt_ts and random.random() > 0.8 else None
-
-''' 
-def pull_code_systems():
-    code_systems = {}
-    relative_path = "../../sushi/fsh-generated/resources"
-    for file in os.listdir(relative_path):
-        if('.json' not in file or 'CodeSystem' not in file):
-            continue
-        full_path = relative_path+"/"+file
-        try:
-            with open(full_path, 'r') as file:
-                data = json.load(file)
-                concepts = []
-                for i in data['concept']:
-                    #print(i['code'])
-                    concepts.append(i['code'])
-                code_systems[data['name']] = concepts
-        except FileNotFoundError:
-            print(f"Error: File not found at path: {full_path}")
-        except json.JSONDecodeError:
-            print(f"Error: Invalid JSON format in file: {full_path}") 
-    return code_systems
-'''
 
 def main():
     parser = argparse.ArgumentParser(description='Generate Synthetic Data for Ingestion by the BFD v3 pipeline.')
@@ -766,7 +757,7 @@ def main():
 
     bene_sk_list = [-1]
     if(args.benes):
-        df = pd.read_csv(args.benes)  # Replace with your actual filename
+        df = pd.read_csv(args.benes)
         bene_sk_list = df['BENE_SK'].unique()
 
     CLM = []

@@ -6,6 +6,8 @@ import datetime
 import pandas as pd
 import os
 import json
+import subprocess
+import sys
 from dateutil.parser import parse
 from faker import Faker
 from pathlib import Path
@@ -32,22 +34,43 @@ class GeneratorUtil():
     def load_code_systems(self):
         code_systems = {}
         relative_path = "../../sushi/fsh-generated/resources"
-        for file in os.listdir(relative_path):
-            if('.json' not in file or 'CodeSystem' not in file):
-                continue
-            full_path = relative_path+"/"+file
+        
+        # Check if the resources directory exists, if not run sushi build
+        if not os.path.exists(relative_path):
+            print("Running sushi build")
             try:
-                with open(full_path, 'r') as file:
-                    data = json.load(file)
-                    concepts = []
-                    for i in data['concept']:
-                        #print(i['code'])
-                        concepts.append(i['code'])
-                    code_systems[data['name']] = concepts
-            except FileNotFoundError:
-                print(f"Error: File not found at path: {full_path}")
-            except json.JSONDecodeError:
-                print(f"Error: Invalid JSON format in file: {full_path}") 
+                sushi_dir = "../../sushi"
+                result = subprocess.run(['sushi', 'build'], cwd=sushi_dir, capture_output=True, text=True)
+                if result.returncode == 0:
+                    print("Sushi build completed successfully")
+                else:
+                    print(f"Sushi build failed with error: {result.stderr}")
+                    sys.exit(1)
+            except Exception as e:
+                print(f"Error running sushi build: {e}")
+                sys.exit(1)
+        
+        try:
+            for file in os.listdir(relative_path):
+                if('.json' not in file or 'CodeSystem' not in file):
+                    continue
+                full_path = relative_path+"/"+file
+                try:
+                    with open(full_path, 'r') as file:
+                        data = json.load(file)
+                        concepts = []
+                        for i in data['concept']:
+                            #print(i['code'])
+                            concepts.append(i['code'])
+                        code_systems[data['name']] = concepts
+                except FileNotFoundError:
+                    print(f"Error: File not found at path: {full_path}")
+                except json.JSONDecodeError:
+                    print(f"Error: Invalid JSON format in file: {full_path}") 
+        except FileNotFoundError:
+            print(f"Error: Resources directory not found at path: {relative_path}")
+            sys.exit(1)
+        
         self.code_systems = code_systems 
 
     def load_addresses(self):
@@ -109,11 +132,12 @@ class GeneratorUtil():
         return patient
 
     def handle_mbis(self, patient, num_mbis, custom_first_mbi=None):
+        previous_obslt_dt = None
+        previous_mbi = None
+        
         for mbi_idx in range(0, num_mbis):
             mbi_obj = {}
-            mbi = self.gen_mbi()
-            self.mbi_table[mbi] = {}
-
+            
             if mbi_idx == 0:
                 efctv_dt = self.fake.date_between_dates(
                     datetime.date(year=2017, month=5, day=20),
@@ -123,27 +147,50 @@ class GeneratorUtil():
 
                 if custom_first_mbi is not None:
                     patient["BENE_MBI_ID"] = custom_first_mbi
+                    current_mbi = custom_first_mbi
                 else:
-                    patient["BENE_MBI_ID"] = mbi
+                    current_mbi = self.gen_mbi()
+                    patient["BENE_MBI_ID"] = current_mbi
             else:
-                efctv_dt = self.fake.date_between_dates(
-                    datetime.date(year=2021, month=1, day=2),
-                    datetime.date(year=2025 - num_mbis + mbi_idx, month=1, day=1),
-                )
+                # If we have a previous obsolescence date, start the new MBI the next day
+                if previous_obslt_dt:
+                    efctv_dt = previous_obslt_dt + datetime.timedelta(days=1)
+                else:
+                    # Fallback to random date if no previous obsolescence date
+                    efctv_dt = self.fake.date_between_dates(
+                        datetime.date(year=2021, month=1, day=2),
+                        datetime.date(year=2025 - num_mbis + mbi_idx, month=1, day=1),
+                    )
+                current_mbi = self.gen_mbi()
 
+            # Create the MBI object with all required fields
             mbi_obj["BENE_MBI_EFCTV_DT"] = str(efctv_dt)
             if mbi_idx != num_mbis - 1:
-                mbi_obj["BENE_MBI_OBSLT_DT"] = self.fake.date_between_dates(
-                    parse(mbi_obj["BENE_MBI_EFCTV_DT"]),
+                # Calculate obsolescence date
+                obslt_dt = self.fake.date_between_dates(
+                    efctv_dt,
                     datetime.date(year=2025 - num_mbis + mbi_idx, month=1, day=1),
-                ).strftime("%Y-%m-%d")
+                )
+                mbi_obj["BENE_MBI_OBSLT_DT"] = obslt_dt.strftime("%Y-%m-%d")
+                
+                # Create historical entry for the OLD MBI (not the new one)
                 historical_patient = copy.deepcopy(patient)
-                historical_patient["BENE_MBI_ID"] = mbi
-                self.set_timestamps(historical_patient, efctv_dt)
+                historical_patient["BENE_MBI_ID"] = previous_mbi if previous_mbi else patient["BENE_MBI_ID"]
+                # Set the obsolescence timestamp for the historical entry
+                self.set_timestamps(historical_patient, obslt_dt)
                 self.bene_hstry_table.append(historical_patient)
+                
+                previous_obslt_dt = obslt_dt  # Store for next iteration
+            else:
+                # For the last MBI, no obsolescence date
+                mbi_obj["BENE_MBI_OBSLT_DT"] = None
 
             self.set_timestamps(mbi_obj, efctv_dt)
-            self.mbi_table[mbi] = mbi_obj
+            self.mbi_table[current_mbi] = mbi_obj
+            
+            # Update patient with current MBI and store previous for next iteration
+            previous_mbi = patient["BENE_MBI_ID"]
+            patient["BENE_MBI_ID"] = current_mbi
 
     def generate_coverages(self, patient):
         mdcr_stus_cd = '~'
