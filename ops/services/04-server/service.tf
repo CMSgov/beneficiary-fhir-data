@@ -105,6 +105,21 @@ resource "aws_ecs_task_definition" "server" {
     name                = "certstores"
   }
 
+  volume {
+    configure_at_launch = false
+    name                = "tmp_certstores"
+  }
+
+  volume {
+    configure_at_launch = false
+    name                = "tmp_log_router"
+  }
+
+  volume {
+    configure_at_launch = false
+    name                = "tmp_${local.service}"
+  }
+
   container_definitions = jsonencode(
     [
       {
@@ -162,7 +177,13 @@ resource "aws_ecs_task_definition" "server" {
             readOnly      = false
             sourceVolume  = "certstores"
           },
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_certstores"
+          }
         ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
         portMappings   = []
         systemControls = []
@@ -208,8 +229,15 @@ resource "aws_ecs_task_definition" "server" {
             mode                  = "non-blocking"
           }
         }
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_log_router"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
-        mountPoints    = []
         portMappings   = []
         systemControls = []
         volumesFrom    = []
@@ -289,7 +317,13 @@ resource "aws_ecs_task_definition" "server" {
             readOnly      = true
             sourceVolume  = "certstores"
           },
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_${local.service}"
+          }
         ]
+        readonlyRootFilesystem = true
         portMappings = [
           {
             containerPort = tonumber(local.server_port)

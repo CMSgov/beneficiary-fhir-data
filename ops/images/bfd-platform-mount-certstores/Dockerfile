@@ -20,4 +20,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --frozen --no-dev
 RUN mkdir -p /data
 VOLUME ["/data"]
-ENTRYPOINT ["uv", "run", "--no-dev", "main.py"]
+ENTRYPOINT ["uv", "run", "--no-dev", "--no-cache", "--no-sync", "main.py"]
