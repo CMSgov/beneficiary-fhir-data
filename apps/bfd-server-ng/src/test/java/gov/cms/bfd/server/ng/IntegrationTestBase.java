@@ -18,8 +18,12 @@ public class IntegrationTestBase {
   @LocalServerPort protected int port;
   protected Expect expect;
 
+  protected String getServerBaseUrl() {
+    return "http://localhost:" + port;
+  }
+
   protected String getServerUrl() {
-    return "http://localhost:" + port + "/v3/fhir";
+    return getServerBaseUrl() + "/v3/fhir";
   }
 
   protected IGenericClient getFhirClient() {
