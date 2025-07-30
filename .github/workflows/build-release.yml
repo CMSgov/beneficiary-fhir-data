@@ -39,6 +39,52 @@ on:
         default: false
         required: false
         type: boolean
+  workflow_call:
+    inputs:
+      releaseBranch:
+        type: string
+        description: >-
+          releaseBranch: Override the branch on which a release is based.
+          Default to the selected reference in the `Use workflow from` drop-down when empty.
+        required: false
+        default: ""
+      releaseVersion:
+        type: string
+        description: >-
+          releaseVersion: Override the release version. Default to promoting the current
+          X.Y.Z-SNAPSHOT to X.Y.Z when empty.
+        required: false
+        default: ""
+      developmentVersion:
+        type: string
+        description: >-
+          developmentVersion: Override the next development iteration version.
+          Default to X.(Y+1).0-SNAPSHOT of the release version X.Y.Z when empty.
+        required: false
+        default: ""
+      awsRegion:
+        type: string
+        description: >-
+          awsRegion: Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
+        default: us-east-1
+        required: true
+      forceRelease:
+        type: boolean
+        description: >-
+          forceRelease: Override creation of the GitHub Release object.
+          Default to creating release objects when `releaseVersion` does not contain the hyphen
+          character ('-'), indicating a pre-release.
+        default: false
+        required: false
+    outputs:
+      bfd_release:
+        description: The BFD release version that corresponds to the Git tag and GitHub release
+        value: ${{ jobs.compute-version-strings.outputs.bfd_release }}
+      bfd_dev_version:
+        description: The BFD snapshot development version that corresponds to the next release version
+        value: ${{ jobs.compute-version-strings.outputs.bfd_dev_version }}
+
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
@@ -135,7 +181,6 @@ jobs:
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
 
       - name: Checkout
-        if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -190,7 +235,6 @@ jobs:
           EOF
 
       - name: "Prepare Release"
-        if: github.event_name == 'workflow_dispatch'
         run: |-
           # We set preparationGoals to an empty string because we don't want to build during the
           # release:prepare since we will need to build again during release:perform. We expect that the
@@ -207,7 +251,6 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
       - name: "Perform Release"
-        if: github.event_name == 'workflow_dispatch'
         run: |-
           mvn --batch-mode --activate-profiles perform-release \
               -Dtag="$BFD_RELEASE" \
@@ -336,7 +379,8 @@ jobs:
         bfd-platform-run-locust,
         bfd-platform-eft-sftp-outbound-transfer-lambda,
         bfd-platform-pipeline-ccw-manifests-verifier-lambda,
-        bfd-platform-pipeline-ccw-runner
+        bfd-platform-pipeline-ccw-runner,
+        bfd-platform-codebuild-runner
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
       tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}

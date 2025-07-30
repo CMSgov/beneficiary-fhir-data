@@ -1,2 +1,2 @@
-FROM amazon/aws-for-fluent-bit:init-2.32.2.20240425
+FROM amazon/aws-for-fluent-bit:init-arm64-2.33.0
 COPY ./server-fluentbit.conf /server-fluentbit.conf

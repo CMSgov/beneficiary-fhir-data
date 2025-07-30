@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -86,6 +87,12 @@
             <artifactId>spring-boot-testcontainers</artifactId>
             <version>${spring-boot.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- This prevents jib from enabling spring devtools in production -->
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-spring-boot-extension-maven</artifactId>
+            <version>${jib-spring-boot-extension-maven.version}</version>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>

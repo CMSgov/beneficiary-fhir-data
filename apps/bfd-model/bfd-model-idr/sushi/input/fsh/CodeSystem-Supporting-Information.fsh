@@ -20,3 +20,4 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_QLFY_STAY_THRU_DT "Qualified Stay Through Date" "The ending date of the beneficiary's qualifying Medicare stay."
 * #CLM_HHA_LUP_IND_CD "Claim Lupa Indicator Code" "The code used to identify those Home Health PPS claims that have 4 visits or less in a 60-day episode."
 * #CLM_HHA_RFRL_CD "Claim Referral Code" "The code used to identify the means by which the beneficiary was referred for Home Health services."
+* #CLM_LINE_HCT_HGB_RSLT_NUM "HCT/HGB Test Result" "The HCT/HGB Test Result"

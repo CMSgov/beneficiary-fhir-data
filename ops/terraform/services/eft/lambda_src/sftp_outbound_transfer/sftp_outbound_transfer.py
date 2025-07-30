@@ -11,7 +11,6 @@ import boto3
 import botocore
 import botocore.exceptions
 import paramiko
-import paramiko.pkey
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -61,7 +60,7 @@ BOTO_CONFIG = Config(
 logger = Logger()
 
 
-def _handle_s3_event(s3_object_key: str):
+def _handle_s3_event(s3_object_key: str) -> None:
     s3_client = boto3.client("s3", config=BOTO_CONFIG)
     ssm_client = boto3.client("ssm", config=BOTO_CONFIG)
     sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
@@ -131,10 +130,12 @@ def _handle_s3_event(s3_object_key: str):
     if not recognized_file:
         raise UnrecognizedFileError(
             message=f"The file {filename} did not match any of {partner}'s recognized files: "
-            + json.dumps([
-                {"type": file.type, "pattern": file.filename_pattern}
-                for file in partner_config.recognized_files
-            ]),
+            + json.dumps(
+                [
+                    {"type": file.type, "pattern": file.filename_pattern}
+                    for file in partner_config.recognized_files
+                ]
+            ),
             s3_object_key=s3_object_key,
             partner=partner,
         )
@@ -315,12 +316,14 @@ def _handle_s3_event(s3_object_key: str):
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
     try:
-        if not all([
-            REGION,
-            BFD_ENVIRONMENT,
-            BUCKET,
-            BUCKET_ROOT_DIR,
-        ]):
+        if not all(
+            [
+                REGION,
+                BFD_ENVIRONMENT,
+                BUCKET,
+                BUCKET_ROOT_DIR,
+            ]
+        ):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         sns_event = SNSEvent(event)

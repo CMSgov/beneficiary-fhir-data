@@ -24,7 +24,8 @@ def print_timers() -> None:
 def get_connection_string() -> str:
     port = os.environ.get("BFD_DB_PORT") or "5432"
     dbname = os.environ.get("BFD_DB_NAME") or "idr"
-    return f"host={os.environ['BFD_DB_ENDPOINT']} port={port} dbname={dbname} user={os.environ['BFD_DB_USERNAME']} password={os.environ['BFD_DB_PASSWORD']}"
+    return f"host={os.environ['BFD_DB_ENDPOINT']} port={port} dbname={dbname} \
+        user={os.environ['BFD_DB_USERNAME']} password={os.environ['BFD_DB_PASSWORD']}"
 
 
 class PostgresLoader:
@@ -52,17 +53,21 @@ class PostgresLoader:
         update_set = ", ".join([f"{v}=EXCLUDED.{v}" for v in insert_cols if v not in unique_key])
         timestamp = datetime.now(UTC)
         table = model.table()
-        # trim the schema from the table name to create the temp table (temp tables can't be created with an explicit schema set)
+        # trim the schema from the table name to create the temp table
+        # (temp tables can't be created with an explicit schema set)
         temp_table = table.split(".")[1] + "_temp"
         with self.conn.cursor() as cur:
             # load each batch in a separate transaction
             for results in fetch_results:
                 # Load each batch into a temp table
-                # This is necessary because we want to use COPY to quickly transfer everything into Postgres
-                # but COPY can't handle constraint conflicts natively.
+                # This is necessary because we want to use COPY to quickly
+                # transfer everything into Postgres, but COPY can't handle
+                # constraint conflicts natively.
+                #
                 # Note that temp tables don't use WAL so that helps with throughput as well.
                 #
-                # For simplicity's sake, we'll create our temp tables using the existing schema and just drop the columns we need to ignore
+                # For simplicity's sake, we'll create our temp tables using the existing schema and
+                # just drop the columns we need to ignore.
                 temp_table_timer.start()
                 cur.execute(
                     f"CREATE TEMPORARY TABLE {temp_table} (LIKE {table}) ON COMMIT DROP"  # type: ignore
@@ -78,12 +83,13 @@ class PostgresLoader:
                 temp_table_timer.stop()
 
                 # Use COPY to load the batch into Postgres.
-                # COPY has a number of optimizations that make bulk loading more efficient than a bunch of INSERTs.
-                # The entire operation is performed in a single statement, resulting in fewer network round-trips,
-                # less WAL activity, and less context switching.
+                # COPY has a number of optimizations that make bulk loading more efficient
+                # than a bunch of INSERTs.
+                # The entire operation is performed in a single statement, resulting in
+                # fewer network round-trips, less WAL activity, and less context switching.
 
-                # Even though we need to move the data from the temp table in the next step, it should still be
-                # faster than alternatives.
+                # Even though we need to move the data from the temp table in the next step,
+                # it should still be faster than alternatives.
                 copy_timer.start()
                 with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:  # type: ignore
                     for row in results:
@@ -92,8 +98,10 @@ class PostgresLoader:
                 copy_timer.stop()
 
                 if len(results) > 0:
-                    # For immutable tables, we may still be attempting to re-load some data due to a batch cancellation.
-                    # In these cases, we can assume any conflicting rows have already been loaded so "DO NOTHING" is appropriate here.
+                    # For immutable tables, we may still be attempting to re-load some data
+                    # due to a batch cancellation.
+                    # In these cases, we can assume any conflicting rows have already been loaded so
+                    # "DO NOTHING" is appropriate here.
                     on_conflict = (
                         "DO NOTHING"
                         if immutable
@@ -113,7 +121,8 @@ class PostgresLoader:
                     insert_timer.stop()
 
                     last = results[len(results) - 1].model_dump()
-                    # Some tables that contain reference data (like contract info) may not have the normal IDR timestamps
+                    # Some tables that contain reference data (like contract info) may not have the
+                    # normal IDR timestamps.
                     # For now we won't support incremental refreshes for those tables
                     batch_timestamp_col = model.batch_timestamp_col(
                         progress is None or progress.is_historical()

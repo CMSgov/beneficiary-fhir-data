@@ -1,43 +1,45 @@
 """Members of this file/module should be related to the collection of performance statistics during
 a test run as well as the representation of those statistics via dataclasses or other suitable
-objects"""
+objects.
+"""
 
 import hashlib
 import time
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from locust.env import Environment
 from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
 
 from common.validation import ValidationResult
 
-ResponseTimePercentiles = Dict[str, Union[int, float]]
+ResponseTimePercentiles = dict[str, int | float]
 """A type representing a dictionary of stringified percentile keys to their integer or
 floating-point values"""
 
 
-class StatsCollector(object):
+class StatsCollector:
     """Used to collect a snapshot of aggregated performance statistics of all tasks, or endpoints,
-    that ran in the current Locust environment"""
+    that ran in the current Locust environment.
+    """
 
     def __init__(
         self,
         locust_env: Environment,
-        stats_tags: List[str],
+        stats_tags: list[str],
         running_env: str,
     ) -> None:
-        """Creates a new instance of StatsCollector given the current Locust environment and a list
+        """Create a new instance of StatsCollector given the current Locust environment and a list
         of percentiles to report.
 
         Args:
             locust_env (Environment): Current Locust environment
             stats_tag (str): A string which tags the output JSON; used to distinguish between
             separate test runs
-            running_env (str): A string which represents the current testing environment. May be test, prod-sbx,
-            prod, or any ephemeral environment whose name ends with one of those values, e.g [TICKET_NUM]-test.
-            Case-insensitive.
+            running_env (str): A string which represents the current testing environment.
+            May be test, prod-sbx, prod, or any ephemeral environment whose name ends with one of
+            those values, e.g [TICKET_NUM]-test. Case-insensitive.
         """
         super().__init__()
 
@@ -45,8 +47,8 @@ class StatsCollector(object):
         self.stats_tags = stats_tags
         self.running_env = running_env
 
-    def __sort_stats(self, stats: Dict[Any, StatsEntry]) -> List[StatsEntry]:
-        """Extracts a sorted list of StatsEntrys from a dictionary of StatsEntrys
+    def __sort_stats(self, stats: dict[Any, StatsEntry]) -> list[StatsEntry]:
+        """Extract a sorted list of StatsEntrys from a dictionary of StatsEntrys.
 
         Args:
             stats (Dict[Any, StatsEntry]): Dictionary of Locust StatsEntrys
@@ -56,9 +58,9 @@ class StatsCollector(object):
         """
         return [stats[key] for key in sorted(stats.keys())]
 
-    def __get_task_stats_list(self) -> List["TaskStats"]:
-        """Returns a list of TaskStats representing the performance statistics of _all_ Locust tasks
-        that ran
+    def __get_task_stats_list(self) -> list["TaskStats"]:
+        """Return a list of TaskStats representing the performance statistics of _all_ Locust tasks
+        that ran.
 
         Returns:
             List[TaskStats]: A List of TaskStats that represent the performance statistics of all
@@ -71,7 +73,7 @@ class StatsCollector(object):
         ]
 
     def collect_stats(self) -> "AggregatedStats":
-        """A method that returns an AggregatedStats instance representing a snapshot of the
+        """Return an AggregatedStats instance representing a snapshot of the
         aggregated performance statistics of the current Locust environment at current time.
 
         Returns:
@@ -94,7 +96,7 @@ class StatsCollector(object):
 
 @dataclass
 class TaskStats:
-    """Dataclass representing the performance statistics of a given Locust task"""
+    """Dataclass representing the performance statistics of a given Locust task."""
 
     task_name: str
     """The name specified by the task"""
@@ -122,8 +124,8 @@ class TaskStats:
 
     @classmethod
     def from_stats_entry(cls, stats_entry: StatsEntry) -> "TaskStats":
-        """A class method that constructs an instance of TaskStats from a Locust StatsEntry
-        instance
+        """Construct an instance of TaskStats from a Locust StatsEntry
+        instance.
 
         Args:
             stats_entry (StatsEntry): A Locust StatsEntry instance encapsulating a Task's stats
@@ -148,8 +150,8 @@ class TaskStats:
 
     @classmethod
     def __get_percentiles_dict(cls, stats_entry: StatsEntry) -> ResponseTimePercentiles:
-        """Returns a dictionary of response time percentiles indicating the percentage of requests
-        that completed in a particular timeframe
+        """Return a dictionary of response time percentiles indicating the percentage of requests
+        that completed in a particular timeframe.
 
         Args:
             stats_entry (StatsEntry): The Locust StatsEntry object which encodes a particular task's
@@ -172,7 +174,8 @@ class TaskStats:
 class FinalCompareResult(StrEnum):
     """Enum that indicates the _overall_ result of a given AggregatedStats' comparison with a
     baseline AggregatedStats. Used to filter out runs that did not pass comparison against a
-    baseline, but may want to be stored for future analysis"""
+    baseline, but may want to be stored for future analysis.
+    """
 
     NOT_APPLICABLE = "NOT_APPLICABLE"
     """Indicates the run either was explicitly not compared against a baseline (i.e. the user did
@@ -189,11 +192,12 @@ class FinalCompareResult(StrEnum):
 @dataclass
 class StatsMetadata:
     """A dataclass encoding metadata that is necessary when comparing snapshots of aggregated
-    performance stats"""
+    performance stats.
+    """
 
     timestamp: int
     """A timestamp indicating the time a stats snapshot was collected"""
-    tags: List[str]
+    tags: list[str]
     """A list of simple string tags that partition or bucket emitted statistics"""
     environment: str
     """The environment that the stats were collected from"""
@@ -207,7 +211,7 @@ class StatsMetadata:
     """The runtime requested by the user via --spawned-runtime or --runtime"""
     total_runtime: float
     """The actual, total runtime of the test run"""
-    user_classes: List[str]
+    user_classes: list[str]
     """A List of the user classes ran during the test run"""
     hash: str
     """A hash that encodes various information about the running tests to ensure that comparisons
@@ -224,13 +228,13 @@ class StatsMetadata:
     def from_locust_env(
         cls,
         timestamp: int,
-        tags: List[str],
+        tags: list[str],
         environment: str,
-        tasks_names: List[str],
+        tasks_names: list[str],
         locust_env: Environment,
     ) -> "StatsMetadata":
-        """A class method that constructs an instance of StatsMetadata by computing its fields from
-        a given Locust environment
+        """Construct an instance of StatsMetadata by computing its fields from
+        a given Locust environment.
 
         Args:
             timestamp (int): A Unix timestamp indicating the time that the stats were collected
@@ -288,51 +292,54 @@ class StatsMetadata:
     @classmethod
     def __generate_hash_str(
         cls,
-        user_classes_names: List[str],
-        tasks_names: List[str],
+        user_classes_names: list[str],
+        tasks_names: list[str],
         num_users: int,
         requested_runtime: int,
         spawn_rate: int,
         stats_reset_after_spawn: bool,
         environment: str,
-    ):
+    ) -> str:
         # The value of the pepper doesn't matter, it's just here so that if anything that composes
         # the hash doesn't change but some external factor (like the data the Regression Suite uses)
         # does, we can forcefully change the hash so that a new baseline can be generated
         pepper = "pepper1"
         # Generate a SHA256 hash string from various bits of information
-        str_to_hash = "".join([
-            "".join(sorted(user_classes_names)),
-            "".join(sorted(tasks_names)),
-            str(num_users),
-            str(requested_runtime),
-            str(spawn_rate),
-            str(stats_reset_after_spawn),
-            str(environment),
-            pepper,
-        ])
+        str_to_hash = "".join(
+            [
+                "".join(sorted(user_classes_names)),
+                "".join(sorted(tasks_names)),
+                str(num_users),
+                str(requested_runtime),
+                str(spawn_rate),
+                str(stats_reset_after_spawn),
+                str(environment),
+                pepper,
+            ]
+        )
         return hashlib.sha256(str.encode(str_to_hash, encoding="utf-8")).hexdigest()
 
 
 @dataclass
 class AggregatedStats:
     """A dataclass encoding the entirety of performance statistics for every Locust Task along with
-    metadata necessary for comparison and storage"""
+    metadata necessary for comparison and storage.
+    """
 
-    metadata: Optional[StatsMetadata]
+    metadata: StatsMetadata | None
     """An instance of StatsMetadata that encapsulates the necessary metadata about the set of Task
     statistics"""
     totals: TaskStats
     """The aggregated totals of performance statistics for every task ran"""
-    tasks: List[TaskStats]
+    tasks: list[TaskStats]
     """A list of TaskStats where each entry represents the performance statistics of each Task"""
 
     def __init__(
         self,
-        totals: Union[TaskStats, Dict[str, Any]],
-        tasks: Union[List[TaskStats], List[Dict[str, Any]]],
-        metadata: Optional[Union[StatsMetadata, Dict[str, Any]]] = None,
-    ):
+        totals: TaskStats | dict[str, Any],
+        tasks: list[TaskStats] | list[dict[str, Any]],
+        metadata: StatsMetadata | dict[str, Any] | None = None,
+    ) -> None:
         # Support conversion directly from a nested dictionary, such as when loading from JSON files
         # or from Athena
         if isinstance(metadata, dict):

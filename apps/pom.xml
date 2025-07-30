@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gov.cms.bfd</groupId>
@@ -136,7 +137,7 @@
             The version used here should be compatible with SLF4J.
             See the compatible versions here: https://www.slf4j.org/manual.html
         -->
-        <logback.classic.version>1.5.15</logback.classic.version>
+        <logback.core.version>1.5.15</logback.core.version>
         <zjsonpatch.version>0.4.16</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
         <reflections.version>0.10.2</reflections.version>
@@ -185,8 +186,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -211,6 +212,7 @@
         <!-- The jib maven plugin produces optimized docker images from maven projects. -->
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
         <jib.version>3.4.4</jib.version>
+        <jib-spring-boot-extension-maven.version>0.1.0</jib-spring-boot-extension-maven.version>
         <!-- The base image (FROM) used to build images with jib. Defaults to pulling from the
         Docker daemon; override with -Djib.from=<image> -->
         <!-- May not work properly with Podman due to
@@ -226,7 +228,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
@@ -424,10 +426,16 @@
             </dependency>
 
             <dependency>
-                <!-- Used as a logging backed/target for SLF4J. -->
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.core.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Used as a logging backed/target for SLF4J.
+                 logback-core and logback-classic should use the same version. -->
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>${logback.classic.version}</version>
+                <version>${logback.core.version}</version>
             </dependency>
             <dependency>
                 <!-- Used to monitor the JVM's memory usage, garbage collection, etc.

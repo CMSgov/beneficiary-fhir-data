@@ -4,9 +4,10 @@ import subprocess
 import urllib.parse
 from dataclasses import asdict, dataclass
 from enum import StrEnum
-from typing import List
+from pathlib import Path
 
 import boto3
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 
 environment = os.environ.get("BFD_ENVIRONMENT", "test").lower()
@@ -28,7 +29,7 @@ class InvokeEvent:
     users: int
     spawned_runtime: str
     compare_tag: str
-    store_tags: List[str]
+    store_tags: list[str]
 
 
 @dataclass
@@ -50,7 +51,7 @@ def get_ssm_parameter(name: str, with_decrypt: bool = False) -> str:
     response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
 
     try:
-        return response["Parameter"]["Value"]
+        return response["Parameter"]["Value"]  # type: ignore
     except KeyError as exc:
         raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
 
@@ -59,7 +60,7 @@ def get_rds_db_uri(cluster_id: str) -> str:
     response = rds_client.describe_db_clusters(DBClusterIdentifier=cluster_id)
 
     try:
-        return response["DBClusters"][0]["ReaderEndpoint"]
+        return response["DBClusters"][0]["ReaderEndpoint"]  # type: ignore
     except KeyError as exc:
         raise ValueError(f'DB URI not found for cluster ID "{cluster_id}"') from exc
 
@@ -85,7 +86,9 @@ def send_sqs_message(sqs_queue_url: str, msg_body: PipelineSignalMessage) -> boo
         return False
 
 
-def send_pipeline_signal(signal_queue_url: str, result: TestResult, message: str, context) -> None:
+def send_pipeline_signal(
+    signal_queue_url: str, result: TestResult, message: str, context: LambdaContext
+) -> None:
     pipeline_signal_msg = PipelineSignalMessage(
         function_name=context.function_name,
         result=result,
@@ -97,19 +100,19 @@ def send_pipeline_signal(signal_queue_url: str, result: TestResult, message: str
     send_sqs_message(signal_queue_url, pipeline_signal_msg)
 
 
-def handler(event, context):
+def handler(event: dict, context: LambdaContext) -> str | None:
     if not s3_bucket or not sqs_pipeline_signal:
         print(
             '"INSIGHTS_BUCKET_NAME" and "SQS_PIPELINE_SIGNAL_NAME" environment variables must be'
             " specified"
         )
-        return
+        return None
 
     try:
         signal_queue_url = get_sqs_queue_url(sqs_pipeline_signal)
     except ValueError as exc:
         print(str(exc))
-        return
+        return None
 
     # We take only the first record, if it exists
     try:
@@ -117,7 +120,7 @@ def handler(event, context):
     except IndexError:
         message = "Invalid queue message, no records found"
         send_pipeline_signal(signal_queue_url, TestResult.FAILURE, message, context)
-        return
+        return None
 
     # We extract the body, and attempt to convert from JSON
     try:
@@ -125,16 +128,16 @@ def handler(event, context):
     except json.JSONDecodeError:
         message = "Record body was not valid JSON"
         send_pipeline_signal(signal_queue_url, TestResult.FAILURE, message, context)
-        return
+        return None
 
     # We then attempt to extract an InvokeEvent instance from
     # the JSON body
     try:
         invoke_event = InvokeEvent(**body)
     except TypeError as ex:
-        message = f"Message body missing required keys: {str(ex)}"
+        message = f"Message body missing required keys: {ex!s}"
         send_pipeline_signal(signal_queue_url, TestResult.FAILURE, message, context)
-        return
+        return None
 
     # Assuming we get this far, invoke_event should have the information
     # required to run the lambda:
@@ -161,10 +164,10 @@ def handler(event, context):
             message=str(exc),
             context=context,
         )
-        return
+        return None
 
     cert_path = "/tmp/bfd_test_cert.pem"
-    with open(cert_path, "w", encoding="utf-8") as file:
+    with Path(cert_path).open("w", encoding="utf-8") as file:
         file.write(cert_key + cert)
 
     password = urllib.parse.quote(raw_password)
@@ -177,7 +180,7 @@ def handler(event, context):
             message=str(exc),
             context=context,
         )
-        return
+        return None
 
     db_dsn = f"postgres://{username}:{password}@{db_uri}:5432/fhirdb"
 
@@ -202,16 +205,14 @@ def handler(event, context):
                 f"--stats-env={environment}",
                 f"--stats-store-s3-bucket={s3_bucket}",
                 f"--stats-store-s3-database=bfd-insights-bfd-{environment}",
-                (
-                    f"--stats-store-s3-table=bfd_insights_bfd_{environment.replace('-', '_')}_server_regression"
-                ),
+                f"--stats-store-s3-table=bfd_insights_bfd_{environment.replace('-', '_')}_server_regression",  # noqa: E501
                 "--stats-compare-average",
                 f"--stats-compare-tag={invoke_event.compare_tag}",
                 f"--stats-compare-meta-file={lambda_task_root}/app/config/regression_suites_compare_meta.json",
                 "--headless",
                 "--only-summary",
-            ]
-            + store_tag_args,
+                *store_tag_args,
+            ],
             text=True,
             check=False,
         )
@@ -227,3 +228,4 @@ def handler(event, context):
         )
 
         return regression_process.stdout
+    return None

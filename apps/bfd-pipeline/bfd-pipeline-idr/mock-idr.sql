@@ -202,6 +202,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
     clm_num_sk BIGINT NOT NULL,
     clm_admsn_type_cd VARCHAR(2),
     bene_ptnt_stus_cd VARCHAR(2),
+    -- SAMHSA (DRG)
     dgns_drg_cd INT,
     clm_mdcr_instnl_mco_pd_sw VARCHAR(1),
     clm_admsn_src_cd VARCHAR(2),
@@ -272,8 +273,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_val_sqnc_num INT NOT NULL,
+    -- SAMHSA (ICD)
     clm_prcdr_cd VARCHAR(7),
     clm_dgns_prcdr_icd_ind VARCHAR(1),
+    -- SAMHSA (ICD)
     clm_dgns_cd VARCHAR(7),
     clm_prod_type_cd VARCHAR(1),
     clm_poa_ind VARCHAR(1),
@@ -283,6 +286,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_prod_type_cd, clm_val_sqnc_num)
 );
 
+-- Note: this table also has CLM_LINE_DGNS_CD but this is redundant with the values in V2_MDCR_CLM_PROD
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_uniq_id BIGINT NOT NULL,
     geo_bene_sk BIGINT NOT NULL,
@@ -300,6 +304,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_cvrd_pd_amt NUMERIC,
     clm_line_blood_ddctbl_amt NUMERIC,
     clm_line_mdcr_ddctbl_amt NUMERIC,
+    -- SAMHSA (HCPCS/CPT)
     clm_line_hcpcs_cd VARCHAR(5),
     clm_line_ndc_cd VARCHAR(11),
     clm_line_ndc_qty NUMERIC,

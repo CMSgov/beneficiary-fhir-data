@@ -1,12 +1,24 @@
 """This module contains various utility functions shared between the node and controller that are
-related to boto3"""
+related to boto3.
+"""
+
 import json
 import re
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from types_boto3_rds import RDSClient
+    from types_boto3_sqs.service_resource import Queue
+    from types_boto3_ssm import SSMClient
+
+else:
+    RDSClient = object
+    Queue = object
+    SSMClient = object
 
 
-def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
-    """Retrieves the value of the given SSM parameter optionally decrypting it if specified
+def get_ssm_parameter(ssm_client: SSMClient, name: str, with_decrypt: bool = False) -> str:
+    """Retrieve the value of the given SSM parameter optionally decrypting it if specified.
 
     Args:
         ssm_client: An instance of boto3's SSM client
@@ -24,13 +36,13 @@ def get_ssm_parameter(ssm_client, name: str, with_decrypt: bool = False) -> str:
     response = ssm_client.get_parameter(Name=name, WithDecryption=with_decrypt)
 
     try:
-        return response["Parameter"]["Value"]
+        return response["Parameter"]["Value"]  # type: ignore
     except KeyError as exc:
         raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
 
 
-def get_rds_db_uri(rds_client, cluster_id: str) -> str:
-    """Retrieves the RDS database URI for a given cluster ID's reader endpoint
+def get_rds_db_uri(rds_client: RDSClient, cluster_id: str) -> str:
+    """Retrieve the RDS database URI for a given cluster ID's reader endpoint.
 
     Args:
         rds_client: An instance of boto3's RDS client
@@ -46,13 +58,13 @@ def get_rds_db_uri(rds_client, cluster_id: str) -> str:
     response = rds_client.describe_db_clusters(DBClusterIdentifier=cluster_id)
 
     try:
-        return response["DBClusters"][0]["ReaderEndpoint"]
+        return response["DBClusters"][0]["ReaderEndpoint"]  # type: ignore
     except KeyError as exc:
         raise ValueError(f'DB URI not found for cluster ID "{cluster_id}"') from exc
 
 
-def check_queue(queue, timeout: int = 1) -> List[Dict[str, str]]:
-    """Checks a given SQS queue for messages and returns the inner JSON message from each
+def check_queue(queue: Queue, timeout: int = 1) -> list[dict[str, str]]:
+    """Check a given SQS queue for messages and returns the inner JSON message from each.
 
     Args:
         queue: A boto3 SQS queue
@@ -61,13 +73,12 @@ def check_queue(queue, timeout: int = 1) -> List[Dict[str, str]]:
     Returns:
         List[Dict[str, str]]: The list of inner queue messages
     """
-    # TODO: Properly type hint 'queue'
-    responses: List[Dict[str, str]] = queue.receive_messages(
+    responses = queue.receive_messages(
         AttributeNames=["SenderId", "SentTimestamp"],
         WaitTimeSeconds=timeout,
     )
 
-    def load_json_safe(json_str: str) -> Dict[str, Any]:
+    def load_json_safe(json_str: str) -> dict[str, Any] | None:
         try:
             return json.loads(json_str)
         except json.JSONDecodeError:
@@ -82,17 +93,15 @@ def check_queue(queue, timeout: int = 1) -> List[Dict[str, str]]:
     # The actual message will be string-escaped JSON under the "Message" key, hence why that key's
     # value is deserialized from JSON if it exists. If it doesn't exist, we assume the message is
     # the _entire_ SQS message
-    filtered_messages = [
-        load_json_safe(message.get("Message")) or message
+    return [
+        load_json_safe(message.get("Message") or "") or message
         for message in raw_messages
         if message is not None
     ]
 
-    return filtered_messages
 
-
-def get_warm_pool_count(message: Dict[str, str]) -> int:
-    """Retrieves the desired warm pool instance count from a given SQS scaling message
+def get_warm_pool_count(message: dict[str, str]) -> int:
+    """Retrieve the desired warm pool instance count from a given SQS scaling message.
 
     Args:
         message (Dict[str, str]): An SQS message generated from a scaling event
