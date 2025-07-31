@@ -4652,7 +4652,7 @@ public final class TransformerUtilsV2 {
         new Reference()
             .setIdentifier(
                 TransformerUtilsV2.createIdentifier(
-                    CcwCodebookVariable.PRVDR_NUM, providerNumber)));
+                    CcwCodebookVariable.ORG_NPI_NUM, providerNumber)));
   }
 
   /**

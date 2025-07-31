@@ -112,17 +112,6 @@ public final class TransformerConstants {
   public static final String NUBC_ADMIT_CODE_SYSTEM =
       BASE_URL_NUBC + "/CodeSystem/PriorityTypeOfAdmitOrVisit";
 
-  /**
-   * Maps a ccw variable to a specific URL. If the variable exists as a key in this map, then the
-   * value will be used as the system; otherwise, it will be constructed using the above constants.
-   */
-  public static final Map<String, String> CCW_SYSTEM_MAP =
-      new HashMap<>() {
-        {
-          put("clm_ip_admsn_type_cd", NUBC_ADMIT_CODE_SYSTEM);
-        }
-      };
-
   /** Constant for Carin BB base url. */
   public static final String BASE_URL_CARIN_BB = "http://hl7.org/fhir/us/carin-bb";
 
@@ -688,6 +677,15 @@ public final class TransformerConstants {
           + "personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso "
           + "intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley "
           + "federal y es sancionada por la ley.";
+
+  /**
+   * Maps a ccw variable to a specific URL. If the variable exists as a key in this map, then the
+   * value will be used as the system; otherwise, it will be constructed using the above constants.
+   */
+  public static final Map<String, String> CCW_SYSTEM_MAP =
+      Map.of(
+          "clm_ip_admsn_type_cd", NUBC_ADMIT_CODE_SYSTEM,
+          "org_npi_num", CODING_NPI_US);
 
   /**
    * Code System URL for C4DIC Logo Extension URL <a
