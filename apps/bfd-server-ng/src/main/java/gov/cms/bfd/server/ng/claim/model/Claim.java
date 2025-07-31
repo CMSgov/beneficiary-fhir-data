@@ -12,13 +12,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -147,12 +145,12 @@ public class Claim {
         .forEach(eob::addSupportingInfo);
 
     claimLines.stream().map(ClaimLine::toFhir).forEach(eob::addItem);
-
-    transformAndSort(careTeam.toFhir(), pair -> pair, pair -> pair.careTeam().getSequence())
+    careTeam
+        .toFhir()
         .forEach(
-            sortedPair -> {
-              eob.addCareTeam(sortedPair.careTeam());
-              eob.addContained(sortedPair.practitioner());
+            c -> {
+              eob.addCareTeam(c.careTeam());
+              eob.addContained(c.practitioner());
             });
 
     institutional.ifPresent(
@@ -169,20 +167,9 @@ public class Claim {
     return sortedEob(eob);
   }
 
-  private <S, T> List<T> transformAndSort(
-      Collection<S> source,
-      java.util.function.Function<S, T> transformer,
-      java.util.function.Function<T, Integer> sequenceExtractor) {
-    if (source == null || source.isEmpty()) {
-      return new ArrayList<>();
-    }
-    return source.stream()
-        .map(transformer)
-        .sorted(Comparator.comparing(sequenceExtractor))
-        .collect(Collectors.toList());
-  }
-
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {
+    eob.getCareTeam()
+        .sort(Comparator.comparing(ExplanationOfBenefit.CareTeamComponent::getSequence));
     eob.getProcedure()
         .sort(Comparator.comparing(ExplanationOfBenefit.ProcedureComponent::getSequence));
     eob.getDiagnosis()
