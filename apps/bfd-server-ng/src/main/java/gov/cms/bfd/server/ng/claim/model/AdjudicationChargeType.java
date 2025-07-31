@@ -107,8 +107,25 @@ enum AdjudicationChargeType {
   private final String coding2Code;
   private final String coding2Display;
 
-  ExplanationOfBenefit.AdjudicationComponent toFhir(double value) {
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(double value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
+        .setCategory(
+            new CodeableConcept()
+                .addCoding(
+                    new Coding()
+                        .setSystem(coding1System)
+                        .setCode(coding1Code)
+                        .setDisplay(coding1Display))
+                .addCoding(
+                    new Coding()
+                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
+                        .setCode(coding2Code)
+                        .setDisplay(coding2Display)))
+        .setAmount(USD.toFhir(value));
+  }
+
+  ExplanationOfBenefit.TotalComponent toFhirTotal(double value) {
+    return new ExplanationOfBenefit.TotalComponent()
         .setCategory(
             new CodeableConcept()
                 .addCoding(

@@ -13,6 +13,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,6 +52,7 @@ public class Claim {
   @Embedded private CareTeam careTeam;
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -150,6 +152,7 @@ public class Claim {
               eob.addCareTeam(c.careTeam());
               eob.addContained(c.practitioner());
             });
+
     institutional.ifPresent(
         i -> {
           eob.addAdjudication(i.getPpsDrgWeight().toFhir());
@@ -158,7 +161,23 @@ public class Claim {
         });
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
-    eob.addAdjudication(adjudicationCharge.toFhir());
+    eob.addTotal(adjudicationCharge.toFhir());
+    eob.setPayment(claimPaymentAmount.toFhir());
+
+    return sortedEob(eob);
+  }
+
+  private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {
+    eob.getCareTeam()
+        .sort(Comparator.comparing(ExplanationOfBenefit.CareTeamComponent::getSequence));
+    eob.getProcedure()
+        .sort(Comparator.comparing(ExplanationOfBenefit.ProcedureComponent::getSequence));
+    eob.getDiagnosis()
+        .sort(Comparator.comparing(ExplanationOfBenefit.DiagnosisComponent::getSequence));
+    eob.getSupportingInfo()
+        .sort(
+            Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
+    eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
     return eob;
   }
 }
