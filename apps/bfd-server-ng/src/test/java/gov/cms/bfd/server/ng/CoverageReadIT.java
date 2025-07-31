@@ -9,16 +9,38 @@ import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import io.restassured.RestAssured;
+import java.sql.SQLException;
 import org.hl7.fhir.r4.model.Coverage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.transaction.TestTransaction;
 
 public class CoverageReadIT extends IntegrationTestBase {
 
+  @Autowired protected JdbcTemplate jdbcTemplate;
+
+  private static final String BENE_ID_HAS_A_AND_B = "405764107";
+
   private IReadTyped<Coverage> coverageRead() {
     return getFhirClient().read().resource(Coverage.class);
+  }
+
+  protected void runSql(String sql) throws SQLException {
+    jdbcTemplate.execute(sql);
+
+    if (TestTransaction.isActive()) {
+      TestTransaction.flagForCommit();
+      TestTransaction.end();
+      TestTransaction.start();
+    }
+  }
+
+  private String createCoverageId(String part, String beneId) {
+    return String.format("part-%s-%s", part, beneId);
   }
 
   @Test
@@ -97,6 +119,27 @@ public class CoverageReadIT extends IntegrationTestBase {
         InvalidRequestException.class,
         () -> coverageRead().withId(unsupportedPartId).execute(),
         "Should throw InvalidRequestException for an unsupported part like Part C/D.");
+  }
+
+  @Test
+  void read_beneWithOnlyExpiredCoverage_isNotFound() throws SQLException {
+
+    final String updateSql =
+        String.format(
+            "UPDATE \"idr\".\"beneficiary_entitlement\" "
+                + "SET \"bene_rng_end_dt\" = '2012-12-31' "
+                + "WHERE \"bene_sk\" = '%s' "
+                + "AND \"bene_mdcr_entlmt_type_cd\" = 'A'",
+            BENE_ID_HAS_A_AND_B);
+
+    runSql(updateSql);
+
+    var expiredCoverageId = createCoverageId("a", BENE_ID_HAS_A_AND_B);
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(expiredCoverageId).execute(),
+        "Should throw ResourceNotFoundException as coverage was just expired via SQL.");
   }
 
   @ParameterizedTest
