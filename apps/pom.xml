@@ -163,7 +163,7 @@
         <commons.io.version>2.18.0</commons.io.version>
         <commons.collections4.version>4.4</commons.collections4.version>
         <commons-codec.version>1.18.0</commons-codec.version>
-        <commons-text.version>1.13.0</commons-text.version>
+        <commons-text.version>1.14.0</commons-text.version>
         <hamcrest-library.version>2.2</hamcrest-library.version>
         <awaitility.version>4.3.0</awaitility.version>
         <lombok.version>1.18.36</lombok.version>
