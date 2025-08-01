@@ -144,15 +144,15 @@ class PostgresLoader:
                                 "last_ts": last_timestamp,
                             },
                         )
-                # Mark the batch as completed
-                cur.execute(
-                    """
-                    UPDATE idr.load_progress
-                    SET batch_completion_ts = NOW()
-                    WHERE table_name = %(table)s
-                    """,
-                    {"table": table},
-                )
                 commit_timer.start()
                 self.conn.commit()
                 commit_timer.stop()
+            # Mark the batch as completed
+            cur.execute(
+                """
+                UPDATE idr.load_progress
+                SET batch_completion_ts = NOW()
+                WHERE table_name = %(table)s
+                """,
+                {"table": table},
+            )

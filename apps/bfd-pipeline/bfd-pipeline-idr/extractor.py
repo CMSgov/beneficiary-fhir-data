@@ -75,7 +75,7 @@ class Extractor(ABC):
         idr_query_timer.start()
         # Saved progress found, start processing from where we left off
         update_clause = (
-            f"OR {update_timestamp_col} IS NOT NULL AND {update_timestamp_col} {op} %(timestamp)s"
+            f"OR ({update_timestamp_col} IS NOT NULL AND {update_timestamp_col} {op} %(timestamp)s)"
             if update_timestamp_col is not None
             else ""
         )
@@ -84,9 +84,11 @@ class Extractor(ABC):
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE 
-                        ({update_timestamp_col} IS NOT NULL 
-                            AND {batch_timestamp_col} {op} %(timestamp)s {update_clause})
+                    WHERE
+                        (
+                            {batch_timestamp_col} {op} %(timestamp)s
+                            {update_clause}
+                        )
                         AND {batch_timestamp_col} {op} '{get_min_transaction_date()}' 
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
