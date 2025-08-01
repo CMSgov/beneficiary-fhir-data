@@ -77,7 +77,7 @@ def extract_and_load(
     cls: type[T],
     data_extractor: Extractor,
     connection_string: str,
-) -> PostgresLoader:
+) -> tuple[PostgresLoader, bool]:
     logger.info("loading %s", cls.table())
     progress = get_progress(connection_string, cls.table())
     batch_start = datetime.datetime.now()
@@ -88,8 +88,8 @@ def extract_and_load(
     )
 
     loader = PostgresLoader(connection_string)
-    loader.load(data_iter, cls, batch_start, progress)
-    return loader
+    data_loaded = loader.load(data_iter, cls, batch_start, progress)
+    return (loader, data_loaded)
 
 
 def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]) -> None:
@@ -107,12 +107,13 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrBeneficiaryMbiId,
     )
 
-    bene_loader = extract_and_load(
+    (bene_loader, data_loaded) = extract_and_load(
         IdrBeneficiary,
         data_extractor,
         connection_string,
     )
-    bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
+    if data_loaded:
+        bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
 
     load_all(
         data_extractor,

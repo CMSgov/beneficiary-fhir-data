@@ -48,7 +48,7 @@ class PostgresLoader:
         model: type[T],
         batch_start: datetime,
         progress: LoadProgress | None,
-    ) -> None:
+    ) -> bool:
         insert_cols = list(model.insert_keys())
         insert_cols.sort()
         cols_str = ", ".join(insert_cols)
@@ -77,8 +77,10 @@ class PostgresLoader:
                     "start_ts": batch_start,
                 },
             )
+            data_loaded = False
             # load each batch in a separate transaction
             for results in fetch_results:
+                data_loaded = True
                 logger.info("loading next %s results", len(results))
                 # Load each batch into a temp table
                 # This is necessary because we want to use COPY to quickly
@@ -174,3 +176,5 @@ class PostgresLoader:
                 {"table": table},
             )
             self.conn.commit()
+
+        return data_loaded

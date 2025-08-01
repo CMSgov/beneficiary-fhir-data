@@ -470,7 +470,7 @@ class IdrClaim(IdrBaseModel):
     clm_bill_fac_type_cd: str
     clm_bill_freq_cd: str
     clm_finl_actn_ind: str
-    clm_src_id: str
+    clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_coinsrnc_amt: float
     clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
