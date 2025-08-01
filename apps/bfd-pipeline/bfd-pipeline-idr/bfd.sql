@@ -148,7 +148,7 @@ CREATE TABLE idr.beneficiary_xref (
     bene_kill_cred_cd VARCHAR(1) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
-    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
+    src_rec_crte_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)

@@ -374,7 +374,7 @@ class IdrBeneficiaryXref(IdrBaseModel):
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
     ]
-    src_rec_ctre_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
+    src_rec_crte_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
 
     @staticmethod
     def table() -> str:
