@@ -76,7 +76,8 @@ class Extractor(ABC):
         idr_query_timer.start()
         # Saved progress found, start processing from where we left off
         update_clause = (
-            f"OR ({update_timestamp_col} IS NOT NULL AND {update_timestamp_col} >= %(timestamp)s)"
+            f"""AND ({update_timestamp_col} IS NULL 
+                OR {update_timestamp_col} >= %(timestamp)s)"""
             if update_timestamp_col is not None
             else ""
         )

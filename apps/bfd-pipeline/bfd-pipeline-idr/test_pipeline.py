@@ -68,7 +68,7 @@ class TestPipeline:
         conn.execute(
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene
-            SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s
+            SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
             WHERE bene_sk = 53965935
             """,
             {"timestamp": datetime.now(UTC)},
