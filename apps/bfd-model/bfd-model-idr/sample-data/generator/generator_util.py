@@ -149,6 +149,7 @@ class GeneratorUtil():
         patient = {}
         self.set_timestamps(patient, datetime.date(year=2017, month=5, day=20))
         patient["CNTCT_LANG_CD"] = random.choice(["~", "ENG", "SPA"])
+        patient["IDR_LTST_TRANS_FLG"] = "Y"
         address = self.gen_address()
         for component in address:
             patient[component] = address[component]
@@ -196,12 +197,15 @@ class GeneratorUtil():
                 )
                 mbi_obj["BENE_MBI_OBSLT_DT"] = obslt_dt.strftime("%Y-%m-%d")
                 
-                # Create historical entry for the OLD MBI (not the new one)
-                historical_patient = copy.deepcopy(patient)
-                historical_patient["BENE_MBI_ID"] = previous_mbi if previous_mbi else patient["BENE_MBI_ID"]
-                # Set the obsolescence timestamp for the historical entry
-                self.set_timestamps(historical_patient, obslt_dt)
-                self.bene_hstry_table.append(historical_patient)
+                if previous_mbi and previous_mbi != current_mbi:
+                    historical_patient = copy.deepcopy(patient)
+                    historical_patient["BENE_MBI_ID"] = previous_mbi
+                    historical_patient["IDR_LTST_TRANS_FLG"] = "N"  
+                    
+                    self.set_timestamps(historical_patient, obslt_dt)
+                    historical_patient["IDR_TRANS_OBSLT_TS"] = str(obslt_dt) + "T00:00:00.000000+0000"
+                    self.bene_hstry_table.append(historical_patient)
+                
                 
                 previous_obslt_dt = obslt_dt  # Store for next iteration
             else:
@@ -308,6 +312,7 @@ class GeneratorUtil():
                     "GEO_ZIP5_CD",
                     "GEO_USPS_STATE_CD",
                     "CNTCT_LANG_CD",
+                    "IDR_LTST_TRANS_FLG",
                     "IDR_TRANS_EFCTV_TS",
                     "IDR_INSRT_TS",
                     "IDR_UPDT_TS",
