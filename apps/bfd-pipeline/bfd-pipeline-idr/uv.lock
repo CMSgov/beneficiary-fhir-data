@@ -25,6 +25,7 @@ name = "bfd-pipeline-idr"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "cryptography" },
     { name = "psycopg" },
     { name = "pydantic" },
     { name = "snowflake-connector-python" },
@@ -41,6 +42,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptography", specifier = ">=44.0.2" },
     { name = "psycopg", specifier = ">=3.2.9" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "snowflake-connector-python", specifier = ">=3.16.0" },

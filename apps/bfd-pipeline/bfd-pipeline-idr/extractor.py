@@ -5,6 +5,8 @@ from datetime import date, datetime
 
 import psycopg
 import snowflake.connector
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from psycopg.rows import class_row
 from snowflake.connector import DictCursor
 
@@ -115,9 +117,18 @@ class PostgresExtractor(Extractor):
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int) -> None:
         super().__init__()
+
+        private_key = serialization.load_pem_private_key(
+            os.environ["IDR_PRIVATE_KEY"].encode(), password=None, backend=default_backend()
+        )
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
         self.conn = snowflake.connector.connect(  # type: ignore
             user=os.environ["IDR_USERNAME"],
-            password=os.environ["IDR_PASSWORD"],
+            private_key=private_key_bytes,
             account=os.environ["IDR_ACCOUNT"],
             warehouse=os.environ["IDR_WAREHOUSE"],
             database=os.environ["IDR_DATABASE"],
