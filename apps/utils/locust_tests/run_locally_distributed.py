@@ -1,10 +1,11 @@
-"""Small python helper for running Locust tests distributedly and headlessly on the local machine."""
+"""Small python helper for running Locust tests distributedly and headlessly
+on the local machine.
+"""
 
 import argparse
 import signal
 import subprocess
 import sys
-from typing import List
 
 arg_parser = argparse.ArgumentParser(
     description=(
@@ -35,14 +36,16 @@ arg_parser.add_argument(
     "--locust-tags",
     dest="locust-tags",
     type=str,
-    help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks if not provided (Optional, Default: "")',
+    help='Space-delimited. Run the locust tasks with ANY of the given @tag(s). Will run all tasks \
+        if not provided (Optional, Default: "")',
     default="",
 )
 arg_parser.add_argument(
     "--locust-exclude-tags",
     dest="locust-exclude-tags",
     type=str,
-    help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) (Optional, Default: "")',
+    help='Space-delimited. Exclude the locust tasks with ANY of the given @tag(s) \
+        (Optional, Default: "")',
     default="",
 )
 arg_parser.add_argument(
@@ -109,7 +112,7 @@ def sigint_handler(
     sys.exit(0)
 
 
-worker_processes: List[subprocess.Popen[bytes]] = []
+worker_processes: list[subprocess.Popen[bytes]] = []
 
 signal.signal(
     signalnum=signal.SIGINT,

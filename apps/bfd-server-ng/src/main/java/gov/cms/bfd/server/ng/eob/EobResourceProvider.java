@@ -6,9 +6,11 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
@@ -52,6 +54,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
+   * @param tag tag to filter by (e.g., Adjudicated status)
    * @return bundle
    */
   @Search
@@ -61,14 +64,18 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = SERVICE_DATE) DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
-      @OptionalParam(name = START_INDEX) NumberParam startIndex) {
+      @OptionalParam(name = START_INDEX) NumberParam startIndex,
+      @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag) {
+
+    var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
 
     return eobHandler.searchByBene(
         FhirInputConverter.toLong(patient, "Patient"),
         Optional.ofNullable(count),
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
-        FhirInputConverter.toIntOptional(startIndex));
+        FhirInputConverter.toIntOptional(startIndex),
+        sourceIds);
   }
 
   /**

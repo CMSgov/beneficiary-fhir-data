@@ -61,7 +61,7 @@ public class ClaimProcedure {
                     .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_PROCEDURE_TYPE)
                     .setCode(code)));
     if (procedureDate.isAfter(DEFAULT_PROCEDURE_DATE)) {
-      procedure.setDate(DateUtil.toDate(procedureDate));
+      procedure.setDateElement(DateUtil.toFhirDate(procedureDate));
     }
     procedure.setProcedure(
         new CodeableConcept(
@@ -84,9 +84,17 @@ public class ClaimProcedure {
               new CodeableConcept(new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode())));
         });
 
+    String formattedCode = icdIndicator.formatCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
         new CodeableConcept(
-            new Coding().setSystem(icdIndicator.getDiagnosisSytem()).setCode(diagnosisCode.get())));
+            new Coding().setSystem(icdIndicator.getDiagnosisSytem()).setCode(formattedCode)));
+
+    this.claimPoaIndicator.ifPresent(
+        poaCode -> {
+          var onAdmissionConcept = new CodeableConcept();
+          onAdmissionConcept.addCoding().setSystem(SystemUrls.POA_CODING).setCode(poaCode);
+          diagnosis.setOnAdmission(onAdmissionConcept);
+        });
 
     return Optional.of(diagnosis);
   }

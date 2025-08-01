@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -13,8 +13,10 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -50,10 +52,11 @@ public class Claim {
   @Embedded private CareTeam careTeam;
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
-  private Beneficiary beneficiary;
+  private BeneficiarySimple beneficiary;
 
   @OneToOne
   @JoinColumn(name = "clm_dt_sgntr_sk")
@@ -66,15 +69,15 @@ public class Claim {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimLine> claimLines;
+  private Set<ClaimLine> claimLines;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimValue> claimValues;
+  private Set<ClaimValue> claimValues;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private List<ClaimProcedure> claimProcedures;
+  private Set<ClaimProcedure> claimProcedures;
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
@@ -87,6 +90,7 @@ public class Claim {
    */
   public ExplanationOfBenefit toFhir() {
     var eob = new ExplanationOfBenefit();
+    eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
     eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
@@ -148,6 +152,7 @@ public class Claim {
               eob.addCareTeam(c.careTeam());
               eob.addContained(c.practitioner());
             });
+
     institutional.ifPresent(
         i -> {
           eob.addAdjudication(i.getPpsDrgWeight().toFhir());
@@ -156,7 +161,23 @@ public class Claim {
         });
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
-    eob.addAdjudication(adjudicationCharge.toFhir());
+    eob.addTotal(adjudicationCharge.toFhir());
+    eob.setPayment(claimPaymentAmount.toFhir());
+
+    return sortedEob(eob);
+  }
+
+  private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {
+    eob.getCareTeam()
+        .sort(Comparator.comparing(ExplanationOfBenefit.CareTeamComponent::getSequence));
+    eob.getProcedure()
+        .sort(Comparator.comparing(ExplanationOfBenefit.ProcedureComponent::getSequence));
+    eob.getDiagnosis()
+        .sort(Comparator.comparing(ExplanationOfBenefit.DiagnosisComponent::getSequence));
+    eob.getSupportingInfo()
+        .sort(
+            Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
+    eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
     return eob;
   }
 }

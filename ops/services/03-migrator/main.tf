@@ -24,7 +24,7 @@ locals {
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
   is_ephemeral_env         = module.terraservice.is_ephemeral_env
-  latest_bfd_release       = module.terraservice.latest_bfd_release
+  bfd_version              = module.terraservice.bfd_version
   ssm_config               = module.terraservice.ssm_config
   env_key_arn              = module.terraservice.env_key_arn
   iam_path                 = module.terraservice.default_iam_path
@@ -35,7 +35,7 @@ locals {
   name_prefix = "bfd-${local.env}-${local.service}"
 
   migrator_repository_name = coalesce(var.migrator_repository_override, "bfd-db-migrator")
-  migrator_version         = coalesce(var.migrator_version_override, local.latest_bfd_release)
+  migrator_version         = coalesce(var.migrator_version_override, local.bfd_version)
 
   db_environment        = coalesce(var.db_environment_override, local.env)
   db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
@@ -76,6 +76,11 @@ resource "aws_ecs_task_definition" "this" {
   runtime_platform {
     cpu_architecture        = "ARM64"
     operating_system_family = "LINUX"
+  }
+
+  volume {
+    configure_at_launch = false
+    name                = "tmp"
   }
 
   container_definitions = jsonencode(
@@ -126,8 +131,15 @@ resource "aws_ecs_task_definition" "this" {
             mode                  = "non-blocking"
           }
         }
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
-        mountPoints    = []
         portMappings   = []
         systemControls = []
         volumesFrom    = []

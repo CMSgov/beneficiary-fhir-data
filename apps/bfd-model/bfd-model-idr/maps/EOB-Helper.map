@@ -40,6 +40,7 @@ conceptmap "CLM_TYPE_CD" {
   s:1011 = t:"institutional"
   s:2011 = t:"institutional"
 }
+
 conceptmap "CLM_TYPE_TO_COVERAGE_PART" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://hl7.org/fhir/string"
@@ -63,6 +64,17 @@ conceptmap "CLM_TYPE_TO_COVERAGE_PART" {
   s:82 = t:"Part B"
   s:1011 = t:"Part A"
   s:2011 = t:"Part A"
+}
+
+conceptmap "RIC_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:M = t:"Part B"
+  s:O = t:"Part B"
+  s:U = t:"Part A"
+  s:V = t:"Part A"
+  s:W = t:"Part B"
 }
 
 conceptmap "profile_metadata" {
@@ -192,6 +204,13 @@ conceptmap "C4BB_DIAGTYPE" {
   s:"D" = t:"other"
   s:"E" = t:"externalcauseofinjury"
   s:"R" = t:"patientreasonforvisit"
+}
+
+conceptmap "C4BB_DIAGTYPE_PROF" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+
+  s:"D" = t:"secondary"
 }
 
 conceptmap "C4BB-SupportingInfo-Categories" {

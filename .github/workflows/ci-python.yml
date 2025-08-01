@@ -1,0 +1,76 @@
+name: CI - Python
+
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - "**/*requirement*.txt"
+      - "**/uv.lock"
+      - ".github/workflows/ci-python.yml"
+
+  merge_group:
+
+env:
+  BASE_COMMIT: ""
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  matrix-pytest:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        projects:
+          [
+            {
+              projectName: "sftp-outbound-transfer-lambda",
+              projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
+              testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.13",
+            },
+            {
+              projectName: "locust",
+              projectRoot: "apps/utils/locust_tests",
+              testsRoot: "apps/utils/locust_tests",
+              uvCommand: "uv sync --group lambda-run-locust",
+              # no tests
+              pytestCommand: "echo 'no tests'",
+              pythonVersion: "3.13"
+            },
+            {
+              projectName: "idr-pipeline",
+              projectRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
+              testsRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
+              uvCommand: "uv sync",
+              pytestCommand: "uv run pytest",
+              pythonVersion: "3.13"
+            }
+          ]
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        id: code-checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          # Install a specific version of uv.
+          version: "0.7.8"
+      - name: Run Python Tests per project
+        id: run-pytest-set
+        run: |
+          echo "Testing ${{ matrix.projects.projectName }}"
+          cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
+          uv python install
+          ${{ matrix.projects.uvCommand }}
+          # check linting
+          uv run ruff check
+          # check formatting
+          uv run ruff format --check
+          # check types
+          uv run pyright .
+          # tests
+          ${{ matrix.projects.pytestCommand }} ${{ github.workspace }}/${{ matrix.projects.testsRoot }}

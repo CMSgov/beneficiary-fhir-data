@@ -1,13 +1,17 @@
 import csv
-import psycopg
-import typing
 import sys
+import typing
+from pathlib import Path
+
+import psycopg
+
 from loader import get_connection_string
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE.csv", "table": "v2_mdcr_bene"},
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
     {"csv_name": "SYNTHETIC_BENE_MBI_ID.csv", "table": "v2_mdcr_bene_mbi_id"},
+    {"csv_name": "SYNTHETIC_BENE_XREF.csv", "table": "v2_mdcr_bene_xref"},
     {"csv_name": "SYNTHETIC_CLM.csv", "table": "v2_mdcr_clm"},
     {"csv_name": "SYNTHETIC_CLM_INSTNL.csv", "table": "v2_mdcr_clm_instnl"},
     {"csv_name": "SYNTHETIC_CLM_DCMTN.csv", "table": "v2_mdcr_clm_dcmtn"},
@@ -27,19 +31,19 @@ tables = [
 ]
 
 
-def load_from_csv(conn: psycopg.Connection, src_folder: str):
+def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
     for table in tables:
-        file = f"{src_folder}/{table["csv_name"]}"
+        file = f"{src_folder}/{table['csv_name']}"
         try:
-            with open(file, "r") as f:
+            with Path(file).open() as f:
                 reader = csv.DictReader(f)
 
                 cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
                 cols_str = ",".join(cols)
-                full_table = f'cms_vdm_view_mdcr_prd.{table["table"]}'
+                full_table = f"cms_vdm_view_mdcr_prd.{table['table']}"
                 with conn.cursor() as cur:
                     # Clear out any previous data
-                    cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignores
+                    cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
                     with cur.copy(
                         f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
                     ) as copy:

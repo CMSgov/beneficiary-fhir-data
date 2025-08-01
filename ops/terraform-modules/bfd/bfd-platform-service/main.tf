@@ -4,8 +4,9 @@ locals {
   account_types = ["prod", "non-prod"]
   account_type  = try(one([for x in local.account_types : x if terraform.workspace == x]), null)
 
-  service      = var.service
-  github_token = coalesce(data.external.github_token.result.github_token, "invalid")
+  bfd_version = data.external.bfd_version.result.bfd_version
+
+  service = var.service
 
   ssm_hierarchies = flatten([
     for root in var.ssm_hierarchy_roots :
@@ -47,8 +48,8 @@ data "aws_region" "current" {
 
 data "aws_caller_identity" "current" {}
 
-data "external" "github_token" {
-  program = ["${path.module}/scripts/get_github_token.sh"]
+data "external" "bfd_version" {
+  program = ["${path.module}/scripts/get_bfd_version.sh"]
 }
 
 data "aws_iam_account_alias" "current" {
@@ -58,13 +59,6 @@ data "aws_iam_account_alias" "current" {
       error_message = "The current account does not match the selected workspace. Select a workspace that matches the current account type."
     }
   }
-}
-data "http" "latest_bfd_release" {
-  url = "https://api.github.com/repos/CMSgov/beneficiary-fhir-data/releases/latest"
-
-  request_headers = local.github_token != "invalid" ? {
-    Authorization = "Bearer ${local.github_token}"
-  } : {}
 }
 
 data "aws_ssm_parameters_by_path" "params" {

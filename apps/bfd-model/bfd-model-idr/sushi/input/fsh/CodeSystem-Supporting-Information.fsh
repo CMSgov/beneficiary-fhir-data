@@ -25,3 +25,4 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_LTC_DSPNSNG_MTHD_CD "Submission Clarification Code" "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days' supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event."
 * #CLM_DRUG_CVRG_STUS_CD "Drug Coverage Status Code" "This field indicates whether or not the drug is covered by Medicare Part D."
 * #CLM_CTSTRPHC_CVRG_IND_CD "Catastrophic Coverage Code" "This variable indicates whether the PDE occurred within the catastrophic benefit phase of the Medicare Part D benefit, according to the source PDE."
+* #CLM_LINE_HCT_HGB_RSLT_NUM "HCT/HGB Test Result" "The HCT/HGB Test Result"

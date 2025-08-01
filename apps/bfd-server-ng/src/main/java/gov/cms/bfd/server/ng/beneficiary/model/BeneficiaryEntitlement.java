@@ -1,7 +1,10 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
 
 /** Entity representing BeneficiaryEntitlement. */
 @Entity
@@ -64,5 +68,22 @@ public class BeneficiaryEntitlement {
                             new Coding(SystemUrls.SYS_BENE_MDCR_ENTLMT_STUS_CD, validCode, null))));
 
     return extensions;
+  }
+
+  Optional<Period> toFhirPeriod() {
+    Optional<LocalDate> optStartDate = Optional.ofNullable(this.getId().getBenefitRangeBeginDate());
+    Optional<LocalDate> optEndDate = Optional.ofNullable(this.getId().getBenefitRangeEndDate());
+
+    return optStartDate.map(
+        startDate -> {
+          Period period = new Period();
+          period.setStartElement(DateUtil.toFhirDate(startDate));
+
+          optEndDate
+              .filter(endDate -> endDate.isBefore(IdrConstants.DEFAULT_DATE))
+              .ifPresent(validEndDate -> period.setEndElement(DateUtil.toFhirDate(validEndDate)));
+
+          return period;
+        });
   }
 }

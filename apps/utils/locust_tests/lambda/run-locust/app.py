@@ -74,16 +74,18 @@ class ResultModel(BaseModel):
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
-    if not all([
-        REGION,
-        BFD_ENVIRONMENT,
-        STATS_BUCKET_ID,
-        STATS_ATHENA_WORKGROUP,
-        STATS_ATHENA_DATABASE,
-        STATS_ATHENA_TABLE,
-        READER_ENDPOINT,
-        LAMBDA_TASK_ROOT,
-    ]):
+    if not all(
+        [
+            REGION,
+            BFD_ENVIRONMENT,
+            STATS_BUCKET_ID,
+            STATS_ATHENA_WORKGROUP,
+            STATS_ATHENA_DATABASE,
+            STATS_ATHENA_TABLE,
+            READER_ENDPOINT,
+            LAMBDA_TASK_ROOT,
+        ]
+    ):
         raise RuntimeError("Not all necessary environment variables were defined")
 
     try:

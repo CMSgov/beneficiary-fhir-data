@@ -1,56 +1,62 @@
 [
   {
-    "name": "bfd-mgmt-base-java",
-    "dockerfile": "ops/images/bfd-mgmt-base-java/Dockerfile",
-    "contextDir": "ops/images/bfd-mgmt-base-java",
+    "name": "bfd-platform-base-java",
+    "dockerfile": "ops/images/bfd-platform-base-java/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-base-java",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-base-python",
-    "dockerfile": "ops/images/bfd-mgmt-base-python/Dockerfile",
-    "contextDir": "ops/images/bfd-mgmt-base-python",
+    "name": "bfd-platform-base-python",
+    "dockerfile": "ops/images/bfd-platform-base-python/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-base-python",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-mount-certstores",
-    "dockerfile": "ops/images/bfd-mgmt-mount-certstores/Dockerfile",
-    "contextDir": "ops/images/bfd-mgmt-mount-certstores",
+    "name": "bfd-platform-mount-certstores",
+    "dockerfile": "ops/images/bfd-platform-mount-certstores/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-mount-certstores",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-server-fluent-bit",
-    "dockerfile": "ops/images/bfd-mgmt-server-fluent-bit/Dockerfile",
-    "contextDir": "ops/images/bfd-mgmt-server-fluent-bit",
+    "name": "bfd-platform-server-fluent-bit",
+    "dockerfile": "ops/images/bfd-platform-server-fluent-bit/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-server-fluent-bit",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-server-regression",
+    "name": "bfd-platform-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
     "contextDir": "apps/utils/locust_tests",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-run-locust",
+    "name": "bfd-platform-run-locust",
     "dockerfile": "apps/utils/locust_tests/run-locust.Dockerfile",
     "contextDir": "apps/utils/locust_tests",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-eft-sftp-outbound-transfer-lambda",
+    "name": "bfd-platform-eft-sftp-outbound-transfer-lambda",
     "dockerfile": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/Dockerfile",
     "contextDir": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
     "platform": "linux/amd64"
   },
   {
-    "name": "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda",
-    "dockerfile": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src/Dockerfile",
-    "contextDir": "ops/terraform/services/pipeline/modules/bfd_pipeline_ccw_manifests_verifier/lambda_src",
+    "name": "bfd-platform-pipeline-ccw-manifests-verifier-lambda",
+    "dockerfile": "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier/Dockerfile",
+    "contextDir": "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
     "platform": "linux/arm64"
   },
   {
-    "name": "bfd-mgmt-pipeline-ccw-runner",
+    "name": "bfd-platform-pipeline-ccw-runner",
     "dockerfile": "ops/services/04-ccw-pipeline/lambda-src/ccw-runner/Dockerfile",
     "contextDir": "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+    "platform": "linux/arm64"
+  },
+  {
+    "name": "bfd-platform-codebuild-runner",
+    "dockerfile": "ops/images/bfd-platform-codebuild-runner/Dockerfile",
+    "contextDir": "ops/images/bfd-platform-codebuild-runner",
     "platform": "linux/arm64"
   }
 ]

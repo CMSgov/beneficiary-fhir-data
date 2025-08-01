@@ -40,7 +40,7 @@ public class CoverageResourceProvider implements IResourceProvider {
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
     var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
-    var coverage = coverageHandler.readCoverage(compositeId, coverageId.getIdPart());
+    var coverage = coverageHandler.readCoverage(compositeId);
     return coverage.orElseThrow(() -> new ResourceNotFoundException(coverageId));
   }
 
@@ -60,7 +60,7 @@ public class CoverageResourceProvider implements IResourceProvider {
     var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
 
     return coverageHandler.searchByCoverageId(
-        compositeId, coverageId.getIdPart(), FhirInputConverter.toDateTimeRange(lastUpdated));
+        compositeId, FhirInputConverter.toDateTimeRange(lastUpdated));
   }
 
   /**

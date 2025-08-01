@@ -5,8 +5,8 @@ locals {
   log_router_repository_default = !var.greenfield ? "bfd-mgmt-server-fluent-bit" : "bfd-platform-server-fluent-bit"
   log_router_repository_name    = coalesce(var.log_router_repository_override, local.log_router_repository_default)
   server_repository_name        = coalesce(var.server_repository_override, "bfd-server-ng")
-  log_router_version            = coalesce(var.log_router_version_override, local.latest_bfd_release)
-  server_version                = coalesce(var.server_version_override, local.latest_bfd_release)
+  log_router_version            = coalesce(var.log_router_version_override, local.bfd_version)
+  server_version                = coalesce(var.server_version_override, local.bfd_version)
 
   server_ssm_hierarchies              = ["/bfd/${local.env}/${local.service}"]
   server_port                         = 8080
@@ -82,7 +82,12 @@ resource "aws_ecs_task_definition" "server" {
 
   volume {
     configure_at_launch = false
-    name                = "certstores"
+    name                = "tmp_log_router"
+  }
+
+  volume {
+    configure_at_launch = false
+    name                = "tmp_${local.service}"
   }
 
   container_definitions = jsonencode(
@@ -127,8 +132,15 @@ resource "aws_ecs_task_definition" "server" {
             mode                  = "non-blocking"
           }
         }
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_log_router"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
-        mountPoints    = []
         portMappings   = []
         systemControls = []
         volumesFrom    = []
@@ -185,9 +197,16 @@ resource "aws_ecs_task_definition" "server" {
           },
         ]
         stopTimeout = 120 # Allow enough time for server to gracefully stop on spot termination.
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp_${local.service}"
+          }
+        ]
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
         dependsOn      = []
-        mountPoints    = []
         systemControls = []
         volumesFrom    = []
       },

@@ -3,13 +3,13 @@ import re
 from argparse import Namespace
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from locust.argument_parser import LocustArgumentParser
 
 
 class StatsStorageType(StrEnum):
-    """Enumeration for each available type of storage for JSON stats"""
+    """Enumeration for each available type of storage for JSON stats."""
 
     FILE = "file"
     """Indicates that aggregated statistics will be stored to a local file"""
@@ -18,7 +18,7 @@ class StatsStorageType(StrEnum):
 
 
 class StatsComparisonType(StrEnum):
-    """Enumeration for each possible type of stats comparison"""
+    """Enumeration for each possible type of stats comparison."""
 
     PREVIOUS = "previous"
     """Indicates that the comparison will be against the most recent, previous run under a given
@@ -30,35 +30,36 @@ class StatsComparisonType(StrEnum):
 @dataclass
 class StatsConfiguration:
     """Dataclass that holds data about where and how aggregated performance statistics are stored
-    and compared"""
+    and compared.
+    """
 
-    stats_store: Optional[StatsStorageType]
+    stats_store: StatsStorageType | None
     """The storage type that the stats will be written to"""
-    stats_env: Optional[str]
+    stats_env: str | None
     """The test running environment from which the statistics will be collected"""
-    stats_store_file_path: Optional[str]
+    stats_store_file_path: str | None
     """The local parent directory where JSON files will be written to.
     Used only if type is file, ignored if type is s3"""
-    stats_store_s3_workgroup: Optional[str]
+    stats_store_s3_workgroup: str | None
     """The Athena workgroup to use when querying statistics.
     Used only if type is s3, ignored if type is file"""
-    stats_store_s3_bucket: Optional[str]
+    stats_store_s3_bucket: str | None
     """The AWS S3 Bucket that the JSON will be written to.
     Used only if type is s3, ignored if type is file"""
-    stats_store_s3_database: Optional[str]
+    stats_store_s3_database: str | None
     """Name of the Athena database that is queried upon when comparing statistics.
     Also used as part of the file path when storing stats in S3"""
-    stats_store_s3_table: Optional[str]
+    stats_store_s3_table: str | None
     """Name of the table to query using Athena if store is s3 and compare is set.
     Also used as part of the file path when storing stats in S3"""
-    stats_compare: Optional[StatsComparisonType]
+    stats_compare: StatsComparisonType | None
     """Indicates the type of performance stats comparison that will be done"""
-    stats_compare_tag: Optional[str]
+    stats_compare_tag: str | None
     """Indicates the tag from which comparison statistics will be loaded"""
-    stats_compare_meta_file: Optional[str]
+    stats_compare_meta_file: str | None
     """Indicates the path to a JSON file containing metadata about how stats should be compared for
     the running test suite. Overrides the default specified by the test suite, if any"""
-    stats_store_tags: List[str] = field(default_factory=list)
+    stats_store_tags: list[str] = field(default_factory=list)
     """A simple List of string tags that are used to partition collected statistics when stored"""
     stats_compare_load_limit: int = 5
     """Indicates the limit of previous AggregatedStats loaded for comparison; used only for average
@@ -66,7 +67,7 @@ class StatsConfiguration:
 
     @classmethod
     def register_custom_args(cls, parser: LocustArgumentParser) -> None:
-        """Registers commnad-line arguments representing the fields of this dataclass
+        """Register commnad-line arguments representing the fields of this dataclass.
 
         Args:
             parser (LocustArgumentParser): The argument parser to register custom arguments to
@@ -225,7 +226,7 @@ class StatsConfiguration:
 
     @classmethod
     def from_parsed_opts(cls, parsed_opts: Namespace) -> "StatsConfiguration":
-        """Constructs an instance of StatsConfiguration from a parsed options Namespace. This will
+        """Construct an instance of StatsConfiguration from a parsed options Namespace. This will
         typically be the Locust Environment.parsed_options Namespace.
 
         Returns:
@@ -236,13 +237,13 @@ class StatsConfiguration:
         common_keys = opts_as_dict.keys() & {
             field.name for field in dataclasses.fields(StatsConfiguration)
         }
-        stats_args: Dict[str, Any] = {k: v for k, v in opts_as_dict.items() if k in common_keys}
+        stats_args: dict[str, Any] = {k: v for k, v in opts_as_dict.items() if k in common_keys}
 
         try:
             stats_config = StatsConfiguration(**stats_args)
         except ValueError as exc:
             raise ValueError(
-                f"Unable to create instance of StatsConfiguration from given arguments: {str(exc)}"
+                f"Unable to create instance of StatsConfiguration from given arguments: {exc!s}"
             ) from exc
 
         return stats_config
