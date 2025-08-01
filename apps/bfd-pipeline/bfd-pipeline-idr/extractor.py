@@ -92,7 +92,7 @@ class Extractor(ABC):
                         AND {batch_timestamp_col} {op} '{get_min_transaction_date()}' 
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
-            {"timestamp": progress.last_ts},
+            {"timestamp": progress.batch_completion_ts},
         )
         idr_query_timer.stop()
         return res

@@ -26,19 +26,15 @@ from model import (
     T,
 )
 
+console_handler = logging.StreamHandler()
+formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
+console_handler.setFormatter(formatter)
+logging.basicConfig(level=logging.INFO, handlers=[console_handler])
+
 logger = logging.getLogger(__name__)
 
 
-def init_logger() -> None:
-    logger.setLevel(logging.INFO)
-    console_handler = logging.StreamHandler()
-    formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-
 def main() -> None:
-    init_logger()
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
         pg_local = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
@@ -81,6 +77,7 @@ def extract_and_load(
 ) -> PostgresLoader:
     logger.info("loading %s", cls.table())
     progress = get_progress(connection_string, cls.table())
+    logger.info("progress for %s - %s", cls.table(), progress.last_ts if progress else "none")
     data_iter = data_extractor.extract_idr_data(
         cls,
         progress,
