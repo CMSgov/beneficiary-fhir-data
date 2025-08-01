@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import sys
 
 import extractor
@@ -36,13 +37,14 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
+    batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
         pg_local = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
         run_pipeline(
             PostgresExtractor(
                 connection_string=pg_local,
-                batch_size=100_000,
+                batch_size=batch_size,
             ),
             pg_local,
         )
@@ -50,14 +52,14 @@ def main() -> None:
         run_pipeline(
             PostgresExtractor(
                 connection_string=get_connection_string(),
-                batch_size=100_000,
+                batch_size=batch_size,
             ),
             get_connection_string(),
         )
     else:
         run_pipeline(
             SnowflakeExtractor(
-                batch_size=100_000,
+                batch_size=batch_size,
             ),
             get_connection_string(),
         )
