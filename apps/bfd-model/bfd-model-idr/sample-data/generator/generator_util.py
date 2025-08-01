@@ -18,8 +18,8 @@ class GeneratorUtil():
         self.fake = Faker()
         self.used_bene_sk = []
         self.used_mbi = []
-        self.bene_table = []
         self.bene_hstry_table = []
+        self.bene_xref_table = []
         self.mbi_table = {}
         self.address_options = []
         self.mdcr_stus = []
@@ -108,6 +108,29 @@ class GeneratorUtil():
         if bene_sk in self.used_bene_sk:
             return self.gen_bene_sk()
         return bene_sk
+    
+    def generate_bene_xref(self, new_bene_sk, old_bene_sk):
+        #10% chance for invalid xref.
+        kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
+        
+        efctv_ts = self.fake.date_time_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.datetime.now() - datetime.timedelta(days=1)
+        )
+        insrt_ts = self.fake.date_time_between_dates(efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1))
+        updt_ts = self.fake.date_time_between_dates(insrt_ts, datetime.datetime.now() - datetime.timedelta(days=1))
+        
+        xref_row = {
+            "BENE_SK": str(new_bene_sk),
+            "BENE_XREF": str(old_bene_sk),
+            "BENE_KILL_CRED_CD": str(kill_cred_cd),
+            "IDR_TRANS_EFCTV_TS": str(efctv_ts),
+            "IDR_INSRT_TS": str(insrt_ts),
+            "IDR_UPDT_TS": str(updt_ts),
+            "IDR_TRANS_OBSLT_TS": "9999-12-31T00:00:00.000000+0000"
+        }
+        
+        self.bene_xref_table.append(xref_row)
 
     def gen_address(self):
         return self.address_options[random.randint(0, len(self.address_options) - 1)]
@@ -260,38 +283,6 @@ class GeneratorUtil():
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
-        df = pd.json_normalize(self.bene_table)
-        df = df[
-            [
-                "BENE_SK",
-                "BENE_XREF_EFCTV_SK",
-                "BENE_MBI_ID",
-                "BENE_LAST_NAME",
-                "BENE_1ST_NAME",
-                "BENE_MIDL_NAME",
-                "BENE_BRTH_DT",
-                "BENE_DEATH_DT",
-                "BENE_VRFY_DEATH_DAY_SW",
-                "BENE_SEX_CD",
-                "BENE_RACE_CD",
-                "BENE_LINE_1_ADR",
-                "BENE_LINE_2_ADR",
-                "BENE_LINE_3_ADR",
-                "BENE_LINE_4_ADR",
-                "BENE_LINE_5_ADR",
-                "BENE_LINE_6_ADR",
-                "GEO_ZIP_PLC_NAME",
-                "GEO_ZIP5_CD",
-                "GEO_USPS_STATE_CD",
-                "CNTCT_LANG_CD",
-                "IDR_TRANS_EFCTV_TS",
-                "IDR_INSRT_TS",
-                "IDR_UPDT_TS",
-                "IDR_TRANS_OBSLT_TS",
-            ]
-        ]
-        df.to_csv("out/SYNTHETIC_BENE.csv", index=False)
-
         df = pd.json_normalize(self.bene_hstry_table)
         if(df.size>0):
             df = df[
@@ -299,6 +290,24 @@ class GeneratorUtil():
                     "BENE_SK",
                     "BENE_XREF_EFCTV_SK",
                     "BENE_MBI_ID",
+                    "BENE_LAST_NAME",
+                    "BENE_1ST_NAME",
+                    "BENE_MIDL_NAME",
+                    "BENE_BRTH_DT",
+                    "BENE_DEATH_DT",
+                    "BENE_VRFY_DEATH_DAY_SW",
+                    "BENE_SEX_CD",
+                    "BENE_RACE_CD",
+                    "BENE_LINE_1_ADR",
+                    "BENE_LINE_2_ADR",
+                    "BENE_LINE_3_ADR",
+                    "BENE_LINE_4_ADR",
+                    "BENE_LINE_5_ADR",
+                    "BENE_LINE_6_ADR",
+                    "GEO_ZIP_PLC_NAME",
+                    "GEO_ZIP5_CD",
+                    "GEO_USPS_STATE_CD",
+                    "CNTCT_LANG_CD",
                     "IDR_TRANS_EFCTV_TS",
                     "IDR_INSRT_TS",
                     "IDR_UPDT_TS",
@@ -331,4 +340,8 @@ class GeneratorUtil():
         
         df = pd.json_normalize(self.mdcr_rsn)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
+        
+        df = pd.json_normalize(self.bene_xref_table)
+        if(df.size>0):
+            df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
         
