@@ -1,3 +1,4 @@
+import datetime
 import logging
 import sys
 
@@ -77,6 +78,7 @@ def extract_and_load(
 ) -> PostgresLoader:
     logger.info("loading %s", cls.table())
     progress = get_progress(connection_string, cls.table())
+    batch_start = datetime.datetime.now()
     logger.info("progress for %s - %s", cls.table(), progress.last_ts if progress else "none")
     data_iter = data_extractor.extract_idr_data(
         cls,
@@ -84,7 +86,7 @@ def extract_and_load(
     )
 
     loader = PostgresLoader(connection_string)
-    loader.load(data_iter, cls, progress)
+    loader.load(data_iter, cls, batch_start, progress)
     return loader
 
 

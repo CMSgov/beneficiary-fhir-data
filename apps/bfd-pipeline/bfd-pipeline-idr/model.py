@@ -876,7 +876,8 @@ class IdrClaimProcedure(IdrBaseModel):
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
-    batch_completion_ts: datetime
+    batch_start_ts: datetime
+    batch_complete_ts: datetime
 
     @staticmethod
     def query_placeholder() -> str:
@@ -889,7 +890,7 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def _current_fetch_query() -> str:
         return f"""
-        SELECT table_name, last_ts, batch_completion_ts 
+        SELECT table_name, last_ts, batch_start_ts, batch_complete_ts 
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s
         """

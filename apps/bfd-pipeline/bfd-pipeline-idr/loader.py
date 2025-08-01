@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import psycopg
 
-from constants import DEFAULT_MAX_DATE
+from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
 from timer import Timer
 
@@ -46,6 +46,7 @@ class PostgresLoader:
         self,
         fetch_results: Iterator[list[T]],
         model: type[T],
+        batch_start: datetime,
         progress: LoadProgress | None,
     ) -> None:
         insert_cols = list(model.insert_keys())
@@ -60,6 +61,22 @@ class PostgresLoader:
         # (temp tables can't be created with an explicit schema set)
         temp_table = table.split(".")[1] + "_temp"
         with self.conn.cursor() as cur:
+            cur.execute(
+                f"""
+                    INSERT INTO idr.load_progress(
+                        table_name, 
+                        last_ts, 
+                        batch_start_ts, 
+                        batch_complete_ts)
+                    VALUES(%(table)s, '{DEFAULT_MIN_DATE}', %(start_ts)s, '{DEFAULT_MIN_DATE}')
+                    ON CONFLICT (table_name) DO UPDATE 
+                    SET batch_start_ts = EXCLUDED.batch_start_ts
+                    """,
+                {
+                    "table": table,
+                    "start_ts": batch_start,
+                },
+            )
             # load each batch in a separate transaction
             for results in fetch_results:
                 logger.info("loading next %s results", len(results))
@@ -134,10 +151,10 @@ class PostgresLoader:
                     if batch_timestamp_col:
                         last_timestamp = last[batch_timestamp_col]
                         cur.execute(
-                            f"""
-                            INSERT INTO idr.load_progress(table_name, last_ts, batch_completion_ts)
-                            VALUES(%(table)s, %(last_ts)s, '{DEFAULT_MAX_DATE}')
-                            ON CONFLICT (table_name) DO UPDATE SET last_ts = EXCLUDED.last_ts
+                            """
+                            UPDATE idr.load_progress
+                            SET last_ts = %(last_ts)s
+                            WHERE table_name = %(table)s
                             """,
                             {
                                 "table": table,
@@ -151,8 +168,9 @@ class PostgresLoader:
             cur.execute(
                 """
                 UPDATE idr.load_progress
-                SET batch_completion_ts = NOW()
+                SET batch_complete_ts = NOW()
                 WHERE table_name = %(table)s
                 """,
                 {"table": table},
             )
+            self.conn.commit()
