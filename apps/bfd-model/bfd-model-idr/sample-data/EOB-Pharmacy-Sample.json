@@ -2,7 +2,7 @@
     "resourceType": "ExplanationOfBenefit-Pharmacy",
     "id": "pharmacy-claim-12345",
     "lastUpdated": "2024-01-15T10:30:00Z",
-    "CLM_FINL_ACTN_IND": "F",
+    "CLM_FINL_ACTN_IND": "Y",
     "CLM_SRC_ID": "20000",
     "CLM_BENE_XREF_EFCTV_SK": "123456789",
     "BENE_SK": "123456789",
