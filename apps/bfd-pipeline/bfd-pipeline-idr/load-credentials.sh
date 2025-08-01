@@ -18,6 +18,6 @@ export BFD_DB_USERNAME
 BFD_DB_PASSWORD="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/db/password --with-decryption --query "Parameter.Value" --output text)"
 export BFD_DB_PASSWORD
 
-db_cluster="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/common/nonsensitive/rds_cluster_identifier --with-decryption --query "Parameter.Value" --output text)"
+db_cluster="bfd-${BFD_ENV}-prod-aurora-cluster"
 BFD_DB_ENDPOINT="$(aws rds describe-db-clusters --db-cluster-identifier $db_cluster --query "DBClusters[0].Endpoint" --output text)"
 export BFD_DB_ENDPOINT
