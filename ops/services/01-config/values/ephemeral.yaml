@@ -17,6 +17,7 @@ copy:
   - /bfd/${env}/idr-pipeline/sensitive/idr_username
   - /bfd/${env}/idr-pipeline/sensitive/idr_account
   - /bfd/${env}/idr-pipeline/sensitive/idr_warehouse
+  - /bfd/${env}/idr-pipeline/sensitive/idr_database
   - /bfd/${env}/idr-pipeline/sensitive/idr_schema
   - /bfd/${env}/idr-pipeline/sensitive/idr_private_key
   - /bfd/${env}/ccw-pipeline/sensitive/db/password
