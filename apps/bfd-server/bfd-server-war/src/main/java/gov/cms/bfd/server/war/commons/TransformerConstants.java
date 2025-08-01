@@ -685,7 +685,7 @@ public final class TransformerConstants {
   public static final Map<String, String> CCW_SYSTEM_MAP =
       Map.of(
           "clm_ip_admsn_type_cd", NUBC_ADMIT_CODE_SYSTEM,
-          "org_npi_num", CODING_NPI_US);
+          "prvdr_npi", CODING_NPI_US);
 
   /**
    * Code System URL for C4DIC Logo Extension URL <a
