@@ -38,8 +38,8 @@ class PostgresLoader:
     ) -> None:
         self.conn = psycopg.connect(connection_string)
 
-    def refresh_materialized_view(self, view_name: str) -> None:
-        self.conn.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view_name}")  # type: ignore
+    def run_sql(self, sql: str) -> None:
+        self.conn.execute(sql)  # type: ignore
         self.conn.commit()
 
     def load(

@@ -166,7 +166,8 @@ CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
     last_ts TIMESTAMPTZ NOT NULL,
-    batch_completion_ts TIMESTAMPTZ NOT NULL
+    batch_start_ts TIMESTAMPTZ NOT NULL,
+    batch_complete_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim (
@@ -381,3 +382,32 @@ HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
 
 -- required to refresh view with CONCURRENTLY
 CREATE UNIQUE INDEX ON idr.overshare_mbis (bene_mbi_id);
+
+CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
+    RETURNS VOID AS $$
+    DECLARE comment_sql TEXT;
+BEGIN
+    -- Using "concurrently" will make the refresh slower, but it will not block any reads
+    -- on the view while the refresh is in progress
+    REFRESH MATERIALIZED VIEW CONCURRENTLY idr.overshare_mbis;
+    -- There's no implicit way to know when a materialized view was last updated
+    -- add a comment on the object in case we need to verify that it's being updated as expected
+    comment_sql := 'COMMENT ON MATERIALIZED VIEW idr.overshare_mbis is '
+        || quote_literal('{"last_refreshed": "' || now() || '"}');
+    EXECUTE comment_sql;
+END;
+$$
+LANGUAGE plpgsql
+
+-- Only the owner of the view may refresh it, we need to set "security definer" so the function
+-- can execute in the context of the creator
+SECURITY DEFINER;
+-- search_path is the order in which schemas are searched when a name is referenced with no schema specified
+-- Postgres recommends setting this on functions marked as "security definer" to prevent malicious users from
+-- creating an object that shadows an existing one on a globally writable schema
+ALTER FUNCTION idr.refresh_overshare_mbis() SET search_path = idr;
+-- Execute privilege is granted to PUBLIC by default
+REVOKE ALL ON FUNCTION idr.refresh_overshare_mbis() FROM PUBLIC;
+
+-- This only needs to be executed by the pipeline
+-- GRANT EXECUTE ON FUNCTION idr.refresh_overshare_mbis() TO api_pipeline_svcs;

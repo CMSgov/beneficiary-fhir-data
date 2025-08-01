@@ -112,7 +112,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         data_extractor,
         connection_string,
     )
-    bene_loader.refresh_materialized_view("idr.overshare_mbis")
+    bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
 
     load_all(
         data_extractor,
