@@ -4645,15 +4645,14 @@ public final class TransformerUtilsV2 {
    *
    * @param eob the {@link ExplanationOfBenefit} this method will modify
    * @param ccwVariable the {@link CcwCodebookVariable} provider type
-   * @param providerNumber a {@link String} provider identification number: representing the provider number for the
-   *     claim
+   * @param providerNumber a {@link String} provider identification number: representing the
+   *     provider number for the claim
    */
-  static void setProviderNumber(ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, String providerNumber) {
+  static void setProviderNumber(
+      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, String providerNumber) {
     eob.setProvider(
         new Reference()
-            .setIdentifier(
-                TransformerUtilsV2.createIdentifier(
-                        ccwVariable, providerNumber)));
+            .setIdentifier(TransformerUtilsV2.createIdentifier(ccwVariable, providerNumber)));
   }
 
   /**

@@ -28,7 +28,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 import org.springframework.stereotype.Component;
@@ -376,7 +375,8 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
                 identifierType, claimGroup.getServiceProviderId()));
       }
 
-      TransformerUtilsV2.setProviderNumber(eob, CcwCodebookVariable.PRVDR_NPI, claimGroup.getServiceProviderId());
+      TransformerUtilsV2.setProviderNumber(
+          eob, CcwCodebookVariable.PRVDR_NPI, claimGroup.getServiceProviderId());
     }
 
     /*
