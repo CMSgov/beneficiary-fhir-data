@@ -334,7 +334,8 @@
             {
                 "id": "LineItemComponent.CLM_LINE_BENE_PD_AMT",
                 "path": "LineItemComponent.CLM_LINE_BENE_PD_AMT",
-                "label": "Claim Line Beneficiary Paid Amount",
+                "label": "Beneficiary Paid Amount",
+                "definition": "The amount paid by the beneficiary.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -440,6 +441,18 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_FROM_DT",
+                "path": "LineItemComponent.CLM_LINE_FROM_DT",
+                "label": "Line Item From Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT",
                 "path": "LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT",
                 "label": "Line Item Allowed Charge Amount",
@@ -524,9 +537,35 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
+                "path": "LineItemComponent.CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
+                "label": "Gross Drug Cost Above Out Of Pocket Threshold",
+                "definition": "The gross drug cost amount that was covered by Part D's catastrophic coverage.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_LINE_ANSTHSA_UNIT_CNT",
                 "path": "LineItemComponent.CLM_LINE_ANSTHSA_UNIT_CNT",
                 "label": "Anesthesia Unit Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_GRS_BLW_THRSHLD_AMT",
+                "path": "LineItemComponent.CLM_LINE_GRS_BLW_THRSHLD_AMT",
+                "label": "Gross Drug Cost Below Out Of Pocket Threshold",
+                "definition": "The gross drug cost amount that was not covered by Part D's catastrophic coverage.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -548,9 +587,35 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_LIS_AMT",
+                "path": "LineItemComponent.CLM_LINE_LIS_AMT",
+                "label": "Low Income Cost Sharing Subsidy Amount",
+                "definition": "The Low Income Cost Sharing Subsidy amount for the line item.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_RNDRG_PRVDR_NPI_NUM",
                 "path": "LineItemComponent.CLM_RNDRG_PRVDR_NPI_NUM",
                 "label": "Rendering Provider NPI Number - Line Level",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_TROOP_TOT_AMT",
+                "path": "LineItemComponent.CLM_LINE_TROOP_TOT_AMT",
+                "label": "Other True Out Of Pocket Paid Amount",
+                "definition": "The Other True Out Of Pocket paid amount for the line item.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -572,9 +637,35 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_PLRO_AMT",
+                "path": "LineItemComponent.CLM_LINE_PLRO_AMT",
+                "label": "Patient Liability Reduction Other Paid Amount",
+                "definition": "The Patient Liability Reduction Other paid amount for the line item.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_LINE_RX_NUM",
                 "path": "LineItemComponent.CLM_LINE_RX_NUM",
                 "label": "RX Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_RPTD_MFTR_DSCNT_AMT",
+                "path": "LineItemComponent.CLM_RPTD_MFTR_DSCNT_AMT",
+                "label": "Gap Discount Amount",
+                "definition": "The reported manufacturer discount amount for the line item.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -596,9 +687,35 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_INGRDNT_CST_AMT",
+                "path": "LineItemComponent.CLM_LINE_INGRDNT_CST_AMT",
+                "label": "Ingredient Cost Amount",
+                "definition": "The ingredient cost amount for the pharmacy line item.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_LINE_MDCR_COINSRNC_AMT",
                 "path": "LineItemComponent.CLM_LINE_MDCR_COINSRNC_AMT",
                 "label": "Coinsurance Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_SRVC_CST_AMT",
+                "path": "LineItemComponent.CLM_LINE_SRVC_CST_AMT",
+                "label": "Dispensing Fee",
+                "definition": "The dispensing fee amount for the pharmacy line item.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -620,6 +737,19 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_SLS_TAX_AMT",
+                "path": "LineItemComponent.CLM_LINE_SLS_TAX_AMT",
+                "label": "Sales Tax Amount",
+                "definition": "The sales tax amount for the pharmacy line item.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_LINE_THRU_DT",
                 "path": "LineItemComponent.CLM_LINE_THRU_DT",
                 "label": "Last Expense Date",
@@ -632,9 +762,35 @@
                 ]
             },
             {
+                "id": "LineItemComponent.CLM_LINE_VCCN_ADMIN_FEE_AMT",
+                "path": "LineItemComponent.CLM_LINE_VCCN_ADMIN_FEE_AMT",
+                "label": "Vaccination Administration Fee",
+                "definition": "The vaccination administration fee amount for the pharmacy line item.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_POS_CD",
                 "path": "LineItemComponent.CLM_POS_CD",
                 "label": "Place Of Service Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PRCNG_EXCPTN_CD",
+                "path": "LineItemComponent.CLM_PRCNG_EXCPTN_CD",
+                "label": "Pricing Exception Code",
+                "definition": "The pricing exception code indicating network status.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -835,7 +991,6 @@
                     }
                 ]
             }
-            
         ]
     }
 }

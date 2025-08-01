@@ -1,0 +1,478 @@
+//See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
+//Must appear in order map -> conceptmap -> uses -> imports -> groups
+
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Pharmacy" = "BFD-ExplanationOfBenefit-Pharmacy-Map"
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Pharmacy" alias ExplanationOfBenefitPharmacy as source
+uses "http://hl7.org/fhir/StructureDefinition/LineItemComponent" alias LineItemComponent as source
+uses "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent" alias SupportingInfoComponent as source
+
+//The first specified target is what the default output will output as the ResourceType
+uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
+
+imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+
+group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
+    
+    src -> tgt.status = "active" "Set status";
+    src -> tgt.use = "claim" "Set use code";
+    src -> tgt.outcome = "complete" "Set outcome";
+    
+    src -> tgt.type = create('CodeableConcept') as tgtCC then {
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_CD','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
+    } "Create type";
+
+    src -> tgt.patient = create('Reference') as tgtReference then {
+      src.CLM_BENE_XREF_EFCTV_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
+    } "Add patient reference to EOB";
+
+    src -> tgt.meta = create('Meta') as tgtMeta then {
+      src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
+      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#profile_metadata','code') "set profile";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_SRC_ID','code') "set source";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#ADJUDICATION-STATUS','coding') "set source";
+    } "Create metadata";
+
+    src -> tgt.identifier = create('Identifier') as tgtIdentifier then {
+          src -> tgtIdentifier.type = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType", "uc") "Add identifier type";
+          src.CLM_UNIQ_ID as claimId -> tgtIdentifier.value = claimId "Set identifier Value";
+    } "Add CLM_UNIQ_ID as unique identifier";
+
+    src -> tgt.identifier = create('Identifier') as tgtIdentifier then {
+      src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "set system";
+      src.CLM_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
+    } "Add CLM_CNTL_NUM as identifier";
+
+    src.CLM_ORIG_CNTL_NUM as origCntlNum -> tgt.related = create('BackboneElement') as tgtRelated then {
+      src -> tgtRelated.relationship = cc("http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship", "prior") "Set relationship to prior";
+      origCntlNum -> tgtRelated.reference = create('Identifier') as tgtId then {
+        src -> tgtId.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "Set identifier system";
+        origCntlNum -> tgtId.value = origCntlNum "Set original claim control number";
+      } "Create identifier for original claim";
+    } "Add related claim for original claim control number";
+
+    src -> tgt.billablePeriod = create('Period') as billablePeriod then {
+      src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
+      src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
+    } "Set EOB period";
+    
+    src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
+
+    // Insurer for Part D claims
+    src.CLM_TYPE_CD as typeCd where (typeCd >= 1 and typeCd <= 4) -> tgt.contained = create('Organization') as tgtOrg then createInsurerOrgPartD(src,tgtOrg) "Create insurer org.";
+    src.CLM_TYPE_CD as typeCd where (typeCd >= 1 and typeCd <= 4) -> tgt.insurer = create('Reference') as tgtOrgRef, 
+    tgtOrgRef.reference = "#insurer-org" "Set reference to contained insurer org";
+
+    // Payment date
+    src.CLM_PD_DT as paidDate -> tgt.payment = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.date = paidDate "Add paid date";
+    } "CLM_PD_DT";
+
+    // CMS process date - from CLM_DT_SGNTR
+    src.CLM_CMS_PROC_DT as procDt -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT" "Add url";
+      procDt -> tgtExtension.value = procDt "set process date";
+    } "CLM_CMS_PROC_DT";
+
+    src.CLM_SBMT_FRMT_CD as fmtCd -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD" "Add url";
+      fmtCd -> tgtExtension.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD" "Set coding system";
+        fmtCd -> tgtCoding.code = fmtCd "Set coding code";
+      } "Create coding";
+    } "CLM_SBMT_FRMT_CD";
+
+    // Provider organization for pharmacy - only create when needed based on NPI_TYPE
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '1' -> tgt.contained = create('Practitioner') as tgtPract then createPharmacyPractitioner(src,tgtPract) "Create contained practitioner."; 
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '1' -> tgt.provider = create('Reference') as tgtRef, 
+    tgtRef.reference = "#provider-practitioner" "Set reference to contained provider practitioner";
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '2' -> tgt.contained = create('Organization') as tgtOrg then createPharmacyOrg(src,tgtOrg) "Create contained org."; 
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '2' -> tgt.provider = create('Reference') as tgtRef, 
+    tgtRef.reference = "#provider-org" "Set reference to contained provider org";
+   
+    src.supportingInfoComponents as infoComponent -> tgt.supportingInfo = create('BackboneElement') as tgtSupportingInfo then addPharmacySupportingInfo(infoComponent,tgtSupportingInfo) "add pharmacy supportingInfo";
+
+    src.lineItemComponents as itemComponent -> tgt.item = create('BackboneElement') as tgtItem then addPharmacyItem(itemComponent,tgtItem) "add pharmacy items";
+
+    // Benefit payment status based on pricing exception code from line items
+    //Note, blank = in network! Null -> treat as blank (in network)
+    src.lineItemComponents as lineItem -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+      src -> tgtAdj.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "benefitpaymentstatus") "Set category";
+      lineItem.CLM_PRCNG_EXCPTN_CD as pricingCode -> tgtAdj.reason = create('CodeableConcept') as tgtCC then {
+        pricingCode where pricingCode = "" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus", "innetwork") "Set in-network";
+        pricingCode where pricingCode = "O" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus", "outofnetwork") "Set out-of-network";
+        pricingCode where pricingCode = "M" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus", "other") "Set other";
+      } "Set reason";
+    } "Add benefit payment status";
+
+    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as prvdrNPI where prvdrNPI != '0' and src.PRVDR_PRSCRBNG_PRVDR_NPI_TYPE = '1' -> tgt then addPrescriberPractitionerCareTeamMember(src,tgt) "Add prescriber practitioner";
+
+    // Insurance coverage
+    src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.focal = true "Add focal";
+      src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
+        claimType -> tgtReference.display = translate(claimType,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_TO_COVERAGE_PART','code') "Add temp coverage placeholder";
+      } "Add reference for coverage";
+      
+      // Submitter contract number
+      src.CLM_SBMTR_CNTRCT_NUM as contractNum -> tgtBBElement.extension = create('Extension') as tgtExtension then {
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM" "Add url";
+        contractNum -> tgtExtension.value = contractNum "set contract number";
+      } "CLM_SBMTR_CNTRCT_NUM";
+
+      // Submitter contract PBP number
+      src.CLM_SBMTR_CNTRCT_PBP_NUM as pbpNum -> tgtBBElement.extension = create('Extension') as tgtExtension then {
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM" "Add url";
+        pbpNum -> tgtExtension.value = pbpNum "set PBP number";
+      } "CLM_SBMTR_CNTRCT_PBP_NUM";
+    } "Add insurance coverage";
+
+    // Total charge amount
+    src.CLM_SBMT_CHRG_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add first coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_SBMT_CHRG_AMT") "Add second coding";
+     } "Add codeable concept";
+     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
+    } "Add total charge amount";
+
+    
+
+
+}
+
+group addMoney(source src: String, target tgt: Money){
+  src -> tgt.currency = "USD" "Set Currency";
+  src as amt -> tgt.value = cast(amt, "decimal") "Set amount";
+}
+group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
+    
+    // Refills authorized (always zero in IDR data)
+    src.CLM_LINE_AUTHRZD_FILL_NUM as refills -> tgt then addRefillsAuthorized(src, tgt) "Add refills authorized";
+    
+    // Pharmacy service type
+    src.CLM_PHRMCY_SRVC_TYPE_CD as pharmType -> tgt then addPharmacyServiceType(src, tgt) "Add pharmacy service type";
+    
+    // Prescription origin code
+    src.CLM_LINE_RX_ORGN_CD as rxOrigin -> tgt then addPrescriptionOrigin(src, tgt) "Add prescription origin";
+    
+    // Brand generic indicator
+    src.CLM_BRND_GNRC_CD as brandGeneric -> tgt then addBrandGenericIndicator(src, tgt) "Add brand generic indicator";
+    
+    // Patient residence code
+    src.CLM_PTNT_RSDNC_CD as ptntRes -> tgt then addPatientResidence(src, tgt) "Add patient residence";
+    
+    // Submission clarification code
+    src.CLM_LTC_DSPNSNG_MTHD_CD as submsnClr -> tgt then addSubmissionClarification(src, tgt) "Add submission clarification";
+    
+    // Compound code
+    src.CLM_CMPND_CD as compound -> tgt then addCompoundCode(src, tgt) "Add compound code";
+    
+    // Days supply
+    src.CLM_LINE_DAYS_SUPLY_QTY as daysSupply -> tgt then addDaysSupply(src, tgt) "Add days supply";
+    
+    // Fill number
+    src.CLM_LINE_RX_FILL_NUM as fillNum -> tgt then addFillNumber(src, tgt) "Add fill number";
+    
+    // Dispense as written product selection
+    src.CLM_DAW_PROD_SLCTN_CD as dawCode -> tgt then addDispenseAsWritten(src, tgt) "Add dispense as written";
+    
+    // Drug coverage status
+    src.CLM_DRUG_CVRG_STUS_CD as drugCovStatus -> tgt then addDrugCoverageStatus(src, tgt) "Add drug coverage status";
+    
+    // Catastrophic coverage
+    src.CLM_CTSTRPHC_CVRG_IND_CD as catCov -> tgt then addCatastrophicCoverage(src, tgt) "Add catastrophic coverage";
+    
+}
+
+group addPharmacyServiceType(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_PHRMCY_SRVC_TYPE_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_PHRMCY_SRVC_TYPE_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addPrescriptionOrigin(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_LINE_RX_ORGN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_LINE_RX_ORGN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode", val) "Add coding";
+        src.CLM_LINE_RX_ORGN_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addBrandGenericIndicator(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_BRND_GNRC_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_BRND_GNRC_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPBrandGenericIndicator", val) "Add coding";
+        src.CLM_BRND_GNRC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addPatientResidence(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_PTNT_RSDNC_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_PTNT_RSDNC_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addSubmissionClarification(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LTC_DSPNSNG_MTHD_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_LTC_DSPNSNG_MTHD_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addCompoundCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_CMPND_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_CMPND_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode", val) "Add coding";
+        src.CLM_CMPND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addDaysSupply(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_LINE_DAYS_SUPLY_QTY",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src.CLM_LINE_DAYS_SUPLY_QTY as daysSupply -> tgt.value = create('Quantity') as tgtQuantity then {
+        daysSupply -> tgtQuantity.value = cast(daysSupply, 'integer') "Set days supply value";
+        src -> tgtQuantity.unit = "days" "Set unit";
+    } "Add days supply";
+}
+
+group addFillNumber(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_LINE_RX_FILL_NUM",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src.CLM_LINE_RX_FILL_NUM as fillNum -> tgt.value = create('Quantity') as tgtQuantity then {
+        fillNum -> tgtQuantity.value = cast(fillNum, 'integer') "Set fill number value";
+        src -> tgtQuantity.unit = "fill" "Set unit";
+    } "Add fill number";
+}
+
+group addDispenseAsWritten(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_DAW_PROD_SLCTN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", val) "Add coding";
+    } "Add CC";
+}
+
+group addDrugCoverageStatus(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_DRUG_CVRG_STUS_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_DRUG_CVRG_STUS_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addCatastrophicCoverage(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_CTSTRPHC_CVRG_IND_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_CTSTRPHC_CVRG_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addRefillsAuthorized(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = translate("CLM_LINE_AUTHRZD_FILL_NUM",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+    } "set category";
+    src.CLM_LINE_AUTHRZD_FILL_NUM as refills -> tgt.value = create('Quantity') as tgtQuantity then {
+        refills -> tgtQuantity.value = cast(refills, 'integer') "Set refills authorized value";
+        src -> tgtQuantity.unit = "refills" "Set unit";
+    } "Add refills authorized";
+}
+
+group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement){
+    src.CLM_LINE_NUM as lineNum -> tgt.sequence = lineNum "set sequence number";
+    
+    src.CLM_LINE_FROM_DT as servicedDate -> tgt.serviced = servicedDate "Set serviced date";
+    
+    src.CLM_LINE_NDC_CD as ndcCode -> tgt.productOrService = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
+            src -> tgtCoding.system = "http://hl7.org/fhir/sid/ndc" "Set NDC system";
+            ndcCode -> tgtCoding.code = ndcCode "Set NDC code";
+        } "Add NDC coding";
+    } "Set product/service";
+    
+    // Quantity dispensed
+    src.CLM_LINE_NDC_QTY as qty -> tgt.quantity = create('Quantity') as tgtQuantity then {
+        qty -> tgtQuantity.value = cast(qty, 'decimal') "Set quantity value";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as qtyQual -> tgtQuantity.unit = qtyQual "Set quantity unit";
+    } "Set quantity";
+
+    src.CLM_LINE_CVRD_PD_AMT as coveredAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+      src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "benefit") "Add first coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_CVRD_PD_AMT") "Add second coding";
+     } "Add codeable concept";
+     src -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(coveredAmt, tgtMoney) "Add Money";
+    } "Add total covered amount";
+
+    src.CLM_LINE_NCVRD_CHRG_AMT as noncoveredAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+      src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "noncovered") "Add first coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_NCVRD_CHRG_AMT") "Add second coding";
+     } "Add codeable concept";
+     src -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(noncoveredAmt, tgtMoney) "Add Money";
+    } "Add total noncovered amount";
+    
+    src.CLM_LINE_BENE_PD_AMT as beneAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add first coding";
+            src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BENE_PD_AMT") "Add second coding";
+        } "Add codeable concept";
+        beneAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(beneAmt, tgtMoney) "Add beneficiary amount";
+    } "Add beneficiary paid amount";
+    
+    src.CLM_LINE_PRVDR_PMT_AMT as prvdrAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidtoprovider") "Add first coding";
+            src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRVDR_PMT_AMT") "Add second coding";
+        } "Add codeable concept";
+        prvdrAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(prvdrAmt, tgtMoney) "Add provider amount";
+    } "Add provider payment amount";
+
+    src.CLM_LINE_GRS_ABOVE_THRSHLD_AMT as aboveThreshAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_GRS_ABOVE_THRSHLD_AMT") "Set category";
+        aboveThreshAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(aboveThreshAmt, tgtMoney) "Add gross above threshold amount";
+    } "Add gross drug cost above threshold amount";
+
+    src.CLM_LINE_GRS_BLW_THRSHLD_AMT as belowThreshAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_GRS_BLW_THRSHLD_AMT") "Set category";
+        belowThreshAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(belowThreshAmt, tgtMoney) "Add gross below threshold amount";
+    } "Add gross drug cost below threshold amount";
+
+    src.CLM_LINE_LIS_AMT as lisAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_LIS_AMT") "Set category";
+        lisAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(lisAmt, tgtMoney) "Add LIS amount";
+    } "Add Low Income Cost Sharing Subsidy Amount";
+
+    src.CLM_LINE_TROOP_TOT_AMT as troopAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_TROOP_TOT_AMT") "Set category";
+        troopAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(troopAmt, tgtMoney) "Add TROOP amount";
+    } "Add Other True Out Of Pocket Paid Amount";
+
+    src.CLM_LINE_PLRO_AMT as plroAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PLRO_AMT") "Set category";
+        plroAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(plroAmt, tgtMoney) "Add PLRO amount";
+    } "Add Patient Liability Reduction Other Paid Amount";
+
+    src.CLM_RPTD_MFTR_DSCNT_AMT as mftrDscntAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_RPTD_MFTR_DSCNT_AMT") "Set category";
+        mftrDscntAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(mftrDscntAmt, tgtMoney) "Add manufacturer discount amount";
+    } "Add Gap Discount Amount";
+
+    src.CLM_LINE_INGRDNT_CST_AMT as ingrdntAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INGRDNT_CST_AMT") "Set category";
+        ingrdntAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(ingrdntAmt, tgtMoney) "Add ingredient cost amount";
+    } "Add Ingredient Cost Amount";
+
+    src.CLM_LINE_SRVC_CST_AMT as srvcAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_SRVC_CST_AMT") "Set category";
+        srvcAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(srvcAmt, tgtMoney) "Add dispensing fee amount";
+    } "Add Dispensing Fee";
+
+    src.CLM_LINE_SLS_TAX_AMT as slsTaxAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_SLS_TAX_AMT") "Set category";
+        slsTaxAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(slsTaxAmt, tgtMoney) "Add sales tax amount";
+    } "Add Sales Tax Amount";
+
+    src.CLM_LINE_VCCN_ADMIN_FEE_AMT as vccnFeeAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_VCCN_ADMIN_FEE_AMT") "Set category";
+        vccnFeeAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(vccnFeeAmt, tgtMoney) "Add vaccination administration fee amount";
+    } "Add Vaccination Administration Fee";
+}
+
+group addPrescriberPractitionerCareTeamMember(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
+  src -> tgt.contained = create('Practitioner') as tgtPract then {
+    src -> tgtPract.id = "careteam-prescriber-practitioner" "Set practitioner id";
+    src -> tgtPract.meta = create('Meta') as tgtMeta then {
+      src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
+      src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
+    } "Add practitioner meta";
+    src -> tgtPract.identifier = create('Identifier') as tgtId then {
+      src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
+          src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
+    } "Create NPI identifier";
+    src as family_name -> tgtPract.name = create('HumanName') as tgtName then {
+      src -> tgtName.family = "LAST NAME FROM NPPES" "set family name";
+      src -> tgtName.use = "official" "set name use";
+    } "add family name";
+  } "Add prescriber practitioner";
+  src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
+    src -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole","prescribing") "Add role";
+    src -> tgtBBElement.sequence = "1" "Set sequence";
+    src -> tgtBBElement.provider = create('Reference') as tgtReference then {
+      src -> tgtReference.reference = "#careteam-prescriber-practitioner" "Add practitioner";
+    } "Add practitioner reference to EOB";
+  } "Add CareTeam Element";
+}
+
+//To get this info, join CLM with V2_MDCR_CNTRCT_PBP_NUM on the claim's CLM.CLM_SBMTR_CNTRCT_NUM + CLM.CLM_SBMTR_CNTRCT_PBP_NUM. 
+group createInsurerOrgPartD(source src: ExplanationOfBenefitPharmacy, target tgtOrg: Organization){
+  src -> tgtOrg.id = "insurer-org" "Set org id";
+  src -> tgtOrg.meta = create('Meta') as tgtMeta then {
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
+  } "Set organization metadata";
+  src -> tgtOrg.active = "true" "set org status";
+  src.CNTRCT_PBP_NAME as pbpName -> tgtOrg.name = pbpName "set org name";
+}
+
+group createPharmacyOrg(source src: ExplanationOfBenefitPharmacy, target tgt: Organization){
+  src -> tgt.id = "provider-org" "Set org id";
+  src -> tgt.meta = create('Meta') as tgtMeta then {
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
+        } "Set organization metadata";
+        src -> tgt.active = "true" "set org status";
+        src -> tgt.identifier = create('Identifier') as tgtId then {
+          src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
+          src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+          src.CLM_SRVC_PRVDR_GNRC_ID_NUM as npi -> tgtId.value = npi "set NPI";
+      } "Create NPI identifier";
+  src -> tgt.name = "PHARMACY ORG SOURCED FROM NPPES" "Add pharmacy org";
+}
+
+group createPharmacyPractitioner(source src: ExplanationOfBenefitPharmacy, target tgt: Practitioner){
+  src -> tgt.id = "provider-practitioner" "Set practitioner id";
+  src -> tgt.meta = create('Meta') as tgtMeta then {
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
+  } "Add practitioner meta";
+  src -> tgt.identifier = create('Identifier') as tgtId then {
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
+    src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+    src.CLM_SRVC_PRVDR_GNRC_ID_NUM as npi -> tgtId.value = npi "set NPI";
+  } "Create NPI identifier";
+
+  src -> tgt.name = create('HumanName') as tgtName then {
+    src -> tgtName.family = "LAST NAME FROM NPPES" "set family name";
+    src -> tgtName.use = "official" "set name use";
+  } "add family name";
+} 

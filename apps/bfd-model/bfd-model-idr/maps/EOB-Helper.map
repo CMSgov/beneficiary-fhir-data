@@ -16,7 +16,7 @@ conceptmap "CLM_LTST_CLM_IND" {
   s:N = t:"cancelled"
 }
 
-conceptmap "ClM_TYPE_CD" {
+conceptmap "CLM_TYPE_CD" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://terminology.hl7.org/CodeSystem/claim-type"
 
@@ -224,6 +224,14 @@ conceptmap "C4BB-SupportingInfo-Categories" {
   s:"DGNS_DRG_CD" = t:"drg"
   s:"CLM_ADMSN_SRC_CD" = t:"pointoforigin"
   s:"TYPE_OF_BILL_CD" = t:"typeofbill"
+  s:"CLM_LINE_DAYS_SUPLY_QTY" = t:"dayssupply"
+  s:"CLM_LINE_RX_FILL_NUM" = t:"refillnum"
+  s:"CLM_DAW_PROD_SLCTN_CD" = t:"dawcode"
+  s:"CLM_CMPND_CD" = t:"compoundcode"
+  s:"CLM_BRND_GNRC_CD" = t:"brandgenericindicator"
+  s:"CLM_LINE_RX_ORGN_CD" = t:"rxorigincode"
+  s:"CLM_LINE_AUTHRZD_FILL_NUM" = t:"refillsauthorized"
+
 }
 
 conceptmap "UnitTransform" {

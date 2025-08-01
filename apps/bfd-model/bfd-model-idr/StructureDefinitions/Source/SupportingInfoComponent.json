@@ -298,6 +298,19 @@
                 ]
             },
             {
+                "id": "SupportingInfoComponent.CLM_PHRMCY_SRVC_TYPE_CD",
+                "path": "SupportingInfoComponent.CLM_PHRMCY_SRVC_TYPE_CD",
+                "label": "Pharmacy Service Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+
                 "id": "SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM",
                 "path": "SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM",
                 "label": "HCT/HGB Test Result Value",
@@ -310,9 +323,142 @@
                 ]
             },
             {
+
                 "id": "SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD",
                 "path": "SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD",
                 "label": "HCT/HGB Test Type",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_RX_ORGN_CD",
+                "path": "SupportingInfoComponent.CLM_LINE_RX_ORGN_CD",
+                "label": "Prescription Origin Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_BRND_GNRC_CD",
+                "path": "SupportingInfoComponent.CLM_BRND_GNRC_CD",
+                "label": "Brand Generic Indicator Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_PTNT_RSDNC_CD",
+                "path": "SupportingInfoComponent.CLM_PTNT_RSDNC_CD",
+                "label": "Patient Residence Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LTC_DSPNSNG_MTHD_CD",
+                "path": "SupportingInfoComponent.CLM_LTC_DSPNSNG_MTHD_CD",
+                "label": "Submission Clarification Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_CMPND_CD",
+                "path": "SupportingInfoComponent.CLM_CMPND_CD",
+                "label": "Compound Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_DAYS_SUPLY_QTY",
+                "path": "SupportingInfoComponent.CLM_LINE_DAYS_SUPLY_QTY",
+                "label": "Days Supply Quantity",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_RX_FILL_NUM",
+                "path": "SupportingInfoComponent.CLM_LINE_RX_FILL_NUM",
+                "label": "Fill Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_DAW_PROD_SLCTN_CD",
+                "path": "SupportingInfoComponent.CLM_DAW_PROD_SLCTN_CD",
+                "label": "Dispense As Written Product Selection Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_DRUG_CVRG_STUS_CD",
+                "path": "SupportingInfoComponent.CLM_DRUG_CVRG_STUS_CD",
+                "label": "Drug Coverage Status Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD",
+                "path": "SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD",
+                "label": "Catastrophic Coverage Indicator Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_AUTHRZD_FILL_NUM",
+                "path": "SupportingInfoComponent.CLM_LINE_AUTHRZD_FILL_NUM",
+                "label": "Refills Authorized",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -333,7 +479,6 @@
                     }
                 ]
             }
-            
         ]
     }
 }
