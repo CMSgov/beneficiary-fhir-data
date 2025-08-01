@@ -1,3 +1,4 @@
+import logging
 import os
 from collections.abc import Iterator
 from datetime import UTC, datetime
@@ -12,6 +13,8 @@ temp_table_timer = Timer("temp_table")
 copy_timer = Timer("copy")
 insert_timer = Timer("insert")
 commit_timer = Timer("commit")
+
+logger = logging.getLogger(__name__)
 
 
 def print_timers() -> None:
@@ -59,6 +62,7 @@ class PostgresLoader:
         with self.conn.cursor() as cur:
             # load each batch in a separate transaction
             for results in fetch_results:
+                logger.info("loading next %s results", len(results))
                 # Load each batch into a temp table
                 # This is necessary because we want to use COPY to quickly
                 # transfer everything into Postgres, but COPY can't handle

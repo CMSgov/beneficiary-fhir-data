@@ -1,3 +1,4 @@
+import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
@@ -18,6 +19,8 @@ idr_query_timer = Timer("idr_query")
 cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
+
+logger = logging.getLogger(__name__)
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -52,6 +55,7 @@ class Extractor(ABC):
         fetch_query = self.get_query(cls, is_historical)
         batch_timestamp_col = cls.batch_timestamp_col_alias(is_historical)
         update_timestamp_col = cls.update_timestamp_col_alias()
+        logger.info("loading %s", cls.table())
         if progress is None:
             idr_query_timer.start()
             # No saved progress, process the whole table from the beginning
@@ -69,7 +73,7 @@ class Extractor(ABC):
         previous_batch_complete = progress.batch_completion_ts != DEFAULT_MAX_DATE
         op = ">" if previous_batch_complete else ">="
         idr_query_timer.start()
-        # Saved progress found, start processing from where we left
+        # Saved progress found, start processing from where we left off
         update_clause = (
             f"OR {update_timestamp_col} IS NOT NULL AND {update_timestamp_col} {op} %(timestamp)s"
             if update_timestamp_col is not None
