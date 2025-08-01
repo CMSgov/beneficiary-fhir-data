@@ -127,8 +127,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref (
     bene_kill_cred_cd VARCHAR(1) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
-    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+    src_rec_crte_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
@@ -174,7 +174,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_rndrg_prvdr_npi_num VARCHAR(10),
     clm_rndrg_prvdr_last_name VARCHAR(60),
     prvdr_blg_prvdr_npi_num VARCHAR(10),
+    prvdr_rfrg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
+    clm_ric_cd VARCHAR(1),
     clm_sbmt_chrg_amt NUMERIC,
     clm_blood_pt_frnsh_qty INT,
     clm_nch_prmry_pyr_cd VARCHAR(1),
@@ -345,6 +347,45 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
+
+-- CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl (
+--     geo_bene_sk BIGINT,
+--     clm_dt_sgntr_sk BIGINT,
+--     clm_ansi_sgntr_sk BIGINT,
+--     clm_type_cd INT NOT NULL,
+--     clm_num_sk BIGINT NOT NULL,
+--     clm_line_num INT NOT NULL,
+--     CLM_CARR_PMT_DNL_CD,
+--     CLM_MDCR_PRFNL_PRMRY_PYR_AMT,
+--     CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW,
+--     CLM_CLNCL_TRIL_NUM
+-- );
+
+-- CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl (
+--     geo_bene_sk BIGINT,
+--     clm_dt_sgntr_sk BIGINT,
+--     clm_ansi_sgntr_sk BIGINT,
+--     clm_type_cd INT NOT NULL,
+--     clm_num_sk BIGINT NOT NULL,
+--     CLM_LINE_HCT_HGB_RSLT_NUM,
+--     CLM_LINE_HCT_HGB_TYPE_CD,
+--     CLM_LINE_CARR_CLNCL_LAB_NUM,
+--     CLM_BENE_PRMRY_PYR_PD_AMT,
+--     CLM_MTUS_IND_CD,
+--     CLM_LINE_PRFNL_MTUS_CNT,
+--     CLM_PRCNG_LCLTY_CD,
+--     CLM_PHYSN_ASTNT_CD,
+--     CLM_LINE_CARR_HPSA_SCRCTY_CD,
+--     CLM_PRMRY_PYR_CD,
+--     CLM_FED_TYPE_SRVC_CD,
+--     CLM_PMT_80_100_CD,
+--     CLM_PRCSG_IND_CD,
+--     CLM_SRVC_DDCTBL_SW,
+--     CLM_PRVDR_SPCLTY_CD,
+--     CLM_LINE_DMERC_SCRN_SVGS_AMT,
+--     CLM_SUPLR_TYPE_CD,
+--     CLM_LINE_PRFNL_DME_PRICE_AMT
+-- );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (
     clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,

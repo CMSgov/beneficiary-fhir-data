@@ -151,7 +151,7 @@ CREATE TABLE idr.beneficiary_xref (
     src_rec_crte_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
 CREATE TABLE idr.contract_pbp_number (
@@ -206,7 +206,9 @@ CREATE TABLE idr.claim (
     clm_rndrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_rndrg_prvdr_last_name VARCHAR(60) NOT NULL,
     prvdr_blg_prvdr_npi_num VARCHAR(10) NOT NULL,
+    prvdr_rfrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_disp_cd VARCHAR(2) NOT NULL,
+    clm_ric_cd VARCHAR(1) NOT NULL,
     clm_sbmt_chrg_amt NUMERIC NOT NULL,
     clm_blood_pt_frnsh_qty INT NOT NULL,
     clm_nch_prmry_pyr_cd VARCHAR(1) NOT NULL,

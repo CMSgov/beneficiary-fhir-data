@@ -472,10 +472,10 @@ class IdrClaim(IdrBaseModel):
     clm_finl_actn_ind: str
     clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_mdcr_coinsrnc_amt: float
+    clm_mdcr_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_ncvrd_chrg_amt: float
-    clm_mdcr_ddctbl_amt: float
+    clm_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_prvdr_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_amt: float
@@ -489,6 +489,8 @@ class IdrClaim(IdrBaseModel):
     clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_blg_prvdr_npi_num: str
+    prvdr_rfrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_ric_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_disp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmt_chrg_amt: float
     clm_blood_pt_frnsh_qty: Annotated[int, BeforeValidator(transform_null_int)]
