@@ -85,7 +85,7 @@
       },
       "provider" : {
         "identifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+          "system" : "http://hl7.org/fhir/sid/us-npi",
           "value" : "1023011079"
         }
       },
