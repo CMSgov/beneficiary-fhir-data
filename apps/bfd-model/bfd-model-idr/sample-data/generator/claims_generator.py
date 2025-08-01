@@ -743,7 +743,7 @@ def add_meta_timestamps(obj, clm, max_date):
 def main():
     parser = argparse.ArgumentParser(description='Generate Synthetic Data for Ingestion by the BFD v3 pipeline.')
     parser.add_argument('--sushi', '-s', action='store_true', help='Generate new StructureDefinitions. Use when testing locally if new .fsh files have been added.')
-    parser.add_argument('--benes', '-b', type=str, help='Pull BENE_SKs from the input file. Expected format is that of SYNTHETIC_BENE.csv')
+    parser.add_argument('--benes', '-b', type=str, help='Pull BENE_SKs from the input file. Expected format is that of SYNTHETIC_BENE_HSTRY.csv')
 
     args = parser.parse_args()
     if(args.sushi):
