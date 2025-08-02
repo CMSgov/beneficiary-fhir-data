@@ -466,9 +466,9 @@ class IdrClaim(IdrBaseModel):
     clm_thru_dt: date
     clm_efctv_dt: date
     clm_obslt_dt: date
-    clm_bill_clsfctn_cd: str
-    clm_bill_fac_type_cd: str
-    clm_bill_freq_cd: str
+    clm_bill_clsfctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bill_fac_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bill_freq_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_finl_actn_ind: str
     clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
