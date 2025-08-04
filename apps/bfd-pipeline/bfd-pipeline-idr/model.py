@@ -692,7 +692,7 @@ class IdrClaimLine(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_LINE}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_line_sbmt_chrg_amt: float
-    clm_line_alowd_chrg_amt: float
+    clm_line_alowd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ncvrd_chrg_amt: float
     clm_line_prvdr_pmt_amt: float
     clm_line_bene_pmt_amt: float
@@ -700,12 +700,12 @@ class IdrClaimLine(IdrBaseModel):
     clm_line_cvrd_pd_amt: float
     clm_line_blood_ddctbl_amt: float
     clm_line_mdcr_ddctbl_amt: float
-    clm_line_hcpcs_cd: str
-    clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_hcpcs_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_ndc_qty: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_srvc_unit_qty: float
-    clm_line_rev_ctr_cd: str
+    clm_line_rev_ctr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     hcpcs_1_mdfr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     hcpcs_2_mdfr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     hcpcs_3_mdfr_cd: Annotated[str, BeforeValidator(transform_null_string)]
