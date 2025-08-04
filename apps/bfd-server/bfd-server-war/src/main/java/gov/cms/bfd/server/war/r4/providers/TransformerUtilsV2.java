@@ -4644,15 +4644,15 @@ public final class TransformerUtilsV2 {
    * Hospice, HHA and SNF.
    *
    * @param eob the {@link ExplanationOfBenefit} this method will modify
-   * @param providerNumber a {@link String} PRVDR_NUM: representing the provider number for the
-   *     claim
+   * @param ccwVariable the {@link CcwCodebookVariable} provider type
+   * @param providerNumber a {@link String} provider identification number: representing the
+   *     provider number for the claim
    */
-  static void setProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+  static void setProviderNumber(
+      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, String providerNumber) {
     eob.setProvider(
         new Reference()
-            .setIdentifier(
-                TransformerUtilsV2.createIdentifier(
-                    CcwCodebookVariable.PRVDR_NUM, providerNumber)));
+            .setIdentifier(TransformerUtilsV2.createIdentifier(ccwVariable, providerNumber)));
   }
 
   /**

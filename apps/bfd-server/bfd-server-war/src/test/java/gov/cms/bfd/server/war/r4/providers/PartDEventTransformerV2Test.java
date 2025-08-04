@@ -1013,7 +1013,7 @@ public final class PartDEventTransformerV2Test {
             .setIdentifier(
                 new Identifier()
                     .setSystem(
-                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRVDR_NUM))
+                        CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PRVDR_NPI))
                     .setValue("1023011079"));
 
     assertTrue(compare.equalsDeep(eob.getProvider()));
