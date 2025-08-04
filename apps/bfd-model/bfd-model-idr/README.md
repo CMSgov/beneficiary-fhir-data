@@ -74,7 +74,28 @@ pass along the resource url with -r
 pass along --test to run conformance tests
 
 
-To generate synthetic claims data, the claims_generator.py script is used. As of 5/22/25, it will only generate inpatient institutional claims and their PAC equivalent claim type codes. 
+To generate synthetic patient data, the patient_generator.py script is used.
+To utilize it:
+```sh
+uv run patient_generator.py
+```
+
+The script supports several options:
+- `--benes <csv_file>`: Use a CSV file containing beneficiary data to populate fields. Empty fields will be filled with random data.
+- `--claims`: Automatically generate claims after patient generation using the generated SYNTHETIC_BENE_HSTRY.csv file.
+
+The files output will be in the out folder:
+SYNTHETIC_BENE_HSTRY.csv
+SYNTHETIC_BENE_MBI_ID.csv
+SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv
+SYNTHETIC_BENE_MDCR_ENTLMT.csv
+SYNTHETIC_BENE_MDCR_STUS.csv
+SYNTHETIC_BENE_TP.csv
+SYNTHETIC_BENE_XREF.csv
+
+The patient generator creates synthetic beneficiary data with realistic but SYNTHETIC MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
+
+To generate synthetic claims data, the claims_generator.py script is used. 
 To utilize it:
 ```sh
 uv run claims_generator.py \
@@ -83,30 +104,21 @@ uv run claims_generator.py \
 ```
 
 --sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK. 
-The files output will be in the outputs folder, there are several files:
-SYNTHETIC_CLM_DCMTN.csv
-SYNTHETIC_CLM_LINE_INSTNL.csv
-SYNTHETIC_CLM_INSTNL.csv
+The files output will be in the out folder, there are several files:
+SYNTHETIC_CLM.csv
+SYNTHETIC_CLM_LINE.csv
+SYNTHETIC_CLM_VAL.csv
 SYNTHETIC_CLM_DT_SGNTR.csv
 SYNTHETIC_CLM_PROD.csv
-SYNTHETIC_CLM_VAL.csv
-SYNTHETIC_CLM_LINE.csv
-SYNTHETIC_CLM.csv
+SYNTHETIC_CLM_INSTNL.csv
+SYNTHETIC_CLM_LINE_INSTNL.csv
+SYNTHETIC_CLM_DCMTN.csv
+SYNTHETIC_CLM_FISS.csv
+SYNTHETIC_CLM_PRFNL.csv
+SYNTHETIC_CLM_LINE_PRFNL.csv
+SYNTHETIC_CLM_ANSI_SGNTR.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
-
-To generate synthetic patient data, the patient_generator.py script is used.
-To utilize it:
-```sh
-uv run patient_generator.py
-```
-The files output will be in the outputs folder:
-SYNTHETIC_BENE_HSTRY.csv
-SYNTHETIC_BENE_MBI_ID.csv
-SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv
-SYNTHETIC_BENE_MDCR_ENTLMT.csv
-SYNTHETIC_BENE_MDCR_STUS.csv
-SYNTHETIC_BENE.csv
 
 Data Dictionary Notes:
 Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition. 
