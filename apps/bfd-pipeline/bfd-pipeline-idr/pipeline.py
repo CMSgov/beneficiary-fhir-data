@@ -1,7 +1,7 @@
-import datetime
 import logging
 import os
 import sys
+from datetime import datetime
 
 import extractor
 import loader
@@ -65,10 +65,12 @@ def main() -> None:
         )
 
 
-def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
+def get_progress(
+    connection_string: str, table_name: str, start_time: datetime
+) -> LoadProgress | None:
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
-        LoadProgress.fetch_query(False),
+        LoadProgress.fetch_query(False, start_time),
         {LoadProgress.query_placeholder(): table_name},
     )
 
@@ -79,13 +81,11 @@ def extract_and_load(
     connection_string: str,
 ) -> tuple[PostgresLoader, bool]:
     logger.info("loading %s", cls.table())
-    progress = get_progress(connection_string, cls.table())
-    batch_start = datetime.datetime.now()
+    batch_start = datetime.now()
+    progress = get_progress(connection_string, cls.table(), batch_start)
+
     logger.info("progress for %s - %s", cls.table(), progress.last_ts if progress else "none")
-    data_iter = data_extractor.extract_idr_data(
-        cls,
-        progress,
-    )
+    data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
 
     loader = PostgresLoader(connection_string)
     data_loaded = loader.load(data_iter, cls, batch_start, progress)

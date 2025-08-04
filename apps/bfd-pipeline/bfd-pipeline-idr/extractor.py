@@ -43,15 +43,17 @@ class Extractor(ABC):
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         pass
 
-    def get_query(self, cls: type[T], is_historical: bool) -> str:
-        query = cls.fetch_query(is_historical)
+    def get_query(self, cls: type[T], is_historical: bool, start_time: datetime) -> str:
+        query = cls.fetch_query(is_historical, start_time)
         columns = ",".join(cls.column_aliases())
         columns_raw = ",".join(cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
-    def extract_idr_data(self, cls: type[T], progress: LoadProgress | None) -> Iterator[list[T]]:
+    def extract_idr_data(
+        self, cls: type[T], progress: LoadProgress | None, start_time: datetime
+    ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(cls, is_historical)
+        fetch_query = self.get_query(cls, is_historical, start_time)
         batch_timestamp_col = cls.batch_timestamp_col_alias(is_historical)
         update_timestamp_col = cls.update_timestamp_col_alias()
 
