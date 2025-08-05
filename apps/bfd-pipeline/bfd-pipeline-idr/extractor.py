@@ -1,15 +1,17 @@
 import logging
 import os
+import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
 from datetime import date, datetime
 
 import psycopg
 import snowflake.connector
+import snowflake.connector.network
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from psycopg.rows import class_row
-from snowflake.connector import DictCursor
+from snowflake.connector import DictCursor, SnowflakeConnection
 
 from model import LoadProgress, T
 from timer import Timer
@@ -128,6 +130,11 @@ class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int) -> None:
         super().__init__()
 
+        self.conn = SnowflakeExtractor._connect()
+        self.batch_size = batch_size
+
+    @staticmethod
+    def _connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
             os.environ["IDR_PRIVATE_KEY"].encode(), password=None, backend=default_backend()
         )
@@ -136,7 +143,7 @@ class SnowflakeExtractor(Extractor):
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         )
-        self.conn = snowflake.connector.connect(  # type: ignore
+        return snowflake.connector.connect(  # type: ignore
             user=os.environ["IDR_USERNAME"],
             private_key=private_key_bytes,
             account=os.environ["IDR_ACCOUNT"],
@@ -144,32 +151,39 @@ class SnowflakeExtractor(Extractor):
             database=os.environ["IDR_DATABASE"],
             schema=os.environ["IDR_SCHEMA"],
         )
-        self.batch_size = batch_size
 
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         cur = None
-        try:
-            cursor_execute_timer.start()
-            cur = self.conn.cursor(DictCursor)
-            cur.execute(sql, params)
-            cursor_execute_timer.stop()
-
-            cursor_fetch_timer.start()
-            # fetchmany can return list[dict] or list[tuple] but we'll only use
-            # queries that return dicts
-            batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-            cursor_fetch_timer.stop()
-
-            while len(batch) > 0:  # type: ignore
-                transform_timer.start()
-                data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                transform_timer.stop()
-
-                yield data
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            try:
+                cursor_execute_timer.start()
+                cur = self.conn.cursor(DictCursor)
+                cur.execute(sql, params)
+                cursor_execute_timer.stop()
 
                 cursor_fetch_timer.start()
-                batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+                # fetchmany can return list[dict] or list[tuple] but we'll only use
+                # queries that return dicts
+                batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                 cursor_fetch_timer.stop()
-        finally:
-            if cur:
-                cur.close()
+
+                while len(batch) > 0:  # type: ignore
+                    transform_timer.start()
+                    data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
+                    transform_timer.stop()
+
+                    yield data
+
+                    cursor_fetch_timer.start()
+                    batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+                    cursor_fetch_timer.stop()
+            except snowflake.connector.network.ReauthenticationRequest as ex:
+                if attempt == max_attempts - 1:
+                    raise ex
+                self.conn = SnowflakeExtractor._connect()
+                time.sleep(1)
+
+            finally:
+                if cur:
+                    cur.close()
