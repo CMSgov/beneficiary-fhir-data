@@ -57,7 +57,7 @@ class Extractor(ABC):
         batch_timestamp_col = cls.batch_timestamp_col_alias(is_historical)
         update_timestamp_col = cls.update_timestamp_col_alias()
 
-        logger.info("loading %s", cls.table())
+        logger.info("extracting %s", cls.table())
         if progress is None:
             idr_query_timer.start()
             # No saved progress, process the whole table from the beginning

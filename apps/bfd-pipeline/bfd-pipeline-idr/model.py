@@ -449,7 +449,7 @@ ALIAS_INSTNL = "instnl"
 ALIAS_VAL = "val"
 
 
-def claim_type_clause(start_time: datetime) -> str:
+def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
     return f"""
         {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
         AND {ALIAS_CLM}.clm_src_id = '20000' 
@@ -868,7 +868,9 @@ class IdrClaimProcedure(IdrBaseModel):
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
-            SELECT {{COLUMNS}}, ROW_NUMBER() OVER (PARTITION BY clm_uniq_id) AS bfd_row_num
+            SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
+                PARTITION BY clm_uniq_id ORDER BY clm_uniq_id
+            ) AS bfd_row_num
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND

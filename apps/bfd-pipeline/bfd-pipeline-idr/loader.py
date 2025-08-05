@@ -78,10 +78,12 @@ class PostgresLoader:
                 },
             )
             data_loaded = False
+            num_rows = 0
             # load each batch in a separate transaction
             for results in fetch_results:
                 data_loaded = True
                 logger.info("loading next %s results", len(results))
+                num_rows += len(results)
                 # Load each batch into a temp table
                 # This is necessary because we want to use COPY to quickly
                 # transfer everything into Postgres, but COPY can't handle
@@ -176,5 +178,5 @@ class PostgresLoader:
                 {"table": table},
             )
             self.conn.commit()
-
+        logger.info("loaded %s rows", num_rows)
         return data_loaded
