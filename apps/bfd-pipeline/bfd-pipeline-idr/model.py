@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
 from typing import Annotated, TypeVar
@@ -450,12 +451,17 @@ ALIAS_VAL = "val"
 
 
 def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
+    latest_claims_env = "IDR_LATEST_CLAIMS"
+    if latest_claims_env in os.environ and os.environ[latest_claims_env] in ("1", "true"):
+        return f"""
+            {ALIAS_CLM}.clm_type_cd IN (61,62,63,64)
+            AND {ALIAS_CLM}.clm_src_id = '20000' 
+            AND {ALIAS_CLM}.clm_finl_actn_ind = 'Y'
+            AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y'
+            """
     return f"""
         {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
-        AND {ALIAS_CLM}.clm_src_id = '20000' 
-        AND {ALIAS_CLM}.clm_finl_actn_ind = 'Y'
-        AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y'
-        """
+    """
 
 
 class IdrClaim(IdrBaseModel):

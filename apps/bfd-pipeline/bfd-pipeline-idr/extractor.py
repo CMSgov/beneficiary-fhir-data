@@ -7,11 +7,11 @@ from datetime import date, datetime
 
 import psycopg
 import snowflake.connector
-import snowflake.connector.network
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
+from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from model import LoadProgress, T
 from timer import Timer
@@ -178,8 +178,10 @@ class SnowflakeExtractor(Extractor):
                     cursor_fetch_timer.start()
                     batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                     cursor_fetch_timer.stop()
-            except snowflake.connector.network.ReauthenticationRequest as ex:
+            except (ReauthenticationRequest, RetryRequest) as ex:
+                logger.warning("received transient error, retrying...", exc_info=ex)
                 if attempt == max_attempts - 1:
+                    logger.error("max attempts exceeded")
                     raise ex
                 self.conn = SnowflakeExtractor._connect()
                 time.sleep(1)
