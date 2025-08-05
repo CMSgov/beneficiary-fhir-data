@@ -34,6 +34,7 @@ CREATE TABLE idr.beneficiary(
 );
 
 CREATE INDEX ON idr.beneficiary(bene_mbi_id);
+CREATE INDEX ON idr.beneficiary(bene_xref_sk_computed);
 
 CREATE TABLE idr.beneficiary_history(
     bene_sk BIGINT NOT NULL,
