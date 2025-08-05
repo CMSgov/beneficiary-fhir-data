@@ -102,13 +102,23 @@ for i in range(patients_to_generate):
         
         # Handle sex code
         if pd.notna(row.get("BENE_SEX_CD")):
-            patient["BENE_SEX_CD"] = str(int(row["BENE_SEX_CD"]))
+            # Safely handle non-numeric sex codes
+            sex_code = str(row["BENE_SEX_CD"])
+            if sex_code.isdigit():
+                patient["BENE_SEX_CD"] = str(int(sex_code))
+            else:
+                patient["BENE_SEX_CD"] = sex_code
         else:
             patient["BENE_SEX_CD"] = str(random.randint(1, 2))
         
         # Handle race code
         if pd.notna(row.get("BENE_RACE_CD")):
-            patient["BENE_RACE_CD"] = str(int(row["BENE_RACE_CD"]))
+            # Safely handle non-numeric race codes to prevent ValueError
+            race_code = str(row["BENE_RACE_CD"])
+            if race_code.isdigit():
+                patient["BENE_RACE_CD"] = str(int(race_code))
+            else:
+                patient["BENE_RACE_CD"] = race_code
         else:
             patient["BENE_RACE_CD"] = random.choice(
                 ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
