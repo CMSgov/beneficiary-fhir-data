@@ -178,6 +178,7 @@ class SnowflakeExtractor(Extractor):
                     cursor_fetch_timer.start()
                     batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                     cursor_fetch_timer.stop()
+                return
             except (ReauthenticationRequest, RetryRequest, ProgrammingError) as ex:
                 logger.warning("received transient error, retrying...", exc_info=ex)
                 if attempt == max_attempts - 1:
