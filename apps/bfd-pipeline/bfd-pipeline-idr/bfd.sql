@@ -2,7 +2,7 @@ DROP SCHEMA IF EXISTS idr CASCADE;
 
 CREATE SCHEMA idr;
 CREATE TABLE idr.beneficiary(
-    bene_sk BIGINT NOT NULL PRIMARY KEY, 
+    bene_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
         AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
@@ -30,25 +30,11 @@ CREATE TABLE idr.beneficiary(
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL
-);
-
-CREATE INDEX ON idr.beneficiary(bene_mbi_id);
-
-CREATE TABLE idr.beneficiary_history(
-    bene_sk BIGINT NOT NULL,
-    bene_xref_efctv_sk BIGINT NOT NULL,
-    bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS
-        AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
-    bene_mbi_id VARCHAR(11) NOT NULL,
-    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
-    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
 );
+
+CREATE INDEX ON idr.beneficiary(bene_mbi_id);
 
 CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
