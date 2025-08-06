@@ -1,4 +1,4 @@
-FROM python:3-slim-bullseye as base
+FROM python:3.14.0rc1-slim-bookworm as base
 RUN apt-get update && apt-get install -y \
     openjdk-11-jdk bc
 
