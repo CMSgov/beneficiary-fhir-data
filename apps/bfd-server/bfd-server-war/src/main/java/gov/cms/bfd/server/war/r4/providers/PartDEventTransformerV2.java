@@ -375,7 +375,8 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
                 identifierType, claimGroup.getServiceProviderId()));
       }
 
-      TransformerUtilsV2.setProviderNumber(eob, claimGroup.getServiceProviderId());
+      TransformerUtilsV2.setProviderNumber(
+          eob, CcwCodebookVariable.PRVDR_NPI, claimGroup.getServiceProviderId());
     }
 
     /*

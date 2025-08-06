@@ -9,7 +9,7 @@ class AdjudicationCharge {
   @Column(name = "clm_sbmt_chrg_amt")
   private float submittedChargeAmount;
 
-  ExplanationOfBenefit.AdjudicationComponent toFhir() {
-    return AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhir(submittedChargeAmount);
+  ExplanationOfBenefit.TotalComponent toFhir() {
+    return AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhirTotal(submittedChargeAmount);
   }
 }

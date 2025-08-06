@@ -251,6 +251,10 @@ public class SystemUrls {
   public static final String HL7_BENEFIT_CATEGORY =
       "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
 
+  /** URL. */
+  public static final String HL7_ADJUDICATION_CATEGORY =
+      "http://terminology.hl7.org/CodeSystem/adjudication";
+
   // US Core
   /**
    * <a href="https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-ethnicity.html">US Core
@@ -302,6 +306,10 @@ public class SystemUrls {
   /** URL. */
   public static final String CARIN_CODE_SYSTEM_CLAIM_PROCEDURE_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType";
+
+  /** URL. */
+  public static final String POA_CODING =
+      "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding";
 
   /** URL. */
   public static final String CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE =
@@ -358,7 +366,7 @@ public class SystemUrls {
 
   /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_CONTRACTOR_NUMBER =
-      "https://bluebutton.cms.gov/CodeSystem/CLM-CNTRCTR-NUM";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM";
 
   /** URL. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_RECORD_TYPE =
@@ -423,6 +431,10 @@ public class SystemUrls {
   /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DEDUCTIBLE_COINSURANCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION_SYSTEM =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication";
 
   /** URL. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =

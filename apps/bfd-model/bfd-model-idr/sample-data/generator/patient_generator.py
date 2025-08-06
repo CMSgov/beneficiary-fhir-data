@@ -15,7 +15,7 @@ fake = Faker()
 # Command line argument parsing
 parser = argparse.ArgumentParser(description='Generate synthetic patient data')
 parser.add_argument('--benes', type=str, help='Path to CSV file containing beneficiary data')
-parser.add_argument('--claims', action='store_true', help='Automatically generate claims after patient generation using the generated SYNTHETIC_BENE.csv file')
+parser.add_argument('--claims', action='store_true', help='Automatically generate claims after patient generation using the generated SYNTHETIC_BENE_HSTRY.csv file')
 args = parser.parse_args()
 
 patients_to_generate = 15
@@ -177,9 +177,14 @@ for i in range(patients_to_generate):
         if idx == 0:
             continue
         prior_patient = copy.deepcopy(patient)
+        old_bene_sk = prior_patient["BENE_SK"]
         pt_bene_sk = generator.gen_bene_sk()
         prior_patient["BENE_SK"] = str(pt_bene_sk)
+        prior_patient["IDR_LTST_TRANS_FLG"] = "N"
         generator.used_bene_sk.append(pt_bene_sk)
+        
+        generator.generate_bene_xref(pt_bene_sk, old_bene_sk)
+        
         generator.set_timestamps(
             prior_patient, datetime.date(year=2017, month=5, day=20)
         )
@@ -188,9 +193,9 @@ for i in range(patients_to_generate):
         past_year_date = datetime.date.today() - datetime.timedelta(days=random.randint(30, 365))
         prior_patient["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
         
-        generator.bene_table.append(prior_patient)
+        generator.bene_hstry_table.append(prior_patient)
 
-    generator.bene_table.append(patient)
+    generator.bene_hstry_table.append(patient)
 
 generator.save_output_files()
 
@@ -198,10 +203,10 @@ generator.save_output_files()
 if args.claims:
     print("Generating claims for generated benes")
     try:
-        # Call claims_generator.py with the generated SYNTHETIC_BENE.csv file
+        # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
         result = subprocess.run([
             sys.executable, 'claims_generator.py', 
-            '--benes', 'out/SYNTHETIC_BENE.csv'
+            '--benes', 'out/SYNTHETIC_BENE_HSTRY.csv'
         ], check=True, capture_output=True, text=True)
         
         print("Claims generation completed successfully!")
