@@ -1,6 +1,6 @@
 FROM python:3-slim-bookworm AS base
 RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk bc
+    openjdk-21-jdk bc
 
 FROM base AS dist
 WORKDIR /usr/local/synthea
