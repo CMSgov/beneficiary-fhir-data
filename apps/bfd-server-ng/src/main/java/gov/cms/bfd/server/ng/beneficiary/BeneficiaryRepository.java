@@ -128,11 +128,7 @@ public class BeneficiaryRepository {
             """
             SELECT MAX(p.batchCompletionTimestamp)
             FROM LoadProgress p
-            WHERE p.tableName IN (
-              "idr.beneficiary",
-              "idr.beneficiary_history",
-              "idr.beneficiary_mbi_id"
-            )
+            WHERE p.tableName LIKE 'idr.beneficiary%'
             """,
             ZonedDateTime.class)
         .getResultList()
