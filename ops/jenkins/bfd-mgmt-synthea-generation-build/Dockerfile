@@ -16,3 +16,4 @@ RUN chmod +x ./docker_entrypoint.sh ./run_synthea ./national_bfd.sh
 RUN mkdir out output logs
 ENTRYPOINT [ "./docker_entrypoint.sh" ]
 CMD ["-h"]
+ 
