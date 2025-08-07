@@ -106,14 +106,15 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 
     src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
     
-    // Add MB identifier with member number
+    // Re-using member number
     src.BENE_PDP_ENRLMT_MMBR_ID_NUM as memberNum -> tgt.identifier = create('Identifier') as tgtID then{
-        src -> tgtID.type = create('CodeableConcept') as idCC,
-            idCC.coding = create('Coding') as tempCode,
-            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
-            tempCode.code = "MB",
-            tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
-            src -> tgtID.value = memberNum "Set identifier Value";
+        src -> tgtID.type = create('CodeableConcept') as idCC then{
+            src -> idCC.coding = create('Coding') as tempCode then{
+                src -> tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203" "Set coding system";
+                src -> tempCode.code = "MB" "Set coding code";
+            } "Create coding";
+        } "Create type";
+        src -> tgtID.value = memberNum "Set identifier value";
     } "Add MB identifier with member number";
     
     src -> tgt.payor = create('Reference') as payorReference then{
