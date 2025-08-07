@@ -134,28 +134,28 @@
     - PartC
     - PartD
   fhirPath: Coverage.period.start
-  sourceView: V2_MDCR_BENE_ENRLMT
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_ENRLMT_BGN_DT
 - inputPath: Coverage-Base.BENE_ENRLMT_END_DT
   appliesTo:
     - PartC
     - PartD
   fhirPath: Coverage.period.end
-  sourceView: V2_MDCR_BENE_ENRLMT
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_ENRLMT_END_DT
 - inputPath: Coverage-Base.BENE_CNTRCT_NUM
   appliesTo:
     - PartC
     - PartD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM').value
-  sourceView: V2_MDCR_BENE_ENRLMT
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_CNTRCT_NUM
 - inputPath: Coverage-Base.BENE_PBP_NUM
   appliesTo:
     - PartC
     - PartD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM').value
-  sourceView: V2_MDCR_BENE_ENRLMT
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_PBP_NUM
 - inputPath: Coverage-Base.BENE_CVRG_TYPE_CD
   appliesTo:
@@ -163,7 +163,7 @@
     - PartD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD').value.code
   referenceTable: BENE_CVRG_TYPE_CD
-  sourceView: V2_MDCR_BENE_ENRLMT
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_CVRG_TYPE_CD
 - inputPath: Coverage-Base.CNTRCT_PBP_NAME
   appliesTo:

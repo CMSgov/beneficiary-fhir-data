@@ -105,6 +105,17 @@ group createPartCCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 
     src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    
+    // Add MB identifier with member number
+    src.BENE_PDP_ENRLMT_MMBR_ID_NUM as memberNum -> tgt.identifier = create('Identifier') as tgtID then{
+        src -> tgtID.type = create('CodeableConcept') as idCC,
+            idCC.coding = create('Coding') as tempCode,
+            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+            tempCode.code = "MB",
+            tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+            src -> tgtID.value = memberNum "Set identifier Value";
+    } "Add MB identifier with member number";
+    
     src -> tgt.payor = create('Reference') as payorReference then{
         src -> payorReference.reference="#insurer-org" "set reference";
     } "create and set payor reference";
@@ -209,6 +220,9 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
     } "Add Bank ID class";
 
     //LIS Effective Code Extension
+    //For all of the LIS fields, the assumption is that we've already determined the row is effective at the time the 
+    //resource is generated. Eg LIS_EFCTV_CD='Y' and current date is
+    //between BENE_RNG_BGN_DT and BENE_RNG_END_DT 
     src.BENE_LIS_EFCTV_CD as lisEfctvCd -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
@@ -221,17 +235,17 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 
     //LIS Copayment Level Code Extension 
     src.BENE_LIS_EFCTV_CD as lisEfctvCd where lisEfctvCd = "Y" -> tgt.extension = create('Extension') as tgtExtension then{
-        src.BENE_LIS_COPMT_LVL_CD as lisCopmtLvlCd -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD" "Add url";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD" "Add url";
         src -> tgtExtension.value = create('Coding') as tgtCoding then{
             src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD" "add system";
-            src -> tgtCoding.code = lisCopmtLvlCd "Add code";
+            src.BENE_LIS_COPMT_LVL_CD as lisCopmtLvlCd -> tgtCoding.code = lisCopmtLvlCd "Add code";
         } "Add coding";
     } "Add LIS copayment level code when LIS is effective";
 
     //LIS Part D Premium Percentage Extension 
     src.BENE_LIS_EFCTV_CD as lisEfctvCd where lisEfctvCd = "Y" -> tgt.extension = create('Extension') as tgtExtension then{
-        src.BENE_LIS_PTD_PRM_PCT as lisPtdPrmPct -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT" "Add url";
-        src -> tgtExtension.value = lisPtdPrmPct "Add value";
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT" "Add url";
+        src.BENE_LIS_PTD_PRM_PCT as lisPtdPrmPct -> tgtExtension.value = cast(lisPtdPrmPct,'decimal')  "Add value";
     } "Add LIS Part D premium percentage when LIS is effective";
 
 }
