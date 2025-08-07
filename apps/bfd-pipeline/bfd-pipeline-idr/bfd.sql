@@ -193,8 +193,8 @@ CREATE TABLE idr.claim (
     clm_ncvrd_chrg_amt NUMERIC NOT NULL,
     clm_mdcr_ddctbl_amt NUMERIC NOT NULL,
     clm_prvdr_pmt_amt NUMERIC NOT NULL,
-    clm_alowd_chg_amt NUMERIC NOT NULL,
-    clm_bene_mpt_amt NUMERIC NOT NULL,
+    clm_alowd_chrg_amt NUMERIC NOT NULL,
+    clm_bene_pmt_amt NUMERIC NOT NULL,
     clm_cntrctr_num VARCHAR(5) NOT NULL,
     clm_pmt_amt NUMERIC NOT NULL,
     clm_ltst_clm_ind VARCHAR(1) NOT NULL,
@@ -206,6 +206,7 @@ CREATE TABLE idr.claim (
     clm_othr_prvdr_last_name VARCHAR(60) NOT NULL,
     clm_rndrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_rndrg_prvdr_last_name VARCHAR(60) NOT NULL,
+    clm_rndrg_prvdr_tax_num VARCHAR(10) NOT NULL,
     clm_disp_cd VARCHAR(2) NOT NULL,
     clm_sbmt_chrg_amt NUMERIC NOT NULL,
     clm_blood_pt_frnsh_qty INT NOT NULL,
@@ -317,7 +318,6 @@ CREATE TABLE idr.claim_professional (
     clm_mdcr_prfnl_prmry_pyr_amt NUMERIC NOT NULL,
     clm_mdcr_prfnl_prvdr_asgnmt_sw VARCHAR(2) NOT NULL,
     geo_bene_sk NUMERIC NOT NULL,
-    clm_dt_sgntr_sk NUMERIC NOT NULL,
     clm_num_sk NUMERIC NOT NULL,
     clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
@@ -325,7 +325,7 @@ CREATE TABLE idr.claim_professional (
     bfd_row_num INT NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_num_sk, clm_type_cd)
+    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd)
 );
 
 CREATE TABLE idr.claim_line_professional (
@@ -348,7 +348,6 @@ CREATE TABLE idr.claim_line_professional (
     clm_srvc_ddtbl_sw VARCHAR(1) NOT NULL,
     clm_suplr_type_cd VARCHAR(1) NOT NULL,
     geo_bene_sk NUMERIC NOT NULL,
-    clm_dt_sgntr_sk NUMERIC NOT NULL,
     clm_line_num NUMERIC NOT NULL,
     clm_num_sk NUMERIC NOT NULL,
     clm_type_cd NUMERIC NOT NULL,
@@ -357,7 +356,7 @@ CREATE TABLE idr.claim_line_professional (
     bfd_row_num INT NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_num_sk, clm_type_cd, clm_line_num)
+    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd, clm_line_num)
 );
 
 CREATE TABLE idr.claim_line (
@@ -374,7 +373,7 @@ CREATE TABLE idr.claim_line (
     clm_line_cvrd_pd_amt NUMERIC NOT NULL,
     clm_line_blood_ddctbl_amt NUMERIC NOT NULL,
     clm_line_mdcr_ddctbl_amt NUMERIC NOT NULL,
-    clm_line_mdcr_coincrnc_amt NUMERIC NOT NULL,
+    clm_line_mdcr_coinsrnc_amt NUMERIC NOT NULL,
     clm_line_hcpcs_cd VARCHAR(5) NOT NULL,
     clm_line_from_dt DATE NOT NULL,
     clm_line_ndc_cd VARCHAR(11) NOT NULL,
@@ -386,7 +385,6 @@ CREATE TABLE idr.claim_line (
     clm_line_thru_dt DATE NOT NULL,
     clm_pos_cd VARCHAR(2) NOT NULL,
     clm_rndrg_prvdr_prtcptg_cd VARCHAR(1) NOT NULL,
-    clm_rndrg_prvdr_tax_num VARCHAR(10) NOT NULL,
     hcpcs_1_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_2_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_3_mdfr_cd VARCHAR(2) NOT NULL,
