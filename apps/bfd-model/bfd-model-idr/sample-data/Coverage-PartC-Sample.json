@@ -1,0 +1,14 @@
+{
+    "resourceType": "CoverageBase",
+    "coveragePart": "C",
+    "BENE_MBI_ID":"ABB2BB0BB22",
+    "XREF_EFCTV_BENE_SK":"123456789",
+    "lastUpdated": "2020-01-07T03:02:28.000000Z",
+    "BENE_ENRLMT_BGN_DT":"2018-04-11",
+    "BENE_ENRLMT_END_DT":"9999-12-31",
+    "currentDate":"2025-03-30",
+    "BENE_CNTRCT_NUM":"H1234",
+    "BENE_CVRG_TYPE_CD":"3",
+    "CNTRCT_PBP_NAME":"Sample Medicare Advantage Plan",
+    "CNTRCT_PLAN_CNTCT_TEL_NUM":"1-800-555-1234"
+}

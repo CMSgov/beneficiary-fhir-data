@@ -26,6 +26,7 @@ class GeneratorUtil():
         self.mdcr_entlmt = []
         self.mdcr_tp = []
         self.mdcr_rsn = []
+        self.bene_cmbnd_dual_mdcr = []
         self.code_systems  = {}
 
         self.load_addresses()
@@ -284,6 +285,35 @@ class GeneratorUtil():
                 }
                 self.mdcr_tp.append(tp_row)
 
+        # Generate dual coverage data 50% of the time
+        if random.choice([True, False]):
+            # Generate dual eligibility dates
+            dual_start_date = self.fake.date_between_dates(
+                datetime.date(year=2017, month=5, day=20),
+                datetime.date(year=2021, month=1, day=1)
+            )
+            dual_end_date = '9999-12-31'
+            dual_status_cd = random.choice(self.code_systems['BENE_DUAL_STUS_CD'])
+            dual_type_cd = random.choice(self.code_systems['BENE_DUAL_TYPE_CD'])
+            
+            state_codes = ['AL', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']
+            medicaid_state_cd = random.choice(state_codes)
+            
+            dual_row = {
+                "BENE_SK": patient['BENE_SK'],
+                'IDR_LTST_TRANS_FLG': 'Y',
+                'BENE_DUAL_STUS_CD': dual_status_cd,
+                'BENE_DUAL_TYPE_CD': dual_type_cd,
+                'MEDICAID_STATE_CD': medicaid_state_cd,
+                'BENE_MDCD_ELGBLTY_BGN_DT': str(dual_start_date),
+                'BENE_MDCD_ELGBLTY_END_DT': dual_end_date,
+                "IDR_TRANS_EFCTV_TS": str(dual_start_date) + "T00:00:00.000000+0000",
+                "IDR_INSRT_TS": str(dual_start_date) + "T00:00:00.000000+0000",
+                "IDR_UPDT_TS": str(dual_start_date) + "T00:00:00.000000+0000",
+                'IDR_TRANS_OBSLT_TS': '9999-12-31T00:00:00.000000+0000'
+            }
+            self.bene_cmbnd_dual_mdcr.append(dual_row)
+
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
@@ -346,7 +376,10 @@ class GeneratorUtil():
         df = pd.json_normalize(self.mdcr_rsn)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
         
+        df = pd.json_normalize(self.bene_cmbnd_dual_mdcr)
+        if(df.size>0):
+            df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
+            
         df = pd.json_normalize(self.bene_xref_table)
         if(df.size>0):
             df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
-        
