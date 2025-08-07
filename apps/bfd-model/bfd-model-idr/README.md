@@ -66,6 +66,16 @@ uv run compile_resources.py \
     --test
 ```
 
+Coverage (part C/D):
+```sh
+uv run compile_resources.py \
+    -m maps/Coverage-Base.map \
+    -i sample-data/Coverage-PartC-Sample.json \
+    -o outputs/Coverage.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base \
+    --test
+```
+
 
 Pass along map with -m
 pass along the sample file with -i
@@ -92,6 +102,10 @@ SYNTHETIC_BENE_MDCR_ENTLMT.csv
 SYNTHETIC_BENE_MDCR_STUS.csv
 SYNTHETIC_BENE_TP.csv
 SYNTHETIC_BENE_XREF.csv
+SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv
+SYNTHETIC_BENE_LIS.csv
+SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv
+SYNTHETIC_BENE_MAPD_ENRLMT.csv
 
 The patient generator creates synthetic beneficiary data with realistic but SYNTHETIC MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
 
