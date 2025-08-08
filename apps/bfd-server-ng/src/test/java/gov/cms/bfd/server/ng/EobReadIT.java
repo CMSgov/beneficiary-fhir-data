@@ -32,18 +32,18 @@ public class EobReadIT extends IntegrationTestBase {
   }
 
   @Test
-  void patientReadIdNotFound() {
+  void eobReadIdNotFound() {
     assertThrows(ResourceNotFoundException.class, () -> eobRead().withId("999").execute());
   }
 
   @Test
-  void patientReadInvalidIdBadRequest() {
+  void eobReadInvalidIdBadRequest() {
     assertThrows(InvalidRequestException.class, () -> eobRead().withId("abc").execute());
   }
 
   @ParameterizedTest
   @EmptySource
-  void patientReadNoIdBadRequest(String id) {
+  void eobReadNoIdBadRequest(String id) {
     // Using RestAssured here because HAPI FHIR doesn't let us send a request with a blank ID
     RestAssured.get(getServerUrl() + "/ExplanationOfBenefit" + id).then().statusCode(400);
   }

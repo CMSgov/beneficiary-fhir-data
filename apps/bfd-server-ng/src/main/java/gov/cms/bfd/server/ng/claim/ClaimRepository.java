@@ -108,16 +108,15 @@ public class ClaimRepository {
 
   private String getClaimTables() {
     return """
-    SELECT c
-    FROM Claim c
-    JOIN FETCH c.beneficiary b
-    JOIN FETCH c.claimDateSignature AS cds
-    JOIN FETCH c.claimLines AS cl
-    JOIN FETCH c.claimProcedures cp
-    LEFT JOIN FETCH c.claimInstitutional ci
-    LEFT JOIN FETCH cl.claimLineInstitutional cli
-    LEFT JOIN FETCH cli.ansiSignature a
-    LEFT JOIN FETCH c.claimValues cv
+      SELECT c
+      FROM Claim c
+      JOIN FETCH c.beneficiary b
+      JOIN FETCH c.claimDateSignature AS cds
+      JOIN FETCH c.claimItems AS cl
+      LEFT JOIN FETCH c.claimInstitutional ci
+      LEFT JOIN FETCH cl.claimLineInstitutional cli
+      LEFT JOIN FETCH cli.ansiSignature a
+      LEFT JOIN FETCH c.claimValues cv
     """;
   }
 

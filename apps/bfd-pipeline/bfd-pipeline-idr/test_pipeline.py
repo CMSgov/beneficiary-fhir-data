@@ -121,7 +121,7 @@ class TestPipeline:
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 191283812055
 
-        cur = conn.execute("select * from idr.claim_line order by clm_uniq_id")
+        cur = conn.execute("select * from idr.claim_item order by clm_uniq_id")
         assert cur.rowcount == 2093
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 74294264116

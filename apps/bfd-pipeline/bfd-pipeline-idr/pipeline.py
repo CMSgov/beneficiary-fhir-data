@@ -19,7 +19,7 @@ from model import (
     IdrClaimAnsiSignature,
     IdrClaimDateSignature,
     IdrClaimInstitutional,
-    IdrClaimLine,
+    IdrClaimItem,
     IdrClaimLineInstitutional,
     IdrClaimValue,
     LoadProgress,
@@ -133,7 +133,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrClaimInstitutional,
         IdrClaimDateSignature,
         IdrClaimValue,
-        IdrClaimLine,
+        IdrClaimItem,
         IdrClaimLineInstitutional,
         IdrClaimAnsiSignature,
     )
