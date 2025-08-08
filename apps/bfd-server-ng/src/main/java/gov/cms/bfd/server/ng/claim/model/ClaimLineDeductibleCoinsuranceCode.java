@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
@@ -42,8 +43,8 @@ public enum ClaimLineDeductibleCoinsuranceCode {
    * @param code database code
    * @return coinsurance code
    */
-  public static ClaimLineDeductibleCoinsuranceCode fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+  public static Optional<ClaimLineDeductibleCoinsuranceCode> tryFromCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
   Coding toFhir() {

@@ -63,7 +63,7 @@ public class ClaimLine {
     revenueCenterCode.ifPresent(
         c -> {
           var revenueCoding =
-              c.toFhir(institutional.map(ClaimLineInstitutional::getDeductibleCoinsuranceCode));
+              c.toFhir(institutional.flatMap(ClaimLineInstitutional::getDeductibleCoinsuranceCode));
           line.setRevenue(revenueCoding);
         });
 

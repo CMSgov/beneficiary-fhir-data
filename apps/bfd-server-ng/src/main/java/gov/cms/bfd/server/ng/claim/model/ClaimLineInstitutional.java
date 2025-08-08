@@ -20,7 +20,7 @@ public class ClaimLineInstitutional {
   @EmbeddedId ClaimLineInstitutionalId claimLineInstitutionalId;
 
   @Column(name = "clm_ddctbl_coinsrnc_cd")
-  private ClaimLineDeductibleCoinsuranceCode deductibleCoinsuranceCode;
+  private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;
 
   @Column(name = "clm_line_instnl_rev_ctr_dt")
   private LocalDate revenueCenterDate;

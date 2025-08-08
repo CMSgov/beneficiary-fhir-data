@@ -20,6 +20,6 @@ public class LoadProgress {
   @Column(name = "last_ts")
   ZonedDateTime lastTimestamp;
 
-  @Column(name = "batch_completion_ts")
+  @Column(name = "batch_complete_ts")
   ZonedDateTime batchCompletionTimestamp;
 }

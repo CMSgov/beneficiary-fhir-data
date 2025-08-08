@@ -3,20 +3,23 @@ package gov.cms.bfd.server.ng.claim.converter;
 import gov.cms.bfd.server.ng.claim.model.ClaimLineDeductibleCoinsuranceCode;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import java.util.Optional;
 
 /** Database code converter. */
 @Converter(autoApply = true)
 public class ClaimLineDeductibleCoinsuranceCodeConverter
-    implements AttributeConverter<ClaimLineDeductibleCoinsuranceCode, String> {
+    implements AttributeConverter<Optional<ClaimLineDeductibleCoinsuranceCode>, String> {
   @Override
   public String convertToDatabaseColumn(
-      ClaimLineDeductibleCoinsuranceCode claimLineDeductibleCoinsuranceCode) {
+      Optional<ClaimLineDeductibleCoinsuranceCode> claimLineDeductibleCoinsuranceCode) {
     // This is a read-only API so this method will never actually persist anything to the database.
-    return claimLineDeductibleCoinsuranceCode.getCode();
+    return claimLineDeductibleCoinsuranceCode
+        .map(ClaimLineDeductibleCoinsuranceCode::getCode)
+        .orElse("");
   }
 
   @Override
-  public ClaimLineDeductibleCoinsuranceCode convertToEntityAttribute(String idrCode) {
-    return ClaimLineDeductibleCoinsuranceCode.fromCode(idrCode);
+  public Optional<ClaimLineDeductibleCoinsuranceCode> convertToEntityAttribute(String idrCode) {
+    return ClaimLineDeductibleCoinsuranceCode.tryFromCode(idrCode);
   }
 }
