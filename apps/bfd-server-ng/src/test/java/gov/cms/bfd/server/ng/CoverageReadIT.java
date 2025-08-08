@@ -17,13 +17,24 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class CoverageReadIT extends IntegrationTestBase {
 
+  private static final String BENE_ID_PART_A_ONLY = "178083966";
+  private static final String BENE_ID_PART_B_ONLY = "365359727";
+  private static final String BENE_ID_HAS_A_AND_B = "405764107";
+  private static final String BENE_ID_NO_TP = "451482106";
+  private static final String BENE_ID_EXPIRED_COVERAGE = "421056595";
+  private static final String BENE_ID_FUTURE_COVERAGE = "971050241";
+
   private IReadTyped<Coverage> coverageRead() {
     return getFhirClient().read().resource(Coverage.class);
   }
 
+  private String createCoverageId(String part, String beneId) {
+    return String.format("part-%s-%s", part, beneId);
+  }
+
   @Test
   void coverageReadValidPartACompositeId() {
-    var validCoverageId = "part-a-405764107";
+    var validCoverageId = createCoverageId("a", BENE_ID_PART_A_ONLY);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -33,7 +44,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidPartBCompositeId() {
-    String validCoverageId = "part-a-405764107";
+    var validCoverageId = createCoverageId("b", BENE_ID_PART_B_ONLY);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -48,13 +59,13 @@ public class CoverageReadIT extends IntegrationTestBase {
     assertThrows(
         ResourceNotFoundException.class,
         () -> coverageRead().withId(nonCurrentEffectiveBeneId).execute(),
-        "Should throw ResourceNotFoundException for Coverage ID 'part-a-405764107' "
+        "Should throw ResourceNotFoundException for Coverage ID 'part-a-181968400' "
             + "because the beneficiary record is not the current effective version.");
   }
 
   @Test
   void coverageReadValidCompositeId() {
-    String validCoverageId = "part-a-405764107";
+    var validCoverageId = createCoverageId("b", BENE_ID_HAS_A_AND_B);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -97,6 +108,66 @@ public class CoverageReadIT extends IntegrationTestBase {
         InvalidRequestException.class,
         () -> coverageRead().withId(unsupportedPartId).execute(),
         "Should throw InvalidRequestException for an unsupported part like Part C/D.");
+  }
+
+  @Test
+  void coverageReadPartACoverageNotFound() {
+
+    var expiredCoverageId = createCoverageId("a", "848484848");
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(expiredCoverageId).execute(),
+        "Should throw ResourceNotFoundException.");
+  }
+
+  @Test
+  void coverageRead_beneWithNoCoverage_throwsNotFound() {
+    // Check that Part A is not found
+    final String partAId = createCoverageId("a", "289169129");
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(partAId).execute(),
+        "Part A Coverage should not be found for a beneficiary with no coverage.");
+
+    // Check that Part B is not found
+    final String partBId = createCoverageId("a", "848484848");
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(partBId).execute(),
+        "Part B Coverage should not be found for a beneficiary with no coverage.");
+  }
+
+  @Test
+  void coverageRead_forBeneWithOnlyPastEntitlementPeriods_shouldBeNotFound() {
+    final String partBId = createCoverageId("b", BENE_ID_EXPIRED_COVERAGE);
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(partBId).execute(),
+        "Should throw ResourceNotFoundException as the beneficiary's Part B entitlement period is in the past.");
+  }
+
+  @Test
+  void coverageRead_forBeneWithOnlyFutureEntitlementPeriods_shouldBeNotFound() {
+    final String partBId = createCoverageId("b", BENE_ID_FUTURE_COVERAGE);
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> coverageRead().withId(partBId).execute(),
+        "Should throw ResourceNotFoundException as the beneficiary's Part B entitlement period is in the past.");
+  }
+
+  @Test
+  void coverageRead_forBeneWithMissingTplData_shouldStillReturnResource() {
+
+    var partAId = createCoverageId("a", BENE_ID_NO_TP);
+    var coverage = coverageRead().withId(partAId).execute();
+
+    assertNotNull(coverage, "Coverage resource should not be null even without TPL data.");
+    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty.");
+
+    expect.serializer("fhir+json").toMatchSnapshot(coverage);
   }
 
   @ParameterizedTest

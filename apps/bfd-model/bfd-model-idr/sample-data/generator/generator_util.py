@@ -108,18 +108,18 @@ class GeneratorUtil():
         if bene_sk in self.used_bene_sk:
             return self.gen_bene_sk()
         return bene_sk
-    
+
     def generate_bene_xref(self, new_bene_sk, old_bene_sk):
         #10% chance for invalid xref.
         kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
-        
+
         efctv_ts = self.fake.date_time_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.datetime.now() - datetime.timedelta(days=1)
         )
         insrt_ts = self.fake.date_time_between_dates(efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1))
         updt_ts = self.fake.date_time_between_dates(insrt_ts, datetime.datetime.now() - datetime.timedelta(days=1))
-        
+
         xref_row = {
             "BENE_SK": str(new_bene_sk),
             "BENE_XREF": str(old_bene_sk),
@@ -129,7 +129,7 @@ class GeneratorUtil():
             "IDR_UPDT_TS": str(updt_ts),
             "IDR_TRANS_OBSLT_TS": "9999-12-31T00:00:00.000000+0000"
         }
-        
+
         self.bene_xref_table.append(xref_row)
 
     def gen_address(self):
@@ -200,13 +200,13 @@ class GeneratorUtil():
                 if previous_mbi and previous_mbi != current_mbi:
                     historical_patient = copy.deepcopy(patient)
                     historical_patient["BENE_MBI_ID"] = previous_mbi
-                    historical_patient["IDR_LTST_TRANS_FLG"] = "N"  
-                    
+                    historical_patient["IDR_LTST_TRANS_FLG"] = "N"
+
                     self.set_timestamps(historical_patient, obslt_dt)
                     historical_patient["IDR_TRANS_OBSLT_TS"] = str(obslt_dt) + "T00:00:00.000000+0000"
                     self.bene_hstry_table.append(historical_patient)
                 
-                
+
                 previous_obslt_dt = obslt_dt  # Store for next iteration
             else:
                 # For the last MBI, no obsolescence date
@@ -219,14 +219,21 @@ class GeneratorUtil():
             previous_mbi = patient["BENE_MBI_ID"]
             patient["BENE_MBI_ID"] = current_mbi
 
-    def generate_coverages(self, patient):
+    def generate_coverages(self, patient, coverage_parts=['A', 'B'], include_tpl=True, expired=False, future=False):
+        now = datetime.date.today()
+        if expired:
+            medicare_start_date = now - datetime.timedelta(days=730)
+            medicare_end_date = now - datetime.timedelta(days=365)
+        elif future:
+            medicare_start_date = now + datetime.timedelta(days=365)
+            medicare_end_date = now + datetime.timedelta(days=730)
+        else:
+            medicare_start_date = parse(self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']).date()
+            medicare_end_date = datetime.date(9999, 12, 31)
         mdcr_stus_cd = '~'
         while(mdcr_stus_cd in ('0','~','00')):
             mdcr_stus_cd = random.choice(self.code_systems['BENE_MDCR_STUS_CD'])
 
-        medicare_start_date = self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']
-        medicare_end_date = '9999-12-31'
-        #STUS
         stus_row = {"BENE_SK":patient['BENE_SK'],
                     'IDR_LTST_TRANS_FLG':'Y',
                     'BENE_MDCR_STUS_CD': mdcr_stus_cd,
@@ -253,8 +260,9 @@ class GeneratorUtil():
                     'BENE_RNG_END_DT': medicare_end_date
                 }
         self.mdcr_rsn.append(rsn_row)
-        for coverage_type in ['A','B']:
-            
+
+        for coverage_type in coverage_parts:
+
             #ENTLMT
             entlmt_row = {"BENE_SK":patient['BENE_SK'],
                         'IDR_LTST_TRANS_FLG':'Y',
@@ -270,7 +278,7 @@ class GeneratorUtil():
             }
             self.mdcr_entlmt.append(entlmt_row)
             #TP
-            if(random.randint(0,10)==10):
+            if include_tpl:
                 tp_row = {"BENE_SK":patient['BENE_SK'],
                             'IDR_LTST_TRANS_FLG':'Y',
                             'BENE_TP_TYPE_CD': coverage_type,
@@ -340,13 +348,54 @@ class GeneratorUtil():
         df.to_csv("out/SYNTHETIC_BENE_MDCR_STUS.csv", index=False)
         df = pd.json_normalize(self.mdcr_entlmt)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", index=False)
-        df = pd.json_normalize(self.mdcr_tp)
-        df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
-        
+        # Check if mdcr_tp is empty before saving to avoid creating an empty file unnecessarily
+        if self.mdcr_tp:
+            df = pd.json_normalize(self.mdcr_tp)
+            df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
+
         df = pd.json_normalize(self.mdcr_rsn)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
-        
+
         df = pd.json_normalize(self.bene_xref_table)
         if(df.size>0):
             df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
-        
+
+# === ADDITION START: Main execution block to generate specific cases ===
+if __name__ == "__main__":
+    util = GeneratorUtil()
+
+    scenarios = {
+        "part_a_only":           {"coverage_parts": ['A'], "include_tpl": True},
+        "part_b_only":           {"coverage_parts": ['B'], "include_tpl": True},
+        "expired_coverage":      {"coverage_parts": ['A', 'B'], "include_tpl": True, "expired": True},
+        "future_coverage":       {"coverage_parts": ['A', 'B'], "include_tpl": True, "future": True},
+        "no_third_party_data":   {"coverage_parts": ['A', 'B'], "include_tpl": False}
+    }
+
+    # Generate one patient for each scenario
+    for patient_type, params in scenarios.items():
+        print(f"Generating patient: {patient_type}...")
+
+        patient = util.create_base_patient()
+
+        patient["BENE_SK"] = util.gen_bene_sk()
+        patient["BENE_XREF_EFCTV_SK"] = 0
+        name = util.fake.name().split()
+        patient["BENE_1ST_NAME"] = name[0]
+        patient["BENE_LAST_NAME"] = name[1]
+        patient["BENE_MIDL_NAME"] = util.fake.random_uppercase_letter()
+        patient["BENE_BRTH_DT"] = util.fake.date_of_birth(minimum_age=65, maximum_age=90).strftime('%Y-%m-%d')
+        patient["BENE_DEATH_DT"] = "9999-12-31"
+        patient["BENE_VRFY_DEATH_DAY_SW"] = "N"
+        patient["BENE_SEX_CD"] = random.choice(["1", "2"])
+        patient["BENE_RACE_CD"] = random.choice(util.code_systems.get('BENE_RACE_CD', ['1']))
+
+        util.handle_mbis(patient, num_mbis=1)
+
+        util.bene_hstry_table.append(patient)
+
+        util.generate_coverages(patient, **params)
+
+    print("Saving all data to output files in 'out/' directory...")
+    util.save_output_files()
+    print("Done.")
