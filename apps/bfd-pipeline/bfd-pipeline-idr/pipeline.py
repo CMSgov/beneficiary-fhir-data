@@ -11,7 +11,6 @@ from model import (
     IdrBeneficiary,
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
-    IdrBeneficiaryHistory,
     IdrBeneficiaryMbiId,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
@@ -103,7 +102,6 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
     load_all(
         data_extractor,
         connection_string,
-        IdrBeneficiaryHistory,
         IdrBeneficiaryMbiId,
     )
 

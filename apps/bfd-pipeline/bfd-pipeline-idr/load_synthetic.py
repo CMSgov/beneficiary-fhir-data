@@ -8,7 +8,6 @@ import psycopg
 from loader import get_connection_string
 
 tables = [
-    {"csv_name": "SYNTHETIC_BENE.csv", "table": "v2_mdcr_bene"},
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
     {"csv_name": "SYNTHETIC_BENE_MBI_ID.csv", "table": "v2_mdcr_bene_mbi_id"},
     {"csv_name": "SYNTHETIC_BENE_XREF.csv", "table": "v2_mdcr_bene_xref"},
