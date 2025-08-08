@@ -44,7 +44,8 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
                     db_columns = cur.execute(
                         f"""
                             SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS 
-                            WHERE table_name = '{sql_table}'"""  # type: ignore
+                            WHERE table_name = '{sql_table}'
+                        """  # type: ignore
                     )
                     db_columns = [typing.cast(str, col[0]).lower() for col in db_columns]
 
