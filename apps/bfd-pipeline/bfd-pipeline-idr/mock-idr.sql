@@ -297,11 +297,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl (
     geo_bene_sk NUMERIC NOT NULL,
     clm_num_sk NUMERIC NOT NULL,
     clm_type_cd NUMERIC NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
-    idr_updt_ts TIMESTAMPTZ,
-    bfd_created_ts TIMESTAMPTZ,
-    bfd_updated_ts TIMESTAMPTZ,
-    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd)
+    idr_updt_ts TIMESTAMPTZ
+    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_num_sk, clm_type_cd)
 );
 
 -- Note: this table also has CLM_LINE_DGNS_CD but this is redundant with the values in V2_MDCR_CLM_PROD
@@ -379,8 +378,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
     clm_line_carr_clncl_lab_num NUMERIC,
     clm_line_carr_hpsa_scrcty_cd VARCHAR(1),
     clm_line_dmerc_scrn_svgs_amt VARCHAR(1),
-    clm_line_hct_hbg_rslt_num NUMERIC,
-    clm_line_hct_hbg_type_cd VARCHAR(2),
+    clm_line_hct_hgb_rslt_num NUMERIC,
+    clm_line_hct_hgb_type_cd VARCHAR(2),
     clm_line_prfnl_dme_price_amt NUMERIC,
     clm_line_prfnl_mtus_cnt NUMERIC,
     clm_mtus_ind_cd VARCHAR(1),
@@ -390,7 +389,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
     clm_prcsg_ind_cd VARCHAR(2),
     clm_prmry_pyr_cd VARCHAR(1),
     clm_prvdr_spclty_cd VARCHAR(2),
-    clm_srvc_ddtbl_sw VARCHAR(1),
+    clm_srvc_ddctbl_sw VARCHAR(1),
     clm_suplr_type_cd VARCHAR(1),
     geo_bene_sk NUMERIC NOT NULL,
     clm_line_num NUMERIC NOT NULL,

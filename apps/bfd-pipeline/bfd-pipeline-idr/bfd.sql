@@ -206,7 +206,6 @@ CREATE TABLE idr.claim (
     clm_othr_prvdr_last_name VARCHAR(60) NOT NULL,
     clm_rndrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_rndrg_prvdr_last_name VARCHAR(60) NOT NULL,
-    clm_rndrg_prvdr_tax_num VARCHAR(10) NOT NULL,
     clm_disp_cd VARCHAR(2) NOT NULL,
     clm_sbmt_chrg_amt NUMERIC NOT NULL,
     clm_blood_pt_frnsh_qty INT NOT NULL,
@@ -322,9 +321,6 @@ CREATE TABLE idr.claim_professional (
     clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    bfd_row_num INT NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd)
 );
 
@@ -334,8 +330,8 @@ CREATE TABLE idr.claim_line_professional (
     clm_line_carr_clncl_lab_num NUMERIC NOT NULL,
     clm_line_carr_hpsa_scrcty_cd VARCHAR(1) NOT NULL,
     clm_line_dmerc_scrn_svgs_amt VARCHAR(1) NOT NULL,
-    clm_line_hct_hbg_rslt_num NUMERIC NOT NULL,
-    clm_line_hct_hbg_type_cd VARCHAR(2) NOT NULL,
+    clm_line_hct_hgb_rslt_num NUMERIC NOT NULL,
+    clm_line_hct_hgb_type_cd VARCHAR(2) NOT NULL,
     clm_line_prfnl_dme_price_amt NUMERIC NOT NULL,
     clm_line_prfnl_mtus_cnt NUMERIC NOT NULL,
     clm_mtus_ind_cd VARCHAR(1) NOT NULL,
@@ -345,7 +341,7 @@ CREATE TABLE idr.claim_line_professional (
     clm_prcsg_ind_cd VARCHAR(2) NOT NULL,
     clm_prmry_pyr_cd VARCHAR(1) NOT NULL,
     clm_prvdr_spclty_cd VARCHAR(2) NOT NULL,
-    clm_srvc_ddtbl_sw VARCHAR(1) NOT NULL,
+    clm_srvc_ddctbl_sw VARCHAR(1) NOT NULL,
     clm_suplr_type_cd VARCHAR(1) NOT NULL,
     geo_bene_sk NUMERIC NOT NULL,
     clm_line_num NUMERIC NOT NULL,
@@ -353,9 +349,6 @@ CREATE TABLE idr.claim_line_professional (
     clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    bfd_row_num INT NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd, clm_line_num)
 );
 
@@ -385,6 +378,7 @@ CREATE TABLE idr.claim_line (
     clm_line_thru_dt DATE NOT NULL,
     clm_pos_cd VARCHAR(2) NOT NULL,
     clm_rndrg_prvdr_prtcptg_cd VARCHAR(1) NOT NULL,
+    clm_rndrg_prvdr_tax_num VARCHAR(10) NOT NULL,
     hcpcs_1_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_2_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_3_mdfr_cd VARCHAR(2) NOT NULL,
