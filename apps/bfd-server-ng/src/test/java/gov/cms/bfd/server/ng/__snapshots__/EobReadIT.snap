@@ -718,7 +718,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
       } ]
     },
-    "sequence" : 0,
+    "sequence" : 1,
     "servicedDate" : "2021-09-26"
   } ],
   "meta" : {
@@ -1758,7 +1758,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
       } ]
     },
-    "sequence" : 0,
+    "sequence" : 1,
     "servicedDate" : "2021-09-26"
   } ],
   "meta" : {

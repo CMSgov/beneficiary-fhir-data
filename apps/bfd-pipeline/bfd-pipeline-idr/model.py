@@ -679,7 +679,7 @@ class IdrClaimValue(IdrBaseModel):
         """
 
 
-class IdrClaimLine(IdrBaseModel):
+class IdrClaimItem(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
     # columns from V2_MDCR_CLM_LINE
@@ -736,7 +736,7 @@ class IdrClaimLine(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.claim_line"
+        return "idr.claim_item"
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:
@@ -806,12 +806,14 @@ class IdrClaimLine(IdrBaseModel):
                     AND {line}.clm_num_sk = {clm}.clm_num_sk 
                     AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {line}.clm_line_num = cg.bfd_row_id
+                    AND {line}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN procedures {prod}
                     ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.line_num = cg.bfd_row_id
+                    AND {prod}.clm_uniq_id = {clm}.clm_uniq_id
                 {{ORDER_BY}}
         """
 

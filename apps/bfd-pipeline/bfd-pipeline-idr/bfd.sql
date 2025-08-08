@@ -282,7 +282,7 @@ CREATE TABLE idr.claim_value (
     PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
 );
 
-CREATE TABLE idr.claim_line (
+CREATE TABLE idr.claim_item (
     clm_uniq_id BIGINT NOT NULL,
     bfd_row_id INT NOT NULL,
     -- columns from V2_MDCR_CLM_LINE

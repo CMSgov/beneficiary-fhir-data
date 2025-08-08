@@ -768,7 +768,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -1822,7 +1822,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -2876,7 +2876,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -3930,7 +3930,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -4985,7 +4985,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -6040,7 +6040,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -6696,7 +6696,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7662,7 +7662,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -8318,7 +8318,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -9284,7 +9284,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -9940,7 +9940,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -10906,7 +10906,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -11562,7 +11562,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -12528,7 +12528,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -13184,7 +13184,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -14150,7 +14150,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -14806,7 +14806,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -15820,7 +15820,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -16476,7 +16476,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -17442,7 +17442,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -18098,7 +18098,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -19064,7 +19064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
-        "sequence" : 0,
+        "sequence" : 1,
         "servicedDate" : "2021-09-26"
       } ],
       "meta" : {
@@ -19720,7 +19720,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 0
+        "sequence" : 1
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

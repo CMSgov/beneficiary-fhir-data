@@ -69,15 +69,11 @@ public class Claim {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private Set<ClaimLine> claimLines;
+  private Set<ClaimItem> claimItems;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private Set<ClaimValue> claimValues;
-
-  @OneToMany(fetch = FetchType.EAGER)
-  @JoinColumn(name = "clm_uniq_id")
-  private Set<ClaimProcedure> claimProcedures;
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
@@ -116,11 +112,14 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    for (var procedure : claimProcedures) {
-      procedure.toFhirProcedure().ifPresent(eob::addProcedure);
-      procedure.toFhirDiagnosis().ifPresent(eob::addDiagnosis);
-    }
-
+    claimItems.forEach(
+        item -> {
+          item.getClaimLine().toFhir(item.getClaimLineInstitutional()).ifPresent(eob::addItem);
+          item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
+          item.getClaimProcedure()
+              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
+              .ifPresent(eob::addDiagnosis);
+        });
     billingProvider
         .toFhir(claimTypeCode)
         .ifPresent(
@@ -144,7 +143,6 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
-    claimLines.stream().map(ClaimLine::toFhir).forEach(eob::addItem);
     careTeam
         .toFhir()
         .forEach(
