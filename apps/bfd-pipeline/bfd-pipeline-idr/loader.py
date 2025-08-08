@@ -97,7 +97,7 @@ class PostgresLoader:
                 cur.execute(
                     f"CREATE TEMPORARY TABLE {temp_table} (LIKE {table}) ON COMMIT DROP"  # type: ignore
                 )
-                immutable = model.update_timestamp_col() is None
+                immutable = len(model.update_timestamp_col()) == 0
                 meta_keys = (
                     ["bfd_created_ts"] if immutable else ["bfd_created_ts", "bfd_updated_ts"]
                 )
@@ -149,11 +149,11 @@ class PostgresLoader:
                     # Some tables that contain reference data (like contract info) may not have the
                     # normal IDR timestamps.
                     # For now we won't support incremental refreshes for those tables
-                    batch_timestamp_col = model.batch_timestamp_col(
+                    batch_timestamp_cols = model.batch_timestamp_col(
                         progress is None or progress.is_historical()
                     )
-                    if batch_timestamp_col:
-                        last_timestamp = last[batch_timestamp_col]
+                    if len(batch_timestamp_cols) > 0:
+                        min_timestamp = min([last[col] for col in batch_timestamp_cols])
                         cur.execute(
                             """
                             UPDATE idr.load_progress
@@ -162,7 +162,7 @@ class PostgresLoader:
                             """,
                             {
                                 "table": table,
-                                "last_ts": last_timestamp,
+                                "last_ts": min_timestamp,
                             },
                         )
                 commit_timer.start()

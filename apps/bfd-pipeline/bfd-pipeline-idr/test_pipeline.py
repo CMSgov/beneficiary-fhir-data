@@ -122,7 +122,7 @@ class TestPipeline:
         assert rows[0]["clm_uniq_id"] == 191283812055
 
         cur = conn.execute("select * from idr.claim_line order by clm_uniq_id")
-        assert cur.rowcount == 1160
+        assert cur.rowcount == 2093
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 74294264116
 
@@ -135,12 +135,6 @@ class TestPipeline:
         assert cur.rowcount == 12072
         rows = cur.fetchmany(1)
         assert rows[0]["clm_ansi_sgntr_sk"] == 0
-
-        cur = conn.execute("select * from idr.claim_procedure order by clm_uniq_id, bfd_row_num")
-        assert cur.rowcount == 2020
-        rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 74294264116
-        assert rows[0]["bfd_row_num"] == 1
 
         # TODO: add these back when contract data is added
         # cur = conn.execute("select * from idr.beneficiary_election_period_usage")

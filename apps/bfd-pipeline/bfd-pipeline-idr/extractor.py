@@ -56,8 +56,10 @@ class Extractor(ABC):
     ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
-        batch_timestamp_col = cls.batch_timestamp_col_alias(is_historical)
-        update_timestamp_col = cls.update_timestamp_col_alias()
+        batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
+        batch_timestamp_clause = f"LEAST({','.join(batch_timestamp_cols)})"
+        update_timestamp_cols = cls.update_timestamp_col_alias()
+        update_timestamp_clause = f"GREATEST({','.join(update_timestamp_cols)})"
 
         logger.info("extracting %s", cls.table())
         if progress is None:
@@ -67,8 +69,8 @@ class Extractor(ABC):
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
-                    f"WHERE {batch_timestamp_col} >= '{get_min_transaction_date()}'",
-                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
+                    f"WHERE {batch_timestamp_clause} >= '{get_min_transaction_date()}'",
+                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
                 {},
             )
             idr_query_timer.stop()
@@ -82,9 +84,9 @@ class Extractor(ABC):
         idr_query_timer.start()
         # Saved progress found, start processing from where we left off
         update_clause = (
-            f"""AND ({update_timestamp_col} IS NULL 
-                OR {update_timestamp_col} >= %(timestamp)s)"""
-            if update_timestamp_col is not None
+            f"""AND ({update_timestamp_clause} IS NULL 
+                OR {update_timestamp_clause} >= %(timestamp)s)"""
+            if len(update_timestamp_cols) > 0
             else ""
         )
         res = self.extract_many(
@@ -94,12 +96,12 @@ class Extractor(ABC):
                 f"""
                     WHERE
                         (
-                            {batch_timestamp_col} >= %(timestamp)s
+                            {batch_timestamp_clause} >= %(timestamp)s
                             {update_clause}
                         )
-                        AND {batch_timestamp_col} >= '{get_min_transaction_date()}' 
+                        AND {batch_timestamp_clause} >= '{get_min_transaction_date()}' 
                     """,
-            ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
+            ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
             {"timestamp": compare_timestamp},
         )
         idr_query_timer.stop()
