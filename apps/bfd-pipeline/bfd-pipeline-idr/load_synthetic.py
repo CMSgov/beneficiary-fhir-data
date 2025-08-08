@@ -52,7 +52,7 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
                     cols = [
                         col
                         for col in typing.cast(typing.Iterable[str], reader.fieldnames)
-                        if col.lower() in db_columns
+                        if col.lower().strip() in db_columns
                     ]
                     # Clear out any previous data
                     cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
