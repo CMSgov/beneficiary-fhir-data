@@ -1,8 +1,9 @@
 DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
 
 CREATE SCHEMA cms_vdm_view_mdcr_prd;
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
-    bene_sk BIGINT NOT NULL PRIMARY KEY, 
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
+     bene_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_mbi_id VARCHAR(11),
     bene_1st_name VARCHAR(30),
@@ -23,16 +24,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
     bene_line_5_adr VARCHAR(40),
     bene_line_6_adr VARCHAR(40),
     cntct_lang_cd VARCHAR(3),
-    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
-    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ
-);
-
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
-    bene_sk BIGINT NOT NULL,
-    bene_xref_efctv_sk BIGINT NOT NULL,
-    bene_mbi_id VARCHAR(11),
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,

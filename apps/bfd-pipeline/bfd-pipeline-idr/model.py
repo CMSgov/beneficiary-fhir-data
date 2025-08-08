@@ -174,35 +174,6 @@ class IdrBeneficiary(IdrBaseModel):
     bene_line_5_adr: Annotated[str, BeforeValidator(transform_null_string)]
     bene_line_6_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
-    idr_updt_ts: Annotated[
-        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.beneficiary"
-
-    @staticmethod
-    def computed_keys() -> list[str]:
-        return ["bene_xref_efctv_sk_computed"]
-
-    @staticmethod
-    def _current_fetch_query() -> str:
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """
-
-
-class IdrBeneficiaryHistory(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
-    bene_xref_efctv_sk: int
-    bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
@@ -212,7 +183,7 @@ class IdrBeneficiaryHistory(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.beneficiary_history"
+        return "idr.beneficiary"
 
     @staticmethod
     def computed_keys() -> list[str]:
