@@ -821,7 +821,7 @@ class IdrClaimItem(IdrBaseModel):
                     AND {val}.clm_num_sk = {clm}.clm_num_sk 
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {val}.clm_val_sqnc_num = cg.bfd_row_id
-                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+                {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
 
