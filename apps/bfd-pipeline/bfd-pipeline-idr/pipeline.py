@@ -83,7 +83,13 @@ def extract_and_load(
     batch_start = datetime.now()
     progress = get_progress(connection_string, cls.table(), batch_start)
 
-    logger.info("progress for %s - %s", cls.table(), progress.last_ts if progress else "none")
+    logger.info(
+        "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
+        cls.table(),
+        progress.last_ts if progress else "none",
+        progress.batch_start_ts if progress else "none",
+        progress.batch_complete_ts if progress else "none",
+    )
     data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
 
     loader = PostgresLoader(connection_string)

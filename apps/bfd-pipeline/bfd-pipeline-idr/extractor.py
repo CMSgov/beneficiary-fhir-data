@@ -75,6 +75,8 @@ class Extractor(ABC):
             return res
 
         previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
+        logger.info("previous batch complete: %s", previous_batch_complete)
+
         compare_timestamp = progress.batch_start_ts if previous_batch_complete else progress.last_ts
 
         idr_query_timer.start()
@@ -179,6 +181,9 @@ class SnowflakeExtractor(Extractor):
                     batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                     cursor_fetch_timer.stop()
                 return
+            # Snowflake will throw a reauth error if the pipeline has been running for several hours
+            # but it seems to be wrapped in a ProgrammingError.
+            # Unclear the best way to handle this, it will require a bit more trial and error
             except (ReauthenticationRequest, RetryRequest, ProgrammingError) as ex:
                 logger.warning("received transient error, retrying...", exc_info=ex)
                 if attempt == max_attempts - 1:
