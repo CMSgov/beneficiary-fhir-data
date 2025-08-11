@@ -25,6 +25,7 @@ CREATE TABLE idr.beneficiary(
     bene_line_5_adr VARCHAR(40) NOT NULL,
     bene_line_6_adr VARCHAR(40) NOT NULL,
     cntct_lang_cd VARCHAR(3) NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
@@ -135,6 +136,8 @@ CREATE TABLE idr.beneficiary_xref (
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
@@ -183,6 +186,7 @@ CREATE TABLE idr.claim (
     clm_bene_pmt_amt NUMERIC NOT NULL,
     clm_cntrctr_num VARCHAR(5) NOT NULL,
     clm_pmt_amt NUMERIC NOT NULL,
+    clm_pd_dt DATE NOT NULL,
     clm_ltst_clm_ind VARCHAR(1) NOT NULL,
     clm_atndg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_atndg_prvdr_last_name VARCHAR(60) NOT NULL,
@@ -200,7 +204,9 @@ CREATE TABLE idr.claim (
     clm_idr_ld_dt DATE NOT NULL,
     clm_nrln_ric_cd VARCHAR(1) NOT NULL,
     clm_ric_cd VARCHAR(1) NOT NULL,
+    clm_srvc_prvdr_gnrc_id_num VARCHAR(20) NOT NULL,
     prvdr_blg_prvdr_npi_num VARCHAR(10) NOT NULL,
+    prvdr_prscrbng_prvdr_npi_num VARCHAR(10) NOT NULL,
     prvdr_rfrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
@@ -307,6 +313,8 @@ CREATE TABLE idr.claim_professional (
     clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd)
 );
 
@@ -335,6 +343,8 @@ CREATE TABLE idr.claim_line_professional (
     clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd, clm_line_num)
 );
 

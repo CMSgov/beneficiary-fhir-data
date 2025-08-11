@@ -174,6 +174,7 @@ class IdrBeneficiary(IdrBaseModel):
     bene_line_5_adr: Annotated[str, BeforeValidator(transform_null_string)]
     bene_line_6_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
@@ -341,6 +342,8 @@ class IdrBeneficiaryXref(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_xref_sk: int
     bene_kill_cred_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_obslt_ts: datetime
     idr_insrt_ts: datetime
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
@@ -426,7 +429,7 @@ def claim_type_clause() -> str:
 
 class IdrClaim(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
-    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_int)]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_num_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
@@ -452,6 +455,7 @@ class IdrClaim(IdrBaseModel):
     clm_bene_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_amt: float
+    clm_pd_dt: date
     clm_ltst_clm_ind: str
     clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_atndg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
@@ -470,6 +474,8 @@ class IdrClaim(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
     clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_rfrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,

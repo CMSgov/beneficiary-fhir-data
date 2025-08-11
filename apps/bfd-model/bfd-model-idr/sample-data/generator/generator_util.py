@@ -110,6 +110,9 @@ class GeneratorUtil():
         return bene_sk
     
     def generate_bene_xref(self, new_bene_sk, old_bene_sk):
+
+        bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
+
         #10% chance for invalid xref.
         kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
         
@@ -117,19 +120,22 @@ class GeneratorUtil():
             datetime.date(year=2017, month=5, day=20),
             datetime.datetime.now() - datetime.timedelta(days=1)
         )
+        src_rec_ctre_ts = self.fake.date_time_between_dates(efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1))
         insrt_ts = self.fake.date_time_between_dates(efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1))
         updt_ts = self.fake.date_time_between_dates(insrt_ts, datetime.datetime.now() - datetime.timedelta(days=1))
         
         xref_row = {
             "BENE_SK": str(new_bene_sk),
-            "BENE_XREF": str(old_bene_sk),
+            "BENE_XREF_SK": str(old_bene_sk),
+            "BENE_HICN_NUM": bene_hicn_num,
             "BENE_KILL_CRED_CD": str(kill_cred_cd),
+            "SRC_REC_CTRE_TS": str(src_rec_ctre_ts),
             "IDR_TRANS_EFCTV_TS": str(efctv_ts),
             "IDR_INSRT_TS": str(insrt_ts),
             "IDR_UPDT_TS": str(updt_ts),
             "IDR_TRANS_OBSLT_TS": "9999-12-31T00:00:00.000000+0000"
         }
-        
+
         self.bene_xref_table.append(xref_row)
 
     def gen_address(self):
