@@ -116,7 +116,6 @@ public class ClaimRepository {
       LEFT JOIN FETCH c.claimInstitutional ci
       LEFT JOIN FETCH cl.claimLineInstitutional cli
       LEFT JOIN FETCH cli.ansiSignature a
-      LEFT JOIN FETCH c.claimValues cv
     """;
   }
 

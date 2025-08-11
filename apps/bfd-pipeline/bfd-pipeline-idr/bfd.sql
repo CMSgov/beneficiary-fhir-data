@@ -270,18 +270,6 @@ CREATE TABLE idr.claim_institutional (
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE idr.claim_value (
-    clm_uniq_id BIGINT NOT NULL,
-    clm_val_sqnc_num INT NOT NULL,
-    clm_val_cd VARCHAR(2) NOT NULL,
-    clm_val_amt NUMERIC NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
-);
-
 CREATE TABLE idr.claim_item (
     clm_uniq_id BIGINT NOT NULL,
     bfd_row_id INT NOT NULL,
@@ -307,10 +295,10 @@ CREATE TABLE idr.claim_item (
     hcpcs_3_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_4_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_5_mdfr_cd VARCHAR(2) NOT NULL,
-    idr_insrt_ts_line TIMESTAMPTZ,
-    idr_updt_ts_line TIMESTAMPTZ,
+    idr_insrt_ts_line TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_line TIMESTAMPTZ NOT NULL,
     -- columns from V2_MDCR_CLM_PROD
-    clm_val_sqnc_num INT NOT NULL,
+    clm_val_sqnc_num_prod INT NOT NULL,
     clm_dgns_prcdr_icd_ind VARCHAR(1) NOT NULL,
     clm_dgns_cd VARCHAR(7) NOT NULL,
     clm_prcdr_cd VARCHAR(7) NOT NULL,
@@ -319,6 +307,12 @@ CREATE TABLE idr.claim_item (
     clm_prcdr_prfrm_dt DATE NOT NULL,
     idr_insrt_ts_prod TIMESTAMPTZ NOT NULL,
     idr_updt_ts_prod TIMESTAMPTZ NOT NULL,
+    -- columns from V2_MDCR_CLM_VAL
+    clm_val_sqnc_num_val INT NOT NULL,
+    clm_val_cd VARCHAR(2) NOT NULL,
+    clm_val_amt NUMERIC NOT NULL,
+    idr_insrt_ts_val TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_val TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(clm_uniq_id, bfd_row_id)

@@ -113,8 +113,9 @@ class IdrBaseModel(BaseModel):
     def _extract_meta(cls, key: str, meta_key: str) -> object | None:
         metadata = cls.model_fields[key].metadata
 
-        if len(metadata) > 0 and isinstance(metadata[0], Iterable) and meta_key in metadata[0]:
-            return metadata[0][meta_key]  # type: ignore
+        for meta in metadata:
+            if isinstance(meta, Iterable) and meta_key in meta:
+                return meta[meta_key]  # type: ignore
         return None
 
     @classmethod
@@ -123,7 +124,9 @@ class IdrBaseModel(BaseModel):
         alias = cls._extract_meta(key, ALIAS)
         col = cls._get_column_map(key)
         if alias is not None:
-            return f"{metadata[0][ALIAS]}.{col}"
+            for meta in metadata:
+                if ALIAS in meta:
+                    return f"{meta[ALIAS]}.{col}"
         return key
 
     @classmethod
@@ -641,44 +644,6 @@ class IdrClaimInstitutional(IdrBaseModel):
         """
 
 
-class IdrClaimValue(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
-    clm_val_sqnc_num: Annotated[int, {PRIMARY_KEY: True}]
-    clm_val_cd: str
-    clm_val_amt: float
-    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
-    idr_insrt_ts: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_VAL},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_VAL},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.claim_value"
-
-    @staticmethod
-    def _current_fetch_query(start_time: datetime) -> str:
-        clm = ALIAS_CLM
-        val = ALIAS_VAL
-        return f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val} ON
-                {clm}.geo_bene_sk = {val}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {val}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {val}.clm_type_cd AND
-                {clm}.clm_num_sk = {val}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
-            {{ORDER_BY}}
-        """
-
-
 class IdrClaimItem(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
@@ -716,7 +681,11 @@ class IdrClaimItem(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     # columns from V2_MDCR_CLM_PROD
-    clm_val_sqnc_num: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_val_sqnc_num_prod: Annotated[
+        int,
+        {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"},
+        BeforeValidator(transform_null_int),
+    ]
     clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dgns_prcdr_icd_ind: Annotated[str, BeforeValidator(transform_empty_string)]
@@ -733,6 +702,22 @@ class IdrClaimItem(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
+    # columns from V2_MDCR_CLM_VAL
+    clm_val_sqnc_num_val: Annotated[
+        int, {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"}, BeforeValidator(transform_null_int)
+    ]
+    clm_val_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_val_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    idr_insrt_ts_val: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_VAL, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_val: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_VAL, COLUMN_MAP: "idr_updt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @staticmethod
     def table() -> str:
@@ -743,6 +728,7 @@ class IdrClaimItem(IdrBaseModel):
         clm = ALIAS_CLM
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
+        val = ALIAS_VAL
         return f"""
                 WITH claims AS (
                     SELECT 
@@ -781,6 +767,19 @@ class IdrClaimItem(IdrBaseModel):
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                UNION
+                SELECT
+                    {clm}.clm_uniq_id, 
+                    ROW_NUMBER() OVER (
+                        PARTITION BY {clm}.clm_uniq_id 
+                        ORDER BY {clm}.clm_uniq_id
+                    ) AS bfd_row_id
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
+                    JOIN claims {clm} 
+                        ON {val}.geo_bene_sk = {clm}.geo_bene_sk
+                        AND {val}.clm_type_cd = {clm}.clm_type_cd
+                        AND {val}.clm_num_sk = {clm}.clm_num_sk 
+                        AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
                 procedures AS (
                     SELECT 
@@ -814,6 +813,12 @@ class IdrClaimItem(IdrBaseModel):
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.line_num = cg.bfd_row_id
                     AND {prod}.clm_uniq_id = {clm}.clm_uniq_id
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
+                    ON {val}.geo_bene_sk = {clm}.geo_bene_sk
+                    AND {val}.clm_type_cd = {clm}.clm_type_cd
+                    AND {val}.clm_num_sk = {clm}.clm_num_sk 
+                    AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                    AND {val}.clm_val_sqnc_num = cg.bfd_row_id
                 {{ORDER_BY}}
         """
 

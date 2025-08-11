@@ -71,10 +71,6 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private Set<ClaimItem> claimItems;
 
-  @OneToMany(fetch = FetchType.EAGER)
-  @JoinColumn(name = "clm_uniq_id")
-  private Set<ClaimValue> claimValues;
-
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
@@ -155,7 +151,7 @@ public class Claim {
         i -> {
           eob.addAdjudication(i.getPpsDrgWeight().toFhir());
           eob.addBenefitBalance(
-              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), claimValues));
+              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), getClaimValues()));
         });
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
@@ -163,6 +159,10 @@ public class Claim {
     eob.setPayment(claimPaymentAmount.toFhir());
 
     return sortedEob(eob);
+  }
+
+  private List<ClaimValue> getClaimValues() {
+    return claimItems.stream().map(ClaimItem::getClaimValue).toList();
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

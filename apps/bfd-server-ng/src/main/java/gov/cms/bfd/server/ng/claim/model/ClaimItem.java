@@ -19,6 +19,7 @@ public class ClaimItem {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLine claimLine;
   @Embedded private ClaimProcedure claimProcedure;
+  @Embedded private ClaimValue claimValue;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne

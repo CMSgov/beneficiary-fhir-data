@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimProcedure {
 
   @Convert(converter = NonZeroIntConverter.class)
-  @Column(name = "clm_val_sqnc_num")
+  @Column(name = "clm_val_sqnc_num_prod")
   private Optional<Integer> sequenceNumber;
 
   @Column(name = "clm_prcdr_prfrm_dt")
