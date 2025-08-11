@@ -688,7 +688,9 @@ class IdrClaimItem(IdrBaseModel):
     ]
     clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_dgns_prcdr_icd_ind: Annotated[str, BeforeValidator(transform_empty_string)]
+    clm_dgns_prcdr_icd_ind: Annotated[
+        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_empty_string)
+    ]
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcdr_prfrm_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
