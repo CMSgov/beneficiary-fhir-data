@@ -11,7 +11,9 @@ class Timer:
         self.perf_start = time.perf_counter()
 
     def stop(self) -> None:
-        self.elapsed += time.perf_counter() - self.perf_start
+        segment = time.perf_counter() - self.perf_start
+        print(f"Segment for {self.name}: {segment:.6f} seconds")
+        self.elapsed += segment
 
     def print_results(self) -> None:
         print(f"Time taken for {self.name}: {self.elapsed:.6f} seconds")
