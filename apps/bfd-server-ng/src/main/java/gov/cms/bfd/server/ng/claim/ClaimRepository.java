@@ -66,6 +66,8 @@ public class ClaimRepository {
       Optional<Integer> limit,
       Optional<Integer> offset,
       List<ClaimSourceId> sourceIds) {
+    // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
+    // setMaxResults will only limit the results in memory rather than at the database level.
     var claimIds =
         entityManager
             .createNativeQuery(
