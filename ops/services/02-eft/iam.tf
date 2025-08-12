@@ -111,7 +111,6 @@ resource "aws_iam_policy" "eft_user" {
   )
 }
 
-# TODO: Kion Migration Must Replace Path and add permission boundary, partners need made aware of new role arn to assume BFD-3953
 resource "aws_iam_role" "partner_bucket_role" {
   for_each = local.eft_partners_config
   path     = "/"
@@ -141,38 +140,6 @@ resource "aws_iam_role" "partner_bucket_role" {
   force_detach_policies = true
 }
 
-# TODO: Kion Migration Must Replace / Remove  BFD-3953
-resource "aws_iam_role" "ct_partner_bucket_role" {
-  for_each             = local.eft_partners_config
-  path                 = local.iam_path
-  permissions_boundary = local.permissions_boundary_arn
-  name                 = "${local.full_name}-${each.key}-ct-bucket-role"
-  description = join("", [
-    "Role granting cross-account permissions to partner-specific folder for ${each.key} within ",
-    "the ${module.bucket_eft.bucket.id} EFT bucket when role is assumed"
-  ])
-
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        for index, assumer_arn in each.value.bucket_iam_assumer_arns : {
-          Sid    = "AllowAssumeRole${index}"
-          Effect = "Allow"
-          Action = "sts:AssumeRole"
-          Principal = {
-            AWS = assumer_arn
-          }
-        }
-      ]
-      Version = "2012-10-17"
-    }
-  )
-  managed_policy_arns = [aws_iam_policy.partner_bucket_access[each.key].arn]
-
-  force_detach_policies = true
-}
-
-# TODO: Kion Migration Must Replace Path and add permission boundary, partners need made aware of new role arn to assume BFD-3953
 resource "aws_iam_role" "isp_bcda_bucket_role" {
   count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
 
@@ -203,39 +170,6 @@ resource "aws_iam_role" "isp_bcda_bucket_role" {
   force_detach_policies = true
 }
 
-# TODO: Kion Migration Must Replace / Remove  BFD-3953
-resource "aws_iam_role" "ct_isp_bcda_bucket_role" {
-  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
-
-  name                 = "${local.full_name}-ct-isp-to-bcda-bucket-role"
-  permissions_boundary = local.permissions_boundary_arn
-  path                 = local.iam_path
-  description = join("", [
-    "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
-    "path within the ${module.bucket_eft.bucket.id} EFT bucket when role is assumed"
-  ])
-
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Sid    = "AllowAssumeRole"
-          Effect = "Allow"
-          Action = "sts:AssumeRole"
-          Principal = {
-            AWS = local.bcda_isp_bucket_assumer_arns
-          }
-        }
-      ]
-      Version = "2012-10-17"
-    }
-  )
-  managed_policy_arns = aws_iam_policy.isp_bcda_bucket_access[*].arn
-
-  force_detach_policies = true
-}
-
-# TODO: Kion Migration Must Replace Path during Migration BFD-3953
 resource "aws_iam_policy" "partner_bucket_access" {
   for_each = local.eft_partners_config
   path     = "/" # Must Change During KION Migration
