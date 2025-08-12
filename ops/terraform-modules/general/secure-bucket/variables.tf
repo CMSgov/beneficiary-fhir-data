@@ -25,6 +25,13 @@ variable "bucket_kms_key_arn" {
   description = "ARN of the KMS Key that will be used as the Bucket Key. Objects must be uploaded using this key exclusively."
 }
 
+variable "additional_bucket_policy_docs" {
+  type        = list(string)
+  default     = []
+  nullable    = true
+  description = "List of JSON policy document strings that are combined with the default secure Bucket policy."
+}
+
 variable "tags" {
   default     = {}
   type        = map(string)
