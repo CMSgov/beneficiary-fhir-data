@@ -15,8 +15,8 @@ class Timer:
 
     def stop(self) -> None:
         segment = time.perf_counter() - self.perf_start
-        logger.info("Segment for %s: %.6f seconds", self.name, segment)
+        logger.info("%s: %.6f seconds", self.name, segment)
         self.elapsed += segment
 
     def print_results(self) -> None:
-        logger.info("Time taken for %s: %.6f seconds", self.name, self.elapsed)
+        logger.info("Total time taken for %s: %.6f seconds", self.name, self.elapsed)
