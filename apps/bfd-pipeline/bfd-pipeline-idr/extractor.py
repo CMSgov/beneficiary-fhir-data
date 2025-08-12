@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
 from datetime import date, datetime
@@ -10,8 +9,7 @@ import snowflake.connector
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from psycopg.rows import class_row
-from snowflake.connector import DictCursor, ProgrammingError, SnowflakeConnection
-from snowflake.connector.network import ReauthenticationRequest, RetryRequest
+from snowflake.connector import DictCursor, SnowflakeConnection
 
 from model import LoadProgress, T
 from timer import Timer
@@ -43,6 +41,10 @@ def get_min_transaction_date() -> str:
 class Extractor(ABC):
     @abstractmethod
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+        pass
+
+    @abstractmethod
+    def reconnect(self) -> None:
         pass
 
     def get_query(self, cls: type[T], is_historical: bool, start_time: datetime) -> str:
@@ -111,8 +113,12 @@ class Extractor(ABC):
 class PostgresExtractor(Extractor):
     def __init__(self, connection_string: str, batch_size: int) -> None:
         super().__init__()
+        self.connection_string = connection_string
         self.conn = psycopg.connect(connection_string)
         self.batch_size = batch_size
+
+    def reconnect(self) -> None:
+        self.conn = psycopg.connect(self.connection_string)
 
     def extract_many(
         self, cls: type[T], sql: str, params: Mapping[str, DbType]
@@ -137,6 +143,9 @@ class SnowflakeExtractor(Extractor):
         self.conn = SnowflakeExtractor._connect()
         self.batch_size = batch_size
 
+    def reconnect(self) -> None:
+        SnowflakeExtractor._connect()
+
     @staticmethod
     def _connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
@@ -158,42 +167,31 @@ class SnowflakeExtractor(Extractor):
 
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         cur = None
-        max_attempts = 5
-        for attempt in range(max_attempts):
-            try:
-                cursor_execute_timer.start()
-                cur = self.conn.cursor(DictCursor)
-                cur.execute(sql, params)
-                cursor_execute_timer.stop()
+
+        try:
+            cursor_execute_timer.start()
+            cur = self.conn.cursor(DictCursor)
+            cur.execute(sql, params)
+            cursor_execute_timer.stop()
+
+            cursor_fetch_timer.start()
+            # fetchmany can return list[dict] or list[tuple] but we'll only use
+            # queries that return dicts
+            batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+            cursor_fetch_timer.stop()
+
+            while len(batch) > 0:  # type: ignore
+                transform_timer.start()
+                data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
+                transform_timer.stop()
+
+                yield data
 
                 cursor_fetch_timer.start()
-                # fetchmany can return list[dict] or list[tuple] but we'll only use
-                # queries that return dicts
-                batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+                batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                 cursor_fetch_timer.stop()
+            return
 
-                while len(batch) > 0:  # type: ignore
-                    transform_timer.start()
-                    data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                    transform_timer.stop()
-
-                    yield data
-
-                    cursor_fetch_timer.start()
-                    batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-                    cursor_fetch_timer.stop()
-                return
-            # Snowflake will throw a reauth error if the pipeline has been running for several hours
-            # but it seems to be wrapped in a ProgrammingError.
-            # Unclear the best way to handle this, it will require a bit more trial and error
-            except (ReauthenticationRequest, RetryRequest, ProgrammingError) as ex:
-                logger.warning("received transient error, retrying...", exc_info=ex)
-                if attempt == max_attempts - 1:
-                    logger.error("max attempts exceeded")
-                    raise ex
-                self.conn = SnowflakeExtractor._connect()
-                time.sleep(1)
-
-            finally:
-                if cur:
-                    cur.close()
+        finally:
+            if cur:
+                cur.close()

@@ -79,6 +79,7 @@ class PostgresLoader:
             )
             data_loaded = False
             num_rows = 0
+
             # load each batch in a separate transaction
             for results in fetch_results:
                 data_loaded = True
