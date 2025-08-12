@@ -296,7 +296,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl (
     clm_type_cd NUMERIC NOT NULL,
     clm_dt_sgntr_sk BIGINT NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
-    idr_updt_ts TIMESTAMPTZ
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_num_sk, clm_type_cd)
 );
 
@@ -394,7 +394,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
     clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_num_sk, clm_type_cd, clm_line_num)
+    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd, clm_line_num)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (

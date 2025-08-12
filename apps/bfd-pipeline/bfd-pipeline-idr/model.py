@@ -342,7 +342,7 @@ class IdrBeneficiaryXref(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_xref_sk: int
     bene_kill_cred_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: datetime
     idr_updt_ts: Annotated[
@@ -861,10 +861,10 @@ class IdrClaimProcedure(IdrBaseModel):
             {{ORDER_BY}}
         """
 
-class IDRClaimProfessional(IdrBaseModel):
-    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_num_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+class IdrClaimProfessional(IdrBaseModel):
+    geo_bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_type_cd: Annotated[int, {PRIMARY_KEY: True}]
+    clm_num_sk: Annotated[int, {PRIMARY_KEY: True}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -900,7 +900,7 @@ class IDRClaimProfessional(IdrBaseModel):
             {{ORDER_BY}}
         """
 
-class IDRClaimLineProfessional(IdrBaseModel):
+class IdrClaimLineProfessional(IdrBaseModel):
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_carr_clncl_lab_num: Annotated[float, BeforeValidator(transform_null_float)]
@@ -919,10 +919,10 @@ class IDRClaimLineProfessional(IdrBaseModel):
     clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
     clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_line_num: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_num_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
+    geo_bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
+    clm_num_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_type_cd: Annotated[int, {PRIMARY_KEY: True}]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},

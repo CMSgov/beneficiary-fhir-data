@@ -110,27 +110,35 @@ class PostgresLoader:
                     timestamp_placeholders = ",".join("%(timestamp)s" for _ in meta_keys)
                     # Upsert into the main table
                     insert_timer.start()
-                    cur.execute(
-                        f"""
-                        INSERT INTO {table}({cols_str}, {",".join(meta_keys)})
-                        SELECT {cols_str},{timestamp_placeholders} FROM {temp_table}
-                        ON CONFLICT ({",".join(unique_key)}) {on_conflict}
-                        """,  # type: ignore
-                        {"timestamp": timestamp},
-                    )
-                    insert_timer.stop()
-
-                    last = results[len(results) - 1].model_dump()
-                    # Some tables that contain reference data (like contract info) may not have the
-                    # normal IDR timestamps.
-                    # For now we won't support incremental refreshes for those tables
-                    batch_timestamp_col = model.batch_timestamp_col(
-                        progress is None or progress.is_historical()
-                    )
-                    if batch_timestamp_col:
-                        last_timestamp = last[batch_timestamp_col]
+                    try:
                         cur.execute(
                             f"""
+                            INSERT INTO {table}({cols_str}, {",".join(meta_keys)})
+                            SELECT {cols_str},{timestamp_placeholders} FROM {temp_table}
+                            ON CONFLICT ({",".join(unique_key)}) {on_conflict}
+                            """,  # type: ignore
+                            {"timestamp": timestamp},
+                        )
+                    except Exception as e:
+                        # Catch-all for any other unexpected exceptions
+                        print(f"""
+                        INSERT INTO {table}({cols_str}, {",".join(meta_keys)})
+                            SELECT {cols_str},{timestamp_placeholders} FROM {temp_table}
+                            ON CONFLICT ({",".join(unique_key)}) {on_conflict}
+                        """)
+                insert_timer.stop()
+
+                last = results[len(results) - 1].model_dump()
+                # Some tables that contain reference data (like contract info) may not have the
+                # normal IDR timestamps.
+                # For now we won't support incremental refreshes for those tables
+                batch_timestamp_col = model.batch_timestamp_col(
+                    progress is None or progress.is_historical()
+                )
+                if batch_timestamp_col:
+                    last_timestamp = last[batch_timestamp_col]
+                    cur.execute(
+                        f"""
                             INSERT INTO idr.load_progress(table_name, last_ts, batch_completion_ts)
                             VALUES(%(table)s, %(last_ts)s, '{DEFAULT_MAX_DATE}')
                             ON CONFLICT (table_name) DO UPDATE SET last_ts = EXCLUDED.last_ts
