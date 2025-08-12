@@ -74,6 +74,7 @@ public class ClaimRepository {
                         FROM idr.claim c
                         JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
                         WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                        ORDER BY c.clm_uniq_id
                         LIMIT :limit
                         OFFSET :offset
                         """,
