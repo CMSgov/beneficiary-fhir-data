@@ -10,63 +10,42 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
+  greenfield           = true
   service              = local.service
   relative_module_root = "ops/services/02-eft"
   subnet_layers        = ["private"]
+  ssm_hierarchy_roots  = local.ssm_hierarchy_roots
 }
 
 locals {
-  default_tags        = module.terraservice.default_tags
-  env                 = module.terraservice.env
-  seed_env            = module.terraservice.seed_env
-  is_ephemeral_env    = module.terraservice.is_ephemeral_env
-  latest_bfd_release  = module.terraservice.latest_bfd_release
-  bfd_version         = var.bfd_version_override == null ? local.latest_bfd_release : var.bfd_version_override
-  cloudtamer_iam_path = "/delegatedadmin/developer/"
-  service             = "eft"
-  layer               = "data"
-  full_name           = "bfd-${local.env}-${local.service}"
+  service = "eft"
+
+  region                   = module.terraservice.region
+  account_id               = module.terraservice.account_id
+  default_tags             = module.terraservice.default_tags
+  env                      = module.terraservice.env
+  is_ephemeral_env         = module.terraservice.is_ephemeral_env
+  bfd_version              = module.terraservice.bfd_version
+  ssm_config               = nonsensitive(module.terraservice.ssm_config)
+  env_key_alias            = module.terraservice.env_key_alias
+  env_key_arn              = module.terraservice.env_key_arn
+  iam_path                 = module.terraservice.default_iam_path
+  permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  vpc                      = module.terraservice.vpc
+  subnets                  = module.terraservice.subnets_map["private"]
+  azs                      = keys(module.terraservice.default_azs)
+
+  full_name = "bfd-${local.env}-${local.service}"
 
   inbound_eft_partners  = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json["inbound"].value))
   outbound_eft_partners = jsondecode(nonsensitive(data.aws_ssm_parameter.partners_list_json["outbound"].value))
   eft_partners          = distinct(concat(local.inbound_eft_partners, local.outbound_eft_partners))
   ssm_hierarchy_roots   = concat(["bfd"], local.eft_partners)
-  ssm_hierarchies = flatten([
-    for root in local.ssm_hierarchy_roots :
-    ["/${root}/${local.env}/common", "/${root}/${local.env}/${local.service}"]
-  ])
-  ssm_flattened_data = {
-    names = flatten(
-      [for k, v in data.aws_ssm_parameters_by_path.params : v.names]
-    )
-    values = flatten(
-      [for k, v in data.aws_ssm_parameters_by_path.params : nonsensitive(v.values)]
-    )
-  }
-  # This returns an object with keys that follow conventional SSM Parameter naming, _excluding_ the
-  # nonsensitve/sensitive node. for example, to get a parameter named "vpc_name" in BFD's hierarchy
-  # in the "common" service, it would be: local.ssm_config["/bfd/common/vpc_name"]. Or, if the
-  # parameter is something more like /dpc/eft/sensitive/inbound/dir, it'd be like:
-  # local.ssm_config["/dpc/eft/inbound/dir"]. Essentially, the environment and sensitivity nodes in
-  # a given parameter's path are removed to reduce the verbosity of referencing parameters
-  # FUTURE: Refactor something like this out into a distinct module much like bfd-terraservice above
-  ssm_config = zipmap(
-    [
-      for name in local.ssm_flattened_data.names :
-      replace(name, "/((non)*sensitive|${local.env})//", "")
-    ],
-    local.ssm_flattened_data.values
-  )
-
-  # SSM Lookup
-  kms_key_alias        = local.ssm_config["/bfd/common/kms_key_alias"]
-  kms_config_key_alias = local.ssm_config["/bfd/common/kms_config_key_alias"]
-  vpc_name             = local.ssm_config["/bfd/common/vpc_name"]
 
   subnet_ip_reservations = jsondecode(
     local.ssm_config["/bfd/${local.service}/inbound/sftp_server/subnet_to_ip_reservations_nlb_json"]
   )
-  inbound_sftp_server_key    = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/host_private_key"]
+  inbound_sftp_server_key    = sensitive(local.ssm_config["/bfd/${local.service}/inbound/sftp_server/host_private_key"])
   inbound_r53_hosted_zone    = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/r53_hosted_zone"]
   inbound_sftp_user_pub_key  = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_public_key"]
   inbound_sftp_user_username = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_username"]
@@ -83,7 +62,7 @@ locals {
   outbound_sftp_host              = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/host", null)
   outbound_sftp_trusted_host_keys = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/trusted_host_keys_json", null)
   outbound_sftp_username          = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/username", null)
-  outbound_sftp_user_priv_key     = lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/user_priv_key", null)
+  outbound_sftp_user_priv_key     = sensitive(lookup(local.ssm_config, "/bfd/${local.service}/outbound/sftp/user_priv_key", null))
   # First, construct the configuration for each partner. Partners with invalid path configuration
   # will be discarded below. We could assume that configuration is infallible for all properties, or
   # that invaild values will fail fast. But, invalid paths may not cause Terraform (really, AWS) to
@@ -180,7 +159,7 @@ locals {
       local.outbound_sftp_host,
       local.outbound_sftp_trusted_host_keys,
       local.outbound_sftp_username,
-      local.outbound_sftp_user_priv_key
+      nonsensitive(local.outbound_sftp_user_priv_key)
     ] : trimspace(coalesce(x, "INVALID")) != "INVALID"]) ? [
     for partner, _ in local.eft_partners_config :
     partner
@@ -201,18 +180,8 @@ locals {
     if length(local.eft_partners_config[partner].outbound.notification_targets) > 0
   ]
 
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-  vpc_id     = data.aws_vpc.this.id
-  kms_key_id = data.aws_kms_key.cmk.arn
-  kms_config_key_arns = flatten(
-    [
-      for v in data.aws_kms_key.config_cmk.multi_region_configuration :
-      concat(v.primary_key[*].arn, v.replica_keys[*].arn)
-    ]
-  )
-  sftp_port      = 22
-  logging_bucket = "bfd-${local.seed_env}-logs-${local.account_id}"
+  vpc_id    = local.vpc.id
+  sftp_port = 22
 
   outbound_lambda_name         = "sftp-outbound-transfer"
   outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
@@ -225,16 +194,72 @@ locals {
   # subnets against the supported availability zones taking only those that belong to supported azs
   available_endpoint_azs = setintersection(
     data.aws_vpc_endpoint_service.transfer_server.availability_zones,
-    values(data.aws_subnet.this)[*].availability_zone
+    local.subnets[*].availability_zone
   )
   available_endpoint_subnets = [
-    for subnet in values(data.aws_subnet.this)
+    for subnet in values(local.subnets)
     : subnet if contains(local.available_endpoint_azs, subnet.availability_zone)
   ]
 }
 
-resource "aws_s3_bucket" "this" {
-  bucket = local.full_name
+data "aws_iam_policy_document" "isp_bcda" {
+  count = length(aws_iam_role.isp_bcda_bucket_role) > 0 ? 1 : 0
+
+  statement {
+    sid    = "AllowISPFromVPCEOnly"
+    effect = "Deny"
+
+    actions = ["s3:*"]
+    resources = [
+      module.bucket_eft.bucket.arn,
+      "${module.bucket_eft.bucket.arn}/*"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = aws_iam_role.isp_bcda_bucket_role[*].arn
+    }
+    condition {
+      test     = "StringNotEquals"
+      variable = "aws:SourceVpce"
+      values   = [local.bcda_isp_vpc_endpoint_id]
+    }
+  }
+}
+
+module "bucket_eft" {
+  source = "../../terraform-modules/general/secure-bucket"
+
+  bucket_prefix                 = local.full_name
+  bucket_kms_key_arn            = local.env_key_arn
+  force_destroy                 = false
+  additional_bucket_policy_docs = data.aws_iam_policy_document.isp_bcda[*].json
+
+  ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = module.bucket_eft.bucket.id
+  versioning_configuration {
+    status = "Disabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "this" {
+  bucket = module.bucket_eft.bucket.id
+
+  rule {
+    id = "${local.full_name}-7day-object-retention"
+
+    # An empty filter means that this lifecycle applies to _all_ objects within the bucket.
+    filter {}
+
+    expiration {
+      days = 7 # This bucket has no versioning and so objects will be permanently deleted on expiry
+    }
+
+    status = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_notification" "bucket_notifications" {
@@ -243,7 +268,7 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
     local.eft_partners_with_outbound_enabled,
   )) > 0 ? 1 : 0
 
-  bucket = aws_s3_bucket.this.id
+  bucket = module.bucket_eft.bucket.id
 
   dynamic "topic" {
     for_each = toset(local.eft_partners_with_inbound_received_notifs)
@@ -278,7 +303,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
     "file(s) via CMS EFT SFTP if they are recognized and valid."
   ])
 
-  kms_key_arn      = local.kms_key_id
+  kms_key_arn      = local.env_key_arn
   image_uri        = local.outbound_lambda_image_uri
   source_code_hash = trimprefix(data.aws_ecr_image.sftp_outbound_transfer.id, "sha256:")
   package_type     = "Image"
@@ -310,7 +335,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
 
   vpc_config {
     security_group_ids = aws_security_group.sftp_outbound_transfer[*].id
-    subnet_ids         = data.aws_subnets.sftp_outbound_transfer.ids
+    subnet_ids         = local.subnets[*].id
   }
 }
 
@@ -318,7 +343,7 @@ resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name                      = "${local.outbound_lambda_full_name}-dlq"
-  kms_master_key_id         = local.kms_key_id
+  kms_master_key_id         = local.env_key_arn
   message_retention_seconds = 14 * 24 * 60 * 60 # 14 days, in seconds, which is the maximum
 }
 
@@ -381,7 +406,7 @@ resource "aws_sns_topic" "inbound_received_s3_notifs" {
   for_each = toset(local.eft_partners_with_inbound_received_notifs)
 
   name              = "${local.full_name}-inbound-received-s3-${each.key}"
-  kms_master_key_id = local.kms_key_id
+  kms_master_key_id = local.env_key_arn
 }
 
 resource "aws_sns_topic_policy" "inbound_received_s3_notifs" {
@@ -401,7 +426,7 @@ resource "aws_sns_topic_policy" "inbound_received_s3_notifs" {
             Resource  = aws_sns_topic.inbound_received_s3_notifs[each.key].arn
             Condition = {
               ArnLike = {
-                "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
+                "aws:SourceArn" = "${module.bucket_eft.bucket.arn}"
               }
             }
           }
@@ -432,7 +457,7 @@ resource "aws_sns_topic" "outbound_pending_s3_notifs" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
   name              = "${local.full_name}-outbound-pending-s3-${each.key}"
-  kms_master_key_id = local.kms_key_id
+  kms_master_key_id = local.env_key_arn
 }
 
 resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
@@ -451,7 +476,7 @@ resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
           Resource  = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
           Condition = {
             ArnLike = {
-              "aws:SourceArn" = "${aws_s3_bucket.this.arn}"
+              "aws:SourceArn" = "${module.bucket_eft.bucket.arn}"
             }
           }
         }
@@ -464,7 +489,7 @@ resource "aws_sns_topic" "outbound_notifs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   name              = local.outbound_notifs_topic_prefix
-  kms_master_key_id = local.kms_key_id
+  kms_master_key_id = local.env_key_arn
 
   lambda_success_feedback_sample_rate = 100
   lambda_success_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
@@ -479,7 +504,7 @@ resource "aws_sns_topic" "outbound_partner_notifs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
 
   name              = "${local.outbound_notifs_topic_prefix}-${each.key}"
-  kms_master_key_id = local.kms_key_id
+  kms_master_key_id = local.env_key_arn
 
   lambda_success_feedback_sample_rate = 100
   lambda_success_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
@@ -518,108 +543,12 @@ resource "aws_sns_topic_policy" "outbound_partner_notifs" {
   )
 }
 
-resource "aws_s3_bucket_versioning" "this" {
-  bucket = aws_s3_bucket.this.id
-  versioning_configuration {
-    status = "Disabled"
-  }
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "this" {
-  bucket = aws_s3_bucket.this.id
-
-  rule {
-    id = "${local.full_name}-7day-object-retention"
-
-    # An empty filter means that this lifecycle applies to _all_ objects within the bucket.
-    filter {}
-
-    expiration {
-      days = 7 # This bucket has no versioning and so objects will be permanently deleted on expiry
-    }
-
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_policy" "this" {
-  bucket = aws_s3_bucket.this.id
-  policy = jsonencode(
-    {
-      Version = "2012-10-17",
-      Statement = concat(
-        [{
-          Sid       = "AllowSSLRequestsOnly",
-          Effect    = "Deny",
-          Principal = "*",
-          Action    = "s3:*",
-          Resource = [
-            "${aws_s3_bucket.this.arn}",
-            "${aws_s3_bucket.this.arn}/*"
-          ],
-          Condition = {
-            Bool = {
-              "aws:SecureTransport" = "false"
-            }
-          }
-        }],
-        length(aws_iam_role.isp_bcda_bucket_role) > 0 ? [{
-          Sid    = "AllowISPFromVPCEOnly",
-          Effect = "Deny",
-          Principal = {
-            AWS = one(aws_iam_role.isp_bcda_bucket_role[*].arn)
-          },
-          Action = "s3:*",
-          Resource = [
-            "${aws_s3_bucket.this.arn}",
-            "${aws_s3_bucket.this.arn}/*"
-          ],
-          Condition = {
-            StringNotEquals = {
-              "aws:SourceVpce" = local.bcda_isp_vpc_endpoint_id
-            }
-          }
-        }] : []
-      )
-    }
-  )
-}
-
-resource "aws_s3_bucket_public_access_block" "this" {
-  bucket = aws_s3_bucket.this.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
-  bucket = aws_s3_bucket.this.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = local.kms_key_id
-      sse_algorithm     = "aws:kms"
-    }
-
-    bucket_key_enabled = true
-  }
-}
-
-resource "aws_s3_bucket_logging" "this" {
-  bucket = aws_s3_bucket.this.id
-
-  target_bucket = local.logging_bucket
-  target_prefix = "${local.full_name}_s3_access_logs/"
-}
-
 resource "aws_ec2_subnet_cidr_reservation" "this" {
   for_each = local.subnet_ip_reservations
 
   cidr_block       = "${each.value}/32"
   reservation_type = "explicit"
-  subnet_id        = data.aws_subnet.this[each.key].id
+  subnet_id        = one([for subnet in local.subnets : subnet.id if subnet.tags["Name"] == each.key])
 
   lifecycle {
     prevent_destroy = true
@@ -694,7 +623,7 @@ resource "aws_security_group" "nlb" {
     from_port       = local.sftp_port
     to_port         = local.sftp_port
     protocol        = "tcp"
-    cidr_blocks     = [data.aws_vpc.this.cidr_block]
+    cidr_blocks     = [local.vpc.cidr_block]
     description     = "Allow ingress from SFTP traffic"
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
   }
@@ -755,7 +684,7 @@ resource "aws_transfer_user" "eft_user" {
 
   home_directory_mappings {
     entry  = "/"
-    target = "/${aws_s3_bucket.this.id}/${local.inbound_sftp_s3_home_dir}"
+    target = "/${module.bucket_eft.bucket.id}/${local.inbound_sftp_s3_home_dir}"
   }
 }
 
@@ -779,24 +708,4 @@ resource "aws_vpc_endpoint" "this" {
   vpc_endpoint_type   = "Interface"
   vpc_id              = local.vpc_id
   tags                = { Name = "${local.full_name}-sftp-endpoint" }
-}
-
-module "outbound_o11y" {
-  depends_on = [
-    aws_sqs_queue.sftp_outbound_transfer_dlq,
-    aws_lambda_function.sftp_outbound_transfer,
-    aws_sns_topic.outbound_notifs,
-    aws_sns_topic.outbound_partner_notifs
-  ]
-  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
-
-  source = "./modules/bfd_eft_outbound_o11y"
-
-  ssm_config                       = local.ssm_config
-  kms_key_arn                      = local.kms_key_id
-  outbound_lambda_name             = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
-  outbound_lambda_dlq_name         = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].name)
-  outbound_bfd_sns_topic_name      = one(aws_sns_topic.outbound_notifs[*].name)
-  outbound_bfd_sns_topic_arn       = one(aws_sns_topic.outbound_notifs[*].arn)
-  outbound_partner_sns_topic_names = [for _, v in aws_sns_topic.outbound_partner_notifs : v.name]
 }
