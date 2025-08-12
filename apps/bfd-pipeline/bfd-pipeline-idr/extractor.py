@@ -47,6 +47,9 @@ class Extractor(ABC):
     def reconnect(self) -> None:
         pass
 
+    def _greatest_col(self, cols: list[str]) -> str:
+        return f"GREATEST({','.join(cols)})"
+
     def get_query(self, cls: type[T], is_historical: bool, start_time: datetime) -> str:
         query = cls.fetch_query(is_historical, start_time)
         columns = ",".join(cls.column_aliases())
@@ -59,9 +62,9 @@ class Extractor(ABC):
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
         batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
-        batch_timestamp_clause = f"LEAST({','.join(batch_timestamp_cols)})"
+        batch_timestamp_clause = self._greatest_col(batch_timestamp_cols)
         update_timestamp_cols = cls.update_timestamp_col_alias()
-        update_timestamp_clause = f"GREATEST({','.join(update_timestamp_cols)})"
+        update_timestamp_clause = self._greatest_col(update_timestamp_cols)
 
         logger.info("extracting %s", cls.table())
         if progress is None:
