@@ -197,7 +197,7 @@ locals {
     local.subnets[*].availability_zone
   )
   available_endpoint_subnets = [
-    for subnet in values(local.subnets)
+    for subnet in local.subnets
     : subnet if contains(local.available_endpoint_azs, subnet.availability_zone)
   ]
 }
