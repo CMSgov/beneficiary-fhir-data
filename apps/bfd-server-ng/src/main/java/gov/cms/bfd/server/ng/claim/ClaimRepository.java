@@ -66,13 +66,28 @@ public class ClaimRepository {
       Optional<Integer> limit,
       Optional<Integer> offset,
       List<ClaimSourceId> sourceIds) {
-
+    var claimIds =
+        entityManager
+            .createNativeQuery(
+                """
+                        SELECT c.clm_uniq_id
+                        FROM idr.claim c
+                        JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
+                        WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                        LIMIT :limit
+                        OFFSET :offset
+                        """,
+                Long.class)
+            .setParameter("beneSk", beneSk)
+            .setParameter("limit", limit.orElse(5000))
+            .setParameter("offset", offset.orElse(0))
+            .getResultList();
     return withParams(
             entityManager.createQuery(
                 String.format(
                     """
                         %s
-                        WHERE b.xrefSk = :beneSk
+                        WHERE c.claimUniqueId IN (:claimIds)
                         %s
                         """,
                     getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
@@ -80,9 +95,7 @@ public class ClaimRepository {
             claimThroughDate,
             lastUpdated,
             sourceIds)
-        .setParameter("beneSk", beneSk)
-        .setMaxResults(limit.orElse(5000))
-        .setFirstResult(offset.orElse(0))
+        .setParameter("claimIds", claimIds)
         .getResultList();
   }
 
