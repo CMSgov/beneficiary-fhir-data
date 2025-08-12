@@ -1,10 +1,11 @@
+import logging
 import os
 from collections.abc import Iterator
 from datetime import UTC, datetime
 
 import psycopg
 
-from constants import DEFAULT_MAX_DATE
+from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
 from timer import Timer
 
@@ -12,6 +13,8 @@ temp_table_timer = Timer("temp_table")
 copy_timer = Timer("copy")
 insert_timer = Timer("insert")
 commit_timer = Timer("commit")
+
+logger = logging.getLogger(__name__)
 
 
 def print_timers() -> None:
@@ -35,16 +38,17 @@ class PostgresLoader:
     ) -> None:
         self.conn = psycopg.connect(connection_string)
 
-    def refresh_materialized_view(self, view_name: str) -> None:
-        self.conn.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view_name}")  # type: ignore
+    def run_sql(self, sql: str) -> None:
+        self.conn.execute(sql)  # type: ignore
         self.conn.commit()
 
     def load(
         self,
         fetch_results: Iterator[list[T]],
         model: type[T],
+        batch_start: datetime,
         progress: LoadProgress | None,
-    ) -> None:
+    ) -> bool:
         insert_cols = list(model.insert_keys())
         insert_cols.sort()
         cols_str = ", ".join(insert_cols)
@@ -57,8 +61,29 @@ class PostgresLoader:
         # (temp tables can't be created with an explicit schema set)
         temp_table = table.split(".")[1] + "_temp"
         with self.conn.cursor() as cur:
+            cur.execute(
+                f"""
+                    INSERT INTO idr.load_progress(
+                        table_name, 
+                        last_ts, 
+                        batch_start_ts, 
+                        batch_complete_ts)
+                    VALUES(%(table)s, '{DEFAULT_MIN_DATE}', %(start_ts)s, '{DEFAULT_MIN_DATE}')
+                    ON CONFLICT (table_name) DO UPDATE 
+                    SET batch_start_ts = EXCLUDED.batch_start_ts
+                    """,
+                {
+                    "table": table,
+                    "start_ts": batch_start,
+                },
+            )
+            data_loaded = False
+            num_rows = 0
             # load each batch in a separate transaction
             for results in fetch_results:
+                data_loaded = True
+                logger.info("loading next %s results", len(results))
+                num_rows += len(results)
                 # Load each batch into a temp table
                 # This is necessary because we want to use COPY to quickly
                 # transfer everything into Postgres, but COPY can't handle
@@ -130,25 +155,28 @@ class PostgresLoader:
                     if batch_timestamp_col:
                         last_timestamp = last[batch_timestamp_col]
                         cur.execute(
-                            f"""
-                            INSERT INTO idr.load_progress(table_name, last_ts, batch_completion_ts)
-                            VALUES(%(table)s, %(last_ts)s, '{DEFAULT_MAX_DATE}')
-                            ON CONFLICT (table_name) DO UPDATE SET last_ts = EXCLUDED.last_ts
+                            """
+                            UPDATE idr.load_progress
+                            SET last_ts = %(last_ts)s
+                            WHERE table_name = %(table)s
                             """,
                             {
                                 "table": table,
                                 "last_ts": last_timestamp,
                             },
                         )
-                # Mark the batch as completed
-                cur.execute(
-                    """
-                    UPDATE idr.load_progress
-                    SET batch_completion_ts = NOW()
-                    WHERE table_name = %(table)s
-                    """,
-                    {"table": table},
-                )
                 commit_timer.start()
                 self.conn.commit()
                 commit_timer.stop()
+            # Mark the batch as completed
+            cur.execute(
+                """
+                UPDATE idr.load_progress
+                SET batch_complete_ts = NOW()
+                WHERE table_name = %(table)s
+                """,
+                {"table": table},
+            )
+            self.conn.commit()
+        logger.info("loaded %s rows", num_rows)
+        return data_loaded
