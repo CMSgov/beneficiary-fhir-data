@@ -731,6 +731,26 @@ class IdrClaimItem(IdrBaseModel):
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
         val = ALIAS_VAL
+        # This query is taking all of the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
+        # them in a unified table. This is necessary because each of these tables have a different
+        # number of rows for each claim. If we don't combine these values, we would either have to
+        # do three separate database queries to load these in the server, or we have to join on each
+        # table in the same query and deal with the fact that the result is a cartesian product of
+        # clm_line + clm_prod + clm_val which can generate many thousands of rows for large claims.
+        # Performing this normalization means we can perform a single query to generate the rows
+        # equal to max(len(clm_prod), len(clm_line), len(clm_val)). The number of rows here will
+        # usually only be a few dozen, maybe a few hundred at worst.
+
+        # There's a few steps here:
+        #   1. Figure out how many rows we need for each claim.
+        #      We do this by taking the UNION of the rows for each table. The end result will be
+        #      a list of rows equal to max(len(clm_prod), len(clm_line), len(clm_val)).
+        #   2. clm_prod is special because its sequence numbers depend on the values in the table
+        #      itself and are not monotonically increasing.
+        #      We perform an intermediary step to create our own line number for clm_prod values.
+        #   3. Take our list of claim_uniq_id + line number and left join each table against it to
+        #      to get the final result.
+
         return f"""
                 WITH claims AS (
                     SELECT 
