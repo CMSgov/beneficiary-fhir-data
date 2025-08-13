@@ -139,33 +139,105 @@ resource "aws_iam_role_policy_attachment" "sftp_user" {
   policy_arn = each.value
 }
 
-resource "aws_iam_role" "partner_bucket_role" {
+data "aws_iam_policy_document" "partner_bucket_access" {
   for_each = local.eft_partners_config
-  path     = "/"
-  name     = "${local.full_name}-${each.key}-bucket-role"
+
+  statement {
+    sid       = "AllowListingOfPartnerHomePath"
+    actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
+    resources = [module.bucket_eft.bucket.arn]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["${each.value.bucket_home_path}/*"]
+    }
+  }
+
+  statement {
+    sid = "AllowPartnerAccessToHomePath"
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
+      "s3:GetObject",
+      "s3:GetObjectAcl",
+      "s3:GetObjectVersion",
+      "s3:GetObjectVersionAcl",
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:PutObjectVersionAcl",
+    ]
+    resources = ["${module.bucket_eft.bucket.arn}/${each.value.bucket_home_path}/*"]
+  }
+
+  statement {
+    sid = "AllowEncryptionAndDecryptionOfS3Files"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+    resources = [local.env_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "partner_bucket_access" {
+  for_each = local.eft_partners_config
+
+  path = local.iam_path
+  name = "${local.full_name}-${each.key}-bucket-access-policy"
+  description = join("", [
+    "Allows ${each.key} to access their specific EFT data when this policy's corresponding IAM ",
+    "role is assumed by ${each.key}"
+  ])
+  policy = data.aws_iam_policy_document.partner_bucket_access[each.key].json
+}
+
+data "aws_iam_policy_document" "partner_bucket_assume" {
+  for_each = local.eft_partners_config
+
+  dynamic "statement" {
+    for_each = { for idx, assumer_arn in each.value.bucket_iam_assumer_arns : idx => assumer_arn }
+
+    content {
+      sid     = "AllowAssumeRole${statement.key}"
+      actions = ["sts:AssumeRole"]
+
+      principals {
+        type        = "AWS"
+        identifiers = [statement.value]
+      }
+    }
+  }
+}
+
+resource "aws_iam_role" "partner_bucket_access" {
+  for_each = local.eft_partners_config
+
+  path                 = local.iam_path
+  permissions_boundary = local.permissions_boundary_arn
+  name                 = "${local.full_name}-${each.key}-bucket-access-role"
   description = join("", [
     "Role granting cross-account permissions to partner-specific folder for ${each.key} within ",
     "the ${module.bucket_eft.bucket.id} EFT bucket when role is assumed"
   ])
-
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        for index, assumer_arn in each.value.bucket_iam_assumer_arns : {
-          Sid    = "AllowAssumeRole${index}"
-          Effect = "Allow"
-          Action = "sts:AssumeRole"
-          Principal = {
-            AWS = assumer_arn
-          }
-        }
-      ]
-      Version = "2012-10-17"
-    }
-  )
-  managed_policy_arns = [aws_iam_policy.partner_bucket_access[each.key].arn]
-
+  assume_role_policy    = data.aws_iam_policy_document.partner_bucket_assume[each.key].json
   force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "partner_bucket_access" {
+  for_each = merge([
+    for partner, _ in local.eft_partners_config
+    : {
+      "${partner}-all" = { partner = partner, policy = aws_iam_policy.partner_bucket_access[partner].arn }
+    }
+  ]...)
+
+  role       = aws_iam_role.partner_bucket_access[each.value.partner].name
+  policy_arn = each.value.policy
 }
 
 resource "aws_iam_role" "isp_bcda_bucket_role" {
@@ -198,70 +270,7 @@ resource "aws_iam_role" "isp_bcda_bucket_role" {
   force_detach_policies = true
 }
 
-resource "aws_iam_policy" "partner_bucket_access" {
-  for_each = local.eft_partners_config
-  path     = "/" # Must Change During KION Migration
-  name     = "${local.full_name}-${each.key}-allow-eft-s3-path"
-  description = join("", [
-    "Allows ${each.key} to access their specific EFT data when this policy's corresponding IAM ",
-    "role is assumed by ${each.key}"
-  ])
 
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid    = "AllowListingOfPartnerHomePath"
-          Effect = "Allow"
-          Action = [
-            "s3:ListBucket",
-            "s3:GetBucketLocation"
-          ]
-          Resource = [module.bucket_eft.bucket.arn]
-          Condition = {
-            StringLike = {
-              "s3:prefix" = ["${each.value.bucket_home_path}/*"]
-            }
-          }
-        },
-        {
-          Sid    = "AllowPartnerAccessToHomePath"
-          Effect = "Allow"
-          Action = [
-            "s3:AbortMultipartUpload",
-            "s3:DeleteObject",
-            "s3:DeleteObjectVersion",
-            "s3:GetObject",
-            "s3:GetObjectAcl",
-            "s3:GetObjectVersion",
-            "s3:GetObjectVersionAcl",
-            "s3:PutObject",
-            "s3:PutObjectAcl",
-            "s3:PutObjectVersionAcl"
-          ],
-          Resource = [
-            "${module.bucket_eft.bucket.arn}/${each.value.bucket_home_path}/*"
-          ]
-        },
-        {
-          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
-          Effect = "Allow"
-          Action = [
-            "kms:Encrypt",
-            "kms:Decrypt",
-            "kms:ReEncrypt*",
-            "kms:GenerateDataKey*",
-            "kms:DescribeKey",
-          ]
-          Resource = [
-            local.env_key_arn
-          ]
-        },
-      ]
-    }
-  )
-}
 
 resource "aws_iam_policy" "isp_bcda_bucket_access" {
   count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
