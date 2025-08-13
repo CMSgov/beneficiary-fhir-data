@@ -665,7 +665,7 @@ class IdrClaimValue(IdrBaseModel):
 class IdrClaimLine(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_LINE}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
-    clm_line_ansthsa_unit_cnt: float
+    clm_line_ansthsa_unit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_sbmt_chrg_amt: float
     clm_line_alowd_chrg_amt: float
     clm_line_ncvrd_chrg_amt: float
@@ -673,9 +673,10 @@ class IdrClaimLine(IdrBaseModel):
     clm_line_bene_pmt_amt: float
     clm_line_bene_pd_amt: float
     clm_line_cvrd_pd_amt: float
+    clm_line_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_blood_ddctbl_amt: float
     clm_line_mdcr_ddctbl_amt: float
-    clm_line_mdcr_coinsrnc_amt: float
+    clm_line_mdcr_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_hcpcs_cd: str
     clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_ndc_qty: Annotated[float, BeforeValidator(transform_null_float)]
@@ -862,21 +863,21 @@ class IdrClaimProcedure(IdrBaseModel):
         """
 
 class IdrClaimProfessional(IdrBaseModel):
-    geo_bene_sk: Annotated[int, {PRIMARY_KEY: True}]
-    clm_type_cd: Annotated[int, {PRIMARY_KEY: True}]
-    clm_num_sk: Annotated[int, {PRIMARY_KEY: True}]
+    geo_bene_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
+    clm_type_cd: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
+    clm_num_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_CLM},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -925,14 +926,26 @@ class IdrClaimLineProfessional(IdrBaseModel):
     clm_type_cd: Annotated[int, {PRIMARY_KEY: True}]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {BATCH_TIMESTAMP: True},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {UPDATE_TIMESTAMP: True},
         BeforeValidator(transform_null_date_to_min),
     ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.claim_line_professional"
+
+    @staticmethod
+    def _current_fetch_query() -> str:
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl
+            {WHERE_CLAUSE}
+        """
 
 class LoadProgress(IdrBaseModel):
     table_name: str
