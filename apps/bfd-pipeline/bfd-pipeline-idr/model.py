@@ -462,7 +462,7 @@ class IdrClaim(IdrBaseModel):
     clm_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_prvdr_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_alowd_chrg_amt: float
+    clm_alowd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_bene_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pd_dt: date
@@ -953,7 +953,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return "idr.claim_line_professional"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl
