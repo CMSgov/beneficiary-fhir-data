@@ -240,95 +240,94 @@ resource "aws_iam_role_policy_attachment" "partner_bucket_access" {
   policy_arn = each.value.policy
 }
 
-resource "aws_iam_role" "isp_bcda_bucket_role" {
+data "aws_iam_policy_document" "isp_bcda_bucket_access" {
   count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
 
-  name = "${local.full_name}-isp-to-bcda-bucket-role"
+  statement {
+    sid       = "AllowListingOfBCDAHomePath"
+    actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
+    resources = [module.bucket_eft.bucket.arn]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["${local.eft_partners_config["bcda"].bucket_home_path}/*"]
+    }
+  }
+
+  statement {
+    sid = "AllowRestrictedAccessToBCDAHomePath"
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:PutObjectVersionAcl"
+    ]
+    resources = [
+      "${module.bucket_eft.bucket.arn}/${local.eft_partners_config["bcda"].bucket_home_path}/*"
+    ]
+  }
+
+  statement {
+    sid = "AllowEncryptionAndDecryptionOfS3Files"
+    actions = [
+      "kms:Encrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+    resources = [local.env_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "isp_bcda_bucket_access" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name = "${local.full_name}-isp-to-bcda-bucket-access-policy"
+  path = local.iam_path
+  description = join("", [
+    "Allows ISP to access the BCDA inbound path when this policy's corresponding IAM ",
+    "role is assumed by ISP"
+  ])
+  policy = one(data.aws_iam_policy_document.isp_bcda_bucket_access[*].json)
+}
+
+data "aws_iam_policy_document" "isp_bcda_bucket_access_assume" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  statement {
+    sid     = "AllowAssumeRole"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "AWS"
+      identifiers = local.bcda_isp_bucket_assumer_arns
+    }
+  }
+}
+
+resource "aws_iam_role" "isp_bcda_bucket_access" {
+  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
+
+  name = "${local.full_name}-isp-to-bcda-bucket-access-role"
   path = "/"
   description = join("", [
     "Role granting cross-account permissions to partner-specific folder for ISP to BCDA folder in ",
     "path within the ${module.bucket_eft.bucket.id} EFT bucket when role is assumed"
   ])
 
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Sid    = "AllowAssumeRole"
-          Effect = "Allow"
-          Action = "sts:AssumeRole"
-          Principal = {
-            AWS = local.bcda_isp_bucket_assumer_arns
-          }
-        }
-      ]
-      Version = "2012-10-17"
-    }
-  )
-  managed_policy_arns = aws_iam_policy.isp_bcda_bucket_access[*].arn
+  assume_role_policy  = one(data.aws_iam_policy_document.isp_bcda_bucket_access_assume[*].json)
 
   force_detach_policies = true
 }
 
+resource "aws_iam_role_policy_attachment" "isp_bcda_bucket_access" {
+  for_each = length(local.bcda_isp_bucket_assumer_arns) > 0 ? {
+    all = one(aws_iam_policy.isp_bcda_bucket_access[*].arn)
+  } : {}
 
-
-resource "aws_iam_policy" "isp_bcda_bucket_access" {
-  count = length(local.bcda_isp_bucket_assumer_arns) > 0 ? 1 : 0
-
-  name = "${local.full_name}-isp-to-bcda-allow-eft-s3-path"
-  path = local.iam_path
-  description = join("", [
-    "Allows ISP to access the BCDA inbound path when this policy's corresponding IAM ",
-    "role is assumed by ISP"
-  ])
-
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid    = "AllowListingOfBCDAHomePath"
-          Effect = "Allow"
-          Action = [
-            "s3:ListBucket",
-            "s3:GetBucketLocation"
-          ]
-          Resource = [module.bucket_eft.bucket.arn]
-          Condition = {
-            StringLike = {
-              "s3:prefix" = ["${local.eft_partners_config["bcda"].bucket_home_path}/*"]
-            }
-          }
-        },
-        {
-          Sid    = "AllowRestrictedAccessToBCDAHomePath"
-          Effect = "Allow"
-          Action = [
-            "s3:AbortMultipartUpload",
-            "s3:PutObject",
-            "s3:PutObjectAcl",
-            "s3:PutObjectVersionAcl"
-          ],
-          Resource = [
-            "${module.bucket_eft.bucket.arn}/${local.eft_partners_config["bcda"].bucket_home_path}/*"
-          ]
-        },
-        {
-          Sid    = "AllowEncryptionAndDecryptionOfS3Files"
-          Effect = "Allow"
-          Action = [
-            "kms:Encrypt",
-            "kms:ReEncrypt*",
-            "kms:GenerateDataKey*",
-            "kms:DescribeKey",
-          ]
-          Resource = [
-            local.env_key_arn
-          ]
-        },
-      ]
-    }
-  )
+  role       = one(aws_iam_role.isp_bcda_bucket_access[*].name)
+  policy_arn = each.value
 }
 
 resource "aws_iam_policy" "sftp_outbound_transfer_logs" {
