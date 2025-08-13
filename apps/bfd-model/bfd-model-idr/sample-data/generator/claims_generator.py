@@ -19,10 +19,29 @@ faker = Faker()
 
 def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_line_instnl,clm_dcmtn,clm_fiss,clm_prfnl,clm_line_prfnl,clm_line_rx):
     Path("out").mkdir(exist_ok=True)
+
     df = pd.json_normalize(clm)
     df['CLM_BLOOD_PT_FRNSH_QTY'] = df['CLM_BLOOD_PT_FRNSH_QTY'].astype('Int64')
+    df['CLM_BLG_PRVDR_OSCAR_NUM'] = df['CLM_BLG_PRVDR_OSCAR_NUM'].astype('string')
+    # Columns you want as string without decimal/nan
+    int_to_string_cols = [
+        'CLM_TYPE_CD', 'CLM_NUM_SK', 'PRVDR_PRSCRBNG_PRVDR_NPI_NUM',
+        'PRVDR_RFRG_PRVDR_NPI_NUM', 'PRVDR_BLG_PRVDR_NPI_NUM',
+        'CLM_ATNDG_PRVDR_NPI_NUM', 'CLM_OPRTG_PRVDR_NPI_NUM',
+        'CLM_OTHR_PRVDR_NPI_NUM', 'CLM_RNDRG_PRVDR_NPI_NUM'
+    ]
+
+    for col in int_to_string_cols:
+        df[col] = (
+            df[col]
+            .astype('Int64')   # Handle floats like 1234.0 → 1234
+            .astype('string')  # Pandas nullable string type
+            .fillna('')        # Replace <NA> with empty string
+        )
     df.to_csv('out/SYNTHETIC_CLM.csv', index=False)
+
     df = pd.json_normalize(clm_line)
+    df['CLM_LINE_NUM'] = df['CLM_LINE_NUM'].astype('str')
     df.to_csv('out/SYNTHETIC_CLM_LINE.csv', index=False)
     df = pd.json_normalize(clm_val)
     df.to_csv('out/SYNTHETIC_CLM_VAL.csv', index=False)
@@ -33,6 +52,7 @@ def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_
     df = pd.json_normalize(clm_instnl)
     df.to_csv('out/SYNTHETIC_CLM_INSTNL.csv', index=False)
     df = pd.DataFrame(clm_line_instnl)
+    df['CLM_LINE_NUM'] = df['CLM_LINE_NUM'].astype('str')
     df.to_csv('out/SYNTHETIC_CLM_LINE_INSTNL.csv', index=False)
     df = pd.json_normalize(clm_dcmtn)
     df.to_csv('out/SYNTHETIC_CLM_DCMTN.csv', index=False)
@@ -41,6 +61,7 @@ def save_output_files(clm,clm_line,clm_val,clm_dt_sgntr,clm_prod,clm_instnl,clm_
     df = pd.json_normalize(clm_prfnl)
     df.to_csv('out/SYNTHETIC_CLM_PRFNL.csv', index=False)
     df = pd.json_normalize(clm_line_prfnl)
+    df['CLM_LINE_NUM'] = df['CLM_LINE_NUM'].astype('str')
     df.to_csv('out/SYNTHETIC_CLM_LINE_PRFNL.csv', index=False)
     df = pd.json_normalize(clm_line_rx)
     df.to_csv('out/SYNTHETIC_CLM_LINE_RX.csv', index=False)
@@ -225,7 +246,7 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
     claim['CLM']['CLM_UNIQ_ID'] = ''.join(random.choices(string.digits, k=13))
     #clm_type_cd = 60
     clm_type_cd = random.choice([1,2,3,4,10,20,30,40,50,60,71,72,81,82])
-    claim['CLM']['CLM_TYPE_CD'] = str(clm_type_cd)
+    claim['CLM']['CLM_TYPE_CD'] = clm_type_cd
 
     clm_src_id = -1
     clm_src_id = 20000
@@ -244,7 +265,7 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
     if(clm_type_cd in (20,30,40,60,61,62,63,71,72)):
         claim['CLM']['CLM_BLOOD_PT_FRNSH_QTY'] = random.randint(0,20)
     
-    claim['CLM']['CLM_NUM_SK'] = str(1)
+    claim['CLM']['CLM_NUM_SK'] = 1
     claim['CLM']['CLM_EFCTV_DT'] = str(date.today())
     claim['CLM']['CLM_IDR_LD_DT'] = random_date(claim['CLM']['CLM_FROM_DT'], max_date)
     claim['CLM']['CLM_OBSLT_DT'] = '9999-12-31'
@@ -256,7 +277,7 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
     if(clm_type_cd in (1,2,3,4)):
         claim['CLM']['CLM_SRVC_PRVDR_GNRC_ID_NUM'] = random.choice(type_2_npis)
         claim['CLM']['CLM_PD_DT'] = random_date(claim['CLM']['CLM_FROM_DT'], claim['CLM']['CLM_THRU_DT'])
-        claim['CLM']['PRVDR_PRSCRBNG_PRVDR_NPI_NUM'] = str(random.choice(type_1_npis))
+        claim['CLM']['PRVDR_PRSCRBNG_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
         claim['CLM']['PRVDR_PRSCRBNG_PRVDR_LAST_NAME'] = 'JOHNSON'
         claim['CLM']['CLM_SBMT_CHRG_AMT'] = round(random.uniform(1, 1000000),2)
         claim['CLM']['CLM_SBMT_FRMT_CD'] = random.choice(generator.code_systems['CLM_SBMT_FRMT_CD'])
@@ -360,12 +381,12 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
 
     #provider elements:
     if((clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in fiss_clm_type_cds):
-        claim['CLM']['PRVDR_BLG_PRVDR_NPI_NUM'] = str(random.choice(type_2_npis))
-        claim['CLM']['CLM_ATNDG_PRVDR_NPI_NUM'] = str(random.choice(type_1_npis))
-        claim['CLM']['CLM_OPRTG_PRVDR_NPI_NUM'] = str(random.choice(type_1_npis))
-        claim['CLM']['CLM_OTHR_PRVDR_NPI_NUM'] = str(random.choice(type_1_npis))
-        claim['CLM']['CLM_RNDRG_PRVDR_NPI_NUM'] = str(random.choice(type_1_npis))
-        claim['CLM']['CLM_BLG_PRVDR_OSCAR_NUM'] = str(random.choice(avail_oscar_codes_institutional))
+        claim['CLM']['PRVDR_BLG_PRVDR_NPI_NUM'] = random.choice(type_2_npis)
+        claim['CLM']['CLM_ATNDG_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
+        claim['CLM']['CLM_OPRTG_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
+        claim['CLM']['CLM_OTHR_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
+        claim['CLM']['CLM_RNDRG_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
+        claim['CLM']['CLM_BLG_PRVDR_OSCAR_NUM'] = random.choice(avail_oscar_codes_institutional)
         claim['CLM']['CLM_MDCR_COINSRNC_AMT'] = round(random.uniform(0,25),2)
 
 
@@ -655,9 +676,9 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
         add_meta_timestamps(claim_line_inst, claim['CLM'], max_date)
 
         claim_line['CLM_UNIQ_ID'] = claim['CLM']['CLM_UNIQ_ID']
-        claim_line['CLM_LINE_NUM'] = str(line)
-        claim_line_inst['CLM_LINE_NUM'] = str(line)
-        claim_line_prfnl['CLM_LINE_NUM'] = str(line)
+        claim_line['CLM_LINE_NUM'] = line
+        claim_line_inst['CLM_LINE_NUM'] = line
+        claim_line_prfnl['CLM_LINE_NUM'] = line
         claim['CLM_LINE'].append(claim_line)
         if(clm_type_cd >=10 and clm_type_cd <=65):
             claim['CLM_LINE_INSTNL'].append(claim_line_inst)
@@ -715,7 +736,7 @@ def gen_pac_version_of_claim(claim, max_date):
 
 
     for i in range(len(pac_claim['CLM_LINE'])):
-        pac_claim['CLM_LINE'][i]['CLM_LINE_NUM'] = str(i)
+        pac_claim['CLM_LINE'][i]['CLM_LINE_NUM'] = i
         pac_claim['CLM_LINE'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
         pac_claim['CLM_LINE'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
         pac_claim['CLM_LINE'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']

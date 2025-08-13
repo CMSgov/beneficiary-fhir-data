@@ -129,7 +129,7 @@ class GeneratorUtil():
             "BENE_XREF_SK": str(old_bene_sk),
             "BENE_HICN_NUM": bene_hicn_num,
             "BENE_KILL_CRED_CD": str(kill_cred_cd),
-            "SRC_REC_CTRE_TS": str(src_rec_ctre_ts),
+            "SRC_REC_CRTE_TS": str(src_rec_ctre_ts),
             "IDR_TRANS_EFCTV_TS": str(efctv_ts),
             "IDR_INSRT_TS": str(insrt_ts),
             "IDR_UPDT_TS": str(updt_ts),
