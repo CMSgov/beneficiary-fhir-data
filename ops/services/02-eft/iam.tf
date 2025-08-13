@@ -69,90 +69,74 @@ resource "aws_iam_role_policy_attachment" "sftp_server" {
   policy_arn = each.value
 }
 
-resource "aws_iam_role" "eft_user" {
-  name                 = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
-  description          = "Role attaching the ${aws_iam_policy.eft_user.name} policy to the ${local.inbound_sftp_user_username} SFTP user"
-  path                 = local.iam_path
-  permissions_boundary = local.permissions_boundary_arn
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Principal = {
-            Service = "transfer.amazonaws.com"
-          }
-        },
-      ]
-      Version = "2012-10-17"
-    }
-  )
-  managed_policy_arns = [aws_iam_policy.eft_user.arn]
+data "aws_iam_policy_document" "sftp_user" {
+  statement {
+    sid = "AllowEncryptionAndDecryptionOfS3Files"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+    resources = [
+      local.env_key_arn
+    ]
+  }
 
-  force_detach_policies = true
+  statement {
+    sid       = "AllowListingOfUserFolder"
+    actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
+    resources = [module.bucket_eft.bucket.arn]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["${local.inbound_sftp_s3_home_dir}/*", local.inbound_sftp_s3_home_dir]
+    }
+  }
+
+  statement {
+    sid = "HomeDirObjectAccess"
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
+      "s3:GetObjectVersion",
+      "s3:GetObjectACL",
+      "s3:PutObjectACL",
+    ]
+    resources = ["${module.bucket_eft.bucket.arn}/${local.inbound_sftp_s3_home_dir}*"]
+  }
 }
 
-resource "aws_iam_policy" "eft_user" {
-  name = "${local.full_name}-${local.inbound_sftp_user_username}-sftp-user"
+resource "aws_iam_policy" "sftp_user" {
+  name = "${local.sftp_full_name}-sftp-user"
   path = local.iam_path
   description = join("", [
     "Allows the ${local.inbound_sftp_user_username} SFTP user to access their restricted portion ",
     "of the ${module.bucket_eft.bucket.id} S3 bucket when using SFTP"
   ])
+  policy = data.aws_iam_policy_document.sftp_eft_user.json
+}
 
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "kms:Encrypt",
-            "kms:Decrypt",
-            "kms:ReEncrypt*",
-            "kms:GenerateDataKey*",
-            "kms:DescribeKey",
-          ]
-          Effect = "Allow"
-          Resource = [
-            local.env_key_arn
-          ]
-          Sid = "AllowEncryptionAndDecryptionOfS3Files"
-        },
-        {
-          Sid = "AllowListingOfUserFolder"
-          Action = [
-            "s3:ListBucket",
-            "s3:GetBucketLocation",
-          ]
-          Effect   = "Allow"
-          Resource = [module.bucket_eft.bucket.arn]
-          Condition = {
-            StringLike = {
-              "s3:prefix" = [
-                "${local.inbound_sftp_s3_home_dir}/*",
-                local.inbound_sftp_s3_home_dir
-              ]
-            }
-          }
-        },
-        {
-          Sid    = "HomeDirObjectAccess"
-          Effect = "Allow"
-          Action = [
-            "s3:PutObject",
-            "s3:GetObject",
-            "s3:DeleteObject",
-            "s3:DeleteObjectVersion",
-            "s3:GetObjectVersion",
-            "s3:GetObjectACL",
-            "s3:PutObjectACL"
-          ]
-          Resource = ["${module.bucket_eft.bucket.arn}/${local.inbound_sftp_s3_home_dir}*"]
-        }
-      ]
-    }
-  )
+resource "aws_iam_role" "sftp_user" {
+  name                  = "${local.sftp_full_name}-sftp-user"
+  path                  = local.iam_path
+  permissions_boundary  = local.permissions_boundary_arn
+  description           = "Role for the ${local.inbound_sftp_user_username} SFTP user"
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["transfer"].json
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "sftp_user" {
+  for_each = {
+    all = aws_iam_policy.sftp_user.arn
+  }
+
+  role       = aws_iam_role.sftp_user.name
+  policy_arn = each.value
 }
 
 resource "aws_iam_role" "partner_bucket_role" {

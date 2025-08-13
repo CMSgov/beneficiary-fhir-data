@@ -686,10 +686,12 @@ resource "aws_transfer_server" "this" {
 }
 
 resource "aws_transfer_user" "eft_user" {
+  depends_on = [aws_iam_role_policy_attachment.sftp_user]
+
   server_id = aws_transfer_server.this.id
-  role      = aws_iam_role.eft_user.arn
+  role      = aws_iam_role.sftp_user.arn
   user_name = local.inbound_sftp_user_username
-  tags      = { Name = "${local.full_name}-sftp-user-${local.inbound_sftp_user_username}" }
+  tags      = { Name = "${local.sftp_full_name}-sftp-user" }
 
   home_directory_type = "LOGICAL"
 
