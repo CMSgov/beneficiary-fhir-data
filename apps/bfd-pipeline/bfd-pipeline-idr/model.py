@@ -875,6 +875,7 @@ class IdrClaimProcedure(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+
 class IdrClaimProfessional(IdrBaseModel):
     geo_bene_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
@@ -913,6 +914,7 @@ class IdrClaimProfessional(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
+
 
 class IdrClaimLineProfessional(IdrBaseModel):
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -960,6 +962,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """
+
 
 class LoadProgress(IdrBaseModel):
     table_name: str

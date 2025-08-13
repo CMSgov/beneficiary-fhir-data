@@ -141,7 +141,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrClaimAnsiSignature,
         IdrClaimProcedure,
         IdrClaimProfessional,
-        IdrClaimLineProfessional
+        IdrClaimLineProfessional,
     )
 
     logger.info("done")
