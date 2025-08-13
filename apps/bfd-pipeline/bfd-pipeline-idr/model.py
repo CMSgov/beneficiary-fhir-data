@@ -877,9 +877,7 @@ class IdrClaimProcedure(IdrBaseModel):
 
 
 class IdrClaimProfessional(IdrBaseModel):
-    geo_bene_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
-    clm_type_cd: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
-    clm_num_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -917,6 +915,8 @@ class IdrClaimProfessional(IdrBaseModel):
 
 
 class IdrClaimLineProfessional(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_carr_clncl_lab_num: Annotated[float, BeforeValidator(transform_null_float)]
@@ -935,10 +935,6 @@ class IdrClaimLineProfessional(IdrBaseModel):
     clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
     clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    geo_bene_sk: Annotated[int, {PRIMARY_KEY: True}]
-    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
-    clm_num_sk: Annotated[int, {PRIMARY_KEY: True}]
-    clm_type_cd: Annotated[int, {PRIMARY_KEY: True}]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True},
@@ -955,12 +951,19 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return "idr.claim_line_professional"
 
     @staticmethod
-    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+    def _current_fetch_query(start_time: datetime) -> str:
+        clm = ALIAS_CLM
+        line = ALIAS_LINE
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl {line} ON
+                {clm}.geo_bene_sk = {line}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {line}.clm_type_cd AND
+                {clm}.clm_num_sk = {line}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{ORDER_BY}}
         """
 
 
