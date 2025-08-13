@@ -118,7 +118,7 @@ resource "aws_iam_policy" "sftp_user" {
     "Allows the ${local.inbound_sftp_user_username} SFTP user to access their restricted portion ",
     "of the ${module.bucket_eft.bucket.id} S3 bucket when using SFTP"
   ])
-  policy = data.aws_iam_policy_document.sftp_eft_user.json
+  policy = data.aws_iam_policy_document.sftp_user.json
 }
 
 resource "aws_iam_role" "sftp_user" {
