@@ -8,7 +8,6 @@ import psycopg
 from loader import get_connection_string
 
 tables = [
-    {"csv_name": "SYNTHETIC_BENE.csv", "table": "v2_mdcr_bene"},
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
     {"csv_name": "SYNTHETIC_BENE_MBI_ID.csv", "table": "v2_mdcr_bene_mbi_id"},
     {"csv_name": "SYNTHETIC_BENE_XREF.csv", "table": "v2_mdcr_bene_xref"},
@@ -37,13 +36,27 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
         try:
             with Path(file).open() as f:
                 reader = csv.DictReader(f)
-
-                cols = list(typing.cast(typing.Iterable[str], reader.fieldnames))
-                cols_str = ",".join(cols)
-                full_table = f"cms_vdm_view_mdcr_prd.{table['table']}"
+                sql_table = table["table"]
+                full_table = f"cms_vdm_view_mdcr_prd.{sql_table}"
                 with conn.cursor() as cur:
+                    # fetch the list of columns from the database and filter them out
+                    # so we don't get errors trying to insert extra columns
+                    db_columns = cur.execute(
+                        f"""
+                            SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE table_name = '{sql_table}'
+                        """  # type: ignore
+                    )
+                    db_columns = [typing.cast(str, col[0]).lower() for col in db_columns]
+
+                    cols = [
+                        col
+                        for col in typing.cast(typing.Iterable[str], reader.fieldnames)
+                        if col.lower().strip() in db_columns
+                    ]
                     # Clear out any previous data
                     cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
+                    cols_str = ",".join(cols)
                     with cur.copy(
                         f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
                     ) as copy:

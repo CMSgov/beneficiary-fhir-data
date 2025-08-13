@@ -1,8 +1,9 @@
 DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
 
 CREATE SCHEMA cms_vdm_view_mdcr_prd;
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
-    bene_sk BIGINT NOT NULL PRIMARY KEY, 
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
+     bene_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_mbi_id VARCHAR(11),
     bene_1st_name VARCHAR(30),
@@ -23,16 +24,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene (
     bene_line_5_adr VARCHAR(40),
     bene_line_6_adr VARCHAR(40),
     cntct_lang_cd VARCHAR(3),
-    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
-    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ
-);
-
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
-    bene_sk BIGINT NOT NULL,
-    bene_xref_efctv_sk BIGINT NOT NULL,
-    bene_mbi_id VARCHAR(11),
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
@@ -127,8 +118,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref (
     bene_kill_cred_cd VARCHAR(1) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
-    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+    src_rec_crte_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
@@ -174,7 +165,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_rndrg_prvdr_npi_num VARCHAR(10),
     clm_rndrg_prvdr_last_name VARCHAR(60),
     prvdr_blg_prvdr_npi_num VARCHAR(10),
+    prvdr_rfrg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
+    clm_ric_cd VARCHAR(1),
     clm_sbmt_chrg_amt NUMERIC,
     clm_blood_pt_frnsh_qty INT,
     clm_nch_prmry_pyr_cd VARCHAR(1),
@@ -345,6 +338,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
+
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (
     clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,

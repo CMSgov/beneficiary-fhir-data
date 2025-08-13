@@ -52,12 +52,6 @@ class TestPipeline:
         assert rows[1]["bene_sk"] == 70288544
         assert rows[1]["bene_mbi_id"] == "3BR5F18GJ10"
 
-        cur = conn.execute("select * from idr.beneficiary_history order by bene_sk")
-        assert cur.rowcount == 4
-        rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 70288544
-        assert rows[0]["bene_mbi_id"] == "3BR5F18GJ10"
-
         cur = conn.execute("select * from idr.beneficiary_mbi_id order by bene_mbi_id")
         assert cur.rowcount == 19
         rows = cur.fetchmany(1)
@@ -67,8 +61,8 @@ class TestPipeline:
         time.sleep(0.05)
         conn.execute(
             """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene
-            SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s
+            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+            SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
             WHERE bene_sk = 53965935
             """,
             {"timestamp": datetime.now(UTC)},

@@ -166,7 +166,12 @@ data "aws_subnet" "main" {
   id = each.key
 }
 
-data "aws_vpc_peering_connections" "main" {}
+data "aws_vpc_peering_connections" "main" {
+  filter {
+    name   = "status-code"
+    values = ["active"]
+  }
+}
 
 data "aws_vpc_peering_connection" "main" {
   for_each = toset(data.aws_vpc_peering_connections.main.ids)

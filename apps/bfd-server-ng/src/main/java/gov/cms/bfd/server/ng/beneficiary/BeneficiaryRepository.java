@@ -92,8 +92,7 @@ public class BeneficiaryRepository {
    */
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, Optional<String> partTypeCode, DateTimeRange lastUpdatedRange) {
-    return searchBeneficiaryWithCoverage(
-        "beneSk", String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
+    return searchBeneficiaryWithCoverage(String.valueOf(beneSk), partTypeCode, lastUpdatedRange);
   }
 
   /**
@@ -129,11 +128,7 @@ public class BeneficiaryRepository {
             """
             SELECT MAX(p.batchCompletionTimestamp)
             FROM LoadProgress p
-            WHERE p.tableName IN (
-              "idr.beneficiary",
-              "idr.beneficiary_history",
-              "idr.beneficiary_mbi_id"
-            )
+            WHERE p.tableName LIKE 'idr.beneficiary%'
             """,
             ZonedDateTime.class)
         .getResultList()
@@ -169,10 +164,7 @@ public class BeneficiaryRepository {
   }
 
   private Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
-      String idColumnName,
-      String idColumnValue,
-      Optional<String> partTypeCode,
-      DateTimeRange lastUpdatedRange) {
+      String idColumnValue, Optional<String> partTypeCode, DateTimeRange lastUpdatedRange) {
     // UTC -12 is "Anywhere on Earth time", sometimes used to specify deadlines in the absence of a
     // specific time zone.
     // https://en.wikipedia.org/wiki/Anywhere_on_Earth
@@ -187,7 +179,7 @@ public class BeneficiaryRepository {
                   LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
                   LEFT JOIN FETCH b.beneficiaryThirdParties tp
                   LEFT JOIN FETCH b.beneficiaryEntitlements be
-                  WHERE b.%s = :id
+                  WHERE b.beneSk = :id
                     AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                     AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                     AND NOT EXISTS(SELECT 1 FROM OvershareMbi om WHERE om.mbi = b.identity.mbi)
@@ -201,7 +193,6 @@ public class BeneficiaryRepository {
                     AND (be IS NULL OR be.id.benefitRangeEndDate >= :referenceDate)
                   ORDER BY b.obsoleteTimestamp DESC
                   """,
-                idColumnName,
                 lastUpdatedRange.getLowerBoundSqlOperator(),
                 lastUpdatedRange.getUpperBoundSqlOperator()),
             BeneficiaryCoverage.class)
