@@ -12,6 +12,14 @@ copy:
   - /bfd/${env}/database/nonsensitive/rds_instance_class
   - /bfd/${env}/migrator/sensitive/db/password
   - /bfd/${env}/migrator/sensitive/db/username
+  - /bfd/${env}/idr-pipeline/sensitive/db/username
+  - /bfd/${env}/idr-pipeline/sensitive/db/password
+  - /bfd/${env}/idr-pipeline/sensitive/idr_username
+  - /bfd/${env}/idr-pipeline/sensitive/idr_account
+  - /bfd/${env}/idr-pipeline/sensitive/idr_warehouse
+  - /bfd/${env}/idr-pipeline/sensitive/idr_database
+  - /bfd/${env}/idr-pipeline/sensitive/idr_schema
+  - /bfd/${env}/idr-pipeline/sensitive/idr_private_key
   - /bfd/${env}/ccw-pipeline/sensitive/db/password
   - /bfd/${env}/ccw-pipeline/sensitive/db/username
   - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/iterations
@@ -72,6 +80,11 @@ values:
   /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
+  /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/cpu: 4096
+  /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/memory: 8192
+  /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/disk_size: 21
+  /bfd/${env}/idr-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+  /bfd/${env}/idr-pipeline/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
   /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/cpu: 8192
   /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/memory: 16384
   /bfd/${env}/ccw-pipeline/nonsensitive/ecs/resources/disk_size: 50

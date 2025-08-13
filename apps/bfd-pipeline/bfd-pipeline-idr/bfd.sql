@@ -36,6 +36,7 @@ CREATE TABLE idr.beneficiary(
 );
 
 CREATE INDEX ON idr.beneficiary(bene_mbi_id);
+CREATE INDEX ON idr.beneficiary(bene_xref_efctv_sk_computed);
 
 CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
@@ -135,12 +136,12 @@ CREATE TABLE idr.beneficiary_xref (
     bene_kill_cred_cd VARCHAR(1) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
-    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
+    src_rec_crte_ts TIMESTAMPTZ NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
 CREATE TABLE idr.contract_pbp_number (
@@ -155,7 +156,8 @@ CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
     last_ts TIMESTAMPTZ NOT NULL,
-    batch_completion_ts TIMESTAMPTZ NOT NULL
+    batch_start_ts TIMESTAMPTZ NOT NULL,
+    batch_complete_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim (
@@ -196,7 +198,10 @@ CREATE TABLE idr.claim (
     clm_othr_prvdr_last_name VARCHAR(60) NOT NULL,
     clm_rndrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_rndrg_prvdr_last_name VARCHAR(60) NOT NULL,
+    prvdr_blg_prvdr_npi_num VARCHAR(10) NOT NULL,
+    prvdr_rfrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_disp_cd VARCHAR(2) NOT NULL,
+    clm_ric_cd VARCHAR(1) NOT NULL,
     clm_sbmt_chrg_amt NUMERIC NOT NULL,
     clm_blood_pt_frnsh_qty INT NOT NULL,
     clm_nch_prmry_pyr_cd VARCHAR(1) NOT NULL,
@@ -431,3 +436,32 @@ HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
 
 -- required to refresh view with CONCURRENTLY
 CREATE UNIQUE INDEX ON idr.overshare_mbis (bene_mbi_id);
+
+CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
+    RETURNS VOID AS $$
+    DECLARE comment_sql TEXT;
+BEGIN
+    -- Using "concurrently" will make the refresh slower, but it will not block any reads
+    -- on the view while the refresh is in progress
+    REFRESH MATERIALIZED VIEW CONCURRENTLY idr.overshare_mbis;
+    -- There's no implicit way to know when a materialized view was last updated
+    -- add a comment on the object in case we need to verify that it's being updated as expected
+    comment_sql := 'COMMENT ON MATERIALIZED VIEW idr.overshare_mbis is '
+        || quote_literal('{"last_refreshed": "' || now() || '"}');
+    EXECUTE comment_sql;
+END;
+$$
+LANGUAGE plpgsql
+
+-- Only the owner of the view may refresh it, we need to set "security definer" so the function
+-- can execute in the context of the creator
+SECURITY DEFINER;
+-- search_path is the order in which schemas are searched when a name is referenced with no schema specified
+-- Postgres recommends setting this on functions marked as "security definer" to prevent malicious users from
+-- creating an object that shadows an existing one on a globally writable schema
+ALTER FUNCTION idr.refresh_overshare_mbis() SET search_path = idr;
+-- Execute privilege is granted to PUBLIC by default
+REVOKE ALL ON FUNCTION idr.refresh_overshare_mbis() FROM PUBLIC;
+
+-- This only needs to be executed by the pipeline
+-- GRANT EXECUTE ON FUNCTION idr.refresh_overshare_mbis() TO api_pipeline_svcs;

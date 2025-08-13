@@ -1,14 +1,18 @@
+import logging
 import os
+import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
 from datetime import date, datetime
 
 import psycopg
 import snowflake.connector
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from psycopg.rows import class_row
-from snowflake.connector import DictCursor
+from snowflake.connector import DictCursor, ProgrammingError, SnowflakeConnection
+from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from constants import DEFAULT_MAX_DATE
 from model import LoadProgress, T
 from timer import Timer
 
@@ -16,6 +20,8 @@ idr_query_timer = Timer("idr_query")
 cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
+
+logger = logging.getLogger(__name__)
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -39,17 +45,21 @@ class Extractor(ABC):
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         pass
 
-    def get_query(self, cls: type[T], is_historical: bool) -> str:
-        query = cls.fetch_query(is_historical)
+    def get_query(self, cls: type[T], is_historical: bool, start_time: datetime) -> str:
+        query = cls.fetch_query(is_historical, start_time)
         columns = ",".join(cls.column_aliases())
         columns_raw = ",".join(cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
-    def extract_idr_data(self, cls: type[T], progress: LoadProgress | None) -> Iterator[list[T]]:
+    def extract_idr_data(
+        self, cls: type[T], progress: LoadProgress | None, start_time: datetime
+    ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(cls, is_historical)
+        fetch_query = self.get_query(cls, is_historical, start_time)
         batch_timestamp_col = cls.batch_timestamp_col_alias(is_historical)
         update_timestamp_col = cls.update_timestamp_col_alias()
+
+        logger.info("extracting %s", cls.table())
         if progress is None:
             idr_query_timer.start()
             # No saved progress, process the whole table from the beginning
@@ -64,12 +74,16 @@ class Extractor(ABC):
             idr_query_timer.stop()
             return res
 
-        previous_batch_complete = progress.batch_completion_ts != DEFAULT_MAX_DATE
-        op = ">" if previous_batch_complete else ">="
+        previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
+        logger.info("previous batch complete: %s", previous_batch_complete)
+
+        compare_timestamp = progress.batch_start_ts if previous_batch_complete else progress.last_ts
+
         idr_query_timer.start()
-        # Saved progress found, start processing from where we left
+        # Saved progress found, start processing from where we left off
         update_clause = (
-            f"OR {update_timestamp_col} IS NOT NULL AND {update_timestamp_col} {op} %(timestamp)s"
+            f"""AND ({update_timestamp_col} IS NULL 
+                OR {update_timestamp_col} >= %(timestamp)s)"""
             if update_timestamp_col is not None
             else ""
         )
@@ -78,13 +92,15 @@ class Extractor(ABC):
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE 
-                        ({update_timestamp_col} IS NOT NULL 
-                            AND {batch_timestamp_col} {op} %(timestamp)s {update_clause})
-                        AND {batch_timestamp_col} {op} '{get_min_transaction_date()}' 
+                    WHERE
+                        (
+                            {batch_timestamp_col} >= %(timestamp)s
+                            {update_clause}
+                        )
+                        AND {batch_timestamp_col} >= '{get_min_transaction_date()}' 
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_col}"),
-            {"timestamp": progress.last_ts},
+            {"timestamp": compare_timestamp},
         )
         idr_query_timer.stop()
         return res
@@ -115,40 +131,67 @@ class PostgresExtractor(Extractor):
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int) -> None:
         super().__init__()
-        self.conn = snowflake.connector.connect(  # type: ignore
+
+        self.conn = SnowflakeExtractor._connect()
+        self.batch_size = batch_size
+
+    @staticmethod
+    def _connect() -> SnowflakeConnection:
+        private_key = serialization.load_pem_private_key(
+            os.environ["IDR_PRIVATE_KEY"].encode(), password=None, backend=default_backend()
+        )
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        return snowflake.connector.connect(  # type: ignore
             user=os.environ["IDR_USERNAME"],
-            password=os.environ["IDR_PASSWORD"],
+            private_key=private_key_bytes,
             account=os.environ["IDR_ACCOUNT"],
             warehouse=os.environ["IDR_WAREHOUSE"],
             database=os.environ["IDR_DATABASE"],
             schema=os.environ["IDR_SCHEMA"],
         )
-        self.batch_size = batch_size
 
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         cur = None
-        try:
-            cursor_execute_timer.start()
-            cur = self.conn.cursor(DictCursor)
-            cur.execute(sql, params)
-            cursor_execute_timer.stop()
-
-            cursor_fetch_timer.start()
-            # fetchmany can return list[dict] or list[tuple] but we'll only use
-            # queries that return dicts
-            batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-            cursor_fetch_timer.stop()
-
-            while len(batch) > 0:  # type: ignore
-                transform_timer.start()
-                data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                transform_timer.stop()
-
-                yield data
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            try:
+                cursor_execute_timer.start()
+                cur = self.conn.cursor(DictCursor)
+                cur.execute(sql, params)
+                cursor_execute_timer.stop()
 
                 cursor_fetch_timer.start()
-                batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+                # fetchmany can return list[dict] or list[tuple] but we'll only use
+                # queries that return dicts
+                batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
                 cursor_fetch_timer.stop()
-        finally:
-            if cur:
-                cur.close()
+
+                while len(batch) > 0:  # type: ignore
+                    transform_timer.start()
+                    data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
+                    transform_timer.stop()
+
+                    yield data
+
+                    cursor_fetch_timer.start()
+                    batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+                    cursor_fetch_timer.stop()
+                return
+            # Snowflake will throw a reauth error if the pipeline has been running for several hours
+            # but it seems to be wrapped in a ProgrammingError.
+            # Unclear the best way to handle this, it will require a bit more trial and error
+            except (ReauthenticationRequest, RetryRequest, ProgrammingError) as ex:
+                logger.warning("received transient error, retrying...", exc_info=ex)
+                if attempt == max_attempts - 1:
+                    logger.error("max attempts exceeded")
+                    raise ex
+                self.conn = SnowflakeExtractor._connect()
+                time.sleep(1)
+
+            finally:
+                if cur:
+                    cur.close()

@@ -15,7 +15,7 @@ class BillingProvider {
   private String billingNpiNumber;
 
   @Column(name = "clm_blg_prvdr_oscar_num")
-  private String billingOscarNumber;
+  private Optional<String> billingOscarNumber;
 
   private static final String PROVIDER_ORG = "provider-org";
 
@@ -39,10 +39,12 @@ class BillingProvider {
                             .setSystem(SystemUrls.HL7_IDENTIFIER)
                             .setCode("NPI")
                             .setDisplay("National provider identifier"))));
-    organization.addIdentifier(
-        new Identifier()
-            .setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS)
-            .setValue(billingOscarNumber));
+    billingOscarNumber.ifPresent(
+        n -> {
+          organization.addIdentifier(
+              new Identifier().setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS).setValue(n));
+        });
+
     organization.setName("PROVIDER ORG SOURCED FROM NPPES");
 
     return Optional.of(organization);

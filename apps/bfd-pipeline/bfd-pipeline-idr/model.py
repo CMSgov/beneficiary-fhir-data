@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
 from typing import Annotated, TypeVar
@@ -63,17 +64,17 @@ class IdrBaseModel(BaseModel):
     def table() -> str: ...
 
     @staticmethod
-    def _current_fetch_query() -> str: ...
+    def _current_fetch_query(start_time: datetime) -> str: ...
 
     @classmethod
-    def _historical_fetch_query(cls) -> str:
-        return cls._current_fetch_query()
+    def _historical_fetch_query(cls, start_time: datetime) -> str:
+        return cls._current_fetch_query(start_time)
 
     @classmethod
-    def fetch_query(cls, is_historical: bool) -> str:
+    def fetch_query(cls, is_historical: bool, start_time: datetime) -> str:
         if is_historical:
-            return cls._historical_fetch_query()
-        return cls._current_fetch_query()
+            return cls._historical_fetch_query(start_time)
+        return cls._current_fetch_query(start_time)
 
     @staticmethod
     def computed_keys() -> list[str]:
@@ -191,7 +192,7 @@ class IdrBeneficiary(IdrBaseModel):
         return ["bene_xref_efctv_sk_computed"]
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
@@ -216,7 +217,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         return "idr.beneficiary_mbi_id"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
@@ -244,7 +245,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         return "idr.beneficiary_third_party"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp
@@ -272,7 +273,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         return "idr.beneficiary_status"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus
@@ -301,7 +302,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         return "idr.beneficiary_entitlement"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt
@@ -328,7 +329,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         return "idr.beneficiary_entitlement_reason"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn
@@ -348,14 +349,14 @@ class IdrBeneficiaryXref(IdrBaseModel):
     idr_updt_ts: Annotated[
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
     ]
-    src_rec_ctre_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
+    src_rec_crte_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
 
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_xref"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
@@ -381,7 +382,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
         return "idr.election_period_usage"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         # equivalent to "select distinct on", but Snowflake has different syntax for that,
         # so it's unfortunately not portable
         return """
@@ -407,7 +408,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         return "idr.contract_pbp_number"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return f"""
         SELECT {{COLUMNS}}
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
@@ -423,8 +424,18 @@ ALIAS_INSTNL = "instnl"
 ALIAS_VAL = "val"
 
 
-def claim_type_clause() -> str:
-    return f"{ALIAS_CLM}.clm_type_cd IN ({','.join([str(c) for c in CLAIM_TYPE_CODES])})"
+def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
+    latest_claims_env = "IDR_LATEST_CLAIMS"
+    if latest_claims_env in os.environ and os.environ[latest_claims_env] in ("1", "true"):
+        return f"""
+            {ALIAS_CLM}.clm_type_cd IN (61,62,63,64)
+            AND {ALIAS_CLM}.clm_src_id = '20000' 
+            AND {ALIAS_CLM}.clm_finl_actn_ind = 'Y'
+            AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y'
+            """
+    return f"""
+        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+    """
 
 
 class IdrClaim(IdrBaseModel):
@@ -440,43 +451,44 @@ class IdrClaim(IdrBaseModel):
     clm_thru_dt: date
     clm_efctv_dt: date
     clm_obslt_dt: date
-    clm_bill_clsfctn_cd: str
-    clm_bill_fac_type_cd: str
-    clm_bill_freq_cd: str
+    clm_bill_clsfctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bill_fac_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bill_freq_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_finl_actn_ind: str
-    clm_src_id: str
+    clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_mdcr_coinsrnc_amt: float
+    clm_mdcr_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blood_lblty_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_ncvrd_chrg_amt: float
-    clm_mdcr_ddctbl_amt: float
+    clm_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_prvdr_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_alowd_chrg_amt: float
     clm_bene_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_pmt_amt: float
     clm_pd_dt: date
+    clm_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ltst_clm_ind: str
-    clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_atndg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_oprtg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_othr_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
-    prvdr_blg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_blg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_rfrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_disp_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_sbmt_chrg_amt: float
+    clm_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blood_pt_frnsh_qty: Annotated[int, BeforeValidator(transform_null_int)]
     clm_nch_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_blg_prvdr_oscar_num: str
-    clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_blg_prvdr_oscar_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
-    prvdr_rfrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM},
@@ -493,7 +505,7 @@ class IdrClaim(IdrBaseModel):
         return "idr.claim"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
         return f"""
@@ -504,7 +516,7 @@ class IdrClaim(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -539,7 +551,7 @@ class IdrClaimDateSignature(IdrBaseModel):
         return "idr.claim_date_signature"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         return f"""
@@ -551,7 +563,7 @@ class IdrClaimDateSignature(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
                 ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
-                {{WHERE_CLAUSE}} AND {claim_type_clause()}
+                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
                 {{ORDER_BY}}
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
@@ -608,7 +620,7 @@ class IdrClaimInstitutional(IdrBaseModel):
         return "idr.claim_institutional"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         instnl = ALIAS_INSTNL
         return f"""
@@ -619,7 +631,7 @@ class IdrClaimInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -646,7 +658,7 @@ class IdrClaimValue(IdrBaseModel):
         return "idr.claim_value"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         val = ALIAS_VAL
         return f"""
@@ -657,7 +669,7 @@ class IdrClaimValue(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {val}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {val}.clm_type_cd AND
                 {clm}.clm_num_sk = {val}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -667,7 +679,7 @@ class IdrClaimLine(IdrBaseModel):
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_line_ansthsa_unit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_sbmt_chrg_amt: float
-    clm_line_alowd_chrg_amt: float
+    clm_line_alowd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ncvrd_chrg_amt: float
     clm_line_prvdr_pmt_amt: float
     clm_line_bene_pmt_amt: float
@@ -676,13 +688,13 @@ class IdrClaimLine(IdrBaseModel):
     clm_line_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_blood_ddctbl_amt: float
     clm_line_mdcr_ddctbl_amt: float
+    clm_line_hcpcs_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_mdcr_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_hcpcs_cd: str
-    clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_ndc_qty: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_srvc_unit_qty: float
-    clm_line_rev_ctr_cd: str
+    clm_line_rev_ctr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_rx_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_prtcptg_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -711,7 +723,7 @@ class IdrClaimLine(IdrBaseModel):
         return "idr.claim_line"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         # Note: joining on clm_uniq_id isn't strictly necessary,
@@ -726,7 +738,7 @@ class IdrClaimLine(IdrBaseModel):
                 {clm}.clm_num_sk = {line}.clm_num_sk AND
                 {clm}.clm_from_dt = {line}.clm_from_dt AND
                 {clm}.clm_uniq_id = {line}.clm_uniq_id
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -771,7 +783,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
         return "idr.claim_line_institutional"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
@@ -782,7 +794,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -805,7 +817,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         return "idr.claim_ansi_signature"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS_NO_ALIAS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
@@ -813,7 +825,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         """
 
     @classmethod
-    def _historical_fetch_query(cls) -> str:
+    def _historical_fetch_query(cls, start_time: datetime) -> str:  # noqa: ARG003
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
@@ -847,18 +859,20 @@ class IdrClaimProcedure(IdrBaseModel):
         return "idr.claim_procedure"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
-            SELECT {{COLUMNS}}, ROW_NUMBER() OVER (PARTITION BY clm_uniq_id) AS bfd_row_num
+            SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
+                PARTITION BY clm_uniq_id ORDER BY clm_uniq_id
+            ) AS bfd_row_num
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -950,7 +964,8 @@ class IdrClaimLineProfessional(IdrBaseModel):
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
-    batch_completion_ts: datetime
+    batch_start_ts: datetime
+    batch_complete_ts: datetime
 
     @staticmethod
     def query_placeholder() -> str:
@@ -961,9 +976,9 @@ class LoadProgress(IdrBaseModel):
         return "idr.load_progress"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return f"""
-        SELECT table_name, last_ts, batch_completion_ts 
+        SELECT table_name, last_ts, batch_start_ts, batch_complete_ts 
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s
         """

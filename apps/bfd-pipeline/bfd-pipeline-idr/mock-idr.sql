@@ -121,8 +121,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref (
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
-    src_rec_ctre_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_ctre_ts)
+    src_rec_crte_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
@@ -175,6 +175,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
     prvdr_rfrg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
+    clm_ric_cd VARCHAR(1),
     clm_sbmt_chrg_amt NUMERIC,
     clm_srvc_prvdr_gnrc_id_num VARCHAR(20),
     clm_blood_pt_frnsh_qty INT,

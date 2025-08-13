@@ -20,7 +20,7 @@ class ClaimInstitutionalSupportingInfo {
   private ClaimAdmissionTypeCode claimAdmissionTypeCode;
 
   @Column(name = "clm_mdcr_instnl_mco_pd_sw")
-  private McoPaidSwitch mcoPaidSwitch;
+  private Optional<McoPaidSwitch> mcoPaidSwitch;
 
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
 
@@ -30,7 +30,7 @@ class ClaimInstitutionalSupportingInfo {
             claimAdmissionSourceCode.map(c -> c.toFhir(supportingInfoFactory)),
             patientStatusCode.map(c -> c.toFhir(supportingInfoFactory)),
             Optional.of(claimAdmissionTypeCode.toFhir(supportingInfoFactory)),
-            Optional.of(mcoPaidSwitch.toFhir(supportingInfoFactory)),
+            mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
             Optional.of(diagnosisDrgCode.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
