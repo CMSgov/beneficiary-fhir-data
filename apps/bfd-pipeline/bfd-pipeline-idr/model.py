@@ -953,7 +953,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return "idr.claim_line_professional"
 
     @staticmethod
-    def _current_fetch_query(start_time: datetime) -> str:
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl
