@@ -486,7 +486,6 @@ class IdrClaim(IdrBaseModel):
     clm_blg_prvdr_oscar_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
-    clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
@@ -900,7 +899,7 @@ class IdrClaimProfessional(IdrBaseModel):
         return "idr.claim_professional"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
@@ -911,7 +910,7 @@ class IdrClaimProfessional(IdrBaseModel):
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause()}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
 
@@ -954,11 +953,12 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return "idr.claim_line_professional"
 
     @staticmethod
-    def _current_fetch_query() -> str:
+    def _current_fetch_query(start_time: datetime) -> str:
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl
             {WHERE_CLAUSE}
+            {ORDER_BY}
         """
 
 class LoadProgress(IdrBaseModel):

@@ -175,7 +175,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
     prvdr_rfrg_prvdr_npi_num VARCHAR(10),
     clm_disp_cd VARCHAR(2),
-    clm_ric_cd VARCHAR(1),
     clm_sbmt_chrg_amt NUMERIC,
     clm_srvc_prvdr_gnrc_id_num VARCHAR(20),
     clm_blood_pt_frnsh_qty INT,
