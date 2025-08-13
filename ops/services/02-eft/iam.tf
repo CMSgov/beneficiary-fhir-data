@@ -1,28 +1,72 @@
-resource "aws_iam_role" "logs" {
-  name                 = "${local.full_name}-logs"
-  path                 = local.iam_path
-  permissions_boundary = local.permissions_boundary_arn
-  description          = "Role allowing the ${local.full_name}-sftp Transfer Server to write logs"
-
-  assume_role_policy = jsonencode(
-    {
-      Statement = [
-        {
-          Action = "sts:AssumeRole"
-          Effect = "Allow"
-          Principal = {
-            Service = "transfer.amazonaws.com"
-          }
-        },
-      ]
-      Version = "2012-10-17"
+data "aws_iam_policy_document" "service_assume_role" {
+  for_each = toset(["transfer"])
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["${each.value}.amazonaws.com"]
     }
-  )
-  force_detach_policies = false
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess",
-  ]
-  max_session_duration = 3600
+  }
+}
+
+data "aws_iam_policy_document" "sftp_server_logs" {
+  statement {
+    sid       = "AllowLogStreamControl"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = ["${aws_cloudwatch_log_group.sftp.arn}:*"]
+  }
+}
+
+resource "aws_iam_policy" "sftp_server_logs" {
+  name = "${local.sftp_full_name}-logs"
+  path = local.iam_path
+  description = join("", [
+    "Grants permissions for the ${local.sftp_full_name} SFTP Server to write to its ",
+    "corresponding CloudWatch Log Group and Log Streams"
+  ])
+  policy = data.aws_iam_policy_document.sftp_server_logs.json
+}
+
+data "aws_iam_policy_document" "sftp_server_kms" {
+  statement {
+    sid = "AllowEncryptionUsingMasterKeys"
+    actions = [
+      "kms:Encrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+    resources = [local.env_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "sftp_server_kms" {
+  name = "${local.sftp_full_name}-kms"
+  path = local.iam_path
+  description = join("", [
+    "Grants permissions for the ${local.sftp_full_name} SFTP Server to use the KMS Master Key to ",
+    "encrypt"
+  ])
+  policy = data.aws_iam_policy_document.sftp_server_kms.json
+}
+
+resource "aws_iam_role" "sftp_server" {
+  name                  = "${local.sftp_full_name}-logs"
+  path                  = local.iam_path
+  permissions_boundary  = local.permissions_boundary_arn
+  description           = "Role for the ${local.sftp_full_name} Transfer Server to write logs"
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["transfer"].json
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "sftp_server" {
+  for_each = {
+    logs = aws_iam_policy.sftp_server_logs.arn
+    kms  = aws_iam_policy.sftp_server_kms.arn
+  }
+
+  role       = aws_iam_role.sftp_server.name
+  policy_arn = each.value
 }
 
 resource "aws_iam_role" "eft_user" {

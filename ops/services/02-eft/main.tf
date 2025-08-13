@@ -180,8 +180,10 @@ locals {
     if length(local.eft_partners_config[partner].outbound.notification_targets) > 0
   ]
 
-  vpc_id    = local.vpc.id
-  sftp_port = 22
+  vpc_id = local.vpc.id
+
+  sftp_port      = 22
+  sftp_full_name = "${local.full_name}-sftp"
 
   outbound_lambda_name         = "sftp-outbound-transfer"
   outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
@@ -659,15 +661,24 @@ resource "aws_security_group" "vpc_endpoint" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "sftp_server" {
+  name         = "/bfd/${local.service}/${local.full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
 resource "aws_transfer_server" "this" {
-  domain                 = "S3"
-  endpoint_type          = "VPC_ENDPOINT"
-  host_key               = local.inbound_sftp_server_key
-  identity_provider_type = "SERVICE_MANAGED"
-  logging_role           = aws_iam_role.logs.arn
-  protocols              = ["SFTP"]
-  security_policy_name   = "TransferSecurityPolicy-FIPS-2024-01"
-  tags                   = { Name = "${local.full_name}-sftp" }
+  depends_on = [aws_iam_role_policy_attachment.sftp_server]
+
+  domain                      = "S3"
+  endpoint_type               = "VPC_ENDPOINT"
+  host_key                    = local.inbound_sftp_server_key
+  identity_provider_type      = "SERVICE_MANAGED"
+  logging_role                = aws_iam_role.sftp_server.arn
+  protocols                   = ["SFTP"]
+  security_policy_name        = "TransferSecurityPolicy-FIPS-2024-01"
+  structured_log_destinations = [aws_cloudwatch_log_group.sftp_server.arn]
+  tags                        = { Name = local.sftp_full_name }
 
   endpoint_details {
     vpc_endpoint_id = aws_vpc_endpoint.this.id
