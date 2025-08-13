@@ -21,10 +21,10 @@ from model import (
     IdrClaimInstitutional,
     IdrClaimLine,
     IdrClaimLineInstitutional,
-    IdrClaimProcedure,
-    IdrClaimValue,
-    IdrClaimProfessional,
     IdrClaimLineProfessional,
+    IdrClaimProcedure,
+    IdrClaimProfessional,
+    IdrClaimValue,
     LoadProgress,
     T,
 )
