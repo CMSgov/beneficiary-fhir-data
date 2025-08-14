@@ -205,7 +205,7 @@ locals {
 }
 
 data "aws_iam_policy_document" "isp_bcda" {
-  count = length(aws_iam_role.isp_bcda_bucket_role) > 0 ? 1 : 0
+  count = length(aws_iam_role.isp_bcda_bucket_access) > 0 ? 1 : 0
 
   statement {
     sid    = "AllowISPFromVPCEOnly"
@@ -219,7 +219,7 @@ data "aws_iam_policy_document" "isp_bcda" {
 
     principals {
       type        = "AWS"
-      identifiers = aws_iam_role.isp_bcda_bucket_role[*].arn
+      identifiers = aws_iam_role.isp_bcda_bucket_access[*].arn
     }
     condition {
       test     = "StringNotEquals"
