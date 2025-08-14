@@ -789,19 +789,19 @@ class IdrClaimItem(IdrBaseModel):
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                UNION
-                SELECT
-                    {clm}.clm_uniq_id, 
-                    ROW_NUMBER() OVER (
-                        PARTITION BY {clm}.clm_uniq_id 
-                        ORDER BY {clm}.clm_uniq_id
-                    ) AS bfd_row_id
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
-                    JOIN claims {clm} 
-                        ON {val}.geo_bene_sk = {clm}.geo_bene_sk
-                        AND {val}.clm_type_cd = {clm}.clm_type_cd
-                        AND {val}.clm_num_sk = {clm}.clm_num_sk 
-                        AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                    UNION
+                    SELECT
+                        {clm}.clm_uniq_id, 
+                        ROW_NUMBER() OVER (
+                            PARTITION BY {clm}.clm_uniq_id 
+                            ORDER BY {clm}.clm_uniq_id
+                        ) AS bfd_row_id
+                        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
+                        JOIN claims {clm} 
+                            ON {val}.geo_bene_sk = {clm}.geo_bene_sk
+                            AND {val}.clm_type_cd = {clm}.clm_type_cd
+                            AND {val}.clm_num_sk = {clm}.clm_num_sk 
+                            AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
                 procedures AS (
                     SELECT 
