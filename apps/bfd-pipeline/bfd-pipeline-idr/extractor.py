@@ -2,7 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
-from datetime import date, datetime
+from datetime import UTC, date, datetime, timezone
 
 import psycopg
 import snowflake.connector
@@ -31,11 +31,11 @@ def print_timers() -> None:
     transform_timer.print_results()
 
 
-def get_min_transaction_date() -> str:
+def get_min_transaction_date() -> datetime:
     min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
     if min_date is not None:
-        return min_date
-    return "0001-01-01"
+        return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
+    return datetime.strptime("0001-01-01", "%Y-%m-%d").replace(tzinfo=UTC)
 
 
 class Extractor(ABC):
@@ -62,10 +62,11 @@ class Extractor(ABC):
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
         batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
-        batch_timestamp_clause = self._greatest_col(batch_timestamp_cols)
         update_timestamp_cols = cls.update_timestamp_col_alias()
-        update_timestamp_clause = self._greatest_col(update_timestamp_cols)
-
+        # We need to create batches using the most recent timestamp from all of the
+        # insert/update timestamps
+        batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+        min_transaction_date = get_min_transaction_date()
         logger.info("extracting %s", cls.table())
         if progress is None:
             idr_query_timer.start()
@@ -74,7 +75,7 @@ class Extractor(ABC):
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
-                    f"WHERE {batch_timestamp_clause} >= '{get_min_transaction_date()}'",
+                    f"WHERE {batch_timestamp_clause} >= '{min_transaction_date}'",
                 ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
                 {},
             )
@@ -85,26 +86,16 @@ class Extractor(ABC):
         logger.info("previous batch complete: %s", previous_batch_complete)
 
         compare_timestamp = progress.batch_start_ts if previous_batch_complete else progress.last_ts
-
+        compare_timestamp = max(min_transaction_date, compare_timestamp)
         idr_query_timer.start()
         # Saved progress found, start processing from where we left off
-        update_clause = (
-            f"""AND ({update_timestamp_clause} IS NULL 
-                OR {update_timestamp_clause} >= %(timestamp)s)"""
-            if len(update_timestamp_cols) > 0
-            else ""
-        )
         res = self.extract_many(
             cls,
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
                     WHERE
-                        (
-                            {batch_timestamp_clause} >= %(timestamp)s
-                            {update_clause}
-                        )
-                        AND {batch_timestamp_clause} >= '{get_min_transaction_date()}' 
+                        {batch_timestamp_clause} >= %(timestamp)s
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
             {"timestamp": compare_timestamp},

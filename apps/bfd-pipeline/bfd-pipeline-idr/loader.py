@@ -1,7 +1,7 @@
 import logging
 import os
 from collections.abc import Iterator
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import psycopg
 
@@ -153,8 +153,15 @@ class PostgresLoader:
                     batch_timestamp_cols = model.batch_timestamp_col(
                         progress is None or progress.is_historical()
                     )
+                    update_cols = model.update_timestamp_col()
                     if len(batch_timestamp_cols) > 0:
-                        min_timestamp = min([last[col] for col in batch_timestamp_cols])
+                        max_timestamp = max(
+                            [
+                                _convert_date(last[col])
+                                for col in [*batch_timestamp_cols, *update_cols]
+                                if last[col] is not None
+                            ]
+                        )
                         cur.execute(
                             """
                             UPDATE idr.load_progress
@@ -163,7 +170,7 @@ class PostgresLoader:
                             """,
                             {
                                 "table": table,
-                                "last_ts": min_timestamp,
+                                "last_ts": max_timestamp,
                             },
                         )
                 commit_timer.start()
@@ -181,3 +188,9 @@ class PostgresLoader:
             self.conn.commit()
         logger.info("loaded %s rows", num_rows)
         return data_loaded
+
+
+def _convert_date(date_field: date | datetime) -> datetime:
+    if isinstance(date_field, date):
+        return datetime.combine(date_field, datetime.min.time())
+    return date_field
