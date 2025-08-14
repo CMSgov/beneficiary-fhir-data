@@ -191,6 +191,6 @@ class PostgresLoader:
 
 
 def _convert_date(date_field: date | datetime) -> datetime:
-    if isinstance(date_field, date):
-        return datetime.combine(date_field, datetime.min.time())
-    return date_field
+    if type(date_field) is datetime:
+        return date_field.replace(tzinfo=UTC)
+    return datetime.combine(date_field, datetime.min.time()).replace(tzinfo=UTC)

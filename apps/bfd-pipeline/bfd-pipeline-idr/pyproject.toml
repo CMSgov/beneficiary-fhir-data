@@ -5,16 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "cryptography>=45.0.5",
+    "cryptography>=45.0.6",
     "psycopg[binary,pool]>=3.2.9",
     "pydantic>=2.11.7",
-    "snowflake-connector-python>=3.16.0",
+    "snowflake-connector-python>=3.17.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12.7",
-    "uv>=0.8.4",
+    "ruff>=0.12.9",
+    "uv>=0.8.10",
     "pytest>=8.4.1",
     "testcontainers>=4.12.0",
     "pyright>=1.1.403",

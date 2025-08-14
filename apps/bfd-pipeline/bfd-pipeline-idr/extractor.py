@@ -94,8 +94,7 @@ class Extractor(ABC):
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE
-                        {batch_timestamp_clause} >= %(timestamp)s
+                    WHERE {batch_timestamp_clause} >= %(timestamp)s
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
             {"timestamp": compare_timestamp},
