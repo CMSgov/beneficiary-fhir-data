@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives import serialization
 from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
+from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
 from timer import Timer
 
@@ -62,7 +63,10 @@ class Extractor(ABC):
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
         batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
-        update_timestamp_cols = cls.update_timestamp_col_alias()
+        # GREATEST doesn't work with nulls so we need to coalesce here
+        update_timestamp_cols = [
+            f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cls.update_timestamp_col_alias()
+        ]
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
