@@ -162,7 +162,7 @@ T = TypeVar("T", bound=IdrBaseModel)
 class IdrBeneficiary(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_xref_efctv_sk: int
-    bene_mbi_id: str
+    bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_null_string)]
     bene_last_name: str

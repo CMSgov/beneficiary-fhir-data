@@ -2,7 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
-from datetime import UTC, date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import psycopg
 import snowflake.connector
