@@ -293,6 +293,14 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "sftp_outbound_transfer" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name         = "/aws/lambda/${local.outbound_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
 resource "aws_lambda_function" "sftp_outbound_transfer" {
   depends_on = [aws_iam_role_policy_attachment.sftp_outbound_transfer]
   count      = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
@@ -311,6 +319,11 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   package_type     = "Image"
   memory_size      = 5120
   timeout          = 450
+
+  logging_config {
+    log_group  = one(aws_cloudwatch_log_group.sftp_outbound_transfer[*].name)
+    log_format = "Text"
+  }
 
   reserved_concurrent_executions = 1
 
