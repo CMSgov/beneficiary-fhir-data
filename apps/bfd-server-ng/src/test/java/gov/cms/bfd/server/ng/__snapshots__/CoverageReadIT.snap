@@ -1,4 +1,44 @@
-gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[missingBothPartA]=[
+{
+  "id" : "part-a-289169129",
+  "resourceType" : "Coverage"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[missingBothPartB]=[
+{
+  "id" : "part-b-289169129",
+  "resourceType" : "Coverage"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithOnlyFutureEntitlementPeriodsShouldBeEmpty=[
+{
+  "id" : "part-b-971050241",
+  "resourceType" : "Coverage"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithOnlyPastEntitlementPeriodsShouldBeEmpty=[
+{
+  "id" : "part-b-421056595",
+  "resourceType" : "Coverage"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId[missingPartB]=[
+{
+  "id" : "part-b-178083966",
+  "resourceType" : "Coverage"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId[validPartA]=[
 {
   "beneficiary" : {
     "reference" : "Patient/178083966"
@@ -126,7 +166,15 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId=[
 ]
 
 
-gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId[missingPartA]=[
+{
+  "id" : "part-a-365359727",
+  "resourceType" : "Coverage"
+}
+]
+
+
+gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId[validPartB]=[
 {
   "beneficiary" : {
     "reference" : "Patient/365359727"
@@ -254,7 +302,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId=[
 ]
 
 
-gov.cms.bfd.server.ng.CoverageReadIT.coverageRead_forBeneWithMissingTplData_shouldStillReturnResource=[
+gov.cms.bfd.server.ng.CoverageReadIT.coverageRead_forBeneWithMissingTpData_shouldStillReturnResource=[
 {
   "beneficiary" : {
     "reference" : "Patient/451482106"
@@ -307,24 +355,6 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageRead_forBeneWithMissingTplData_shou
     "valueCoding" : {
       "code" : "Y",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
-    "valueCoding" : {
-      "code" : "21",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
-    "valueCoding" : {
-      "code" : "Y",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
-    "valueCoding" : {
-      "code" : "Y",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
     }
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
