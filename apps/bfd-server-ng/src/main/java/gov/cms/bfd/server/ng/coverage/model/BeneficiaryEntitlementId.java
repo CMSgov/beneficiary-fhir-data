@@ -1,5 +1,6 @@
-package gov.cms.bfd.server.ng.beneficiary.model;
+package gov.cms.bfd.server.ng.coverage.model;
 
+import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hl7.fhir.r4.model.Period;
 
 /** Represents the composite primary key for the {@link BeneficiaryEntitlement} entity. */
 @EqualsAndHashCode
@@ -28,4 +30,13 @@ public class BeneficiaryEntitlementId implements Serializable {
 
   @Column(name = "bene_mdcr_entlmt_type_cd")
   private String medicareEntitlementTypeCode;
+
+  Period toFhirPeriod() {
+
+    Period period = new Period();
+    period.setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate));
+    period.setEndElement(DateUtil.toFhirDate(benefitRangeEndDate));
+
+    return period;
+  }
 }
