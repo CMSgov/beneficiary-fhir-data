@@ -182,6 +182,19 @@ for i in range(patients_to_generate):
 
     generator.generate_coverages(patient)
 
+    #pt c / d data
+    #50% of the time, generate part C
+    #25% of time, PDP only
+    #25% of time, no part C or D. 
+    if(random.randint(0,10)>=5):
+        contract_info = generator.generate_bene_mapd_enrlmt(patient,pdp_only=False)
+        generator.generate_bene_mapd_enrlmt_rx(patient,contract_info)
+        generator.generate_bene_lis(patient)
+    elif(random.choice([True,False])):
+        contract_info = generator.generate_bene_mapd_enrlmt(patient,pdp_only=True)
+        generator.generate_bene_mapd_enrlmt_rx(patient,contract_info = contract_info)
+        generator.generate_bene_lis(patient)
+
 
     for idx in range(0, random.randint(0, 2)):
         if idx == 0:
