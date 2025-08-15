@@ -291,13 +291,19 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
         claim_line['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
         claim_line['CLM_LINE_CVRD_PD_AMT'] = round(random.uniform(1, 1000000),2)
         claim_line['CLM_LINE_NCVRD_PD_AMT'] = round(random.uniform(1, 1000000),2)
+        claim_line['CLM_LINE_NCVRD_CHRG_AMT'] = round(random.uniform(0,1500),2)
         claim_line['CLM_LINE_NDC_CD'] = random.choice(available_ndc)
         claim_line['CLM_LINE_SRVC_UNIT_QTY'] = random.randint(1,10)
-        claim_line['CLM_LINE_FROM_DT'] =claim['CLM']['CLM_FROM_DT']
+        claim_line['CLM_LINE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
+        claim_line['CLM_LINE_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
         claim_line['CLM_LINE_NDC_QTY'] = random.randint(1,10)
         claim_line['CLM_LINE_NDC_QTY_QLFYR_CD'] = 'ML'
         claim_line['CLM_LINE_BENE_PD_AMT'] = round(random.uniform(1, 1000000),2)
         claim_line['CLM_LINE_PRVDR_PMT_AMT'] = round(random.uniform(1, 1000000),2)
+        claim_line['CLM_LINE_SBMT_CHRG_AMT'] = round(random.uniform(0,5),2)
+        claim_line['CLM_LINE_BENE_PMT_AMT'] = round(random.uniform(0,5),2)
+        claim_line['CLM_LINE_BLOOD_DDCTBL_AMT'] = round(random.uniform(0,15),2)
+        claim_line['CLM_LINE_MDCR_DDCTBL_AMT'] = round(random.uniform(0,5),2)
         claim_line['CLM_LINE_NUM'] = '1'
         claim_line['CLM_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
 
@@ -551,6 +557,7 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
     claim['CLM_PRFNL']['CLM_MDCR_PRFNL_PRMRY_PYR_AMT'] = round(random.uniform(10,1000),2)
     claim['CLM_PRFNL']['CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW'] = random.choice(generator.code_systems['CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW'])
     claim['CLM_PRFNL']['CLM_CLNCL_TRIL_NUM'] = str(random.randint(0,10000))
+    add_meta_timestamps(claim['CLM_PRFNL'], claim['CLM'], max_date)
     
 
     num_clm_lines = random.randint(1,15)
@@ -566,6 +573,8 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
         claim_line['CLM_TYPE_CD'] = claim['CLM']['CLM_TYPE_CD']
         claim_line['CLM_NUM_SK'] = claim['CLM']['CLM_NUM_SK']
         claim_line['CLM_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
+        claim_line['CLM_LINE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
+        claim_line['CLM_LINE_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
         if(clm_type_cd >=10 and clm_type_cd <= 64):
             claim_line_inst['GEO_BENE_SK'] = claim['CLM']['GEO_BENE_SK']
             claim_line_inst['CLM_DT_SGNTR_SK'] = claim['CLM']['CLM_DT_SGNTR_SK']
@@ -592,7 +601,6 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
 
             if(random.randint(0,10)==6):
                 claim_line_prfnl['CLM_LINE_HCT_HGB_TYPE_CD'] = random.choice(['R1','R2'])
-                claim_line_prfnl['CLM_LINE_HCT_HGB_TYPE_CD'] = round(random.uniform(0,1),2)
                 claim_line_prfnl['CLM_LINE_CARR_CLNCL_LAB_NUM'] = random.choice(['11D1111111','22D2222222'])
 
 
@@ -600,8 +608,6 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
             
 
             #these don't have much variance in our synthetic data, but they are not strictly the same in actual data!
-            claim_line['CLM_LINE_FROM_DT'] = claim['CLM']['CLM_FROM_DT']
-            claim_line['CLM_LINE_THRU_DT'] = claim['CLM']['CLM_THRU_DT']
             claim_line['CLM_LINE_MDCR_COINSRNC_AMT'] = round(random.uniform(0,5),2)
             
             #pick a random diagnosis. 
@@ -625,7 +631,7 @@ def gen_claim(bene_sk = '-1', min_date = '2018-01-01', max_date = str(date.today
             claim_line_prfnl['CLM_LINE_PRFNL_DME_PRICE_AMT'] = round(random.uniform(0,10000),2)
             claim_line['CLM_RNDRG_PRVDR_NPI_NUM'] = random.choice(type_1_npis)
 
-
+        add_meta_timestamps(claim_line_prfnl, claim['CLM'], max_date)
 
         claim_line['CLM_LINE_HCPCS_CD'] = random.choice(proc_codes_cpt_hcpcs)
         num_mods = random.randint(0,5)
@@ -949,9 +955,9 @@ def main():
                     for line in pac_claim['CLM_LINE_INSTNL']:
                         CLM_LINE_INSTNL.append(line)
                 CLM_FISS.append(pac_claim['CLM_FISS'])
-                CLM_PRFNL.append(pac_claim['CLM_PRFNL'])
-                for line in pac_claim['CLM_LINE_PRFNL']:
-                    CLM_LINE_PRFNL.append(line)
+                # CLM_PRFNL.append(pac_claim['CLM_PRFNL'])
+                # for line in pac_claim['CLM_LINE_PRFNL']:
+                #     CLM_LINE_PRFNL.append(line)
             
         pt_complete+=1
     save_output_files(CLM,CLM_LINE,CLM_VAL,CLM_DT_SGNTR,CLM_PROD,CLM_INSTNL,CLM_LINE_INSTNL,CLM_DCMTN,CLM_FISS,CLM_PRFNL,CLM_LINE_PRFNL,CLM_LINE_RX)

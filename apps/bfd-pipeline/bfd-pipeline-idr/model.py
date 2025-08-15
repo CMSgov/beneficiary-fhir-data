@@ -421,6 +421,7 @@ ALIAS_DCMTN = "dcmtn"
 ALIAS_SGNTR = "sgntr"
 ALIAS_LINE = "line"
 ALIAS_INSTNL = "instnl"
+ALIAS_PRFNL = "prfnl"
 ALIAS_VAL = "val"
 
 
@@ -465,7 +466,7 @@ class IdrClaim(IdrBaseModel):
     clm_alowd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_bene_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_pd_dt: date
+    clm_pd_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     clm_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ltst_clm_ind: str
     clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
@@ -884,12 +885,12 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_CLM},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -900,15 +901,15 @@ class IdrClaimProfessional(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
-        line = ALIAS_LINE
+        prfnl = ALIAS_PRFNL
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {line} ON
-                {clm}.geo_bene_sk = {line}.geo_bene_sk AND
-                {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = {line}.clm_num_sk
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
+                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
+                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
+                {clm}.clm_num_sk = {prfnl}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
@@ -919,9 +920,9 @@ class IdrClaimLineProfessional(IdrBaseModel):
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_carr_clncl_lab_num: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_carr_clncl_lab_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_carr_hpsa_scrcty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_dmerc_scrn_svgs_amt: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_dmerc_scrn_svgs_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_hct_hgb_rslt_num: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_hct_hgb_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_prfnl_dme_price_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -937,12 +938,12 @@ class IdrClaimLineProfessional(IdrBaseModel):
     clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -953,15 +954,15 @@ class IdrClaimLineProfessional(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
-        line = ALIAS_LINE
+        prfnl = ALIAS_PRFNL
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl {line} ON
-                {clm}.geo_bene_sk = {line}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_num_sk = {line}.clm_num_sk
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl {prfnl} ON
+                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
+                {clm}.clm_num_sk = {prfnl}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """

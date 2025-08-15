@@ -292,10 +292,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl (
     clm_clncl_tril_num VARCHAR(8),
     clm_mdcr_prfnl_prmry_pyr_amt NUMERIC,
     clm_mdcr_prfnl_prvdr_asgnmt_sw VARCHAR(2),
-    geo_bene_sk NUMERIC NOT NULL,
-    clm_num_sk NUMERIC NOT NULL,
-    clm_type_cd NUMERIC NOT NULL,
+    geo_bene_sk BIGINT NOT NULL,
     clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_num_sk, clm_type_cd)
@@ -371,11 +371,16 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
+    geo_bene_sk BIGINT,
+    clm_dt_sgntr_sk BIGINT,
+    clm_line_num INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
     clm_bene_prmry_pyr_pd_amt NUMERIC,
     clm_fed_type_srvc_cd VARCHAR(1),
-    clm_line_carr_clncl_lab_num NUMERIC,
+    clm_line_carr_clncl_lab_num VARCHAR(10),
     clm_line_carr_hpsa_scrcty_cd VARCHAR(1),
-    clm_line_dmerc_scrn_svgs_amt VARCHAR(1),
+    clm_line_dmerc_scrn_svgs_amt NUMERIC,
     clm_line_hct_hgb_rslt_num NUMERIC,
     clm_line_hct_hgb_type_cd VARCHAR(2),
     clm_line_prfnl_dme_price_amt NUMERIC,
@@ -389,13 +394,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
     clm_prvdr_spclty_cd VARCHAR(2),
     clm_srvc_ddctbl_sw VARCHAR(1),
     clm_suplr_type_cd VARCHAR(1),
-    geo_bene_sk NUMERIC NOT NULL,
-    clm_line_num NUMERIC NOT NULL,
-    clm_num_sk NUMERIC NOT NULL,
-    clm_type_cd NUMERIC NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    PRIMARY KEY(geo_bene_sk, clm_num_sk, clm_type_cd, clm_line_num)
+    PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (
