@@ -1,4 +1,4 @@
-package gov.cms.bfd.sharedutils;
+package gov.cms.bfd.server.ng;
 
 import java.io.InputStream;
 import java.util.ArrayList;

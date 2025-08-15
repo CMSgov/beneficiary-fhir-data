@@ -1,13 +1,13 @@
 package gov.cms.bfd.server.ng.eob;
 
 import gov.cms.bfd.server.ng.FhirUtil;
+import gov.cms.bfd.server.ng.SecurityLabels;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.sharedutils.SecurityLabels;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +28,10 @@ import org.springframework.stereotype.Component;
 public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+
+  // Cache the security labels dictionary to avoid repeated I/O and parsing
+  private static final Map<String, List<Map<String, Object>>> SECURITY_LABELS_DICT =
+      SecurityLabels.securityLabelsDict();
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -72,7 +76,7 @@ public class EobHandler {
   Bundle getFhirEobs(List<Claim> eobs, boolean filterSamhsa) {
 
     var filteredEobs = eobs;
-    var dict = SecurityLabels.securityLabelsDict();
+    var dict = SECURITY_LABELS_DICT;
 
     if (filterSamhsa) {
 
