@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -14,12 +16,30 @@
         Provides utility code and dependencies that are shared by (more or less) all of the other BFD modules.
     </description>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/../bfd-pipeline/bfd-pipeline-shared-utils/src/main/resources</directory>
+                <includes>
+                    <include>security_labels.yml</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
             <version>${javax.annotation-api.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+        </dependency>
+
 
         <dependency>
             <!-- Just useful. -->
@@ -64,7 +84,8 @@
             <artifactId>sqs</artifactId>
         </dependency>
         <dependency>
-            <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in Java. -->
+            <!-- Provides a sane facade for the giant mess of incompatible logging frameworks in
+            Java. -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -130,7 +151,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+            <!-- Used to provide DB connection pooling. See
+            https://github.com/brettwooldridge/HikariCP
                     for details. -->
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>

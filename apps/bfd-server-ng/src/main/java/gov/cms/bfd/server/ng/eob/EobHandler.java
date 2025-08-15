@@ -1,18 +1,22 @@
 package gov.cms.bfd.server.ng.eob;
 
 import gov.cms.bfd.server.ng.FhirUtil;
+import gov.cms.bfd.server.ng.SecurityLabels;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,6 +28,10 @@ import org.springframework.stereotype.Component;
 public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+
+  // Cache the security labels dictionary to avoid repeated I/O and parsing
+  private static final Map<String, List<Map<String, Object>>> SECURITY_LABELS_DICT =
+      SecurityLabels.securityLabelsDict();
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -61,8 +69,38 @@ public class EobHandler {
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
+
+    return getFhirEobs(eobs, true);
+  }
+
+  Bundle getFhirEobs(List<Claim> eobs, boolean filterSamhsa) {
+
+    var filteredEobs = eobs;
+    var dict = SECURITY_LABELS_DICT;
+
+    if (filterSamhsa) {
+
+      var sys = SecurityLabels.getSecurityLabelKeys();
+
+      filteredEobs =
+          eobs.stream()
+              // keep claims that do NOT contain any SAMHSA-coded procedures
+              .filter(claim -> !claimHasSamhsa(claim, dict, sys))
+              .toList();
+    }
+
+    if (filteredEobs.isEmpty()) {
+      Bundle emptyBundle = new Bundle();
+      emptyBundle.setType(Bundle.BundleType.COLLECTION);
+      emptyBundle.setTypeElement(null);
+
+      return emptyBundle;
+    }
+
+    var fhirEobs = filteredEobs.stream().map(Claim::toFhir).toList();
+
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+        fhirEobs.stream().map(eob -> (Resource) eob), claimRepository::claimLastUpdated);
   }
 
   /**
@@ -81,8 +119,45 @@ public class EobHandler {
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var claim = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
+    var eobs = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated).stream().toList();
+    Bundle bundle = getFhirEobs(eobs, true);
+    return bundle.getEntry().stream()
+        .map(entry -> entry.getResource())
+        .filter(resource -> resource instanceof ExplanationOfBenefit)
+        .map(resource -> (ExplanationOfBenefit) resource)
+        .findFirst();
+  }
 
-    return claim.map(Claim::toFhir);
+  private String getCode(ClaimProcedure e) {
+    String code = e.getDiagnosisCode().orElse("").trim().toLowerCase();
+    return code;
+  }
+
+  private String getDictCode(Map<String, Object> entry) {
+    String dictCode =
+        entry.get("code") != null
+            ? entry.get("code").toString().trim().replace(".", "").toLowerCase()
+            : "";
+    return dictCode;
+  }
+
+  // Returns true if the given claim contains any procedure that matches a SAMHSA
+  // security label code from the provided dictionary and keys.
+  private boolean claimHasSamhsa(
+      Claim claim, Map<String, List<Map<String, Object>>> dict, List<String> sys) {
+    return claim.getClaimProcedures().stream()
+        .anyMatch(proc -> procedureMatchesDict(proc, dict, sys));
+  }
+
+  private boolean procedureMatchesDict(
+      ClaimProcedure proc, Map<String, List<Map<String, Object>>> dict, List<String> sys) {
+    String code = getCode(proc);
+    for (String link : sys) {
+      List<Map<String, Object>> entries = dict.getOrDefault(link, List.of());
+      for (Map<String, Object> entry : entries) {
+        if (getDictCode(entry).equals(code)) return true;
+      }
+    }
+    return false;
   }
 }

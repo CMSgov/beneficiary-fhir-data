@@ -10,12 +10,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Optional;
+import lombok.Getter;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Procedure and diagnosis table. */
 @Entity
+@Getter
+@Setter
 @Table(name = "claim_procedure", schema = "idr")
 public class ClaimProcedure {
   @EmbeddedId ClaimProcedureId claimProcedureId;
