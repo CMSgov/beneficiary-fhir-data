@@ -97,3 +97,127 @@
   sourceView: V2_MDCR_BENE_MDCR_STUS_CD
   sourceColumn: BENE_DSBLD_STUS_ID
   nameOverride: Beneficiary Disabled Status Code
+- inputPath: Coverage-Base.BENE_DUAL_STUS_CD
+  appliesTo:
+    - DUAL
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-STUS-CD').value.code
+  referenceTable: BENE_DUAL_STUS_CD
+  sourceView: V2_MDCR_BENE_CMBND_DUAL_MDCR
+  sourceColumn: BENE_DUAL_STUS_CD
+- inputPath: Coverage-Base.BENE_DUAL_TYPE_CD
+  appliesTo:
+    - DUAL
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-TYPE-CD').value.code
+  referenceTable: BENE_DUAL_TYPE_CD
+  sourceView: V2_MDCR_BENE_CMBND_DUAL_MDCR
+  sourceColumn: BENE_DUAL_TYPE_CD
+- inputPath: Coverage-Base.GEO_USPS_STATE_CD
+  appliesTo:
+    - DUAL
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD').value.code
+  sourceView: V2_MDCR_BENE_CMBND_DUAL_MDCR
+  sourceColumn: GEO_USPS_STATE_CD
+- inputPath: Coverage-Base.BENE_MDCD_ELGBLTY_BGN_DT
+  appliesTo:
+    - DUAL
+  fhirPath: Coverage.period.start
+  sourceView: V2_MDCR_BENE_CMBND_DUAL_MDCR
+  sourceColumn: BENE_MDCD_ELGBLTY_BGN_DT
+- inputPath: Coverage-Base.BENE_MDCD_ELGBLTY_END_DT
+  appliesTo:
+    - DUAL
+  fhirPath: Coverage.period.end
+  sourceView: V2_MDCR_BENE_CMBND_DUAL_MDCR
+  sourceColumn: BENE_MDCD_ELGBLTY_END_DT
+- inputPath: Coverage-Base.BENE_ENRLMT_BGN_DT
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.period.start
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
+  sourceColumn: BENE_ENRLMT_BGN_DT
+- inputPath: Coverage-Base.BENE_ENRLMT_END_DT
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.period.end
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
+  sourceColumn: BENE_ENRLMT_END_DT
+- inputPath: Coverage-Base.BENE_CNTRCT_NUM
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
+  sourceColumn: BENE_CNTRCT_NUM
+- inputPath: Coverage-Base.BENE_PBP_NUM
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
+  sourceColumn: BENE_PBP_NUM
+- inputPath: Coverage-Base.BENE_CVRG_TYPE_CD
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD').value.code
+  referenceTable: BENE_CVRG_TYPE_CD
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
+  sourceColumn: BENE_CVRG_TYPE_CD
+- inputPath: Coverage-Base.CNTRCT_PBP_NAME
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.contained.where(resourceType='Organization').name
+  sourceView: V2_MDCR_CNTRCT_PBP_NUM
+  sourceColumn: CNTRCT_PBP_NAME
+- inputPath: Coverage-Base.CNTRCT_PLAN_CNTCT_TEL_NUM
+  appliesTo:
+    - PartC
+    - PartD
+  fhirPath: Coverage.contained.where(resourceType='Organization').contact.telecom.where(system='phone').value
+  sourceView: V2_MDCR_CNTRCT_PBP_CNTCT
+  sourceColumn: CNTRCT_PLAN_CNTCT_TEL_NUM
+- inputPath: Coverage-Base.BENE_PDP_ENRLMT_MMBR_ID_NUM
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.class.where(type.coding.code='rxid').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT_RX
+  sourceColumn: BENE_PDP_ENRLMT_MMBR_ID_NUM
+- inputPath: Coverage-Base.BENE_PDP_ENRLMT_GRP_NUM
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.class.where(type.coding.code='rxgroup').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT_RX
+  sourceColumn: BENE_PDP_ENRLMT_GRP_NUM
+- inputPath: Coverage-Base.BENE_PDP_ENRLMT_PRCSR_NUM
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.class.where(type.coding.code='rxpcn').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT_RX
+  sourceColumn: BENE_PDP_ENRLMT_PRCSR_NUM
+- inputPath: Coverage-Base.BENE_PDP_ENRLMT_BANK_ID_NUM
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.class.where(type.coding.code='rxbin').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT_RX
+  sourceColumn: BENE_PDP_ENRLMT_BANK_ID_NUM
+- inputPath: Coverage-Base.BENE_LIS_EFCTV_CD
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD').value.code
+  sourceView: V2_MDCR_BENE_LIS
+  sourceColumn: BENE_LIS_EFCTV_CD
+- inputPath: Coverage-Base.BENE_LIS_COPMT_LVL_CD
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD').value.code
+  sourceView: V2_MDCR_BENE_LIS
+  sourceColumn: BENE_LIS_COPMT_LVL_CD
+- inputPath: Coverage-Base.BENE_LIS_PTD_PRM_PCT
+  appliesTo:
+    - PartD
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT').value
+  sourceView: V2_MDCR_BENE_LIS
+  sourceColumn: BENE_LIS_PTD_PRM_PCT

@@ -26,6 +26,10 @@ class GeneratorUtil():
         self.mdcr_entlmt = []
         self.mdcr_tp = []
         self.mdcr_rsn = []
+        self.bene_cmbnd_dual_mdcr = []
+        self.bene_lis = []
+        self.bene_mapd_enrlmt_rx = []
+        self.bene_mapd_enrlmt = []
         self.code_systems  = {}
 
         self.load_addresses()
@@ -290,6 +294,118 @@ class GeneratorUtil():
                 }
                 self.mdcr_tp.append(tp_row)
 
+        # Generate dual coverage data 50% of the time
+        if random.choice([True, False]):
+            # Generate dual eligibility dates
+            dual_start_date = self.fake.date_between_dates(
+                datetime.date(year=2017, month=5, day=20),
+                datetime.date(year=2021, month=1, day=1)
+            )
+            dual_end_date = '9999-12-31'
+            dual_status_cd = random.choice(self.code_systems['BENE_DUAL_STUS_CD'])
+            dual_type_cd = random.choice(self.code_systems['BENE_DUAL_TYPE_CD'])
+            
+            state_codes = ['AL', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']
+            medicaid_state_cd = random.choice(state_codes)
+            
+            dual_row = {
+                "BENE_SK": patient['BENE_SK'],
+                'IDR_LTST_TRANS_FLG': 'Y',
+                'BENE_DUAL_STUS_CD': dual_status_cd,
+                'BENE_DUAL_TYPE_CD': dual_type_cd,
+                'MEDICAID_STATE_CD': medicaid_state_cd,
+                'BENE_MDCD_ELGBLTY_BGN_DT': str(dual_start_date),
+                'BENE_MDCD_ELGBLTY_END_DT': dual_end_date,
+                "IDR_TRANS_EFCTV_TS": str(dual_start_date) + "T00:00:00.000000+0000",
+                "IDR_INSRT_TS": str(dual_start_date) + "T00:00:00.000000+0000",
+                "IDR_UPDT_TS": str(dual_start_date) + "T00:00:00.000000+0000",
+                'IDR_TRANS_OBSLT_TS': '9999-12-31T00:00:00.000000+0000'
+            }
+            self.bene_cmbnd_dual_mdcr.append(dual_row)
+
+    def generate_bene_lis(self, patient):
+        if random.choice([True,False]):
+            lis_start_date = self.fake.date_between_dates(
+                datetime.date(year=2017, month=5, day=20),
+                datetime.date(year=2021, month=1, day=1)
+            )
+            lis_end_date = '9999-12-31'
+            lis_efctv_cd = random.choice(self.code_systems['BENE_LIS_EFCTV_CD'])
+            copmt_lvl_cd = random.choice(self.code_systems['BENE_LIS_COPMT_LVL_CD'])
+            ptd_prm_pct = random.choice(['025','050','075','100'])
+            
+            lis_row = {
+                "BENE_SK": patient['BENE_SK'],
+                'IDR_LTST_TRANS_FLG': 'Y',
+                'BENE_LIS_EFCTV_CD': lis_efctv_cd,
+                'BENE_LIS_COPMT_LVL_CD': copmt_lvl_cd,
+                'BENE_LIS_PTD_PRM_PCT': str(ptd_prm_pct),
+                'BENE_RNG_BGN_DT': str(lis_start_date),
+                'BENE_RNG_END_DT': lis_end_date,
+                "IDR_TRANS_EFCTV_TS": str(lis_start_date) + "T00:00:00.000000+0000",
+                "IDR_INSRT_TS": str(lis_start_date) + "T00:00:00.000000+0000",
+                "IDR_UPDT_TS": str(lis_start_date) + "T00:00:00.000000+0000",
+                'IDR_TRANS_OBSLT_TS': '9999-12-31T00:00:00.000000+0000'
+            }
+            self.bene_lis.append(lis_row)
+
+    def generate_bene_mapd_enrlmt_rx(self, patient,contract_info = None):
+        rx_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1)
+        )
+        member_id_num = str(random.randint(100000000, 999999999))
+        group_num = str(random.randint(100, 999))
+        prcsr_num = str(random.randint(100000, 999999))
+        bank_id_num = str(random.randint(100000, 999999))
+            
+        rx_row = {
+            "BENE_SK": patient['BENE_SK'],
+            'IDR_LTST_TRANS_FLG': 'Y',
+            'BENE_PDP_ENRLMT_MMBR_ID_NUM': member_id_num,
+            'BENE_PDP_ENRLMT_GRP_NUM': group_num,
+            'BENE_PDP_ENRLMT_PRCSR_NUM': prcsr_num,
+            'BENE_PDP_ENRLMT_BANK_ID_NUM': bank_id_num,
+            'BENE_CNTRCT_NUM': contract_info['contract_num'],
+            'BENE_PBP_NUM': contract_info['pbp_num'],
+            "IDR_TRANS_EFCTV_TS": str(rx_start_date) + "T00:00:00.000000+0000",
+            "IDR_INSRT_TS": str(rx_start_date) + "T00:00:00.000000+0000",
+            "IDR_UPDT_TS": str(rx_start_date) + "T00:00:00.000000+0000",
+            'IDR_TRANS_OBSLT_TS': '9999-12-31T00:00:00.000000+0000'
+        }
+        self.bene_mapd_enrlmt_rx.append(rx_row)
+
+
+    def generate_bene_mapd_enrlmt(self, patient, pdp_only=False):
+        enrollment_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1)
+        )
+        enrollment_end_date = '9999-12-31'
+
+        if(pdp_only):
+            cntrct_num = 'S0001'
+        else:
+            cntrct_num = random.choice(['H1234','G1234'])
+        pbp_num = "001"
+        cvrg_type_cd = '11' if pdp_only else '3'
+            
+        enrollment_row = {
+            "BENE_SK": patient['BENE_SK'],
+            'IDR_LTST_TRANS_FLG': 'Y',
+            'BENE_CNTRCT_NUM': cntrct_num,
+            'BENE_PBP_NUM': pbp_num,
+            'BENE_CVRG_TYPE_CD': cvrg_type_cd,
+            'BENE_ENRLMT_BGN_DT': str(enrollment_start_date),
+            'BENE_ENRLMT_END_DT': enrollment_end_date,
+            "IDR_TRANS_EFCTV_TS": str(enrollment_start_date) + "T00:00:00.000000+0000",
+            "IDR_INSRT_TS": str(enrollment_start_date) + "T00:00:00.000000+0000",
+            "IDR_UPDT_TS": str(enrollment_start_date) + "T00:00:00.000000+0000",
+            'IDR_TRANS_OBSLT_TS': '9999-12-31T00:00:00.000000+0000'
+        }
+        self.bene_mapd_enrlmt.append(enrollment_row)
+        return {"contract_num":cntrct_num,"pbp_num":pbp_num}
+
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
@@ -352,7 +468,23 @@ class GeneratorUtil():
         df = pd.json_normalize(self.mdcr_rsn)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
         
+        df = pd.json_normalize(self.bene_cmbnd_dual_mdcr)
+        if(df.size>0):
+            df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
+            
         df = pd.json_normalize(self.bene_xref_table)
         if(df.size>0):
             df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
-        
+            
+        # Save new synthetic data tables
+        df = pd.json_normalize(self.bene_lis)
+        if(df.size>0):
+            df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
+            
+        df = pd.json_normalize(self.bene_mapd_enrlmt_rx)
+        if(df.size>0):
+            df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", index=False)
+            
+        df = pd.json_normalize(self.bene_mapd_enrlmt)
+        if(df.size>0):
+            df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", index=False)
