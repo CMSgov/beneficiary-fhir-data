@@ -1,4 +1,7 @@
+import logging
 import time
+
+logger = logging.getLogger(__name__)
 
 
 class Timer:
@@ -11,7 +14,9 @@ class Timer:
         self.perf_start = time.perf_counter()
 
     def stop(self) -> None:
-        self.elapsed += time.perf_counter() - self.perf_start
+        segment = time.perf_counter() - self.perf_start
+        logger.info("%s: %.6f seconds", self.name, segment)
+        self.elapsed += segment
 
     def print_results(self) -> None:
-        print(f"Time taken for {self.name}: {self.elapsed:.6f} seconds")
+        logger.info("Total time taken for %s: %.6f seconds", self.name, self.elapsed)

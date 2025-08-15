@@ -66,13 +66,31 @@ public class ClaimRepository {
       Optional<Integer> limit,
       Optional<Integer> offset,
       List<ClaimSourceId> sourceIds) {
-
+    // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
+    // setMaxResults will only limit the results in memory rather than at the database level.
+    var claimIds =
+        entityManager
+            .createNativeQuery(
+                """
+                        SELECT c.clm_uniq_id
+                        FROM idr.claim c
+                        JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
+                        WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                        ORDER BY c.clm_uniq_id
+                        LIMIT :limit
+                        OFFSET :offset
+                        """,
+                Long.class)
+            .setParameter("beneSk", beneSk)
+            .setParameter("limit", limit.orElse(5000))
+            .setParameter("offset", offset.orElse(0))
+            .getResultList();
     return withParams(
             entityManager.createQuery(
                 String.format(
                     """
                         %s
-                        WHERE b.xrefSk = :beneSk
+                        WHERE c.claimUniqueId IN (:claimIds)
                         %s
                         """,
                     getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
@@ -80,9 +98,7 @@ public class ClaimRepository {
             claimThroughDate,
             lastUpdated,
             sourceIds)
-        .setParameter("beneSk", beneSk)
-        .setMaxResults(limit.orElse(5000))
-        .setFirstResult(offset.orElse(0))
+        .setParameter("claimIds", claimIds)
         .getResultList();
   }
 
@@ -108,16 +124,14 @@ public class ClaimRepository {
 
   private String getClaimTables() {
     return """
-    SELECT c
-    FROM Claim c
-    JOIN FETCH c.beneficiary b
-    JOIN FETCH c.claimDateSignature AS cds
-    JOIN FETCH c.claimLines AS cl
-    JOIN FETCH c.claimProcedures cp
-    LEFT JOIN FETCH c.claimInstitutional ci
-    LEFT JOIN FETCH cl.claimLineInstitutional cli
-    LEFT JOIN FETCH cli.ansiSignature a
-    LEFT JOIN FETCH c.claimValues cv
+      SELECT c
+      FROM Claim c
+      JOIN FETCH c.beneficiary b
+      JOIN FETCH c.claimDateSignature AS cds
+      JOIN FETCH c.claimItems AS cl
+      LEFT JOIN FETCH c.claimInstitutional ci
+      LEFT JOIN FETCH cl.claimLineInstitutional cli
+      LEFT JOIN FETCH cli.ansiSignature a
     """;
   }
 

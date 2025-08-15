@@ -58,7 +58,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           # Install a specific version of uv.
-          version: "0.7.8"
+          version: "0.8.10"
       - name: Run Python Tests per project
         id: run-pytest-set
         run: |

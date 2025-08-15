@@ -1,7 +1,7 @@
 import logging
 import os
 from collections.abc import Iterator
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import psycopg
 
@@ -79,6 +79,7 @@ class PostgresLoader:
             )
             data_loaded = False
             num_rows = 0
+
             # load each batch in a separate transaction
             for results in fetch_results:
                 data_loaded = True
@@ -97,7 +98,7 @@ class PostgresLoader:
                 cur.execute(
                     f"CREATE TEMPORARY TABLE {temp_table} (LIKE {table}) ON COMMIT DROP"  # type: ignore
                 )
-                immutable = model.update_timestamp_col() is None
+                immutable = len(model.update_timestamp_col()) == 0
                 meta_keys = (
                     ["bfd_created_ts"] if immutable else ["bfd_created_ts", "bfd_updated_ts"]
                 )
@@ -149,11 +150,18 @@ class PostgresLoader:
                     # Some tables that contain reference data (like contract info) may not have the
                     # normal IDR timestamps.
                     # For now we won't support incremental refreshes for those tables
-                    batch_timestamp_col = model.batch_timestamp_col(
+                    batch_timestamp_cols = model.batch_timestamp_col(
                         progress is None or progress.is_historical()
                     )
-                    if batch_timestamp_col:
-                        last_timestamp = last[batch_timestamp_col]
+                    update_cols = model.update_timestamp_col()
+                    if len(batch_timestamp_cols) > 0:
+                        max_timestamp = max(
+                            [
+                                _convert_date(last[col])
+                                for col in [*batch_timestamp_cols, *update_cols]
+                                if last[col] is not None
+                            ]
+                        )
                         cur.execute(
                             """
                             UPDATE idr.load_progress
@@ -162,7 +170,7 @@ class PostgresLoader:
                             """,
                             {
                                 "table": table,
-                                "last_ts": last_timestamp,
+                                "last_ts": max_timestamp,
                             },
                         )
                 commit_timer.start()
@@ -180,3 +188,9 @@ class PostgresLoader:
             self.conn.commit()
         logger.info("loaded %s rows", num_rows)
         return data_loaded
+
+
+def _convert_date(date_field: date | datetime) -> datetime:
+    if type(date_field) is datetime:
+        return date_field.replace(tzinfo=UTC)
+    return datetime.combine(date_field, datetime.min.time()).replace(tzinfo=UTC)

@@ -1,27 +1,24 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
 import java.util.Optional;
+import lombok.Getter;
 
-@Entity
-@Table(name = "claim_value", schema = "idr")
+@Getter
+@Embeddable
 class ClaimValue {
-  @EmbeddedId private ClaimValueId claimValueId;
+  @Convert(converter = NonZeroIntConverter.class)
+  @Column(name = "clm_val_sqnc_num_val")
+  private Optional<Integer> sequenceNumber;
 
   @Column(name = "clm_val_cd")
-  private String claimValueCode;
+  private Optional<String> claimValueCode;
 
   @Column(name = "clm_val_amt")
   private double claimValueAmount;
-
-  @JoinColumn(name = "clm_uniq_id")
-  @ManyToOne
-  private Claim claim;
 
   private static final String VALUE_CODE_DISPROPORTIONATE = "18";
   private static final String VALUE_CODE_IME = "19";
@@ -35,10 +32,13 @@ class ClaimValue {
   }
 
   private Optional<Double> getAmountForCode(String code) {
-    if (claimValueCode.equals(code)) {
-      return Optional.of(claimValueAmount);
-    } else {
-      return Optional.empty();
-    }
+    return claimValueCode.flatMap(
+        c -> {
+          if (c.equals(code)) {
+            return Optional.of(claimValueAmount);
+          } else {
+            return Optional.empty();
+          }
+        });
   }
 }
