@@ -10,7 +10,7 @@ import org.hl7.fhir.r4.model.Patient;
 /** Main entity representing the beneficiary table. */
 @Entity
 @Getter
-@Table(name = "beneficiary", schema = "idr")
+@Table(name = "valid_beneficiary", schema = "idr")
 public class Beneficiary extends BeneficiaryBase {
 
   /**

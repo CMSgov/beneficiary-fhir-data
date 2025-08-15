@@ -41,7 +41,7 @@ docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/mo
 docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/bfd.sql
 
 uv sync
-BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run python ./load_synthetic.py
+BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run python ./load_synthetic.py "$1"
 
 echo
 echo Schema created successfully.

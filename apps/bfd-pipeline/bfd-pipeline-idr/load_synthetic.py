@@ -70,7 +70,7 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
 if __name__ == "__main__":
     baseDir = (
         sys.argv[1]
-        if len(sys.argv) > 1
+        if len(sys.argv) > 1 and sys.argv[1] != ""
         else "../../bfd-model/bfd-model-idr/sample-data/generator/out"
     )
     load_from_csv(

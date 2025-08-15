@@ -33,6 +33,21 @@ public class CoverageSearchIT extends IntegrationTestBase {
     return getFhirClient().search().forResource(Coverage.class).returnBundle(Bundle.class);
   }
 
+  private static final String BENE_ID_PART_A_ONLY = "178083966";
+  private static final String BENE_ID_PART_B_ONLY = "365359727";
+  private static final String BENE_ID_NON_CURRENT = "181968400";
+  private static final String BENE_ID_NO_COVERAGE = "289169129";
+  private static final String BENE_ID_EXPIRED_COVERAGE = "421056595";
+  private static final String BENE_ID_FUTURE_COVERAGE = "971050241";
+  private static final String BENE_ID_NO_TP = "451482106";
+
+  private Bundle searchByBeneficiary(String beneId, SearchStyleEnum searchStyle) {
+    return searchBundle()
+        .where(new ReferenceClientParam(Coverage.SP_BENEFICIARY).hasId("Patient/" + beneId))
+        .usingStyle(searchStyle)
+        .execute();
+  }
+
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void coverageSearchById(SearchStyleEnum searchStyle) {
@@ -187,5 +202,94 @@ public class CoverageSearchIT extends IntegrationTestBase {
   @Test
   void coverageSearchWithNoParametersBadRequest() {
     assertThrows(InvalidRequestException.class, () -> searchBundle().execute());
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forBeneWithOnlyPartA_shouldReturnOneEntry(SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_PART_A_ONLY, searchStyle);
+    assertEquals(
+        1,
+        coverageBundle.getEntry().size(),
+        "Should find exactly one Coverage resource for a Part A-only beneficiary");
+    assertEquals(
+        "part-a-" + BENE_ID_PART_A_ONLY,
+        coverageBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forBeneWithOnlyPartB_shouldReturnOneEntry(SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_PART_B_ONLY, searchStyle);
+    assertEquals(
+        1,
+        coverageBundle.getEntry().size(),
+        "Should find exactly one Coverage resource for a Part B-only beneficiary");
+    assertEquals(
+        "part-b-" + BENE_ID_PART_B_ONLY,
+        coverageBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forNonCurrentBene_shouldReturnEmptyBundle(SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_NON_CURRENT, searchStyle);
+    assertEquals(
+        0,
+        coverageBundle.getEntry().size(),
+        "Should find no Coverage for a beneficiary record that is not the current effective version.");
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forBeneWithNoCoverage_shouldReturnEmptyBundle(SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_NO_COVERAGE, searchStyle);
+    assertEquals(
+        0,
+        coverageBundle.getEntry().size(),
+        "Should find no Coverage for a beneficiary who exists but has no entitlement records.");
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forBeneWithExpiredCoverage_shouldReturnEmptyBundle(
+      SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_EXPIRED_COVERAGE, searchStyle);
+    assertEquals(
+        0,
+        coverageBundle.getEntry().size(),
+        "Should find no Coverage for a beneficiary whose entitlement periods are all in the past.");
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forBeneWithFutureCoverage_shouldReturnEmptyBundle(
+      SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_FUTURE_COVERAGE, searchStyle);
+    assertEquals(
+        0,
+        coverageBundle.getEntry().size(),
+        "Should find no Coverage for a beneficiary whose entitlement periods all start in the future.");
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearch_forBeneWithMissingTplData_shouldStillReturnResources(
+      SearchStyleEnum searchStyle) {
+    Bundle coverageBundle = searchByBeneficiary(BENE_ID_NO_TP, searchStyle);
+    assertEquals(
+        2,
+        coverageBundle.getEntry().size(),
+        "Should find both Part A and B Coverage resources even if TPL data is missing.");
+    coverageBundle
+        .getEntry()
+        .sort(Comparator.comparing(entry -> entry.getResource().getIdElement().getIdPart()));
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
   }
 }
