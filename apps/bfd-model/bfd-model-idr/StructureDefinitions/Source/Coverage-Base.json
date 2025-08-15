@@ -69,9 +69,9 @@
                 ]
             },
             {
-                "id": "Coverage-Base.DUAL_STUS_CD",
-                "path": "Coverage-Base.DUAL_STUS_CD",
-                "label": "Medicare/Medicaid Dual Status Code",
+                "id": "Coverage-Base.BENE_DUAL_STUS_CD",
+                "path": "Coverage-Base.BENE_DUAL_STUS_CD",
+                "label": "Beneficiary Dual Status Code",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -181,6 +181,222 @@
                 "id": "Coverage-Base.BENE_MDCR_ENTLMT_RSN_CD",
                 "path": "Coverage-Base.BENE_MDCR_ENTLMT_RSN_CD",
                 "label": "Beneficiary Entitlement Reason Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_MDCD_ELGBLTY_BGN_DT",
+                "path": "Coverage-Base.BENE_MDCD_ELGBLTY_BGN_DT",
+                "label": "Medicaid Eligibility Begin Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_MDCD_ELGBLTY_END_DT",
+                "path": "Coverage-Base.BENE_MDCD_ELGBLTY_END_DT",
+                "label": "Medicaid Eligibility End Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.GEO_USPS_STATE_CD",
+                "path": "Coverage-Base.GEO_USPS_STATE_CD",
+                "label": "Medicaid State Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_ENRLMT_BGN_DT",
+                "path": "Coverage-Base.BENE_ENRLMT_BGN_DT",
+                "label": "Beneficiary Enrollment Begin Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_ENRLMT_END_DT",
+                "path": "Coverage-Base.BENE_ENRLMT_END_DT",
+                "label": "Beneficiary Enrollment End Date",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_CNTRCT_NUM",
+                "path": "Coverage-Base.BENE_CNTRCT_NUM",
+                "label": "Beneficiary Contract Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_PBP_NUM",
+                "path": "Coverage-Base.BENE_PBP_NUM",
+                "label": "Beneficiary PBP Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_CVRG_TYPE_CD",
+                "path": "Coverage-Base.BENE_CVRG_TYPE_CD",
+                "label": "Beneficiary Coverage Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.CNTRCT_PBP_NAME",
+                "path": "Coverage-Base.CNTRCT_PBP_NAME",
+                "label": "Contract PBP Name",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.CNTRCT_PLAN_CNTCT_TEL_NUM",
+                "path": "Coverage-Base.CNTRCT_PLAN_CNTCT_TEL_NUM",
+                "label": "Contract Plan Contact Telephone Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_MAPD_ENRLMT_RX",
+                "path": "Coverage-Base.BENE_MAPD_ENRLMT_RX",
+                "label": "Beneficiary MAPD Enrollment RX",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_PDP_ENRLMT_MMBR_ID_NUM",
+                "path": "Coverage-Base.BENE_PDP_ENRLMT_MMBR_ID_NUM",
+                "label": "Beneficiary PDP Enrollment Member ID Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_PDP_ENRLMT_GRP_NUM",
+                "path": "Coverage-Base.BENE_PDP_ENRLMT_GRP_NUM",
+                "label": "Beneficiary PDP Enrollment Group Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_PDP_ENRLMT_PRCSR_NUM",
+                "path": "Coverage-Base.BENE_PDP_ENRLMT_PRCSR_NUM",
+                "label": "Beneficiary PDP Enrollment Processor Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_PDP_ENRLMT_BANK_ID_NUM",
+                "path": "Coverage-Base.BENE_PDP_ENRLMT_BANK_ID_NUM",
+                "label": "Beneficiary PDP Enrollment Bank ID Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_LIS_EFCTV_CD",
+                "path": "Coverage-Base.BENE_LIS_EFCTV_CD",
+                "label": "Beneficiary LIS Effective Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_LIS_COPMT_LVL_CD",
+                "path": "Coverage-Base.BENE_LIS_COPMT_LVL_CD",
+                "label": "Beneficiary LIS Copayment Level Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_LIS_PTD_PRM_PCT",
+                "path": "Coverage-Base.BENE_LIS_PTD_PRM_PCT",
+                "label": "Beneficiary LIS Part D Premium Percentage",
                 "min": 0,
                 "max": "1",
                 "type": [
