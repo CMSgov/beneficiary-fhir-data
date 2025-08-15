@@ -441,7 +441,7 @@ def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
 
 class IdrClaim(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
-    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_int)]
+    geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_num_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
