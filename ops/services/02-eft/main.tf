@@ -338,7 +338,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
       BFD_ENVIRONMENT   = local.env
       BUCKET            = local.full_name
       BUCKET_ROOT_DIR   = local.inbound_sftp_s3_home_dir
-      BFD_SNS_TOPIC_ARN = one(aws_sns_topic.outbound_notifs[*].arn)
+      BFD_SNS_TOPIC_ARN = one(module.topic_outbound_notifs[*].topic.arn)
       SNS_TOPIC_ARNS_BY_PARTNER_JSON = jsonencode(
         {
           for partner in local.eft_partners_with_outbound_notifs
@@ -524,19 +524,20 @@ module "topic_outbound_pending_s3_notifs" {
   lambda_sample_rate = 100
 }
 
-resource "aws_sns_topic" "outbound_notifs" {
+module "topic_outbound_notifs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name              = local.outbound_notifs_topic_prefix
-  kms_master_key_id = local.env_key_arn
+  source = "../../terraform-modules/general/logging-sns-topic"
 
-  lambda_success_feedback_sample_rate = 100
-  lambda_success_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
-  lambda_failure_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
+  topic_name              = local.outbound_notifs_topic_prefix
 
-  sqs_success_feedback_sample_rate = 100
-  sqs_success_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
-  sqs_failure_feedback_role_arn    = one(aws_iam_role.outbound_notifs[*].arn)
+  iam_path                 = local.iam_path
+  permissions_boundary_arn = local.permissions_boundary_arn
+
+  kms_key_arn = local.env_key_arn
+
+  sqs_sample_rate    = 100
+  lambda_sample_rate = 100
 }
 
 resource "aws_sns_topic" "outbound_partner_notifs" {
