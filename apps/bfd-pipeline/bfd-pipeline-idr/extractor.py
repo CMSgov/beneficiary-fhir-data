@@ -87,10 +87,13 @@ class Extractor(ABC):
             return res
 
         previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
-        logger.info("previous batch complete: %s", previous_batch_complete)
-
-        compare_timestamp = progress.batch_start_ts if previous_batch_complete else progress.last_ts
-        compare_timestamp = max(min_transaction_date, compare_timestamp)
+        # If we've completed the last batch, there shouldn't be any additional records
+        # with the same timestamp
+        op = ">" if previous_batch_complete else ">="
+        # insertion timestamps aren't always representative of the time the data is available in
+        # Snowflake, so we should always start loading from the most recent timestamp
+        # that we've already fetched
+        compare_timestamp = max(min_transaction_date, progress.last_ts)
         idr_query_timer.start()
         # Saved progress found, start processing from where we left off
         res = self.extract_many(
@@ -98,7 +101,7 @@ class Extractor(ABC):
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE {batch_timestamp_clause} >= %(timestamp)s
+                    WHERE {batch_timestamp_clause} {op} %(timestamp)s
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
             {"timestamp": compare_timestamp},
