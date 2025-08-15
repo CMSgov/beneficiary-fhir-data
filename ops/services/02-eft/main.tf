@@ -185,6 +185,8 @@ locals {
   sftp_port      = 22
   sftp_full_name = "${local.full_name}-sftp"
 
+  topic_arn_placeholder = "%TOPIC_ARN%"
+
   outbound_lambda_name         = "sftp-outbound-transfer"
   outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
   outbound_lambda_src          = replace(local.outbound_lambda_name, "-", "_")
@@ -277,8 +279,8 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
     content {
       events        = ["s3:ObjectCreated:*"]
       filter_prefix = "${local.eft_partners_config[topic.key].inbound.dir}/"
-      id            = aws_sns_topic.inbound_received_s3_notifs[topic.key].name
-      topic_arn     = aws_sns_topic.inbound_received_s3_notifs[topic.key].arn
+      id            = module.topic_inbound_received_s3_notifs[topic.key].topic.name
+      topic_arn     = module.topic_inbound_received_s3_notifs[topic.key].topic.arn
     }
   }
 
@@ -417,55 +419,72 @@ resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
   endpoint  = one(aws_lambda_function.sftp_outbound_transfer[*].arn)
 }
 
-resource "aws_sns_topic" "inbound_received_s3_notifs" {
+data "aws_iam_policy_document" "topic_inbound_received_s3_notifs" {
   for_each = toset(local.eft_partners_with_inbound_received_notifs)
 
-  name              = "${local.full_name}-inbound-received-s3-${each.key}"
-  kms_master_key_id = local.env_key_arn
+  statement {
+    sid       = "Allow_Publish_from_S3"
+    actions   = ["SNS:Publish"]
+    resources = [local.topic_arn_placeholder]
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["${module.bucket_eft.bucket.arn}"]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = {
+      for index, target in local.eft_partners_config[each.key].inbound.s3_notifications.received_file_targets
+      : index => target
+    }
+    content {
+      sid       = "Allow_Subscribe_from_${each.key}_${statement.key}"
+      actions   = ["SNS:Subscribe", "SNS:Receive"]
+      resources = [local.topic_arn_placeholder]
+
+      principals {
+        type        = "AWS"
+        identifiers = [statement.value.principal]
+      }
+
+      condition {
+        test     = "StringEquals"
+        variable = "sns:Protocol"
+        values   = [statement.value.protocol]
+
+      }
+
+      condition {
+        test     = "ForAllValues:StringEquals"
+        variable = "sns:Endpoint"
+        values   = [statement.value.arn]
+      }
+    }
+  }
 }
 
-resource "aws_sns_topic_policy" "inbound_received_s3_notifs" {
+module "topic_inbound_received_s3_notifs" {
   for_each = toset(local.eft_partners_with_inbound_received_notifs)
 
-  arn = aws_sns_topic.inbound_received_s3_notifs[each.key].arn
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = concat(
-        [
-          {
-            Sid       = "Allow_Publish_from_S3"
-            Effect    = "Allow"
-            Principal = { Service = "s3.amazonaws.com" }
-            Action    = "SNS:Publish"
-            Resource  = aws_sns_topic.inbound_received_s3_notifs[each.key].arn
-            Condition = {
-              ArnLike = {
-                "aws:SourceArn" = "${module.bucket_eft.bucket.arn}"
-              }
-            }
-          }
-        ],
-        [
-          for index, target in local.eft_partners_config[each.key].inbound.s3_notifications.received_file_targets : {
-            Sid       = "Allow_Subscribe_from_${each.key}_${index}"
-            Effect    = "Allow"
-            Principal = { AWS = target.principal }
-            Action    = ["SNS:Subscribe", "SNS:Receive"]
-            Resource  = aws_sns_topic.inbound_received_s3_notifs[each.key].arn
-            Condition = {
-              StringEquals = {
-                "sns:Protocol" = target.protocol
-              }
-              "ForAllValues:StringEquals" = {
-                "sns:Endpoint" = [target.arn]
-              }
-            }
-          }
-        ]
-      )
-    }
-  )
+  source = "../../terraform-modules/general/logging-sns-topic"
+
+  topic_name                   = "${local.full_name}-inbound-received-s3-${each.key}"
+  additional_topic_policy_docs = [data.aws_iam_policy_document.topic_inbound_received_s3_notifs[each.key].json]
+
+  iam_path                 = local.iam_path
+  permissions_boundary_arn = local.permissions_boundary_arn
+
+  kms_key_arn = local.env_key_arn
+
+  sqs_sample_rate    = 100
+  lambda_sample_rate = 100
 }
 
 resource "aws_sns_topic" "outbound_pending_s3_notifs" {
