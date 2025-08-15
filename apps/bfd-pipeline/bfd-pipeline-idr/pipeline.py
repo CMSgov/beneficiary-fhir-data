@@ -21,7 +21,9 @@ from model import (
     IdrClaimInstitutional,
     IdrClaimLine,
     IdrClaimLineInstitutional,
+    IdrClaimLineProfessional,
     IdrClaimProcedure,
+    IdrClaimProfessional,
     IdrClaimValue,
     LoadProgress,
     T,
@@ -138,6 +140,8 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrClaimLineInstitutional,
         IdrClaimAnsiSignature,
         IdrClaimProcedure,
+        IdrClaimProfessional,
+        IdrClaimLineProfessional,
     )
 
     logger.info("done")

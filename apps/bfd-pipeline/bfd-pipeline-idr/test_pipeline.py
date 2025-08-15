@@ -44,18 +44,18 @@ class TestPipeline:
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
         conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")
-        assert cur.rowcount == 20
+        assert cur.rowcount == 24
         rows = cur.fetchmany(2)
 
-        assert rows[0]["bene_sk"] == 53965935
-        assert rows[0]["bene_mbi_id"] == "3LQ6D75DA70"
-        assert rows[1]["bene_sk"] == 70288544
-        assert rows[1]["bene_mbi_id"] == "3BR5F18GJ10"
+        assert rows[0]["bene_sk"] == 10464258
+        assert rows[0]["bene_mbi_id"] == "2ZT2XU2EN18"
+        assert rows[1]["bene_sk"] == 16666900
+        assert rows[1]["bene_mbi_id"] == "5B88XK5JN88"
 
         cur = conn.execute("select * from idr.beneficiary_mbi_id order by bene_mbi_id")
-        assert cur.rowcount == 19
+        assert cur.rowcount == 21
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_mbi_id"] == "1IH0YW0KT23"
+        assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
         # Wait for system time to advance enough to update the timestamp
         time.sleep(0.05)
@@ -63,7 +63,7 @@ class TestPipeline:
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
             SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
-            WHERE bene_sk = 53965935
+            WHERE bene_sk = 10464258
             """,
             {"timestamp": datetime.now(UTC)},
         )
@@ -73,63 +73,73 @@ class TestPipeline:
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")
         rows = cur.fetchmany(2)
         assert rows[0]["bene_mbi_id"] == "1S000000000"
-        assert rows[1]["bene_mbi_id"] == "3BR5F18GJ10"
+        assert rows[1]["bene_mbi_id"] == "5B88XK5JN88"
 
         cur = conn.execute("select * from idr.beneficiary_xref")
-        assert cur.rowcount == 1
+        assert cur.rowcount == 6
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 405764107
+        assert rows[0]["bene_sk"] == 454323619
 
         cur = conn.execute("select * from idr.beneficiary_third_party order by bene_sk")
-        assert cur.rowcount == 1
+        assert cur.rowcount == 4
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 445272343
+        assert rows[0]["bene_sk"] == 16666900
 
         cur = conn.execute("select * from idr.beneficiary_status order by bene_sk")
         assert cur.rowcount == 15
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 53965935
+        assert rows[0]["bene_sk"] == 10464258
 
         cur = conn.execute("select * from idr.beneficiary_entitlement order by bene_sk")
         assert cur.rowcount == 30
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 53965935
+        assert rows[0]["bene_sk"] == 10464258
 
         cur = conn.execute("select * from idr.beneficiary_entitlement_reason order by bene_sk")
         assert cur.rowcount == 15
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 53965935
+        assert rows[0]["bene_sk"] == 10464258
 
         cur = conn.execute("select * from idr.claim order by clm_uniq_id")
-        assert cur.rowcount == 150
+        assert cur.rowcount == 144
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 74294264116
-        assert rows[0]["clm_nrln_ric_cd"] == "V"
+        assert rows[0]["clm_uniq_id"] == 113370100080
+        assert rows[0]["clm_nrln_ric_cd"] == "W"
 
         cur = conn.execute("select * from idr.claim_institutional order by clm_uniq_id")
-        assert cur.rowcount == 150
+        assert cur.rowcount == 74
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 74294264116
+        assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
-        assert cur.rowcount == 150
+        assert cur.rowcount == 144
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_dt_sgntr_sk"] == 5123224512
+        assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
+
+        cur = conn.execute("select * from idr.claim_professional order by clm_uniq_id")
+        assert cur.rowcount == 85
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_value order by clm_uniq_id")
-        assert cur.rowcount == 136
+        assert cur.rowcount == 84
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 191283812055
+        assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_line order by clm_uniq_id")
-        assert cur.rowcount == 1160
+        assert cur.rowcount == 1034
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 74294264116
+        assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_line_institutional order by clm_uniq_id")
-        assert cur.rowcount == 1160
+        assert cur.rowcount == 612
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 74294264116
+        assert rows[0]["clm_uniq_id"] == 113370100080
+
+        cur = conn.execute("select * from idr.claim_line_professional order by clm_uniq_id")
+        assert cur.rowcount == 264
+        rows = cur.fetchmany(1)
+        assert rows[0]["clm_uniq_id"] == 797757725380
 
         cur = conn.execute("select * from idr.claim_ansi_signature order by clm_ansi_sgntr_sk")
         assert cur.rowcount == 12072
@@ -137,9 +147,9 @@ class TestPipeline:
         assert rows[0]["clm_ansi_sgntr_sk"] == 0
 
         cur = conn.execute("select * from idr.claim_procedure order by clm_uniq_id, bfd_row_num")
-        assert cur.rowcount == 2020
+        assert cur.rowcount == 1340
         rows = cur.fetchmany(1)
-        assert rows[0]["clm_uniq_id"] == 74294264116
+        assert rows[0]["clm_uniq_id"] == 113370100080
         assert rows[0]["bfd_row_num"] == 1
 
         # TODO: add these back when contract data is added
