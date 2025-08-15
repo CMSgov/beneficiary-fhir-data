@@ -295,6 +295,77 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
   }
 }
 
+data "aws_iam_policy_document" "sftp_outbound_transfer_invoke" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  statement {
+    sid       = "AllowSNSSendMessage"
+    actions   = ["sqs:SendMessage"]
+    resources = aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn
+
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ForAnyValue:ArnEquals"
+      variable = "aws:SourceArn"
+      values   = values(module.topic_outbound_pending_s3_notifs)[*].topic.arn
+    }
+  }
+}
+
+resource "aws_sqs_queue" "sftp_outbound_transfer_invoke" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name              = "${local.outbound_lambda_full_name}-sqs"
+  kms_master_key_id = local.env_key_arn
+}
+
+resource "aws_sqs_queue_policy" "sftp_outbound_transfer_invoke" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  queue_url = one(aws_sqs_queue.sftp_outbound_transfer_invoke[*].id)
+  policy    = one(data.aws_iam_policy_document.sftp_outbound_transfer_invoke[*].json)
+}
+
+resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  name                      = "${local.outbound_lambda_full_name}-dlq"
+  kms_master_key_id         = local.env_key_arn
+  message_retention_seconds = 14 * 24 * 60 * 60 # 14 days, in seconds, which is the maximum
+}
+
+resource "aws_sqs_queue_redrive_allow_policy" "sftp_outbound_transfer" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  queue_url = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].id)
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue",
+    sourceQueueArns   = aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn
+  })
+}
+
+resource "aws_sqs_queue_redrive_policy" "sftp_outbound_transfer" {
+  count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+
+  queue_url = one(aws_sqs_queue.sftp_outbound_transfer_invoke[*].id)
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn)
+    maxReceiveCount     = 4
+  })
+}
+
+resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
+  for_each = toset(local.eft_partners_with_outbound_enabled)
+
+  topic_arn = module.topic_outbound_pending_s3_notifs[each.key].topic.arn
+  protocol  = "sqs"
+  endpoint  = one(aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn)
+}
+
 resource "aws_cloudwatch_log_group" "sftp_outbound_transfer" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
@@ -356,12 +427,24 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   }
 }
 
-resource "aws_sqs_queue" "sftp_outbound_transfer_dlq" {
+resource "aws_lambda_permission" "sftp_outbound_transfer_sqs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name                      = "${local.outbound_lambda_full_name}-dlq"
-  kms_master_key_id         = local.env_key_arn
-  message_retention_seconds = 14 * 24 * 60 * 60 # 14 days, in seconds, which is the maximum
+  statement_id   = "${local.outbound_lambda_full_name}-allow-sqs"
+  action         = "lambda:InvokeFunction"
+  function_name  = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  principal      = "sqs.amazonaws.com"
+  source_arn     = one(aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn)
+  source_account = local.account_id
+}
+
+resource "aws_lambda_event_source_mapping" "sftp_outbound_transfer" {
+  count      = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
+  depends_on = [aws_iam_role_policy_attachment.sftp_outbound_transfer]
+
+  event_source_arn = one(aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn)
+  function_name    = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
+  batch_size       = 1
 }
 
 resource "aws_lambda_function_event_invoke_config" "sftp_outbound_transfer" {
@@ -397,25 +480,6 @@ resource "aws_security_group" "sftp_outbound_transfer" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
-  for_each = toset(local.eft_partners_with_outbound_enabled)
-
-  statement_id   = "${local.outbound_lambda_full_name}-allow-sns-${each.key}"
-  action         = "lambda:InvokeFunction"
-  function_name  = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
-  principal      = "sns.amazonaws.com"
-  source_arn     = module.topic_outbound_pending_s3_notifs[each.key].topic.arn
-  source_account = local.account_id
-}
-
-resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
-  for_each = toset(local.eft_partners_with_outbound_enabled)
-
-  topic_arn = module.topic_outbound_pending_s3_notifs[each.key].topic.arn
-  protocol  = "lambda"
-  endpoint  = one(aws_lambda_function.sftp_outbound_transfer[*].arn)
 }
 
 data "aws_iam_policy_document" "topic_inbound_received_s3_notifs" {

@@ -456,25 +456,29 @@ resource "aws_iam_policy" "sftp_outbound_transfer_s3" {
   policy = one(data.aws_iam_policy_document.sftp_outbound_transfer_s3[*].json)
 }
 
-data "aws_iam_policy_document" "sftp_outbound_transfer_sqs_dlq" {
+data "aws_iam_policy_document" "sftp_outbound_transfer_sqs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
   statement {
-    sid       = "AllowSendingMessages"
-    actions   = ["sqs:GetQueueUrl", "sqs:SendMessage"]
-    resources = [one(aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn)]
+    sid       = "AllowUsageOfInvokeQueue"
+    actions   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+    resources = aws_sqs_queue.sftp_outbound_transfer_invoke[*].arn
+  }
+
+  statement {
+    sid       = "AllowSendMessageToDLQ"
+    actions   = ["sqs:SendMessage"]
+    resources = aws_sqs_queue.sftp_outbound_transfer_dlq[*].arn
   }
 }
 
-resource "aws_iam_policy" "sftp_outbound_transfer_sqs_dlq" {
+resource "aws_iam_policy" "sftp_outbound_transfer_sqs" {
   count = length(local.eft_partners_with_outbound_enabled) > 0 ? 1 : 0
 
-  name = "${local.outbound_lambda_full_name}-sqs-dlq"
-  path = local.iam_path
-  description = join("", [
-    "Allows the ${local.outbound_lambda_full_name} to push events into its DLQ upon any failures"
-  ])
-  policy = one(data.aws_iam_policy_document.sftp_outbound_transfer_sqs_dlq[*].json)
+  name        = "${local.outbound_lambda_full_name}-sqs-policy"
+  path        = local.iam_path
+  description = "Grants permission for the ${local.outbound_lambda_full_name} to use SQS for invocation and dead-letters"
+  policy      = one(data.aws_iam_policy_document.sftp_outbound_transfer_sqs[*].json)
 }
 
 data "aws_iam_policy_document" "sftp_outbound_transfer_sns" {
@@ -522,13 +526,13 @@ data "aws_iam_policy" "lambda_vpc_access" {
 
 resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
   for_each = length(local.eft_partners_with_outbound_enabled) > 0 ? {
-    logs    = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
-    ssm     = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
-    kms     = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
-    s3      = one(aws_iam_policy.sftp_outbound_transfer_s3[*].arn),
-    sqs_dlq = one(aws_iam_policy.sftp_outbound_transfer_sqs_dlq[*].arn)
-    sns     = one(aws_iam_policy.sftp_outbound_transfer_sns[*].arn)
-    vpc     = data.aws_iam_policy.lambda_vpc_access.arn
+    logs = one(aws_iam_policy.sftp_outbound_transfer_logs[*].arn),
+    ssm  = one(aws_iam_policy.sftp_outbound_transfer_ssm[*].arn),
+    kms  = one(aws_iam_policy.sftp_outbound_transfer_kms[*].arn),
+    s3   = one(aws_iam_policy.sftp_outbound_transfer_s3[*].arn),
+    sqs  = one(aws_iam_policy.sftp_outbound_transfer_sqs[*].arn)
+    sns  = one(aws_iam_policy.sftp_outbound_transfer_sns[*].arn)
+    vpc  = data.aws_iam_policy.lambda_vpc_access.arn
   } : {}
 
   role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
