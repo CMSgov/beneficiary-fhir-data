@@ -342,7 +342,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
       SNS_TOPIC_ARNS_BY_PARTNER_JSON = jsonencode(
         {
           for partner in local.eft_partners_with_outbound_notifs
-          : partner => aws_sns_topic.outbound_partner_notifs[partner].arn
+          : partner => module.topic_outbound_partner_notifs[partner].topic.arn
         }
       )
     }
@@ -529,7 +529,7 @@ module "topic_outbound_notifs" {
 
   source = "../../terraform-modules/general/logging-sns-topic"
 
-  topic_name              = local.outbound_notifs_topic_prefix
+  topic_name = local.outbound_notifs_topic_prefix
 
   iam_path                 = local.iam_path
   permissions_boundary_arn = local.permissions_boundary_arn
@@ -540,47 +540,55 @@ module "topic_outbound_notifs" {
   lambda_sample_rate = 100
 }
 
-resource "aws_sns_topic" "outbound_partner_notifs" {
+data "aws_iam_policy_document" "topic_outbound_partner_notifs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
 
-  name              = "${local.outbound_notifs_topic_prefix}-${each.key}"
-  kms_master_key_id = local.env_key_arn
+  dynamic "statement" {
+    for_each = {
+      for index, target in local.eft_partners_config[each.key].outbound.notification_targets
+      : index => target
+    }
 
-  lambda_success_feedback_sample_rate = 100
-  lambda_success_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
-  lambda_failure_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
+    content {
+      sid       = "Allow_Subscribe_from_${each.key}_${index}"
+      actions   = ["SNS:Subscribe", "SNS:Receive"]
+      resources = [local.topic_arn_placeholder]
 
-  sqs_success_feedback_sample_rate = 100
-  sqs_success_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
-  sqs_failure_feedback_role_arn    = aws_iam_role.outbound_partner_notifs[each.key].arn
+      principals {
+        type        = "AWS"
+        identifiers = [each.value.principal]
+      }
+
+      condition {
+        test     = "StringEquals"
+        variable = "sns:Protocol"
+        values   = [each.value.protocol]
+
+      }
+
+      condition {
+        test     = "ForAllValues:StringEquals"
+        variable = "sns:Endpoint"
+        values   = [each.value.arn]
+      }
+    }
+  }
 }
 
-resource "aws_sns_topic_policy" "outbound_partner_notifs" {
+module "topic_outbound_partner_notifs" {
   for_each = toset(local.eft_partners_with_outbound_notifs)
 
-  arn = aws_sns_topic.outbound_partner_notifs[each.key].arn
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        for index, target in local.eft_partners_config[each.key].outbound.notification_targets : {
-          Sid       = "Allow_Subscribe_from_${each.key}_${index}"
-          Effect    = "Allow"
-          Principal = { AWS = target.principal }
-          Action    = ["SNS:Subscribe", "SNS:Receive"]
-          Resource  = aws_sns_topic.outbound_partner_notifs[each.key].arn
-          Condition = {
-            StringEquals = {
-              "sns:Protocol" = target.protocol
-            }
-            "ForAllValues:StringEquals" = {
-              "sns:Endpoint" = [target.arn]
-            }
-          }
-        }
-      ]
-    }
-  )
+  source = "../../terraform-modules/general/logging-sns-topic"
+
+  topic_name = "${local.outbound_notifs_topic_prefix}-${each.key}"
+
+  iam_path                 = local.iam_path
+  permissions_boundary_arn = local.permissions_boundary_arn
+
+  kms_key_arn = local.env_key_arn
+
+  sqs_sample_rate    = 100
+  lambda_sample_rate = 100
 }
 
 resource "aws_ec2_subnet_cidr_reservation" "this" {

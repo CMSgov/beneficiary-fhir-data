@@ -487,7 +487,7 @@ data "aws_iam_policy_document" "sftp_outbound_transfer_sns" {
       module.topic_outbound_notifs[*].topic.arn,
       [
         for partner in local.eft_partners_with_outbound_notifs :
-        aws_sns_topic.outbound_partner_notifs[partner].arn
+        module.topic_outbound_partner_notifs[partner].topic.arn
       ]
     ])
   }
@@ -533,70 +533,4 @@ resource "aws_iam_role_policy_attachment" "sftp_outbound_transfer" {
 
   role       = one(aws_iam_role.sftp_outbound_transfer[*].name)
   policy_arn = each.value
-}
-
-resource "aws_iam_policy" "outbound_partner_notifs_logs" {
-  for_each = toset(local.eft_partners_with_outbound_notifs)
-  path     = local.iam_path
-  name     = "${local.outbound_notifs_topic_prefix}-${each.key}-logs"
-  description = join("", [
-    "Permissions for the ${local.outbound_notifs_topic_prefix}-${each.key} SNS topic to write to ",
-    "its corresponding CloudWatch Log Group and Log Stream",
-  ])
-
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Effect = "Allow"
-          Action = [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
-            "logs:PutLogEvents",
-            "logs:PutMetricFilter",
-            "logs:PutRetentionPolicy"
-          ]
-          Resource = [
-            # There is no documentation about SNS delivery status logging that explicitly defines
-            # the log group naming format. So, constraining this policy is not entirely possible
-            "arn:aws:logs:${local.region}:${local.account_id}:*"
-          ]
-        }
-      ]
-    }
-  )
-}
-
-resource "aws_iam_role" "outbound_partner_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_notifs)
-
-  name                 = "${local.outbound_notifs_topic_prefix}-${each.key}"
-  path                 = local.iam_path
-  permissions_boundary = local.permissions_boundary_arn
-  description          = "Role for ${local.outbound_notifs_topic_prefix}-${each.key} SNS Topic"
-
-  assume_role_policy = jsonencode(
-    {
-      Version = "2012-10-17",
-      Statement = [
-        {
-          Action = "sts:AssumeRole",
-          Effect = "Allow",
-          Principal = {
-            Service = "sns.amazonaws.com"
-          }
-        }
-      ]
-    }
-  )
-
-  force_detach_policies = true
-}
-
-resource "aws_iam_role_policy_attachment" "outbound_partner_notifs" {
-  for_each = toset(local.eft_partners_with_outbound_notifs)
-
-  role       = aws_iam_role.outbound_partner_notifs[each.key].name
-  policy_arn = aws_iam_policy.outbound_partner_notifs_logs[each.key].arn
 }
