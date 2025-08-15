@@ -289,8 +289,8 @@ resource "aws_s3_bucket_notification" "bucket_notifications" {
     content {
       events        = ["s3:ObjectCreated:*"]
       filter_prefix = "${local.eft_partners_config[topic.key].outbound.pending_path}/"
-      id            = aws_sns_topic.outbound_pending_s3_notifs[topic.key].name
-      topic_arn     = aws_sns_topic.outbound_pending_s3_notifs[topic.key].arn
+      id            = module.topic_outbound_pending_s3_notifs[topic.key].topic.name
+      topic_arn     = module.topic_outbound_pending_s3_notifs[topic.key].topic.arn
     }
   }
 }
@@ -399,7 +399,6 @@ resource "aws_security_group" "sftp_outbound_transfer" {
   }
 }
 
-
 resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
@@ -407,14 +406,14 @@ resource "aws_lambda_permission" "sftp_outbound_transfer_sns" {
   action         = "lambda:InvokeFunction"
   function_name  = one(aws_lambda_function.sftp_outbound_transfer[*].function_name)
   principal      = "sns.amazonaws.com"
-  source_arn     = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
+  source_arn     = module.topic_outbound_pending_s3_notifs[each.key].topic.arn
   source_account = local.account_id
 }
 
 resource "aws_sns_topic_subscription" "sftp_outbound_transfer" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
-  topic_arn = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
+  topic_arn = module.topic_outbound_pending_s3_notifs[each.key].topic.arn
   protocol  = "lambda"
   endpoint  = one(aws_lambda_function.sftp_outbound_transfer[*].arn)
 }
@@ -487,36 +486,42 @@ module "topic_inbound_received_s3_notifs" {
   lambda_sample_rate = 100
 }
 
-resource "aws_sns_topic" "outbound_pending_s3_notifs" {
+data "aws_iam_policy_document" "topic_outbound_pending_s3_notifs" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
-  name              = "${local.full_name}-outbound-pending-s3-${each.key}"
-  kms_master_key_id = local.env_key_arn
+  statement {
+    sid       = "Allow_Publish_from_S3"
+    actions   = ["SNS:Publish"]
+    resources = [local.topic_arn_placeholder]
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [module.bucket_eft.bucket.arn]
+    }
+  }
 }
 
-resource "aws_sns_topic_policy" "outbound_pending_s3_notifs" {
+module "topic_outbound_pending_s3_notifs" {
   for_each = toset(local.eft_partners_with_outbound_enabled)
 
-  arn = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
-  policy = jsonencode(
-    {
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid       = "Allow_Publish_from_S3"
-          Effect    = "Allow"
-          Principal = { Service = "s3.amazonaws.com" }
-          Action    = "SNS:Publish"
-          Resource  = aws_sns_topic.outbound_pending_s3_notifs[each.key].arn
-          Condition = {
-            ArnLike = {
-              "aws:SourceArn" = "${module.bucket_eft.bucket.arn}"
-            }
-          }
-        }
-      ]
-    }
-  )
+  source = "../../terraform-modules/general/logging-sns-topic"
+
+  topic_name                   = "${local.full_name}-outbound-pending-s3-${each.key}"
+  additional_topic_policy_docs = [data.aws_iam_policy_document.topic_outbound_pending_s3_notifs[each.key].json]
+
+  iam_path                 = local.iam_path
+  permissions_boundary_arn = local.permissions_boundary_arn
+
+  kms_key_arn = local.env_key_arn
+
+  sqs_sample_rate    = 100
+  lambda_sample_rate = 100
 }
 
 resource "aws_sns_topic" "outbound_notifs" {
