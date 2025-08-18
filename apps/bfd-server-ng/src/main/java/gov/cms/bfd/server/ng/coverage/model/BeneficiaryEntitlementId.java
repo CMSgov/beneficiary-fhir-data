@@ -31,7 +31,7 @@ public class BeneficiaryEntitlementId implements Serializable {
   @Column(name = "bene_mdcr_entlmt_type_cd")
   private String medicareEntitlementTypeCode;
 
-  Period toFhirPeriod() {
+  Period toFhir() {
 
     Period period = new Period();
     period.setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate));

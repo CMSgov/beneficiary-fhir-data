@@ -25,7 +25,7 @@ public class BeneficiaryThirdParty {
    *
    * @return optional extension
    */
-  public List<Extension> toFhirExtensions() {
+  public List<Extension> toFhir() {
     List<Extension> extensions = new ArrayList<>();
 
     buyInCode.ifPresent(

@@ -96,10 +96,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             .findFirst();
 
     Stream.of(
-            beneficiaryThirdParty.map(BeneficiaryThirdParty::toFhirExtensions),
+            beneficiaryThirdParty.map(BeneficiaryThirdParty::toFhir),
             Optional.of(entitlement.toFhirExtensions()),
             getStatus().map(BeneficiaryStatus::toFhir),
-            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhirExtensions))
+            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhir))
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(coverage::addExtension);

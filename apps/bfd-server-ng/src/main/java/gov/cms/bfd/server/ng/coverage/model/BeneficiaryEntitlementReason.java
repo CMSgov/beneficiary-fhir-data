@@ -27,7 +27,7 @@ public class BeneficiaryEntitlementReason {
    *
    * @return optional extension
    */
-  public List<Extension> toFhirExtensions() {
+  public List<Extension> toFhir() {
     List<Extension> extensions = new ArrayList<>();
 
     medicareEntitlementReasonCode.ifPresent(

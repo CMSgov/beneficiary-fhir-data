@@ -64,6 +64,6 @@ public class BeneficiaryEntitlement {
   }
 
   Period toFhirPeriod() {
-    return id.toFhirPeriod();
+    return id.toFhir();
   }
 }
