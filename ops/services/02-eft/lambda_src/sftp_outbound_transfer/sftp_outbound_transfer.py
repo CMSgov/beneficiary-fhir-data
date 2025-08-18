@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 import re
@@ -5,14 +6,15 @@ import sys
 from datetime import UTC, datetime
 from io import BytesIO, StringIO
 from typing import Any
-from urllib.parse import unquote
+from urllib.parse import unquote_plus
 
 import boto3
 import botocore
 import botocore.exceptions
 import paramiko
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.data_classes import S3Event, SNSEvent
+from aws_lambda_powertools.utilities.parser import envelopes
+from aws_lambda_powertools.utilities.parser.models import S3Model
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 from paramiko.ssh_exception import (
@@ -130,12 +132,10 @@ def _handle_s3_event(s3_object_key: str) -> None:
     if not recognized_file:
         raise UnrecognizedFileError(
             message=f"The file {filename} did not match any of {partner}'s recognized files: "
-            + json.dumps(
-                [
-                    {"type": file.type, "pattern": file.filename_pattern}
-                    for file in partner_config.recognized_files
-                ]
-            ),
+            + json.dumps([
+                {"type": file.type, "pattern": file.filename_pattern}
+                for file in partner_config.recognized_files
+            ]),
             s3_object_key=s3_object_key,
             partner=partner,
         )
@@ -316,48 +316,39 @@ def _handle_s3_event(s3_object_key: str) -> None:
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
     try:
-        if not all(
-            [
-                REGION,
-                BFD_ENVIRONMENT,
-                BUCKET,
-                BUCKET_ROOT_DIR,
-            ]
-        ):
+        if not all([
+            REGION,
+            BFD_ENVIRONMENT,
+            BUCKET,
+            BUCKET_ROOT_DIR,
+        ]):
             raise RuntimeError("Not all necessary environment variables were defined")
 
-        sns_event = SNSEvent(event)
-        if next(sns_event.records, None) is None:
-            raise ValueError(
-                "Invalid SNS event with empty records:"
-                f" {json.dumps(sns_event.raw_event, default=str)}"
+        s3_event_records = list(
+            itertools.chain.from_iterable(
+                event.Records
+                for event in envelopes.SnsSqsEnvelope().parse(data=event, model=S3Model)
+                if event is not None
+            )
+        )
+        if not s3_event_records:
+            raise ValueError("Invalid invocation event, no records")
+
+        for s3_record in s3_event_records:
+            s3_event_time = s3_record.eventTime.astimezone(UTC)
+            s3_object_key = unquote_plus(s3_record.s3.object.key)
+            s3_event_name = s3_record.eventName
+            s3_event_type = S3EventType.from_event_name(s3_event_name)
+
+            # Append to all future logs information about the S3 Event
+            logger.append_keys(
+                s3_object_key=s3_object_key,
+                s3_event_name=s3_event_name,
+                s3_event_type=s3_event_type.name,
+                s3_event_time=s3_event_time.isoformat(),
             )
 
-        for sns_record in sns_event.records:
-            s3_event = S3Event(json.loads(sns_record.sns.message))
-            if next(s3_event.records, None) is None:
-                raise ValueError(
-                    "Invalid inner S3 event with empty records:"
-                    f" {json.dumps(s3_event.raw_event, default=str)}"
-                )
-
-            for s3_record in s3_event.records:
-                s3_event_time = datetime.fromisoformat(
-                    s3_record.event_time.removesuffix("Z")
-                ).replace(tzinfo=UTC)
-                s3_object_key = unquote(s3_record.s3.get_object.key)
-                s3_event_name = s3_record.event_name
-                s3_event_type = S3EventType.from_event_name(s3_event_name)
-
-                # Append to all future logs information about the S3 Event
-                logger.append_keys(
-                    s3_object_key=s3_object_key,
-                    s3_event_name=s3_event_name,
-                    s3_event_type=s3_event_type.name,
-                    s3_event_time=s3_event_time.isoformat(),
-                )
-
-                _handle_s3_event(s3_object_key=s3_object_key)
+            _handle_s3_event(s3_object_key=s3_object_key)
     except Exception as exc:
         sns_resource = boto3.resource("sns", config=BOTO_CONFIG)
 

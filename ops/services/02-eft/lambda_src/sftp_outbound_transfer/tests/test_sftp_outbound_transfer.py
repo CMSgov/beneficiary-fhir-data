@@ -9,6 +9,8 @@ from unittest import mock
 
 import paramiko
 import pytest
+from aws_lambda_powertools.utilities.parser.models import SqsModel
+from pydantic import ValidationError
 
 from errors import (
     InvalidObjectKeyError,
@@ -118,25 +120,71 @@ def generate_event(
     event_time_iso: str = DEFAULT_MOCK_EVENT_TIME_ISO,
     event_name: str = DEFAULT_MOCK_EVENT_NAME,
 ) -> dict[str, Any]:
-    return {
+    s3_event = {
         "Records": [
             {
-                "Sns": {
-                    "Message": json.dumps(
-                        {
-                            "Records": [
-                                {
-                                    "eventName": event_name,
-                                    "eventTime": event_time_iso,
-                                    "s3": {"object": {"key": key}},
-                                }
-                            ]
-                        }
-                    )
-                }
+                "eventVersion": "",
+                "eventSource": "aws:s3",
+                "awsRegion": "",
+                "eventTime": event_time_iso,
+                "eventName": event_name,
+                "userIdentity": {"principalId": ""},
+                "requestParameters": {"sourceIPAddress": "127.0.0.1"},
+                "responseElements": {
+                    "x-amz-request-id": "",
+                    "x-amz-id-2": "",
+                },
+                "s3": {
+                    "s3SchemaVersion": "",
+                    "configurationId": "",
+                    "bucket": {
+                        "name": "",
+                        "ownerIdentity": {"principalId": ""},
+                        "arn": "",
+                    },
+                    "object": {
+                        "key": key,
+                        "size": 0,
+                        "eTag": "",
+                        "sequencer": "",
+                    },
+                },
             }
         ]
     }
+    sns_notification = {
+        "SignatureVersion": "",
+        "Timestamp": datetime.now(UTC).isoformat(),
+        "Signature": "",
+        "SigningCertURL": "https://localhost",
+        "MessageId": "",
+        "Message": json.dumps(s3_event),
+        "MessageAttributes": {},
+        "Type": "Notification",
+        "UnsubscribeURL": "https://localhost",
+        "TopicArn": "",
+        "Subject": "",
+    }
+    return SqsModel.model_validate({
+        "Records": [
+            {
+                "messageId": "",
+                "receiptHandle": "",
+                "body": json.dumps(sns_notification),
+                "attributes": {
+                    "ApproximateReceiveCount": "",
+                    "SentTimestamp": datetime.now(UTC).isoformat(),
+                    "SenderId": "",
+                    "ApproximateFirstReceiveTimestamp": datetime.now(UTC).isoformat(),
+                },
+                "messageAttributes": {},
+                "md5OfBody": "",
+                "eventSource": "aws:sqs",
+                "eventSourceARN": "",
+                "awsRegion": "",
+            },
+        ]
+    }).model_dump()
 
 
 @mock.patch(f"{MODULE_UNDER_TEST}.boto3.client", new=mock_boto3_client)
@@ -179,56 +227,54 @@ class TestUpdatePipelineSlisHandler:
     @pytest.mark.parametrize(
         ("event", "expected_error"),
         [
-            (None, TypeError),
-            ("", TypeError),
+            (None, ValidationError),
+            ("", ValidationError),
             ({"Records": []}, ValueError),
-            ({"Records": ""}, ValueError),
-            ({"Records": [""]}, TypeError),
-            ({"Records": [{"OtherKey": ""}]}, KeyError),
-            ({"Records": [{"Sns": {"OtherKey": ""}}]}, KeyError),
-            ({"Records": [{"Sns": {"Message": "invalid"}}]}, json.JSONDecodeError),
-            ({"Records": [{"Sns": {"Message": {"NotJsonStr": ""}}}]}, TypeError),
-            ({"Records": [{"Sns": {"Message": "{}"}}]}, KeyError),
-            ({"Records": [{"Sns": {"Message": '{"Records":[]}'}}]}, ValueError),
-            ({"Records": [{"Sns": {"Message": '{"Records":""}'}}]}, ValueError),
-            ({"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}, KeyError),
+            ({"Records": ""}, ValidationError),
+            ({"Records": [""]}, ValidationError),
+            ({"Records": [{"OtherKey": ""}]}, ValidationError),
+            ({"Records": [{"Sns": {"OtherKey": ""}}]}, ValidationError),
+            ({"Records": [{"Sns": {"Message": "invalid"}}]}, ValidationError),
+            ({"Records": [{"Sns": {"Message": {"NotJsonStr": ""}}}]}, ValidationError),
+            ({"Records": [{"Sns": {"Message": "{}"}}]}, ValidationError),
+            ({"Records": [{"Sns": {"Message": '{"Records":[]}'}}]}, ValidationError),
+            ({"Records": [{"Sns": {"Message": '{"Records":""}'}}]}, ValidationError),
+            ({"Records": [{"Sns": {"Message": '{"Records":[{}]}'}}]}, ValidationError),
             (generate_event(event_name="invalid"), ValueError),
             (
                 {
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps(
-                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
-                                )
+                                "Message": json.dumps({
+                                    "Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]
+                                })
                             }
                         }
                     ]
                 },
-                KeyError,
+                ValidationError,
             ),
-            (generate_event(event_time_iso="24-01-19T00:00:00Z"), ValueError),
+            (generate_event(event_time_iso="24-01-19T00:00:00Z"), ValidationError),
             (
                 {
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps(
-                                    {
-                                        "Records": [
-                                            {
-                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                                "s3": {"object": {}},
-                                            }
-                                        ]
-                                    }
-                                )
+                                "Message": json.dumps({
+                                    "Records": [
+                                        {
+                                            "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                            "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                            "s3": {"object": {}},
+                                        }
+                                    ]
+                                })
                             }
                         }
                     ]
                 },
-                KeyError,
+                ValidationError,
             ),
         ],
     )
