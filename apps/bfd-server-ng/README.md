@@ -94,7 +94,8 @@ The Swagger UI is available at `/v3/fhir/swagger-ui`
 
 ## Tests
 
-Note that certain Postgres environment variables can interfere with the database connection in the tests, namely `PGSSLMODE`.
+Note that certain Postgres environment variables can interfere with the database connection in the tests,
+namely `PGSSLMODE`.
 
 You'll probably want to unset these when running the tests from the terminal.
 
@@ -102,8 +103,14 @@ You'll probably want to unset these when running the tests from the terminal.
 
 Run with `-DupdateSnapshot=` to update the snapshots (yes, the trailing equals is required, unfortunately).
 
-If snapshot tests fail, they will generate a `.patch` file with the difference that can be viewed using your diff tool of choice.
+If snapshot tests fail, they will generate a `.patch` file with the difference that can be viewed using your diff tool
+of choice.
 
 ```sh
 mvn clean verify -DupdateSnapshot=
 ```
+
+### Debugging Tests
+
+Log messages from the server process will not be shown in the console output.
+To see detailed log info, look at the files created under `target/failsafe-reports/logs`.
