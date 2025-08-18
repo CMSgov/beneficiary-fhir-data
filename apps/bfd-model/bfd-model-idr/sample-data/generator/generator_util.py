@@ -470,35 +470,27 @@ class GeneratorUtil():
         df.to_csv("out/SYNTHETIC_BENE_MDCR_STUS.csv", index=False)
         df = pd.json_normalize(self.mdcr_entlmt)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", index=False)
-        # Check if mdcr_tp is empty before saving to avoid creating an empty file unnecessarily
-        if self.mdcr_tp:
-            df = pd.json_normalize(self.mdcr_tp)
-            df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
+        df = pd.json_normalize(self.mdcr_tp)
+        df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
 
         df = pd.json_normalize(self.mdcr_rsn)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
 
         df = pd.json_normalize(self.bene_xref_table)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
             
         df = pd.json_normalize(self.bene_cmbnd_dual_mdcr)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
             
         df = pd.json_normalize(self.bene_xref_table)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
             
         # Save new synthetic data tables
         df = pd.json_normalize(self.bene_lis)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
             
         df = pd.json_normalize(self.bene_mapd_enrlmt_rx)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", index=False)
             
         df = pd.json_normalize(self.bene_mapd_enrlmt)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", index=False)
