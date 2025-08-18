@@ -7,15 +7,6 @@ data "aws_ssm_parameter" "partners_list_json" {
   with_decryption = true
 }
 
-data "aws_ecr_repository" "ecr" {
-  name = "bfd-platform-${local.service}-${local.outbound_lambda_name}-lambda"
-}
-
-data "aws_ecr_image" "sftp_outbound_transfer" {
-  repository_name = data.aws_ecr_repository.ecr.name
-  image_tag       = local.bfd_version
-}
-
 data "aws_ec2_managed_prefix_list" "vpn" {
   filter {
     name   = "prefix-list-name"

@@ -1,8 +1,18 @@
 locals {
-  outbound_lambda_name         = "sftp-outbound-transfer"
-  outbound_lambda_full_name    = "${local.full_name}-${local.outbound_lambda_name}"
-  outbound_lambda_src          = replace(local.outbound_lambda_name, "-", "_")
-  outbound_lambda_image_uri    = "${data.aws_ecr_repository.ecr.repository_url}:${local.bfd_version}"
+  outbound_lambda_name            = "sftp-outbound-transfer"
+  outbound_lambda_full_name       = "${local.full_name}-${local.outbound_lambda_name}"
+  outbound_lambda_repository_name = coalesce(var.outbound_lambda_repository_override, "bfd-platform-${local.service}-${local.outbound_lambda_name}-lambda")
+  outbound_lambda_version         = coalesce(var.outbound_lambda_version_override, local.bfd_version)
+  outbound_lambda_src             = replace(local.outbound_lambda_name, "-", "_")
+}
+
+data "aws_ecr_repository" "sftp_outbound_transfer" {
+  name = local.outbound_lambda_repository_name
+}
+
+data "aws_ecr_image" "sftp_outbound_transfer" {
+  repository_name = data.aws_ecr_repository.sftp_outbound_transfer.name
+  image_tag       = local.bfd_version
 }
 
 data "aws_iam_policy_document" "topic_outbound_pending_s3_notifs" {
@@ -202,8 +212,9 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   ])
 
   kms_key_arn      = local.env_key_arn
-  image_uri        = local.outbound_lambda_image_uri
+  image_uri        = data.aws_ecr_image.sftp_outbound_transfer.image_uri
   source_code_hash = trimprefix(data.aws_ecr_image.sftp_outbound_transfer.id, "sha256:")
+  architectures    = ["arm64"]
   package_type     = "Image"
   memory_size      = 5120
   timeout          = 450
