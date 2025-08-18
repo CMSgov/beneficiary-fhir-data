@@ -32,7 +32,7 @@ class StatusNotification:
 class PostSlackMessageError(Exception): ...
 
 
-def _slack_status_notif(status_notification: StatusNotification):
+def _slack_status_notif(status_notification: StatusNotification) -> None:
     message_preamble: str
     match status_notification.type:
         case NotificationType.FILE_DISCOVERED:
@@ -89,7 +89,7 @@ def _slack_status_notif(status_notification: StatusNotification):
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext):  # pylint: disable=unused-argument
+def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
     try:
         if not all([BFD_ENVIRONMENT, SLACK_WEBHOOK_URL]):
             raise RuntimeError("Not all necessary environment variables were defined")
