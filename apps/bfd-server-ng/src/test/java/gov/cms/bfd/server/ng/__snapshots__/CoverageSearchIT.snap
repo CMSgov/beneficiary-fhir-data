@@ -520,7 +520,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[POST]=[
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithExpiredCoverage_shouldReturnEmptyBundle[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle[GET]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -536,7 +536,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithExpiredCoverage
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithExpiredCoverage_shouldReturnEmptyBundle[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle[GET_WITH_SEARCH]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -552,7 +552,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithExpiredCoverage
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithExpiredCoverage_shouldReturnEmptyBundle[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle[POST]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -568,7 +568,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithExpiredCoverage
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithFutureCoverage_shouldReturnEmptyBundle[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageShouldReturnEmptyBundle[GET]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -584,7 +584,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithFutureCoverage_
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithFutureCoverage_shouldReturnEmptyBundle[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageShouldReturnEmptyBundle[GET_WITH_SEARCH]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -600,7 +600,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithFutureCoverage_
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithFutureCoverage_shouldReturnEmptyBundle[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageShouldReturnEmptyBundle[POST]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -616,7 +616,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithFutureCoverage_
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_shouldStillReturnResources[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataShouldStillReturnResources[GET]=[
 {
   "entry" : [ {
     "resource" : {
@@ -671,6 +671,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -772,6 +790,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -835,7 +871,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_shouldStillReturnResources[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataShouldStillReturnResources[GET_WITH_SEARCH]=[
 {
   "entry" : [ {
     "resource" : {
@@ -890,6 +926,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -991,6 +1045,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -1054,7 +1126,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_shouldStillReturnResources[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithMissingTplDataShouldStillReturnResources[POST]=[
 {
   "entry" : [ {
     "resource" : {
@@ -1109,6 +1181,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -1212,6 +1302,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
         "valueCoding" : {
           "code" : "0",
@@ -1273,7 +1381,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithMissingTplData_
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithNoCoverage_shouldReturnEmptyBundle[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithNoCoverageShouldReturnEmptyBundle[GET]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -1289,7 +1397,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithNoCoverage_shou
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithNoCoverage_shouldReturnEmptyBundle[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithNoCoverageShouldReturnEmptyBundle[GET_WITH_SEARCH]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -1305,7 +1413,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithNoCoverage_shou
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithNoCoverage_shouldReturnEmptyBundle[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithNoCoverageShouldReturnEmptyBundle[POST]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -1321,7 +1429,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithNoCoverage_shou
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartA_shouldReturnOneEntry[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithOnlyPartAShouldReturnOneEntry[GET]=[
 {
   "entry" : [ {
     "resource" : {
@@ -1463,7 +1571,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartA_shoul
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartA_shouldReturnOneEntry[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithOnlyPartAShouldReturnOneEntry[GET_WITH_SEARCH]=[
 {
   "entry" : [ {
     "resource" : {
@@ -1605,7 +1713,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartA_shoul
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartA_shouldReturnOneEntry[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithOnlyPartAShouldReturnOneEntry[POST]=[
 {
   "entry" : [ {
     "resource" : {
@@ -1747,7 +1855,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartA_shoul
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartB_shouldReturnOneEntry[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithOnlyPartBShouldReturnOneEntry[GET]=[
 {
   "entry" : [ {
     "resource" : {
@@ -1889,7 +1997,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartB_shoul
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartB_shouldReturnOneEntry[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithOnlyPartBShouldReturnOneEntry[GET_WITH_SEARCH]=[
 {
   "entry" : [ {
     "resource" : {
@@ -2031,7 +2139,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartB_shoul
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartB_shouldReturnOneEntry[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithOnlyPartBShouldReturnOneEntry[POST]=[
 {
   "entry" : [ {
     "resource" : {
@@ -2173,7 +2281,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forBeneWithOnlyPartB_shoul
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forNonCurrentBene_shouldReturnEmptyBundle[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForNonCurrentBeneShouldReturnEmptyBundle[GET]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -2189,7 +2297,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forNonCurrentBene_shouldRe
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forNonCurrentBene_shouldReturnEmptyBundle[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForNonCurrentBeneShouldReturnEmptyBundle[GET_WITH_SEARCH]=[
 {
   "id" : "{uuid}",
   "link" : [ {
@@ -2205,7 +2313,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forNonCurrentBene_shouldRe
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearch_forNonCurrentBene_shouldReturnEmptyBundle[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForNonCurrentBeneShouldReturnEmptyBundle[POST]=[
 {
   "id" : "{uuid}",
   "link" : [ {

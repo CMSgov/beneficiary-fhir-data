@@ -73,7 +73,7 @@ public class CoverageReadIT extends IntegrationTestBase {
   @Test
   void coverageReadForNonCurrentEffectiveBeneficiaryIdShouldBeNotFound() {
 
-    String nonCurrentEffectiveBeneId = "part-a-181968400";
+    var nonCurrentEffectiveBeneId = "part-a-181968400";
     assertThrows(
         ResourceNotFoundException.class,
         () -> coverageRead().withId(nonCurrentEffectiveBeneId).execute(),
@@ -92,7 +92,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadBeneExistsButPartOrVersionNotFound() {
-    String idForNonExistentCoverage = "part-c-1";
+    var idForNonExistentCoverage = "part-c-1";
 
     assertThrows(
         InvalidRequestException.class,
@@ -102,7 +102,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadBeneSkNotFound() {
-    String nonExistentBeneSkId = "part-a-9999999";
+    var nonExistentBeneSkId = "part-a-9999999";
 
     assertThrows(
         ResourceNotFoundException.class,
@@ -112,7 +112,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @ValueSource(strings = {"part-a", "-12345", "part-a-abc", "foo-12345", "part-e-12345"})
-  void coverageReadInvalidIdFormatBadRequest_UsingHapiClient(String invalidId) {
+  void coverageReadInvalidIdFormatBadRequest(String invalidId) {
     assertThrows(
         InvalidRequestException.class,
         () -> coverageRead().withId(invalidId).execute(),
@@ -121,7 +121,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadUnsupportedValidPartBadRequest() {
-    String unsupportedPartId = "part-c-1";
+    var unsupportedPartId = "part-c-1";
     assertThrows(
         InvalidRequestException.class,
         () -> coverageRead().withId(unsupportedPartId).execute(),
@@ -130,7 +130,6 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadPartACoverageNotFound() {
-
     var expiredCoverageId = createCoverageId("a", "848484848");
 
     assertThrows(
@@ -151,7 +150,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadForBeneWithOnlyPastEntitlementPeriodsShouldBeEmpty() {
-    final String partBId = createCoverageId("b", BENE_ID_EXPIRED_COVERAGE);
+    final var partBId = createCoverageId("b", BENE_ID_EXPIRED_COVERAGE);
 
     var coverage = coverageRead().withId(partBId).execute();
     assertEquals(partBId, coverage.getIdPart());
@@ -170,7 +169,7 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @Test
-  void coverageRead_forBeneWithMissingTpData_shouldStillReturnResource() {
+  void coverageRead_forBeneWithMissingTpDataShouldStillReturnResource() {
 
     var partAId = createCoverageId("a", BENE_ID_NO_TP);
     var coverage = coverageRead().withId(partAId).execute();
@@ -183,7 +182,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EmptySource
-  void coverageReadEmptyIdSegmentResultsInServerError_WithRestAssured(String id) {
+  void coverageReadEmptyIdSegmentResultsInServerError(String id) {
     RestAssured.given()
         .when()
         .get(getServerUrl() + "/Coverage/" + id)
