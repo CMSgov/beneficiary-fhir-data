@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,8 +23,8 @@ public enum IcdIndicator {
    * @param code database code
    * @return ICD indicator
    */
-  public static IcdIndicator fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+  public static Optional<IcdIndicator> tryFromCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
   private final String code;
