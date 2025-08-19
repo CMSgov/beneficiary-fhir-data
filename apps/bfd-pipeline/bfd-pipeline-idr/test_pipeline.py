@@ -117,12 +117,12 @@ class TestPipeline:
         assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
 
         cur = conn.execute("select * from idr.claim_professional order by clm_uniq_id")
-        assert cur.rowcount == 85
+        assert cur.rowcount == 86
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_item order by clm_uniq_id")
-        assert cur.rowcount == 2093
+        assert cur.rowcount == 1624
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
@@ -132,7 +132,7 @@ class TestPipeline:
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_line_professional order by clm_uniq_id")
-        assert cur.rowcount == 264
+        assert cur.rowcount == 281
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 797757725380
 
