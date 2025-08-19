@@ -9,8 +9,8 @@ data "aws_iam_policy_document" "logs" {
       "logs:PutRetentionPolicy"
     ]
     resources = [
-      aws_cloudwatch_log_group.success.arn,
-      aws_cloudwatch_log_group.failure.arn
+      "${aws_cloudwatch_log_group.success.arn}:*",
+      "${aws_cloudwatch_log_group.failure.arn}:*"
     ]
   }
 }
