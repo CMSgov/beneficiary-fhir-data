@@ -4,6 +4,7 @@ locals {
   outbound_lambda_repository_name = coalesce(var.outbound_lambda_repository_override, "bfd-platform-${local.service}-${local.outbound_lambda_name}-lambda")
   outbound_lambda_version         = coalesce(var.outbound_lambda_version_override, local.bfd_version)
   outbound_lambda_src             = replace(local.outbound_lambda_name, "-", "_")
+  outbound_lambda_timeout         = 450
 }
 
 data "aws_ecr_repository" "sftp_outbound_transfer" {
@@ -146,6 +147,8 @@ resource "aws_sqs_queue" "sftp_outbound_transfer_invoke" {
 
   name              = "${local.outbound_lambda_full_name}-sqs"
   kms_master_key_id = local.env_key_arn
+
+  visibility_timeout_seconds = local.outbound_lambda_timeout
 }
 
 resource "aws_sqs_queue_policy" "sftp_outbound_transfer_invoke" {
@@ -217,7 +220,7 @@ resource "aws_lambda_function" "sftp_outbound_transfer" {
   architectures    = ["arm64"]
   package_type     = "Image"
   memory_size      = 5120
-  timeout          = 450
+  timeout          = local.outbound_lambda_timeout
 
   logging_config {
     log_group  = one(aws_cloudwatch_log_group.sftp_outbound_transfer[*].name)
