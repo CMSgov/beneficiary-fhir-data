@@ -1,22 +1,53 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.9"
+    }
+  }
+}
+
+module "terraservice" {
+  source = "../../terraform-modules/bfd/bfd-terraservice"
+
+  greenfield           = true
+  service              = local.service
+  relative_module_root = "ops/services/03-eft-o11y"
+}
+
 locals {
-  env                      = terraform.workspace
-  service                  = "eft"
-  account_id               = data.aws_caller_identity.current.account_id
-  region                   = data.aws_region.current.name
-  cloudtamer_iam_path      = "/delegatedadmin/developer/"
+  service        = "eft-o11y"
+  target_service = "eft"
+
+  region                   = module.terraservice.region
+  account_id               = module.terraservice.account_id
+  default_tags             = module.terraservice.default_tags
+  env                      = module.terraservice.env
+  is_ephemeral_env         = module.terraservice.is_ephemeral_env
+  bfd_version              = module.terraservice.bfd_version
+  ssm_config               = nonsensitive(module.terraservice.ssm_config)
+  env_key_alias            = module.terraservice.env_key_alias
+  env_key_arn              = module.terraservice.env_key_arn
+  iam_path                 = module.terraservice.default_iam_path
+  permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  vpc                      = module.terraservice.vpc
+  azs                      = keys(module.terraservice.default_azs)
+
+  full_name = "bfd-${local.env}-${local.service}"
+
   lambda_metrics_namespace = "AWS/Lambda"
   sns_metrics_namespace    = "AWS/SNS"
 
-  outbound_sns_topic_names = concat([var.outbound_bfd_sns_topic_name], var.outbound_partner_sns_topic_names)
+  outbound_sns_topic_names = concat([local.eft_outputs.outbound_bfd_sns_topic_name], local.eft_outputs.outbound_partner_sns_topic_names)
   alarms_raw_config = {
     lambda_errors = {
-      breach_topic   = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/lambda_errors/breach_topic", null)
-      ok_topic       = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/lambda_errors/ok_topic", null)
-      log_group_name = "/aws/lambda/${var.outbound_lambda_name}"
+      breach_topic   = lookup(local.ssm_config, "/bfd/${local.service}/outbound/alarms/lambda_errors/breach_topic", null)
+      ok_topic       = lookup(local.ssm_config, "/bfd/${local.service}/outbound/alarms/lambda_errors/ok_topic", null)
+      log_group_name = "/aws/lambda/${local.eft_outputs.outbound_lambda_name}"
     }
     sns_failures = {
-      breach_topic = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/sns_failures/breach_topic", null)
-      ok_topic     = lookup(var.ssm_config, "/bfd/${local.service}/outbound/o11y/alarms/sns_failures/ok_topic", null)
+      breach_topic = lookup(local.ssm_config, "/bfd/${local.service}/outbound/alarms/sns_failures/breach_topic", null)
+      ok_topic     = lookup(local.ssm_config, "/bfd/${local.service}/outbound/alarms/sns_failures/ok_topic", null)
       per_topic = {
         for topic_name in local.outbound_sns_topic_names :
         topic_name => {
@@ -29,7 +60,7 @@ locals {
     lambda_errors = {
       breach_topic_arn = try(data.aws_sns_topic.breach_topics["lambda_errors"].arn, null)
       ok_topic_arn     = try(data.aws_sns_topic.ok_topics["lambda_errors"].arn, null)
-      alarm_name       = "${var.outbound_lambda_name}-errors"
+      alarm_name       = "${local.eft_outputs.outbound_lambda_name}-errors"
       log_group_name   = local.alarms_raw_config.lambda_errors.log_group_name
       log_group_url    = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#logsV2:log-groups/log-group/${replace(local.alarms_raw_config.lambda_errors.log_group_name, "/", "$252F")}"
       queue_url        = "https://${local.region}.console.aws.amazon.com/sqs/v3/home?region=${local.region}#/queues/${urlencode(data.aws_sqs_queue.outbound_lambda_dlq.url)}"
@@ -50,7 +81,7 @@ locals {
 
   slack_notifier_lambda_name = "bfd-${local.env}-${local.service}-outbound-slack-notifier"
   slack_notifier_lambda_src  = "outbound_slack_notifier"
-  slack_webhook_ssm_path     = var.ssm_config["/bfd/${local.service}/outbound/o11y/slack_notifier/webhook_ssm_path"]
+  slack_webhook_ssm_path     = local.ssm_config["/bfd/${local.service}/outbound/slack_notifier/webhook_ssm_path"]
   slack_webhook              = nonsensitive(data.aws_ssm_parameter.slack_webhook.value)
 }
 
@@ -65,18 +96,18 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   treat_missing_data  = "notBreaching"
 
   alarm_description = join("", [
-    "The ${var.outbound_lambda_name} has failed 3 times in 10 minutes in ${local.env}. View the ",
+    "The ${local.eft_outputs.outbound_lambda_name} has failed 3 times in 10 minutes in ${local.env}. View the ",
     "linked CloudWatch Log Group for more details on the failures, and inspect the failing events ",
     "in the linked DLQ",
     "\n",
     "\n* CloudWatch Log Group: <${local.alarms_config.lambda_errors.log_group_url}|${local.alarms_config.lambda_errors.log_group_name}>",
-    "\n* Dead Letter Queue: <${local.alarms_config.lambda_errors.queue_url}|${var.outbound_lambda_dlq_name}>",
+    "\n* Dead Letter Queue: <${local.alarms_config.lambda_errors.queue_url}|${local.eft_outputs.outbound_lambda_dlq_name}>",
   ])
 
   metric_name = "Errors"
   namespace   = local.lambda_metrics_namespace
   dimensions = {
-    FunctionName = var.outbound_lambda_name
+    FunctionName = local.eft_outputs.outbound_lambda_name
   }
 
   alarm_actions = local.alarms_config.lambda_errors.breach_topic_arn != null ? [local.alarms_config.lambda_errors.breach_topic_arn] : null
@@ -125,18 +156,18 @@ resource "aws_cloudwatch_metric_alarm" "lambda_timeouts" {
   treat_missing_data  = "notBreaching"
 
   alarm_description = join("", [
-    "The ${var.outbound_lambda_name} has timed out in ${local.env}. View the ",
+    "The ${local.eft_outputs.outbound_lambda_name} has timed out in ${local.env}. View the ",
     "linked CloudWatch Log Group for more details on the failure, and inspect the failing event ",
     "in the linked DLQ",
     "\n",
     "\n* CloudWatch Log Group: <${local.alarms_config.lambda_errors.log_group_url}|${local.alarms_config.lambda_errors.log_group_name}>",
-    "\n* Dead Letter Queue: <${local.alarms_config.lambda_errors.queue_url}|${var.outbound_lambda_dlq_name}>",
+    "\n* Dead Letter Queue: <${local.alarms_config.lambda_errors.queue_url}|${local.eft_outputs.outbound_lambda_dlq_name}>",
   ])
 
   metric_name = "Duration"
   namespace   = local.lambda_metrics_namespace
   dimensions = {
-    FunctionName = var.outbound_lambda_name
+    FunctionName = local.eft_outputs.outbound_lambda_name
   }
 
   alarm_actions = local.alarms_config.lambda_errors.breach_topic_arn != null ? [local.alarms_config.lambda_errors.breach_topic_arn] : null
@@ -148,32 +179,42 @@ resource "aws_lambda_permission" "slack_notifier_allow_sns" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.slack_notifier.function_name
   principal     = "sns.amazonaws.com"
-  source_arn    = var.outbound_bfd_sns_topic_arn
+  source_arn    = local.eft_outputs.outbound_bfd_sns_topic_arn
 }
 
 resource "aws_sns_topic_subscription" "sns_to_slack_notifier" {
-  topic_arn = var.outbound_bfd_sns_topic_arn
+  topic_arn = local.eft_outputs.outbound_bfd_sns_topic_arn
   protocol  = "lambda"
   endpoint  = aws_lambda_function.slack_notifier.arn
+}
+
+data "archive_file" "slack_notifier_src" {
+  type        = "zip"
+  output_path = "${path.module}/lambda_src/${local.slack_notifier_lambda_src}/${local.slack_notifier_lambda_src}.zip"
+
+  source {
+    content  = file("${path.module}/lambda_src/${local.slack_notifier_lambda_src}/${local.slack_notifier_lambda_src}.py")
+    filename = "${local.slack_notifier_lambda_src}.py"
+  }
 }
 
 resource "aws_lambda_function" "slack_notifier" {
   function_name = local.slack_notifier_lambda_name
 
   description = join("", [
-    "Invoked when the ${var.outbound_bfd_sns_topic_name} sends a notification. This Lambda posts ",
+    "Invoked when the ${local.eft_outputs.outbound_bfd_sns_topic_name} sends a notification. This Lambda posts ",
     "the contents of the notification to the configured Slack channel"
   ])
 
-  kms_key_arn      = var.kms_key_arn
+  kms_key_arn      = local.env_key_arn
   filename         = data.archive_file.slack_notifier_src.output_path
   source_code_hash = data.archive_file.slack_notifier_src.output_base64sha256
-  architectures    = ["x86_64"]
-  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:60"]
+  architectures    = ["arm64"]
+  layers           = ["arn:aws:lambda:${local.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-arm64:18"]
   handler          = "${local.slack_notifier_lambda_src}.handler"
   memory_size      = 128
   package_type     = "Zip"
-  runtime          = "python3.11"
+  runtime          = "python3.13"
   timeout          = 300
 
   tags = {
