@@ -12,16 +12,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 |---|---|---|---|
 | `config` | Yes | N/A | N/A |
 
-## `tofu destroy`ing `eft`
-
-The `eft` Terraservice defines multiple `aws_ec2_subnet_cidr_reservation` resources that should be left applied to our infrastructure at all times. These resources ensure that the static, internal IP addresses allocated for the SFTP server endpoints in each environment remain free and unallocated to other AWS services. Therefore, these resources have an explicit `prevent_destroy` `lifecycle` attached to them, so attempting to `tofu destroy` `eft` in an environment with these resources will result in an error.
-
-So, to workaround this, the following command can be used to do a targeted `tofu destroy` targeting every resource other than `aws_ec2_subnet_cidr_reservation` resources and the data sources it depends on:
-
-```bash
-tofu destroy $(for r in `tofu state list | grep -vE "aws_ec2_subnet_cidr_reservation.this|data.*"` ; do printf "-target=${r} "; done)
-```
-
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
