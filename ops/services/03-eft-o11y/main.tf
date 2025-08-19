@@ -93,7 +93,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   statistic           = "Sum"
   threshold           = "1"
   datapoints_to_alarm = "3"
-  treat_missing_data  = "notBreaching"
+  treat_missing_data  = "ignore"
 
   alarm_description = join("", [
     "The ${local.eft_outputs.outbound_lambda_name} has failed 3 times in 10 minutes in ${local.env}. View the ",
