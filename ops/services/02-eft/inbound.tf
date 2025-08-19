@@ -66,18 +66,6 @@ module "topic_inbound_received_s3_notifs" {
   lambda_sample_rate = 100
 }
 
-resource "aws_ec2_subnet_cidr_reservation" "this" {
-  for_each = local.subnet_ip_reservations
-
-  cidr_block       = "${each.value}/32"
-  reservation_type = "explicit"
-  subnet_id        = one([for subnet in local.subnets : subnet.id if subnet.tags["Name"] == each.key])
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
 resource "aws_lb" "this" {
   name                             = "${local.full_name}-nlb"
   internal                         = true
@@ -85,12 +73,13 @@ resource "aws_lb" "this" {
   load_balancer_type               = "network"
   tags                             = { Name = "${local.full_name}-nlb" }
 
+  security_groups = [aws_security_group.nlb.id]
+
   dynamic "subnet_mapping" {
     for_each = local.available_endpoint_subnets
 
     content {
-      subnet_id            = subnet_mapping.value.id
-      private_ipv4_address = local.subnet_ip_reservations[subnet_mapping.value.tags["Name"]]
+      subnet_id = subnet_mapping.value.id
     }
   }
 }
@@ -141,22 +130,32 @@ resource "aws_security_group" "nlb" {
   description = "Allow access to the ${local.service} network load balancer"
   vpc_id      = local.vpc_id
   tags        = { Name = "${local.full_name}-nlb" }
+}
 
-  ingress {
-    from_port       = local.sftp_port
-    to_port         = local.sftp_port
-    protocol        = "tcp"
-    cidr_blocks     = [local.vpc.cidr_block]
-    description     = "Allow ingress from SFTP traffic"
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
-  }
+resource "aws_vpc_security_group_ingress_rule" "nlb_allow_sftp_traffic_vpn" {
+  security_group_id = aws_security_group.nlb.id
+  prefix_list_id    = data.aws_ec2_managed_prefix_list.vpn.id
+  from_port         = local.sftp_port
+  to_port           = local.sftp_port
+  ip_protocol       = "TCP"
+  description       = "Allow ingress from SFTP traffic"
+}
 
-  egress {
-    from_port   = local.sftp_port
-    to_port     = local.sftp_port
-    protocol    = "tcp"
-    cidr_blocks = [for ip in data.aws_network_interface.vpc_endpoint[*].private_ip : "${ip}/32"]
-  }
+resource "aws_vpc_security_group_ingress_rule" "nlb_allow_sftp_traffic_vpc" {
+  security_group_id = aws_security_group.nlb.id
+  cidr_ipv4         = local.vpc.cidr_block
+  from_port         = local.sftp_port
+  to_port           = local.sftp_port
+  ip_protocol       = "TCP"
+  description       = "Allow ingress from SFTP traffic"
+}
+
+resource "aws_vpc_security_group_egress_rule" "nlb_allow_sftp_traffic_to_vpc_endpoint" {
+  security_group_id            = aws_security_group.nlb.id
+  referenced_security_group_id = aws_security_group.vpc_endpoint.id
+  from_port                    = local.sftp_port
+  to_port                      = local.sftp_port
+  ip_protocol                  = "TCP"
 }
 
 resource "aws_security_group" "vpc_endpoint" {
@@ -164,22 +163,24 @@ resource "aws_security_group" "vpc_endpoint" {
   description = "Allow ingress and egress from ${aws_lb.this.name}"
   vpc_id      = local.vpc_id
   tags        = { Name = "${local.full_name}-vpc-endpoint" }
+}
 
-  ingress {
-    from_port   = local.sftp_port
-    to_port     = local.sftp_port
-    protocol    = "tcp"
-    cidr_blocks = [for ip in aws_lb.this.subnet_mapping[*].private_ipv4_address : "${ip}/32"]
-    description = "Allow ingress from SFTP traffic from NLB"
-  }
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoint_allow_sftp_traffic_from_nlb" {
+  security_group_id            = aws_security_group.vpc_endpoint.id
+  referenced_security_group_id = aws_security_group.nlb.id
+  from_port                    = local.sftp_port
+  to_port                      = local.sftp_port
+  ip_protocol                  = "TCP"
+  description                  = "Allow ingress from SFTP traffic from NLB"
+}
 
-  egress {
-    from_port   = local.sftp_port
-    to_port     = local.sftp_port
-    protocol    = "tcp"
-    cidr_blocks = [for ip in aws_lb.this.subnet_mapping[*].private_ipv4_address : "${ip}/32"]
-    description = "Allow egress from SFTP traffic from NLB"
-  }
+resource "aws_vpc_security_group_egress_rule" "vpc_endpoint_allow_sftp_traffic_to_nlb" {
+  security_group_id            = aws_security_group.nlb.id
+  referenced_security_group_id = aws_security_group.nlb.id
+  from_port                    = local.sftp_port
+  to_port                      = local.sftp_port
+  ip_protocol                  = "TCP"
+  description                  = "Allow egress from SFTP traffic from NLB"
 }
 
 resource "aws_cloudwatch_log_group" "sftp_server" {

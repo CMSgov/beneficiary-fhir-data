@@ -14,16 +14,6 @@ data "aws_ec2_managed_prefix_list" "vpn" {
   }
 }
 
-data "aws_subnet" "this" {
-  for_each = nonsensitive(local.subnet_ip_reservations)
-
-  vpc_id = local.vpc_id
-  filter {
-    name   = "tag:Name"
-    values = [each.key]
-  }
-}
-
 data "aws_network_interface" "vpc_endpoint" {
   # This is a bit strange looking, but we cannot use network_interface_ids within a for_each as its
   # value is not determined until _after_ aws_vpc_endpoint.this is applied. Terraform expects the

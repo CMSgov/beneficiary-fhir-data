@@ -42,9 +42,6 @@ locals {
   eft_partners          = distinct(concat(local.inbound_eft_partners, local.outbound_eft_partners))
   ssm_hierarchy_roots   = concat(["bfd"], local.eft_partners)
 
-  subnet_ip_reservations = jsondecode(
-    local.ssm_config["/bfd/${local.service}/inbound/sftp_server/subnet_to_ip_reservations_nlb_json"]
-  )
   inbound_sftp_server_key    = sensitive(local.ssm_config["/bfd/${local.service}/inbound/sftp_server/host_private_key"])
   inbound_r53_hosted_zone    = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/r53_hosted_zone"]
   inbound_sftp_user_pub_key  = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_public_key"]
