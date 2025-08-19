@@ -32,8 +32,8 @@ data "aws_iam_policy_document" "sftp_outbound_transfer_ssm" {
     resources = flatten([
       for hierarchy in local.ssm_hierarchy_roots :
       [
-        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${hierarchy}/common/*",
-        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${hierarchy}/${local.service}/*",
+        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${hierarchy}/${local.env}/common/*",
+        "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${hierarchy}/${local.env}/${local.service}/*",
       ]
     ])
   }
