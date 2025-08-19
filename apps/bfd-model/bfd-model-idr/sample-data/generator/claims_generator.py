@@ -742,7 +742,7 @@ def gen_pac_version_of_claim(claim, max_date):
 
 
     for i in range(len(pac_claim['CLM_LINE'])):
-        pac_claim['CLM_LINE'][i]['CLM_LINE_NUM'] = i
+        pac_claim['CLM_LINE'][i]['CLM_LINE_NUM'] = i + 1
         pac_claim['CLM_LINE'][i]['CLM_UNIQ_ID'] = pac_claim['CLM']['CLM_UNIQ_ID']
         pac_claim['CLM_LINE'][i]['GEO_BENE_SK'] = pac_claim['CLM']['GEO_BENE_SK']
         pac_claim['CLM_LINE'][i]['CLM_DT_SGNTR_SK'] = pac_claim['CLM']['CLM_DT_SGNTR_SK']
@@ -955,9 +955,6 @@ def main():
                     for line in pac_claim['CLM_LINE_INSTNL']:
                         CLM_LINE_INSTNL.append(line)
                 CLM_FISS.append(pac_claim['CLM_FISS'])
-                # CLM_PRFNL.append(pac_claim['CLM_PRFNL'])
-                # for line in pac_claim['CLM_LINE_PRFNL']:
-                #     CLM_LINE_PRFNL.append(line)
             
         pt_complete+=1
     save_output_files(CLM,CLM_LINE,CLM_VAL,CLM_DT_SGNTR,CLM_PROD,CLM_INSTNL,CLM_LINE_INSTNL,CLM_DCMTN,CLM_FISS,CLM_PRFNL,CLM_LINE_PRFNL,CLM_LINE_RX)

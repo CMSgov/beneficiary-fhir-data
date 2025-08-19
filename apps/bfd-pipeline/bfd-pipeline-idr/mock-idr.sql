@@ -371,8 +371,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
-    geo_bene_sk BIGINT,
-    clm_dt_sgntr_sk BIGINT,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
