@@ -13,7 +13,7 @@ data "aws_ecr_repository" "sftp_outbound_transfer" {
 
 data "aws_ecr_image" "sftp_outbound_transfer" {
   repository_name = data.aws_ecr_repository.sftp_outbound_transfer.name
-  image_tag       = local.bfd_version
+  image_tag       = local.outbound_lambda_version
 }
 
 data "aws_iam_policy_document" "topic_outbound_pending_s3_notifs" {
