@@ -174,15 +174,6 @@ resource "aws_vpc_security_group_ingress_rule" "vpc_endpoint_allow_sftp_traffic_
   description                  = "Allow ingress from SFTP traffic from NLB"
 }
 
-resource "aws_vpc_security_group_egress_rule" "vpc_endpoint_allow_sftp_traffic_to_nlb" {
-  security_group_id            = aws_security_group.nlb.id
-  referenced_security_group_id = aws_security_group.nlb.id
-  from_port                    = local.sftp_port
-  to_port                      = local.sftp_port
-  ip_protocol                  = "TCP"
-  description                  = "Allow egress from SFTP traffic from NLB"
-}
-
 resource "aws_cloudwatch_log_group" "sftp_server" {
   name         = "/bfd/${local.service}/${local.full_name}"
   kms_key_id   = local.env_key_arn
