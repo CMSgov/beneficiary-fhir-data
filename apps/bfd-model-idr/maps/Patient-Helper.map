@@ -1,0 +1,53 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper" = "patient-support-map"
+
+//Eventually these should be sourced automagically from IDR on startup. But until then!
+
+//This concept map is used for representing "Sex"
+conceptmap "AdministrativeSex" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:1 = t:male
+  s:2 = t:female
+}
+
+//This concept map is used for representing "Sex" as defined by HHS. 
+//valueset 2.16.840.1.113762.1.4.1021.121
+conceptmap "FederalAdministrativeSex" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://snomed.info/sct"
+
+  s:1 = t:"248153007"
+  s:2 = t:"248152002"
+}
+
+conceptmap "PreferredContactLanguage" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "urn:ietf:bcp:47"
+
+  s:"~" = t:unknown
+  s:ENG = t:en
+  s:SPA = t:es
+}
+
+conceptmap "USCDIRaceCode" {
+    prefix s = "https://hl7.org/fhir/string"
+    prefix t = "https://hl7.org/fhir/string"
+
+    s:1 = t:"2106-3"
+    s:2 = t:"2054-5"
+    s:3 = t:"2131-1"
+    s:4 = t:"2028-9"
+    s:6 = t:"1002-5"
+}
+
+conceptmap "USCDIRaceDisplay" {
+    prefix s = "https://hl7.org/fhir/string"
+    prefix t = "https://hl7.org/fhir/string"
+
+    s:1 = t:"White"
+    s:2 = t:"Black or African American"
+    s:3 = t:"Other Race"
+    s:4 = t:"Asian"
+    s:6 = t:"American Indian or Alaska Native"
+}

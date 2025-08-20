@@ -1,0 +1,5 @@
+#ignore artifacts from FHIR Mapping Language
+StructureMaps/*
+out/*
+sushi/fsh-generated/*
+validator_cli.jar

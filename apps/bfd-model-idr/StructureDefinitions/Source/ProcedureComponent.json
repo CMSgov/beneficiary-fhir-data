@@ -1,0 +1,72 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "ProcedureComponent",
+    "url": "http://hl7.org/fhir/StructureDefinition/ProcedureComponent",
+    "name": "Procedure info",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "ProcedureComponent",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "ProcedureComponent",
+                "path": "ProcedureComponent",
+                "label": "Procedure Info for IDR. Ignore in DD Generation",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "ProcedureComponent.CLM_VAL_SQNC_NUM",
+                "path": "ProcedureComponent.CLM_VAL_SQNC_NUM",
+                "label": "Procedure Sequence Number",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ProcedureComponent.CLM_PRCDR_PRFRM_DT",
+                "path": "ProcedureComponent.CLM_PRCDR_PRFRM_DT",
+                "label": "Procedure Performed Date",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ProcedureComponent.CLM_PRCDR_CD",
+                "path": "ProcedureComponent.CLM_PRCDR_CD",
+                "label": "Claim Procedure Code",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND",
+                "path": "ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND",
+                "label": "Diagnosis Procedure ICD indicator",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
+        ]
+    }
+}

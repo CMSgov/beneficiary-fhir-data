@@ -1,0 +1,98 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "DiagnosisComponent",
+    "url": "http://hl7.org/fhir/StructureDefinition/DiagnosisComponent",
+    "name": "Diagnosis info",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "DiagnosisComponent",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "DiagnosisComponent",
+                "path": "DiagnosisComponent",
+                "label": "Diagnosis Info for IDR. Ignore in DD Generation",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "DiagnosisComponent.CLM_VAL_SQNC_NUM",
+                "path": "DiagnosisComponent.CLM_VAL_SQNC_NUM",
+                "label": "Diagnosis Sequence Number",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "DiagnosisComponent.ROW_NUM",
+                "path": "DiagnosisComponent.ROW_NUM",
+                "label": "Generated Row Number",
+                "definition": "This is a non-overlapping number that should be used as the sequence number for a diagnosis on a given claim.",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "DiagnosisComponent.CLM_DGNS_CD",
+                "path": "DiagnosisComponent.CLM_DGNS_CD",
+                "label": "Claim Diagnosis Code",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND",
+                "path": "DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND",
+                "label": "Diagnosis Procedure ICD indicator",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "DiagnosisComponent.CLM_PROD_TYPE_CD",
+                "path": "DiagnosisComponent.CLM_PROD_TYPE_CD",
+                "label": "Diagnosis Prod Type Code",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "DiagnosisComponent.CLM_POA_IND",
+                "path": "DiagnosisComponent.CLM_POA_IND",
+                "label": "Claim Present on Admission Indicator",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
+            
+        ]
+    }
+}

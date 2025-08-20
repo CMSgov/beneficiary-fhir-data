@@ -1,0 +1,134 @@
+//See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
+//Must appear in order map -> conceptmap -> uses -> imports -> groups
+map "https://bfd.cms.gov/MappingLanguage/Maps/Patient" = "BFD-Patient-Map"
+
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Beneficiary" alias Bene as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
+//The first specified target is what the default output will output as the ResourceType
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as target
+
+
+imports "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper" 
+
+//This refers to a patient where BENE_XREF_EFCTV_SK == BENE_SK. See notes for the other identity use case.
+
+group createPatient(source src: Bene, target patient: BFDPatient){
+    
+    src -> patient.name = create('HumanName') as tgtName then{
+        src.BENE_1ST_NAME as firstName -> tgtName.given = firstName "Populate first name";
+        src.BENE_MIDL_NAME as middleName -> tgtName.given = middleName "Populate middle name";
+        src.BENE_LAST_NAME as lastName -> tgtName.family = lastName "Populate last name";
+    } "add name";
+    src.BENE_DOB as dob -> patient.birthDate = dob "set dob";
+    src.BENE_DEATH_DT as dod where (src.BENE_VRFY_DEATH_DAY_SW = "true")  -> patient.deceased = dod "Set death date";
+    src.BENE_SEX_CD as sex -> patient.gender = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#AdministrativeSex', 'code');
+    src.BENE_SEX_CD as sex -> patient.extension = create('Extension') as sexExtension then {
+        src -> sexExtension.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex" "Set sex extension url";
+        src -> sexExtension.value = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#FederalAdministrativeSex', 'code') "Add sex value";
+    } "add sex";
+
+    //All except Unknown, Missing, or Hispanic
+    src.BENE_RACE_CD as race where (race != "~" and race != "0" and race != "5") -> patient.extension = create('Extension') as raceExtension then {
+        src -> raceExtension.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race" "Set race extension url";
+        src -> raceExtension.extension = create('Extension') as raceExtensionExtended then {
+            src -> raceExtensionExtended.url = "ombCategory" "Set race extension url";
+            src -> raceExtensionExtended.value = create('Coding') as valueCoding then{
+                src -> valueCoding.system = "urn:oid:2.16.840.1.113883.6.238" "Set race system urn";
+                src -> valueCoding.code = translate(race, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#USCDIRaceCode', "code") "Set code";
+                src -> valueCoding.display = translate(race, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#USCDIRaceDisplay', "code") "Set display";
+            } "Create Coding within sub-extension";
+        } "Create sub-extension for ombCategory";
+        src -> raceExtension.extension = create('Extension') as raceExtensionExtended then {
+            src -> raceExtensionExtended.url = "text" "Set race extension text url";
+            src -> raceExtensionExtended.valueString = translate(race, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#USCDIRaceDisplay','code') "set value string";
+        } "Create sub-extension for text display";
+    } "Create race extension";
+
+    //Missing or unknown
+    src.BENE_RACE_CD as race where (race = "~" or race = "0") -> patient.extension = create('Extension') as raceExtension then {
+        src -> raceExtension.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race" "Set race extension url";
+        src -> raceExtension.extension = create('Extension') as raceExtensionExtended then {
+            src -> raceExtensionExtended.url = "ombCategory" "Set race extension url";
+            src -> raceExtensionExtended.value = create('Coding') as valueCoding then{
+                src -> valueCoding.system = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor" "Set race system urn";
+                src -> valueCoding.code = "UNK" "Set code";
+                src -> valueCoding.display = "Unknown" "Set display";
+            } "Create Coding within sub-extension";
+        } "Create sub-extension for ombCategory";
+        src -> raceExtension.extension = create('Extension') as raceExtensionExtended then {
+            src -> raceExtensionExtended.url = "text" "Set race extension text url";
+            src -> raceExtensionExtended.valueString = "Unknown" "Set display";
+        } "Create sub-extension for text display";
+    } "Create race extension";
+
+
+    src.BENE_RACE_CD as race where (race = "5") -> patient.extension = create('Extension') as ethnicityExtension then {
+        src -> ethnicityExtension.url="http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity" "Set ethnicity extension url";
+        src -> ethnicityExtension.extension = create('Extension') as ethnicityExtensionExtended then {
+            src -> ethnicityExtensionExtended.url = "ombCategory" "Set ethnicity extension url";
+            src -> ethnicityExtensionExtended.value = create('Coding') as valueCoding then{
+                src -> valueCoding.system = "urn:oid:2.16.840.1.113883.6.238" "Set ethnicity system urn";
+                src -> valueCoding.code = "2135-2" "Set code";
+                src -> valueCoding.display = "Hispanic or Latino" "Set display";
+            } "Create Coding within sub-extension";
+        } "Create sub-extension for ombCategory";
+        src -> ethnicityExtension.extension = create('Extension') as ethnicityExtensionExtended then {
+            src -> ethnicityExtensionExtended.url = "text" "Set ethnicity extension text url";
+            src -> ethnicityExtensionExtended.valueString = "Hispanic or Latino" "Set display";
+        } "Create sub-extension for text display";
+    } "create ethnicity extension";
+
+
+    src.BENE_SK as bene_sk -> patient.id = bene_sk "Assign BENE_SK as identifier.";
+
+    src.ALL_BENE_SKs as bene_sks where (bene_sks != src.BENE_XREF_EFCTV_SK) -> patient.link = create('BackboneElement') as patientLink then{
+        src -> patientLink.type = "replaces" "replaces type";
+        src -> patientLink.other = create('Reference') as tgtReference,
+        tgtReference.reference = append("Patient/",bene_sks),
+        tgtReference.display = bene_sks "Set BENE_SK";
+    } "Create Patient links";
+
+
+    src.mbi as bene_mbis -> patient.identifier = create('Identifier') as ptIdentifier then SetMBI(bene_mbis,ptIdentifier) "Set Bene MBIs";
+
+
+    src -> patient.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0" "Set C4BB profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" "Set US Core profile";
+    } "add metadata";
+
+    //we have the IF here to only populate if the address is actually available. 
+    src.GEO_USPS_STATE_CD as stateCode where stateCode.length() = 2 -> patient.address = create('Address') as ptAddress then {
+        src.GEO_USPS_STATE_CD as stateCode -> ptAddress.state = stateCode "Set state code";
+        src.GEO_ZIP5_CD as zipCode -> ptAddress.postalCode = zipCode "Set zip code";
+        src.BENE_LINE_1_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 1";
+        src.BENE_LINE_2_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 2";
+        src.BENE_LINE_3_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 3";
+        src.BENE_LINE_4_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 4";
+        src.BENE_LINE_5_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 5";
+        src.BENE_LINE_6_ADR as addrLine where (addrLine.length()>0) -> ptAddress.line = addrLine "Set address line 6";
+        src.GEO_ZIP_PLC_NAME as cityName -> ptAddress.city = cityName "Set city name";
+    } "Set patient address";
+
+    src -> patient.communication = create('BackboneElement') as commsBackbone then{
+        src -> commsBackbone.language = create('CodeableConcept') as langCC then{
+            src.CNTCT_LANG_CD as langCode -> langCC.coding = translate(langCode,'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#PreferredContactLanguage','coding') "set coding";
+        }"Create CodeableConcept for Language.";
+        src -> commsBackbone.preferred=true "set preference as true";
+    } "Create backbone element for communication";
+}
+
+group SetMBI(source src : BeneMBI, target tgt : Identifier) {
+    src -> tgt.type = create('CodeableConcept') as idCC,
+        idCC.coding = create('Coding') as tempCode,
+        tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+        tempCode.code = "MB",
+        tgt.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+        src.BENE_MBI_ID as mbi -> tgt.value = mbi "Set identifier Value";
+    src -> tgt.period = create('Period') as tgtPeriod then {
+        src.BENE_MBI_EFCTV_DT as start-> tgtPeriod.start = start "Add MBI start date";
+        src.BENE_MBI_OBSLT_DT as end -> tgtPeriod.end = end "Add MBI end date.";
+    } "Mark start and end dates of MBI";
+}

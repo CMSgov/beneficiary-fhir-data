@@ -1,0 +1,313 @@
+{
+    "resourceType": "StructureDefinition",
+    "id": "ExplanationOfBenefit-Institutional-Base",
+    "url": "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit-Institutional-Base",
+    "name": "ExplanationOfBenefit-Institutional-Base",
+    "status": "draft",
+    "fhirVersion": "4.0.1",
+    "kind": "logical",
+    "abstract": true,
+    "type": "ExplanationOfBenefit-Institutional-Base",
+    "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+    "derivation": "specialization",
+    "differential": {
+        "element": [
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base",
+                "path": "ExplanationOfBenefit-Institutional-Base",
+                "label": "Explanation of Benefit Institutional Base Resource for IDR. Ignore in DD Generation",
+                "min": 1,
+                "max": "1"
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NPMT_RSN_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NPMT_RSN_CD",
+                "label": "Claim Non Payment Reason Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT",
+                "label": "Lifetime Reserved Days Used Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_MDCR_COINS_DAY_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_MDCR_COINS_DAY_CNT",
+                "label": "Total Coinsurance Days Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_NCVRD_DAY_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_NCVRD_DAY_CNT",
+                "label": "Non Utilization Day Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PER_DIEM_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PER_DIEM_AMT",
+                "label": "Pass Through Per Diem Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_CVRD_DAY_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_CVRD_DAY_CNT",
+                "label": "Utilization Day Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DRG_WT_NUM",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DRG_WT_NUM",
+                "label": "Claim PPS Capital DRG Weight Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT",
+                "label": "Claim PPS Capital Disproportionate Share Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_EXCPTN_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_EXCPTN_AMT",
+                "label": "Claim PPS Capital Exception Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_FSP_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_FSP_AMT",
+                "label": "Claim PPS Capital FSP Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_IME_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_IME_AMT",
+                "label": "Claim PPS Capital IME Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT",
+                "label": "Claim PPS Capital Outlier Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT",
+                "label": "Claim PPS Old Capital Hold Harmless Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_TOT_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_TOT_AMT",
+                "label": "Claim Total PPS Capital Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_PRMRY_PYR_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_PRMRY_PYR_AMT",
+                "label": "Primary Payer Paid Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT",
+                "label": "Professional Component Charge",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_DRG_OUTLIER_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_DRG_OUTLIER_AMT",
+                "label": "DRG Outlier Approved Payment Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT",
+                "label": "Deductible Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_UNCOMPD_CARE_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_UNCOMPD_CARE_AMT",
+                "label": "Claim Uncompensated Care Payment Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD",
+                "label": "FI Claim Action Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT",
+                "label": "Outpatient Beneficiary Payment Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT",
+                "label": "Hospice Period Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT",
+                "label": "Claim Total Visit Count",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD",
+                "label": "Claim Current Status Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
+            
+        ]
+    }
+}

@@ -1,0 +1,11 @@
+system,code,display
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",A,Aged recipient of SSI payments (CMS to State).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",B,Blind recipient of SSI payments (CMS to State).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",C,Entitled to Part A of Title IV (AFDC) (State to CMS).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",D,Disabled recipient of SSI payments (CMS to State).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",E,Aged recipient of supplemental payment administered by SSA (CMS to State).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",F,Blind recipient of supplemental payment administered by SSA (CMS to State).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",G,Disabled recipient of supplemental payment administered by SSA (CMS to State).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",H,Aged, blind, or disabled recipient.
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",M,Entitled to Medical Assistance only (MAO), non-cash recipient (State to CMS).
+"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",Z,Deemed categorically needy (State to CMS).

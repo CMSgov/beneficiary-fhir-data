@@ -1,0 +1,148 @@
+- inputPath: Beneficiary.BENE_1ST_NAME
+  appliesTo:
+    - Patient
+  fhirPath: Patient.name.given[0]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_1ST_NAME
+- inputPath: Beneficiary.BENE_LAST_NAME
+  appliesTo:
+    - Patient
+  fhirPath: Patient.name.family
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LAST_NAME
+- inputPath: Beneficiary.BENE_MIDL_NAME
+  appliesTo:
+    - Patient
+  fhirPath: Patient.name.given[1]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_MIDL_NAME
+- inputPath: Beneficiary.BENE_BRTH_DT
+  appliesTo:
+    - Patient
+  fhirPath: Patient.birthDate
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_BRTH_DT
+- inputPath: Beneficiary.BENE_DEATH_DT
+  appliesTo:
+    - Patient
+  fhirPath: Patient.deceasedDateTime
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_DEATH_DT
+- inputPath: Beneficiary.BENE_VRFY_DEATH_DAY_SW
+  appliesTo:
+    - Patient
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_VRFY_DEATH_DAY_SW
+- inputPath: Beneficiary.BENE_XREF_EFCTV_SK
+  appliesTo:
+    - Patient
+  fhirPath: iif(Patient.link.where(type = 'replaced-by').other.exists(),Patient.link.where(type = 'replaced-by').other.reference.substring(8),Patient.id)
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_XREF_EFCTV_SK
+- inputPath: Beneficiary.ALL_BENE_SKs
+  appliesTo:
+    - Patient
+  fhirPath: Patient.link.other.display.union(Patient.id)
+  bfdDerived: true
+- inputPath: Beneficiary.BENE_SK
+  appliesTo:
+    - Patient
+  fhirPath: Patient.id
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_SK
+- inputPath: Beneficiary.lastUpdated
+  appliesTo:
+    - Patient
+  fhirPath: Patient.meta.lastUpdated
+  bfdDerived: True
+- inputPath: Beneficiary.GEO_USPS_STATE_CD
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.state
+  sourceView: V2_MDCR_BENE
+  sourceColumn: GEO_USPS_STATE_CD
+- inputPath: Beneficiary.GEO_ZIP5_CD
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.postalCode
+  sourceView: V2_MDCR_BENE
+  sourceColumn: GEO_ZIP5_CD
+- inputPath: Beneficiary.BENE_LINE_1_ADR
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.line[0]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LINE_1_ADR
+- inputPath: Beneficiary.BENE_LINE_2_ADR
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.line[1]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LINE_2_ADR
+- inputPath: Beneficiary.BENE_LINE_3_ADR
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.line[2]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LINE_3_ADR
+- inputPath: Beneficiary.BENE_LINE_4_ADR
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.line[3]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LINE_4_ADR
+- inputPath: Beneficiary.BENE_LINE_5_ADR
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.line[4]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LINE_5_ADR
+- inputPath: Beneficiary.BENE_LINE_6_ADR
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.line[5]
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_LINE_6_ADR
+- inputPath: Beneficiary.GEO_ZIP_PLC_NAME
+  appliesTo:
+    - Patient
+  fhirPath: Patient.address.city
+  sourceView: V2_MDCR_BENE
+  sourceColumn: GEO_ZIP_PLC_NAME
+- inputPath: Beneficiary.CNTCT_LANG_CD
+  appliesTo:
+    - Patient
+  fhirPath: Patient.communication.language.coding.where(system='urn:ietf:bcp:47').code
+  sourceView: V2_MDCR_BENE
+  sourceColumn: CNTCT_LANG_CD
+- inputPath: Beneficiary.BENE_SEX_CD
+  appliesTo:
+    - Patient
+  fhirPath: Patient.extension.where(url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex').value
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_SEX_CD
+- inputPath: Beneficiary.BENE_RACE_CD
+  appliesTo:
+    - Patient
+  fhirPath: Patient.extension.where(url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity' or url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-race').extension.valueCoding
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_RACE_CD
+- inputPath: Bene-MBI.BENE_MBI_ID
+  appliesTo:
+    - Patient
+  fhirPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').value
+  sourceView: V2_MDCR_BENE
+  sourceColumn: BENE_MBI_ID
+- inputPath: Bene-MBI.BENE_MBI_EFCTV_DT
+  appliesTo:
+    - Patient
+  fhirPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').period.start
+  sourceView: V2_MDCR_BENE_MBI_ID
+  sourceColumn: BENE_MBI_EFCTV_DT
+- inputPath: Bene-MBI.BENE_MBI_OBSLT_DT
+  appliesTo:
+    - Patient
+  fhirPath: Patient.identifier.where(system='http://hl7.org/fhir/sid/us-mbi').period.end
+  sourceView: V2_MDCR_BENE_MBI_ID
+  sourceColumn: BENE_MBI_OBSLT_DT
+  
