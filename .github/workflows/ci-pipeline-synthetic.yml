@@ -3,9 +3,8 @@ name: CI - Synthetic Pipeline
 on:
   pull_request:
     paths:
-      - "**/*.py"
-      - "**/*requirement*.txt"
-      - "**/uv.lock"
+      - "apps/bfd-model-idr"
+      - "apps/bfd-pipeline/bfd-pipeline-idr"
       - ".github/workflows/ci-python-synthetic.yml"
   merge_group:
   push:
@@ -27,6 +26,7 @@ jobs:
         node-version: '22'
     - name: Install dependencies
       run: |
+        npm install -g sushi
         cd ${{ github.workspace }}/apps/bfd-model-idr
         sushi build ./sushi
         uv run patient_generator.py

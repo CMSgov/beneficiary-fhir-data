@@ -778,7 +778,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     add_meta_timestamps(claim["CLM_PRFNL"], claim["CLM"], max_date)
 
     num_clm_lines = random.randint(1, 15)
-    for line in range(1, num_clm_lines + 1):
+    for line_num in range(1, num_clm_lines + 1):
         if clm_type_cd in (1, 2, 3, 4):
             # handled above
             continue
@@ -925,9 +925,9 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         add_meta_timestamps(claim_line_inst, claim["CLM"], max_date)
 
         claim_line["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
-        claim_line["CLM_LINE_NUM"] = line
-        claim_line_inst["CLM_LINE_NUM"] = line
-        claim_line_prfnl["CLM_LINE_NUM"] = line
+        claim_line["CLM_LINE_NUM"] = line_num
+        claim_line_inst["CLM_LINE_NUM"] = line_num
+        claim_line_prfnl["CLM_LINE_NUM"] = line_num
         claim["CLM_LINE"].append(claim_line)
         if clm_type_cd >= 10 and clm_type_cd <= 65:
             claim["CLM_LINE_INSTNL"].append(claim_line_inst)
@@ -1223,7 +1223,7 @@ def main():
             ):
                 pac_claim = gen_pac_version_of_claim(claim, max_date)
                 CLM.append(pac_claim["CLM"])
-                CLM_LINE.extend(claim["CLM_LINE"])
+                CLM_LINE.extend(pac_claim["CLM_LINE"])
                 CLM_VAL.extend(pac_claim["CLM_VAL"])
                 CLM_DT_SGNTR.append(pac_claim["CLM_DT_SGNTR"])
                 CLM_PROD.extend(pac_claim["CLM_PROD"])
