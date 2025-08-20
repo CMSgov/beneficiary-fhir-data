@@ -1164,9 +1164,7 @@ def main():
     args = parser.parse_args()
     if args.sushi:
         print("Running sushi build")
-        _, stderr = run_command("sushi build", cwd="../../sushi")
-        print("SUSHI output:")
-        # print(stdout)
+        _, stderr = run_command("sushi build", cwd="./sushi")
         if stderr:
             print("SUSHI errors:")
             print(stderr)

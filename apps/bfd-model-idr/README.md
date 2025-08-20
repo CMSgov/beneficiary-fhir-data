@@ -64,6 +64,20 @@ uv run compile_resources.py \
     --test
 ```
 
+### Synthetic data generation
+
+Quick start:
+
+```sh
+uv run patient_generator.py
+
+uv run claims_generator.py \
+    --sushi \
+    --benes out/SYNTHETIC_BENE_HSTRY.csv
+```
+
+#### Patient Data
+
 To generate synthetic patient data, the patient_generator.py script is used.
 To utilize it:
 
@@ -89,6 +103,8 @@ SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv
 SYNTHETIC_BENE_MAPD_ENRLMT.csv
 
 The patient generator creates synthetic beneficiary data with realistic but SYNTHETIC MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
+
+#### Claims data
 
 To generate synthetic claims data, the claims_generator.py script is used. 
 To utilize it:
