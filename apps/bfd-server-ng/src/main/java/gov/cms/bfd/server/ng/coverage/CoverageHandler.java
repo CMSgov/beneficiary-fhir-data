@@ -36,9 +36,7 @@ public class CoverageHandler {
 
     var beneficiaryOpt =
         beneficiaryRepository.searchBeneficiaryWithCoverage(
-            coverageCompositeId.beneSk(),
-            Optional.of(coverageCompositeId.coveragePart().getStandardCode()),
-            new DateTimeRange());
+            coverageCompositeId.beneSk(), new DateTimeRange());
 
     return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
   }
@@ -54,10 +52,7 @@ public class CoverageHandler {
       CoverageCompositeId parsedCoverageId, DateTimeRange lastUpdated) {
 
     var beneficiaryOpt =
-        beneficiaryRepository.searchBeneficiaryWithCoverage(
-            parsedCoverageId.beneSk(),
-            Optional.of(parsedCoverageId.coveragePart().getStandardCode()),
-            lastUpdated);
+        beneficiaryRepository.searchBeneficiaryWithCoverage(parsedCoverageId.beneSk(), lastUpdated);
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.defaultBundle(beneficiaryRepository::beneficiaryLastUpdated);
     }
@@ -79,7 +74,7 @@ public class CoverageHandler {
   public Bundle searchByBeneficiary(Long beneSk, DateTimeRange lastUpdated) {
     var beneficiaryOpt =
         beneficiaryRepository
-            .searchBeneficiaryWithCoverage(beneSk, Optional.empty(), lastUpdated)
+            .searchBeneficiaryWithCoverage(beneSk, lastUpdated)
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.bundleOrDefault(List.of(), beneficiaryRepository::beneficiaryLastUpdated);
