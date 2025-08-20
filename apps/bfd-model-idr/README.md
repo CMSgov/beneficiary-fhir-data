@@ -71,12 +71,6 @@ To utilize it:
 uv run patient_generator.py
 ```
 
-Generate claims data:
-
-```sh
-uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
-```
-
 The script supports several options:
 - `--benes <csv_file>`: Use a CSV file containing beneficiary data to populate fields. Empty fields will be filled with random data.
 - `--claims`: Automatically generate claims after patient generation using the generated SYNTHETIC_BENE_HSTRY.csv file.
