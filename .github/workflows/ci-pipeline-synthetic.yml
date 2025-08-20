@@ -5,7 +5,7 @@ on:
     paths:
       - "apps/bfd-model-idr/*"
       - "apps/bfd-pipeline/bfd-pipeline-idr/*"
-      - ".github/workflows/ci-python-synthetic.yml"
+      - ".github/workflows/ci-pipeline-synthetic.yml"
   merge_group:
 
 jobs:
