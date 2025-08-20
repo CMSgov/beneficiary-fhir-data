@@ -28,6 +28,7 @@ jobs:
       run: |
         npm install -g sushi
         cd ${{ github.workspace }}/apps/bfd-model-idr
+        ls $(npm config get prefix)/bin
         $(npm config get prefix)/bin/sushi build ./sushi
         uv run patient_generator.py
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
