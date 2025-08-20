@@ -9,11 +9,5 @@
 **/nb-configuration.xml
 **/nbactions.xml
 
-#ignore artifacts from FHIR Mapping Language
-bfd-model/bfd-model-idr/StructureMaps/*
-bfd-model/bfd-model-idr/outputs/*
-bfd-model/bfd-model-idr/sushi/fsh-generated/*
-bfd-model/bfd-model-idr/validator_cli.jar
-
 # Ignore Python bytecode files
 *.pyc
