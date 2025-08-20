@@ -26,10 +26,9 @@ jobs:
         node-version: '22'
     - name: Install dependencies
       run: |
-        npm install -g sushi
+        npm install -g fsh-sushi
         cd ${{ github.workspace }}/apps/bfd-model-idr
-        ls $(npm config get prefix)
-        $(npm config get prefix)/bin/sushi build ./sushi
+        sushi build ./sushi
         uv run patient_generator.py
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
         cd ../bfd-pipeline/bfd-pipeline-idr
