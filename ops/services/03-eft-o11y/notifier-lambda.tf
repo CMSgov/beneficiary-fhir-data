@@ -1,8 +1,9 @@
 locals {
-  slack_notifier_lambda_name = "bfd-${local.env}-${local.service}-outbound-slack-notifier"
-  slack_notifier_lambda_src  = "outbound_slack_notifier"
-  slack_webhook_ssm_path     = local.ssm_config["/bfd/${local.service}/outbound/slack_notifier/webhook_ssm_path"]
-  slack_webhook              = nonsensitive(data.aws_ssm_parameter.slack_webhook.value)
+  slack_notifier_lambda_name      = "outbound-slack-notifier"
+  slack_notifier_lambda_full_name = "${local.name_prefix}-${local.slack_notifier_lambda_name}"
+  slack_notifier_lambda_src       = "outbound_slack_notifier"
+  slack_webhook_ssm_path          = local.ssm_config["/bfd/${local.service}/outbound/slack_notifier/webhook_ssm_path"]
+  slack_webhook                   = nonsensitive(data.aws_ssm_parameter.slack_webhook.value)
 }
 
 data "aws_ssm_parameter" "slack_webhook" {
@@ -34,8 +35,16 @@ data "archive_file" "slack_notifier_src" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "slack_notifier" {
+  name         = "/aws/lambda/${local.slack_notifier_lambda_full_name}"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
 resource "aws_lambda_function" "slack_notifier" {
-  function_name = local.slack_notifier_lambda_name
+  depends_on = [aws_iam_role_policy_attachment.slack_notifier]
+
+  function_name = local.slack_notifier_lambda_full_name
 
   description = join("", [
     "Invoked when the ${local.eft_outputs.outbound_bfd_sns_topic_name} sends a notification. This Lambda posts ",
@@ -53,8 +62,13 @@ resource "aws_lambda_function" "slack_notifier" {
   runtime          = "python3.13"
   timeout          = 300
 
+  logging_config {
+    log_group  = aws_cloudwatch_log_group.slack_notifier.name
+    log_format = "Text"
+  }
+
   tags = {
-    Name = local.slack_notifier_lambda_name
+    Name = local.slack_notifier_lambda_full_name
   }
 
   environment {

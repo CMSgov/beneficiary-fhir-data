@@ -33,7 +33,7 @@ locals {
   vpc                      = module.terraservice.vpc
   azs                      = keys(module.terraservice.default_azs)
 
-  full_name = "bfd-${local.env}-${local.service}"
+  name_prefix = "bfd-${local.env}-${local.service}"
 
   outbound_sns_topic_names = concat([local.eft_outputs.outbound_bfd_sns_topic_name], local.eft_outputs.outbound_partner_sns_topic_names)
 }
