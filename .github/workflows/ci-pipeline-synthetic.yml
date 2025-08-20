@@ -3,8 +3,8 @@ name: CI - Synthetic Pipeline
 on:
   pull_request:
     paths:
-      - "apps/bfd-model-idr"
-      - "apps/bfd-pipeline/bfd-pipeline-idr"
+      - "apps/bfd-model-idr/*"
+      - "apps/bfd-pipeline/bfd-pipeline-idr/*"
       - ".github/workflows/ci-python-synthetic.yml"
   merge_group:
 
