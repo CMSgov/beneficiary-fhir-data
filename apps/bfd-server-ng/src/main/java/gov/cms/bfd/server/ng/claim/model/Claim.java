@@ -124,6 +124,16 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
+    if (claimSourceId.equals(ClaimSourceId.NATIONAL_CLAIMS_HISTORY)) {
+        eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
+    }
+
+    if (claimTypeCode.getCode() >= 1000 && claimTypeCode.getCode() < 2000) {
+        eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+    } else if (claimTypeCode.getCode() >= 2000 && claimTypeCode.getCode() < 3000) {
+
+    }
+
     var supportingInfoFactory = new SupportingInfoFactory();
     var initialSupportingInfo =
         List.of(
