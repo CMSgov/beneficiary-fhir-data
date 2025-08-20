@@ -7,7 +7,6 @@ on:
       - "apps/bfd-pipeline/bfd-pipeline-idr"
       - ".github/workflows/ci-python-synthetic.yml"
   merge_group:
-  push:
 
 jobs:
   run-synthetic:
