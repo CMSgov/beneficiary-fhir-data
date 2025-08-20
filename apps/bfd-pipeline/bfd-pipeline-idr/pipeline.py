@@ -1,7 +1,10 @@
 import logging
 import os
 import sys
+import time
 from datetime import datetime
+
+from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 import extractor
 import loader
@@ -19,10 +22,10 @@ from model import (
     IdrClaimAnsiSignature,
     IdrClaimDateSignature,
     IdrClaimInstitutional,
-    IdrClaimLine,
+    IdrClaimItem,
     IdrClaimLineInstitutional,
-    IdrClaimProcedure,
-    IdrClaimValue,
+    IdrClaimLineProfessional,
+    IdrClaimProfessional,
     LoadProgress,
     T,
 )
@@ -90,11 +93,24 @@ def extract_and_load(
         progress.batch_start_ts if progress else "none",
         progress.batch_complete_ts if progress else "none",
     )
-    data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
-
+    max_attempts = 5
     loader = PostgresLoader(connection_string)
-    data_loaded = loader.load(data_iter, cls, batch_start, progress)
-    return (loader, data_loaded)
+    for attempt in range(max_attempts):
+        try:
+            data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
+            data_loaded = loader.load(data_iter, cls, batch_start, progress)
+            return (loader, data_loaded)
+        # Snowflake will throw a reauth error if the pipeline has been running for several hours
+        # but it seems to be wrapped in a ProgrammingError.
+        # Unclear the best way to handle this, it will require a bit more trial and error
+        except (ReauthenticationRequest, RetryRequest) as ex:
+            logger.warning("received transient error, retrying...", exc_info=ex)
+            data_extractor.reconnect()
+            if attempt == max_attempts - 1:
+                logger.error("max attempts exceeded")
+                raise ex
+            time.sleep(1)
+    return (loader, False)
 
 
 def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]) -> None:
@@ -133,11 +149,11 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrClaim,
         IdrClaimInstitutional,
         IdrClaimDateSignature,
-        IdrClaimValue,
-        IdrClaimLine,
+        IdrClaimItem,
         IdrClaimLineInstitutional,
         IdrClaimAnsiSignature,
-        IdrClaimProcedure,
+        IdrClaimProfessional,
+        IdrClaimLineProfessional,
     )
 
     logger.info("done")

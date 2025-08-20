@@ -25,6 +25,7 @@ CREATE TABLE idr.beneficiary(
     bene_line_5_adr VARCHAR(40) NOT NULL,
     bene_line_6_adr VARCHAR(40) NOT NULL,
     cntct_lang_cd VARCHAR(3) NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
@@ -136,6 +137,8 @@ CREATE TABLE idr.beneficiary_xref (
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     src_rec_crte_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
@@ -181,8 +184,11 @@ CREATE TABLE idr.claim (
     clm_ncvrd_chrg_amt NUMERIC NOT NULL,
     clm_mdcr_ddctbl_amt NUMERIC NOT NULL,
     clm_prvdr_pmt_amt NUMERIC NOT NULL,
+    clm_alowd_chrg_amt NUMERIC NOT NULL,
+    clm_bene_pmt_amt NUMERIC NOT NULL,
     clm_cntrctr_num VARCHAR(5) NOT NULL,
     clm_pmt_amt NUMERIC NOT NULL,
+    clm_pd_dt DATE NOT NULL,
     clm_ltst_clm_ind VARCHAR(1) NOT NULL,
     clm_atndg_prvdr_npi_num VARCHAR(10) NOT NULL,
     clm_atndg_prvdr_last_name VARCHAR(60) NOT NULL,
@@ -202,8 +208,12 @@ CREATE TABLE idr.claim (
     clm_blg_prvdr_oscar_num VARCHAR(20) NOT NULL,
     clm_idr_ld_dt DATE NOT NULL,
     clm_nrln_ric_cd VARCHAR(1) NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    clm_srvc_prvdr_gnrc_id_num VARCHAR(20) NOT NULL,
+    prvdr_prscrbng_prvdr_npi_num VARCHAR(10) NOT NULL,
+    idr_insrt_ts_clm TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_clm TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts_dcmtn TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_dcmtn TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
@@ -268,38 +278,53 @@ CREATE TABLE idr.claim_institutional (
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE idr.claim_value (
-    clm_uniq_id BIGINT NOT NULL,
-    clm_val_sqnc_num INT NOT NULL,
-    clm_val_cd VARCHAR(2) NOT NULL,
-    clm_val_amt NUMERIC NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(clm_uniq_id, clm_val_sqnc_num)
-);
-
-CREATE TABLE idr.claim_procedure (
-    clm_uniq_id BIGINT NOT NULL,
-    clm_val_sqnc_num INT NOT NULL,
-    clm_dgns_prcdr_icd_ind VARCHAR(1) NOT NULL,
-    clm_dgns_cd VARCHAR(7) NOT NULL,
-    clm_prcdr_cd VARCHAR(7) NOT NULL,
-    clm_prod_type_cd VARCHAR(1) NOT NULL,
-    clm_poa_ind VARCHAR(1) NOT NULL,
-    clm_prcdr_prfrm_dt DATE NOT NULL,
+CREATE TABLE idr.claim_professional (
+    clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
+    clm_carr_pmt_dnl_cd VARCHAR(2) NOT NULL,
+    clm_clncl_tril_num VARCHAR(8) NOT NULL,
+    clm_mdcr_prfnl_prmry_pyr_amt NUMERIC NOT NULL,
+    clm_mdcr_prfnl_prvdr_asgnmt_sw VARCHAR(2) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    bfd_row_num INT NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(clm_uniq_id, clm_prod_type_cd, clm_val_sqnc_num)
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE idr.claim_line (
+CREATE TABLE idr.claim_line_professional (
     clm_uniq_id BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
+    clm_bene_prmry_pyr_pd_amt NUMERIC NOT NULL,
+    clm_fed_type_srvc_cd VARCHAR(1) NOT NULL,
+    clm_line_carr_clncl_lab_num VARCHAR(10) NOT NULL,
+    clm_line_carr_hpsa_scrcty_cd VARCHAR(1) NOT NULL,
+    clm_line_dmerc_scrn_svgs_amt NUMERIC NOT NULL,
+    clm_line_hct_hgb_rslt_num NUMERIC NOT NULL,
+    clm_line_hct_hgb_type_cd VARCHAR(2) NOT NULL,
+    clm_line_prfnl_dme_price_amt NUMERIC NOT NULL,
+    clm_line_prfnl_mtus_cnt NUMERIC NOT NULL,
+    clm_mtus_ind_cd VARCHAR(1) NOT NULL,
+    clm_physn_astnt_cd VARCHAR(1) NOT NULL,
+    clm_pmt_80_100_cd VARCHAR(1) NOT NULL,
+    clm_prcng_lclty_cd VARCHAR(2) NOT NULL,
+    clm_prcsg_ind_cd VARCHAR(2) NOT NULL,
+    clm_prmry_pyr_cd VARCHAR(1) NOT NULL,
+    clm_prvdr_spclty_cd VARCHAR(2) NOT NULL,
+    clm_srvc_ddctbl_sw VARCHAR(1) NOT NULL,
+    clm_suplr_type_cd VARCHAR(1) NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(clm_uniq_id, clm_line_num)
+);
+
+CREATE TABLE idr.claim_item (
+    clm_uniq_id BIGINT NOT NULL,
+    bfd_row_id INT NOT NULL,
+    -- columns from V2_MDCR_CLM_LINE
+    clm_line_num INT NOT NULL,
+    clm_line_ansthsa_unit_cnt NUMERIC NOT NULL,
+    clm_line_dgns_cd VARCHAR(7) NOT NULL,
     clm_line_sbmt_chrg_amt NUMERIC NOT NULL,
     clm_line_alowd_chrg_amt NUMERIC NOT NULL,
     clm_line_ncvrd_chrg_amt NUMERIC NOT NULL,
@@ -309,22 +334,45 @@ CREATE TABLE idr.claim_line (
     clm_line_cvrd_pd_amt NUMERIC NOT NULL,
     clm_line_blood_ddctbl_amt NUMERIC NOT NULL,
     clm_line_mdcr_ddctbl_amt NUMERIC NOT NULL,
+    clm_line_mdcr_coinsrnc_amt NUMERIC NOT NULL,
     clm_line_hcpcs_cd VARCHAR(5) NOT NULL,
+    clm_line_from_dt DATE NOT NULL,
     clm_line_ndc_cd VARCHAR(11) NOT NULL,
     clm_line_ndc_qty NUMERIC NOT NULL,
     clm_line_ndc_qty_qlfyr_cd VARCHAR(2) NOT NULL,
     clm_line_srvc_unit_qty NUMERIC NOT NULL,
     clm_line_rev_ctr_cd VARCHAR(4) NOT NULL,
+    clm_line_rx_num VARCHAR(30) NOT NULL,
+    clm_line_thru_dt DATE NOT NULL,
+    clm_pos_cd VARCHAR(2) NOT NULL,
+    clm_rndrg_prvdr_prtcptg_cd VARCHAR(1) NOT NULL,
+    clm_rndrg_prvdr_tax_num VARCHAR(10) NOT NULL,
     hcpcs_1_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_2_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_3_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_4_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_5_mdfr_cd VARCHAR(2) NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts_line TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_line TIMESTAMPTZ NOT NULL,
+    -- columns from V2_MDCR_CLM_PROD
+    clm_val_sqnc_num_prod INT NOT NULL,
+    clm_dgns_prcdr_icd_ind VARCHAR(1) NOT NULL,
+    clm_dgns_cd VARCHAR(7) NOT NULL,
+    clm_prcdr_cd VARCHAR(7) NOT NULL,
+    clm_prod_type_cd VARCHAR(1) NOT NULL,
+    clm_poa_ind VARCHAR(1) NOT NULL,
+    clm_prcdr_prfrm_dt DATE NOT NULL,
+    idr_insrt_ts_prod TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_prod TIMESTAMPTZ NOT NULL,
+    -- columns from V2_MDCR_CLM_VAL
+    clm_val_sqnc_num_val INT NOT NULL,
+    clm_val_cd VARCHAR(2) NOT NULL,
+    clm_val_amt NUMERIC NOT NULL,
+    idr_insrt_ts_val TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_val TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(clm_uniq_id, clm_line_num)
+    PRIMARY KEY(clm_uniq_id, bfd_row_id)
 );
 
 CREATE TABLE idr.claim_line_institutional (

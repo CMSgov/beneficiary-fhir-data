@@ -35,7 +35,7 @@ public class ClaimLineInstitutional {
   private ClaimAnsiSignature ansiSignature;
 
   @OneToOne(mappedBy = "claimLineInstitutional")
-  private ClaimLine claimLine;
+  private ClaimItem claimLine;
 
   /**
    * Return claim ANSI signature data if available.
