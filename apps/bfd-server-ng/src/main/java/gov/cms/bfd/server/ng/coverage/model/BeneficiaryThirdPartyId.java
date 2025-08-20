@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng.beneficiary.model;
+package gov.cms.bfd.server.ng.coverage.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

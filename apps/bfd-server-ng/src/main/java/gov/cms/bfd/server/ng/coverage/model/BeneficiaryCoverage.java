@@ -1,5 +1,8 @@
-package gov.cms.bfd.server.ng.beneficiary.model;
+package gov.cms.bfd.server.ng.coverage.model;
 
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
+import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
+import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,7 +22,7 @@ import org.hl7.fhir.r4.model.Reference;
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
 @Getter
-@Table(name = "beneficiary", schema = "idr")
+@Table(name = "valid_beneficiary", schema = "idr")
 public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
@@ -84,8 +87,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     coverage.setType(coveragePart.toFhirTypeCode());
     coverage.addClass_(coveragePart.toFhirClassComponent());
-    var fhirPeriodOpt = entitlement.toFhirPeriod();
-    fhirPeriodOpt.ifPresent(coverage::setPeriod);
+    coverage.setPeriod(entitlement.toFhirPeriod());
     coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
 
     var beneficiaryThirdParty =
@@ -94,10 +96,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             .findFirst();
 
     Stream.of(
-            beneficiaryThirdParty.map(BeneficiaryThirdParty::toFhirExtensions),
+            beneficiaryThirdParty.map(BeneficiaryThirdParty::toFhir),
             Optional.of(entitlement.toFhirExtensions()),
-            getStatus().map(BeneficiaryStatus::toFhirExtensions),
-            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhirExtensions))
+            getStatus().map(BeneficiaryStatus::toFhir),
+            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhir))
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(coverage::addExtension);
