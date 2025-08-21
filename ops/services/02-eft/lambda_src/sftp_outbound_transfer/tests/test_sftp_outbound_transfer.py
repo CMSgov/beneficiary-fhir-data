@@ -245,9 +245,9 @@ class TestUpdatePipelineSlisHandler:
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps({
-                                    "Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]
-                                })
+                                "Message": json.dumps(
+                                    {"Records": [{"eventName": DEFAULT_MOCK_EVENT_NAME}]}
+                                )
                             }
                         }
                     ]
@@ -260,15 +260,17 @@ class TestUpdatePipelineSlisHandler:
                     "Records": [
                         {
                             "Sns": {
-                                "Message": json.dumps({
-                                    "Records": [
-                                        {
-                                            "eventName": DEFAULT_MOCK_EVENT_NAME,
-                                            "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
-                                            "s3": {"object": {}},
-                                        }
-                                    ]
-                                })
+                                "Message": json.dumps(
+                                    {
+                                        "Records": [
+                                            {
+                                                "eventName": DEFAULT_MOCK_EVENT_NAME,
+                                                "eventTime": DEFAULT_MOCK_EVENT_TIME_ISO,
+                                                "s3": {"object": {}},
+                                            }
+                                        ]
+                                    }
+                                )
                             }
                         }
                     ]

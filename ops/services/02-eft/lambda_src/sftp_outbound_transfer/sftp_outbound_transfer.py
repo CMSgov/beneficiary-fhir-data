@@ -132,10 +132,12 @@ def _handle_s3_event(s3_object_key: str) -> None:
     if not recognized_file:
         raise UnrecognizedFileError(
             message=f"The file {filename} did not match any of {partner}'s recognized files: "
-            + json.dumps([
-                {"type": file.type, "pattern": file.filename_pattern}
-                for file in partner_config.recognized_files
-            ]),
+            + json.dumps(
+                [
+                    {"type": file.type, "pattern": file.filename_pattern}
+                    for file in partner_config.recognized_files
+                ]
+            ),
             s3_object_key=s3_object_key,
             partner=partner,
         )
@@ -316,12 +318,14 @@ def _handle_s3_event(s3_object_key: str) -> None:
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
     try:
-        if not all([
-            REGION,
-            BFD_ENVIRONMENT,
-            BUCKET,
-            BUCKET_ROOT_DIR,
-        ]):
+        if not all(
+            [
+                REGION,
+                BFD_ENVIRONMENT,
+                BUCKET,
+                BUCKET_ROOT_DIR,
+            ]
+        ):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         s3_event_records = list(
