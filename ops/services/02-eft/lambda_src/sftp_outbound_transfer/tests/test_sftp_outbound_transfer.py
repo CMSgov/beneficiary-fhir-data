@@ -9,7 +9,6 @@ from unittest import mock
 
 import paramiko
 import pytest
-from aws_lambda_powertools.utilities.parser.models import SqsModel
 from pydantic import ValidationError
 
 from errors import (
@@ -165,7 +164,7 @@ def generate_event(
         "TopicArn": "",
         "Subject": "",
     }
-    return SqsModel.model_validate({
+    return {
         "Records": [
             {
                 "messageId": "",
@@ -184,7 +183,7 @@ def generate_event(
                 "awsRegion": "",
             },
         ]
-    }).model_dump()
+    }
 
 
 @mock.patch(f"{MODULE_UNDER_TEST}.boto3.client", new=mock_boto3_client)
