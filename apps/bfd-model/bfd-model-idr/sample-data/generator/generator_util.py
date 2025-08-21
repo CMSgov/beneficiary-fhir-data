@@ -112,14 +112,14 @@ class GeneratorUtil():
         if bene_sk in self.used_bene_sk:
             return self.gen_bene_sk()
         return bene_sk
-    
+
     def generate_bene_xref(self, new_bene_sk, old_bene_sk):
 
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         #10% chance for invalid xref.
         kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
-        
+
         efctv_ts = self.fake.date_time_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.datetime.now() - datetime.timedelta(days=1)
@@ -127,7 +127,7 @@ class GeneratorUtil():
         src_rec_ctre_ts = self.fake.date_time_between_dates(efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1))
         insrt_ts = self.fake.date_time_between_dates(efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1))
         updt_ts = self.fake.date_time_between_dates(insrt_ts, datetime.datetime.now() - datetime.timedelta(days=1))
-        
+
         xref_row = {
             "BENE_SK": str(new_bene_sk),
             "BENE_XREF_SK": str(old_bene_sk),
@@ -210,13 +210,13 @@ class GeneratorUtil():
                 if previous_mbi and previous_mbi != current_mbi:
                     historical_patient = copy.deepcopy(patient)
                     historical_patient["BENE_MBI_ID"] = previous_mbi
-                    historical_patient["IDR_LTST_TRANS_FLG"] = "N"  
-                    
+                    historical_patient["IDR_LTST_TRANS_FLG"] = "N"
+
                     self.set_timestamps(historical_patient, obslt_dt)
                     historical_patient["IDR_TRANS_OBSLT_TS"] = str(obslt_dt) + "T00:00:00.000000+0000"
                     self.bene_hstry_table.append(historical_patient)
                 
-                
+
                 previous_obslt_dt = obslt_dt  # Store for next iteration
             else:
                 # For the last MBI, no obsolescence date
@@ -230,13 +230,27 @@ class GeneratorUtil():
             patient["BENE_MBI_ID"] = current_mbi
 
     def generate_coverages(self, patient):
+        parts = random.choices([['A'], ['B'], ['A', 'B'], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
+        include_tp = random.random() > 0.2
+        expired = random.random() < 0.2
+        future = random.random() < 0.2
+        self._generate_coverages(patient, coverage_parts=parts, include_tp=include_tp, expired=expired, future=future)
+        
+    def _generate_coverages(self, patient, coverage_parts, include_tp, expired, future):
+        now = datetime.date.today()
+        if expired:
+            medicare_start_date = now - datetime.timedelta(days=730)
+            medicare_end_date = now - datetime.timedelta(days=365)
+        elif future:
+            medicare_start_date = now + datetime.timedelta(days=365)
+            medicare_end_date = now + datetime.timedelta(days=730)
+        else:
+            medicare_start_date = parse(self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']).date()
+            medicare_end_date = datetime.date(9999, 12, 31)
         mdcr_stus_cd = '~'
         while(mdcr_stus_cd in ('0','~','00')):
             mdcr_stus_cd = random.choice(self.code_systems['BENE_MDCR_STUS_CD'])
 
-        medicare_start_date = self.mbi_table[patient['BENE_MBI_ID']]['BENE_MBI_EFCTV_DT']
-        medicare_end_date = '9999-12-31'
-        #STUS
         stus_row = {"BENE_SK":patient['BENE_SK'],
                     'IDR_LTST_TRANS_FLG':'Y',
                     'BENE_MDCR_STUS_CD': mdcr_stus_cd,
@@ -263,8 +277,8 @@ class GeneratorUtil():
                     'BENE_RNG_END_DT': medicare_end_date
                 }
         self.mdcr_rsn.append(rsn_row)
-        for coverage_type in ['A','B']:
-            
+
+        for coverage_type in coverage_parts:
             #ENTLMT
             entlmt_row = {"BENE_SK":patient['BENE_SK'],
                         'IDR_LTST_TRANS_FLG':'Y',
@@ -280,7 +294,7 @@ class GeneratorUtil():
             }
             self.mdcr_entlmt.append(entlmt_row)
             #TP
-            if(random.randint(0,10)==10):
+            if include_tp:
                 tp_row = {"BENE_SK":patient['BENE_SK'],
                             'IDR_LTST_TRANS_FLG':'Y',
                             'BENE_TP_TYPE_CD': coverage_type,
@@ -464,27 +478,25 @@ class GeneratorUtil():
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", index=False)
         df = pd.json_normalize(self.mdcr_tp)
         df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
-        
+
         df = pd.json_normalize(self.mdcr_rsn)
         df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
-        
+
+        df = pd.json_normalize(self.bene_xref_table)
+        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
+            
         df = pd.json_normalize(self.bene_cmbnd_dual_mdcr)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
             
         df = pd.json_normalize(self.bene_xref_table)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
             
         # Save new synthetic data tables
         df = pd.json_normalize(self.bene_lis)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
             
         df = pd.json_normalize(self.bene_mapd_enrlmt_rx)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", index=False)
             
         df = pd.json_normalize(self.bene_mapd_enrlmt)
-        if(df.size>0):
-            df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", index=False)
+        df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", index=False)
