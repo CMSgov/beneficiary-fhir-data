@@ -196,6 +196,17 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_fiss (
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
+    clm_crnt_stus_cd VARCHAR(1),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
+);
+
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
     geo_bene_sk BIGINT NOT NULL,
     clm_dt_sgntr_sk BIGINT NOT NULL,
@@ -401,6 +412,10 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (
     clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
+    clm_1_rev_cntr_ansi_grp_cd VARCHAR(2),
+    clm_2_rev_cntr_ansi_grp_cd VARCHAR(2),
+    clm_3_rev_cntr_ansi_grp_cd VARCHAR(2),
+    clm_4_rev_cntr_ansi_grp_cd VARCHAR(2),
     clm_1_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3),
     clm_3_rev_cntr_ansi_rsn_cd VARCHAR(3),
