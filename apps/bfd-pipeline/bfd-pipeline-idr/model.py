@@ -424,6 +424,7 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
+ALIAS_FISS = "fiss"
 ALIAS_SGNTR = "sgntr"
 ALIAS_LINE = "line"
 ALIAS_PROCEDURE = "prod"
@@ -586,6 +587,39 @@ class IdrClaimDateSignature(IdrBaseModel):
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
         """
 
+class IdrClaimFiss(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_insrt_ts: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.claim_fiss"
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:
+        clm = ALIAS_CLM
+        fiss = ALIAS_FISS
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_fiss {fiss} ON
+                {clm}.geo_bene_sk = {fiss}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {fiss}.clm_type_cd AND
+                {clm}.clm_num_sk = {fiss}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{ORDER_BY}}
+        """
 
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
@@ -923,6 +957,10 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 class IdrClaimAnsiSignature(IdrBaseModel):
     clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_4_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_1_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_3_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]

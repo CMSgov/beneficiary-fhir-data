@@ -239,6 +239,13 @@ CREATE TABLE idr.claim_date_signature (
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
+CREATE TABLE idr.claim_fiss (
+    clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
+    clm_crnt_stus_cd VARCHAR(1) NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL
+);
+
 CREATE TABLE idr.claim_institutional (
     clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
     clm_admsn_type_cd VARCHAR(2) NOT NULL,
@@ -401,6 +408,10 @@ CREATE TABLE idr.claim_line_institutional (
 
 CREATE TABLE idr.claim_ansi_signature (
     clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
+    clm_1_rev_cntr_ansi_grp_cd VARCHAR(2) NOT NULL,
+    clm_2_rev_cntr_ansi_grp_cd VARCHAR(2) NOT NULL,
+    clm_3_rev_cntr_ansi_grp_cd VARCHAR(2) NOT NULL,
+    clm_4_rev_cntr_ansi_grp_cd VARCHAR(2) NOT NULL,
     clm_1_rev_cntr_ansi_rsn_cd VARCHAR(3) NOT NULL,
     clm_2_rev_cntr_ansi_rsn_cd VARCHAR(3) NOT NULL,
     clm_3_rev_cntr_ansi_rsn_cd VARCHAR(3) NOT NULL,
