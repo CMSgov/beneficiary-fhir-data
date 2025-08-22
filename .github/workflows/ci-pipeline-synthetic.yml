@@ -1,0 +1,35 @@
+name: CI - Synthetic Pipeline
+
+on:
+  pull_request:
+    paths:
+      - "apps/bfd-model-idr/*"
+      - "apps/bfd-pipeline/bfd-pipeline-idr/*"
+      - ".github/workflows/ci-pipeline-synthetic.yml"
+  merge_group:
+
+jobs:
+  run-synthetic:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout code
+      id: code-checkout
+      uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+          version: "0.8.10"
+    - name: Install node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install dependencies
+      run: |
+        npm install -g fsh-sushi
+        cd ${{ github.workspace }}/apps/bfd-model-idr
+        sushi build ./sushi
+        uv run patient_generator.py
+        uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
+        cd ../bfd-pipeline/bfd-pipeline-idr
+        ./run-db.sh
+        uv run pipeline.py local

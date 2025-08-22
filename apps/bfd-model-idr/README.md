@@ -1,15 +1,16 @@
-### Welcome to the README!
-
-This file will be extended, but for this step, we're consolidating multiple steps into a single script. 
+# IDR Model
 
 Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
 
 To download the FHIR Validator:
 https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
-  - place the jar file in the `beneficiary-fhir-data/apps/bfd-model/bfd-model-idr` directory
-  - ensure the name file name is `validator_cli.jar`
 
-#### Install sushi + fhirpath.js + yaml
+```sh
+curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar > validator_cli.jar
+```
+
+## Install sushi + fhirpath.js
+
 ```sh
 # Check if npm is installed
 npm --version
@@ -19,10 +20,10 @@ brew install npm
 ```
 
 ```sh
-npm install -g fsh-sushi yaml fhirpath
+npm install -g fsh-sushi fhirpath
 ```
 
-#### Install packages  (via uv)
+## Install packages  (via uv)
 ```sh
 # Check if uv is installed
 uv --version
@@ -36,18 +37,24 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-### Create FHIR files with synthetic data
+## Create FHIR files with synthetic data
 
-EOB Institutional Inpatient:
+To easily compile all resources:
+
 ```sh
-uv run compile_resources.py \
-    -m maps/EOB-Base.map \
-    -i sample-data/EOB-Base-Sample.json \
-    -o outputs/ExplanationOfBenefit.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
-    --test
+./compile-all-resources.sh
 ```
-Patient:
+
+To compile a specific resource:
+
+Pass along map with -m
+pass along the sample file with -i
+pass along the output file with -o
+pass along the resource url with -r
+pass along --test to run conformance tests
+
+Example (Patient):
+
 ```sh
 uv run compile_resources.py \
     -m maps/patient.map \
@@ -56,36 +63,24 @@ uv run compile_resources.py \
     -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
     --test
 ```
-Coverage (part A/B):
+
+### Synthetic data generation
+
+Quick start:
+
 ```sh
-uv run compile_resources.py \
-    -m maps/Coverage-Base.map \
-    -i sample-data/Coverage-FFS-Sample.json \
-    -o outputs/Coverage-FFS.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base \
-    --test
+uv run patient_generator.py
+
+uv run claims_generator.py \
+    --sushi \
+    --benes out/SYNTHETIC_BENE_HSTRY.csv
 ```
 
-Coverage (part C/D):
-```sh
-uv run compile_resources.py \
-    -m maps/Coverage-Base.map \
-    -i sample-data/Coverage-PartC-Sample.json \
-    -o outputs/Coverage.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base \
-    --test
-```
-
-
-Pass along map with -m
-pass along the sample file with -i
-pass along the output file with -o
-pass along the resource url with -r
-pass along --test to run conformance tests
-
+#### Patient Data
 
 To generate synthetic patient data, the patient_generator.py script is used.
 To utilize it:
+
 ```sh
 uv run patient_generator.py
 ```
@@ -108,6 +103,8 @@ SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv
 SYNTHETIC_BENE_MAPD_ENRLMT.csv
 
 The patient generator creates synthetic beneficiary data with realistic but SYNTHETIC MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
+
+#### Claims data
 
 To generate synthetic claims data, the claims_generator.py script is used. 
 To utilize it:
@@ -134,10 +131,13 @@ SYNTHETIC_CLM_ANSI_SGNTR.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
 
-Data Dictionary Notes:
+### Data Dictionary
+
 Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition. 
 
 Sometimes a field may be condensed at the IDR level, and fanned into multiple discrete components at the BFD / FHIR layer. An example is BENE_MDCR_STUS_CD. This code can indicate several interesting characteristics, such as ESRD status and disability status. A field, nameOverride, is available to directly populate names in the BFD DD for these fields that do not surface through a StructureDefinition. 
 To generate the data dictionary:
-python gen_dd.py
 
+```sh
+uv run gen_dd.py
+```

@@ -29,7 +29,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
       //CodeSystem -> CLM_TYPE_CD
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#ClM_TYPE_CD','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_CD','coding') "translate code";
       src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
     } "Create type";
 

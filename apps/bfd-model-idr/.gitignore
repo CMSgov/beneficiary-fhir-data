@@ -1,0 +1,6 @@
+#ignore artifacts from FHIR Mapping Language
+StructureMaps/*
+out/*
+!out/.gitkeep
+sushi/fsh-generated/*
+validator_cli.jar
