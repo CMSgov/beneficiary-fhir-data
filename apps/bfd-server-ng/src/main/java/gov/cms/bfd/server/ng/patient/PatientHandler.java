@@ -53,7 +53,8 @@ public class PatientHandler {
    * @return bundle
    */
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
-    var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
+    var xrefBeneSk = beneficiaryRepository.getXrefSkFromMbi(identifier);
+    var beneficiary = xrefBeneSk.flatMap(x -> beneficiaryRepository.findById(x, lastUpdated));
 
     return FhirUtil.bundleOrDefault(
         beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);

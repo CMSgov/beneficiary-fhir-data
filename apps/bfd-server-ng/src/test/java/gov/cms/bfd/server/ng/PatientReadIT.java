@@ -21,24 +21,24 @@ public class PatientReadIT extends IntegrationTestBase {
 
   @Test
   void patientReadValidLong() {
-    var patient = patientRead().withId(405764107L).execute();
+    var patient = patientRead().withId(Long.parseLong(BENE_ID_A_AND_B)).execute();
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadValidString() {
-    var patient = patientRead().withId("405764107").execute();
+    var patient = patientRead().withId(BENE_ID_A_AND_B).execute();
     assertEquals(1, patient.getIdentifier().size());
     assertEquals(1, patient.getLink().size());
-    assertEquals("181968400", patient.getLinkFirstRep().getOther().getDisplay());
+    assertEquals(BENE_ID_NON_CURRENT, patient.getLinkFirstRep().getOther().getDisplay());
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadMergedBene() {
-    var patient = patientRead().withId("792872340").execute();
+    var patient = patientRead().withId(HISTORICAL_MERGED_BENE_SK).execute();
 
     assertFalse(patient.isEmpty(), "Patient should not be empty");
     assertEquals(0, patient.getIdentifier().size(), "Expected no identifiers");
@@ -48,16 +48,23 @@ public class PatientReadIT extends IntegrationTestBase {
     var other = link.getOther();
 
     assertEquals(Patient.LinkType.REPLACEDBY, link.getType(), "Link type should be REPLACEDBY");
-    assertEquals("178083966", other.getDisplay(), "Link display should be '178083966'");
+    assertEquals(
+        CURRENT_MERGED_BENE_SK,
+        other.getDisplay(),
+        String.format("Link display should be '%s'", CURRENT_MERGED_BENE_SK));
 
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadUnMergedWithHistoricBenes() {
-    var patient = patientRead().withId("517782585").execute();
+    var patient = patientRead().withId(CURRENT_MERGED_BENE_SK).execute();
     assertFalse(patient.isEmpty());
-    assertEquals(1, patient.getIdentifier().size());
+    assertEquals(2, patient.getIdentifier().size());
+    assertFalse(
+        patient.getIdentifier().stream()
+            .anyMatch(i -> i.getValue().equals(HISTORICAL_MERGED_MBI_KILL_CREDIT)));
+
     assertEquals(2, patient.getLink().size());
     assertTrue(
         patient.getLink().stream().allMatch(link -> link.getType() == Patient.LinkType.REPLACES),
@@ -65,26 +72,23 @@ public class PatientReadIT extends IntegrationTestBase {
     assertTrue(
         patient.getLink().stream()
             .map(link -> link.getOther().getDisplay())
-            .anyMatch("121212121"::equals),
-        "Expected to find a link with display '121212121'");
+            .anyMatch(HISTORICAL_MERGED_BENE_SK2::equals),
+        String.format("Expected to find a link with display '%s'", HISTORICAL_MERGED_BENE_SK2));
     assertTrue(
         patient.getLink().stream()
             .map(link -> link.getOther().getDisplay())
-            .anyMatch("848484848"::equals),
-        "Expected to find a link with display '848484848'");
+            .anyMatch(HISTORICAL_MERGED_BENE_SK::equals),
+        String.format("Expected to find a link with display '%s'", HISTORICAL_MERGED_BENE_SK));
+
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadUnMergedWithHistoricKillCredit() {
-    var patient = patientRead().withId("178083966").execute();
+    var patient = patientRead().withId(HISTORICAL_MERGED_BENE_SK_KILL_CREDIT).execute();
     assertFalse(patient.isEmpty());
     assertEquals(1, patient.getIdentifier().size());
-    assertTrue(
-        patient.getLink().stream().allMatch(link -> link.getType() == Patient.LinkType.REPLACES),
-        "Expected all link types to be 'replaces'");
-    assertEquals(1, patient.getLink().size());
-    assertEquals("792872340", patient.getLinkFirstRep().getOther().getDisplay());
+    assertEquals(0, patient.getLink().size());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 

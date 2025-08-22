@@ -65,7 +65,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier("405764107"))
+                    .identifier(BENE_ID_A_AND_B))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(2, eobBundle.getEntry().size());
@@ -80,7 +80,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier("181968400"))
+                    .identifier(HISTORICAL_MERGED_BENE_SK))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
@@ -94,7 +94,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier("405764107"))
+                    .identifier(BENE_ID_A_AND_B))
             .count(1)
             .offset(offset)
             .execute();
@@ -104,20 +104,22 @@ public class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchByDate() {
-    var beneSk = "405764107";
+
     var lastUpdated =
         entityManager
             .createQuery(
                 "SELECT c.meta.updatedTimestamp FROM Claim c WHERE c.beneficiary.xrefSk = :beneSk",
                 ZonedDateTime.class)
-            .setParameter("beneSk", beneSk)
+            .setParameter("beneSk", BENE_ID_A_AND_B)
             .getResultList()
             .getFirst();
 
     var eobBundle =
         searchBundle()
             .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT).exactly().identifier(beneSk))
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_A_AND_B))
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .afterOrEquals()
@@ -128,7 +130,9 @@ public class EobSearchIT extends IntegrationTestBase {
     eobBundle =
         searchBundle()
             .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT).exactly().identifier(beneSk))
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_A_AND_B))
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .before()
@@ -188,7 +192,6 @@ public class EobSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByTag(SearchStyleEnum searchStyle) {
-    String beneficiaryId = "405764107";
     String validTag = IdrConstants.ADJUDICATION_STATUS_FINAL;
 
     Bundle eobBundle =
@@ -196,7 +199,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(beneficiaryId))
+                    .identifier(BENE_ID_A_AND_B))
             .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(validTag))
             .usingStyle(searchStyle)
             .execute();
@@ -213,7 +216,6 @@ public class EobSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchBySystemUrlTag(SearchStyleEnum searchStyle) {
-    String beneficiaryId = "405764107";
     String tagSystem = SystemUrls.SYS_ADJUDICATION_STATUS;
     String tagCode = "Adjudicated";
 
@@ -222,7 +224,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(beneficiaryId))
+                    .identifier(BENE_ID_A_AND_B))
             .and(
                 new TokenClientParam(Constants.PARAM_TAG)
                     .exactly()
@@ -242,7 +244,6 @@ public class EobSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByTagEmpty(SearchStyleEnum searchStyle) {
-    String beneficiaryId = "405764107";
     String validTagWithNoMatches = IdrConstants.ADJUDICATION_STATUS_PARTIAL;
 
     Bundle eobBundle =
@@ -250,7 +251,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(beneficiaryId))
+                    .identifier(BENE_ID_A_AND_B))
             .and(
                 new TokenClientParam(Constants.PARAM_TAG)
                     .exactly()
@@ -275,7 +276,6 @@ public class EobSearchIT extends IntegrationTestBase {
         "https://bluebutton.cms.gov/fhir/CodeSystem/test"
       })
   void eobSearchByInvalidTagBadRequest(String invalidTag) {
-    String beneficiaryId = "405764107";
 
     assertThrows(
         InvalidRequestException.class,
@@ -284,7 +284,7 @@ public class EobSearchIT extends IntegrationTestBase {
                 .where(
                     new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                         .exactly()
-                        .identifier(beneficiaryId))
+                        .identifier(BENE_ID_A_AND_B))
                 .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(invalidTag))
                 .execute(),
         "Should throw InvalidRequestException for unsupported _tag value: " + invalidTag);

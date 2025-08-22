@@ -127,6 +127,9 @@ class GeneratorUtil:
         src_rec_ctre_ts = self.fake.date_time_between_dates(
             efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1)
         )
+        src_rec_updt_ts = self.fake.date_time_between_dates(
+            src_rec_ctre_ts, datetime.datetime.now() - datetime.timedelta(days=1)
+        )
         insrt_ts = self.fake.date_time_between_dates(
             efctv_ts, datetime.datetime.now() - datetime.timedelta(days=1)
         )
@@ -140,6 +143,7 @@ class GeneratorUtil:
             "BENE_HICN_NUM": bene_hicn_num,
             "BENE_KILL_CRED_CD": str(kill_cred_cd),
             "SRC_REC_CRTE_TS": str(src_rec_ctre_ts),
+            "SRC_REC_UPDT_TS": str(src_rec_updt_ts),
             "IDR_TRANS_EFCTV_TS": str(efctv_ts),
             "IDR_INSRT_TS": str(insrt_ts),
             "IDR_UPDT_TS": str(updt_ts),
@@ -456,6 +460,7 @@ class GeneratorUtil:
                 [
                     "BENE_SK",
                     "BENE_XREF_EFCTV_SK",
+                    "BENE_XREF_SK",
                     "BENE_MBI_ID",
                     "BENE_LAST_NAME",
                     "BENE_1ST_NAME",

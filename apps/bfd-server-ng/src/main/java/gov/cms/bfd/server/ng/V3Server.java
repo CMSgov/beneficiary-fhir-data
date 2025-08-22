@@ -10,7 +10,6 @@ import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /** FHIR server for V3 operations. */
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Component;
 @WebServlet(urlPatterns = {"/v3/fhir*"})
 public class V3Server extends RestfulServer {
   private final List<IResourceProvider> resourceProviders;
-  private final Configuration configuration;
-  private final Environment environment;
 
   @Override
   public void initialize() {

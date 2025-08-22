@@ -34,14 +34,6 @@ public class CoverageSearchIT extends IntegrationTestBase {
     return getFhirClient().search().forResource(Coverage.class).returnBundle(Bundle.class);
   }
 
-  private static final String BENE_ID_PART_A_ONLY = "178083966";
-  private static final String BENE_ID_PART_B_ONLY = "365359727";
-  private static final String BENE_ID_NON_CURRENT = "181968400";
-  private static final String BENE_ID_NO_COVERAGE = "289169129";
-  private static final String BENE_ID_EXPIRED_COVERAGE = "421056595";
-  private static final String BENE_ID_FUTURE_COVERAGE = "971050241";
-  private static final String BENE_ID_NO_TP = "451482106";
-
   private Bundle searchByBeneficiary(String beneId, SearchStyleEnum searchStyle) {
     return searchBundle()
         .where(new ReferenceClientParam(Coverage.SP_BENEFICIARY).hasId("Patient/" + beneId))

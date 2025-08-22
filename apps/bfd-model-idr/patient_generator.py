@@ -146,6 +146,7 @@ for i in range(patients_to_generate):
 
         patient["BENE_SK"] = str(pt_bene_sk)
         patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
+        patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
         generator.used_bene_sk.append(pt_bene_sk)
 
         if pd.notna(row.get("BENE_MBI_ID")):
@@ -186,6 +187,7 @@ for i in range(patients_to_generate):
         pt_bene_sk = generator.gen_bene_sk()
         patient["BENE_SK"] = str(pt_bene_sk)
         patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
+        patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
         generator.used_bene_sk.append(pt_bene_sk)
 
         num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
