@@ -230,6 +230,15 @@ class IdrBeneficiary(IdrBaseModel):
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
+        # There can be multiple xref records for the same bene_sk/bene_ref_sk combo
+        # so we need to find the most recent one based on src_rec_updt_ts.
+
+        # Unlike idr_updt_ts, src_rec_updt_ts will be set to the created timestamp
+        # if no update has been applied. Therefore, we can just check the updated timestamp
+        # without caring about the created timestamp.
+
+        # There can also be duplicate values with the same idr_insrt_ts, so we have to rely on
+        # src_rec_insrt_ts/src_rec_updt_ts for this.
         return f"""
             WITH ordered_xref AS (
                 SELECT bene_sk, bene_xref_sk, ROW_NUMBER() OVER (
@@ -247,12 +256,14 @@ class IdrBeneficiary(IdrBaseModel):
                     bx.idr_insrt_ts,
                     bx.idr_updt_ts
                 FROM ordered_xref ox
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx 
+                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
                     ON bx.bene_sk = ox.bene_sk AND bx.bene_xref_sk = ox.bene_xref_sk
                 WHERE ox.row_order = 1
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
+            -- NOTE: the join condition is intentionally inverted here
+            -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
             LEFT JOIN current_xref {xref} 
                 ON {xref}.bene_sk = {hstry}.bene_xref_sk 
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
