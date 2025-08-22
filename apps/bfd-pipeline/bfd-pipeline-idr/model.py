@@ -592,12 +592,12 @@ class IdrClaimFiss(IdrBaseModel):
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_FISS},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_FISS},
         BeforeValidator(transform_null_date_to_min),
     ]
 
