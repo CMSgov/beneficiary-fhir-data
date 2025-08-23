@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.IdrConstants;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,16 +49,8 @@ public class BeneficiaryIdentity {
     }
     var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(mbi.get());
     var period = new Period();
-    mbiEffectiveDate.ifPresent(
-        e -> {
-          period.setStart(DateUtil.toDate(e));
-        });
-    mbiObsoleteDate.ifPresent(
-        o -> {
-          if (o.isBefore(IdrConstants.DEFAULT_DATE)) {
-            period.setEnd(DateUtil.toDate(o));
-          }
-        });
+    mbiEffectiveDate.ifPresent(e -> period.setStart(DateUtil.toDate(e)));
+    mbiObsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(o)));
     identifier.setPeriod(period);
 
     final var memberNumber = "MB";
