@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
 
 /**
  * Represents the beneficiary's primary identity information (specifically MBI) as relevant for
@@ -20,25 +19,25 @@ import org.hl7.fhir.r4.model.Identifier;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Identity {
+public class CurrentIdentifier {
 
   @Column(name = "bene_mbi_id")
   private String mbi;
 
   /**
-   * Transforms this identity information into a FHIR {@link Identifier} for the MBI. This
-   * identifier does not include a period, as it represents the beneficiary's primary MBI in the
-   * context of the Coverage resource.
+   * Transforms this identity information into a FHIR {@link org.hl7.fhir.r4.model.Identifier} for
+   * the MBI. This identifier does not include a period, as it represents the beneficiary's primary
+   * MBI in the context of the Coverage resource.
    *
-   * @return An {@link Optional} containing the FHIR {@link Identifier} if an MBI is present,
-   *     otherwise {@link Optional#empty()}.
+   * @return An {@link Optional} containing the FHIR {@link org.hl7.fhir.r4.model.Identifier} if an
+   *     MBI is present, otherwise {@link Optional#empty()}.
    */
-  public Optional<Identifier> toFhirMbiIdentifier() {
+  public Optional<org.hl7.fhir.r4.model.Identifier> toFhir() {
     if (mbi.isEmpty()) {
       return Optional.empty();
     }
 
-    Identifier mbiIdentifier = new Identifier();
+    org.hl7.fhir.r4.model.Identifier mbiIdentifier = new org.hl7.fhir.r4.model.Identifier();
     mbiIdentifier.setType(
         new CodeableConcept()
             .addCoding(
@@ -50,14 +49,5 @@ public class Identity {
     // in the context of this Coverage.
 
     return Optional.of(mbiIdentifier);
-  }
-
-  /**
-   * Gets the MBI string, if present.
-   *
-   * @return An {@link Optional} containing the MBI string.
-   */
-  public String getMbiValue() {
-    return mbi;
   }
 }

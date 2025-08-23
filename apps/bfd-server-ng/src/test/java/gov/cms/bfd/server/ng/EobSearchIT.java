@@ -65,7 +65,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(2, eobBundle.getEntry().size());
@@ -94,7 +94,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .count(1)
             .offset(offset)
             .execute();
@@ -110,7 +110,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .createQuery(
                 "SELECT c.meta.updatedTimestamp FROM Claim c WHERE c.beneficiary.xrefSk = :beneSk",
                 ZonedDateTime.class)
-            .setParameter("beneSk", BENE_ID_A_AND_B)
+            .setParameter("beneSk", BENE_ID_PART_A_AND_B_WITH_XREF)
             .getResultList()
             .getFirst();
 
@@ -119,7 +119,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .afterOrEquals()
@@ -132,7 +132,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .before()
@@ -199,7 +199,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(validTag))
             .usingStyle(searchStyle)
             .execute();
@@ -224,7 +224,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .and(
                 new TokenClientParam(Constants.PARAM_TAG)
                     .exactly()
@@ -251,7 +251,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_A_AND_B))
+                    .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .and(
                 new TokenClientParam(Constants.PARAM_TAG)
                     .exactly()
@@ -284,7 +284,7 @@ public class EobSearchIT extends IntegrationTestBase {
                 .where(
                     new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                         .exactly()
-                        .identifier(BENE_ID_A_AND_B))
+                        .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
                 .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(invalidTag))
                 .execute(),
         "Should throw InvalidRequestException for unsupported _tag value: " + invalidTag);

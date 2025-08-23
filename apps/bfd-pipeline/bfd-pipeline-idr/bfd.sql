@@ -439,6 +439,17 @@ CREATE VIEW idr.beneficiary_entitlement_reason_current AS
 SELECT * FROM idr.beneficiary_entitlement_reason
 WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours' AND bene_rng_end_dt >= NOW() - INTERVAL '12 hours';
 
+CREATE VIEW idr.beneficiary_identity AS
+SELECT DISTINCT 
+    bene.bene_sk, 
+    bene.bene_xref_efctv_sk_computed, 
+    bene.bene_mbi_id,
+    bene_mbi.bene_mbi_efctv_dt, 
+    bene_mbi.bene_mbi_obslt_dt
+FROM idr.beneficiary bene
+LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
+    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id;
+
 CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
     RETURNS VOID AS $$
     DECLARE comment_sql TEXT;

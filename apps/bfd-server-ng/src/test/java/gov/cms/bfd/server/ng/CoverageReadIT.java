@@ -77,7 +77,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidCompositeId() {
-    var validCoverageId = createCoverageId("b", BENE_ID_A_AND_B);
+    var validCoverageId = createCoverageId("b", BENE_ID_PART_A_AND_B_WITH_XREF);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");

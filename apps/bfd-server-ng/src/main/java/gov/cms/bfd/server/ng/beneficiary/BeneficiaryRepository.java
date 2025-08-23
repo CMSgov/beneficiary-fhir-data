@@ -2,8 +2,8 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.patient.PatientIdentity;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -25,26 +25,15 @@ public class BeneficiaryRepository {
    * @return list of patient identities representing all active identities connected to the bene
    *     record
    */
-  public List<PatientIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
+  public List<BeneficiaryIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
     return entityManager
         .createQuery(
             """
-            SELECT new PatientIdentity(
-                ROW_NUMBER() OVER (ORDER BY bene.beneSk) rowId,
-                bene.beneSk,
-                bene.xrefSk,
-                bene.identity.mbi,
-                mbiId.effectiveDate,
-                mbiId.obsoleteDate
-              )
-            FROM Beneficiary bene
-            LEFT JOIN BeneficiaryMbiId mbiId
-              ON bene.identity.mbi = mbiId.mbi
-              AND mbiId.obsoleteDate < gov.cms.bfd.server.ng.IdrConstants.DEFAULT_DATE
-            WHERE bene.xrefSk = :beneXrefSk
-            GROUP BY bene.beneSk, bene.xrefSk, bene.identity.mbi, mbiId.effectiveDate, mbiId.obsoleteDate
+            SELECT identity
+            FROM BeneficiaryIdentity identity
+            WHERE identity.xrefSk = :beneXrefSk
             """,
-            PatientIdentity.class)
+            BeneficiaryIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)
         .getResultList();
   }
@@ -112,7 +101,7 @@ public class BeneficiaryRepository {
             """
             SELECT bene.xrefSk
             FROM Beneficiary bene
-            WHERE bene.identity.mbi = :mbi
+            WHERE bene.identifier.mbi = :mbi
           """,
             Long.class)
         .setParameter("mbi", mbi)

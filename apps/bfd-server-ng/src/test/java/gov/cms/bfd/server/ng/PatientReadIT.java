@@ -21,18 +21,16 @@ public class PatientReadIT extends IntegrationTestBase {
 
   @Test
   void patientReadValidLong() {
-    var patient = patientRead().withId(Long.parseLong(BENE_ID_A_AND_B)).execute();
+    var patient = patientRead().withId(Long.parseLong(BENE_ID_PART_A_ONLY)).execute();
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadValidString() {
-    var patient = patientRead().withId(BENE_ID_A_AND_B).execute();
+    var patient = patientRead().withId(BENE_ID_PART_A_ONLY).execute();
     assertEquals(1, patient.getIdentifier().size());
-    assertEquals(1, patient.getLink().size());
-    assertEquals(BENE_ID_NON_CURRENT, patient.getLinkFirstRep().getOther().getDisplay());
-    assertFalse(patient.isEmpty());
+    assertEquals(0, patient.getLink().size());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
 

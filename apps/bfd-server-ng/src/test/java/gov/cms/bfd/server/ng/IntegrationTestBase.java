@@ -31,7 +31,7 @@ public class IntegrationTestBase {
 
   protected static final String BENE_ID_PART_A_ONLY = "178083966";
   protected static final String BENE_ID_PART_B_ONLY = "365359727";
-  protected static final String BENE_ID_A_AND_B = "405764107";
+  protected static final String BENE_ID_PART_A_AND_B_WITH_XREF = "405764107";
   protected static final String BENE_ID_NO_TP = "451482106";
   protected static final String BENE_ID_EXPIRED_COVERAGE = "421056595";
   protected static final String BENE_ID_FUTURE_COVERAGE = "971050241";

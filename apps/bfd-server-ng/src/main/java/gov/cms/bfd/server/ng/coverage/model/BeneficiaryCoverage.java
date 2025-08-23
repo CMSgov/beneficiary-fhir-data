@@ -82,8 +82,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
 
-    identity.toFhirMbiIdentifier().ifPresent(coverage::addIdentifier);
-    coverage.setSubscriberId(identity.getMbiValue());
+    identifier.toFhir().ifPresent(coverage::addIdentifier);
+    coverage.setSubscriberId(identifier.getMbi());
 
     coverage.setType(coveragePart.toFhirTypeCode());
     coverage.addClass_(coveragePart.toFhirClassComponent());

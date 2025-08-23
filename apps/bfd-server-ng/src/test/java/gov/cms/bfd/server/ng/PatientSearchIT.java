@@ -39,7 +39,8 @@ public class PatientSearchIT extends IntegrationTestBase {
   void patientSearchById(SearchStyleEnum searchStyle) {
     var patientBundle =
         searchBundle()
-            .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier(BENE_ID_A_AND_B))
+            .where(
+                new TokenClientParam(Patient.SP_RES_ID).exactly().identifier(BENE_ID_PART_A_ONLY))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
@@ -170,15 +171,17 @@ public class PatientSearchIT extends IntegrationTestBase {
                 .where(
                     new TokenClientParam(Patient.SP_IDENTIFIER)
                         .exactly()
-                        .identifier(BENE_ID_A_AND_B))
+                        .identifier(BENE_ID_PART_A_ONLY))
                 .execute());
   }
 
   private static Stream<Arguments> patientSearchByDate() {
     return Stream.of(
         Arguments.of(
-            new TokenClientParam(Patient.SP_RES_ID).exactly().identifier(BENE_ID_A_AND_B),
-            BENE_ID_A_AND_B),
+            new TokenClientParam(Patient.SP_RES_ID)
+                .exactly()
+                .identifier(BENE_ID_PART_A_AND_B_WITH_XREF),
+            BENE_ID_PART_A_AND_B_WITH_XREF),
         Arguments.of(
             new TokenClientParam(Patient.SP_IDENTIFIER)
                 .exactly()
