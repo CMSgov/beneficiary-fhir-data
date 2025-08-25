@@ -37,9 +37,9 @@
   },
   {
     "name": "bfd-platform-eft-sftp-outbound-transfer-lambda",
-    "dockerfile": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/Dockerfile",
-    "contextDir": "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
-    "platform": "linux/amd64"
+    "dockerfile": "ops/services/02-eft/lambda_src/sftp_outbound_transfer/Dockerfile",
+    "contextDir": "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
+    "platform": "linux/arm64"
   },
   {
     "name": "bfd-platform-pipeline-ccw-manifests-verifier-lambda",

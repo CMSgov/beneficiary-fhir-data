@@ -83,9 +83,13 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
+data "aws_iam_policy_document" "combined" {
+  source_policy_documents = concat([data.aws_iam_policy_document.this.json], coalesce(var.additional_bucket_policy_docs, []))
+}
+
 resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.bucket
-  policy = data.aws_iam_policy_document.this.json
+  policy = data.aws_iam_policy_document.combined.json
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
