@@ -77,7 +77,8 @@ checkSopsFiles() {
     if [[ "$(
         UNENCRYPTED_REGEX="$sops_unencrypted_regex" yq 'to_entries
           | map(
-              select(.key != "sops" and (.key | test(env(UNENCRYPTED_REGEX)) | not)
+              select(.key != "sops"
+                and (.key | test(env(UNENCRYPTED_REGEX)) | not)
                 and (.value
                   | tostring
                   | test("^ENC\[AES256_GCM,data:(.*),iv:(.*),tag:(.*),type:(.*)\]$")
