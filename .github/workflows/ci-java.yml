@@ -100,7 +100,7 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
-          mvn --threads 1C --quiet --batch-mode  \
+          mvn -ntp \
           -Dmaven.build.cache.enabled=false \
           -Dapidocgen.skip=false \
           -DbfdOps.skip=false \
