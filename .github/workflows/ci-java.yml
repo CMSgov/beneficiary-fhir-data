@@ -100,7 +100,8 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
-          mvn -ntp \
+          mvn --threads 1C \
+          --no-transfer-progress \
           -Dmaven.build.cache.enabled=false \
           -Dapidocgen.skip=false \
           -DbfdOps.skip=false \
