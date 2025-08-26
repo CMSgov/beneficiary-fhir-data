@@ -8,7 +8,14 @@ import java.util.Properties;
 public class SnapshotHelper {
   public static File getPatchfile(Class<?> currentClass, String filename) throws IOException {
     Properties properties = new Properties();
-    properties.load(currentClass.getClassLoader().getResourceAsStream("snapshot.properties"));
+    var in = currentClass.getClassLoader().getResourceAsStream("snapshot.properties");
+    if (in == null) {
+      in = ClassLoader.getSystemResourceAsStream("snapshot.properties");
+    }
+    if (in == null) {
+      throw new IOException("snapshot.properties not found on classpath");
+    }
+    properties.load(in);
     var snapshotDir = properties.getProperty("snapshot-dir");
 
     return new File(

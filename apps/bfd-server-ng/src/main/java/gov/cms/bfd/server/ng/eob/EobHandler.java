@@ -1,18 +1,23 @@
 package gov.cms.bfd.server.ng.eob;
 
 import gov.cms.bfd.server.ng.FhirUtil;
+import gov.cms.bfd.server.ng.SecurityLabels;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.ClaimLine;
+import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,6 +29,10 @@ import org.springframework.stereotype.Component;
 public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+
+  // Cache the security labels dictionary to avoid repeated I/O and parsing
+  private static final Map<String, List<Map<String, Object>>> SECURITY_LABELS_MAP =
+      SecurityLabels.securityLabelsMap();
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -61,8 +70,30 @@ public class EobHandler {
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
+
+    return getFhirEobs(eobs, true);
+  }
+
+  protected Bundle getFhirEobs(List<Claim> eobs, boolean filterSamhsa) {
+
+    var filteredEobs = eobs;
+    var dict = SECURITY_LABELS_MAP;
+
+    if (filterSamhsa) {
+
+      var sys = SECURITY_LABELS_MAP.keySet().stream().toList();
+
+      filteredEobs =
+          eobs.stream()
+              // keep claims that do NOT contain any SAMHSA-coded procedures
+              .filter(claim -> !claimHasSamhsa(claim, dict, sys))
+              .toList();
+    }
+
+    var fhirEobs = filteredEobs.stream().map(Claim::toFhir).toList();
+
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+        fhirEobs.stream().map(Resource.class::cast), claimRepository::claimLastUpdated);
   }
 
   /**
@@ -81,8 +112,75 @@ public class EobHandler {
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var claim = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
+    var eobs = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated).stream().toList();
+    Bundle bundle = getFhirEobs(eobs, true);
+    return bundle.getEntry().stream()
+        .map(entry -> entry.getResource())
+        .filter(ExplanationOfBenefit.class::isInstance)
+        .map(ExplanationOfBenefit.class::cast)
+        .findFirst();
+  }
 
-    return claim.map(Claim::toFhir);
+  private String getDiagnosisCode(ClaimProcedure e) {
+    return e.getDiagnosisCode().orElse("").trim().toLowerCase();
+  }
+
+  private String getClaimProcedureCode(ClaimProcedure e) {
+    return e.getProcedureCode().orElse("").trim().toLowerCase();
+  }
+
+  private String getDictCode(Map<String, Object> entry) {
+    return entry.get("code") != null
+        ? entry.get("code").toString().trim().replace(".", "").toLowerCase()
+        : "";
+  }
+
+  // Returns true if the given claim contains any procedure that matches a SAMHSA
+  // security label code from the provided dictionary and keys.
+  private boolean claimHasSamhsa(
+      Claim claim, Map<String, List<Map<String, Object>>> dict, List<String> sys) {
+
+    return claim.getClaimItems().stream()
+        .anyMatch(
+            e -> {
+              var cl = e.getClaimLine();
+              var cp = e.getClaimProcedure();
+              return procedureMatchesDict(cp, dict, sys) || hcpcsCodeMatches(cl, dict, sys);
+            });
+  }
+
+  // cpt, Software and CodeSets.
+  private boolean hcpcsCodeMatches(
+      ClaimLine claimLine, Map<String, List<Map<String, Object>>> dict, List<String> sys) {
+    String hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
+    for (String link : sys) {
+      var entries = dict.getOrDefault(link, List.of());
+      for (var entry : entries) {
+        if (getDictCode(entry).equals(hcpcs)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // icds
+  private boolean procedureMatchesDict(
+      ClaimProcedure proc, Map<String, List<Map<String, Object>>> dict, List<String> sys) {
+    String diagnosisCode = getDiagnosisCode(proc);
+    String procedureCode = getClaimProcedureCode(proc);
+    for (String link : sys) {
+      var entries = dict.getOrDefault(link, List.of());
+      for (var entry : entries) {
+        if (getDictCode(entry).equals(procedureCode)) {
+          return true;
+        }
+        if (proc.getIcdIndicator().get().getDiagnosisSytem().equals(link)
+            && getDictCode(entry).equals(diagnosisCode)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

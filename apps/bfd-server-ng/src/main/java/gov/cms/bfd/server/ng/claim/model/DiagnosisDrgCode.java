@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class DiagnosisDrgCode {
-  @Column(name = "dgns_drg_cd")
+  @Column(name = "dgns_drg_cd") // SAMHSA
   private String diagnosisDrgCode;
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
