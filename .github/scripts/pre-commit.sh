@@ -71,11 +71,8 @@ checkSopsFiles() {
     echo "Checking sops file $sops_file_name..."
 
     sops_file_path="$(git rev-parse --show-toplevel)/$sops_file"
-    # Counter-intuitively, we do not want sops to be able to decrypt any sopsw.yaml file with just a
-    # "sops decrypt" command, as we wish to secure our account ID. So, if it can be decrypted, that
-    # means that somehow the placeholder was replaced with the real account ID.
-    if sops decrypt "$sops_file_path" &>/dev/null; then
-      echo "sops can decrypt $sops_file_name without being provided account ID. Try using 'sopsw -C $sops_file_name' to convert the file to what sopsw expects."
+    if grep -E 'arn:aws:.*:\d{12}' "$sops_file_path" &>/dev/null; then
+      echo "A bare AWS account ID is exposed in $sops_file_name. Try using 'sopsw -C $sops_file_name' to convert the file, or make the value sensitive."
       exit 1
     fi
 
