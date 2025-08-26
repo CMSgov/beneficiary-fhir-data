@@ -59,6 +59,17 @@ INSERT_EXCLUDE = "insert_exclude"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
 
+ALIAS_CLM = "clm"
+ALIAS_DCMTN = "dcmtn"
+ALIAS_SGNTR = "sgntr"
+ALIAS_LINE = "line"
+ALIAS_PROCEDURE = "prod"
+ALIAS_INSTNL = "instnl"
+ALIAS_PRFNL = "prfnl"
+ALIAS_VAL = "val"
+ALIAS_HSTRY = "hstry"
+ALIAS_XREF = "xref"
+
 
 class IdrBaseModel(BaseModel):
     @staticmethod
@@ -160,7 +171,8 @@ T = TypeVar("T", bound=IdrBaseModel)
 
 
 class IdrBeneficiary(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    # columns from V2_MDCR_BENE_HSTRY
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_HSTRY}]
     bene_xref_efctv_sk: int
     bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
     bene_1st_name: str
@@ -184,9 +196,26 @@ class IdrBeneficiary(IdrBaseModel):
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
-    idr_updt_ts: Annotated[
-        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    idr_insrt_ts_bene: Annotated[
+        datetime, {BATCH_TIMESTAMP: True, ALIAS: ALIAS_HSTRY, COLUMN_MAP: "idr_insrt_ts"}
+    ]
+    idr_updt_ts_bene: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_HSTRY, COLUMN_MAP: "idr_updt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    # columns from V2_MDCR_BENE_XREF
+    bene_kill_cred_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    src_rec_updt_ts: Annotated[datetime, BeforeValidator(transform_null_date_to_min)]
+    idr_insrt_ts_xref: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_XREF, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_xref: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_XREF, COLUMN_MAP: "idr_updt_ts"},
+        BeforeValidator(transform_null_date_to_min),
     ]
 
     @staticmethod
@@ -199,11 +228,47 @@ class IdrBeneficiary(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        xref = ALIAS_XREF
+        # There can be multiple xref records for the same bene_sk/bene_ref_sk combo
+        # so we need to find the most recent one based on src_rec_updt_ts.
+
+        # Unlike idr_updt_ts, src_rec_updt_ts will be set to the created timestamp
+        # if no update has been applied. Therefore, we can just check the updated timestamp
+        # without caring about the created timestamp.
+
+        # There can also be duplicate values with the same idr_insrt_ts, so we have to rely on
+        # src_rec_insrt_ts/src_rec_updt_ts for this.
+        return f"""
+            WITH ordered_xref AS (
+                SELECT bene_sk, bene_xref_sk, ROW_NUMBER() OVER (
+                    PARTITION BY bene_sk, bene_xref_sk 
+                    ORDER BY src_rec_updt_ts DESC
+                ) AS row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
+            ), 
+            current_xref AS (
+                SELECT 
+                    ox.bene_sk, 
+                    ox.bene_xref_sk, 
+                    bx.bene_kill_cred_cd, 
+                    bx.src_rec_updt_ts,
+                    bx.idr_insrt_ts,
+                    bx.idr_updt_ts
+                FROM ordered_xref ox
+                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
+                    ON bx.bene_sk = ox.bene_sk AND bx.bene_xref_sk = ox.bene_xref_sk
+                WHERE ox.row_order = 1
+            )
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
+            -- NOTE: the join condition is intentionally inverted here
+            -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
+            LEFT JOIN current_xref {xref} 
+                ON {xref}.bene_sk = {hstry}.bene_xref_sk 
+                AND {xref}.bene_xref_sk = {hstry}.bene_sk
+            {{WHERE_CLAUSE}}
+            {{ORDER_BY}}
         """
 
 
@@ -344,33 +409,6 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         """
 
 
-class IdrBeneficiaryXref(IdrBaseModel):
-    bene_hicn_num: Annotated[str, {PRIMARY_KEY: True}]
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
-    bene_xref_sk: int
-    bene_kill_cred_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
-    idr_insrt_ts: datetime
-    idr_updt_ts: Annotated[
-        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
-    ]
-    src_rec_crte_ts: Annotated[datetime, {PRIMARY_KEY: True, BATCH_TIMESTAMP: True}]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.beneficiary_xref"
-
-    @staticmethod
-    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """
-
-
 class IdrElectionPeriodUsage(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
@@ -420,16 +458,6 @@ class IdrContractPbpNumber(IdrBaseModel):
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
         WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
-
-
-ALIAS_CLM = "clm"
-ALIAS_DCMTN = "dcmtn"
-ALIAS_SGNTR = "sgntr"
-ALIAS_LINE = "line"
-ALIAS_PROCEDURE = "prod"
-ALIAS_INSTNL = "instnl"
-ALIAS_PRFNL = "prfnl"
-ALIAS_VAL = "val"
 
 
 def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001

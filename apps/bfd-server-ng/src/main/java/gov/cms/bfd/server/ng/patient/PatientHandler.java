@@ -53,7 +53,8 @@ public class PatientHandler {
    * @return bundle
    */
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
-    var beneficiary = beneficiaryRepository.findByIdentifier(identifier, lastUpdated);
+    var xrefBeneSk = beneficiaryRepository.getXrefSkFromMbi(identifier);
+    var beneficiary = xrefBeneSk.flatMap(x -> beneficiaryRepository.findById(x, lastUpdated));
 
     return FhirUtil.bundleOrDefault(
         beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
@@ -67,11 +68,11 @@ public class PatientHandler {
       // check for merged bene and if mbi identifier has already been added to the patient
       if (!beneficiary.isMergedBeneficiary()
           && patient.getIdentifier().stream()
-              .noneMatch(identifier -> identifier.getValue().equals(id.mbi.orElse(null)))) {
+              .noneMatch(identifier -> identifier.getValue().equals(id.getMbi().orElse("")))) {
         id.toFhirIdentifier().ifPresent(patient::addIdentifier);
       }
 
-      id.toFhirLink(patient.getId()).ifPresent(patient::addLink);
+      id.toFhirLink(Long.parseLong(patient.getId())).ifPresent(patient::addLink);
     }
 
     return patient;

@@ -42,7 +42,7 @@ public abstract class BeneficiaryBase {
   @Embedded protected Address address;
   @Embedded protected Meta meta;
   @Embedded protected DeathDate deathDate;
-  @Embedded protected Identity identity;
+  @Embedded protected CurrentIdentifier identifier;
 
   /**
    * Determines if this beneficiary has been merged into another.
