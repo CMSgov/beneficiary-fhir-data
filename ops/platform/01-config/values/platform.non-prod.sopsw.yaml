@@ -10,6 +10,7 @@
 #ENC[AES256_GCM,data:EJPqNfnhx5DORdBM/c2Et5VMNSCWzWQppF955ykp0XieLWjZnqxmuMu51TFP+8GRGws6S5x8U0cL61mNMFbsjSb2V2026gOz9g==,iv:qjVtyebpcAfWqLEJpmxs2W7xg1p+qtxsY5pv9HiRHzs=,tag:r4jvr2BKyDPgwA5c3RIBfQ==,type:comment]
 #ENC[AES256_GCM,data:/fwg0uLj+yb80jW1Lxa3/WAM6h2xn+ogwk1k7ECXW8ESq90nwtN9cSs5fDZFM7hzpS6TQPV+JA==,iv:NFLC9D74aqW4qs1VKTXAxNk+aAT2IpzUKRYbowsYKcU=,tag:ONd6luaDBLQqaBEr+PryWQ==,type:comment]
 /bfd/platform/network/sensitive/route53/zone/root/external_vpcs_list_json: ENC[AES256_GCM,data:lWyN,iv:3O1KzN9OWVv+BgHEzU2gcrpP0Q1c0Mb5ugWQo6002BI=,tag:/v5crZrQk+e1o8Pyu+PlAQ==,type:str]
+/bfd/platform/sonar/sensitive/service_account_access_key: ENC[AES256_GCM,data:I7hQVx3Wry0IUvANFGyJtdj6rT8nJ3zfpPMIiovJ6MeOqBhJgTWx1KqKWEE=,iv:5CMjVqrByv1PlF27QoVCLsfU+fa3vzLHZf+HRGV3w/Y=,tag:dY8Zl1wz92qqhnkOHdqfSA==,type:str]
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-mgmt-config-cmk
