@@ -11,6 +11,9 @@ env:
   # using a '\' as a continuation character.
   # https://stackoverflow.com/questions/6268391/is-there-a-way-to-represent-a-long-string-that-doesnt-have-any-whitespace-on-mul
   workflow_files_re: "^apps/(?!bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
+  AWS_REGION: us-east-1
+  SONAR_PROJECT_KEY: bfd-parent
+  SONAR_HOST_URL: https://sonarqube.cloud.cms.gov
 
 jobs:
   workflow:
@@ -22,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - id: workflow_files
         name: Set output
         run: |
@@ -46,7 +49,7 @@ jobs:
         working-directory: ./apps
 
   mvn-verify:
-    runs-on: ubuntu-24.04
+    runs-on: codebuild-bfd-non-prod-platform-small-${{ github.run_id }}-${{ github.run_attempt }}
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
@@ -61,8 +64,30 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
+      - name: Set env vars from AWS params
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        with:
+          params: |
+            SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key
+
       - name: 'Run Maven Build'
-        run: mvn --threads 1C --quiet --batch-mode -Dmaven.build.cache.enabled=false -Dapidocgen.skip=false -DbfdOps.skip=false verify
+        run: |
+          mvn --threads 1C --quiet --batch-mode  \
+          -Dmaven.build.cache.enabled=false \
+          -Dapidocgen.skip=false \
+          -DbfdOps.skip=false \
+          -Dmaven.jacoco.skip=false \
+          verify
+          set +x
+          mvn sonar:sonar \
+          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+          -Dsonar.host.url="$SONAR_HOST_URL" \
+          -Dsonar.login="$SONAR_TOKEN" \
+          -Dmaven.build.cache.enabled=false \
+          -DskipITs \
+          -DskipTests \
+          -Dsonar.exclusions='*.java' \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
         working-directory: ./apps
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
