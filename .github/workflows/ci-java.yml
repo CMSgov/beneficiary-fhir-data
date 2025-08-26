@@ -59,6 +59,8 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v4
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
