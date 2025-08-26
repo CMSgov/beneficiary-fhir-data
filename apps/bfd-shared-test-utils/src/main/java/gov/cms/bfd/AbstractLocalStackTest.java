@@ -24,7 +24,8 @@ public abstract class AbstractLocalStackTest {
     var localStackImageName =
         System.getProperty(TEST_CONTAINER_AWS_IMAGE_PROPERTY, TEST_CONTAINER_AWS_IMAGE_DEFAULT);
     localstack =
-        new LocalStackContainer(DockerImageName.parse(localStackImageName))
+        new LocalStackContainer(
+                DockerImageName.parse(localStackImageName).asCompatibleSubstituteFor("localstack"))
             .withServices(
                 LocalStackContainer.Service.S3,
                 LocalStackContainer.Service.SQS,

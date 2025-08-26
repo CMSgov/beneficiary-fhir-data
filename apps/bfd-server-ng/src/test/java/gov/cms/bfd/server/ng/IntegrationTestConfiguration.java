@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration
 public class IntegrationTestConfiguration {
@@ -27,7 +28,8 @@ public class IntegrationTestConfiguration {
     var databaseImage = System.getProperty("its.testcontainer.db.image");
 
     var container =
-        new PostgreSQLContainer<>(databaseImage)
+        new PostgreSQLContainer<>(
+                DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
             .withDatabaseName("testdb")
             .withUsername("bfdtest")
             .withPassword("bfdtest")
