@@ -98,14 +98,14 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
-          /usr/bin/mvn --threads 1C --quiet --batch-mode  \
+          mvn --threads 1C --quiet --batch-mode  \
           -Dmaven.build.cache.enabled=false \
           -Dapidocgen.skip=false \
           -DbfdOps.skip=false \
           -Dmaven.jacoco.skip=false \
           verify \
           && set +x \
-          && /usr/bin/mvn sonar:sonar \
+          && mvn sonar:sonar \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.login="$SONAR_TOKEN" \
