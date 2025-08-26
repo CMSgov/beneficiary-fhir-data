@@ -57,13 +57,8 @@ checkSopsFiles() {
   IFS=$'\n' read -d '' -r -a sops_files < <(git diff --cached --name-only --diff-filter=ACM | grep "sopsw\.yaml" && printf '\0')
 
   for sops_file in "${sops_files[@]}"; do
-    if [[ ! "$(command -v sops)" ]]; then
-      echo "'sops' not found. Try 'brew install sops' and commit again"
-      exit 1
-    fi
-
-    if [[ ! "$(command -v jq)" ]]; then
-      echo "'jq' not found. Try 'brew install jq' and commit again"
+    if [[ ! "$(command -v yq)" ]]; then
+      echo "'yq' not found. Try 'brew install yq' and commit again"
       exit 1
     fi
 
