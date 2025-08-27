@@ -108,4 +108,17 @@ jobs:
           verify
         working-directory: ./apps
 
+      - name: 'Generate, Upload Build Reports'
+        run: |
+          mvn sonar:sonar \
+          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+          -Dsonar.host.url="$SONAR_HOST_URL" \
+          -Dsonar.login="$SONAR_TOKEN" \
+          -Dmaven.build.cache.enabled=false \
+          -DskipITs \
+          -DskipTests \
+          -Dsonar.exclusions='*.java' \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
+        working-directory: ./apps
+
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
