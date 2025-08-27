@@ -111,6 +111,7 @@ jobs:
       - name: 'Generate, Upload Build Reports'
         run: |
           mvn sonar:sonar \
+          -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.login="$SONAR_TOKEN" \
