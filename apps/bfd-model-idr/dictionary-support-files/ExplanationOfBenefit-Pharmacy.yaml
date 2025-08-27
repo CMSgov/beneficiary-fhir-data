@@ -6,14 +6,6 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_UNIQ_ID
   fhirPath: ExplanationOfBenefit.identifier.where(type.coding.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType' and type.coding.code = 'uc' ).value
-- inputPath: ExplanationOfBenefit-Pharmacy.CLM_CNTL_NUM
-  appliesTo:
-    - Pharmacy
-  sources:
-    - NCH
-  sourceView: V2_MDCR_CLM
-  sourceColumn: CLM_CNTL_NUM
-  fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_ORIG_CNTL_NUM
   appliesTo:
     - Pharmacy
@@ -21,7 +13,7 @@
     - NCH
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ORIG_CNTL_NUM
-  fhirPath: ExplanationOfBenefit.related.where(relationship.coding.where(system='http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship' and code='prior').exists()).reference.value
+  fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_TYPE_CD
   appliesTo:
     - Pharmacy

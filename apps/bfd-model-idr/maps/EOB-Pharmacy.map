@@ -14,7 +14,8 @@ imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper"
 
 group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
     
-    src -> tgt.status = "active" "Set status";
+    //Even though we may have "cancelled" claims, status refers to the resource itself.
+    src -> tgt.status = "active" "Set status"; 
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.outcome = "complete" "Set outcome";
     
@@ -41,16 +42,8 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
 
     src -> tgt.identifier = create('Identifier') as tgtIdentifier then {
       src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "set system";
-      src.CLM_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
-    } "Add CLM_CNTL_NUM as identifier";
-
-    src.CLM_ORIG_CNTL_NUM as origCntlNum -> tgt.related = create('BackboneElement') as tgtRelated then {
-      src -> tgtRelated.relationship = cc("http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship", "prior") "Set relationship to prior";
-      origCntlNum -> tgtRelated.reference = create('Identifier') as tgtId then {
-        src -> tgtId.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "Set identifier system";
-        origCntlNum -> tgtId.value = origCntlNum "Set original claim control number";
-      } "Create identifier for original claim";
-    } "Add related claim for original claim control number";
+      src.CLM_ORIG_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
+    } "Add CLM_ORIG_CNTL_NUM as identifier";
 
     src -> tgt.billablePeriod = create('Period') as billablePeriod then {
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";

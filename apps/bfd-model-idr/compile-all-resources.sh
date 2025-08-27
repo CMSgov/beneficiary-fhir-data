@@ -27,3 +27,10 @@ uv run compile_resources.py \
     -o out/ExplanationOfBenefit.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
     --test
+
+uv run compile_resources.py \
+    -m maps/EOB-Pharmacy.map \
+    -i sample-data/EOB-Pharmacy-Sample.json \
+    -o out/ExplanationOfBenefit-Pharmacy.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Pharmacy \
+    --test
