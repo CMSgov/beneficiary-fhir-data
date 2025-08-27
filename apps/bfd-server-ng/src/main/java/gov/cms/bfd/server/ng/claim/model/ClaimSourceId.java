@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -49,9 +48,8 @@ public enum ClaimSourceId {
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
     return switch (this) {
-        case NATIONAL_CLAIMS_HISTORY -> Optional.of(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
-        default -> Optional.empty();
+      case NATIONAL_CLAIMS_HISTORY -> Optional.of(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
+      default -> Optional.empty();
     };
   }
-
 }
