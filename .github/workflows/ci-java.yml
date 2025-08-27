@@ -53,7 +53,7 @@ jobs:
         working-directory: ./apps
 
   mvn-verify:
-    runs-on: codebuild-bfd-non-prod-platform-small-${{ github.run_id }}-${{ github.run_attempt }}
+    runs-on: codebuild-bfd-non-prod-platform-large-${{ github.run_id }}-${{ github.run_attempt }}
     needs: workflow
     if: needs.workflow.outputs.files
     steps:

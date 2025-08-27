@@ -18,6 +18,14 @@ locals {
       privileged   = false
       timeout      = 60
     }
+    large = {
+      name         = "bfd-${local.account_type}-platform-large"
+      compute_type = "BUILD_GENERAL1_LARGE"
+      type         = "ARM_CONTAINER"
+      image        = "${aws_ecr_repository.codebuild_runner.repository_url}:${local.bfd_version}"
+      privileged   = false
+      timeout      = 60
+    }
     # Runner for building Docker images and nothing else
     docker = {
       name         = "bfd-${local.account_type}-platform-docker"
