@@ -105,7 +105,7 @@ jobs:
           -Dmaven.build.cache.enabled=false \
           -Dapidocgen.skip=false \
           -Dmaven.jacoco.skip=false \
-          verify
+          clean install
         working-directory: ./apps
 
       - name: 'Generate, Upload Build Reports'
