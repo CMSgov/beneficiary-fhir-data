@@ -75,10 +75,12 @@ class TestPipeline:
         assert rows[0]["bene_mbi_id"] == "1S000000000"
         assert rows[1]["bene_mbi_id"] == "5B88XK5JN88"
 
-        cur = conn.execute("select * from idr.beneficiary_xref")
+        cur = conn.execute(
+            "select * from idr.beneficiary where bene_kill_cred_cd != '' order by bene_sk"
+        )
         assert cur.rowcount == 6
         rows = cur.fetchmany(1)
-        assert rows[0]["bene_sk"] == 454323619
+        assert rows[0]["bene_sk"] == 174441863
 
         cur = conn.execute("select * from idr.beneficiary_third_party order by bene_sk")
         assert cur.rowcount == 4

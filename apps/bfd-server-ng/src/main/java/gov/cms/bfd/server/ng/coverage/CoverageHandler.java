@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CoverageHandler {
 
+  private final CoverageRepository coverageRepository;
   private final BeneficiaryRepository beneficiaryRepository;
 
   /**
@@ -33,9 +34,8 @@ public class CoverageHandler {
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
   public Optional<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
-
     var beneficiaryOpt =
-        beneficiaryRepository.searchBeneficiaryWithCoverage(
+        coverageRepository.searchBeneficiaryWithCoverage(
             coverageCompositeId.beneSk(), new DateTimeRange());
 
     return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
@@ -50,9 +50,8 @@ public class CoverageHandler {
    */
   public Bundle searchByCoverageId(
       CoverageCompositeId parsedCoverageId, DateTimeRange lastUpdated) {
-
     var beneficiaryOpt =
-        beneficiaryRepository.searchBeneficiaryWithCoverage(parsedCoverageId.beneSk(), lastUpdated);
+        coverageRepository.searchBeneficiaryWithCoverage(parsedCoverageId.beneSk(), lastUpdated);
     if (beneficiaryOpt.isEmpty()) {
       return FhirUtil.defaultBundle(beneficiaryRepository::beneficiaryLastUpdated);
     }
@@ -73,7 +72,7 @@ public class CoverageHandler {
    */
   public Bundle searchByBeneficiary(Long beneSk, DateTimeRange lastUpdated) {
     var beneficiaryOpt =
-        beneficiaryRepository
+        coverageRepository
             .searchBeneficiaryWithCoverage(beneSk, lastUpdated)
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {

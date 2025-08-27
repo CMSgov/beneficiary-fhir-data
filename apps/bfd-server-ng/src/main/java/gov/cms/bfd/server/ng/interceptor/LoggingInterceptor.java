@@ -35,10 +35,14 @@ public class LoggingInterceptor {
       BaseServerResponseException exception,
       HttpServletRequest request,
       HttpServletResponse response) {
+    // If there's a valid status code < 500, it's an invalid input
+    var logBuilder =
+        exception.getStatusCode() > 0 && exception.getStatusCode() < 500
+            ? LOGGER.atWarn()
+            : LOGGER.atError();
 
     addCommonAttrs(
-            LOGGER
-                .atError()
+            logBuilder
                 .setMessage(exception.getMessage())
                 .addKeyValue("stackTrace", exception.getStackTrace())
                 .addKeyValue("statusCode", exception.getStatusCode()),

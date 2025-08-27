@@ -1,10 +1,10 @@
 gov.cms.bfd.server.ng.PatientReadIT.patientReadMergedBene=[
 {
-  "id" : "792872340",
+  "id" : "848484848",
   "link" : [ {
     "other" : {
-      "display" : "178083966",
-      "reference" : "Patient/178083966"
+      "display" : "517782585",
+      "reference" : "Patient/517782585"
     },
     "type" : "replaced-by"
   } ],
@@ -50,6 +50,22 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
   "gender" : "male",
   "id" : "517782585",
   "identifier" : [ {
+    "period" : {
+      "end" : "2024-12-31T00:00:00+00:00",
+      "start" : "2020-04-21T00:00:00+00:00"
+    },
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "type" : {
+      "coding" : [ {
+        "code" : "MB",
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      } ]
+    },
+    "value" : "2B19C89AA36"
+  }, {
+    "period" : {
+      "start" : "2020-04-21T00:00:00+00:00"
+    },
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
       "coding" : [ {
@@ -86,6 +102,65 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
 
 
 gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
+{
+  "address" : [ {
+    "city" : "Lisbon",
+    "line" : [ "14152 ND-27" ],
+    "postalCode" : "58054",
+    "state" : "ND"
+  } ],
+  "birthDate" : "1959-03-14",
+  "communication" : [ {
+    "language" : {
+      "coding" : [ {
+        "code" : "unknown",
+        "system" : "urn:ietf:bcp:47"
+      } ]
+    }
+  } ],
+  "extension" : [ {
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+    "valueCode" : "248153007"
+  }, {
+    "extension" : [ {
+      "url" : "ombCategory",
+      "valueCoding" : {
+        "code" : "2028-9",
+        "display" : "Asian",
+        "system" : "urn:oid:2.16.840.1.113883.6.238"
+      }
+    }, {
+      "url" : "text",
+      "valueCode" : "Asian"
+    } ],
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+  } ],
+  "gender" : "male",
+  "id" : "232323232",
+  "identifier" : [ {
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "type" : {
+      "coding" : [ {
+        "code" : "MB",
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      } ]
+    },
+    "value" : "2B19C89AA37"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+  },
+  "name" : [ {
+    "family" : "Heeler",
+    "given" : [ "Alex", "Joey" ]
+  } ],
+  "resourceType" : "Patient"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 {
   "address" : [ {
     "city" : "Galveston",
@@ -131,13 +206,6 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
     },
     "value" : "9OJ2CG2UC85"
   } ],
-  "link" : [ {
-    "other" : {
-      "display" : "792872340",
-      "reference" : "Patient/792872340"
-    },
-    "type" : "replaces"
-  } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
@@ -151,117 +219,43 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
 ]
 
 
-gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
-{
-  "address" : [ {
-    "city" : "Mobile",
-    "line" : [ "1970 S University Blvd" ],
-    "postalCode" : "36609",
-    "state" : "AL"
-  } ],
-  "birthDate" : "1967-03-19",
-  "communication" : [ {
-    "language" : {
-      "coding" : [ {
-        "code" : "es",
-        "system" : "urn:ietf:bcp:47"
-      } ]
-    }
-  } ],
-  "extension" : [ {
-    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-    "valueCode" : "248152002"
-  }, {
-    "extension" : [ {
-      "url" : "ombCategory",
-      "valueCoding" : {
-        "code" : "2054-5",
-        "display" : "Black or African American",
-        "system" : "urn:oid:2.16.840.1.113883.6.238"
-      }
-    }, {
-      "url" : "text",
-      "valueCode" : "Black or African American"
-    } ],
-    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-  } ],
-  "gender" : "female",
-  "id" : "405764107",
-  "identifier" : [ {
-    "period" : {
-      "end" : "2020-05-25T00:00:00+00:00",
-      "start" : "2020-04-21T00:00:00+00:00"
-    },
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "8Z73WV0QC20"
-  } ],
-  "link" : [ {
-    "other" : {
-      "display" : "181968400",
-      "reference" : "Patient/181968400"
-    },
-    "type" : "replaces"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
-  },
-  "name" : [ {
-    "family" : "Erdapfel",
-    "given" : [ "Bluey", "Caroline" ]
-  } ],
-  "resourceType" : "Patient"
-}
-]
-
-
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
 {
   "address" : [ {
-    "city" : "Mobile",
-    "line" : [ "1970 S University Blvd" ],
-    "postalCode" : "36609",
-    "state" : "AL"
+    "city" : "Galveston",
+    "line" : [ "2904 61st" ],
+    "postalCode" : "77551",
+    "state" : "TX"
   } ],
-  "birthDate" : "1967-03-19",
+  "birthDate" : "1922-04-01",
   "communication" : [ {
     "language" : {
       "coding" : [ {
-        "code" : "es",
+        "code" : "unknown",
         "system" : "urn:ietf:bcp:47"
       } ]
     }
   } ],
   "extension" : [ {
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-    "valueCode" : "248152002"
+    "valueCode" : "248153007"
   }, {
     "extension" : [ {
       "url" : "ombCategory",
       "valueCoding" : {
-        "code" : "2054-5",
-        "display" : "Black or African American",
+        "code" : "1002-5",
+        "display" : "American Indian or Alaska Native",
         "system" : "urn:oid:2.16.840.1.113883.6.238"
       }
     }, {
       "url" : "text",
-      "valueCode" : "Black or African American"
+      "valueCode" : "American Indian or Alaska Native"
     } ],
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
   } ],
-  "gender" : "female",
-  "id" : "405764107",
+  "gender" : "male",
+  "id" : "178083966",
   "identifier" : [ {
-    "period" : {
-      "end" : "2020-05-25T00:00:00+00:00",
-      "start" : "2020-04-21T00:00:00+00:00"
-    },
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
       "coding" : [ {
@@ -269,22 +263,15 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
       } ]
     },
-    "value" : "8Z73WV0QC20"
-  } ],
-  "link" : [ {
-    "other" : {
-      "display" : "181968400",
-      "reference" : "Patient/181968400"
-    },
-    "type" : "replaces"
+    "value" : "9OJ2CG2UC85"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
   },
   "name" : [ {
-    "family" : "Erdapfel",
-    "given" : [ "Bluey", "Caroline" ]
+    "family" : "Jones",
+    "given" : [ "Abby" ]
   } ],
   "resourceType" : "Patient"
 }

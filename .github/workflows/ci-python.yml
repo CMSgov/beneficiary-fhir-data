@@ -23,8 +23,8 @@ jobs:
           [
             {
               projectName: "sftp-outbound-transfer-lambda",
-              projectRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer",
-              testsRoot: "ops/terraform/services/eft/lambda_src/sftp_outbound_transfer/tests",
+              projectRoot: "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
+              testsRoot: "ops/services/02-eft/lambda_src/sftp_outbound_transfer/tests",
               uvCommand: "uv sync",
               pytestCommand: "uv run pytest",
               pythonVersion: "3.13",

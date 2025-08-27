@@ -19,13 +19,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class CoverageReadIT extends IntegrationTestBase {
 
-  private static final String BENE_ID_PART_A_ONLY = "178083966";
-  private static final String BENE_ID_PART_B_ONLY = "365359727";
-  private static final String BENE_ID_HAS_A_AND_B = "405764107";
-  private static final String BENE_ID_NO_TP = "451482106";
-  private static final String BENE_ID_EXPIRED_COVERAGE = "421056595";
-  private static final String BENE_ID_FUTURE_COVERAGE = "971050241";
-
   private IReadTyped<Coverage> coverageRead() {
     return getFhirClient().read().resource(Coverage.class);
   }
@@ -73,17 +66,18 @@ public class CoverageReadIT extends IntegrationTestBase {
   @Test
   void coverageReadForNonCurrentEffectiveBeneficiaryIdShouldBeNotFound() {
 
-    var nonCurrentEffectiveBeneId = "part-a-181968400";
+    var nonCurrentEffectiveBeneId = "part-a-" + BENE_ID_NON_CURRENT;
     assertThrows(
         ResourceNotFoundException.class,
         () -> coverageRead().withId(nonCurrentEffectiveBeneId).execute(),
-        "Should throw ResourceNotFoundException for Coverage ID 'part-a-181968400' "
-            + "because the beneficiary record is not the current effective version.");
+        String.format(
+            "Should throw ResourceNotFoundException for Coverage ID 'part-a-%s 'because the beneficiary record is not the current effective version.",
+            BENE_ID_NON_CURRENT));
   }
 
   @Test
   void coverageReadValidCompositeId() {
-    var validCoverageId = createCoverageId("b", BENE_ID_HAS_A_AND_B);
+    var validCoverageId = createCoverageId("b", BENE_ID_PART_A_AND_B_WITH_XREF);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -130,7 +124,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadPartACoverageNotFound() {
-    var expiredCoverageId = createCoverageId("a", "848484848");
+    var expiredCoverageId = createCoverageId("a", HISTORICAL_MERGED_BENE_SK);
 
     assertThrows(
         ResourceNotFoundException.class,
@@ -141,7 +135,7 @@ public class CoverageReadIT extends IntegrationTestBase {
   @ParameterizedTest
   @ValueSource(strings = {"A", "B"})
   void coverageReadBeneWithNoCoverageReturnsEmpty(String part) {
-    final String partId = createCoverageId(part, "289169129");
+    final String partId = createCoverageId(part, BENE_ID_NO_COVERAGE);
     var coverage = coverageRead().withId(partId).execute();
     assertEquals(partId.toLowerCase(), coverage.getIdPart());
     assertTrue(coverage.getIdentifier().isEmpty());

@@ -2,10 +2,12 @@ DROP SCHEMA IF EXISTS idr CASCADE;
 
 CREATE SCHEMA idr;
 CREATE TABLE idr.beneficiary(
+    -- columns from V2_MDCR_BENE_HSTRY
     bene_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
-        AS (CASE WHEN bene_xref_efctv_sk = 0 THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
+        -- if kill credit is set to 1, the merge is invalid, and we should act like it's not present
+        AS (CASE WHEN bene_xref_efctv_sk = 0 OR bene_kill_cred_cd = '1' THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_1st_name VARCHAR(30) NOT NULL,
     bene_midl_name VARCHAR(15) NOT NULL,
@@ -28,8 +30,13 @@ CREATE TABLE idr.beneficiary(
     idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts_bene TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_bene TIMESTAMPTZ NOT NULL,
+    -- columns from V2_MDCR_BENE_XREF
+    bene_kill_cred_cd VARCHAR(1) NOT NULL,
+    src_rec_updt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts_xref TIMESTAMPTZ NOT NULL,
+    idr_updt_ts_xref TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, idr_trans_efctv_ts)
@@ -127,21 +134,6 @@ CREATE TABLE idr.beneficiary_election_period_usage (
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt)
-);
-
-CREATE TABLE idr.beneficiary_xref (
-    bene_sk BIGINT NOT NULL,
-    bene_xref_sk BIGINT NOT NULL,
-    bene_hicn_num VARCHAR(11) NOT NULL,
-    bene_kill_cred_cd VARCHAR(1) NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL,
-    src_rec_crte_ts TIMESTAMPTZ NOT NULL,
-    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
-    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
 CREATE TABLE idr.contract_pbp_number (
@@ -457,6 +449,17 @@ WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours
 CREATE VIEW idr.beneficiary_entitlement_reason_current AS
 SELECT * FROM idr.beneficiary_entitlement_reason
 WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours' AND bene_rng_end_dt >= NOW() - INTERVAL '12 hours';
+
+CREATE VIEW idr.beneficiary_identity AS
+SELECT DISTINCT 
+    bene.bene_sk, 
+    bene.bene_xref_efctv_sk_computed, 
+    bene.bene_mbi_id,
+    bene_mbi.bene_mbi_efctv_dt, 
+    bene_mbi.bene_mbi_obslt_dt
+FROM idr.beneficiary bene
+LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
+    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id;
 
 CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
     RETURNS VOID AS $$
