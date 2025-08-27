@@ -343,6 +343,13 @@ public enum ClaimTypeCode {
             .setCoverage(new Reference().setDisplay("Part A")));
   }
 
+  Optional <ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
+      if (isBetween(1000, 1999)) {
+          return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+      }
+      return Optional.empty();
+  }
+
   boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);
   }

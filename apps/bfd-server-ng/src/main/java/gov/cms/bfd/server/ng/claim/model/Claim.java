@@ -65,6 +65,11 @@ public class Claim {
   @Nullable
   @OneToOne
   @JoinColumn(name = "clm_uniq_id")
+  private ClaimFiss claimFiss;
+
+  @Nullable
+  @OneToOne
+  @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
   @OneToMany(fetch = FetchType.EAGER)
@@ -73,6 +78,10 @@ public class Claim {
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
+  }
+
+  private Optional<ClaimFiss> getClaimFiss() {
+    return Optional.ofNullable(claimFiss);
   }
 
   /**
@@ -123,16 +132,12 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
+    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
+    claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
 
-    if (claimSourceId.equals(ClaimSourceId.NATIONAL_CLAIMS_HISTORY)) {
-        eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
-    }
-
-    if (claimTypeCode.getCode() >= 1000 && claimTypeCode.getCode() < 2000) {
-        eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
-    } else if (claimTypeCode.getCode() >= 2000 && claimTypeCode.getCode() < 3000) {
-
-    }
+    getClaimFiss()
+      .flatMap(f -> f.toFhirOutcome(claimTypeCode.getCode()))
+      .ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();
     var initialSupportingInfo =
