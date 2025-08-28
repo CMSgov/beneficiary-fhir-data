@@ -1,5 +1,7 @@
 name: 'CI - Java'
 on:
+  schedule:
+    - cron: '13 8 * * 1-5'  # Early morning continental US hours, Monday through Friday
   pull_request:
   merge_group:
 
