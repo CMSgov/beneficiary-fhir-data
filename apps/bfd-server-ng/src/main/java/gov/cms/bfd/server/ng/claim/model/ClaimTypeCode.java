@@ -328,15 +328,6 @@ public enum ClaimTypeCode {
   }
 
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
-    var shouldAdd =
-        switch (code) {
-          case 60, 61, 62, 63, 64, 1011, 1041, 2011, 2041 -> true;
-          default -> false;
-        };
-    if (!shouldAdd) {
-      return Optional.empty();
-    }
-
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)
