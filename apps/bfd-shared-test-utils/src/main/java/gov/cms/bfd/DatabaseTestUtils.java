@@ -277,6 +277,7 @@ public final class DatabaseTestUtils {
    * @param password the password for the test database to connect to
    * @return a PostgreSQL {@link DataSource} for the test DB
    */
+  @SuppressWarnings("resource")
   private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
       String username, String password) {
 
