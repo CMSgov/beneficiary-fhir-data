@@ -130,9 +130,7 @@ public class EobHandler {
   }
 
   private String getDictCode(Map<String, Object> entry) {
-    return entry.get("code") != null
-        ? entry.get("code").toString().trim().replace(".", "").toLowerCase()
-        : "";
+    return entry.get("code").toString().trim().replace(".", "").toLowerCase();
   }
 
   // Returns true if the given claim contains any procedure that matches a SAMHSA
