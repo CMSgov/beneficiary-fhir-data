@@ -150,15 +150,16 @@ public class EobHandler {
   // cpt, Software and CodeSets.
   private boolean hcpcsCodeMatches(
       ClaimLine claimLine, Map<String, List<Map<String, Object>>> dict, List<String> sys) {
-    String hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
-    for (String link : sys) {
-      var entries = dict.getOrDefault(link, List.of());
-      for (var entry : entries) {
-        if (getDictCode(entry).equals(hcpcs)) {
-          return true;
-        }
+    String hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("").toLowerCase();
+    String claimSystem = FhirUtil.getHcpcsSystem(hcpcs);
+
+    var entries = dict.getOrDefault(claimSystem, List.of());
+    for (var entry : entries) {
+      if (getDictCode(entry).equals(hcpcs)) {
+        return true;
       }
     }
+
     return false;
   }
 
