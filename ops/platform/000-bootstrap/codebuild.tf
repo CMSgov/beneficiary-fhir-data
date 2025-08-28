@@ -8,6 +8,7 @@ locals {
       image        = "${aws_ecr_repository.codebuild_runner.repository_url}:${local.bfd_version}"
       privileged   = false
       timeout      = 15
+      vpc_config   = []
     }
     # Runner for long-running (>= 15 minutes) Terraservice applies or other jobs
     small = {
@@ -17,14 +18,21 @@ locals {
       image        = "${aws_ecr_repository.codebuild_runner.repository_url}:${local.bfd_version}"
       privileged   = false
       timeout      = 60
+      vpc_config   = []
     }
+    # Runner for longer running, larger workloads, with need for CMSNet connectivity, like java-ci
     large = {
       name         = "bfd-${local.account_type}-platform-large"
       compute_type = "BUILD_GENERAL1_LARGE"
       type         = "ARM_CONTAINER"
-      image        = "${aws_ecr_repository.codebuild_runner.repository_url}:${local.bfd_version}"
-      privileged   = false
+      image        = "aws/codebuild/amazonlinux-aarch64-standard:3.0"
+      privileged   = true # Enables this runner to interact with container daemon
       timeout      = 60
+      vpc_config = [{
+        vpc_id             = data.aws_vpc.this.id
+        subnets            = flatten(data.aws_subnets.private[*].ids)
+        security_group_ids = [data.aws_security_group.this.id]
+      }]
     }
     # Runner for building Docker images and nothing else
     docker = {
@@ -34,8 +42,36 @@ locals {
       image        = "aws/codebuild/amazonlinux-aarch64-standard:3.0"
       privileged   = true # Enables this Runner to build Docker images
       timeout      = 60
+      vpc_config   = []
     }
   }
+  env_vpc = local.account_type == "non-prod" ? "bfd-east-test" : "bfd-prod-test"
+}
+
+data "aws_vpc" "this" {
+  filter {
+    name   = "tag:Name"
+    values = [local.env_vpc]
+  }
+}
+
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+  filter {
+    name   = "tag:use"
+    values = ["private"]
+  }
+}
+
+data "aws_security_group" "this" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+  name = "cms-cloud-security-validation-egress"
 }
 
 # ECR resources are defined in this Terraservice opposed to "ecr" as the CodeBuild Runner image
@@ -149,6 +185,15 @@ resource "aws_codebuild_project" "runner" {
     type                = "GITHUB"
     git_submodules_config {
       fetch_submodules = false
+    }
+  }
+
+  dynamic "vpc_config" {
+    for_each = each.value.vpc_config
+    content {
+      security_group_ids = vpc_config.value["security_group_ids"]
+      subnets            = vpc_config.value["subnets"]
+      vpc_id             = vpc_config.value["vpc_id"]
     }
   }
 }
