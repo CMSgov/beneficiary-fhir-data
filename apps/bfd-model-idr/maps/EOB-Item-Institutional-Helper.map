@@ -92,7 +92,10 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Add benefitpaymentstatus";
     
 
-    //Note, it's not mapped in FML, but diagnosisSequence shall be mapped to the correct diagnosis code in relation to CLM_LINE_DGNS_CD
+    //In claims data, CLM_LINE_DGNS_CD refers to the diagnosis that supports the given claim line
+    //diagnosisRelatedLine is a computed value that is input "for FML purposes" to correspond to the sequence number
+    //present on the diagnosis in EoB.diagnosis that corresponds to the value in CLM_LINE_DGNS_CD.
+    src.diagnosisRelatedLine as claimLineDiagnosis -> tgt.diagnosisSequence = claimLineDiagnosis "Add diagnosis sequence number";
 
 }
 
