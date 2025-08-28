@@ -9,6 +9,7 @@ from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
 from timer import Timer
 
+idr_query_timer = Timer("idr_query")
 temp_table_timer = Timer("temp_table")
 copy_timer = Timer("copy")
 insert_timer = Timer("insert")
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def print_timers() -> None:
+    idr_query_timer.print_results()
     temp_table_timer.print_results()
     copy_timer.print_results()
     insert_timer.print_results()
@@ -81,7 +83,15 @@ class PostgresLoader:
             num_rows = 0
 
             # load each batch in a separate transaction
-            for results in fetch_results:
+            while True:
+                idr_query_timer.start()
+                # We unfortunately need to use a while true loop here since we need to wrap the
+                # iterator with the timer calls.
+                results = next(fetch_results, None)
+                idr_query_timer.stop()
+                if results is None:
+                    break
+
                 data_loaded = True
                 logger.info("loading next %s results", len(results))
                 num_rows += len(results)

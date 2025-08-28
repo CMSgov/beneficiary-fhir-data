@@ -87,9 +87,6 @@ def save_output_files(
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
 
 
-claims_to_generate_per_person = 5
-
-
 fiss_clm_type_cds = [
     1011,
     1041,
@@ -408,7 +405,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     claim["CLM"]["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
-    claim["CLM"]["CLM_UNIQ_ID"] = "".join(random.choices(string.digits, k=13))
+    claim["CLM"]["CLM_UNIQ_ID"] = "-" + "".join(random.choices(string.digits, k=13))
     # clm_type_cd = 60
     clm_type_cd = random.choice([1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 71, 72, 81, 82])
     claim["CLM"]["CLM_TYPE_CD"] = clm_type_cd
@@ -1150,15 +1147,21 @@ def main():
         "--sushi",
         "-s",
         action="store_true",
-        help="Generate new StructureDefinitions. Use when testing locally if new .fsh files \
-            have been added.",
+        help="Generate new StructureDefinitions. Use when testing locally if new .fsh files "
+        "have been added.",
     )
     parser.add_argument(
         "--benes",
         "-b",
         type=str,
-        help="Pull BENE_SKs from the input file. Expected format is that of \
-            SYNTHETIC_BENE_HSTRY.csv",
+        help="Pull BENE_SKs from the input file. Expected format is that of "
+        "SYNTHETIC_BENE_HSTRY.csv",
+    )
+    parser.add_argument(
+        "--min-claims", type=int, default=5, help="Minimum number of claims to generate per person"
+    )
+    parser.add_argument(
+        "--max-claims", type=int, default=5, help="Maximum number of claims to generate per person"
     )
 
     args = parser.parse_args()
@@ -1187,14 +1190,16 @@ def main():
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
     pt_complete = 0
+    min_claims = args.min_claims
+    max_claims = args.max_claims
     max_date = str(date.today())
     for pt_complete, pt_bene_sk in enumerate(bene_sk_list):
         if (pt_complete) % 1000 == 0 and pt_complete > 0:
             print(
-                f"Completed {pt_complete} patients with {claims_to_generate_per_person} \
-                    claims per patient."
+                f"Completed {pt_complete} patients with between {min_claims} and {max_claims} "
+                "claims per patient."
             )
-        for _ in range(claims_to_generate_per_person):
+        for _ in range(random.randint(min_claims, max_claims)):
             clm_from_dt_min = "2018-01-01"
             claim = gen_claim(bene_sk=pt_bene_sk, min_date=clm_from_dt_min, max_date=max_date)
             CLM.append(claim["CLM"])
