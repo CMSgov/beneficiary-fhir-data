@@ -78,10 +78,10 @@ public class ClaimProcedure {
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(bfdRowId);
     diagnosisType.ifPresent(
-        d -> {
-          diagnosis.addType(
-              new CodeableConcept(new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode())));
-        });
+        d ->
+            diagnosis.addType(
+                new CodeableConcept(
+                    new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode()))));
 
     String formattedCode = icdIndicator.get().formatCode(diagnosisCode.get());
     diagnosis.setDiagnosis(

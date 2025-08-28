@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -30,8 +28,8 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class SecurityLabels {
 
-  // Add a logger instance
-  private static final Logger LOGGER = LoggerFactory.getLogger(SecurityLabels.class);
+  // Private constructor to prevent instantiation
+  private SecurityLabels() {}
 
   /**
    * Reads a YAML file containing entries with keys such as "system", "code", "startDate", and
@@ -53,7 +51,6 @@ public class SecurityLabels {
         resultMap.computeIfAbsent(system, k -> new ArrayList<>()).add(entry);
       }
     } catch (Exception e) {
-      LOGGER.error("Failed to read YAML file", e);
       throw new RuntimeException("Failed to read YAML file", e);
     }
 

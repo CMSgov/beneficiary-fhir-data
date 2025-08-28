@@ -31,6 +31,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String BUNDLE_SEARCH_CALL = "bundleFromSearchCall";
 
   private final FhirContext context = FhirContext.forR4(); // Create a FhirContext for R4
+  private static final String FHIR_JSON = "fhir+json";
   IGenericClient client = context.newRestfulGenericClient(getServerUrl());
 
   protected long claimUniqueId = 566745788569L;
@@ -46,12 +47,12 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String CPT = "99408";
 
   // Code: HZ2ZZZZ System: ICD10 [clm_prcdr_cd]
-  private static final String ICDx = "HZ2ZZZZ";
+  private static final String ICDX = "HZ2ZZZZ";
 
   // Code: 522 System: DRG [dgns_drg_cd]
   private static final int DRG = 522;
 
-  protected final List<String> codeToCheck = List.of(DRG + "", HCPCS, ICD_X, ICDx);
+  protected final List<String> codeToCheck = List.of(DRG + "", HCPCS, ICD_X, ICDX);
 
   private Bundle bundle;
   private List<ExplanationOfBenefit> eob;
@@ -91,8 +92,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   @Test
   void bundleCallResultShouldNotBeEmpty() {
-
-    expect.scenario(BUNDLE_SEARCH_CALL).serializer("fhir+json").toMatchSnapshot(bundle);
+    expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
     assertFalse(codeToCheck.stream().anyMatch(e -> containsDiagnosisCode(eob, e)));
     assertFalse(bundle.isEmpty());
@@ -101,7 +101,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   @Test
   void bundleCallResultShouldNotContainSamhsaICD_x() {
 
-    expect.scenario(BUNDLE_SEARCH_CALL).serializer("fhir+json").toMatchSnapshot(bundle);
+    expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
     assertFalse(containsDiagnosisCode(eob, ICD_X));
     assertFalse(bundle.isEmpty());
@@ -110,7 +110,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   @Test
   void bundleCallResultShouldNotContainSamhsaDrg() {
 
-    expect.scenario(BUNDLE_SEARCH_CALL).serializer("fhir+json").toMatchSnapshot(bundle);
+    expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
     assertFalse(containsDiagnosisCode(eob, DRG + ""));
     assertFalse(bundle.isEmpty());
@@ -119,7 +119,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   @Test
   void bundleCallResultShouldNotContainSamhsaHcpcs() {
 
-    expect.scenario(BUNDLE_SEARCH_CALL).serializer("fhir+json").toMatchSnapshot(bundle);
+    expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
     assertFalse(containsDiagnosisCode(eob, HCPCS));
     assertFalse(bundle.isEmpty());
@@ -128,7 +128,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   @Test
   void bundleCallResultShouldNotContainSamhsaCpt() {
 
-    expect.scenario(BUNDLE_SEARCH_CALL).serializer("fhir+json").toMatchSnapshot(bundle);
+    expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
     assertFalse(containsDiagnosisCode(eob, CPT));
     assertFalse(bundle.isEmpty());
@@ -137,9 +137,9 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   @Test
   void bundleCallResultShouldNotContainSamhsaICDx() {
 
-    expect.scenario(BUNDLE_SEARCH_CALL).serializer("fhir+json").toMatchSnapshot(bundle);
+    expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(containsDiagnosisCode(eob, ICDx));
+    assertFalse(containsDiagnosisCode(eob, ICDX));
     assertFalse(bundle.isEmpty());
   }
 
