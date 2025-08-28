@@ -122,11 +122,11 @@ public class EobHandler {
   }
 
   private String getDiagnosisCode(ClaimProcedure e) {
-    return e.getDiagnosisCode().orElse("").trim().toLowerCase();
+    return e.getDiagnosisCode().orElse("").trim().replace(".", "").toLowerCase();
   }
 
   private String getClaimProcedureCode(ClaimProcedure e) {
-    return e.getProcedureCode().orElse("").trim().toLowerCase();
+    return e.getProcedureCode().orElse("").trim().replace(".", "").toLowerCase();
   }
 
   private String getDictCode(Map<String, Object> entry) {
