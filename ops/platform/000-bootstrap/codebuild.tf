@@ -147,6 +147,9 @@ resource "aws_codebuild_project" "runner" {
     location            = "https://github.com/CMSgov/beneficiary-fhir-data"
     report_build_status = false
     type                = "GITHUB"
+    git_submodules_config {
+      fetch_submodules = false
+    }
   }
 }
 
