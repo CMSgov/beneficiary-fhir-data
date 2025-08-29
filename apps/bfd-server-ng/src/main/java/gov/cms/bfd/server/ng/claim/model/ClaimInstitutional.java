@@ -33,7 +33,8 @@ public class ClaimInstitutional {
    */
   public java.util.Optional<String> getDrgCode() {
     var code = supportingInfo.getDiagnosisDrgCode().getDiagnosisDrgCode();
-    if (code == null || code.isBlank()) {
+    // code is guaranteed non-null; only filter out blank values
+    if (code.isBlank()) {
       return java.util.Optional.empty();
     }
     return java.util.Optional.of(code.trim());

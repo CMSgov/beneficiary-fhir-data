@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimLine;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,8 @@ public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
 
-  // Cache the security labels dictionary to avoid repeated I/O and parsing
-  private static final Map<String, List<Map<String, Object>>> SECURITY_LABELS_DICTIONARY =
+  // Cache the security labels map to avoid repeated I/O and parsing
+  private static final Map<String, List<Map<String, Object>>> SECURITY_LABELS_MAP =
       SecurityLabels.securityLabelsMap();
 
   /**
@@ -88,20 +89,17 @@ public class EobHandler {
   protected Bundle getFhirEobs(List<Claim> claims, boolean filterSamhsa) {
 
     var filteredClaims = claims;
-
     if (filterSamhsa) {
-
       filteredClaims =
           claims.stream()
               // keep claims that do NOT contain any SAMHSA-coded procedures
-              .filter(claim -> !claimHasSamhsa(claim, SECURITY_LABELS_DICTIONARY))
+              .filter(claim -> !claimHasSamhsa(claim, SECURITY_LABELS_MAP))
               .toList();
     }
 
-    var fhirEobs = filteredClaims.stream().map(Claim::toFhir).toList();
-
     return FhirUtil.bundleOrDefault(
-        fhirEobs.stream().map(Resource.class::cast), claimRepository::claimLastUpdated);
+        filteredClaims.stream().map(Claim::toFhir).map(Resource.class::cast),
+        claimRepository::claimLastUpdated);
   }
 
   /**
@@ -123,8 +121,7 @@ public class EobHandler {
     var eobs = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated).stream().toList();
     Bundle bundle = getFhirEobs(eobs, true);
     return bundle.getEntry().stream()
-        .map(entry -> entry.getResource())
-        .filter(ExplanationOfBenefit.class::isInstance)
+        .map(Bundle.BundleEntryComponent::getResource)
         .map(ExplanationOfBenefit.class::cast)
         .findFirst();
   }
@@ -162,7 +159,7 @@ public class EobHandler {
 
   // Checks DRG.
   private boolean drgCodeMatches(Claim claim, Map<String, List<Map<String, Object>>> dict) {
-    var entries = dict.getOrDefault(SystemUrls.CMS_MS_DRG, List.of());
+    var entries = dict.get(SystemUrls.CMS_MS_DRG);
     for (var entry : entries) {
       if (claim.getDrgCode().filter(drgCode -> getDictCode(entry).equals(drgCode)).isPresent()) {
         return true;
@@ -176,15 +173,17 @@ public class EobHandler {
   private boolean hcpcsCodeMatches(
       ClaimLine claimLine, Map<String, List<Map<String, Object>>> dict) {
     String hcpcs = claimLine.getHcpcsCode().getHcpcsCode().map(String::toLowerCase).orElse("");
-    String claimSystem = FhirUtil.getHcpcsSystem(hcpcs);
-
-    var entries = dict.getOrDefault(claimSystem, List.of());
-    for (var entry : entries) {
-      if (!hcpcs.equals("") && getDictCode(entry).equals(hcpcs)) {
-        return true;
+    if (hcpcs.isEmpty()) {
+      return false;
+    }
+    for (String system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
+      var entries = dict.getOrDefault(system, List.of());
+      for (var entry : entries) {
+        if (getDictCode(entry).equals(hcpcs)) {
+          return true;
+        }
       }
     }
-
     return false;
   }
 
@@ -194,20 +193,20 @@ public class EobHandler {
     String diagnosisCode = getDiagnosisCode(proc);
     String procedureCode = getClaimProcedureCode(proc);
 
-    var link = proc.getIcdIndicator().orElseThrow().getProcedureSystem();
-    var entries = dict.getOrDefault(link, List.of());
+    // Fallback to DEFAULT (currently ICD-9) if absent; may adjust to ICD_10 per business decision.
+    var icdIndicator = proc.getIcdIndicator().orElse(IcdIndicator.DEFAULT);
+    var procSystem = icdIndicator.getProcedureSystem();
+    var entries = dict.getOrDefault(procSystem, List.of());
+
     for (var entry : entries) {
-      if (getDictCode(entry).equals(procedureCode)) {
+      String dictCode = getDictCode(entry);
+      if (dictCode.equals(procedureCode)) {
         return true;
       }
-      var icdIndicatorOpt = proc.getIcdIndicator();
-      if (icdIndicatorOpt.isPresent()
-          && icdIndicatorOpt.get().getDiagnosisSytem().equals(link)
-          && getDictCode(entry).equals(diagnosisCode)) {
+      if (icdIndicator.getDiagnosisSytem().equals(procSystem) && dictCode.equals(diagnosisCode)) {
         return true;
       }
     }
-
     return false;
   }
 }

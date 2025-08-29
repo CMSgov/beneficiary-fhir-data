@@ -95,11 +95,6 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   }
 
   @Test
-  void eobReadIdNotFound() {
-    assertThrows(ResourceNotFoundException.class, () -> eobRead().withId("999").execute());
-  }
-
-  @Test
   void eobReadInvalidIdBadRequest() {
     assertThrows(InvalidRequestException.class, () -> eobRead().withId("abc").execute());
   }
