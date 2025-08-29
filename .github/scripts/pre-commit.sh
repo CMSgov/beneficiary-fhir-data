@@ -57,13 +57,8 @@ checkSopsFiles() {
   IFS=$'\n' read -d '' -r -a sops_files < <(git diff --cached --name-only --diff-filter=ACM | grep "sopsw\.yaml" && printf '\0')
 
   for sops_file in "${sops_files[@]}"; do
-    if [[ ! "$(command -v sops)" ]]; then
-      echo "'sops' not found. Try 'brew install sops' and commit again"
-      exit 1
-    fi
-
-    if [[ ! "$(command -v jq)" ]]; then
-      echo "'jq' not found. Try 'brew install jq' and commit again"
+    if [[ ! "$(command -v yq)" ]]; then
+      echo "'yq' not found. Try 'brew install yq' and commit again"
       exit 1
     fi
 
@@ -71,37 +66,29 @@ checkSopsFiles() {
     echo "Checking sops file $sops_file_name..."
 
     sops_file_path="$(git rev-parse --show-toplevel)/$sops_file"
-    # Counter-intuitively, we do not want sops to be able to decrypt any sopsw.yaml file with just a
-    # "sops decrypt" command, as we wish to secure our account ID. So, if it can be decrypted, that
-    # means that somehow the placeholder was replaced with the real account ID.
-    if sops decrypt "$sops_file_path" &>/dev/null; then
-      echo "sops can decrypt $sops_file_name without being provided account ID. Try using 'sopsw -C $sops_file_name' to convert the file to what sopsw expects."
+    if grep -E 'arn:aws:.*:\d{12}' "$sops_file_path" &>/dev/null; then
+      echo "A bare AWS account ID is exposed in $sops_file_name. Try using 'sopsw -C $sops_file_name' to convert the file, or make the value sensitive."
       exit 1
     fi
 
-    sopsw_script_path="$(git rev-parse --show-toplevel)/apps/utils/scripts/sopsw"
-
-    # Now, if the templated sops file cannot be decrypted, that means that it is invalid
-    if ! $sopsw_script_path -d "$sops_file_path" &>/dev/null; then
-      echo "sops cannot decrypt account ID templated $sops_file_name. This means one of two things:"
-      cat <<EOF
-1. You are trying to commit changes to sops configuration across multiple accounts. You need to
-split the commit across multiple commits and assume an account Role corresponding to the file
-changed
-2. You are trying to commit a corrupted $sops_file_name that has sensitive values modified outside
-of sops. You will need to fix these errors. Consult the config README to run the 'sops decrypt'
-command and determine the error
-EOF
-      exit 1
-    fi
-
-    sops_temp_dir="$(mktemp -d)"
-    sops_temp_file="$sops_temp_dir/$sops_file_name"
-    # Finally, ensure that sops indicates the file is encrypted before allowing commit
-    $sopsw_script_path -c "$sops_file_path" >"$sops_temp_file"
-    sops_encrypted="$(sops filestatus "$sops_temp_file" | jq -r '.encrypted')"
-    if [[ $sops_encrypted != "true" ]]; then
-      echo "sops is indicating $sops_file is unencrypted. Do not commit this file unless it is encrypted"
+    sops_unencrypted_regex="$(yq '.sops.unencrypted_regex' < "$sops_file_path")"
+    # Now, if the following naive check for invalid encrypted values fails that means that some
+    # encrypted values are not encrypted properly and we should not commit the changes
+    if [[ "$(
+        UNENCRYPTED_REGEX="$sops_unencrypted_regex" yq 'to_entries
+          | map(
+              select(.key != "sops"
+                and (.key | test(env(UNENCRYPTED_REGEX)) | not)
+                and (.value
+                  | tostring
+                  | test("^ENC\[AES256_GCM,data:(.*),iv:(.*),tag:(.*),type:(.*)\]$")
+                  | not
+                )
+              )
+            )
+          | length' < "$sops_file_path"
+      )" != "0" ]]; then
+      echo "There are invalid sensitive values in $sops_file_name. This file cannot be committed as-is. Fix the invalid values and try again."
       exit 1
     fi
 
