@@ -42,11 +42,13 @@ Run the app (optionally specify a minimum transaction date)
 PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 ```
 
-## Adding columns to the model
+## Adding data to the model
 
-- add the column to `mock-idr.sql` (local representation of the IDR schema)
-- add the column to `bfd.sql` (BFD database definition)
-- add the column to `model.py`, queries will be auto-generated using those fields
+- Add the data to `mock-idr.sql` (local representation of the IDR schema)
+- Add the data to `bfd.sql` (BFD database definition)
+- Add the data to `model.py`, queries will be auto-generated using those fields
+- If adding a new table, register it in the call to `load_all` in `pipeline.py`
+- If adding a new table, register it in the list of CSVs to load in `load_synthetic.py` 
 
 ## Loading synthetic data
 

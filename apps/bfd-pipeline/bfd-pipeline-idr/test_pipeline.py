@@ -102,6 +102,11 @@ class TestPipeline:
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 10464258
 
+        cur = conn.execute("select * from idr.beneficiary_dual_eligibility order by bene_sk")
+        assert cur.rowcount == 4
+        rows = cur.fetchmany(1)
+        assert rows[0]["bene_sk"] == 47347082
+
         cur = conn.execute("select * from idr.claim order by clm_uniq_id")
         assert cur.rowcount == 144
         rows = cur.fetchmany(1)

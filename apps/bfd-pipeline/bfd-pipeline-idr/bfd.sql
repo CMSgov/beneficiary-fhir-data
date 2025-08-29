@@ -136,6 +136,23 @@ CREATE TABLE idr.beneficiary_election_period_usage (
     PRIMARY KEY(bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt)
 );
 
+CREATE TABLE idr.beneficiary_dual_eligibility (
+    bene_sk BIGINT NOT NULL,
+    bene_mdcd_elgblty_bgn_dt DATE NOT NULL,
+    bene_mdcd_elgblty_end_dt DATE NOT NULL,
+    bene_dual_stus_cd VARCHAR(2) NOT NULL,
+    bene_dual_type_cd VARCHAR(1) NOT NULL,
+    geo_usps_state_cd VARCHAR(2) NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY(bene_sk, bene_mdcd_elgblty_bgn_dt, idr_trans_efctv_ts)
+);
+
 CREATE TABLE idr.contract_pbp_number (
     cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
     cntrct_drug_plan_ind_cd VARCHAR(1) NOT NULL,
