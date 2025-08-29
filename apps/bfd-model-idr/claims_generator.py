@@ -1194,7 +1194,8 @@ def main():
     max_claims = args.max_claims
     if min_claims > max_claims:
         print(
-            f"error: min claims value of {min_claims} is less than max claims value of {max_claims}"
+            f"error: min claims value of {min_claims} is greater than "
+            f"max claims value of {max_claims}"
         )
         sys.exit(1)
     max_date = str(date.today())
