@@ -10,9 +10,10 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.BeforeAll;
@@ -87,8 +88,9 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     // Wrongly added HCPCS Samhsa code should not be removed
     // even it is a Samhsa code it is in wrong system
     // Samhsa code H0036 becomes H00.36 in ICD-10
-    var eob = eobRead().withId(claimWithHcpcsInIcd).execute();
-    var diag = eob.getDiagnosis().getFirst().getDiagnosisCodeableConcept().getCoding().getFirst();
+    var fetched = eobRead().withId(claimWithHcpcsInIcd).execute();
+    var diag =
+        fetched.getDiagnosis().getFirst().getDiagnosisCodeableConcept().getCoding().getFirst();
 
     assertTrue(diag.getCode().equals("H00.36"));
     assertTrue(diag.getSystem().equals(SystemUrls.ICD_10_CM));
@@ -103,7 +105,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   void bundleCallResultShouldNotBeEmpty() {
     expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(codeToCheck.stream().anyMatch(e -> containsDiagnosisCode(eob, e)));
+    assertFalse(codeToCheck.stream().anyMatch(e -> containsSamhsaCodeAnywhere(eob, e)));
     assertFalse(bundle.isEmpty());
   }
 
@@ -112,7 +114,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(containsDiagnosisCode(eob, ICD_X));
+    assertFalse(containsSamhsaCodeAnywhere(eob, ICD_X));
     assertFalse(bundle.isEmpty());
   }
 
@@ -121,7 +123,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(containsDiagnosisCode(eob, DRG + ""));
+    assertFalse(containsSamhsaCodeAnywhere(eob, DRG + ""));
     assertFalse(bundle.isEmpty());
   }
 
@@ -130,7 +132,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(containsDiagnosisCode(eob, HCPCS));
+    assertFalse(containsSamhsaCodeAnywhere(eob, HCPCS));
     assertFalse(bundle.isEmpty());
   }
 
@@ -139,7 +141,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(containsDiagnosisCode(eob, CPT));
+    assertFalse(containsSamhsaCodeAnywhere(eob, CPT));
     assertFalse(bundle.isEmpty());
   }
 
@@ -148,7 +150,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     expect.scenario(BUNDLE_SEARCH_CALL).serializer(FHIR_JSON).toMatchSnapshot(bundle);
 
-    assertFalse(containsDiagnosisCode(eob, ICDX));
+    assertFalse(containsSamhsaCodeAnywhere(eob, ICDX));
     assertFalse(bundle.isEmpty());
   }
 
@@ -161,28 +163,41 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   }
 
   private List<ExplanationOfBenefit> bundleToEob(Bundle bundle) {
-    List<ExplanationOfBenefit> fhirClaims =
-        bundle.getEntry().stream()
-            .map(Bundle.BundleEntryComponent::getResource)
-            .filter(resource -> resource instanceof ExplanationOfBenefit)
-            .map(resource -> (ExplanationOfBenefit) resource)
-            .collect(Collectors.toList());
-    return fhirClaims;
+    return bundle.getEntry().stream()
+        .map(Bundle.BundleEntryComponent::getResource)
+        .filter(ExplanationOfBenefit.class::isInstance)
+        .map(ExplanationOfBenefit.class::cast)
+        .toList();
   }
 
-  private boolean containsDiagnosisCode(List<ExplanationOfBenefit> fhirClaims, String code) {
-    return fhirClaims.stream()
-        .anyMatch(
-            d ->
-                d.getDiagnosis().stream()
-                    .anyMatch(
-                        e ->
-                            e.getDiagnosis().getNamedProperty("coding").getValues().stream()
-                                    .anyMatch(
-                                        t ->
-                                            t.getNamedProperty("code").getValues().stream()
-                                                .anyMatch(c -> c.toString().equals(code)))
-                                || e.getDiagnosisCodeableConcept().getCoding().stream()
-                                    .anyMatch(f -> code.equals(f.getCode()))));
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
+  private boolean containsSamhsaCodeAnywhere(List<ExplanationOfBenefit> fhirClaims, String code) {
+    String targetNorm = normalize(code);
+    return fhirClaims.stream().anyMatch(e -> eobJsonHasCode(e, targetNorm));
+  }
+
+  private boolean eobJsonHasCode(ExplanationOfBenefit eob, String targetNorm) {
+    try {
+      String json = context.newJsonParser().encodeResourceToString(eob);
+      JsonNode root = objectMapper.readTree(json);
+      // Find every JSON node with field name "code" and compare normalized values
+      return root.findValues("code").stream()
+          .map(JsonNode::asText)
+          .map(this::normalize)
+          .anyMatch(val -> val.equals(targetNorm));
+    } catch (Exception ex) {
+      throw new EobJsonScanException("Failed to parse EOB JSON", ex);
+    }
+  }
+
+  private static class EobJsonScanException extends RuntimeException {
+    EobJsonScanException(String msg, Throwable cause) {
+      super(msg, cause);
+    }
+  }
+
+  private String normalize(String val) {
+    return val == null ? "" : val.trim().replace(".", "").toLowerCase();
   }
 }
