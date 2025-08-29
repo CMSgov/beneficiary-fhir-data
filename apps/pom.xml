@@ -90,8 +90,8 @@
         <aws-java-sdk-bom.version>2.30.32</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
-        <spring-data-jpa.version>3.4.3</spring-data-jpa.version>
-        <spring-framework.version>6.2.3</spring-framework.version>
+        <spring-data-jpa.version>3.4.6</spring-data-jpa.version>
+        <spring-framework.version>6.2.8</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
         <spring-boot.version>3.4.4</spring-boot.version>
         <spring-cloud.version>4.2.1</spring-cloud.version>
@@ -227,7 +227,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
