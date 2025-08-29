@@ -43,7 +43,6 @@ locals {
   ssm_hierarchy_roots   = concat(["bfd"], local.eft_partners)
 
   inbound_sftp_server_key    = sensitive(local.ssm_config["/bfd/${local.service}/inbound/sftp_server/host_private_key"])
-  inbound_r53_hosted_zone    = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/r53_hosted_zone"]
   inbound_sftp_user_pub_key  = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_public_key"]
   inbound_sftp_user_username = local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_username"]
   inbound_sftp_s3_home_dir   = trim(local.ssm_config["/bfd/${local.service}/inbound/sftp_server/eft_user_home_dir"], "/")

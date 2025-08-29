@@ -30,7 +30,7 @@ data "aws_vpc_endpoint_service" "transfer_server" {
 }
 
 data "aws_ssm_parameter" "zone_name" {
-  name            = "/bfd/platform/network/sensitive/route53/zone/${local.inbound_r53_hosted_zone}/domain"
+  name            = "/bfd/platform/network/sensitive/route53/zone/${local.parent_env}/domain"
   with_decryption = true
 }
 
@@ -38,6 +38,6 @@ data "aws_route53_zone" "this" {
   name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
   private_zone = true
   tags = {
-    "ConfigId" = local.inbound_r53_hosted_zone
+    "ConfigId" = local.parent_env
   }
 }
