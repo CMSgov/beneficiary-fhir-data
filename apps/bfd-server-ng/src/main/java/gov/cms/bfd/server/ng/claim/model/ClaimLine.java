@@ -10,12 +10,14 @@ import jakarta.persistence.Embedded;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Claim line info. */
 @Embeddable
+@Getter
 public class ClaimLine {
 
   @Convert(converter = NonZeroIntConverter.class)

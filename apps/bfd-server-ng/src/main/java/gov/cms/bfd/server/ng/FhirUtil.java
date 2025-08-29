@@ -50,6 +50,18 @@ public class FhirUtil {
   }
 
   /**
+   * Retrieves a list of ICD (International Classification of Diseases) system URLs. These URLs
+   * represent different versions and standards of the ICD coding system.
+   *
+   * @return a list of strings containing the URLs for ICD-9, ICD-10, and their respective CM
+   *     (Clinical Modification) versions.
+   */
+  public static List<String> getIcdSystem() {
+    return List.of(
+        SystemUrls.CMS_ICD_9, SystemUrls.CMS_ICD_10, SystemUrls.ICD_9_CM, SystemUrls.ICD_10_CM);
+  }
+
+  /**
    * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
    * empty.
    *

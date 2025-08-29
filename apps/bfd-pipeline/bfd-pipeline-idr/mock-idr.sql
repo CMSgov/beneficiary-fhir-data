@@ -322,6 +322,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_bene_pd_amt NUMERIC,
     clm_line_cvrd_pd_amt NUMERIC,
     clm_line_blood_ddctbl_amt NUMERIC,
+    -- SAMHSA (ICD)
     clm_line_dgns_cd VARCHAR(7),
     clm_line_from_dt DATE,
     clm_line_mdcr_ddctbl_amt NUMERIC,
