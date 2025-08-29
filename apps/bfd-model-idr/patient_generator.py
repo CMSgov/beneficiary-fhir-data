@@ -18,8 +18,8 @@ parser.add_argument("--benes", type=str, help="Path to CSV file containing benef
 parser.add_argument(
     "--claims",
     action="store_true",
-    help="Automatically generate claims after patient generation using the generated \
-        SYNTHETIC_BENE_HSTRY.csv file",
+    help="Automatically generate claims after patient generation using the generated "
+    "SYNTHETIC_BENE_HSTRY.csv file",
 )
 args = parser.parse_args()
 
@@ -47,7 +47,7 @@ generator = GeneratorUtil()
 csv_data = None
 if args.benes:
     try:
-        csv_data = pd.read_csv(args.benes)
+        csv_data = pd.read_csv(args.benes, dtype={"BENE_SEX_CD": "Int64", "BENE_RACE_CD": "Int64"})
         print(f"Loaded {len(csv_data)} rows from CSV file: {args.benes}")
 
         patients_to_generate = len(csv_data)

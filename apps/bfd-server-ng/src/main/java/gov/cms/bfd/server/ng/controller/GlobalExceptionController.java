@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.controller;
 
+import gov.cms.bfd.server.ng.filter.MdcFilter;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -25,23 +26,33 @@ public class GlobalExceptionController implements ErrorController {
     var message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
     // Note: this doesn't include the query string
     var originalUri = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+    var logBuilder = LOGGER.atError();
+    // Unexpected errors could contain anything, so we should not return the text to the user.
+    var responseMessage = "an unknown error occurred";
 
     if (status != null) {
       var statusCode = Integer.parseInt(status.toString());
-      // For "expected" errors, we can assume the supplied error message is user-friendly, if
-      // present
+
       if (statusCode < 500) {
-        var responseMessage = message == null ? "error" : message.toString();
-        LOGGER
-            .atWarn()
-            .setMessage(responseMessage)
-            .addKeyValue("statusCode", statusCode)
-            .addKeyValue("originalUri", originalUri)
-            .log();
-        return responseMessage;
+        if (message != null) {
+          // For "expected" errors, we can assume the supplied error message is user-friendly, if
+          // present
+          responseMessage = message.toString();
+        }
+        // Sub-500 response codes indicate a bad request rather than an internal failure
+        logBuilder = LOGGER.atWarn();
       }
+      logBuilder = logBuilder.addKeyValue("statusCode", statusCode);
     }
-    // Unexpected errors could contain anything, so we should not return the text to the user.
-    return "an unknown error occurred";
+    // Since this is controller is hit from a redirect, we don't have the context from the normal
+    // MDC filter, so we need to add them to the log here explicitly,
+    logBuilder
+        .setMessage(responseMessage)
+        .addKeyValue(MdcFilter.URI_KEY, originalUri)
+        .addKeyValue(MdcFilter.REQUEST_ID_KEY, request.getRequestId())
+        .addKeyValue(MdcFilter.REMOTE_ADDRESS_KEY, request.getRemoteAddr())
+        .log();
+
+    return responseMessage;
   }
 }

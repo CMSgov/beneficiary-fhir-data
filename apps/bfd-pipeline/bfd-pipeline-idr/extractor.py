@@ -15,7 +15,6 @@ from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
 from timer import Timer
 
-idr_query_timer = Timer("idr_query")
 cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
@@ -26,7 +25,6 @@ type DbType = str | float | int | bool | date | datetime
 
 
 def print_timers() -> None:
-    idr_query_timer.print_results()
     cursor_execute_timer.print_results()
     cursor_fetch_timer.print_results()
     transform_timer.print_results()
@@ -73,9 +71,8 @@ class Extractor(ABC):
         min_transaction_date = get_min_transaction_date()
         logger.info("extracting %s", cls.table())
         if progress is None:
-            idr_query_timer.start()
             # No saved progress, process the whole table from the beginning
-            res = self.extract_many(
+            return self.extract_many(
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
@@ -83,8 +80,6 @@ class Extractor(ABC):
                 ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
                 {},
             )
-            idr_query_timer.stop()
-            return res
 
         previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
         # If we've completed the last batch, there shouldn't be any additional records
@@ -94,9 +89,8 @@ class Extractor(ABC):
         # Snowflake, so we should always start loading from the most recent timestamp
         # that we've already fetched
         compare_timestamp = max(min_transaction_date, progress.last_ts)
-        idr_query_timer.start()
         # Saved progress found, start processing from where we left off
-        res = self.extract_many(
+        return self.extract_many(
             cls,
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
@@ -106,8 +100,6 @@ class Extractor(ABC):
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
             {"timestamp": compare_timestamp},
         )
-        idr_query_timer.stop()
-        return res
 
 
 class PostgresExtractor(Extractor):

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,11 +20,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 @Component
 @RequiredArgsConstructor
-// Ensure this runs first
-@Order(1)
+// This should run directly after the MDC filter
+@Order(2)
 @WebFilter(filterName = "AuthenticationFilter")
 public class AuthenticationFilter extends OncePerRequestFilter {
   private static final String MISSING_INVALID_HEADER_MSG = "Missing or invalid certificate header.";
+  private static final String CLIENT = "client";
 
   private final CertificateUtil certificateUtil;
 
@@ -42,10 +44,14 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     final var certAlias = certificateUtil.getAliasFromCert(request);
 
     if (certAlias.isEmpty()) {
-      response.sendError(400, MISSING_INVALID_HEADER_MSG);
+      response.sendError(401, MISSING_INVALID_HEADER_MSG);
       return;
     }
     certificateUtil.attachCertAliasToRequest(request, certAlias.get());
+    MDC.put(CLIENT, certAlias.get());
     filterChain.doFilter(request, response);
+
+    // Clean up to prevent leaks
+    MDC.remove(CLIENT);
   }
 }

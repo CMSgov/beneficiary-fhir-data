@@ -85,6 +85,15 @@ To utilize it:
 uv run patient_generator.py
 ```
 
+Or, to load the specific MBIs used in the sandbox env:
+
+```sh
+uv run patient_generator.py --benes Benes-Sandbox.csv
+```
+
+**NOTE**: the bene_id column in this file is to reference the bene_id field used in V1/V2.
+It's not used for sample data generation here.
+
 The script supports several options:
 - `--benes <csv_file>`: Use a CSV file containing beneficiary data to populate fields. Empty fields will be filled with random data.
 - `--claims`: Automatically generate claims after patient generation using the generated SYNTHETIC_BENE_HSTRY.csv file.

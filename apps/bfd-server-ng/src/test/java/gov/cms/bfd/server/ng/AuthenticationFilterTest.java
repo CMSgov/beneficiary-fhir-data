@@ -35,7 +35,7 @@ public class AuthenticationFilterTest {
     when(request.getRequestURI()).thenReturn("/v3/Fhir/Patient");
     var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
-    verify(response).sendError(400, "Missing or invalid certificate header.");
+    verify(response).sendError(401, "Missing or invalid certificate header.");
   }
 
   @Test
@@ -44,17 +44,15 @@ public class AuthenticationFilterTest {
     when(request.getRequestURI()).thenReturn("/v3/Fhir/Patient");
     when(request.getHeader("X-Amzn-Mtls-Clientcert")).thenReturn("badcert");
     when(configuration.getClientCertsToAliases()).thenReturn(Map.of("goodcert", "alias"));
-    var configuration = new Configuration();
     var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
-    verify(response).sendError(400, "Missing or invalid certificate header.");
+    verify(response).sendError(401, "Missing or invalid certificate header.");
   }
 
   @Test
   void testNotAllowedPathsWithAuthDisabled() throws ServletException, IOException {
     when(environment.getActiveProfiles()).thenReturn(new String[] {"local"});
     when(request.getRequestURI()).thenReturn("/v3/fhir/Patient");
-    var configuration = new Configuration();
     var filter = new AuthenticationFilter(new CertificateUtil(configuration, environment));
     filter.doFilter(request, response, filterChain);
     verify(response, never()).sendError(any(Integer.class));

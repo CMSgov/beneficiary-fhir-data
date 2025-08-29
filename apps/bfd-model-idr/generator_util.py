@@ -109,7 +109,7 @@ class GeneratorUtil:
         return mbi
 
     def gen_bene_sk(self):
-        bene_sk = random.randint(1000, 1000000000)
+        bene_sk = random.randint(-1000000000, -1000)
         if bene_sk in self.used_bene_sk:
             return self.gen_bene_sk()
         return bene_sk
@@ -455,39 +455,38 @@ class GeneratorUtil:
         Path("out").mkdir(exist_ok=True)
 
         df = pd.json_normalize(self.bene_hstry_table)
-        if df.size > 0:
-            df = df[
-                [
-                    "BENE_SK",
-                    "BENE_XREF_EFCTV_SK",
-                    "BENE_XREF_SK",
-                    "BENE_MBI_ID",
-                    "BENE_LAST_NAME",
-                    "BENE_1ST_NAME",
-                    "BENE_MIDL_NAME",
-                    "BENE_BRTH_DT",
-                    "BENE_DEATH_DT",
-                    "BENE_VRFY_DEATH_DAY_SW",
-                    "BENE_SEX_CD",
-                    "BENE_RACE_CD",
-                    "BENE_LINE_1_ADR",
-                    "BENE_LINE_2_ADR",
-                    "BENE_LINE_3_ADR",
-                    "BENE_LINE_4_ADR",
-                    "BENE_LINE_5_ADR",
-                    "BENE_LINE_6_ADR",
-                    "GEO_ZIP_PLC_NAME",
-                    "GEO_ZIP5_CD",
-                    "GEO_USPS_STATE_CD",
-                    "CNTCT_LANG_CD",
-                    "IDR_LTST_TRANS_FLG",
-                    "IDR_TRANS_EFCTV_TS",
-                    "IDR_INSRT_TS",
-                    "IDR_UPDT_TS",
-                    "IDR_TRANS_OBSLT_TS",
-                ]
+        df = df[
+            [
+                "BENE_SK",
+                "BENE_XREF_EFCTV_SK",
+                "BENE_XREF_SK",
+                "BENE_MBI_ID",
+                "BENE_LAST_NAME",
+                "BENE_1ST_NAME",
+                "BENE_MIDL_NAME",
+                "BENE_BRTH_DT",
+                "BENE_DEATH_DT",
+                "BENE_VRFY_DEATH_DAY_SW",
+                "BENE_SEX_CD",
+                "BENE_RACE_CD",
+                "BENE_LINE_1_ADR",
+                "BENE_LINE_2_ADR",
+                "BENE_LINE_3_ADR",
+                "BENE_LINE_4_ADR",
+                "BENE_LINE_5_ADR",
+                "BENE_LINE_6_ADR",
+                "GEO_ZIP_PLC_NAME",
+                "GEO_ZIP5_CD",
+                "GEO_USPS_STATE_CD",
+                "CNTCT_LANG_CD",
+                "IDR_LTST_TRANS_FLG",
+                "IDR_TRANS_EFCTV_TS",
+                "IDR_INSRT_TS",
+                "IDR_UPDT_TS",
+                "IDR_TRANS_OBSLT_TS",
             ]
-            df.to_csv("out/SYNTHETIC_BENE_HSTRY.csv", index=False)
+        ]
+        df.to_csv("out/SYNTHETIC_BENE_HSTRY.csv", index=False)
 
         arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
         df = pd.json_normalize(arr)
@@ -502,6 +501,7 @@ class GeneratorUtil:
                 "IDR_TRANS_OBSLT_TS",
             ]
         ]
+
         df.to_csv("out/SYNTHETIC_BENE_MBI_ID.csv", index=False)
 
         df = pd.json_normalize(self.mdcr_stus)

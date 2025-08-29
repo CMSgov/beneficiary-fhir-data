@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.filter;
 
-import gov.cms.bfd.server.ng.CertificateUtil;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,15 +16,18 @@ import org.springframework.stereotype.Component;
 /** Filter for attaching MDC properties. */
 @Component
 @RequiredArgsConstructor
-// This should run directly after the auth filter
-@Order(2)
+// Ensure this runs first
+@Order(1)
 @WebFilter(filterName = "MdcFilter")
 public class MdcFilter implements Filter {
-  private final CertificateUtil certificateUtil;
-  private static final String URI = "uri";
-  private static final String REQUEST_ID = "requestId";
-  private static final String CLIENT = "client";
-  private static final String REMOTE_ADDRESS = "remoteAddress";
+  /** Name of the URI key for logging. */
+  public static final String URI_KEY = "uri";
+
+  /** Name of the request ID key for logging. */
+  public static final String REQUEST_ID_KEY = "requestId";
+
+  /** Name of the remote address key for logging. */
+  public static final String REMOTE_ADDRESS_KEY = "remoteAddress";
 
   @Override
   public void doFilter(
@@ -33,18 +35,15 @@ public class MdcFilter implements Filter {
       throws IOException, ServletException {
 
     if (servletRequest instanceof HttpServletRequest httpRequest) {
-      MDC.put(URI, httpRequest.getRequestURI());
-      MDC.put(REQUEST_ID, httpRequest.getRequestId());
-      MDC.put(REMOTE_ADDRESS, httpRequest.getRemoteAddr());
-      var aliasAttribute = certificateUtil.getAliasAttribute(httpRequest);
-      aliasAttribute.ifPresent((attr) -> MDC.put(CLIENT, attr));
+      MDC.put(URI_KEY, httpRequest.getRequestURI());
+      MDC.put(REQUEST_ID_KEY, httpRequest.getRequestId());
+      MDC.put(REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
     }
     filterChain.doFilter(servletRequest, servletResponse);
 
     // Clean up to prevent leaks
-    MDC.remove(URI);
-    MDC.remove(REQUEST_ID);
-    MDC.remove(CLIENT);
-    MDC.remove(REMOTE_ADDRESS);
+    MDC.remove(URI_KEY);
+    MDC.remove(REQUEST_ID_KEY);
+    MDC.remove(REMOTE_ADDRESS_KEY);
   }
 }
