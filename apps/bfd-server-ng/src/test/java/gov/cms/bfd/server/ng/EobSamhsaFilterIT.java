@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -35,6 +36,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   IGenericClient client = context.newRestfulGenericClient(getServerUrl());
 
   protected long claimUniqueId = 566745788569L;
+  protected long claimWithHcpcsInIcd = 6288598524935L;
   protected long beneSk = 412457726;
 
   // Code: F10.10 System: icd-10-cm [clm_dgns_cd]
@@ -78,6 +80,18 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     // Enabling samhsa filtering should cause
     // v3/fhir/ExplanationOfBenefit/566745788569 calls to throw
     assertThrows(ResourceNotFoundException.class, () -> eobRead().withId(claimUniqueId).execute());
+  }
+
+  @Test
+  void claimWithWrongCode() {
+    // Wrongly added HCPCS Samhsa code should not be removed
+    // even it is a Samhsa code it is in wrong system
+    // Samhsa code H0036 becomes H00.36 in ICD-10
+    var eob = eobRead().withId(claimWithHcpcsInIcd).execute();
+    var diag = eob.getDiagnosis().getFirst().getDiagnosisCodeableConcept().getCoding().getFirst();
+
+    assertTrue(diag.getCode().equals("H00.36"));
+    assertTrue(diag.getSystem().equals(SystemUrls.ICD_10_CM));
   }
 
   @Test
