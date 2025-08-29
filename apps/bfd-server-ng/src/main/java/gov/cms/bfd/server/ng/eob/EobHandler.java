@@ -225,9 +225,9 @@ public class EobHandler {
       if (compare(dictCode, procedureCode)) {
         return true;
       }
-    // Only attempt diagnosis match when the indicator explicitly identifies ICD-9 or ICD-10.
-    if ((icdIndicator == IcdIndicator.ICD_9 || icdIndicator == IcdIndicator.ICD_10)
-      && compare(dictCode, diagnosisCode)) {
+      // Only attempt diagnosis match when the indicator explicitly identifies ICD-9 or ICD-10.
+      if ((icdIndicator == IcdIndicator.ICD_9 || icdIndicator == IcdIndicator.ICD_10)
+          && compare(dictCode, diagnosisCode)) {
         return true;
       }
     }
