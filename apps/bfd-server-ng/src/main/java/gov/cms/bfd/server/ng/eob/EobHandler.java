@@ -194,20 +194,20 @@ public class EobHandler {
     String diagnosisCode = getDiagnosisCode(proc);
     String procedureCode = getClaimProcedureCode(proc);
 
-    for (String link : FhirUtil.getIcdSystem()) {
-      var entries = dict.getOrDefault(link, List.of());
-      for (var entry : entries) {
-        if (getDictCode(entry).equals(procedureCode)) {
-          return true;
-        }
-        var icdIndicatorOpt = proc.getIcdIndicator();
-        if (icdIndicatorOpt.isPresent()
-            && icdIndicatorOpt.get().getDiagnosisSytem().equals(link)
-            && getDictCode(entry).equals(diagnosisCode)) {
-          return true;
-        }
+    var link = proc.getIcdIndicator().orElseThrow().getProcedureSystem();
+    var entries = dict.getOrDefault(link, List.of());
+    for (var entry : entries) {
+      if (getDictCode(entry).equals(procedureCode)) {
+        return true;
+      }
+      var icdIndicatorOpt = proc.getIcdIndicator();
+      if (icdIndicatorOpt.isPresent()
+          && icdIndicatorOpt.get().getDiagnosisSytem().equals(link)
+          && getDictCode(entry).equals(diagnosisCode)) {
+        return true;
       }
     }
+
     return false;
   }
 }
