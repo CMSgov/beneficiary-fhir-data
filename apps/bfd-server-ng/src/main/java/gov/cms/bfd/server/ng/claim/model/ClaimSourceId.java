@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The source of the claim. */
 @Getter
@@ -43,5 +44,12 @@ public enum ClaimSourceId {
   Optional<Coding> toFhirAdjudicationStatus() {
     return adjudicationStatus.map(
         s -> new Coding().setSystem(SystemUrls.BLUE_BUTTON_ADJUDICATION_STATUS).setCode(s));
+  }
+
+  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
+    return switch (this) {
+      case NATIONAL_CLAIMS_HISTORY -> Optional.of(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
+      default -> Optional.empty();
+    };
   }
 }
