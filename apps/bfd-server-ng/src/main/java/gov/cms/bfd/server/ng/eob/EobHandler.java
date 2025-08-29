@@ -53,7 +53,7 @@ public class EobHandler {
    * @param count record count
    * @param serviceDate service date
    * @param lastUpdated last updated
-   * @param startIndex start index
+   * @param startIndex start 160
    * @param sourceIds sourceIds
    * @return bundle
    */
@@ -142,6 +142,28 @@ public class EobHandler {
     return code.orElse("").trim().replace(".", "").toLowerCase();
   }
 
+  /**
+   * Compares two raw code strings using the SAMHSA normalization rules.
+   *
+   * <p>Normalization steps (applied to both inputs):
+   *
+   * <ul>
+   *   <li>Null -> empty string
+   *   <li>Trim leading/trailing whitespace
+   *   <li>Remove all '.' characters
+   *   <li>Lowercase the result
+   * </ul>
+   *
+   * This ensures comparisons are insensitive to formatting differences (case, dots, or padding).
+   *
+   * @param source the first (potentially null) raw code value
+   * @param target the second (potentially null) raw code value
+   * @return true if the normalized forms are equal; false otherwise
+   */
+  private boolean compare(String source, String target) {
+    return normalize(Optional.ofNullable(source)).equals(normalize(Optional.ofNullable(target)));
+  }
+
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the provided dictionary and keys.
   private boolean claimHasSamhsa(Claim claim, Map<String, List<Map<String, Object>>> dict) {
@@ -161,7 +183,7 @@ public class EobHandler {
   private boolean drgCodeMatches(Claim claim, Map<String, List<Map<String, Object>>> dict) {
     var entries = dict.get(SystemUrls.CMS_MS_DRG);
     for (var entry : entries) {
-      if (claim.getDrgCode().filter(drgCode -> getDictCode(entry).equals(drgCode)).isPresent()) {
+      if (claim.getDrgCode().filter(drgCode -> compare(getDictCode(entry), drgCode)).isPresent()) {
         return true;
       }
     }
@@ -179,7 +201,7 @@ public class EobHandler {
     for (String system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
       var entries = dict.getOrDefault(system, List.of());
       for (var entry : entries) {
-        if (getDictCode(entry).equals(hcpcs)) {
+        if (compare(getDictCode(entry), hcpcs)) {
           return true;
         }
       }
@@ -200,10 +222,10 @@ public class EobHandler {
 
     for (var entry : entries) {
       String dictCode = getDictCode(entry);
-      if (dictCode.equals(procedureCode)) {
+      if (compare(dictCode, procedureCode)) {
         return true;
       }
-      if (icdIndicator.getDiagnosisSytem().equals(procSystem) && dictCode.equals(diagnosisCode)) {
+      if (icdIndicator.getDiagnosisSytem().equals(procSystem) && compare(dictCode, diagnosisCode)) {
         return true;
       }
     }
