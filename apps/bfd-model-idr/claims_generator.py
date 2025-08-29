@@ -1192,6 +1192,11 @@ def main():
     pt_complete = 0
     min_claims = args.min_claims
     max_claims = args.max_claims
+    if min_claims > max_claims:
+        print(
+            f"error: min claims value of {min_claims} is less than max claims value of {max_claims}"
+        )
+        sys.exit(1)
     max_date = str(date.today())
     for pt_complete, pt_bene_sk in enumerate(bene_sk_list):
         if (pt_complete) % 1000 == 0 and pt_complete > 0:
