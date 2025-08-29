@@ -424,11 +424,10 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         random.choices(string.ascii_uppercase, k=3)
     )
     # PDE -> diff Claim control number process.
-    if clm_type_cd in (1, 2, 3, 4) and random.choice([0, 1]):
+    if clm_type_cd in (1, 2, 3, 4):
         claim["CLM"]["CLM_ORIG_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
             random.choices(string.ascii_uppercase, k=3)
         )
-        claim["CLM"]["CLM_PRNT_CNTL_NUM"] = claim["CLM"]["CLM_ORIG_CNTL_NUM"]
 
     if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
         claim["CLM"]["CLM_BLOOD_PT_FRNSH_QTY"] = random.randint(0, 20)
