@@ -31,7 +31,7 @@ locals {
       vpc_config = [{
         vpc_id             = data.aws_vpc.this.id
         subnets            = flatten(data.aws_subnets.private[*].ids)
-        security_group_ids = [data.aws_security_group.this.id]
+        security_group_ids = [aws_security_group.this.id]
       }]
     }
     # Runner for building Docker images and nothing else
@@ -66,12 +66,17 @@ data "aws_subnets" "private" {
   }
 }
 
-data "aws_security_group" "this" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.this.id]
-  }
-  name = "cms-cloud-security-validation-egress"
+resource "aws_security_group" "this" {
+  description            = "Egress-only security group for CodeBuild Runners"
+  name                   = "bfd-${local.env_vpc}-codebuild-egress"
+  revoke_rules_on_delete = true
+  vpc_id                 = data.aws_vpc.this.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+  security_group_id = aws_security_group.this.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
 }
 
 # ECR resources are defined in this Terraservice opposed to "ecr" as the CodeBuild Runner image
