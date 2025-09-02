@@ -45,7 +45,7 @@ locals {
       vpc_config   = []
     }
   }
-  env_vpc = local.account_type == "non-prod" ? "bfd-east-test" : "bfd-prod-test"
+  env_vpc = local.account_type == "non-prod" ? "bfd-east-test" : "bfd-east-prod"
 }
 
 data "aws_vpc" "this" {
@@ -68,9 +68,12 @@ data "aws_subnets" "private" {
 
 resource "aws_security_group" "this" {
   description            = "Egress-only security group for CodeBuild Runners"
-  name                   = "bfd-${local.env_vpc}-codebuild-egress"
+  name                   = "bfd-${data.aws_vpc.this.tags.stack}-codebuild-egress"
   revoke_rules_on_delete = true
   vpc_id                 = data.aws_vpc.this.id
+  tags = {
+    Name = "bfd-${data.aws_vpc.this.tags.stack}-codebuild-egress"
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
