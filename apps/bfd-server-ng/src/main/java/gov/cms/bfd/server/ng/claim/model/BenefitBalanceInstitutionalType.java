@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 
 @AllArgsConstructor
 enum BenefitBalanceInstitutionalType {
+  /** CLM_MDCR_INSTNL_BENE_PD_AMT -  */
+  CLM_MDCR_INSTNL_BENE_PD_AMT("CLM_MDCR_INSTNL_BENE_PD_AMT", "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the claim."),
   /** CLM_MDCR_IP_LRD_USE_CNT - Beneficiary Medicare Lifetime Reserve Days (LRD) Used Count. */
   CLM_MDCR_IP_LRD_USE_CNT(
       "CLM_MDCR_IP_LRD_USE_CNT", "Beneficiary Medicare Lifetime Reserve Days (LRD) Used Count"),
@@ -21,6 +23,10 @@ enum BenefitBalanceInstitutionalType {
   CLM_INSTNL_PER_DIEM_AMT("CLM_INSTNL_PER_DIEM_AMT", "Claim Pass Thru Per Diem Amount"),
   /** CLM_INSTNL_CVRD_DAY_CNT - Claim Medicare Utilization Day Count. */
   CLM_INSTNL_CVRD_DAY_CNT("CLM_INSTNL_CVRD_DAY_CNT", "Claim Medicare Utilization Day Count"),
+  /** CLM_MDCR_HHA_TOT_VISIT_CNT - Claim HHA Total Visit Count. */
+  CLM_MDCR_HHA_TOT_VISIT_CNT("CLM_MDCR_HHA_TOT_VISIT_CNT", "Claim HHA Total Visit Count."),
+  /** CLM_MDCR_HOSPC_PRD_CNT - Beneficiary's Hospice Period Count. */
+  CLM_MDCR_HOSPC_PRD_CNT("CLM_MDCR_HOSPC_PRD_CNT", "Beneficiary's Hospice Period Count."),
   /** CLM_MDCR_IP_PPS_DSPRPRTNT_AMT - Claim PPS Capital Disproportionate Share Amount. */
   CLM_MDCR_IP_PPS_DSPRPRTNT_AMT(
       "CLM_MDCR_IP_PPS_DSPRPRTNT_AMT", "Claim PPS Capital Disproportionate Share Amount"),

@@ -10,6 +10,9 @@ class BenefitBalanceInstitutional {
   @Column(name = "clm_mdcr_ip_lrd_use_cnt")
   private int lifetimeReserveDaysUsed;
 
+  @Column(name = "clm_mdcr_instnl_bene_pd_amt")
+  private double benePaidAmount;
+
   @Column(name = "clm_instnl_mdcr_coins_day_cnt")
   private int totalCoinsuranceDays;
 
@@ -18,6 +21,12 @@ class BenefitBalanceInstitutional {
 
   @Column(name = "clm_instnl_per_diem_amt")
   private double perDiemAmount;
+
+  @Column(name = "clm_mdcr_hha_tot_visit_cnt")
+  private int totalHHAVisits;
+
+  @Column(name = "clm_mdcr_hospc_prd_cnt")
+  private int totalHospicePeriodTrailers;
 
   @Column(name = "clm_mdcr_ip_pps_dsprprtnt_amt")
   private double ppsDisproportionateAmount;
@@ -59,12 +68,15 @@ class BenefitBalanceInstitutional {
     return List.of(
         BenefitBalanceInstitutionalType.CLM_MDCR_IP_LRD_USE_CNT.toFhirIntType(
             lifetimeReserveDaysUsed),
+        BenefitBalanceInstitutionalType.CLM_MDCR_HHA_TOT_VISIT_CNT.toFhirIntType(totalHHAVisits),
+        BenefitBalanceInstitutionalType.CLM_MDCR_HOSPC_PRD_CNT.toFhirIntType(totalHospicePeriodTrailers),
         BenefitBalanceInstitutionalType.CLM_INSTNL_MDCR_COINS_DAY_CNT.toFhirIntType(
             totalCoinsuranceDays),
         BenefitBalanceInstitutionalType.CLM_INSTNL_CVRD_DAY_CNT.toFhirIntType(
             // These are always whole numbers, but IDR stores them as floats
             Math.round(totalCoveredDays)),
         BenefitBalanceInstitutionalType.CLM_INSTNL_PER_DIEM_AMT.toFhirMoney(perDiemAmount),
+        BenefitBalanceInstitutionalType.CLM_MDCR_INSTNL_BENE_PD_AMT.toFhirMoney(benePaidAmount),
         BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT.toFhirMoney(
             ppsDisproportionateAmount),
         BenefitBalanceInstitutionalType.CLM_MDCR_IP_PPS_EXCPTN_AMT.toFhirMoney(ppsExceptionAmount),
