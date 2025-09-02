@@ -32,15 +32,28 @@ public class ClaimAnsiSignature {
   @Column(name = "clm_4_rev_cntr_ansi_rsn_cd")
   private Optional<String> revenueCenterAnsiReasonCode4;
 
+  @Column(name = "clm_1_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode1;
+
+  @Column(name = "clm_2_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode2;
+
+  @Column(name = "clm_3_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode3;
+
+  @Column(name = "clm_4_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode4;
+
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    var codes =
-        Stream.of(
-                revenueCenterAnsiReasonCode1,
-                revenueCenterAnsiReasonCode2,
-                revenueCenterAnsiReasonCode3,
-                revenueCenterAnsiReasonCode4)
-            .flatMap(Optional::stream);
-    return codes.map(this::toAdjudicationComponent).toList();
+    return Stream.of(
+                revenueCenterAnsiGroupCode1,
+                revenueCenterAnsiGroupCode2,
+                revenueCenterAnsiGroupCode3,
+                revenueCenterAnsiGroupCode4)
+            .flatMap(Optional::stream)
+            .filter(code -> code.length() == 2)
+            .map(this::toAdjudicationComponent)
+            .toList();
   }
 
   private ExplanationOfBenefit.AdjudicationComponent toAdjudicationComponent(String code) {
