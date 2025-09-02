@@ -116,12 +116,15 @@ jobs:
         working-directory: ./apps
 
       - name: 'Generate, Upload Build Reports'
+        env:
+          BFD_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           mvn sonar:sonar \
           -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.token="$SONAR_TOKEN" \
+          -Dsonar.branch.name="$BFD_BRANCH" \
           -Dmaven.build.cache.enabled=false \
           -DskipITs \
           -DskipTests \
