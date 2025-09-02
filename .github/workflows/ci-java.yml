@@ -37,7 +37,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-          ref: ${{ inputs.branch || github.ref_name }}
       - id: workflow_files
         name: Set output
         run: |
@@ -69,6 +68,8 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
