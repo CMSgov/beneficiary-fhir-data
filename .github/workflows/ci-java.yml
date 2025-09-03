@@ -66,10 +66,6 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
-      - name: 'Checkout repo'
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -82,6 +78,11 @@ jobs:
       - name: Investigate
         run: |
           find /codebuild/output/
+
+      - name: 'Checkout repo'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Configure AWS credentials
         id: config-aws-creds
