@@ -143,7 +143,7 @@ fiss_clm_type_cds = [
     2018,
 ]
 mcs_clm_type_cds = [1700, 2700]
-vips_cds = [1800, 2800]
+vms_cds = [1800, 2800]
 
 institutional_claim_types = [10, 20, 30, 40, 50, 60, 61, 62, 63, 64, *fiss_clm_type_cds]
 
@@ -440,6 +440,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim["CLM"]["BENE_SK"] = bene_sk
     claim["CLM"]["CLM_DISP_CD"] = random.choice(generator.code_systems["CLM_DISP_CD"])
     claim["CLM"]["CLM_QUERY_CD"] = random.choice(generator.code_systems["CLM_QUERY_CD"])
+    claim['CLM']['CLM_ADJSTMT_TYPE_CD'] = random.choice(generator.code_systems['CLM_ADJSTMT_TYPE_CD'])
 
     if clm_type_cd in (1, 2, 3, 4):
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
@@ -475,6 +476,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line["CLM_LINE_MDCR_DDCTBL_AMT"] = round(random.uniform(0, 5), 2)
         claim_line["CLM_LINE_NUM"] = "1"
         claim_line["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
+        claim_line['CLM_LINE_RX_NUM'] = round(random.uniform(0,100000),2)
 
         claim_line_rx = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
@@ -483,6 +485,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
         claim_line_rx["CLM_LINE_NUM"] = "1"
         claim_line_rx["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
+        claim_line_rx['CLMCLM_DSPNSNG_STUS_CD'] = random.choice(['P','C'])
         claim_line_rx["CLM_LINE_RX_ORGN_CD"] = random.choice(
             generator.code_systems["CLM_LINE_RX_ORGN_CD"]
         )
@@ -563,6 +566,9 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     elif clm_type_cd == 40:
         # outpatient
         claim["CLM_DCMTN"]["CLM_NRLN_RIC_CD"] = "W"  # outpatient
+        claim['CLM']['CLM_INSTNL']['CLM_OP_SRVC_TYPE_CD'] = random.choice(
+            generator.code_systems["CLM_OP_SRVC_TYPE_CD"]
+        )
     elif clm_type_cd == 10:
         claim["CLM_DCMTN"]["CLM_NRLN_RIC_CD"] = random.choice(["U", "V", "W"])
     elif clm_type_cd in (71, 72):
@@ -846,6 +852,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         if clm_type_cd >= 71 and clm_type_cd <= 72:
             claim_line["CLM_RNDRG_PRVDR_TAX_NUM"] = random.choice(["1928347912", "912834729"])
             claim_line["CLM_RNDRG_PRVDR_PIN_NUM"] = random.choice(["29364819", "19238747"])
+            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
             if random.choice([0, 10]) == 7:
                 claim_line["CLM_LINE_ANSTHSA_UNIT_CNT"] = random.uniform(0, 10)
             if random.choice([0, 15]) == 7:
@@ -1112,8 +1119,8 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"]["CLM_SRC_ID"] = 21000  # FISS
     elif pac_claim["CLM"]["CLM_TYPE_CD"] in mcs_clm_type_cds:
         pac_claim["CLM"]["CLM_SRC_ID"] = 22000  # MCS
-    elif pac_claim["CLM"]["CLM_TYPE_CD"] in vips_cds:
-        pac_claim["CLM"]["CLM_SRC_ID"] = 23000  # VIPS
+    elif pac_claim["CLM"]["CLM_TYPE_CD"] in vms_cds:
+        pac_claim["CLM"]["CLM_SRC_ID"] = 23000  # VMS
 
     if "CLM_DCMTN" in pac_claim:
         pac_claim.pop("CLM_DCMTN")

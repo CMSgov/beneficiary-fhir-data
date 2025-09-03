@@ -22,6 +22,8 @@
   appliesTo:
     - PartA
     - PartB
+  cclfMapping:
+    - CCLF8.BENE_MDCR_STUS_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD').value.code
   referenceTable: BENE_MDCR_STUS_CD
   sourceView: V2_MDCR_BENE_MDCR_STUS
@@ -38,6 +40,8 @@
   appliesTo:
     - PartA
     - PartB
+  cclfMapping:
+    - CCLF8.BENE_ENTLMT_BUYIN_IND
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD').value.code
   referenceTable: BENE_BUYIN_CD
   sourceView: V2_MDCR_BENE_TP
@@ -46,6 +50,9 @@
   appliesTo:
     - PartA
     - PartB
+  cclfMapping:
+    - CCLF8.BENE_PART_A_ENRLMT_BGN_DT
+    - CCLF8.BENE_PART_B_ENRLMT_BGN_DT
   fhirPath: Coverage.period.start
   sourceView: V2_MDCR_BENE_MDCR_ENTLMT
   sourceColumn: BENE_RNG_BGN_DT
@@ -75,6 +82,8 @@
   appliesTo:
     - PartA
     - PartB
+  cclfMapping:
+    - CCLF8.BENE_ORGNL_ENTLMT_RSN_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD').value.code
   referenceTable: BENE_MDCR_ENTLMT_RSN_CD
   sourceView: V2_MDCR_BENE_MDCR_ENTLMT_RSN
@@ -100,6 +109,8 @@
 - inputPath: Coverage-Base.BENE_DUAL_STUS_CD
   appliesTo:
     - DUAL
+  cclfMapping:
+    - CCLF8.BENE_DUAL_STUS_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-STUS-CD').value.code
   referenceTable: BENE_DUAL_STUS_CD
   sourceView: V2_MDCR_BENE_CMBND_DUAL_MDCR

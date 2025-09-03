@@ -83,6 +83,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         } "Set coding";
       } "Add claim query code";
     } "Set EOB period";
+
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt.created = create('Extension') as tgtExtension then{
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
+      src -> tgtExtension.value = idrLdDt "add date";
+    } "add idr load date";
     
     src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
 
@@ -109,6 +114,13 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
           tgtCoding.code = ricCd "Add code";
         } "Add coding";
       } "CLM_NRLN_RIC_CD";
+    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSMT-TYPE-CD" "Add url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then{
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSMT-TYPE-CD",
+        tgtCoding.code = adjTypeCd "Add code";
+      } "Add coding";
+    } "CLM_ADJSTMT_TYPE_CD";
     //This is intentional. The IDR stores partially-adjudicated RIC codes in a separate field, but the content / meaning is the same. We can just re-use the extension.
     src.CLM_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
@@ -169,7 +181,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       //We will add the professional "array" here.
     } "Complete additional outcomes";
     
-    //When we get to carrier/DME, we'll do the same with MCS/VIPS status. 
+    //When we get to carrier/DME, we'll do the same with MCS/VMS status. 
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
 
@@ -364,6 +376,14 @@ group addInstitutionalItems(source src: ExplanationOfBenefitBase, target tgt: BF
         actnCd -> tgtCoding.code=actnCd "set code";
       } "Set value";
     } "CLM_FI_ACTN_CD";
+
+    institutionalComponents.CLM_OP_SRVC_TYPE_CD as opSrvcTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OP-SRVC-TYPE-CD" "Add url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then{
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD",
+        tgtCoding.code = opSrvcTypeCd "Add code";
+      } "Add coding";
+    } "CLM_OP_SRVC_TYPE_CD";
     
   } "Add wrapper for institutional components";
 

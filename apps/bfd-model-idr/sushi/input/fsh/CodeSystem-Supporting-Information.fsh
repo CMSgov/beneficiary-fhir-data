@@ -26,3 +26,5 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_DRUG_CVRG_STUS_CD "Drug Coverage Status Code" "This field indicates whether or not the drug is covered by Medicare Part D."
 * #CLM_CTSTRPHC_CVRG_IND_CD "Catastrophic Coverage Code" "This variable indicates whether the PDE occurred within the catastrophic benefit phase of the Medicare Part D benefit, according to the source PDE."
 * #CLM_LINE_HCT_HGB_RSLT_NUM "HCT/HGB Test Result" "The HCT/HGB Test Result"
+* #CLM_DSPNSNG_STUS_CD "Claim Dispensing Status Code" "Indicates the status of prescription fulfillment."
+* #CLM_LINE_RX_NUM "Claim Line Prescription Service Reference Number" "Identifies a prescription dispensed by a particular service provider on a particular service date"

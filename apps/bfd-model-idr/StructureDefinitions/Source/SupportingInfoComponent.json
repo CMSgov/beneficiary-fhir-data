@@ -478,6 +478,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_LINE_RX_NUM",
+                "path": "SupportingInfoComponent.CLM_LINE_RX_NUM",
+                "label": "RX Reference Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }

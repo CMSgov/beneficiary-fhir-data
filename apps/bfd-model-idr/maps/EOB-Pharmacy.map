@@ -49,6 +49,11 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
       src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
     } "Set EOB period";
+
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt.created = create('Extension') as tgtExtension then{
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
+      src -> tgtExtension.value = idrLdDt "add date";
+    } "add idr load date";
     
     src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
 
@@ -130,7 +135,13 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
      src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
     } "Add total charge amount";
 
-    
+    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSMT-TYPE-CD" "Add url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then{
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSMT-TYPE-CD",
+        tgtCoding.code = adjTypeCd "Add code";
+      } "Add coding";
+    } "CLM_ADJSTMT_TYPE_CD";
 
 
 }
@@ -177,7 +188,18 @@ group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt:
     
     // Catastrophic coverage
     src.CLM_CTSTRPHC_CVRG_IND_CD as catCov -> tgt then addCatastrophicCoverage(src, tgt) "Add catastrophic coverage";
+
+    src.CLM_LINE_RX_NUM as rxNumber -> tgt then addRxNum(src, tgt) "Add rx num";
+
     
+}
+
+group addRxNum(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_RX_NUM") "Add Coding";
+  } "Add category";
+  src.CLM_LINE_RX_NUM as rxNum -> tgt.value = cast(rxNum,'integer') "Add RX Num";
 }
 
 group addPharmacyServiceType(source src: SupportingInfoComponent, target tgt: BackboneElement){

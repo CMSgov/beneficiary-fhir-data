@@ -552,6 +552,43 @@
                         ]
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD",
+                "label": "Claim Adjustment Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_DSPNSNG_STUS_CD",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_DSPNSNG_STUS_CD",
+                "label": "Claim Dispensing Status Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
+                "label": "Claim IDR Load Date",
+                "definition": "Date the claim was loaded into the IDR",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }

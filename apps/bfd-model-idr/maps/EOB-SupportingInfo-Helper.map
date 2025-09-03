@@ -116,7 +116,7 @@ group addPrimaryPayer(source src: SupportingInfoComponent, target tgt: BackboneE
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NCH_PRMRY_PYR_CD") "Add Coding";
     } "Add category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
-        src.CLM_NCH_PRMRY_PYR_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD",val) "Add coding";
+        src.CLM_NCH_PRMRY_PYR_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD",val) "Add coding";
     } "Add CC";
 }
 //code
