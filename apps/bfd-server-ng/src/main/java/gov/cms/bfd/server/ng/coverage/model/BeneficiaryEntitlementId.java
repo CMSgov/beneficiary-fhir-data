@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,21 +28,22 @@ public class BeneficiaryEntitlementId implements Serializable {
   private LocalDate benefitRangeBeginDate;
 
   @Column(name = "bene_rng_end_dt")
-  private LocalDate benefitRangeEndDate;
+  private Optional<LocalDate> benefitRangeEndDate;
 
   @Column(name = "bene_mdcr_entlmt_type_cd")
   private String medicareEntitlementTypeCode;
 
   Period toFhirPeriod() {
-    return new Period()
-        .setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate))
-        .setEndElement(DateUtil.toFhirDate(benefitRangeEndDate));
+    var period = new Period().setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate));
+    benefitRangeEndDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
+    return period;
   }
 
   Coverage.CoverageStatus toFhirStatus() {
-    if (benefitRangeEndDate.isBefore(DateUtil.nowAoe())) {
+    if (benefitRangeEndDate.isPresent() && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe())) {
       return Coverage.CoverageStatus.CANCELLED;
     }
+
     return Coverage.CoverageStatus.ACTIVE;
   }
 }

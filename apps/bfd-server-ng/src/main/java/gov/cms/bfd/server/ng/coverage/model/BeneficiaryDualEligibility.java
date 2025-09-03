@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
@@ -27,7 +28,7 @@ public class BeneficiaryDualEligibility {
   private LocalDate eligibilityBeginDate;
 
   @Column(name = "bene_mdcd_elgblty_end_dt")
-  private LocalDate eligibilityEndDate;
+  private Optional<LocalDate> eligibilityEndDate;
 
   @Column(name = "bene_dual_type_cd")
   private String dualTypeCode;
@@ -36,15 +37,16 @@ public class BeneficiaryDualEligibility {
   private String stateCode;
 
   Period toFhirPeriod() {
-    return new Period()
-        .setStart(DateUtil.toDate(eligibilityBeginDate))
-        .setEnd(DateUtil.toDate(eligibilityEndDate));
+    var period = new Period().setStartElement(DateUtil.toFhirDate(eligibilityBeginDate));
+    eligibilityEndDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
+    return period;
   }
 
   Coverage.CoverageStatus toFhirStatus() {
-    if (eligibilityEndDate.isBefore(DateUtil.nowAoe())) {
+    if (eligibilityEndDate.isPresent() && eligibilityEndDate.get().isBefore(DateUtil.nowAoe())) {
       return Coverage.CoverageStatus.CANCELLED;
     }
+
     return Coverage.CoverageStatus.ACTIVE;
   }
 
