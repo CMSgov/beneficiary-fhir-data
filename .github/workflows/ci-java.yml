@@ -9,6 +9,9 @@ on:
     - cron: '13 8 * * 1-5'  # Early morning continental US hours, Monday through Friday
   pull_request:
   merge_group:
+  push:
+    branches:
+      - master
 
 permissions:
   id-token: write
@@ -66,6 +69,13 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref_name }}
+      - name: Pre-Cache Hydration
+        run: |
+          find /codebuild/output/*/beneficiary-fhir-data/beneficiary-fhir-data/
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -75,14 +85,9 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Investigate
+      - name: Post Cache Hydration
         run: |
-          find /codebuild/output/
-
-      - name: 'Checkout repo'
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch || github.ref_name }}
+          find /codebuild/output/*/beneficiary-fhir-data/beneficiary-fhir-data/
 
       - name: Configure AWS credentials
         id: config-aws-creds
