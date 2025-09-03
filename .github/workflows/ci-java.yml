@@ -75,7 +75,7 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
       - name: Pre-Cache Hydration
         run: |
-          find /codebuild/output/*/beneficiary-fhir-data/beneficiary-fhir-data/
+          find /codebuild/output/
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
