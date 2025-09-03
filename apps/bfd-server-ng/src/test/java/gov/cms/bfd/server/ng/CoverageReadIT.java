@@ -24,19 +24,19 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   private String createCoverageId(String part, String beneId) {
-    return String.format("part-%s-%s", part, beneId);
+    return String.format("%s-%s", part, beneId);
   }
 
   @Test
   void coverageReadValidPartACompositeId() {
-    var validCoverageId = createCoverageId("a", BENE_ID_PART_A_ONLY);
+    var validCoverageId = createCoverageId("part-a", BENE_ID_PART_A_ONLY);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
     expect.scenario("validPartA").serializer("fhir+json").toMatchSnapshot(coverage);
 
-    var missingCoverageId = createCoverageId("b", BENE_ID_PART_A_ONLY);
+    var missingCoverageId = createCoverageId("part-b", BENE_ID_PART_A_ONLY);
     var missingCoverage = coverageRead().withId(missingCoverageId).execute();
     // Response for a missing coverage part should only contain the ID
     assertTrue(missingCoverage.getIdentifier().isEmpty());
@@ -47,14 +47,14 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadValidPartBCompositeId() {
-    var validCoverageId = createCoverageId("b", BENE_ID_PART_B_ONLY);
+    var validCoverageId = createCoverageId("part-b", BENE_ID_PART_B_ONLY);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
     expect.scenario("validPartB").serializer("fhir+json").toMatchSnapshot(coverage);
 
-    var missingCoverageId = createCoverageId("a", BENE_ID_PART_B_ONLY);
+    var missingCoverageId = createCoverageId("part-a", BENE_ID_PART_B_ONLY);
     var missingCoverage = coverageRead().withId(missingCoverageId).execute();
     // Response for a missing coverage part should only contain the ID
     assertTrue(missingCoverage.getIdentifier().isEmpty());
@@ -74,9 +74,10 @@ public class CoverageReadIT extends IntegrationTestBase {
             BENE_ID_NON_CURRENT));
   }
 
-  @Test
-  void coverageReadValidCompositeId() {
-    var validCoverageId = createCoverageId("b", BENE_ID_ALL_PARTS_WITH_XREF);
+  @ParameterizedTest
+  @ValueSource(strings = {"a", "-12345", "part-a-abc", "foo-12345", "part-e-12345"})
+  void coverageReadPartAWithAllCoverage() {
+    var validCoverageId = createCoverageId("part-a", BENE_ID_ALL_PARTS_WITH_XREF);
 
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
@@ -114,16 +115,16 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadUnsupportedValidPartBadRequest() {
-    var unsupportedPartId = "part-c-1";
+    var unsupportedPartId = "part-e-1";
     assertThrows(
         InvalidRequestException.class,
         () -> coverageRead().withId(unsupportedPartId).execute(),
-        "Should throw InvalidRequestException for an unsupported part like Part C/D.");
+        "Should throw InvalidRequestException for an unsupported part.");
   }
 
   @Test
-  void coverageReadPartACoverageNotFound() {
-    var expiredCoverageId = createCoverageId("a", HISTORICAL_MERGED_BENE_SK);
+  void coverageReadMergedBeneReturnsNotFound() {
+    var expiredCoverageId = createCoverageId("part-a", HISTORICAL_MERGED_BENE_SK);
 
     assertThrows(
         ResourceNotFoundException.class,
@@ -132,18 +133,18 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"A", "B"})
+  @ValueSource(strings = {"part-A", "part-B", "dual"})
   void coverageReadBeneWithNoCoverageReturnsEmpty(String part) {
     final String partId = createCoverageId(part, BENE_ID_NO_COVERAGE);
     var coverage = coverageRead().withId(partId).execute();
     assertEquals(partId.toLowerCase(), coverage.getIdPart());
     assertTrue(coverage.getIdentifier().isEmpty());
-    expect.scenario("missingBothPart" + part).serializer("fhir+json").toMatchSnapshot(coverage);
+    expect.scenario("missingAll" + part).serializer("fhir+json").toMatchSnapshot(coverage);
   }
 
   @Test
   void coverageReadForBeneWithOnlyPastEntitlementPeriodsShouldBeCancelled() {
-    final var partBId = createCoverageId("b", BENE_ID_EXPIRED_COVERAGE);
+    final var partBId = createCoverageId("part-b", BENE_ID_EXPIRED_COVERAGE);
 
     var coverage = coverageRead().withId(partBId).execute();
     assertEquals(partBId, coverage.getIdPart());
@@ -153,7 +154,7 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadForBeneWithOnlyFutureEntitlementPeriodsShouldBeEmpty() {
-    final String partBId = createCoverageId("b", BENE_ID_FUTURE_COVERAGE);
+    final String partBId = createCoverageId("part-b", BENE_ID_FUTURE_COVERAGE);
 
     var coverage = coverageRead().withId(partBId).execute();
     assertEquals(partBId, coverage.getIdPart());
@@ -162,9 +163,8 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @Test
-  void coverageRead_forBeneWithMissingTpDataShouldStillReturnResource() {
-
-    var partAId = createCoverageId("a", BENE_ID_NO_TP);
+  void coverageReadForBeneWithMissingTpDataShouldStillReturnResource() {
+    var partAId = createCoverageId("part-a", BENE_ID_NO_TP);
     var coverage = coverageRead().withId(partAId).execute();
 
     assertNotNull(coverage, "Coverage resource should not be null even without TPL data.");
