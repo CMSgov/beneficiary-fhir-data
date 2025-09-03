@@ -75,7 +75,7 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
       - name: Pre-Cache Hydration
         run: |
-          find /codebuild/output/
+          find /codebuild/ -iwholename '/codebuild/output/*/src/actions-runner/_work/beneficiary-fhir-data/beneficiary-fhir-data/*'
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Post Cache Hydration
         run: |
-          find /codebuild/output/*/beneficiary-fhir-data/beneficiary-fhir-data/
+          find /codebuild/ -iwholename '/codebuild/output/*/src/actions-runner/_work/beneficiary-fhir-data/beneficiary-fhir-data/*'
 
       - name: Configure AWS credentials
         id: config-aws-creds
