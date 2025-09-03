@@ -131,9 +131,9 @@ resource "aws_lb_target_group" "this" {
 }
 
 resource "aws_route53_record" "this" {
-  name    = "${local.env}.fhirv3.${data.aws_route53_zone.env.name}"
+  name    = "${local.env}.fhirv3.${data.aws_route53_zone.parent_env.name}"
   type    = "A"
-  zone_id = data.aws_route53_zone.env.zone_id
+  zone_id = data.aws_route53_zone.parent_env.zone_id
 
   alias {
     name                   = aws_lb.this.dns_name

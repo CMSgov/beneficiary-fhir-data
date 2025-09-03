@@ -28,7 +28,7 @@ data "aws_ssm_parameter" "zone_name" {
   with_decryption = true
 }
 
-data "aws_route53_zone" "env" {
+data "aws_route53_zone" "parent_env" {
   name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
   private_zone = true
   tags = {
