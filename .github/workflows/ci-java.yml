@@ -109,7 +109,7 @@ jobs:
         run: |
           mvn --threads 1C \
           --no-transfer-progress \
-          -Dmaven.build.cache.enabled=false \
+          -Dmaven.build.cache.enabled=true \
           -Dapidocgen.skip=false \
           -Dmaven.jacoco.skip=false \
           clean install
@@ -125,7 +125,7 @@ jobs:
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.token="$SONAR_TOKEN" \
           -Dsonar.branch.name="$BFD_BRANCH" \
-          -Dmaven.build.cache.enabled=false \
+          -Dmaven.build.cache.enabled=true \
           -DskipITs \
           -DskipTests \
           -Dsonar.exclusions='*.java' \
