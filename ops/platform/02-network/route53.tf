@@ -59,16 +59,16 @@ resource "aws_route53_zone" "main" {
 
 resource "aws_route53_record" "main" {
   for_each = {
-    for val in [
+    for val in flatten([
       for zone_name, zone_config in local.hosted_zones :
       [
         for record in zone_config.records :
         {
           record = record
-          zone   = zone
+          zone   = zone_name
         }
       ]
-    ] : "${val.zone}_${val.record.name}" => val
+    ]) : "${val.zone}_${val.record.name}" => val
   }
 
   zone_id = aws_route53_zone.main[each.value.zone].zone_id
