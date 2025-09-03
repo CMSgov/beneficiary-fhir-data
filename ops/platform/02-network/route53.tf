@@ -11,6 +11,7 @@ locals {
       # error
       internal_vpc_ids = jsondecode(nonsensitive(local.ssm_config["${local.route53_ssm_path}/zone/${zone}/internal_vpcs_list_json"]))
       external_vpc_ids = jsondecode(nonsensitive(lookup(local.ssm_config, "${local.route53_ssm_path}/zone/${zone}/external_vpcs_list_json", "[]")))
+      records          = jsondecode(nonsensitive(lookup(local.ssm_config, "${local.route53_ssm_path}/zone/${zone}/records", "[]")))
     }
   }
   all_internal_r53_vpcs = flatten(values(local.hosted_zones)[*].internal_vpc_ids)
@@ -54,4 +55,26 @@ resource "aws_route53_zone" "main" {
       vpc_id = vpc.key
     }
   }
+}
+
+resource "aws_route53_record" "main" {
+  for_each = {
+    for val in flatten([
+      for zone_name, zone_config in local.hosted_zones :
+      [
+        for record in zone_config.records :
+        {
+          record = record
+          zone   = zone_name
+        }
+      ]
+    ]) : "${val.zone}_${val.record.name}" => val
+  }
+
+  zone_id = aws_route53_zone.main[each.value.zone].zone_id
+
+  name    = each.value.record.name
+  type    = each.value.record.type
+  ttl     = each.value.record.ttl
+  records = [each.value.record.value]
 }
