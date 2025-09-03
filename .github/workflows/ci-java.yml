@@ -124,6 +124,10 @@ jobs:
           clean install
         working-directory: ./apps
 
+      - name: Post-Build
+        run: |
+          find ~/ -iwholename '*/.m2/*'
+
       - name: 'Generate, Upload Build Reports'
         env:
           BFD_BRANCH: ${{ inputs.branch || github.ref_name }}
