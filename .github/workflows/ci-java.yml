@@ -75,7 +75,7 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
       - name: Pre-Cache Hydration
         run: |
-          find ~/ -iwholename '.m2/*'
+          find ~/ -iwholename '*/.m2/*'
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Post Cache Hydration
         run: |
-          find ~/ -iwholename '.m2/*'
+          find ~/ -iwholename '*/.m2/*'
       - name: Configure AWS credentials
         id: config-aws-creds
         uses: aws-actions/configure-aws-credentials@v4
