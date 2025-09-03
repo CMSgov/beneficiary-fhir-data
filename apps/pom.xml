@@ -101,7 +101,7 @@
         <junit.version>5.13.4</junit.version>
         <junit.platform.version>1.13.4</junit.platform.version>
         <javadoc.version>3.11.3</javadoc.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
