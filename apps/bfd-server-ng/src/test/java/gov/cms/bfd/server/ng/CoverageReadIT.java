@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import io.restassured.RestAssured;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -142,6 +143,15 @@ public class CoverageReadIT extends IntegrationTestBase {
     expect.scenario("missingAll" + part).serializer("fhir+json").toMatchSnapshot(coverage);
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"part-A", "part-B", "dual"})
+  void coverageReadBeneWithAllCoverage(String part) {
+    final String partId = createCoverageId(part, BENE_ID_ALL_PARTS_WITH_XREF);
+    var coverage = coverageRead().withId(partId).execute();
+    assertEquals(partId.toLowerCase(), coverage.getIdPart());
+    expect.scenario("allCoverage" + part).serializer("fhir+json").toMatchSnapshot(coverage);
+  }
+
   @Test
   void coverageReadForBeneWithOnlyPastEntitlementPeriodsShouldBeCancelled() {
     final var partBId = createCoverageId("part-b", BENE_ID_EXPIRED_COVERAGE);
@@ -169,6 +179,22 @@ public class CoverageReadIT extends IntegrationTestBase {
 
     assertNotNull(coverage, "Coverage resource should not be null even without TPL data.");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty.");
+
+    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+  }
+
+  @Test
+  void coverageReadDualOnly() {
+    var dualId = createCoverageId("dual", BENE_ID_DUAL_ONLY);
+    var coverage = coverageRead().withId(dualId).execute();
+
+    assertEquals(dualId, coverage.getIdPart());
+    var dualStatusCodeExtension =
+        getExtensionByUrl(coverage, SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_DUAL_STATUS_CODE);
+    assertEquals(1, dualStatusCodeExtension.size());
+    assertEquals(
+        DUAL_ONLY_BENE_COVERAGE_STATUS_CODE,
+        ((Coding) dualStatusCodeExtension.getFirst().getValue()).getCode());
 
     expect.serializer("fhir+json").toMatchSnapshot(coverage);
   }

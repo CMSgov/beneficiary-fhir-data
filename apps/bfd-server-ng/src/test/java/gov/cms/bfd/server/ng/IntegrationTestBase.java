@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,12 +34,15 @@ public class IntegrationTestBase {
 
   protected static final String BENE_ID_PART_A_ONLY = "178083966";
   protected static final String BENE_ID_PART_B_ONLY = "365359727";
+  protected static final String BENE_ID_DUAL_ONLY = "184043356";
   protected static final String BENE_ID_ALL_PARTS_WITH_XREF = "405764107";
   protected static final String BENE_ID_NO_TP = "451482106";
   protected static final String BENE_ID_EXPIRED_COVERAGE = "421056595";
   protected static final String BENE_ID_FUTURE_COVERAGE = "971050241";
   protected static final String BENE_ID_NON_CURRENT = "181968400";
   protected static final String BENE_ID_NO_COVERAGE = "289169129";
+
+  protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
@@ -65,5 +70,9 @@ public class IntegrationTestBase {
         .map(Bundle.BundleEntryComponent::getResource)
         .map(Coverage.class::cast)
         .toList();
+  }
+
+  protected List<Extension> getExtensionByUrl(DomainResource resource, String url) {
+    return resource.getExtension().stream().filter(e -> e.getUrl().equals(url)).toList();
   }
 }
