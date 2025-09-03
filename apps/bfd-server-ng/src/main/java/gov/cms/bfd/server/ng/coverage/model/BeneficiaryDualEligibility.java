@@ -1,13 +1,17 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
+import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.List;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
 
 @Entity
 @Table(name = "beneficiary_dual_eligibility_latest", schema = "idr")
@@ -19,11 +23,30 @@ public class BeneficiaryDualEligibility {
   @Column(name = "bene_dual_stus_cd")
   private String dualStatusCode;
 
+  @Column(name = "bene_mdcd_elgblty_bgn_dt")
+  private LocalDate eligibilityBeginDate;
+
+  @Column(name = "bene_mdcd_elgblty_end_dt")
+  private LocalDate eligibilityEndDate;
+
   @Column(name = "bene_dual_type_cd")
   private String dualTypeCode;
 
   @Column(name = "geo_usps_state_cd")
   private String stateCode;
+
+  Period toFhirPeriod() {
+    return new Period()
+        .setStart(DateUtil.toDate(eligibilityBeginDate))
+        .setEnd(DateUtil.toDate(eligibilityEndDate));
+  }
+
+  Coverage.CoverageStatus toFhirStatus() {
+    if (eligibilityEndDate.isBefore(DateUtil.nowAoe())) {
+      return Coverage.CoverageStatus.CANCELLED;
+    }
+    return Coverage.CoverageStatus.ACTIVE;
+  }
 
   List<Extension> toFhirExtensions() {
     var statusCodeExtension =

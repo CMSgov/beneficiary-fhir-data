@@ -4,16 +4,16 @@ import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Organization;
@@ -65,26 +65,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
     var coverage = new Coverage();
     coverage.setId(coverageCompositeId.fullId());
-
-    var coveragePart = coverageCompositeId.coveragePart();
-    var coverageType = coveragePart.getStandardCode();
-    var entitlementOpt =
-        beneficiaryEntitlements.stream()
-            .filter(
-                e -> e.getId().getMedicareEntitlementTypeCode().toUpperCase().equals(coverageType))
-            .findFirst();
-    // If no entitlement record, bene doesn't have this coverage type
-    if (entitlementOpt.isEmpty()) {
-      return coverage;
-    }
-    var entitlement = entitlementOpt.get();
-
     coverage.setMeta(meta.toFhirCoverage());
 
     coverage.setBeneficiary(new Reference("Patient/" + beneSk));
-
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
-
     Organization cmsOrg = OrganizationFactory.createCmsOrganization();
     coverage.addContained(cmsOrg);
 
@@ -92,28 +76,14 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     identifier.toFhir().ifPresent(coverage::addIdentifier);
     coverage.setSubscriberId(identifier.getMbi());
-
+    var coveragePart = coverageCompositeId.coveragePart();
     coverage.setType(coveragePart.toFhirTypeCode());
     coverage.addClass_(coveragePart.toFhirClassComponent());
-    coverage.setPeriod(entitlement.toFhirPeriod());
-    coverage.setStatus(entitlement.toFhirStatus());
 
-    var beneficiaryThirdParty =
-        beneficiaryThirdParties.stream()
-            .filter(tp -> tp.getId().getThirdPartyTypeCode().toUpperCase().equals(coverageType))
-            .findFirst();
-
-    Stream.of(
-            beneficiaryThirdParty.map(BeneficiaryThirdParty::toFhir),
-            Optional.of(entitlement.toFhirExtensions()),
-            getStatus().map(BeneficiaryStatus::toFhir),
-            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhir),
-            getDualEligibility().map(BeneficiaryDualEligibility::toFhirExtensions))
-        .flatMap(Optional::stream)
-        .flatMap(Collection::stream)
-        .forEach(coverage::addExtension);
-
-    return coverage;
+    return switch (coveragePart) {
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart);
+      case DUAL -> mapCoverageDual(coverage);
+    };
   }
 
   /**
@@ -129,5 +99,56 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       return Optional.empty();
     }
     return Optional.of(coverage);
+  }
+
+  private Coverage mapCoverageAB(Coverage coverage, CoveragePart coveragePart) {
+    var coverageType = coveragePart.getStandardCode();
+    var entitlementOpt =
+        beneficiaryEntitlements.stream()
+            .filter(
+                e -> e.getId().getMedicareEntitlementTypeCode().toUpperCase().equals(coverageType))
+            .findFirst();
+    // If no entitlement record, bene doesn't have this coverage type
+    if (entitlementOpt.isEmpty()) {
+      return toEmptyResource(coverage);
+    }
+    var entitlement = entitlementOpt.get();
+
+    coverage.setPeriod(entitlement.toFhirPeriod());
+    coverage.setStatus(entitlement.toFhirStatus());
+
+    var beneficiaryThirdParty =
+        beneficiaryThirdParties.stream()
+            .filter(tp -> tp.getId().getThirdPartyTypeCode().toUpperCase().equals(coverageType))
+            .findFirst();
+
+    beneficiaryThirdParty.flatMap(BeneficiaryThirdParty::toFhir).ifPresent(coverage::addExtension);
+    entitlement.toFhirExtensions().forEach(coverage::addExtension);
+    getStatus().map(BeneficiaryStatus::toFhir).orElse(List.of()).forEach(coverage::addExtension);
+    getEntitlementReason()
+        .flatMap(BeneficiaryEntitlementReason::toFhir)
+        .ifPresent(coverage::addExtension);
+
+    return coverage;
+  }
+
+  private Coverage toEmptyResource(Coverage coverage) {
+    var emptyCoverage = new Coverage();
+    emptyCoverage.setId(coverage.getId());
+    return emptyCoverage;
+  }
+
+  private Coverage mapCoverageDual(Coverage coverage) {
+    var dualEligibilityOpt = getDualEligibility();
+    if (dualEligibilityOpt.isEmpty()) {
+      return toEmptyResource(coverage);
+    }
+    var dualEligibility = dualEligibilityOpt.get();
+    coverage.setPeriod(dualEligibility.toFhirPeriod());
+    coverage.setStatus(dualEligibility.toFhirStatus());
+
+    dualEligibility.toFhirExtensions().forEach(coverage::addExtension);
+
+    return coverage;
   }
 }

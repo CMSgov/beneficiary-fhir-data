@@ -2,8 +2,6 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
@@ -25,14 +23,10 @@ public class BeneficiaryThirdParty {
    *
    * @return optional extension
    */
-  public List<Extension> toFhir() {
-    List<Extension> extensions = new ArrayList<>();
-
-    buyInCode.ifPresent(
+  public Optional<Extension> toFhir() {
+    return buyInCode.map(
         validCode ->
-            extensions.add(
-                new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
-                    .setValue(new Coding(SystemUrls.SYS_BENE_BUYIN_CD, validCode, null))));
-    return extensions;
+            new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
+                .setValue(new Coding(SystemUrls.SYS_BENE_BUYIN_CD, validCode, null)));
   }
 }

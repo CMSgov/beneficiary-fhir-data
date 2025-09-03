@@ -2,8 +2,6 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
@@ -27,15 +25,11 @@ public class BeneficiaryEntitlementReason {
    *
    * @return optional extension
    */
-  public List<Extension> toFhir() {
-    List<Extension> extensions = new ArrayList<>();
+  public Optional<Extension> toFhir() {
 
-    medicareEntitlementReasonCode.ifPresent(
+    return medicareEntitlementReasonCode.map(
         validCode ->
-            extensions.add(
-                new Extension(SystemUrls.EXT_BENE_MDCR_ENTLMT_RSN_CD_URL)
-                    .setValue(
-                        new Coding(SystemUrls.SYS_BENE_MDCR_ENTLMT_RSN_CD, validCode, null))));
-    return extensions;
+            new Extension(SystemUrls.EXT_BENE_MDCR_ENTLMT_RSN_CD_URL)
+                .setValue(new Coding(SystemUrls.SYS_BENE_MDCR_ENTLMT_RSN_CD, validCode, null)));
   }
 }

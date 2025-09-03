@@ -3,9 +3,9 @@ package gov.cms.bfd.server.ng.coverage.model;
 import gov.cms.bfd.server.ng.SystemUrls;
 import jakarta.persistence.*;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -44,24 +44,23 @@ public class BeneficiaryEntitlement {
    * @return optional extension
    */
   public List<Extension> toFhirExtensions() {
-    List<Extension> extensions = new ArrayList<>();
 
     // Handle Medicare Enrollment Reason Code
-    medicareEnrollmentReasonCode.ifPresent(
-        validCode ->
-            extensions.add(
+    var extEnrollmentReason =
+        medicareEnrollmentReasonCode.map(
+            validCode ->
                 new Extension(SystemUrls.EXT_BENE_ENRLMT_RSN_CD_URL)
-                    .setValue(new Coding(SystemUrls.SYS_BENE_ENRLMT_RSN_CD, validCode, null))));
+                    .setValue(new Coding(SystemUrls.SYS_BENE_ENRLMT_RSN_CD, validCode, null)));
 
     // Handle Medicare Entitlement Status Code
-    medicareEntitlementStatusCode.ifPresent(
-        validCode ->
-            extensions.add(
+    var extStatusCode =
+        medicareEntitlementStatusCode.map(
+            validCode ->
                 new Extension(SystemUrls.EXT_BENE_MDCR_ENTLMT_STUS_CD_URL)
                     .setValue(
-                        new Coding(SystemUrls.SYS_BENE_MDCR_ENTLMT_STUS_CD, validCode, null))));
+                        new Coding(SystemUrls.SYS_BENE_MDCR_ENTLMT_STUS_CD, validCode, null)));
 
-    return extensions;
+    return Stream.of(extEnrollmentReason, extStatusCode).flatMap(Optional::stream).toList();
   }
 
   Period toFhirPeriod() {

@@ -22,7 +22,12 @@ public enum CoveragePart {
   /** Medicare Part B. */
   PART_B("B", "Part B", "part-b", "121", "MEDICARE FFS"),
   /** Dual enrollment. */
-  DUAL("DUAL", "Dual", "dual", "14", "Dual Eligibility Medicare/Medicaid Organization");
+  DUAL(
+      "DUAL",
+      "Dual Medicare/Medicaid",
+      "dual",
+      "14",
+      "Dual Eligibility Medicare/Medicaid Organization");
 
   private final String standardCode;
   private final String standardDisplay;
@@ -74,8 +79,7 @@ public enum CoveragePart {
    * @return TypeCode
    */
   public CodeableConcept toFhirTypeCode() {
-
-    CodeableConcept typeCode = new CodeableConcept();
+    var typeCode = new CodeableConcept();
     typeCode
         .addCoding()
         .setSystem(SystemUrls.SYS_SOPT)
@@ -90,31 +94,12 @@ public enum CoveragePart {
    * @return classComponent
    */
   public Coverage.ClassComponent toFhirClassComponent() {
-    Coverage.ClassComponent classComponent = new Coverage.ClassComponent();
+    var classComponent = new Coverage.ClassComponent();
     classComponent
         .setType(
             new CodeableConcept()
                 .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "plan", null)))
         .setValue(this.getStandardDisplay());
     return classComponent;
-  }
-
-  /**
-   * Finds a {@link CoveragePart} enum constant by its single character code (e.g., "A", "B"). This
-   * method is case-sensitive for the input code.
-   *
-   * @param code The single character code (e.g., "A", "B", "C", "D"). Must not be null and must be
-   *     a single character.
-   * @return An {@link Optional} containing the matching {@link CoveragePart}, or {@link
-   *     Optional#empty()} if no match is found.
-   * @throws IllegalArgumentException if the provided code is null or not a single character.
-   */
-  public static Optional<CoveragePart> forCode(String code) {
-    for (CoveragePart part : values()) {
-      if (part.getStandardCode().equals(code)) { // Direct string comparison for "A", "B", etc.
-        return Optional.of(part);
-      }
-    }
-    return Optional.empty();
   }
 }
