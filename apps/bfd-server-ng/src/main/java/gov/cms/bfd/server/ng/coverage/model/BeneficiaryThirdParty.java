@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Extension;
 /** Entity representing beneficiary_third_party. */
 @Entity
 @Getter
-@Table(name = "beneficiary_third_party_current", schema = "idr")
+@Table(name = "beneficiary_third_party_latest", schema = "idr")
 public class BeneficiaryThirdParty {
 
   @EmbeddedId private BeneficiaryThirdPartyId id;

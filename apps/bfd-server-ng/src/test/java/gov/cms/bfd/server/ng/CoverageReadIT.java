@@ -143,12 +143,12 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @Test
-  void coverageReadForBeneWithOnlyPastEntitlementPeriodsShouldBeEmpty() {
+  void coverageReadForBeneWithOnlyPastEntitlementPeriodsShouldBeCancelled() {
     final var partBId = createCoverageId("b", BENE_ID_EXPIRED_COVERAGE);
 
     var coverage = coverageRead().withId(partBId).execute();
     assertEquals(partBId, coverage.getIdPart());
-    assertTrue(coverage.getIdentifier().isEmpty());
+    assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
     expect.serializer("fhir+json").toMatchSnapshot(coverage);
   }
 

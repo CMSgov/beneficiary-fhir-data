@@ -142,8 +142,6 @@ public class CoverageSearchIT extends IntegrationTestBase {
     var lowerBound = lastUpdated.minusNanos(1_000_000); // 1 millisecond before
     var upperBound = lastUpdated.plusNanos(1_000_000); // 1 millisecond after
 
-    // Search using an inclusive range that is guaranteed to contain the value
-    System.out.println("Testing inclusive range for bene_sk: " + beneSk);
     var coverageBundle =
         searchBundle()
             .where(searchCriteria)
@@ -246,13 +244,15 @@ public class CoverageSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
-  void coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle(
-      SearchStyleEnum searchStyle) {
+  void coverageSearchForBeneWithExpiredCoverage(SearchStyleEnum searchStyle) {
     var coverageBundle = searchByBeneficiary(BENE_ID_EXPIRED_COVERAGE, searchStyle);
     assertEquals(
-        0,
+        2,
         coverageBundle.getEntry().size(),
         "Should find no Coverage for a beneficiary whose entitlement periods are all in the past.");
+    for (var coverage : getCoverageFromBundle(coverageBundle)) {
+      assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
+    }
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
   }
 

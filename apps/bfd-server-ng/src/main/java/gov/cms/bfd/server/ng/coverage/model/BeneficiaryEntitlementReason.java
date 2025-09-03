@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Extension;
 /** Entity representing BeneficiaryEntitlementReason. */
 @Entity
 @Getter
-@Table(name = "beneficiary_entitlement_reason_current", schema = "idr")
+@Table(name = "beneficiary_entitlement_reason_latest", schema = "idr")
 public class BeneficiaryEntitlementReason {
 
   @Id

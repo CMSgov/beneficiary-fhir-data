@@ -61,10 +61,10 @@ public class EobResourceProvider implements IResourceProvider {
   public Bundle searchByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
       @Count final Integer count,
-      @OptionalParam(name = SERVICE_DATE) DateRangeParam serviceDate,
+      @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
-      @OptionalParam(name = START_INDEX) NumberParam startIndex,
+      @OptionalParam(name = START_INDEX) final NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag) {
 
     var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
@@ -89,7 +89,7 @@ public class EobResourceProvider implements IResourceProvider {
   @Search
   public Bundle searchById(
       @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final IdType fhirId,
-      @OptionalParam(name = SERVICE_DATE) DateRangeParam serviceDate,
+      @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated) {
     return eobHandler.searchById(

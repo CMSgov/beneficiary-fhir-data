@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 
 /** Entity representing BeneficiaryEntitlement. */
 @Entity
 @Getter
-@Table(name = "beneficiary_entitlement_current", schema = "idr")
+@Table(name = "beneficiary_entitlement_latest", schema = "idr")
 public class BeneficiaryEntitlement {
 
   @EmbeddedId private BeneficiaryEntitlementId id;
@@ -64,6 +65,10 @@ public class BeneficiaryEntitlement {
   }
 
   Period toFhirPeriod() {
-    return id.toFhir();
+    return id.toFhirPeriod();
+  }
+
+  Coverage.CoverageStatus toFhirStatus() {
+    return id.toFhirStatus();
   }
 }

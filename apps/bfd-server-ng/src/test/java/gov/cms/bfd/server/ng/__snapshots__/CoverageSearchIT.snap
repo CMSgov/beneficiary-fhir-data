@@ -520,8 +520,223 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[POST]=[
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle[GET]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[GET]=[
 {
+  "entry" : [ {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/421056595"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "H",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "A",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-a-421056595",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "6ON6NC8FE68"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2024-12-31",
+        "start" : "2022-10-12"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "cancelled",
+      "subscriberId" : "6ON6NC8FE68",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  }, {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/421056595"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part B"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "H",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "B",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-b-421056595",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "6ON6NC8FE68"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2024-12-31",
+        "start" : "2022-10-12"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "cancelled",
+      "subscriberId" : "6ON6NC8FE68",
+      "type" : {
+        "coding" : [ {
+          "code" : "121",
+          "display" : "MEDICARE FFS",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
@@ -536,8 +751,223 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageS
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[GET_WITH_SEARCH]=[
 {
+  "entry" : [ {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/421056595"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "H",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "A",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-a-421056595",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "6ON6NC8FE68"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2024-12-31",
+        "start" : "2022-10-12"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "cancelled",
+      "subscriberId" : "6ON6NC8FE68",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  }, {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/421056595"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part B"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "H",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "B",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-b-421056595",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "6ON6NC8FE68"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2024-12-31",
+        "start" : "2022-10-12"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "cancelled",
+      "subscriberId" : "6ON6NC8FE68",
+      "type" : {
+        "coding" : [ {
+          "code" : "121",
+          "display" : "MEDICARE FFS",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
@@ -552,8 +982,223 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageS
 ]
 
 
-gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle[POST]=[
+gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[POST]=[
 {
+  "entry" : [ {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/421056595"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "H",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "A",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-a-421056595",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "6ON6NC8FE68"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2024-12-31",
+        "start" : "2022-10-12"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "cancelled",
+      "subscriberId" : "6ON6NC8FE68",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  }, {
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/421056595"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part B"
+      } ],
+      "contained" : [ {
+        "active" : true,
+        "contact" : [ {
+          "purpose" : {
+            "coding" : [ {
+              "code" : "PATINF",
+              "display" : "Patient",
+              "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+            } ]
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "1-800-633-4227"
+          }, {
+            "system" : "phone",
+            "value" : "TTY: 1-877-486-2048"
+          }, {
+            "system" : "url",
+            "value" : "www.medicare.gov"
+          } ]
+        } ],
+        "id" : "cms-org",
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+        },
+        "name" : "Centers for Medicare and Medicaid Services",
+        "resourceType" : "Organization"
+      } ],
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+        "valueCoding" : {
+          "code" : "H",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "B",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "id" : "part-b-421056595",
+      "identifier" : [ {
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "6ON6NC8FE68"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+      },
+      "payor" : [ {
+        "reference" : "#cms-org"
+      } ],
+      "period" : {
+        "end" : "2024-12-31",
+        "start" : "2022-10-12"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "cancelled",
+      "subscriberId" : "6ON6NC8FE68",
+      "type" : {
+        "coding" : [ {
+          "code" : "121",
+          "display" : "MEDICARE FFS",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",

@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,6 +57,13 @@ public class IntegrationTestBase {
         .map(Bundle.BundleEntryComponent::getResource)
         // We don't check the type here because the types should be homogeneous
         .map(Patient.class::cast)
+        .toList();
+  }
+
+  protected List<Coverage> getCoverageFromBundle(Bundle coverageBundle) {
+    return coverageBundle.getEntry().stream()
+        .map(Bundle.BundleEntryComponent::getResource)
+        .map(Coverage.class::cast)
         .toList();
   }
 }

@@ -40,12 +40,20 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @JoinColumn(name = "bene_sk")
   private BeneficiaryEntitlementReason beneficiaryEntitlementReason;
 
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private BeneficiaryDualEligibility beneficiaryDualEligibility;
+
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
     return Optional.ofNullable(beneficiaryEntitlementReason);
   }
 
   private Optional<BeneficiaryStatus> getStatus() {
     return Optional.ofNullable(beneficiaryStatus);
+  }
+
+  private Optional<BeneficiaryDualEligibility> getDualEligibility() {
+    return Optional.ofNullable(beneficiaryDualEligibility);
   }
 
   /**
@@ -88,7 +96,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.setType(coveragePart.toFhirTypeCode());
     coverage.addClass_(coveragePart.toFhirClassComponent());
     coverage.setPeriod(entitlement.toFhirPeriod());
-    coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+    coverage.setStatus(entitlement.toFhirStatus());
 
     var beneficiaryThirdParty =
         beneficiaryThirdParties.stream()
@@ -99,7 +107,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             beneficiaryThirdParty.map(BeneficiaryThirdParty::toFhir),
             Optional.of(entitlement.toFhirExtensions()),
             getStatus().map(BeneficiaryStatus::toFhir),
-            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhir))
+            getEntitlementReason().map(BeneficiaryEntitlementReason::toFhir),
+            getDualEligibility().map(BeneficiaryDualEligibility::toFhirExtensions))
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(coverage::addExtension);

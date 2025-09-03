@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Period;
 
 /** Represents the composite primary key for the {@link BeneficiaryEntitlement} entity. */
@@ -31,12 +32,16 @@ public class BeneficiaryEntitlementId implements Serializable {
   @Column(name = "bene_mdcr_entlmt_type_cd")
   private String medicareEntitlementTypeCode;
 
-  Period toFhir() {
+  Period toFhirPeriod() {
+    return new Period()
+        .setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate))
+        .setEndElement(DateUtil.toFhirDate(benefitRangeEndDate));
+  }
 
-    Period period = new Period();
-    period.setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate));
-    period.setEndElement(DateUtil.toFhirDate(benefitRangeEndDate));
-
-    return period;
+  Coverage.CoverageStatus toFhirStatus() {
+    if (benefitRangeEndDate.isBefore(DateUtil.nowAoe())) {
+      return Coverage.CoverageStatus.CANCELLED;
+    }
+    return Coverage.CoverageStatus.ACTIVE;
   }
 }

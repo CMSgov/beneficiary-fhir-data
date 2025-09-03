@@ -460,6 +460,26 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DUAL-STUS-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_DUAL_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-STUS-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DUAL-TYPE-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_DUAL_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-TYPE-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_MEDICAID_STATE_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
+
   // CMS
   /** URL. */
   public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
@@ -544,4 +564,7 @@ public class SystemUrls {
   /** URL. */
   public static final String X12_CLAIM_ADJUSTMENT_REASON_CODES =
       "https://x12.org/codes/claim-adjustment-reason-codes";
+
+  /** URL. */
+  public static final String USPS = "https://www.usps.com";
 }

@@ -43,9 +43,6 @@ public class DateUtil {
    * @return A FHIR DateTimeType with DAY precision, or null if input is null.
    */
   public static DateTimeType toFhirDate(LocalDate localDate) {
-    if (localDate == null) {
-      return null;
-    }
     Date utilDate = toDate(localDate);
     DateTimeType fhirDate = new DateTimeType(utilDate);
     fhirDate.setPrecision(TemporalPrecisionEnum.DAY);
@@ -71,5 +68,9 @@ public class DateUtil {
    */
   public static ZonedDateTime toZonedDateTime(Date date) {
     return date.toInstant().atZone(ZONE_ID_UTC);
+  }
+
+  public static LocalDate nowAoe() {
+    return LocalDate.now(ZoneId.of("-12:00"));
   }
 }

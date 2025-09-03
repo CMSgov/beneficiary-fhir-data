@@ -16,11 +16,13 @@ import org.hl7.fhir.r4.model.Coverage;
 @Getter
 @AllArgsConstructor
 public enum CoveragePart {
-  /** Represents Medicare Part A. */
+  /** Medicare Part A. */
   PART_A("A", "Part A", "part-a", "1", "MEDICARE"),
 
-  /** Represents Medicare Part B. */
-  PART_B("B", "Part B", "part-b", "121", "MEDICARE FFS");
+  /** Medicare Part B. */
+  PART_B("B", "Part B", "part-b", "121", "MEDICARE FFS"),
+  /** Dual enrollment. */
+  DUAL("DUAL", "Dual", "dual", "14", "Dual Eligibility Medicare/Medicaid Organization");
 
   private final String standardCode;
   private final String standardDisplay;

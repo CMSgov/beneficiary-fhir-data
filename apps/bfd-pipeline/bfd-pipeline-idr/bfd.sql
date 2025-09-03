@@ -436,25 +436,37 @@ WHERE NOT EXISTS(SELECT 1 FROM idr.overshare_mbis om WHERE om.bene_mbi_id = b.be
 
 -- we use NOW() - 12 hours to represent "anywhere in the world" time
 
-CREATE VIEW idr.beneficiary_status_current AS
-SELECT * FROM idr.beneficiary_status
-WHERE idr_ltst_trans_flg = 'Y' AND mdcr_stus_bgn_dt <= NOW() - INTERVAL '12 hours' and mdcr_stus_end_dt >= NOW() - INTERVAL '12 hours';
+CREATE VIEW idr.beneficiary_status_latest AS
+SELECT DISTINCT ON (bene_sk) * 
+FROM idr.beneficiary_status
+WHERE idr_ltst_trans_flg = 'Y' AND mdcr_stus_bgn_dt <= NOW() - INTERVAL '12 hours'
+ORDER BY bene_sk, mdcr_stus_bgn_dt DESC;
 
 -- entitlement data is a bit weird because there can be multiple active records with no discernable difference
 -- when this happens, we take the one with the more recent begin date
-CREATE VIEW idr.beneficiary_entitlement_current AS
+CREATE VIEW idr.beneficiary_entitlement_latest AS
 SELECT DISTINCT ON (bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt) *
 FROM idr.beneficiary_entitlement
-WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours' AND bene_rng_end_dt >= NOW() - INTERVAL '12 hours'
+WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours'
 ORDER BY bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt DESC;
 
-CREATE VIEW idr.beneficiary_third_party_current AS
-SELECT * FROM idr.beneficiary_third_party
-WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours' AND bene_rng_end_dt >= NOW() - INTERVAL '12 hours';
+CREATE VIEW idr.beneficiary_third_party_latest AS
+SELECT DISTINCT ON (bene_sk, bene_tp_type_cd) * 
+FROM idr.beneficiary_third_party
+WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours'
+ORDER BY bene_sk, bene_tp_type_cd, bene_rng_bgn_dt DESC;
 
-CREATE VIEW idr.beneficiary_entitlement_reason_current AS
-SELECT * FROM idr.beneficiary_entitlement_reason
-WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours' AND bene_rng_end_dt >= NOW() - INTERVAL '12 hours';
+CREATE VIEW idr.beneficiary_entitlement_reason_latest AS
+SELECT DISTINCT ON (bene_sk) * 
+FROM idr.beneficiary_entitlement_reason
+WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours'
+ORDER BY bene_sk, bene_rng_bgn_dt DESC;
+
+CREATE VIEW idr.beneficiary_dual_eligibility_latest AS
+SELECT DISTINCT ON (bene_sk) * 
+FROM idr.beneficiary_dual_eligibility
+WHERE idr_ltst_trans_flg = 'Y' AND bene_mdcd_elgblty_bgn_dt <= NOW() - INTERVAL '12 hours'
+ORDER BY bene_sk, bene_mdcd_elgblty_bgn_dt DESC;
 
 CREATE VIEW idr.beneficiary_identity AS
 SELECT DISTINCT 
