@@ -180,8 +180,8 @@ public class PatientSearchIT extends IntegrationTestBase {
         Arguments.of(
             new TokenClientParam(Patient.SP_RES_ID)
                 .exactly()
-                .identifier(BENE_ID_PART_A_AND_B_WITH_XREF),
-            BENE_ID_PART_A_AND_B_WITH_XREF),
+                .identifier(BENE_ID_ALL_PARTS_WITH_XREF),
+            BENE_ID_ALL_PARTS_WITH_XREF),
         Arguments.of(
             new TokenClientParam(Patient.SP_IDENTIFIER)
                 .exactly()

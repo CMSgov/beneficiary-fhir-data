@@ -44,7 +44,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void coverageSearchById(SearchStyleEnum searchStyle) {
-    String validId = String.format("part-a-%s", BENE_ID_PART_A_AND_B_WITH_XREF);
+    String validId = String.format("part-a-%s", BENE_ID_ALL_PARTS_WITH_XREF);
 
     var coverageBundle =
         searchBundle()
@@ -83,7 +83,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         searchBundle()
             .where(
                 new ReferenceClientParam(Coverage.SP_BENEFICIARY)
-                    .hasId("Patient/" + BENE_ID_PART_A_AND_B_WITH_XREF))
+                    .hasId("Patient/" + BENE_ID_ALL_PARTS_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
 
@@ -119,12 +119,12 @@ public class CoverageSearchIT extends IntegrationTestBase {
         Arguments.of(
             new TokenClientParam(Coverage.SP_RES_ID)
                 .exactly()
-                .identifier(String.format("part-a-%s", BENE_ID_PART_A_AND_B_WITH_XREF)),
-            Long.parseLong(BENE_ID_PART_A_AND_B_WITH_XREF)),
+                .identifier(String.format("part-a-%s", BENE_ID_ALL_PARTS_WITH_XREF)),
+            Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF)),
         Arguments.of(
             new ReferenceClientParam(Coverage.SP_BENEFICIARY)
-                .hasId(String.format("Patient/%s", BENE_ID_PART_A_AND_B_WITH_XREF)),
-            Long.parseLong(BENE_ID_PART_A_AND_B_WITH_XREF)));
+                .hasId(String.format("Patient/%s", BENE_ID_ALL_PARTS_WITH_XREF)),
+            Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF)));
   }
 
   @ParameterizedTest
@@ -160,7 +160,6 @@ public class CoverageSearchIT extends IntegrationTestBase {
         "A small inclusive range around the exact timestamp should find a match");
 
     // Search for strictly greater than (gt) the exact timestamp
-    System.out.println("Testing 'gt' for bene_sk: " + beneSk);
     coverageBundle =
         searchBundle()
             .where(searchCriteria)
