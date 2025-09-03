@@ -176,6 +176,9 @@
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
+/bfd/${env}/server-ng/nonsensitive/eob/enabled: "true"
+/bfd/${env}/server-ng/nonsensitive/patient/enabled: "true"
+/bfd/${env}/server-ng/nonsensitive/coverage/enabled: "true"
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server ${env}
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"

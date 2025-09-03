@@ -9,7 +9,11 @@ import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** FHIR server for V3 operations. */
@@ -18,6 +22,17 @@ import org.springframework.stereotype.Component;
 @WebServlet(urlPatterns = {"/v3/fhir*"})
 public class V3Server extends RestfulServer {
   private final List<IResourceProvider> resourceProviders;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(V3Server.class);
+
+  @Value("${eob/enabled:false}")
+  private boolean eobEnabled;
+
+  @Value("${patient/enabled:false}")
+  private boolean patientEnabled;
+
+  @Value("${coverage/enabled:false}")
+  private boolean coverageEnabled;
 
   @Override
   public void initialize() {
@@ -35,6 +50,41 @@ public class V3Server extends RestfulServer {
     this.setFhirContext(FhirContext.forR4());
     this.registerProviders(resourceProviders);
 
+    List<IResourceProvider> filteredProviders =
+        resourceProviders.stream()
+            .filter(
+                provider -> {
+                  String resourceType = provider.getResourceType().getSimpleName();
+                  boolean keepProvider = true; // Default to keeping the provider
+
+                  switch (resourceType) {
+                    case "ExplanationOfBenefit":
+                      keepProvider = eobEnabled;
+                      if (!keepProvider) {
+                        LOGGER.info("Disabling ExplanationOfBenefit endpoint based on config.");
+                      }
+                      break;
+                    case "Patient":
+                      keepProvider = patientEnabled;
+                      if (!keepProvider) {
+                        LOGGER.info("Disabling Patient endpoint based on config.");
+                      }
+                      break;
+                    case "Coverage":
+                      keepProvider = coverageEnabled;
+                      if (!keepProvider) {
+                        LOGGER.info("Disabling Coverage endpoint based on config.");
+                      }
+                      break;
+                    default:
+                      LOGGER.debug("Keeping {} endpoint by default.", resourceType);
+                      break;
+                  }
+                  return keepProvider;
+                })
+            .collect(Collectors.toList());
+
+    this.registerProviders(filteredProviders); // Register the filtered list
     this.registerInterceptor(new LoggingInterceptor());
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
