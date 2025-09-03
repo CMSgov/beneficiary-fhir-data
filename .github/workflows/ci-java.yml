@@ -79,6 +79,10 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
+      - name: Investigate
+        run: |
+          find /codebuild/output/
+
       - name: Configure AWS credentials
         id: config-aws-creds
         uses: aws-actions/configure-aws-credentials@v4
