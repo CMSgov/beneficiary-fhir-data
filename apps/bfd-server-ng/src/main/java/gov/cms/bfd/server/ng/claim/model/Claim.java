@@ -119,11 +119,11 @@ public class Claim {
 
     claimItems.forEach(
         item -> {
-          item.getClaimLine().toFhir(item.getClaimLineInstitutional()).ifPresent(eob::addItem);
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
               .ifPresent(eob::addDiagnosis);
+          item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
         });
     billingProvider
         .toFhir(claimTypeCode)
