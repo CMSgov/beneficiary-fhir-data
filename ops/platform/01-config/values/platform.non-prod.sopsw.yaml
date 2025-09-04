@@ -1,15 +1,15 @@
-#ENC[AES256_GCM,data:MAGjZCWW3Q/09nqmtgmUH86l49iBVR6dHrfV+TDs8ygdpK4OXcpWr7PAHu/i7RcuelURCcsXEAjMY7SVbF9D3qYRYZqKQyS0iugTbbqvOn1HDFZJ8+rsQcMcXRGYigkmozx4tuhbMmas,iv:CqeraoABl0KflXn0J2ZZef4Zalipq7I9iizijpKJcek=,tag:8RHlXxfok8pEn+jnMq5zQg==,type:comment]
 /bfd/platform/network/nonsensitive/route53/zones_list_json: |-
   [
-    "root"
+    "test"
   ]
-/bfd/platform/network/sensitive/route53/zone/root/domain: ENC[AES256_GCM,data:hHjMCTaaG3uuh+CNNTBciV6U,iv:V5uqNePEZ41XgRhYFz0yb/PmxHfQYoqvHY91vwFLTbw=,tag:2kIzMYuf1Cprkk5xTn0iLA==,type:str]
-/bfd/platform/network/sensitive/route53/zone/root/comment: ENC[AES256_GCM,data:YrBRCliqmFzBcggD/yh0BaH0gRIGEM5gwzkQk6vM+ek0nqm1ZnKt1fMeX3ge6NBRX8xqDAmNcGqblHcqxdbADmO1mHpgUCJlaUFz4u6I,iv:hYd3Ss6L4Cpct/9O2QKsEdVTmlm1WPp7aQdQbBD3OVA=,tag:XBoA/CJ2MsncDlGYupyHlg==,type:str]
+/bfd/platform/network/sensitive/route53/zone/test/domain: ENC[AES256_GCM,data:K0r/PBS2kdAWsgzRwDE3d6LrqdgukQs=,iv:bduzY63yIpb9OEoALkrs4k6nS6RIcD2ByRbJXWFtDnE=,tag:Vt6y+TPNyPQxJoUApIYwIw==,type:str]
+/bfd/platform/network/sensitive/route53/zone/test/comment: ENC[AES256_GCM,data:fhE3fVfSZIdlk/+WC0v5FYUpp42lwtL/ak0yf6VDgje8IqX2g4z6XsVXk37ziIncIegx0Co6e2iQHPDq0CJQ,iv:lqJx6ibO1vrDvhBqftjZbre9MneNxs9a5TZs68KMDws=,tag:Ob5AZJtXJGVJ/BqytqXaxA==,type:str]
 #ENC[AES256_GCM,data:v3X0zoiIQ8Cgg/VODntYXAINLMUVTRjSIY3js+a7Lj24IquG1exiRamuCooplXTEj34Ax0jTTf4=,iv:kcUNqWYe8AcGT+0QOgXZvlRwbw6L4nIJgsjvE4X5av4=,tag:/8MtCbviq0NotvmSqjdilA==,type:comment]
-/bfd/platform/network/sensitive/route53/zone/root/internal_vpcs_list_json: ENC[AES256_GCM,data:jKkMTxYziFVvvUOZi2Mhyw0qjex/idZPkqgJhCc=,iv:IUUMvvSi+nCJuVsBgw6AiBGNUyXwO32Z2h2kmhuQ0KI=,tag:fsHIllC/6YYPCaKKdG0OBg==,type:str]
+/bfd/platform/network/sensitive/route53/zone/test/internal_vpcs_list_json: ENC[AES256_GCM,data:XjL4TRP/AQisTN/2zvECdAtk3GYRqH7QtE7OnwM=,iv:Ou6tVTCvnN6SRxORGwuNFO7lxNQ8Nib7cFr6q/Un8/c=,tag:2yLJRRw/U1kPTd2NgsSxHQ==,type:str]
 #ENC[AES256_GCM,data:EJPqNfnhx5DORdBM/c2Et5VMNSCWzWQppF955ykp0XieLWjZnqxmuMu51TFP+8GRGws6S5x8U0cL61mNMFbsjSb2V2026gOz9g==,iv:qjVtyebpcAfWqLEJpmxs2W7xg1p+qtxsY5pv9HiRHzs=,tag:r4jvr2BKyDPgwA5c3RIBfQ==,type:comment]
-#ENC[AES256_GCM,data:/fwg0uLj+yb80jW1Lxa3/WAM6h2xn+ogwk1k7ECXW8ESq90nwtN9cSs5fDZFM7hzpS6TQPV+JA==,iv:NFLC9D74aqW4qs1VKTXAxNk+aAT2IpzUKRYbowsYKcU=,tag:ONd6luaDBLQqaBEr+PryWQ==,type:comment]
-/bfd/platform/network/sensitive/route53/zone/root/external_vpcs_list_json: ENC[AES256_GCM,data:lWyN,iv:3O1KzN9OWVv+BgHEzU2gcrpP0Q1c0Mb5ugWQo6002BI=,tag:/v5crZrQk+e1o8Pyu+PlAQ==,type:str]
+/bfd/platform/network/sensitive/route53/zone/test/external_vpcs_list_json: ENC[AES256_GCM,data:ZtMWOGrMx4znKmUeHA3/DOhlEoGWZr4/o5W7nGg7l6TLeszEH1c=,iv:K7ailUBD7JN8LdpIELeC0vN5hOPy15N8If0IcHTJQXg=,tag:bBLlGwtgAPgY91th8r2YrA==,type:str]
+/bfd/platform/network/sensitive/route53/zone/test/records: ENC[AES256_GCM,data:elc=,iv:JaN3qPDgxcrAKVgbAd69k5pVtOR64TnlEyyl/VIIZm8=,tag:RCS21GML9uul4CfmGwlQqg==,type:str]
+/bfd/platform/sonar/sensitive/service_account_access_key: ENC[AES256_GCM,data:I7hQVx3Wry0IUvANFGyJtdj6rT8nJ3zfpPMIiovJ6MeOqBhJgTWx1KqKWEE=,iv:5CMjVqrByv1PlF27QoVCLsfU+fa3vzLHZf+HRGV3w/Y=,tag:dY8Zl1wz92qqhnkOHdqfSA==,type:str]
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-mgmt-config-cmk

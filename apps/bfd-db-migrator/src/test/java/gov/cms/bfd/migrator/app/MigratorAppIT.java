@@ -46,11 +46,13 @@ import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Tests the migrator app under various conditions to ensure it works correctly. */
+@Disabled("Temporarily disable while evaluating github actions runners")
 public final class MigratorAppIT extends AbstractLocalStackTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(MigratorAppIT.class);
 

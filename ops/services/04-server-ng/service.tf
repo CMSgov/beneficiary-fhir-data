@@ -154,7 +154,6 @@ resource "aws_ecs_task_definition" "server" {
           {
             name = "JDK_JAVA_OPTIONS"
             value = join(" ", [
-              "-Dlogback.configurationFile=all-stdout.logback.xml",
               "-XX:+UseContainerSupport",
               "-XX:MaxRAMPercentage=75.0",
               "-XX:+PreserveFramePointer",

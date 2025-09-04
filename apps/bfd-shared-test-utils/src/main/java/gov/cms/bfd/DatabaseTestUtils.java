@@ -29,6 +29,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.testcontainers.utility.DockerImageName;
 
 /** Provides utilities for managing the database in integration tests. */
 public final class DatabaseTestUtils {
@@ -276,6 +277,7 @@ public final class DatabaseTestUtils {
    * @param password the password for the test database to connect to
    * @return a PostgreSQL {@link DataSource} for the test DB
    */
+  @SuppressWarnings("resource")
   private static DataSource initUnpooledDataSourceForTestContainerWithPostgres(
       String username, String password) {
 
@@ -284,7 +286,9 @@ public final class DatabaseTestUtils {
             TEST_CONTAINER_DATABASE_IMAGE_PROPERTY, TEST_CONTAINER_DATABASE_IMAGE_DEFAULT);
     LOGGER.debug("Starting container, using image {}", testContainerDatabaseImage);
     container =
-        new PostgreSQLContainer(testContainerDatabaseImage)
+        new PostgreSQLContainer(
+                DockerImageName.parse(testContainerDatabaseImage)
+                    .asCompatibleSubstituteFor("postgres"))
             .withDatabaseName("fhirdb")
             .withUsername(username)
             .withPassword(password)

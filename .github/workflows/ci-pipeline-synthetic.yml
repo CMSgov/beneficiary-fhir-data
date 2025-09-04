@@ -24,11 +24,23 @@ jobs:
       with:
         node-version: '22'
     - name: Install dependencies
-      run: |
-        npm install -g fsh-sushi
+      run: npm install -g fsh-sushi
+    - name: Build sushi
+      run:  |
         cd ${{ github.workspace }}/apps/bfd-model-idr
         sushi build ./sushi
+    - name: Ensure synthetic data pipeline runs
+      run: |
+        cd ${{ github.workspace }}/apps/bfd-model-idr
         uv run patient_generator.py
+        uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
+        cd ../bfd-pipeline/bfd-pipeline-idr
+        ./run-db.sh
+        uv run pipeline.py local
+    - name: Ensure synthetic data pipeline runs with sandbox benes
+      run: |
+        cd ${{ github.workspace }}/apps/bfd-model-idr
+        uv run patient_generator.py --benes ./Benes-Sandbox.csv
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
         cd ../bfd-pipeline/bfd-pipeline-idr
         ./run-db.sh

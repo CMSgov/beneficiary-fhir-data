@@ -725,6 +725,18 @@
                 ]
             },
             {
+                "id": "LineItemComponent.diagnosisRelatedLine",
+                "path": "LineItemComponent.diagnosisRelatedLine",
+                "label": "Corresponding diagnosis sequence number. Computed based upon resource generation.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.CLM_LINE_SLS_TAX_AMT",
                 "path": "LineItemComponent.CLM_LINE_SLS_TAX_AMT",
                 "label": "Sales Tax Amount",
