@@ -127,6 +127,21 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref (
     PRIMARY KEY(bene_sk, bene_hicn_num, src_rec_crte_ts)
 );
 
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr (
+    bene_sk BIGINT NOT NULL,
+    bene_mdcd_elgblty_bgn_dt DATE NOT NULL,
+    bene_mdcd_elgblty_end_dt DATE NOT NULL,
+    bene_dual_stus_cd VARCHAR(2) NOT NULL,
+    bene_dual_type_cd VARCHAR(1) NOT NULL,
+    geo_usps_state_cd VARCHAR(2) NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
+    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
+    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ NOT NULL,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(bene_sk, bene_mdcd_elgblty_bgn_dt, idr_trans_efctv_ts)
+);
+
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
     cntrct_pbp_sk BIGINT NOT NULL,
     cntrct_drug_plan_ind_cd VARCHAR(1),

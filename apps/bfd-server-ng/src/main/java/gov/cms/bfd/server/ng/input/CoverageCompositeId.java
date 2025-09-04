@@ -15,10 +15,9 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
 
   // Group 1: The entire part prefix (e.g., "part-a", "c4dic-part-b")
   // Group 2: The bene_sk
+  // Example: "part-a-123", "part-b--456"
   private static final Pattern STANDARD_COVERAGE_ID_PATTERN =
-      Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\p{Digit}+)", Pattern.CASE_INSENSITIVE);
-
-  // Example: "part-a-123", "partb--456"
+      Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\d+)", Pattern.CASE_INSENSITIVE);
 
   /**
    * Parses a raw composite ID string (e.g., "part-a-12345") into a {@link CoverageCompositeId}.

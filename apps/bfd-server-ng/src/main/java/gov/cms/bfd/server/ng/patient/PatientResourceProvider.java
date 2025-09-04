@@ -5,10 +5,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -73,25 +70,5 @@ public class PatientResourceProvider implements IResourceProvider {
     return patientHandler.searchByIdentifier(
         FhirInputConverter.toString(identifier, SystemUrls.CMS_MBI),
         FhirInputConverter.toDateTimeRange(lastUpdated));
-  }
-
-  /**
-   * Searches for a Patient by contract info.
-   *
-   * @param coverageId coverage ID
-   * @param referenceYear reference year
-   * @param cursor pagination cursor
-   * @param count pagination count
-   * @param requestDetails request details
-   * @return bundle
-   */
-  @Search
-  public Bundle searchByCoverageContract(
-      @RequiredParam(name = "_has:Coverage.extension") final TokenParam coverageId,
-      @OptionalParam(name = "_has:Coverage.rfrncyr") final TokenParam referenceYear,
-      @OptionalParam(name = "cursor") final NumberParam cursor,
-      @OptionalParam(name = Constants.PARAM_COUNT) final NumberParam count,
-      final RequestDetails requestDetails) {
-    return new Bundle();
   }
 }

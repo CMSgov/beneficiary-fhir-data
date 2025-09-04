@@ -33,6 +33,7 @@ public class CoverageRepository {
                 LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
                 LEFT JOIN FETCH b.beneficiaryThirdParties tp
                 LEFT JOIN FETCH b.beneficiaryEntitlements be
+                LEFT JOIN FETCH b.beneficiaryDualEligibility de
                 WHERE b.beneSk = :id
                   AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                   AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)

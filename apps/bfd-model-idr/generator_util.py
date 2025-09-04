@@ -362,7 +362,7 @@ class GeneratorUtil:
                 "IDR_LTST_TRANS_FLG": "Y",
                 "BENE_DUAL_STUS_CD": dual_status_cd,
                 "BENE_DUAL_TYPE_CD": dual_type_cd,
-                "MEDICAID_STATE_CD": medicaid_state_cd,
+                "GEO_USPS_STATE_CD": medicaid_state_cd,
                 "BENE_MDCD_ELGBLTY_BGN_DT": str(dual_start_date),
                 "BENE_MDCD_ELGBLTY_END_DT": dual_end_date,
                 "IDR_TRANS_EFCTV_TS": str(dual_start_date) + "T00:00:00.000000+0000",

@@ -251,10 +251,6 @@ public class SystemUrls {
   public static final String HL7_BENEFIT_CATEGORY =
       "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
 
-  /** URL. */
-  public static final String HL7_ADJUDICATION_CATEGORY =
-      "http://terminology.hl7.org/CodeSystem/adjudication";
-
   // US Core
   /**
    * <a href="https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-ethnicity.html">US Core
@@ -344,121 +340,137 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_ADJUDICATION_STATUS =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
 
-  /** URL. */
+  /** Blue Button code system - adjudication. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication";
 
-  /** URL. */
+  /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
 
-  /** URL. */
+  /** Blue Button structure definition - claim query code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD";
 
-  /** URL. */
+  /** Blue Button code system - claim query code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_QUERY_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD";
 
-  /** URL. */
+  /** Blue Button structure definition - claim contractor number. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CONTRACTOR_NUMBER =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM";
 
-  /** URL. */
+  /** Blue Button code system - claim contractor number. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_CONTRACTOR_NUMBER =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM";
 
-  /** URL. */
+  /** Blue Button structure definition - claim record type. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_RECORD_TYPE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD";
 
-  /** URL. */
+  /** Blue Button code system - claim record type. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_RECORD_TYPE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD";
 
-  /** URL. */
+  /** Blue Button structure definition - claim. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_DISPOSITION_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD";
 
-  /** URL. */
+  /** Blue Button code system - claim disposition code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DISPOSITION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD";
 
-  /** URL. */
+  /** Blue Button structure definition - claim process date. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT";
 
-  /** URL. */
+  /** Blue Button code system - claim admission source code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADMISSION_SOURCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD";
 
-  /** URL. */
+  /** Blue Button code system - patient status code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_PATIENT_STATUS_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD";
 
-  /** URL. */
+  /** Blue Button code system - claim admission type code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADMISSION_TYPE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD";
 
-  /** URL. */
+  /** Blue Button code system - supporting information. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_SUPPORTING_INFORMATION =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information";
 
-  /** URL. */
+  /** Blue Button code system - primary payor code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_PRIMARY_PAYOR_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD";
 
-  /** URL. */
+  /** Blue Button code system - MCO paid switch. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_MCO_PAID_SWITCH =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW";
 
-  /** URL. */
+  /** Blue Button code system - facility type code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_FACILITY_TYPE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD";
 
-  /** URL. */
+  /** Blue Button code system - bill classification code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BILL_CLASSIFICATION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD";
 
-  /** URL. */
+  /** Blue Button code system - bill frequency code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BILL_FREQUENCY_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD";
 
-  /** URL. */
+  /** Blue Button code system - revenue center code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD";
 
-  /** URL. */
+  /** Blue Button code system - claim deductible coinsurance code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DEDUCTIBLE_COINSURANCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD";
 
-  /** URL. */
-  public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION_SYSTEM =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication";
-
-  /** URL. */
+  /** Blue Button structure definition - PPS DRG weight number. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM";
 
-  /** URL. */
+  /** Blue Button structure definition - nonpayment reason code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_NONPAYMENT_REASON_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
 
-  /** URL. */
+  /** Blue Button code system - nonpayment reason code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_NONPAYMENT_REASON_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
 
-  /** URL. */
+  /** Blue Button structure definition - final action code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_FINAL_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD";
 
-  /** URL. */
+  /** Blue Button code system - final action code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD";
 
-  /** URL. */
+  /** Blue Button code system - benefit balance. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
+
+  /** Blue Button code system - dual status code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DUAL-STUS-CD";
+
+  /** Blue Button structure definition - dual status code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_DUAL_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-STUS-CD";
+
+  /** Blue Button code system - dual type code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DUAL-TYPE-CD";
+
+  /** Blue Button structure definition - dual type code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_DUAL_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-TYPE-CD";
+
+  /** Blue Button structure definition - medicaid state code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_MEDICAID_STATE_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
 
   // CMS
   /** URL. */
@@ -544,4 +556,7 @@ public class SystemUrls {
   /** URL. */
   public static final String X12_CLAIM_ADJUSTMENT_REASON_CODES =
       "https://x12.org/codes/claim-adjustment-reason-codes";
+
+  /** <a href="https://www.usps.com">USPS</a>. */
+  public static final String USPS = "https://www.usps.com";
 }
