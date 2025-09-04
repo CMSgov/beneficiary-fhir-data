@@ -129,6 +129,7 @@ jobs:
           -Dmaven.build.cache.enabled=true \
           -DskipITs \
           -DskipTests \
+          -Dsonar.qualitygate.wait=true \
           -Dsonar.exclusions='*.java' \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
         working-directory: ./apps
