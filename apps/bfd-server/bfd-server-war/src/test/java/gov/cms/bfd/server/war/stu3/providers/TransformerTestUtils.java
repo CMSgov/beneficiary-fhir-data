@@ -1711,9 +1711,6 @@ final class TransformerTestUtils {
     assertEquals(
         TransformerUtils.referencePatient(beneficiaryId).getReference(),
         referral.getSubject().getReference());
-    var patientRef = TransformerUtils.referencePatient(beneficiaryId).getReference();
-    var subjectRef = referral.getSubject().getReference();
-    assertEquals(patientRef, subjectRef);
     assertReferenceIdentifierEquals(
         TransformerConstants.CODING_NPI_US,
         referringPhysicianNpi.get(),
