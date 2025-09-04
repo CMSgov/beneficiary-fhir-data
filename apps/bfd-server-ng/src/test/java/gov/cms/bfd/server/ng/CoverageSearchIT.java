@@ -192,32 +192,28 @@ public class CoverageSearchIT extends IntegrationTestBase {
     assertThrows(InvalidRequestException.class, () -> searchBundle().execute());
   }
 
+  private static Stream<Arguments> coverageSearchForBeneWithSinglePartShouldReturnOneEntry() {
+    return Stream.of(
+        Arguments.of(BENE_ID_PART_A_ONLY, "part-a"),
+        Arguments.of(BENE_ID_PART_B_ONLY, "part-b"),
+        Arguments.of(BENE_ID_DUAL_ONLY, "dual"));
+  }
+
   @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void coverageSearchForBeneWithOnlyPartAShouldReturnOneEntry(SearchStyleEnum searchStyle) {
-    var coverageBundle = searchByBeneficiary(BENE_ID_PART_A_ONLY, searchStyle);
+  @MethodSource
+  void coverageSearchForBeneWithSinglePartShouldReturnOneEntry(String beneSk, String part) {
+    var coverageBundle = searchByBeneficiary(beneSk, SearchStyleEnum.GET);
     assertEquals(
         1,
         coverageBundle.getEntry().size(),
         "Should find exactly one Coverage resource for a Part A-only beneficiary");
     assertEquals(
-        "part-a-" + BENE_ID_PART_A_ONLY,
+        part + "-" + beneSk,
         coverageBundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
-  }
-
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void coverageSearchForBeneWithOnlyPartBShouldReturnOneEntry(SearchStyleEnum searchStyle) {
-    var coverageBundle = searchByBeneficiary(BENE_ID_PART_B_ONLY, searchStyle);
-    assertEquals(
-        1,
-        coverageBundle.getEntry().size(),
-        "Should find exactly one Coverage resource for a Part B-only beneficiary");
-    assertEquals(
-        "part-b-" + BENE_ID_PART_B_ONLY,
-        coverageBundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expect
+        .scenario("singleCoverage" + part)
+        .serializer("fhir+json")
+        .toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
