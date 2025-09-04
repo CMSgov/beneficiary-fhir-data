@@ -115,8 +115,7 @@ resource "aws_ssm_parameter" "this" {
 
   name           = each.key
   tier           = "Intelligent-Tiering"
-  value          = each.value.is_sensitive ? each.value.str_val : null
-  insecure_value = each.value.is_sensitive ? null : try(nonsensitive(each.value.str_val), each.value.str_val)
+  value          = each.value.str_val
   type           = each.value.is_sensitive ? "SecureString" : "String"
   key_id         = each.value.is_sensitive ? local.env_key_arn : null
 

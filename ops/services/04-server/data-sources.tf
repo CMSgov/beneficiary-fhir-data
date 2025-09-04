@@ -23,23 +23,15 @@ data "aws_ec2_managed_prefix_list" "vpn" {
   }
 }
 
-data "aws_ssm_parameter" "zones_list" {
-  name = !var.greenfield ? "/bfd/mgmt/common/nonsensitive/r53_hosted_zones_json" : "/bfd/platform/network/nonsensitive/route53/zones_list_json"
-}
-
 data "aws_ssm_parameter" "zone_name" {
-  count = local.root_zone_configured ? 1 : 0
-
-  name            = !var.greenfield ? "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain" : "/bfd/platform/network/sensitive/route53/zone/root/domain"
+  name            = !var.greenfield ? "/bfd/mgmt/common/sensitive/r53_hosted_zone_root_domain" : "/bfd/platform/network/sensitive/route53/zone/${local.parent_env}/domain"
   with_decryption = true
 }
 
-data "aws_route53_zone" "root" {
-  count = local.root_zone_configured ? 1 : 0
-
-  name         = nonsensitive(one(data.aws_ssm_parameter.zone_name[*].value))
+data "aws_route53_zone" "parent_env" {
+  name         = nonsensitive(data.aws_ssm_parameter.zone_name.value)
   private_zone = true
   tags = {
-    "ConfigId" = "root"
+    "ConfigId" = local.parent_env
   }
 }
