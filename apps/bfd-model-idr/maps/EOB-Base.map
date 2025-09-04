@@ -282,11 +282,19 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.CLM_BENE_PMT_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidtopatient") "Add first coding";
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add first coding";
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_BENE_PMT_AMT") "Add second coding";
      } "Add codeable concept";
      src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
-    } "Add total charge amount";
+    } "Add charge amount";
+
+    src.CLM_BENE_PD_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidtopatient") "Add first coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_BENE_PD_AMT") "Add second coding";
+     } "Add codeable concept";
+     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
+    } "Add charge amount";
 
     src.CLM_PRVDR_PMT_AMT as totChargeAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
@@ -361,6 +369,7 @@ group addMoney(source src: String, target tgt: Money){
 group addInstitutionalItems(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
   //This is a bit obtuse, but this allows us to cite the institutional + overall information from the same context.
   src.institutionalComponents as institutionalComponents -> tgt then {
+
     institutionalComponents.CLM_MDCR_NPMT_RSN_CD as nonPmtCode where nonPmtCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then {
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD" "Add url";
       src -> tgtExtension.value = create('Coding') as tgtCoding then {
@@ -726,7 +735,7 @@ group addRenderingCareTeamMemberProfessional(source src: LineItemComponent, targ
         src.CLM_RNDRG_PRVDR_TAX_NUM as taxNum -> tgtId.value = taxNum "set tax num";
     } "Create NPI identifier";
     src -> tgtPract.name = create('HumanName') as tgtName then {
-      src -> tgtName.family = "MOCK-FAMILY-NAME" "set family name";
+      src -> tgtName.family = "MOCK-FAMILY-NAME" "set family name"; 
     } "add family name";
     src.CLM_RNDRG_PRVDR_PRTCPTG_CD as participatingCode -> tgtPract.extension = create('Extension') as tgtExtension then{
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD" "Set extension url";
@@ -735,6 +744,14 @@ group addRenderingCareTeamMemberProfessional(source src: LineItemComponent, targ
         tgtCoding.code = participatingCode "Set participating code";
       } "Set coding";
     } "Add participation code";
+    //generic extension + code system since the type codes can be applied to different types, not just rendering providers.
+    src.CLM_RNDRG_PRVDR_TYPE_CD as prvdrTypeCd -> tgtPract.extension = create('Extension') as tgtExtension then{
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD" "Set extension url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD",
+        tgtCoding.code = prvdrTypeCd "Set participating code";
+      } "Set coding";
+    } "Add provider type code";
 
     src.CLM_LINE_NUM as lineNum -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole","rendering") "Add role";

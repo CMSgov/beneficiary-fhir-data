@@ -28,3 +28,4 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_LINE_HCT_HGB_RSLT_NUM "HCT/HGB Test Result" "The HCT/HGB Test Result"
 * #CLM_DSPNSNG_STUS_CD "Claim Dispensing Status Code" "Indicates the status of prescription fulfillment."
 * #CLM_LINE_RX_NUM "Claim Line Prescription Service Reference Number" "Identifies a prescription dispensed by a particular service provider on a particular service date"
+* #DGNS_DRG_OUTLIER_CD "Claim Diagnosis Related Group Outlier Stay Code" "On an institutional claim, the code that indicates the beneficiary stay under the prospective payment system (PPS) which, although classified into a specific diagnosis related group, has an unusually long length (day outlier) or exceptionally high cost (cost outlier)."

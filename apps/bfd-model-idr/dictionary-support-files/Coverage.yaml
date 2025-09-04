@@ -22,6 +22,8 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - BENE_MDCR_STATUS_CD
   cclfMapping:
     - CCLF8.BENE_MDCR_STUS_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD').value.code
@@ -32,6 +34,9 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - BENE_PTA_TRMNTN_CD
+    - BENE_PTB_TRMNTN_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD').value.code
   referenceTable: BENE_MDCR_ENTLMT_STUS_CD
   sourceView: V2_MDCR_BENE_MDCR_ENTLMT
@@ -40,6 +45,19 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - MDCR_ENTLMT_BUYIN_1_IND
+    - MDCR_ENTLMT_BUYIN_2_IND
+    - MDCR_ENTLMT_BUYIN_3_IND
+    - MDCR_ENTLMT_BUYIN_4_IND
+    - MDCR_ENTLMT_BUYIN_5_IND
+    - MDCR_ENTLMT_BUYIN_6_IND
+    - MDCR_ENTLMT_BUYIN_7_IND
+    - MDCR_ENTLMT_BUYIN_8_IND
+    - MDCR_ENTLMT_BUYIN_9_IND
+    - MDCR_ENTLMT_BUYIN_10_IND
+    - MDCR_ENTLMT_BUYIN_11_IND
+    - MDCR_ENTLMT_BUYIN_12_IND
   cclfMapping:
     - CCLF8.BENE_ENTLMT_BUYIN_IND
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD').value.code
@@ -50,6 +68,8 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - COVSTART
   cclfMapping:
     - CCLF8.BENE_PART_A_ENRLMT_BGN_DT
     - CCLF8.BENE_PART_B_ENRLMT_BGN_DT
@@ -82,6 +102,8 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - BENE_ENTLMT_RSN_ORIG
   cclfMapping:
     - CCLF8.BENE_ORGNL_ENTLMT_RSN_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD').value.code
@@ -92,6 +114,8 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - BENE_ESRD_IND
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID').value.code
   referenceTable: BENE_ESRD_STUS_ID
   sourceView: V2_MDCR_BENE_MDCR_STUS_CD
@@ -109,6 +133,19 @@
 - inputPath: Coverage-Base.BENE_DUAL_STUS_CD
   appliesTo:
     - DUAL
+  ccwMapping:
+    - DUAL_STUS_CD_01
+    - DUAL_STUS_CD_02
+    - DUAL_STUS_CD_03
+    - DUAL_STUS_CD_04
+    - DUAL_STUS_CD_05
+    - DUAL_STUS_CD_06
+    - DUAL_STUS_CD_07
+    - DUAL_STUS_CD_08
+    - DUAL_STUS_CD_09
+    - DUAL_STUS_CD_10
+    - DUAL_STUS_CD_11
+    - DUAL_STUS_CD_12
   cclfMapping:
     - CCLF8.BENE_DUAL_STUS_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DUAL-STUS-CD').value.code
@@ -158,6 +195,31 @@
   appliesTo:
     - PartC
     - PartD
+  ccwMapping:
+    - PTC_CNTRCT_ID_01
+    - PTC_CNTRCT_ID_02
+    - PTC_CNTRCT_ID_03
+    - PTC_CNTRCT_ID_04
+    - PTC_CNTRCT_ID_05
+    - PTC_CNTRCT_ID_06
+    - PTC_CNTRCT_ID_07
+    - PTC_CNTRCT_ID_08
+    - PTC_CNTRCT_ID_09
+    - PTC_CNTRCT_ID_10
+    - PTC_CNTRCT_ID_11
+    - PTC_CNTRCT_ID_12
+    - PTD_CNTRCT_ID_01
+    - PTD_CNTRCT_ID_02
+    - PTD_CNTRCT_ID_03
+    - PTD_CNTRCT_ID_04
+    - PTD_CNTRCT_ID_05
+    - PTD_CNTRCT_ID_06
+    - PTD_CNTRCT_ID_07
+    - PTD_CNTRCT_ID_08
+    - PTD_CNTRCT_ID_09
+    - PTD_CNTRCT_ID_10
+    - PTD_CNTRCT_ID_11
+    - PTD_CNTRCT_ID_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM').value
   sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_CNTRCT_NUM
@@ -165,6 +227,31 @@
   appliesTo:
     - PartC
     - PartD
+  ccwMapping:
+    - PTC_PBP_ID_01
+    - PTC_PBP_ID_02
+    - PTC_PBP_ID_03
+    - PTC_PBP_ID_04
+    - PTC_PBP_ID_05
+    - PTC_PBP_ID_06
+    - PTC_PBP_ID_07
+    - PTC_PBP_ID_08
+    - PTC_PBP_ID_09
+    - PTC_PBP_ID_10
+    - PTC_PBP_ID_11
+    - PTC_PBP_ID_12
+    - PTD_PBP_ID_01
+    - PTD_PBP_ID_02
+    - PTD_PBP_ID_03
+    - PTD_PBP_ID_04
+    - PTD_PBP_ID_05
+    - PTD_PBP_ID_06
+    - PTD_PBP_ID_07
+    - PTD_PBP_ID_08
+    - PTD_PBP_ID_09
+    - PTD_PBP_ID_10
+    - PTD_PBP_ID_11
+    - PTD_PBP_ID_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM').value
   sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_PBP_NUM
@@ -172,10 +259,24 @@
   appliesTo:
     - PartC
     - PartD
+  ccwMapping:
+    - PTC_PLAN_TYPE_CD_01
+    - PTC_PLAN_TYPE_CD_02
+    - PTC_PLAN_TYPE_CD_03
+    - PTC_PLAN_TYPE_CD_04
+    - PTC_PLAN_TYPE_CD_05
+    - PTC_PLAN_TYPE_CD_06
+    - PTC_PLAN_TYPE_CD_07
+    - PTC_PLAN_TYPE_CD_08
+    - PTC_PLAN_TYPE_CD_09
+    - PTC_PLAN_TYPE_CD_10
+    - PTC_PLAN_TYPE_CD_11
+    - PTC_PLAN_TYPE_CD_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD').value.code
   referenceTable: BENE_CVRG_TYPE_CD
   sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_CVRG_TYPE_CD
+  notes: The code system has a different enumeration between the CCW and the IDR. For example, in the IDR, PACE is 6, but 020 in the CCW.
 - inputPath: Coverage-Base.CNTRCT_PBP_NAME
   appliesTo:
     - PartC
@@ -217,18 +318,96 @@
 - inputPath: Coverage-Base.BENE_LIS_EFCTV_CD
   appliesTo:
     - PartD
+  ccwMapping:
+    - CST_SHR_GRP_CD_01
+    - CST_SHR_GRP_CD_02
+    - CST_SHR_GRP_CD_03
+    - CST_SHR_GRP_CD_04
+    - CST_SHR_GRP_CD_05
+    - CST_SHR_GRP_CD_06
+    - CST_SHR_GRP_CD_07
+    - CST_SHR_GRP_CD_08
+    - CST_SHR_GRP_CD_09
+    - CST_SHR_GRP_CD_10
+    - CST_SHR_GRP_CD_11
+    - CST_SHR_GRP_CD_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD').value.code
   sourceView: V2_MDCR_BENE_LIS
   sourceColumn: BENE_LIS_EFCTV_CD
 - inputPath: Coverage-Base.BENE_LIS_COPMT_LVL_CD
   appliesTo:
     - PartD
+  ccwMapping:
+    - CST_SHR_GRP_CD_01
+    - CST_SHR_GRP_CD_02
+    - CST_SHR_GRP_CD_03
+    - CST_SHR_GRP_CD_04
+    - CST_SHR_GRP_CD_05
+    - CST_SHR_GRP_CD_06
+    - CST_SHR_GRP_CD_07
+    - CST_SHR_GRP_CD_08
+    - CST_SHR_GRP_CD_09
+    - CST_SHR_GRP_CD_10
+    - CST_SHR_GRP_CD_11
+    - CST_SHR_GRP_CD_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD').value.code
   sourceView: V2_MDCR_BENE_LIS
   sourceColumn: BENE_LIS_COPMT_LVL_CD
 - inputPath: Coverage-Base.BENE_LIS_PTD_PRM_PCT
   appliesTo:
     - PartD
+  ccwMapping:
+    - CST_SHR_GRP_CD_01
+    - CST_SHR_GRP_CD_02
+    - CST_SHR_GRP_CD_03
+    - CST_SHR_GRP_CD_04
+    - CST_SHR_GRP_CD_05
+    - CST_SHR_GRP_CD_06
+    - CST_SHR_GRP_CD_07
+    - CST_SHR_GRP_CD_08
+    - CST_SHR_GRP_CD_09
+    - CST_SHR_GRP_CD_10
+    - CST_SHR_GRP_CD_11
+    - CST_SHR_GRP_CD_12
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT').value
   sourceView: V2_MDCR_BENE_LIS
   sourceColumn: BENE_LIS_PTD_PRM_PCT
+- inputPath: Coverage-Base.CNTRCT_PBP_SGMT_NUM
+  appliesTo:
+    - PartD
+  ccwMapping:
+    - PTD_SGMT_ID_01
+    - PTD_SGMT_ID_02
+    - PTD_SGMT_ID_03
+    - PTD_SGMT_ID_04
+    - PTD_SGMT_ID_05
+    - PTD_SGMT_ID_06
+    - PTD_SGMT_ID_07
+    - PTD_SGMT_ID_08
+    - PTD_SGMT_ID_09
+    - PTD_SGMT_ID_10
+    - PTD_SGMT_ID_11
+    - PTD_SGMT_ID_12
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CNTRCT-PBP-SGMT-NUM').value
+  sourceView: V2_MDCR_CNTRCT_PBP_SGMT
+  sourceColumn: CNTRCT_PBP_SGMT_NUM
+- inputPath: Coverage-Base.BENE_ENRLMT_EMPLR_SBSDY_SW
+  appliesTo:
+    - PartD
+  ccwMapping:
+    - RDS_IND_01
+    - RDS_IND_02
+    - RDS_IND_03
+    - RDS_IND_04
+    - RDS_IND_05
+    - RDS_IND_06
+    - RDS_IND_07
+    - RDS_IND_08
+    - RDS_IND_09
+    - RDS_IND_10
+    - RDS_IND_11
+    - RDS_IND_12
+  fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW').value
+  sourceView: V2_MDCR_BENE_MAPD_ENRLMT
+  sourceColumn: BENE_ENRLMT_EMPLR_SBSDY_SW
+

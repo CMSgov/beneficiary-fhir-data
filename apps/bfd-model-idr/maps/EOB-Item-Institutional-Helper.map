@@ -100,9 +100,10 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
 }
 
 group addSuplrTypeCd(source src: String, target tgt: Extension){
-    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SUPLR-TYPE-CD" "Add extension url";
+    //This is purposeful (use of PRVDR-TYPE-CD.) Suplr-type-cd is a subset of the overall set. We can combine the extensions + code systems.
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD" "Add extension url";
     src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SUPLR-TYPE-CD" "Set system";
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD" "Set system";
         inputCode -> tgtCoding.code = inputCode "set code";
       } "Set value";
 }

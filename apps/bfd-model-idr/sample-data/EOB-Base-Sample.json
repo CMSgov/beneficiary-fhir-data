@@ -49,7 +49,8 @@
         {"ROW_NUM":"18","CLM_QLFY_STAY_FROM_DT":"2025-01-02"},
         {"ROW_NUM":"19","CLM_QLFY_STAY_THRU_DT":"2025-01-01"},
         {"ROW_NUM":"20","CLM_HHA_LUP_IND_CD":"L"},
-        {"ROW_NUM":"21","CLM_HHA_RFRL_CD":"C"}
+        {"ROW_NUM":"21","CLM_HHA_RFRL_CD":"C"},
+        {"ROW_NUM":"22","DGNS_DRG_OUTLIER_CD":"6"}
         
     ],
     "lineItemComponents":[
