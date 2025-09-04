@@ -117,42 +117,58 @@ def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]) -
         extract_and_load(c, data_extractor, connection_string)
 
 
+def parse_bool(var: str) -> bool:
+    # bool(str) interprets anything non-empty as true so we gotta do it manually
+    return var.lower() == "true" or var == "1"
+
+
 def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
     logger.info("load start")
 
-    load_all(
-        data_extractor,
-        connection_string,
-        IdrBeneficiaryMbiId,
-    )
+    # temporary flags to load a subset of data for testing
+    load_benes = parse_bool(os.environ.get("IDR_LOAD_BENES", "true"))
+    load_claims = parse_bool(os.environ.get("IDR_LOAD_CLAIMS", "true"))
 
-    (bene_loader, data_loaded) = extract_and_load(
-        IdrBeneficiary,
-        data_extractor,
-        connection_string,
-    )
-    if data_loaded:
-        bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
+    if load_benes:
+        load_all(
+            data_extractor,
+            connection_string,
+            IdrBeneficiaryMbiId,
+        )
 
-    load_all(
-        data_extractor,
-        connection_string,
-        IdrBeneficiaryStatus,
-        IdrBeneficiaryThirdParty,
-        IdrBeneficiaryEntitlement,
-        IdrBeneficiaryEntitlementReason,
-        # Ignore for now, we'll likely source these elsewhere when we load contract data
-        # IdrContractPbpNumber,
-        # IdrElectionPeriodUsage,
-        IdrClaim,
-        IdrClaimInstitutional,
-        IdrClaimDateSignature,
-        IdrClaimItem,
-        IdrClaimLineInstitutional,
-        IdrClaimAnsiSignature,
-        IdrClaimProfessional,
-        IdrClaimLineProfessional,
-    )
+        (bene_loader, data_loaded) = extract_and_load(
+            IdrBeneficiary,
+            data_extractor,
+            connection_string,
+        )
+        if data_loaded:
+            bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
+
+        load_all(
+            data_extractor,
+            connection_string,
+            IdrBeneficiaryStatus,
+            IdrBeneficiaryThirdParty,
+            IdrBeneficiaryEntitlement,
+            IdrBeneficiaryEntitlementReason,
+            # Ignore for now, we'll likely source these elsewhere when we load contract data
+            # IdrContractPbpNumber,
+            # IdrElectionPeriodUsage,
+        )
+
+    if load_claims:
+        load_all(
+            data_extractor,
+            connection_string,
+            IdrClaim,
+            IdrClaimInstitutional,
+            IdrClaimDateSignature,
+            IdrClaimItem,
+            IdrClaimLineInstitutional,
+            IdrClaimAnsiSignature,
+            IdrClaimProfessional,
+            IdrClaimLineProfessional,
+        )
 
     logger.info("done")
     extractor.print_timers()
