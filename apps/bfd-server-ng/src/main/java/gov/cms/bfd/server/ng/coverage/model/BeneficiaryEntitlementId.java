@@ -1,17 +1,12 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import gov.cms.bfd.server.ng.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.Period;
 
 /** Represents the composite primary key for the {@link BeneficiaryEntitlement} entity. */
 @EqualsAndHashCode
@@ -24,26 +19,6 @@ public class BeneficiaryEntitlementId implements Serializable {
   @Column(name = "bene_sk")
   private Long beneSk;
 
-  @Column(name = "bene_rng_bgn_dt")
-  private LocalDate benefitRangeBeginDate;
-
-  @Column(name = "bene_rng_end_dt")
-  private Optional<LocalDate> benefitRangeEndDate;
-
   @Column(name = "bene_mdcr_entlmt_type_cd")
   private String medicareEntitlementTypeCode;
-
-  Period toFhirPeriod() {
-    var period = new Period().setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate));
-    benefitRangeEndDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
-    return period;
-  }
-
-  Coverage.CoverageStatus toFhirStatus() {
-    if (benefitRangeEndDate.isPresent() && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe())) {
-      return Coverage.CoverageStatus.CANCELLED;
-    }
-
-    return Coverage.CoverageStatus.ACTIVE;
-  }
 }

@@ -38,6 +38,8 @@ public class BeneficiaryEntitlement {
   @Column(name = "bfd_updated_ts")
   private ZonedDateTime bfdUpdatedTimestamp;
 
+  private BeneficiaryEntitlementPeriod entitlementPeriod;
+
   /**
    * create create Medicare Status Extension.
    *
@@ -64,10 +66,10 @@ public class BeneficiaryEntitlement {
   }
 
   Period toFhirPeriod() {
-    return id.toFhirPeriod();
+    return entitlementPeriod.toFhirPeriod();
   }
 
   Coverage.CoverageStatus toFhirStatus() {
-    return id.toFhirStatus();
+    return entitlementPeriod.toFhirStatus();
   }
 }
