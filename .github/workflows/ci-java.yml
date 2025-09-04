@@ -1,10 +1,5 @@
 name: 'CI - Java'
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        required: false
-        default: ""
   schedule:
     - cron: '13 8 * * 1-5'  # Early morning continental US hours, Monday through Friday
   pull_request:
@@ -53,8 +48,6 @@ jobs:
     if: needs.workflow.outputs.files
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -73,7 +66,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.branch || github.ref_name }}
 
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
@@ -127,8 +119,6 @@ jobs:
         working-directory: ./apps
 
       - name: 'Generate, Upload Build Reports'
-        env:
-          BFD_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           mvn sonar:sonar \
           --no-transfer-progress \
@@ -136,7 +126,6 @@ jobs:
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.token="$SONAR_TOKEN" \
-          -Dsonar.branch.name="$BFD_BRANCH" \
           -Dmaven.build.cache.enabled=true \
           -DskipITs \
           -DskipTests \
