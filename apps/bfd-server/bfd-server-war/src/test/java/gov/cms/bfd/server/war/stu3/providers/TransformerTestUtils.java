@@ -1707,9 +1707,10 @@ final class TransformerTestUtils {
 
     assertExtensionCodingEquals(CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode, eob);
 
-    var eobReferral = eob.getReferral();
-    var eobResource = eobReferral.getResource();
-    ReferralRequest referral = (ReferralRequest) eobResource;
+    ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+    assertEquals(
+        TransformerUtils.referencePatient(beneficiaryId).getReference(),
+        referral.getSubject().getReference());
     var patientRef = TransformerUtils.referencePatient(beneficiaryId).getReference();
     var subjectRef = referral.getSubject().getReference();
     assertEquals(patientRef, subjectRef);
