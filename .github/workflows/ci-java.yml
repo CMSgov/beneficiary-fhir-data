@@ -81,7 +81,13 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-          cache: 'maven'
+      - name: Cache local Maven build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
