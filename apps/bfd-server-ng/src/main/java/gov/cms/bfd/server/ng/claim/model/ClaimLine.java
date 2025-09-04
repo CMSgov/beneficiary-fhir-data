@@ -72,6 +72,10 @@ public class ClaimLine {
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
+    claimLineInstitutional
+        .map(ClaimLineInstitutional::getExtensions)
+        .ifPresent(e -> line.setExtension(e.toFhir()));
+
     return Optional.of(line);
   }
 }

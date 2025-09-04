@@ -328,19 +328,17 @@ public enum ClaimTypeCode {
   }
 
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
-    var shouldAdd =
-        switch (code) {
-          case 60, 61, 62, 63, 64, 1011, 1041, 2011, 2041 -> true;
-          default -> false;
-        };
-    if (!shouldAdd) {
-      return Optional.empty();
-    }
-
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)
             .setCoverage(new Reference().setDisplay("Part A")));
+  }
+
+  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
+    if (isBetween(1000, 1999)) {
+      return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+    }
+    return Optional.empty();
   }
 
   boolean isBetween(int lower, int upper) {

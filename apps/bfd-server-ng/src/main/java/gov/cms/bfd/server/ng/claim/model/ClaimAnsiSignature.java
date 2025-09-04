@@ -32,18 +32,33 @@ public class ClaimAnsiSignature {
   @Column(name = "clm_4_rev_cntr_ansi_rsn_cd")
   private Optional<String> revenueCenterAnsiReasonCode4;
 
+  @Column(name = "clm_1_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode1;
+
+  @Column(name = "clm_2_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode2;
+
+  @Column(name = "clm_3_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode3;
+
+  @Column(name = "clm_4_rev_cntr_ansi_grp_cd")
+  private Optional<String> revenueCenterAnsiGroupCode4;
+
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    var codes =
-        Stream.of(
-                revenueCenterAnsiReasonCode1,
-                revenueCenterAnsiReasonCode2,
-                revenueCenterAnsiReasonCode3,
-                revenueCenterAnsiReasonCode4)
-            .flatMap(Optional::stream);
-    return codes.map(this::toAdjudicationComponent).toList();
+    return Stream.of(
+            new Pair(revenueCenterAnsiGroupCode1, revenueCenterAnsiReasonCode1),
+            new Pair(revenueCenterAnsiGroupCode2, revenueCenterAnsiReasonCode2),
+            new Pair(revenueCenterAnsiGroupCode3, revenueCenterAnsiReasonCode3),
+            new Pair(revenueCenterAnsiGroupCode4, revenueCenterAnsiReasonCode4))
+        .flatMap(
+            pair -> pair.group().map(code -> new Pair(Optional.of(code), pair.reason())).stream())
+        .filter(pair -> pair.group().map(code -> code.length() == 2).orElse(false))
+        .map(pair -> toAdjudicationComponent(pair.group().get(), String.valueOf(pair.reason())))
+        .toList();
   }
 
-  private ExplanationOfBenefit.AdjudicationComponent toAdjudicationComponent(String code) {
+  private ExplanationOfBenefit.AdjudicationComponent toAdjudicationComponent(
+      String groupCode, String reasonCode) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(
             new CodeableConcept(
@@ -52,9 +67,16 @@ public class ClaimAnsiSignature {
                     .setCode("adjustmentreason")
                     .setDisplay("Adjustment Reason")))
         .setReason(
-            new CodeableConcept(
-                new Coding()
-                    .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
-                    .setCode(code)));
+            new CodeableConcept()
+                .addCoding(
+                    new Coding()
+                        .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
+                        .setCode(groupCode))
+                .addCoding(
+                    new Coding()
+                        .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
+                        .setCode(reasonCode)));
   }
+
+  private record Pair(Optional<String> group, Optional<String> reason) {}
 }
