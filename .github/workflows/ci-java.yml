@@ -73,9 +73,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch || github.ref_name }}
-      - name: Pre-Cache Hydration
-        run: |
-          find ~/ -iwholename '*/.m2/*'
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
