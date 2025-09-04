@@ -185,6 +185,9 @@ public class Configuration {
   @ConfigurationProperties
   public static class Nonsensitive {
     private Db db = new Db();
+    private boolean eobEnabled = true;
+    private boolean patientEnabled = true;
+    private boolean coverageEnabled = true;
 
     /** Nonsensitive database configuration. */
     @Data
