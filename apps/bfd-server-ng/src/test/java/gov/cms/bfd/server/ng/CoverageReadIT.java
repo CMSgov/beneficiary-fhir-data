@@ -195,12 +195,24 @@ public class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(dualId).execute();
 
     assertEquals(dualId, coverage.getIdPart());
+    assertEquals(Coverage.CoverageStatus.ACTIVE, coverage.getStatus());
     var dualStatusCodeExtension =
         getExtensionByUrl(coverage, SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_DUAL_STATUS_CODE);
     assertEquals(1, dualStatusCodeExtension.size());
     assertEquals(
         DUAL_ONLY_BENE_COVERAGE_STATUS_CODE,
         ((Coding) dualStatusCodeExtension.getFirst().getValue()).getCode());
+
+    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+  }
+
+  @Test
+  void coverageReadDualOnlyExpired() {
+    var dualId = createCoverageId("dual", BENE_ID_DUAL_ONLY_EXPIRED);
+    var coverage = coverageRead().withId(dualId).execute();
+
+    assertEquals(dualId, coverage.getIdPart());
+    assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
 
     expect.serializer("fhir+json").toMatchSnapshot(coverage);
   }
