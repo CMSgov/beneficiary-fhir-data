@@ -67,9 +67,10 @@ public class CoverageReadIT extends IntegrationTestBase {
   @Test
   void coverageReadForNonCurrentEffectiveBeneficiaryIdShouldBeNotFound() {
     var nonCurrentEffectiveBeneId = "part-a-" + BENE_ID_NON_CURRENT;
+    var readWithId = coverageRead().withId(nonCurrentEffectiveBeneId);
     assertThrows(
         ResourceNotFoundException.class,
-        () -> coverageRead().withId(nonCurrentEffectiveBeneId).execute(),
+        readWithId::execute,
         String.format(
             "Should throw ResourceNotFoundException for Coverage ID 'part-a-%s 'because the beneficiary record is not the current effective version.",
             BENE_ID_NON_CURRENT));
@@ -87,11 +88,12 @@ public class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadBeneExistsButPartOrVersionNotFound() {
-    var idForNonExistentCoverage = "part-c-1";
+    var idForNonExistentCoverage = "part-e-" + BENE_ID_ALL_PARTS_WITH_XREF;
 
+    var readWithId = coverageRead().withId(idForNonExistentCoverage);
     assertThrows(
         InvalidRequestException.class,
-        () -> coverageRead().withId(idForNonExistentCoverage).execute(),
+        readWithId::execute,
         "Should throw ResourceNotFoundException for a validly formatted ID that doesn't map to a resource.");
   }
 
@@ -99,27 +101,30 @@ public class CoverageReadIT extends IntegrationTestBase {
   void coverageReadBeneSkNotFound() {
     var nonExistentBeneSkId = "part-a-9999999";
 
+    var readWithId = coverageRead().withId(nonExistentBeneSkId);
     assertThrows(
         ResourceNotFoundException.class,
-        () -> coverageRead().withId(nonExistentBeneSkId).execute(),
+        readWithId::execute,
         "Should throw ResourceNotFoundException if the beneficiary part of the ID does not exist.");
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"part-a", "-12345", "part-a-abc", "foo-12345", "part-e-12345"})
   void coverageReadInvalidIdFormatBadRequest(String invalidId) {
+    var readWithId = coverageRead().withId(invalidId);
     assertThrows(
         InvalidRequestException.class,
-        () -> coverageRead().withId(invalidId).execute(),
+        readWithId::execute,
         "Should throw InvalidRequestException from server for ID: " + invalidId);
   }
 
   @Test
   void coverageReadUnsupportedValidPartBadRequest() {
     var unsupportedPartId = "part-e-1";
+    var readWithId = coverageRead().withId(unsupportedPartId);
     assertThrows(
         InvalidRequestException.class,
-        () -> coverageRead().withId(unsupportedPartId).execute(),
+        readWithId::execute,
         "Should throw InvalidRequestException for an unsupported part.");
   }
 
@@ -127,9 +132,10 @@ public class CoverageReadIT extends IntegrationTestBase {
   void coverageReadMergedBeneReturnsNotFound() {
     var expiredCoverageId = createCoverageId("part-a", HISTORICAL_MERGED_BENE_SK);
 
+    var readWithId = coverageRead().withId(expiredCoverageId);
     assertThrows(
         ResourceNotFoundException.class,
-        () -> coverageRead().withId(expiredCoverageId).execute(),
+        readWithId::execute,
         "Should throw ResourceNotFoundException.");
   }
 

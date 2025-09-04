@@ -189,7 +189,8 @@ public class CoverageSearchIT extends IntegrationTestBase {
 
   @Test
   void coverageSearchWithNoParametersBadRequest() {
-    assertThrows(InvalidRequestException.class, () -> searchBundle().execute());
+    var bundle = searchBundle();
+    assertThrows(InvalidRequestException.class, bundle::execute);
   }
 
   private static Stream<Arguments> coverageSearchForBeneWithSinglePartShouldReturnOneEntry() {

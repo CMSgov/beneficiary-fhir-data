@@ -178,15 +178,13 @@ public class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchByPatientInvalidResourceType() {
-    assertThrows(
-        InvalidRequestException.class,
-        () ->
-            searchBundle()
-                .where(
-                    new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-                        .exactly()
-                        .identifier("Blah/181968400"))
-                .execute());
+    var searchWithidentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier("Blah/" + BENE_ID_ALL_PARTS_WITH_XREF));
+    assertThrows(InvalidRequestException.class, searchWithidentifier::execute);
   }
 
   @ParameterizedTest
@@ -276,17 +274,16 @@ public class EobSearchIT extends IntegrationTestBase {
         "https://bluebutton.cms.gov/fhir/CodeSystem/test"
       })
   void eobSearchByInvalidTagBadRequest(String invalidTag) {
-
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(invalidTag));
     assertThrows(
         InvalidRequestException.class,
-        () ->
-            searchBundle()
-                .where(
-                    new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-                        .exactly()
-                        .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
-                .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(invalidTag))
-                .execute(),
+        searchWithIdentifier::execute,
         "Should throw InvalidRequestException for unsupported _tag value: " + invalidTag);
   }
 }
