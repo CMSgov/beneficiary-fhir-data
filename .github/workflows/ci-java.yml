@@ -4,6 +4,9 @@ on:
     - cron: '13 8 * * 1-5'  # Early morning continental US hours, Monday through Friday
   pull_request:
   merge_group:
+  push:
+    branches:
+      - master
 
 permissions:
   id-token: write
@@ -61,15 +64,23 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'corretto'
-          cache: 'maven'
+      - name: Cache local Maven build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-
       - name: Configure AWS credentials
         id: config-aws-creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -100,22 +111,25 @@ jobs:
         run: |
           mvn --threads 1C \
           --no-transfer-progress \
-          -Dmaven.build.cache.enabled=false \
+          -Dmaven.build.cache.enabled=true \
           -Dapidocgen.skip=false \
           -Dmaven.jacoco.skip=false \
+          -Dmaven.source.skip=true \
           clean install
         working-directory: ./apps
 
       - name: 'Generate, Upload Build Reports'
         run: |
           mvn sonar:sonar \
+          --no-transfer-progress \
           -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.token="$SONAR_TOKEN" \
-          -Dmaven.build.cache.enabled=false \
+          -Dmaven.build.cache.enabled=true \
           -DskipITs \
           -DskipTests \
+          -Dsonar.qualitygate.wait=true \
           -Dsonar.exclusions='*.java' \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
         working-directory: ./apps

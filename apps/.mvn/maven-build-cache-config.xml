@@ -4,4 +4,9 @@
     <configuration>
         <projectVersioning adjustMetaInf="true" calculateProjectVersionChecksum="true" />
     </configuration>
+    <input>
+        <global>
+            <glob>{*.java,*.xml,*.properties}</glob>
+        </global>
+    </input>
 </cache>

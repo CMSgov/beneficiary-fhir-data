@@ -56,7 +56,7 @@ public class DataSetQueueTest {
 
   /** Used to validate parsing of manifests. */
   private static final String SAMPLE_MANIFEST =
-      """
+"""
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <bbr:dataSetManifest xmlns:bbr="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v10" timestamp="2024-01-19T16:16:38Z" sequenceId="0">
   <bbr:entry name="beneficiary.csv" type="BENEFICIARY"/>
