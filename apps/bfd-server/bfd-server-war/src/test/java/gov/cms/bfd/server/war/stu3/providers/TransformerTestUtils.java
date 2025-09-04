@@ -1042,7 +1042,10 @@ final class TransformerTestUtils {
    * @param resource the FHIR {@link Resource} to check
    */
   static void assertNoEncodedOptionals(Resource resource) {
-    String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
+    // HAPI FHIR performs some normalization steps before serializing the object,
+    // so it's important to call copy() first due to Java's pass by reference semantics.
+    // Otherwise, the object will be modified in place.
+    String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource.copy());
     assertFalse(encodedResourceXml.contains("Optional"));
   }
 

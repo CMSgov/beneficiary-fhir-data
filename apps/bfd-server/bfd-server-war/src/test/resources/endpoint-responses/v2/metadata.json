@@ -19,7 +19,7 @@
     "url" : "https://localhost:IGNORED_FIELD/v2/fhir"
   },
   "fhirVersion" : "4.0.1",
-  "format" : [ "application/fhir+xml", "xml", "application/fhir+json", "json" ],
+  "format" : [ "application/fhir+xml", "xml", "application/fhir+json", "json", "application/x-turtle", "ttl" ],
   "rest" : [ {
     "mode" : "server",
     "resource" : [ {

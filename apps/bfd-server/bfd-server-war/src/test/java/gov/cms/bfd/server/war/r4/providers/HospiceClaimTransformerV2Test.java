@@ -219,7 +219,7 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHaveOrganizationContainedEntry() {
     Optional<Resource> resource =
-        eob.getContained().stream().filter(r -> r.getId().equals("#provider-org")).findFirst();
+        eob.getContained().stream().filter(r -> r.getId().equals("provider-org")).findFirst();
     assertTrue(resource.isPresent());
 
     Organization actualEobContainedOrganizationResource = (Organization) resource.get();
