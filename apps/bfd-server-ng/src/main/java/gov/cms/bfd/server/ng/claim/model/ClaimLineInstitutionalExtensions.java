@@ -9,21 +9,23 @@ import org.hl7.fhir.r4.model.Extension;
 
 @Embeddable
 public class ClaimLineInstitutionalExtensions {
-    @Embedded ClaimRevenueDiscountIndicatorCode claimRevenueDiscountIndicatorCode;
-    @Embedded ClaimObligatedToAcceptasFinalOneIndicatorCode claimObligatedToAcceptasFinalOneIndicatorCode;
-    @Embedded ClaimRevenuePackageIndicatorCode claimRevenuePackageIndicatorCode;
-    @Embedded ClaimRevenuePaymentMethodCode claimRevenuePaymentMethodCode;
-    @Embedded ClaimRevenueCenterStatusCode claimRevenueCenterStatusCode;
+  @Embedded ClaimRevenueDiscountIndicatorCode claimRevenueDiscountIndicatorCode;
 
-    List<Extension> toFhir() {
-        return Stream.of(
-                    claimRevenueDiscountIndicatorCode.toFhir(),
-                    claimObligatedToAcceptasFinalOneIndicatorCode.toFhir(),
-                    claimRevenuePackageIndicatorCode.toFhir(),
-                    claimRevenuePaymentMethodCode.toFhir(),
-                    claimRevenueCenterStatusCode.toFhir()
-                )
-                .flatMap(Optional::stream)
-                .toList();
-    }
+  @Embedded
+  ClaimObligatedToAcceptasFinalOneIndicatorCode claimObligatedToAcceptasFinalOneIndicatorCode;
+
+  @Embedded ClaimRevenuePackageIndicatorCode claimRevenuePackageIndicatorCode;
+  @Embedded ClaimRevenuePaymentMethodCode claimRevenuePaymentMethodCode;
+  @Embedded ClaimRevenueCenterStatusCode claimRevenueCenterStatusCode;
+
+  List<Extension> toFhir() {
+    return Stream.of(
+            claimRevenueDiscountIndicatorCode.toFhir(),
+            claimObligatedToAcceptasFinalOneIndicatorCode.toFhir(),
+            claimRevenuePackageIndicatorCode.toFhir(),
+            claimRevenuePaymentMethodCode.toFhir(),
+            claimRevenueCenterStatusCode.toFhir())
+        .flatMap(Optional::stream)
+        .toList();
+  }
 }

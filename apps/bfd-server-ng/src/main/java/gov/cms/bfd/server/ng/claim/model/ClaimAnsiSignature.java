@@ -46,17 +46,19 @@ public class ClaimAnsiSignature {
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return Stream.of(
-                new Pair(revenueCenterAnsiGroupCode1, revenueCenterAnsiReasonCode1),
-                new Pair(revenueCenterAnsiGroupCode2, revenueCenterAnsiReasonCode2),
-                new Pair(revenueCenterAnsiGroupCode3, revenueCenterAnsiReasonCode3),
-                new Pair(revenueCenterAnsiGroupCode4, revenueCenterAnsiReasonCode4))
-        .flatMap(pair -> pair.group().map(code -> new Pair(Optional.of(code), pair.reason())).stream())
+            new Pair(revenueCenterAnsiGroupCode1, revenueCenterAnsiReasonCode1),
+            new Pair(revenueCenterAnsiGroupCode2, revenueCenterAnsiReasonCode2),
+            new Pair(revenueCenterAnsiGroupCode3, revenueCenterAnsiReasonCode3),
+            new Pair(revenueCenterAnsiGroupCode4, revenueCenterAnsiReasonCode4))
+        .flatMap(
+            pair -> pair.group().map(code -> new Pair(Optional.of(code), pair.reason())).stream())
         .filter(pair -> pair.group().map(code -> code.length() == 2).orElse(false))
         .map(pair -> toAdjudicationComponent(pair.group().get(), String.valueOf(pair.reason())))
         .toList();
   }
 
-  private ExplanationOfBenefit.AdjudicationComponent toAdjudicationComponent(String groupCode, String reasonCode) {
+  private ExplanationOfBenefit.AdjudicationComponent toAdjudicationComponent(
+      String groupCode, String reasonCode) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(
             new CodeableConcept(
@@ -67,14 +69,13 @@ public class ClaimAnsiSignature {
         .setReason(
             new CodeableConcept()
                 .addCoding(
-                        new Coding()
-                                .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
-                                .setCode(groupCode))
+                    new Coding()
+                        .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
+                        .setCode(groupCode))
                 .addCoding(
-                        new Coding()
-                                .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
-                                .setCode(reasonCode))
-        );
+                    new Coding()
+                        .setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_REASON_CODES)
+                        .setCode(reasonCode)));
   }
 
   private record Pair(Optional<String> group, Optional<String> reason) {}

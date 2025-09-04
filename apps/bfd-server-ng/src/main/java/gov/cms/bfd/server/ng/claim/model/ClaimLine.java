@@ -8,7 +8,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -74,8 +73,8 @@ public class ClaimLine {
         .forEach(line::addAdjudication);
 
     claimLineInstitutional
-            .map(ClaimLineInstitutional::getExtensions)
-            .ifPresent(e -> line.setExtension(e.toFhir()));
+        .map(ClaimLineInstitutional::getExtensions)
+        .ifPresent(e -> line.setExtension(e.toFhir()));
 
     return Optional.of(line);
   }

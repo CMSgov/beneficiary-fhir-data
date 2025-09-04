@@ -223,7 +223,8 @@ public class SystemUrls {
   /**
    * <a href="https://terminology.hl7.org/1.0.0/CodeSystem-v3-NullFlavor.html">Hl7 Null Flavor.</a>
    */
-  public static final String HL7_NULL_FLAVOR = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
+  public static final String HL7_NULL_FLAVOR =
+      "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
 
   /** <a href="https://terminology.hl7.org/2.1.0/CodeSystem-v2-0203.html">Hl7 Identifier.</a> */
   public static final String HL7_IDENTIFIER = "http://terminology.hl7.org/CodeSystem/v2-0203";
@@ -472,29 +473,29 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_OTAF_ONE_INDICATOR_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-ONE-IND-CD";
 
-    /** URL. */
-    public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_PACKAGE_INDICATOR_CODE =
-            "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD";
+  /** URL. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_PACKAGE_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD";
 
-    /** URL. */
-    public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_PACKAGE_INDICATOR_CODE =
-            "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD";
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_PACKAGE_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD";
 
-    /** URL. */
-    public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_PAYMENT_METHOD_CODE =
-            "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PMT-MTHD-CD";
+  /** URL. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_PAYMENT_METHOD_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PMT-MTHD-CD";
 
-    /** URL. */
-    public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_PAYMENT_METHOD_CODE =
-            "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD";
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_PAYMENT_METHOD_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD";
 
-    /** URL. */
-    public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_CENTER_STATUS_CODE =
-            "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD";
+  /** URL. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_CENTER_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD";
 
-    /** URL. */
-    public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_STATUS_CODE =
-            "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD";
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD";
 
   /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =

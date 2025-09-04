@@ -9,8 +9,10 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
 
 @AllArgsConstructor
 enum BenefitBalanceInstitutionalType {
-  /** CLM_MDCR_INSTNL_BENE_PD_AMT -  */
-  CLM_MDCR_INSTNL_BENE_PD_AMT("CLM_MDCR_INSTNL_BENE_PD_AMT", "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the claim."),
+  /** CLM_MDCR_INSTNL_BENE_PD_AMT - */
+  CLM_MDCR_INSTNL_BENE_PD_AMT(
+      "CLM_MDCR_INSTNL_BENE_PD_AMT",
+      "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the claim."),
   /** CLM_MDCR_IP_LRD_USE_CNT - Beneficiary Medicare Lifetime Reserve Days (LRD) Used Count. */
   CLM_MDCR_IP_LRD_USE_CNT(
       "CLM_MDCR_IP_LRD_USE_CNT", "Beneficiary Medicare Lifetime Reserve Days (LRD) Used Count"),
