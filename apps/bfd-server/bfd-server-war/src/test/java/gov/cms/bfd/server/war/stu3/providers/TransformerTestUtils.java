@@ -1042,7 +1042,10 @@ final class TransformerTestUtils {
    * @param resource the FHIR {@link Resource} to check
    */
   static void assertNoEncodedOptionals(Resource resource) {
-    String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
+    // HAPI FHIR performs some normalization steps before serializing the object,
+    // so it's important to call copy() first due to Java's pass by reference semantics.
+    // Otherwise, the object will be modified in place.
+    String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource.copy());
     assertFalse(encodedResourceXml.contains("Optional"));
   }
 
@@ -1704,10 +1707,12 @@ final class TransformerTestUtils {
 
     assertExtensionCodingEquals(CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode, eob);
 
-    ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-    assertEquals(
-        TransformerUtils.referencePatient(beneficiaryId).getReference(),
-        referral.getSubject().getReference());
+    var eobReferral = eob.getReferral();
+    var eobResource = eobReferral.getResource();
+    ReferralRequest referral = (ReferralRequest) eobResource;
+    var patientRef = TransformerUtils.referencePatient(beneficiaryId).getReference();
+    var subjectRef = referral.getSubject().getReference();
+    assertEquals(patientRef, subjectRef);
     assertReferenceIdentifierEquals(
         TransformerConstants.CODING_NPI_US,
         referringPhysicianNpi.get(),
