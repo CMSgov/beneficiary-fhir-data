@@ -557,6 +557,6 @@ public class SystemUrls {
   public static final String X12_CLAIM_ADJUSTMENT_REASON_CODES =
       "https://x12.org/codes/claim-adjustment-reason-codes";
 
-  /** URL. */
+  /** <a href="https://www.usps.com">USPS</a>. */
   public static final String USPS = "https://www.usps.com";
 }
