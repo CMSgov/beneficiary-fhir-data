@@ -70,6 +70,12 @@ public class DateUtil {
     return date.toInstant().atZone(ZONE_ID_UTC);
   }
 
+  /**
+   * <a href="https://en.wikipedia.org/wiki/Anywhere_on_Earth">"Anywhere on Earth"</a> time which
+   * indicates a period that expires when the date passes everywhere on Earth.
+   *
+   * @return local date
+   */
   public static LocalDate nowAoe() {
     return LocalDate.now(ZoneId.of("-12:00"));
   }

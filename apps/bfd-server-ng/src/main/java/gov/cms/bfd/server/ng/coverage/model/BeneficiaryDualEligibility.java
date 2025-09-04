@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 
+/** Dual Medicare/Medicaid eligibility info. */
 @Entity
 @Table(name = "beneficiary_dual_eligibility_latest", schema = "idr")
 public class BeneficiaryDualEligibility {

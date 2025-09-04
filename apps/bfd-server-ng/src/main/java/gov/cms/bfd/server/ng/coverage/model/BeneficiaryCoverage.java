@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Entity representing the beneficiary table with coverage info. */
@@ -69,12 +68,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     coverage.setBeneficiary(new Reference("Patient/" + beneSk));
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
-    Organization cmsOrg = OrganizationFactory.createCmsOrganization();
-    coverage.addContained(cmsOrg);
 
-    coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
-
-    identifier.toFhir().ifPresent(coverage::addIdentifier);
     coverage.setSubscriberId(identifier.getMbi());
     var coveragePart = coverageCompositeId.coveragePart();
     coverage.setType(coveragePart.toFhirTypeCode());
@@ -112,6 +106,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     if (entitlementOpt.isEmpty()) {
       return toEmptyResource(coverage);
     }
+
+    identifier.toFhir().ifPresent(coverage::addIdentifier);
+    var cmsOrg = OrganizationFactory.createCmsOrganization();
+    coverage.addContained(cmsOrg);
+    coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
+
     var entitlement = entitlementOpt.get();
 
     coverage.setPeriod(entitlement.toFhirPeriod());
@@ -143,6 +143,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
     }
+
+    identifier.toFhir().ifPresent(coverage::addIdentifier);
+    var cmsOrg = OrganizationFactory.createCmsOrganization();
+    coverage.addContained(cmsOrg);
+    coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
+
     var dualEligibility = dualEligibilityOpt.get();
     coverage.setPeriod(dualEligibility.toFhirPeriod());
     coverage.setStatus(dualEligibility.toFhirStatus());
