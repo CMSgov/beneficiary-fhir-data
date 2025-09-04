@@ -137,6 +137,7 @@ jobs:
           BFD_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           mvn sonar:sonar \
+          --no-transfer-progress \
           -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
