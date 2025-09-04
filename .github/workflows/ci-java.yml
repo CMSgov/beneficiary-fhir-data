@@ -89,10 +89,6 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-
-      - name: Post Cache Hydration
-        run: |
-          find ~/ -iwholename '*/.m2/*'
       - name: Configure AWS credentials
         id: config-aws-creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -129,10 +125,6 @@ jobs:
           -Dmaven.source.skip=true \
           clean install
         working-directory: ./apps
-
-      - name: Post-Build
-        run: |
-          find ~/ -iwholename '*/.m2/*'
 
       - name: 'Generate, Upload Build Reports'
         env:
