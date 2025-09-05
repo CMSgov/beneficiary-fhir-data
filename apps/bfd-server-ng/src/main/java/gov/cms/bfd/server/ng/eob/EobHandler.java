@@ -23,7 +23,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -73,37 +72,29 @@ public class EobHandler {
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
       return new Bundle();
     }
-    var eobs =
+    var claims =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
 
-    return buildEobBundleExcludingSamhsa(eobs, true);
+    var filteredClaims = filterClaimsExcludingSamhsa(claims, true);
+    return FhirUtil.bundleOrDefault(
+        filteredClaims.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
   }
 
   /**
-   * Converts a list of {@link Claim} objects into a FHIR {@link Bundle} of Explanation of Benefits
-   * (EOBs). Optionally filters out claims that contain SAMHSA-coded procedures based on the
-   * provided flag.
+   * Returns a filtered list of claims with optional SAMHSA exclusion applied. This performs only
+   * in-memory filtering logic and intentionally avoids any bundle creation or additional database
+   * lookups so that callers can build a single bundle as the final step.
    *
-   * @param claims the list of {@link Claim} objects to be converted into FHIR EOBs
-   * @param excludeSamhsa a boolean flag indicating whether to filter out claims containing
-   *     SAMHSA-coded procedures
-   * @return a FHIR {@link Bundle} containing the converted Explanation of Benefits (EOBs)
+   * @param claims input claims
+   * @param excludeSamhsa whether to exclude SAMHSA-coded claims
+   * @return filtered claims
    */
-  protected Bundle buildEobBundleExcludingSamhsa(List<Claim> claims, boolean excludeSamhsa) {
-
-    var filteredClaims = claims;
-    if (excludeSamhsa) {
-      filteredClaims =
-          claims.stream()
-              // keep claims that do NOT contain any SAMHSA-coded procedures
-              .filter(claim -> !claimHasSamhsa(claim))
-              .toList();
+  protected List<Claim> filterClaimsExcludingSamhsa(List<Claim> claims, boolean excludeSamhsa) {
+    if (!excludeSamhsa) {
+      return claims; // no filtering requested
     }
-
-    return FhirUtil.bundleOrDefault(
-        filteredClaims.stream().map(Claim::toFhir).map(Resource.class::cast),
-        claimRepository::claimLastUpdated);
+    return claims.stream().filter(claim -> !claimHasSamhsa(claim)).toList();
   }
 
   /**
@@ -122,12 +113,16 @@ public class EobHandler {
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var eobs = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated).stream().toList();
-    var bundle = buildEobBundleExcludingSamhsa(eobs, true);
-    return bundle.getEntry().stream()
-        .map(Bundle.BundleEntryComponent::getResource)
-        .map(ExplanationOfBenefit.class::cast)
-        .findFirst();
+    var claimOpt = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
+    if (claimOpt.isEmpty()) {
+      return Optional.empty();
+    }
+    var claim = claimOpt.get();
+    // Apply SAMHSA exclusion in-memory without constructing a bundle.
+    if (claimHasSamhsa(claim)) {
+      return Optional.empty();
+    }
+    return Optional.of(claim.toFhir());
   }
 
   private String getDiagnosisCode(ClaimProcedure e) {
@@ -255,9 +250,9 @@ public class EobHandler {
       boolean procMatch =
           procedureEntries.stream()
               .anyMatch(
-                  e -> {
-                    if (claimCodeDateInvalidInSamhsaList(claimDate, e)) return false;
-                    return compare(getCode(e), procedureCode);
+                  pEntries -> {
+                    if (claimCodeDateInvalidInSamhsaList(claimDate, pEntries)) return false;
+                    return compare(getCode(pEntries), procedureCode);
                   });
       if (procMatch) {
         return true;
@@ -267,7 +262,12 @@ public class EobHandler {
     // Only check diagnosis when indicator explicitly identifies ICD-9 or ICD-10.
     if (!diagnosisCode.isEmpty()) {
       boolean diagMatch =
-          diagnosisEntries.stream().anyMatch(e -> compare(getCode(e), diagnosisCode));
+          diagnosisEntries.stream()
+              .anyMatch(
+                  dEntry -> {
+                    if (claimCodeDateInvalidInSamhsaList(claimDate, dEntry)) return false;
+                    return compare(getCode(dEntry), diagnosisCode);
+                  });
       if (diagMatch) {
         return true;
       }
