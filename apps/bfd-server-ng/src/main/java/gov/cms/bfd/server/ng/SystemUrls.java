@@ -498,6 +498,14 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD";
 
   /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_LUPA_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD";
+
+  /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
