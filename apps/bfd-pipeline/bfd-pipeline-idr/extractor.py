@@ -46,6 +46,9 @@ class Extractor(ABC):
     def reconnect(self) -> None:
         pass
 
+    def _coalesce_dates(self, cols: list[str]) -> list[str]:
+        return [f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cols]
+
     def _greatest_col(self, cols: list[str]) -> str:
         return f"GREATEST({','.join(cols)})"
 
@@ -60,11 +63,9 @@ class Extractor(ABC):
     ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
-        batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
         # GREATEST doesn't work with nulls so we need to coalesce here
-        update_timestamp_cols = [
-            f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cls.update_timestamp_col_alias()
-        ]
+        batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
+        update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
