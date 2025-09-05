@@ -301,6 +301,7 @@
                 "id": "SupportingInfoComponent.CLM_PHRMCY_SRVC_TYPE_CD",
                 "path": "SupportingInfoComponent.CLM_PHRMCY_SRVC_TYPE_CD",
                 "label": "Pharmacy Service Type Code",
+                "definition": "The type of pharmacy used. This variable indicates the type of pharmacy that dispensed the prescription.",
                 "min": 0,
                 "max": "1",
                 "type": [

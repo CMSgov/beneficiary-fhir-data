@@ -1788,7 +1788,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_MTUS_CNT
-  fhirPath: 
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT').value
 - inputPath: LineItemComponent.CLM_PRCNG_LCLTY_CD
   appliesTo:
     - Carrier

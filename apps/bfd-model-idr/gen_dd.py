@@ -22,6 +22,7 @@ For the initial version, we'll start simple and hard code no dependent variables
 sample_sources = {
     "Patient": "out/Patient.json",
     "ExplanationOfBenefit": "out/ExplanationOfBenefit.json",
+    "ExplanationOfBenefit-Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
     "Coverage": "out/Coverage-FFS.json",
 }
 sample_resources = {}
@@ -54,6 +55,8 @@ for walk_info in os.walk(idr_ref_folder):
         for _, row in df.iterrows():
             idr_table_descriptors[file_name[0 : len(file_name) - 4]][row["name"]] = row["comment"]
 
+coverage_parts = ['PartA','PartB','PartC','PartD','DUAL']
+claim_profiles = ['HHA','Hospice','SNF','DME','Carrier','Inpatient','Outpatient','Pharmacy']
 for walk_info in os.walk(dd_support_folder):
     files = list(filter(lambda file: ".yaml" in file, walk_info[2]))
     for file_name in files:
@@ -65,6 +68,25 @@ for walk_info in os.walk(dd_support_folder):
                     entry["appliesTo"].sort()
                     if "sources" in entry:
                         entry["sources"].sort()
+             #       if('cclfMapping') in entry:
+             #           entry['cclfMapping'].sort()
+             #       else:
+             #           entry['cclfMapping'] = []
+             #       if('ccwMapping') in entry:
+                 #       entry['ccwMapping'].sort()
+                 #   else:
+                 #       entry['ccwMapping'] = []
+                    if('Patient' in entry['appliesTo']):
+                        entry['FHIR Resource'] = 'Patient'
+                    elif(any(x in coverage_parts for x in entry['appliesTo'])):
+                        entry['FHIR Resource'] = 'Coverage'
+                        entry['Coverage Type'] = entry['appliesTo']
+                    elif(any(x in claim_profiles for x in entry['appliesTo'])):
+                        entry['FHIR Resource'] = 'ExplanationOfBenefit'
+                        entry['Claim Type'] = entry['appliesTo']
+
+
+
                     result = subprocess.run(
                         [
                             "node",
@@ -89,7 +111,7 @@ for walk_info in os.walk(dd_support_folder):
 
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
-                        entry["Concept Name"] = structure_def_names_descriptions[
+                        entry["Field Name"] = structure_def_names_descriptions[
                             entry["inputPath"]
                         ]["name"]
                         if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
@@ -98,7 +120,7 @@ for walk_info in os.walk(dd_support_folder):
                             ]["definition"]
                     entry.pop("inputPath")
                     if "nameOverride" in entry:
-                        entry["Concept Name"] = entry["nameOverride"]
+                        entry["Field Name"] = entry["nameOverride"]
 
                     dd_df.append(entry)
 
@@ -117,9 +139,11 @@ dd_df["referenceTable"] = list(map(replace_str, dd_df["referenceTable"]))
 dd_df.to_csv(
     "out/bfd_data_dictionary.csv",
     columns=[
-        "Concept Name",
+        "Field Name",
         "Description",
-        "appliesTo",
+        "FHIR Resource",
+        "Coverage Type",
+        "Claim Type",
         "fhirPath",
         "example",
         "notes",
@@ -128,12 +152,16 @@ dd_df.to_csv(
         "bfdDerived",
         "sources",
         "referenceTable",
+        "cclfMapping",
+        "ccwMapping"
     ],
 )
 export_columns = [
-    "Concept Name",
+    "Field Name",
     "Description",
-    "appliesTo",
+    "FHIR Resource",
+    "Coverage Type",
+    "Claim Type",
     "fhirPath",
     "example",
     "notes",
@@ -142,6 +170,8 @@ export_columns = [
     "bfdDerived",
     "sources",
     "referenceTable",
+    "cclfMapping",
+    "ccwMapping"
 ]
 export_df = dd_df[export_columns]
 tips_df = pd.read_csv(dd_support_folder + "/tips.csv")
@@ -163,14 +193,18 @@ with pd.ExcelWriter("out/bfd_data_dictionary.xlsx", engine="xlsxwriter") as writ
     worksheet.set_column("B:B", 30, text_format)
     worksheet.set_column("C:C", 65, text_format)
     worksheet.set_column("D:D", 20, text_format)
-    worksheet.set_column("E:E", 55, text_format)
-    worksheet.set_column("F:F", 25, text_format)
-    worksheet.set_column("G:G", 25, text_format)
-    worksheet.set_column("H:H", 18, text_format)
-    worksheet.set_column("I:I", 20, text_format)
-    worksheet.set_column("J:J", 5, text_format)
-    worksheet.set_column("K:K", 10, text_format)
-    worksheet.set_column("L:L", 20, text_format)
+    worksheet.set_column("E:E", 20, text_format)
+    worksheet.set_column("F:F", 20, text_format)
+    worksheet.set_column("G:G", 55, text_format)
+    worksheet.set_column("H:H", 25, text_format)
+    worksheet.set_column("I:I", 25, text_format)
+    worksheet.set_column("J:J", 18, text_format)
+    worksheet.set_column("K:K", 20, text_format)
+    worksheet.set_column("L:L", 5, text_format)
+    worksheet.set_column("M:M", 10, text_format)
+    worksheet.set_column("N:N", 20, text_format)
+    worksheet.set_column("O:O", 30, text_format)
+    worksheet.set_column("P:P", 30, text_format)
 
     tips_df.to_excel(writer, sheet_name="Tips and Tricks", index=True)
     worksheet = writer.sheets["Tips and Tricks"]

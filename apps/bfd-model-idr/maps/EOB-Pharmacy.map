@@ -413,7 +413,7 @@ group addPrescriberPractitionerCareTeamMember(source src: ExplanationOfBenefitPh
     src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
     } "Create NPI identifier";
     src as family_name -> tgtPract.name = create('HumanName') as tgtName then {
-      src -> tgtName.family = "LAST NAME FROM NPPES" "set family name";
+      src -> tgtName.family = "LAST NAME HERE" "set family name";
       src -> tgtName.use = "official" "set name use";
     } "add family name";
   } "Add prescriber practitioner";
@@ -465,7 +465,7 @@ group createPharmacyPractitioner(source src: ExplanationOfBenefitPharmacy, targe
   } "Create NPI identifier";
 
   src -> tgt.name = create('HumanName') as tgtName then {
-    src -> tgtName.family = "LAST NAME FROM NPPES" "set family name";
+    src -> tgtName.family = "LAST NAME HERE" "set family name";
     src -> tgtName.use = "official" "set name use";
   } "add family name";
 } 

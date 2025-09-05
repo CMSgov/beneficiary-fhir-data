@@ -4,4 +4,5 @@ topic,tip
 "Handling arrays with FHIRPath","We recommend utilizing the cardinality field in order to determine if the evaluation of a FHIRPath expression may return multiple resources. If so, there are several options, such as modifying the FHIRPath to only return a single result (for example, Patient.address.state -> Patient.address[0].state), or manipulating the data after the expression has been evaluated."
 "Bug Reports + Suggestions","Please either make a google group post or email the published email for the API that you received the data through, and we will be sure to look at it!"
 "Utilizing Terminology Resources","The URLs available in the 'referenceTable' column point to CodeSystem resources that enumerate the potential values for a given field. Of note, these are only populated for CMS-specific terminology that would not be found elsewhere."
-"",""
+"Going from v2 -> v3 mappings","The 'ccwMapping' column aligns with the 'CCW Mapping' field in the v2 data dictionary. "
+"Mapping from CCLF","The 'cclfMapping' column aligns with the 'CCLF Mapping' field in the v2 data dictionary. "

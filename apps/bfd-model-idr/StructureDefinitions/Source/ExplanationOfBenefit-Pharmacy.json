@@ -36,6 +36,7 @@
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_BENE_XREF_EFCTV_SK",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_BENE_XREF_EFCTV_SK",
                 "label": "Beneficiary Source Key",
+                "description": "Beneficiary Source Key",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -236,10 +237,10 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_PHRMCY_SRVC_TYPE_CD",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_PHRMCY_SRVC_TYPE_CD",
-                "label": "Pharmacy Service Type Code",
-                "definition": "The type of pharmacy used. This variable indicates the type of pharmacy that dispensed the prescription.",
+                "id": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_LAST_NAME",
+                "path": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_LAST_NAME",
+                "label": "Prescribing Provider Last Name",
+                "definition": "Last name of the prescribing provider",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -304,7 +305,7 @@
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_CMPND_CD",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_CMPND_CD",
                 "label": "Compound Code",
-                "definition": "This field indicates whether or not the dispensed drug was compounded or mixed.",
+                "description": "This field indicates whether or not the dispensed drug was compounded or mixed.",
                 "min": 0,
                 "max": "1",
                 "type": [

@@ -109,7 +109,7 @@
     - Pharmacy
   sources:
     - NCH
-  sourceView: V2_MDCR_CLM
+  sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_CMS_PROC_DT
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT').value
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMT_FRMT_CD
@@ -157,7 +157,7 @@
     - Pharmacy
   sources:
     - NCH
-  sourceView: V2_MDCR_CLM
+  sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NUM
   fhirPath: ExplanationOfBenefit.item.sequence
 - inputPath: LineItemComponent.CLM_LINE_FROM_DT

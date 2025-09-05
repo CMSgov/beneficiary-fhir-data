@@ -22,6 +22,10 @@
   appliesTo:
     - PartA
     - PartB
+  ccwMapping:
+    - BENE_MDCR_STATUS_CD
+  cclfMapping:
+    - CCLF8.BENE_MDCR_STUS_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD').value.code
   referenceTable: BENE_MDCR_STUS_CD
   sourceView: V2_MDCR_BENE_MDCR_STUS
