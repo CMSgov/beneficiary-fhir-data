@@ -56,9 +56,13 @@
     - HHA
     - Hospice
     - SNF
+    - DME
+    - Carrier
   sources:
     - FISS
     - NCH
+    - VMS
+    - MCS
   ccwMapping:
     - CARR_CLM_CNTL_NUM
     - FI_DOC_CLM_CNTL_NUM
@@ -86,10 +90,17 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   appliesTo:
     - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+    - DME
+    - Carrier
   sources:
     - FISS
     - MCS
     - NCH
+    - VMS
   ccwMapping:
     - NCH_CLM_TYPE_CD
   cclfMapping:
@@ -112,10 +123,17 @@
 - inputPath: ExplanationOfBenefit-Base.BENE_SK
   appliesTo:
     - Inpatient
+    - HHA
+    - Hospice
+    - Carrier
+    - DME
+    - SNF
+    - Outpatient
   sources:
     - FISS
     - MCS
     - NCH
+    - VMS
   sourceView: V2_MDCR_CLM
   sourceColumn: BENE_SK
   fhirPath: ExplanationOfBenefit.patient.reference.substring(8)
@@ -132,6 +150,7 @@
     - FISS
     - MCS
     - NCH
+    - VMS
   ccwMapping:
     - CLM_FROM_DT
   cclfMapping:
@@ -157,6 +176,7 @@
     - FISS
     - MCS
     - NCH
+    - VMS
   ccwMapping:
     - CLM_THRU_DT
   cclfMapping:
@@ -172,10 +192,17 @@
 - inputPath: ExplanationOfBenefit-Base.CLM_EFCTV_DT
   appliesTo:
     - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+    - DME
+    - Carrier
   sources:
     - FISS
     - MCS
     - NCH
+    - VMS
   cclfMapping:
     - CCLF1.CLM_EFCTV_DT
     - CCLF5.CLM_EFCTV_DT
@@ -1588,7 +1615,8 @@
     - CLM_FAC_TYPE_CD
   cclfMapping: 
     - CCLF1.CLM_BILL_FAC_TYPE_CD
-  fhirPath: <UPDATE>
+  referenceTable: CLM_BILL_FAC_TYPE_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD').code
 - inputPath: SupportingInfoComponent.CLM_BILL_CLSFCTN_CD
   appliesTo:
     - Inpatient
@@ -1603,7 +1631,8 @@
     - CLM_SRVC_CLSFCTN_TYPE_CD
   cclfMapping: 
     - CCLF1.CLM_BILL_CLSFCTN_CD
-  fhirPath: <UPDATE>
+  referenceTable: CLM_BILL_CLSFCTN_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD').code
 - inputPath: SupportingInfoComponent.CLM_BILL_FREQ_CD
   appliesTo:
     - Inpatient
@@ -1618,7 +1647,8 @@
     - CLM_FREQ_CD
   cclfMapping: 
     - CCLF1.CLM_BILL_FREQ_CD
-  fhirPath: <UPDATE>
+  referenceTable: CLM_BILL_FREQ_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD').code
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
@@ -1828,6 +1858,7 @@
     - CLM_MDCR_NON_PMT_RSN_CD
   cclfMapping:
     - CCLF1.CLM_MDCR_NPMT_RSN_CD
+  referenceTable: CLM_MDCR_NPMT_RSN_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_NPMT_RSN_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD').value.code
@@ -2476,6 +2507,7 @@
   cclfMapping:
     - CCLF5.CLM_POS_CD
     - CCLF6.CLM_POS_CD
+  referenceTable: CLM_POS_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_POS_CD
   fhirPath: ExplanationOfBenefit.item.location.coding.where(system='https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set').code
@@ -2488,8 +2520,10 @@
     - VMS
   ccwMapping:
     - PRTCPTNG_IND_CD
+  referenceTable: PRTCPTNG_IND_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_PRTCPTG_CD
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD').coding.code
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
   appliesTo:
     - Carrier
@@ -2499,8 +2533,10 @@
     - VMS
   ccwMapping:
     - CARR_LINE_PRVDR_TYPE_CD
+  referenceTable: CLM_PRVDR_TYPE_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_TYPE_CD
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').coding.code
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
@@ -2514,6 +2550,7 @@
     - CCLF6.CLM_CARR_PMT_DNL_CD
   ccwMapping:
     - CARR_CLM_PMT_DNL_CD
+  referenceTable: CLM_CARR_PMT_DNL_CD
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_CARR_PMT_DNL_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD').value.code
@@ -2575,6 +2612,7 @@
     - NCH
   ccwMapping:
     - LINE_HCT_HGB_TYPE_CD
+  referenceTable: CLM_LINE_HCT_HGB_TYPE_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_HCT_HGB_TYPE_CD
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).code.coding
@@ -2634,6 +2672,7 @@
   ccwMapping:
     - CARR_LINE_PRCNG_LCLTY_CD
     - DMERC_LINE_PRCNG_STATE_CD
+  referenceTable: CLM_PRCNG_LCLTY_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRCNG_LCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD').value.code
@@ -2644,6 +2683,7 @@
     - NCH
   ccwMapping:
     - CARR_LINE_RDCD_PMT_PHYS_ASTN_C
+  referenceTable: CLM_PHYSN_ASTNT_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PHYSN_ASTNT_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD').value.code
@@ -2657,6 +2697,7 @@
     - HPSA_SCRCTY_IND_CD
   cclfMapping:
     - CCLFB.CLM_LINE_CARR_HPSA_SCRCTY_CD
+  referenceTable: CLM_LINE_CARR_HPSA_SCRCTY_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_CARR_HPSA_SCRCTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-CARR-HPSA-SCRCTY-CD').value.code
@@ -2671,6 +2712,7 @@
   cclfMapping:
     - CCLF5.CLM_LINE_PRMRY_PYR_CD
     - CCLF6.CLM_PRMRY_PYR_CD
+  referenceTable: CLM_PRMRY_PYR_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRMRY_PYR_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRMRY-PYR-CD').value.code
@@ -2685,6 +2727,7 @@
   cclfMapping:
     - CCLF5.CLM_FED_TYPE_SRVC_CD
     - CCLF6.CLM_FED_TYPE_SRVC_CD
+  referenceTable: CLM_FED_TYPE_SRVC_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_FED_TYPE_SRVC_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FED-TYPE-SRVC-CD').value.code
@@ -2697,6 +2740,7 @@
     - MCS
   ccwMapping:
      - LINE_PMT_80_100_CD
+  referenceTable: CLM_PMT_80_100_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PMT_80_100_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD').value.code
@@ -2711,6 +2755,7 @@
   cclfMapping:
     - CCLF5.CLM_PRCSG_IND_CD
     - CCLF6.CLM_PRCSG_IND_CD
+  referenceTable: CLM_PRCSG_IND_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRCSG_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD').value.code
@@ -2724,6 +2769,7 @@
     - MCS
   ccwMapping:
     - LINE_SERVICE_DEDUCTIBLE
+  referenceTable: CLM_SRVC_DDCTBL_SW
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_SRVC_DDCTBL_SW
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW').value.code
@@ -2739,6 +2785,7 @@
     - PRVDR_SPCLTY
   cclfMapping:
     - CCLF5.CLM_PRVDR_SPCLTY_CD
+  referenceTable: CLM_PRVDR_SPCLTY_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRVDR_SPCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD').value.code
@@ -2761,6 +2808,7 @@
     - VMS
   ccwMapping:
     - DMERC_LINE_SUPPLR_TYPE_CD
+  referenceTable: CLM-PRVDR-TYPE-CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_SUPLR_TYPE_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
@@ -2792,6 +2840,7 @@
     - CCLF1.CLM_ADJSTMT_TYPE_CD
     - CCLF5.CLM_ADJSMT_TYPE_CD
     - CCLF6.CLM_ADJSMT_TYPE_CD
+  referenceTable: CLM_ADJSTMT_TYPE_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code

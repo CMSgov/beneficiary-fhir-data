@@ -482,7 +482,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
         claim_line_rx["CLM_LINE_NUM"] = "1"
         claim_line_rx["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
-        claim_line_rx['CLMCLM_DSPNSNG_STUS_CD'] = random.choice(['P','C'])
+        claim_line_rx['CLM_DSPNSNG_STUS_CD'] = random.choice(['P','C'])
         claim_line_rx["CLM_LINE_RX_ORGN_CD"] = random.choice(
             generator.code_systems["CLM_LINE_RX_ORGN_CD"]
         )

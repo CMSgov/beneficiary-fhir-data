@@ -48,6 +48,7 @@
                 "id": "ExplanationOfBenefit-Base.CLM_BENE_XREF_EFCTV_SK",
                 "path": "ExplanationOfBenefit-Base.CLM_BENE_XREF_EFCTV_SK",
                 "label": "Beneficiary Source Key",
+                "definition": "The Beneficiary Source Key",
                 "min": 1,
                 "max": "1",
                 "type": [

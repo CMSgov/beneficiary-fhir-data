@@ -25,6 +25,7 @@
     - NCH
   cclfMapping:
     - CCLF7.CLM_TYPE_CD
+  referenceTable: CLM_TYPE_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_TYPE_CD
   fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD').code
@@ -66,6 +67,7 @@
     - Pharmacy
   sources:
     - NCH
+  referenceTable: CLM_SRC_ID
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRC_ID
   fhirPath: ExplanationOfBenefit.meta.source
@@ -139,6 +141,7 @@
     - NCH
   ccwMapping:
     - NSTD_FRMT_CD
+  referenceTable: CLM_SBMT_FRMT_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMT_FRMT_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD').valueCoding.code
@@ -391,6 +394,7 @@
     - PHRMCY_SRVC_TYPE_CD
   cclfMapping:
     - CCLF7.CLM_PHRMCY_SRVC_TYPE_CD
+  referenceTable: CLM_PHRMCY_SRVC_TYPE_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_PHRMCY_SRVC_TYPE_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_PHRMCY_SRVC_TYPE_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD').code
@@ -401,6 +405,7 @@
     - NCH
   ccwMapping:
     - RX_ORGN_CD
+  referenceTable: CLM_LINE_RX_ORGN_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_RX_ORGN_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='rxorigincode').exists()).code.coding.where(system='http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode').code
@@ -409,6 +414,7 @@
     - Pharmacy
   sources:
     - NCH
+  referenceTable: CLM_BRND_GNRC_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_BRND_GNRC_CD
   ccwMapping:
@@ -421,6 +427,7 @@
     - NCH
   ccwMapping:
     - PTNT_RSDNC_CD
+  referenceTable: CLM_PTNT_RSDNC_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_PTNT_RSDNC_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD').code
@@ -431,6 +438,7 @@
     - NCH
   ccwMapping:
     - SUBMSN_CLR_CD
+  referenceTable: CLM_LTC_DSPNSNG_MTHD_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LTC_DSPNSNG_MTHD_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD').code 
@@ -441,6 +449,7 @@
     - NCH
   ccwMapping:
     - CMPND_CD
+  referenceTable: CLM_CMPND_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_CMPND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='compoundcode').exists()).code.coding.where(system='http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode').code
@@ -485,6 +494,7 @@
     - NCH
   ccwMapping:
     - DRUG_CVRG_STUS_CD
+  referenceTable: CLM_DRUG_CVRG_STUS_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_DRUG_CVRG_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD').code 
@@ -495,10 +505,11 @@
     - NCH
   ccwMapping:
     - CTSTRPHC_CVRG_CD
+  referenceTable: CLM_CTSTRPHC_CVRG_IND_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_CTSTRPHC_CVRG_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD').code 
-- inputPath: ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD
+- inputPath: ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Pharmacy
   sources:
@@ -507,6 +518,7 @@
     - ADJSTMT_DLTN_CD
   cclfMapping:
     - CCLF7.CLM_ADJSMT_TYPE_CD
+  referenceTable: CLM_ADJSTMT_TYPE_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code
@@ -519,10 +531,11 @@
     - DSPNSNG_STUS_CD
   cclfMapping:
     - CCLF7.CLM_DSPNSNG_STUS_CD
+  referenceTable: CLM_DSPNSNG_STUS_CD
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_DSPNSNG_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD').code 
-- inputPath: ExplanationOfBenefit-Base.CLM_IDR_LD_DT
+- inputPath: ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT
   appliesTo:
     - Pharmacy
   sources:

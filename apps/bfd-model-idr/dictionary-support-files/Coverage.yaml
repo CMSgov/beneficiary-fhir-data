@@ -331,6 +331,7 @@
     - CST_SHR_GRP_CD_10
     - CST_SHR_GRP_CD_11
     - CST_SHR_GRP_CD_12
+  referenceTable: BENE_LIS_EFCTV_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-EFCTV-CD').value.code
   sourceView: V2_MDCR_BENE_LIS
   sourceColumn: BENE_LIS_EFCTV_CD
@@ -350,6 +351,7 @@
     - CST_SHR_GRP_CD_10
     - CST_SHR_GRP_CD_11
     - CST_SHR_GRP_CD_12
+  referenceTable: BENE_LIS_COPMT_LVL_CD
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD').value.code
   sourceView: V2_MDCR_BENE_LIS
   sourceColumn: BENE_LIS_COPMT_LVL_CD
@@ -407,6 +409,7 @@
     - RDS_IND_10
     - RDS_IND_11
     - RDS_IND_12
+  referenceTable: BENE_ENRLMT_EMPLR_SBSDY_SW
   fhirPath: Coverage.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW').value
   sourceView: V2_MDCR_BENE_MAPD_ENRLMT
   sourceColumn: BENE_ENRLMT_EMPLR_SBSDY_SW

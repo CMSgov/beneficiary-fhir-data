@@ -318,6 +318,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD",
+                "label": "Claim Outpatient Service Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]

@@ -191,6 +191,8 @@ group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt:
 
     src.CLM_LINE_RX_NUM as rxNumber -> tgt then addRxNum(src, tgt) "Add rx num";
 
+    src.CLM_DSPNSNG_STUS_CD as dispCd -> tgt then addDispCd(src, tgt) "Add dispensing status code";
+
     
 }
 
@@ -309,6 +311,16 @@ group addCatastrophicCoverage(source src: SupportingInfoComponent, target tgt: B
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_CTSTRPHC_CVRG_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD", val) "Add coding";
     } "Add CC";
+}
+
+group addDispCd(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_DSPNSNG_STUS_CD") "Add Coding";
+  } "Add category";
+  src -> tgt.code = create('CodeableConcept') as tgtCC then{
+      src.CLM_DSPNSNG_STUS_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD", val) "Add coding";
+  } "Add CC";
 }
 
 group addRefillsAuthorized(source src: SupportingInfoComponent, target tgt: BackboneElement){

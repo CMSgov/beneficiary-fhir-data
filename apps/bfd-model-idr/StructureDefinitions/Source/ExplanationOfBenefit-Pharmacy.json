@@ -567,18 +567,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_DSPNSNG_STUS_CD",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_DSPNSNG_STUS_CD",
-                "label": "Claim Dispensing Status Code",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
                 "label": "Claim IDR Load Date",

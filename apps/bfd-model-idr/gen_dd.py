@@ -64,18 +64,12 @@ for walk_info in os.walk(dd_support_folder):
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
+                if "fhirPath" not in entry:
+                    print(entry['inputPath'])
                 if "fhirPath" in entry:
                     entry["appliesTo"].sort()
                     if "sources" in entry:
                         entry["sources"].sort()
-             #       if('cclfMapping') in entry:
-             #           entry['cclfMapping'].sort()
-             #       else:
-             #           entry['cclfMapping'] = []
-             #       if('ccwMapping') in entry:
-                 #       entry['ccwMapping'].sort()
-                 #   else:
-                 #       entry['ccwMapping'] = []
                     if('Patient' in entry['appliesTo']):
                         entry['FHIR Resource'] = 'Patient'
                     elif(any(x in coverage_parts for x in entry['appliesTo'])):

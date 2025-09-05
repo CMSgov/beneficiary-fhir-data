@@ -340,6 +340,7 @@
                 "id": "SupportingInfoComponent.CLM_LINE_RX_ORGN_CD",
                 "path": "SupportingInfoComponent.CLM_LINE_RX_ORGN_CD",
                 "label": "Prescription Origin Code",
+                "definition": "This variable indicates whether the prescription was transmitted as an electronic prescription, by phone, by fax, or as a written paper copy.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -352,6 +353,7 @@
                 "id": "SupportingInfoComponent.CLM_BRND_GNRC_CD",
                 "path": "SupportingInfoComponent.CLM_BRND_GNRC_CD",
                 "label": "Brand Generic Indicator Code",
+                "definition": "Plan reported value indicating whether the plan adjudicated the claim as a brand or generic drug.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -364,6 +366,7 @@
                 "id": "SupportingInfoComponent.CLM_PTNT_RSDNC_CD",
                 "path": "SupportingInfoComponent.CLM_PTNT_RSDNC_CD",
                 "label": "Patient Residence Code",
+                "definition": "This variable indicates where the beneficiary lived when the prescription was filled, as reported on the PDE record.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -376,6 +379,7 @@
                 "id": "SupportingInfoComponent.CLM_LTC_DSPNSNG_MTHD_CD",
                 "path": "SupportingInfoComponent.CLM_LTC_DSPNSNG_MTHD_CD",
                 "label": "Submission Clarification Code",
+                "definition": "For beneficiaries living in long-term care (LTC) facilities, this variable indicates how many days’ supply of the medication was dispensed by the long-term care pharmacy and provides some details about the dispensing event.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -388,6 +392,7 @@
                 "id": "SupportingInfoComponent.CLM_CMPND_CD",
                 "path": "SupportingInfoComponent.CLM_CMPND_CD",
                 "label": "Compound Code",
+                "definition": "This field indicates whether or not the dispensed drug was compounded or mixed.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -400,6 +405,7 @@
                 "id": "SupportingInfoComponent.CLM_LINE_DAYS_SUPLY_QTY",
                 "path": "SupportingInfoComponent.CLM_LINE_DAYS_SUPLY_QTY",
                 "label": "Days Supply Quantity",
+                "definition": "This field indicates the number of days' supply of medication dispensed by the pharmacy and consists of the amount the pharmacy enters for the prescription.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -412,6 +418,20 @@
                 "id": "SupportingInfoComponent.CLM_LINE_RX_FILL_NUM",
                 "path": "SupportingInfoComponent.CLM_LINE_RX_FILL_NUM",
                 "label": "Fill Number",
+                "definition": "This field indicates the number fill of the current dispensed supply.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_DSPNSNG_STUS_CD",
+                "path": "SupportingInfoComponent.CLM_DSPNSNG_STUS_CD",
+                "label": "Claim Dispensing Status Code",
+                "definition": "This field indicates how the pharmacy dispensed the complete quantity of the prescription.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -424,6 +444,7 @@
                 "id": "SupportingInfoComponent.CLM_DAW_PROD_SLCTN_CD",
                 "path": "SupportingInfoComponent.CLM_DAW_PROD_SLCTN_CD",
                 "label": "Dispense As Written Product Selection Code",
+                "definition": "This field indicates the prescriber's instruction regarding substitution of generic equivalents or order to dispense the specific prescribed medication.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -436,6 +457,7 @@
                 "id": "SupportingInfoComponent.CLM_DRUG_CVRG_STUS_CD",
                 "path": "SupportingInfoComponent.CLM_DRUG_CVRG_STUS_CD",
                 "label": "Drug Coverage Status Code",
+                "definition": "This field indicates whether or not the drug is covered by Medicare Part D.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -448,6 +470,7 @@
                 "id": "SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD",
                 "path": "SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD",
                 "label": "Catastrophic Coverage Indicator Code",
+                "definition":"This variable indicates whether the PDE occurred within the catastrophic benefit phase of the Medicare Part D benefit, according to the source PDE.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -460,6 +483,7 @@
                 "id": "SupportingInfoComponent.CLM_LINE_AUTHRZD_FILL_NUM",
                 "path": "SupportingInfoComponent.CLM_LINE_AUTHRZD_FILL_NUM",
                 "label": "Refills Authorized",
+                "definition": "Number of refills authorized.",
                 "min": 0,
                 "max": "1",
                 "type": [
