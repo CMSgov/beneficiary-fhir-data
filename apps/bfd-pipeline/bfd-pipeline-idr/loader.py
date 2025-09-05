@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from model import LoadProgress, T
+from model import DbType, LoadProgress, T
 from timer import Timer
 
 idr_query_timer = Timer("idr_query")
@@ -130,7 +130,7 @@ class PostgresLoader:
                 with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:  # type: ignore
                     for row in results:
                         model_dump = row.model_dump()
-                        copy.write_row([model_dump[k] for k in insert_cols])
+                        copy.write_row([_remove_non_utf8(model_dump[k]) for k in insert_cols])
                 copy_timer.stop()
 
                 if len(results) > 0:
@@ -198,6 +198,13 @@ class PostgresLoader:
             self.conn.commit()
         logger.info("loaded %s rows", num_rows)
         return data_loaded
+
+
+def _remove_non_utf8(val: DbType) -> DbType:
+    # Some IDR values have non-UTF8 characters
+    if val is str:
+        return bytes(val, "utf-8").decode("utf-8", "ignore")
+    return val
 
 
 def _convert_date(date_field: date | datetime) -> datetime:
