@@ -548,7 +548,7 @@ class IdrClaim(IdrBaseModel):
     ]
     idr_updt_ts_dcmtn: Annotated[
         datetime,
-        {ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_updt_ts"},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
 
