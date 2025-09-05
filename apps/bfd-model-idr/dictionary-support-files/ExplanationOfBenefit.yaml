@@ -13,6 +13,17 @@
     - NCH
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_UNIQ_ID
+  ccwMapping:
+    - CLM_ID
+  cclfMapping:
+    - CCLF1.CUR_CLM_UNIQ_ID
+    - CCLF2.CUR_CLM_UNIQ_ID
+    - CCLF3.CUR_CLM_UNIQ_ID
+    - CCLF4.CUR_CLM_UNIQ_ID
+    - CCLF5.CUR_CLM_UNIQ_ID
+    - CCLF6.CUR_CLM_UNIQ_ID
+    - CCLFA.CUR_CLM_UNIQ_ID
+    - CCLFB.CUR_CLM_UNIQ_ID
   fhirPath: ExplanationOfBenefit.identifier.where(type.coding.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType' and type.coding.code = 'uc' ).value
 - inputPath: ExplanationOfBenefit-Base.CLM_LTST_CLM_IND
   appliesTo:
@@ -48,6 +59,13 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CARR_CLM_CNTL_NUM
+    - FI_DOC_CLM_CNTL_NUM
+  cclfMapping:
+    - CCLF1.CLM_CNTL_NUM
+    - CCLF5.CLM_CNTL_NUM
+    - CCLF6.CLM_CNTL_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTL_NUM
   fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
@@ -61,6 +79,8 @@
   sources:
     - FISS
     - NCH
+  cclfMapping:
+    - CCLF1.CLM_ORG_CNTL_NUM
   bfdDerived: true
   fhirPath: ExplanationOfBenefit.related.where(relationship.coding.system = 'http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship').reference.where(system='https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
@@ -70,6 +90,17 @@
     - FISS
     - MCS
     - NCH
+  ccwMapping:
+    - NCH_CLM_TYPE_CD
+  cclfMapping:
+    - CCLF1.CLM_TYPE_CD
+    - CCLF2.CLM_TYPE_CD
+    - CCLF3.CLM_TYPE_CD
+    - CCLF4.CLM_TYPE_CD
+    - CCLF5.CLM_TYPE_CD
+    - CCLF6.CLM_TYPE_CD
+    - CCLFA.CLM_TYPE_CD
+    - CCLFB.CLM_TYPE_CD
   referenceTable: CLM_TYPE_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_TYPE_CD
@@ -101,6 +132,15 @@
     - FISS
     - MCS
     - NCH
+  ccwMapping:
+    - CLM_FROM_DT
+  cclfMapping:
+    - CCLF1.CLM_FROM_DT
+    - CCLF2.CLM_FROM_DT
+    - CCLF3.CLM_FROM_DT
+    - CCLF4.CLM_FROM_DT
+    - CCLF5.CLM_FROM_DT
+    - CCLF6.CLM_FROM_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FROM_DT
   fhirPath: ExplanationOfBenefit.billablePeriod.start
@@ -117,6 +157,15 @@
     - FISS
     - MCS
     - NCH
+  ccwMapping:
+    - CLM_THRU_DT
+  cclfMapping:
+    - CCLF1.CLM_THRU_DT
+    - CCLF2.CLM_THRU_DT
+    - CCLF3.CLM_THRU_DT
+    - CCLF4.CLM_THRU_DT
+    - CCLF5.CLM_THRU_DT
+    - CCLF6.CLM_THRU_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_THRU_DT
   fhirPath: ExplanationOfBenefit.billablePeriod.end
@@ -127,9 +176,34 @@
     - FISS
     - MCS
     - NCH
+  cclfMapping:
+    - CCLF1.CLM_EFCTV_DT
+    - CCLF5.CLM_EFCTV_DT
+    - CCLF6.CLM_EFCTV_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_EFCTV_DT
   fhirPath: ExplanationOfBenefit.created
+- inputPath: ExplanationOfBenefit-Base.CLM_IDR_LD_DT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - Hospice
+    - HHA
+    - DME
+    - Carrier
+  sources:
+    - FISS
+    - MCS
+    - NCH
+    - VMS
+  cclfMapping:
+    - CCLF1.CLM_IDR_LD_DT
+    - CCLF5.CLM_IDR_LD_DT
+    - CCLF6.CLM_IDR_LD_DT
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_IDR_LD_DT
+  fhirPath: ExplanationOfBenefit.created.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
@@ -143,7 +217,7 @@
     - FISS
     - MCS
     - NCH
-    - VIPS
+    - VMS
   referenceTable: CLM_SRC_ID
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRC_ID
@@ -161,9 +235,33 @@
     - FISS
     - NCH
     - MCS
+  ccwMapping:
+    - ORG_NPI_NUM
+    - PRVDR_NPI
+    - CARR_CLM_BLG_NPI_NUM
+  cclfMapping:
+    - CCLF1.FAC_PRVDR_NPI_NUM
+    - CCLF1.CLM_BLG_PRVDR_NPI_NUM
+    - CCLF6.CLM_BLG_PRVDR_NPI_NUM
+    - CCLF6.PAYTO_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_BLG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
+  notes: CLM_BLG_PRVDR_NPI_NUM is in CCLF, but not always present. PRVDR_BLG_PRVDR_NPI_NUM is always present on institutional claims.
+- inputPath: ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+  sources:
+    - NCH
+  ccwMapping:
+    - PRVDR_ZIP
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BLG_PRVDR_ZIP5_CD
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).address.postalCode
 - inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
   appliesTo:
     - Inpatient
@@ -176,6 +274,11 @@
   sources:
     - FISS
     - NCH
+  cclfMapping:
+    - CCLF1.CLM_QUERY_CD
+  ccwMapping:
+    - CARR_CLM_ENTRY_CD
+    - CLAIM_QUERY_CODE
   referenceTable: CLM_QUERY_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_QUERY_CD
@@ -187,6 +290,10 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - NCH_IP_NCVRD_CHRG_AMT
+  cclfMapping:
+    - CCLFA.CLM_NCVRD_CHRG_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_NCVRD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_NCVRD_CHRG_AMT').used.value
@@ -200,6 +307,13 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - NCH_BENE_PTB_DDCTBL_AMT
+    - NCH_IP_TOT_DDCTN_AMT
+    - CARR_CLM_CASH_DDCTBL_APLD_AMT
+  cclfMapping:
+    - CCLFA.CLM_MDCR_DDCTBL_AMT
+    - CCLFB.CLM_MDCR_DDCTBL_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_MDCR_DDCTBL_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_DDCTBL_AMT').used.value
@@ -214,16 +328,34 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - NCH_NEAR_LINE_REC_IDENT_CD
   referenceTable: CLM_NRLN_RIC_CD
   sourceView: V2_MDCR_CLM_DCMTN
   sourceColumn: CLM_NRLN_RIC_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD').value.code
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD
+  appliesTo:
+    - Outpatient
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLF1.CLM_OP_SRVC_TYPE_CD
+  referenceTable: CLM_OP_SRVC_TYPE_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_OP_SRVC_TYPE_CD
+  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OP-SRVC-TYPE-CD').value.code
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - DSH_OP_CLM_VAL_AMT
+  cclfMapping:
+    - CCLF1.CLM_OPRTNL_DSPRPRTNT_AMT
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_OPRTNL_DSPRTNT_AMT').used.value
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
@@ -232,6 +364,10 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - IME_OP_CLM_VAL_AMT
+  cclfMapping:
+    - CCLF1.CLM_OPRTNL_IME_AMT
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_OPRTNL_IME_AMT').used.value
 - inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
@@ -244,6 +380,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - FI_CLM_PROC_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_CMS_PROC_DT
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT').value
@@ -257,6 +395,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PMT_AMT
+  cclfMapping:
+    - CCLF1.CLM_PMT_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_PMT_AMT
   fhirPath: ExplanationOfBenefit.payment.amount.value
@@ -273,6 +415,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - AT_PHYSN_NPI
+  cclfMapping:
+    - CCLF1.ATNDG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ATNDG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='attending').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -289,6 +435,10 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - OP_PHYSN_NPI
+  cclfMapping:
+    - CCLF1.OPRTG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_OPRTG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='operating').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -302,6 +452,8 @@
   sources:
     - FISS
     - NCH
+  cclfMapping:
+    - CCLF4.CLM_VAL_SQNC_NUM
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_VAL_SQNC_NUM
   notes: A FHIRPath is not provided for this element because the sequence number of a diagnosis in FHIR is not to be given importance.
@@ -319,6 +471,65 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - FST_DGNS_E_CD
+    - RSN_VISIT_CD1
+    - RSN_VISIT_CD2
+    - RSN_VISIT_CD3
+    - ICD_DGNS_CD1
+    - ICD_DGNS_CD2
+    - ICD_DGNS_CD3
+    - ICD_DGNS_CD4
+    - ICD_DGNS_CD5
+    - ICD_DGNS_CD6
+    - ICD_DGNS_CD7
+    - ICD_DGNS_CD8
+    - ICD_DGNS_CD9
+    - ICD_DGNS_CD10
+    - ICD_DGNS_CD11
+    - ICD_DGNS_CD12
+    - ICD_DGNS_CD13
+    - ICD_DGNS_CD14
+    - ICD_DGNS_CD15
+    - ICD_DGNS_CD16
+    - ICD_DGNS_CD17
+    - ICD_DGNS_CD18
+    - ICD_DGNS_CD19
+    - ICD_DGNS_CD20
+    - ICD_DGNS_CD21
+    - ICD_DGNS_CD22
+    - ICD_DGNS_CD23
+    - ICD_DGNS_CD24
+    - ICD_DGNS_CD25
+    - ICD_DGNS_E_CD1
+    - ICD_DGNS_E_CD2
+    - ICD_DGNS_E_CD3
+    - ICD_DGNS_E_CD4
+    - ICD_DGNS_E_CD5
+    - ICD_DGNS_E_CD6
+    - ICD_DGNS_E_CD7
+    - ICD_DGNS_E_CD8
+    - ICD_DGNS_E_CD9
+    - ICD_DGNS_E_CD10
+    - ICD_DGNS_E_CD11
+    - ICD_DGNS_E_CD12
+    - PRNCPAL_DGNS_CD
+  cclfMapping:
+    - CCLF1.PRNCPL_DGNS_CD: "ExplanationOfBenefit.diagnosis.where(type.coding.system='http://terminology.hl7.org/CodeSystem/ex-diagnosistype' and type.coding.code='principal').diagnosis.coding.code"
+    - CCLF1.ADMTG_DGNS_CD: "ExplanationOfBenefit.diagnosis.where(type.coding.system='http://terminology.hl7.org/CodeSystem/ex-diagnosistype' and type.coding.code='admitting').diagnosis.coding.code"
+    - CCLF4.CLM_DGNS_CD
+    - CCLF5.CLM_DGNS_1_CD
+    - CCLF5.CLM_DGNS_2_CD
+    - CCLF5.CLM_DGNS_3_CD
+    - CCLF5.CLM_DGNS_4_CD
+    - CCLF5.CLM_DGNS_5_CD
+    - CCLF5.CLM_DGNS_6_CD
+    - CCLF5.CLM_DGNS_7_CD
+    - CCLF5.CLM_DGNS_8_CD
+    - CCLF5.CLM_DGNS_9_CD
+    - CCLF5.CLM_DGNS_10_CD
+    - CCLF5.CLM_DGNS_11_CD
+    - CCLF5.CLM_DGNS_12_CD
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_DGNS_CD
   fhirPath: ExplanationOfBenefit.diagnosis.diagnosis.coding.code
@@ -333,6 +544,56 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - FST_DGNS_E_VRSN_CD
+    - RSN_VISIT_VRSN_CD1
+    - RSN_VISIT_VRSN_CD2
+    - RSN_VISIT_VRSN_CD3
+    - ADMTG_DGNS_VRSN_CD
+    - ICD_DGNS_E_VRSN_CD1
+    - ICD_DGNS_E_VRSN_CD2
+    - ICD_DGNS_E_VRSN_CD3
+    - ICD_DGNS_E_VRSN_CD4
+    - ICD_DGNS_E_VRSN_CD5
+    - ICD_DGNS_E_VRSN_CD6
+    - ICD_DGNS_E_VRSN_CD7
+    - ICD_DGNS_E_VRSN_CD8
+    - ICD_DGNS_E_VRSN_CD9
+    - ICD_DGNS_E_VRSN_CD10
+    - ICD_DGNS_E_VRSN_CD11
+    - ICD_DGNS_E_VRSN_CD12
+    - ICD_DGNS_VRSN_CD1
+    - ICD_DGNS_VRSN_CD2
+    - ICD_DGNS_VRSN_CD3
+    - ICD_DGNS_VRSN_CD4
+    - ICD_DGNS_VRSN_CD5
+    - ICD_DGNS_VRSN_CD6
+    - ICD_DGNS_VRSN_CD7
+    - ICD_DGNS_VRSN_CD8
+    - ICD_DGNS_VRSN_CD9
+    - ICD_DGNS_VRSN_CD10
+    - ICD_DGNS_VRSN_CD11
+    - ICD_DGNS_VRSN_CD12
+    - ICD_DGNS_VRSN_CD13
+    - ICD_DGNS_VRSN_CD14
+    - ICD_DGNS_VRSN_CD15
+    - ICD_DGNS_VRSN_CD16
+    - ICD_DGNS_VRSN_CD17
+    - ICD_DGNS_VRSN_CD18
+    - ICD_DGNS_VRSN_CD19
+    - ICD_DGNS_VRSN_CD20
+    - ICD_DGNS_VRSN_CD21
+    - ICD_DGNS_VRSN_CD22
+    - ICD_DGNS_VRSN_CD23
+    - ICD_DGNS_VRSN_CD24
+    - ICD_DGNS_VRSN_CD25
+    - PRNCPAL_DGNS_VRSN_CD
+    - LINE_ICD_DGNS_VRSN_CD
+  cclfMapping:
+    - CCLF1.DGNS_PRCDR_ICD_IND
+    - CCLF2.DGNS_PRCDR_ICD_IND
+    - CCLF4.DGNS_PRCDR_ICD_IND
+    - CCLF5.DGNS_PRCDR_ICD_IND
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_DGNS_PRCDR_ICD_IND
   fhirPath: ExplanationOfBenefit.diagnosis.diagnosis.coding.system
@@ -346,6 +607,8 @@
   sources:
     - FISS
     - NCH
+  cclfMapping:
+    - CCLF4.CLM_PROD_TYPE_CD
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_PROD_TYPE_CD
   fhirPath: ExplanationOfBenefit.diagnosis.type.coding
@@ -356,6 +619,46 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_E_POA_IND_SW1
+    - CLM_E_POA_IND_SW2
+    - CLM_E_POA_IND_SW3
+    - CLM_E_POA_IND_SW4
+    - CLM_E_POA_IND_SW5
+    - CLM_E_POA_IND_SW6
+    - CLM_E_POA_IND_SW7
+    - CLM_E_POA_IND_SW8
+    - CLM_E_POA_IND_SW9
+    - CLM_E_POA_IND_SW10
+    - CLM_E_POA_IND_SW11
+    - CLM_E_POA_IND_SW12
+    - CLM_POA_IND_SW1
+    - CLM_POA_IND_SW2
+    - CLM_POA_IND_SW3
+    - CLM_POA_IND_SW4
+    - CLM_POA_IND_SW5
+    - CLM_POA_IND_SW6
+    - CLM_POA_IND_SW7
+    - CLM_POA_IND_SW8
+    - CLM_POA_IND_SW9
+    - CLM_POA_IND_SW10
+    - CLM_POA_IND_SW11
+    - CLM_POA_IND_SW12
+    - CLM_POA_IND_SW13
+    - CLM_POA_IND_SW14
+    - CLM_POA_IND_SW15
+    - CLM_POA_IND_SW16
+    - CLM_POA_IND_SW17
+    - CLM_POA_IND_SW18
+    - CLM_POA_IND_SW19
+    - CLM_POA_IND_SW20
+    - CLM_POA_IND_SW21
+    - CLM_POA_IND_SW22
+    - CLM_POA_IND_SW23
+    - CLM_POA_IND_SW24
+    - CLM_POA_IND_SW25
+  cclfMapping:
+    - CCLF4.CLM_POA_IND
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_POA_IND
   fhirPath: ExplanationOfBenefit.diagnosis.onAdmission.coding
@@ -369,6 +672,8 @@
   sources:
     - FISS
     - NCH
+  cclfMapping:
+    - CCLF3.CLM_VAL_SQNC_NUM
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_VAL_SQNC_NUM
   notes: A FHIRPath is not provided for this element because the sequence number of a procedure in FHIR is not to be given importance.
@@ -382,6 +687,34 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - PRCDR_DT1
+    - PRCDR_DT2
+    - PRCDR_DT3
+    - PRCDR_DT4
+    - PRCDR_DT5
+    - PRCDR_DT6
+    - PRCDR_DT7
+    - PRCDR_DT8
+    - PRCDR_DT9
+    - PRCDR_DT10
+    - PRCDR_DT11
+    - PRCDR_DT12
+    - PRCDR_DT13
+    - PRCDR_DT14
+    - PRCDR_DT15
+    - PRCDR_DT16
+    - PRCDR_DT17
+    - PRCDR_DT18
+    - PRCDR_DT19
+    - PRCDR_DT20
+    - PRCDR_DT21
+    - PRCDR_DT22
+    - PRCDR_DT23
+    - PRCDR_DT24
+    - PRCDR_DT25
+  cclfMapping:
+    - CCLF3.CLM_PRCDR_PRFRM_DT
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_PRCDR_PRFRM_DT
   fhirPath: ExplanationOfBenefit.procedure.date
@@ -395,6 +728,34 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - ICD_PRCDR_CD1
+    - ICD_PRCDR_CD2
+    - ICD_PRCDR_CD3
+    - ICD_PRCDR_CD4
+    - ICD_PRCDR_CD5
+    - ICD_PRCDR_CD6
+    - ICD_PRCDR_CD7
+    - ICD_PRCDR_CD8
+    - ICD_PRCDR_CD9
+    - ICD_PRCDR_CD10
+    - ICD_PRCDR_CD11
+    - ICD_PRCDR_CD12
+    - ICD_PRCDR_CD13
+    - ICD_PRCDR_CD14
+    - ICD_PRCDR_CD15
+    - ICD_PRCDR_CD16
+    - ICD_PRCDR_CD17
+    - ICD_PRCDR_CD18
+    - ICD_PRCDR_CD19
+    - ICD_PRCDR_CD20
+    - ICD_PRCDR_CD21
+    - ICD_PRCDR_CD22
+    - ICD_PRCDR_CD23
+    - ICD_PRCDR_CD24
+    - ICD_PRCDR_CD25
+  cclfMapping:
+    - CCLF3.CLM_PRCDR_CD
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_PRCDR_CD
   fhirPath: ExplanationOfBenefit.procedure.procedure.coding.code
@@ -408,6 +769,34 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - ICD_PRCDR_VRSN_CD1
+    - ICD_PRCDR_VRSN_CD2
+    - ICD_PRCDR_VRSN_CD3
+    - ICD_PRCDR_VRSN_CD4
+    - ICD_PRCDR_VRSN_CD5
+    - ICD_PRCDR_VRSN_CD6
+    - ICD_PRCDR_VRSN_CD7
+    - ICD_PRCDR_VRSN_CD8
+    - ICD_PRCDR_VRSN_CD9
+    - ICD_PRCDR_VRSN_CD10
+    - ICD_PRCDR_VRSN_CD11
+    - ICD_PRCDR_VRSN_CD12
+    - ICD_PRCDR_VRSN_CD13
+    - ICD_PRCDR_VRSN_CD14
+    - ICD_PRCDR_VRSN_CD15
+    - ICD_PRCDR_VRSN_CD16
+    - ICD_PRCDR_VRSN_CD17
+    - ICD_PRCDR_VRSN_CD18
+    - ICD_PRCDR_VRSN_CD19
+    - ICD_PRCDR_VRSN_CD20
+    - ICD_PRCDR_VRSN_CD21
+    - ICD_PRCDR_VRSN_CD22
+    - ICD_PRCDR_VRSN_CD23
+    - ICD_PRCDR_VRSN_CD24
+    - ICD_PRCDR_VRSN_CD25
+  cclfMapping:
+    - CCLF3.DGNS_PRCDR_ICD_IND
   sourceView: V2_MDCR_CLM_PROD
   sourceColumn: CLM_DGNS_PRCDR_ICD_IND
   fhirPath: ExplanationOfBenefit.procedure.procedure.coding.system
@@ -423,8 +812,11 @@
   sources:
     - FISS
     - NCH
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - LINE_SBMTD_CHRG_AMT
+    - REV_CNTR_TOT_CHRG_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_SBMT_CHRG_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_SBMT_CHRG_AMT')).amount.value
@@ -441,7 +833,12 @@
     - FISS
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - LINE_ALOWD_CHRG_AMT
+  cclfMapping:
+    - CCLF5.CLM_LINE_ALOWD_CHRG_AMT
+    - CCLF6.CLM_LINE_ALOWD_CHRG_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_ALOWD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_ALOWD_CHRG_AMT')).amount.value
@@ -452,9 +849,19 @@
     - HHA
     - Hospice
     - SNF
+    - DME
+    - CARRIER
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_LINE_NUM
+    - LINE_NUM
+  cclfMapping:
+    - CCLF2.CLM_LINE_NUM
+    - CCLF5.CLM_LINE_NUM
+    - CCLF6.CLM_LINE_NUM
+    - CCLFB.CLM_LINE_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NUM
   fhirPath: ExplanationOfBenefit.item.sequence
@@ -468,6 +875,12 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - HCPCS_CD
+  cclfMapping:
+    - CCLF2.CLM_LINE_HCPCS_CD
+    - CCLF5.CLM_LINE_HCPCS_CD
+    - CCLF6.CLM_LINE_HCPCS_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_HCPCS_CD
   fhirPath: ExplanationOfBenefit.item.productOrService.where(coding.system='http://www.ama-assn.org/go/cpt' or coding.system='https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets' or coding.system='http://terminology.hl7.org/CodeSystem/data-absent-reason').coding.code
@@ -478,6 +891,10 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_APC_HIPPS_CD
+  cclfMapping:
+    - CCLF2.CLM_REV_APC_HIPPS_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_REV_APC_HIPPS_CD
   fhirPath: ExplanationOfBenefit.item.productOrService.where(coding.system='https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes').coding.code
@@ -493,6 +910,9 @@
     - NCH
     - FISS
     - MCS
+  ccwMapping:
+    - LINE_NDC_CD
+    - REV_CNTR_IDE_NDC_UPC_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_CD
   fhirPath: ExplanationOfBenefit.item.detail.productOrService.where(coding.system='http://hl7.org/fhir/sid/ndc').coding.code
@@ -506,6 +926,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_NDC_QTY
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_QTY
   fhirPath: ExplanationOfBenefit.item.detail.where(productOrService.where(coding.system='http://hl7.org/fhir/sid/ndc')).quantity.value
@@ -519,6 +941,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_NDC_QTY_QLFR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_QTY_QLFYR_CD
   fhirPath: ExplanationOfBenefit.item.detail.where(productOrService.where(coding.system='http://hl7.org/fhir/sid/ndc')).quantity.code
@@ -532,6 +956,12 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - LINE_SRVC_CNT
+    - REV_CNTR_UNIT_CNT
+  cclfMapping:
+    - CCLF2.CLM_LINE_SRVC_UNIT_QTY
+    - CCLF5.CLM_LINE_SRVC_UNIT_QTY
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_SRVC_UNIT_QTY
   fhirPath: ExplanationOfBenefit.item.quantity.value
@@ -545,6 +975,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - REV_CNTR
+  cclfMapping:
+    - CCLF2.CLM_LINE_REV_CTR_CD
   referenceTable: CLM_LINE_REV_CTR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_REV_CTR_CD
@@ -558,6 +992,8 @@
   sources: 
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_DDCTBL_COINSRNC_CD
   referenceTable: CLM_DDCTBL_COINSRNC_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_DDCTBL_COINSRNC_CD
@@ -573,6 +1009,11 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - HCPCS_1ST_MDFR_CD
+  cclfMapping:
+    - CCLF2.HCPCS_1_MDFR_CD
+    - CCLF5.HCPCS_1_MDFR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: HCPCS_1_MDFR_CD
   fhirPath: ExplanationOfBenefit.item.modifier[0].coding.code
@@ -587,6 +1028,11 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - HCPCS_2ND_MDFR_CD
+  cclfMapping:
+    - CCLF2.HCPCS_2_MDFR_CD
+    - CCLF5.HCPCS_2_MDFR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: HCPCS_2_MDFR_CD
   fhirPath: ExplanationOfBenefit.item.modifier[1].coding.code
@@ -601,6 +1047,11 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - HCPCS_3RD_MDFR_CD
+  cclfMapping:
+    - CCLF2.HCPCS_3_MDFR_CD
+    - CCLF5.HCPCS_3_MDFR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: HCPCS_3_MDFR_CD
   fhirPath: ExplanationOfBenefit.item.modifier[2].coding.code
@@ -615,6 +1066,11 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - HCPCS_4TH_MDFR_CD
+  cclfMapping:
+    - CCLF2.HCPCS_4_MDFR_CD
+    - CCLF5.HCPCS_4_MDFR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: HCPCS_4_MDFR_CD
   fhirPath: ExplanationOfBenefit.item.modifier[3].coding.code
@@ -629,6 +1085,9 @@
   sources:
     - NCH
     - FISS
+  cclfMapping:
+    - CCLF2.HCPCS_5_MDFR_CD
+    - CCLF5.HCPCS_5_MDFR_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: HCPCS_5_MDFR_CD
   fhirPath: ExplanationOfBenefit.item.modifier[4].coding.code
@@ -642,6 +1101,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_RATE_AMT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_RATE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_RATE_AMT')).amount.value
@@ -654,6 +1115,10 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_1ST_ANSI_CD
+  cclfMapping:
+    - CCLFA.CLM_1_REV_CNTR_ANSI_RSN_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_1_REV_CNTR_ANSI_RSN_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
@@ -667,6 +1132,10 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_1ST_ANSI_CD
+  cclfMapping:
+    - CCLFA.CLM_1_REV_CNTR_ANSI_GRP_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_1_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
@@ -680,6 +1149,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_2ND_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_2_REV_CNTR_ANSI_RSN_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
@@ -693,6 +1164,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_2ND_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_2_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
@@ -706,6 +1179,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_3RD_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_3_REV_CNTR_ANSI_RSN_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
@@ -719,6 +1194,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_3RD_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_3_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
@@ -732,6 +1209,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_4TH_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_4_REV_CNTR_ANSI_RSN_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
@@ -745,6 +1224,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_4TH_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_4_REV_CNTR_ANSI_GRP_CD
   fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
@@ -759,6 +1240,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_NCVRD_CHRG_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NCVRD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NCVRD_CHRG_AMT')).amount.value
@@ -774,8 +1257,11 @@
   sources:
     - NCH
     - FISS
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - LINE_PRVDR_PMT_AMT
+    - REV_CNTR_PRVDR_PMT_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_PRVDR_PMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRVDR_PMT_AMT')).amount.value
@@ -789,6 +1275,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_PTNT_RSPNSBLTY_PMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BENE_PMT_AMT')).amount.value
@@ -804,8 +1292,11 @@
   sources:
     - NCH
     - FISS
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - LINE_BENE_PMT_AMT
+    - REV_CNTR_BENE_PMT_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BENE_PD_AMT')).amount.value
@@ -821,8 +1312,15 @@
   sources:
     - NCH
     - FISS
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - LINE_NCH_PMT_AMT
+    - REV_CNTR_PMT_AMT_AMT
+  cclfMapping:
+    - CCLF2.CLM_LINE_CVRD_PD_AMT
+    - CCLF5.CLM_LINE_CVRD_PD_AMT
+    - CCLF6.CLM_LINE_CVRD_PD_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_CVRD_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CVRD_PD_AMT')).amount.value
@@ -835,6 +1333,8 @@
     - SNF
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_BLOOD_DDCTBL_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BLOOD_DDCTBL_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BLOOD_DDCTBL_AMT')).amount.value
@@ -850,10 +1350,15 @@
   sources:
     - NCH
     - FISS
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - REV_CNTR_CASH_DDCTBL_AMT
+    - LINE_BENE_PTB_DDCTBL_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_MDCR_DDCTBL_AMT
+  cclfMapping:
+    - CCLFB.CLM_LINE_MDCR_DDCTBL_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_MDCR_DDCTBL_AMT')).amount.value
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT
   appliesTo:
@@ -862,6 +1367,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - REV_CNTR_COINSRNC_WGE_ADJSTD_C
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_ADJSTD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_ADJSTD_AMT')).amount.value
@@ -871,6 +1378,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - REV_CNTR_RDCD_COINSRNC_AMT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_RDCD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_RDCD_AMT')).amount.value
@@ -884,6 +1393,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - REV_CNTR_1ST_MSP_PD_AMT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_MSP1_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP1_PD_AMT')).amount.value
@@ -897,6 +1408,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - REV_CNTR_2ND_MSP_PD_AMT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_MSP2_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP2_PD_AMT')).amount.value
@@ -910,6 +1423,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - REV_CNTR_DT
+  cclfMapping:
+    - CCLF2.CLM_LINE_INSTNL_REV_CTR_DT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_REV_CTR_DT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP2_PD_AMT')).amount.value
@@ -922,6 +1439,11 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_HOSPC_START_DT_ID
+    - CLM_ADMSN_DT
+  cclfMapping:
+    - CCLFA.CLM_ACTV_CARE_FROM_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_ACTV_CARE_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.start
@@ -934,6 +1456,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - NCH_BENE_DSCHRG_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_DSCHRG_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.end
@@ -944,6 +1468,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_IP_ADMSN_TYPE_CD
+  cclfMapping:
+    - CCLF1.CLM_ADMSN_TYPE_CD
   referenceTable: CLM_ADMSN_TYPE_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_ADMSN_TYPE_CD
@@ -967,10 +1495,16 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - NCH_PTNT_STATUS_IND_CD
+    - PTNT_DSCHRG_STUS_CD
+  cclfMapping:
+    - CCLF1.BENE_PTNT_STUS_CD
   referenceTable: BENE_PTNT_STUS_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: BENE_PTNT_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='discharge-status').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD').code
+  notes: The two CCW variables here represent the same concept, but only one code system is enumerated here. 
 - inputPath: SupportingInfoComponent.DGNS_DRG_CD
   appliesTo:
     - Inpatient
@@ -978,6 +1512,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_DRG_CD
+  cclfMapping:
+    - CCLF1.DGNS_DRG_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: DGNS_DRG_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='drg').code.coding.where(system='https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software').code
@@ -988,6 +1526,8 @@
     - Outpatient
   sources: 
     - NCH
+  ccwMapping:
+    - NCH_BLOOD_PNTS_FRNSHD_QTY
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLOOD_PT_FRNSH_QTY
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BLOOD_PT_FRNSH_QTY').exists()).value.value
@@ -1001,6 +1541,8 @@
   sources: 
     - NCH
     - FISS
+  ccwMapping:
+    - CLM_MCO_PD_SW
   referenceTable: CLM_MDCR_INSTNL_MCO_PD_SW
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_INSTNL_MCO_PD_SW
@@ -1011,6 +1553,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_SRC_IP_ADMSN_CD
+  cclfMapping:
+    - CCLF1.CLM_ADMSN_SRC_CD
   referenceTable: CLM_ADMSN_SRC_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_ADMSN_SRC_CD
@@ -1028,11 +1574,58 @@
   bfdDerived: True
   notes: This field is derived from 0 + CLM_BILL_FAC_TYPE_CD + CLM_BILL_CLSFCTN_CD + CLM_BILL_FREQ_CD because the codes are dependent upon one another, and require concatenation to be meaningful in a machine-readable format. 
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://www.nubc.org/CodeSystem/TypeOfBill').code
+- inputPath: SupportingInfoComponent.CLM_BILL_FAC_TYPE_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - FISS
+    - NCH
+  ccwMapping:
+    - CLM_FAC_TYPE_CD
+  cclfMapping: 
+    - CCLF1.CLM_BILL_FAC_TYPE_CD
+  fhirPath: <UPDATE>
+- inputPath: SupportingInfoComponent.CLM_BILL_CLSFCTN_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - FISS
+    - NCH
+  ccwMapping:
+    - CLM_SRVC_CLSFCTN_TYPE_CD
+  cclfMapping: 
+    - CCLF1.CLM_BILL_CLSFCTN_CD
+  fhirPath: <UPDATE>
+- inputPath: SupportingInfoComponent.CLM_BILL_FREQ_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - FISS
+    - NCH
+  ccwMapping:
+    - CLM_FREQ_CD
+  cclfMapping: 
+    - CCLF1.CLM_BILL_FREQ_CD
+  fhirPath: <UPDATE>
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
   sources:
     - NCH
+  ccwMapping:
+    - NCH_WKLY_PROC_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_NCH_WKLY_PROC_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_WKLY_PROC_DT').exists()).timing
@@ -1042,6 +1635,8 @@
     - SNF
   sources:
     - NCH
+  ccwMapping:
+    - NCH_VRFD_NCVRD_STAY_FROM_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_NCVRD_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_FROM_DT').exists()).timing
@@ -1051,6 +1646,8 @@
     - SNF
   sources:
     - NCH
+  ccwMapping: 
+    - NCH_VRFD_NCVRD_STAY_THRU_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_NCVRD_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_THRU_DT').exists()).timing
@@ -1060,6 +1657,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - NCH_QLFYD_STAY_FROM_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_QLFY_STAY_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_FROM_DT').exists()).timing
@@ -1069,6 +1668,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - CLM_QLFY_STAY_THRU_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_QLFY_STAY_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_THRU_DT').exists()).timing
@@ -1078,6 +1679,8 @@
     - SNF
   sources:
     - NCH
+  ccwMapping:
+    - NCH_ACTV_OR_CVRD_LVL_CARE_THRU
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_ACTV_CARE_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ACTV_CARE_THRU_DT').exists()).timing
@@ -1086,6 +1689,8 @@
     - Inpatient
   sources:
     - NCH
+  ccwMapping:
+    - NCH_BENE_MDCR_BNFTS_EXHTD_DT_I
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_MDCR_EXHSTD_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_EXHSTD_DT').exists()).timing
@@ -1099,6 +1704,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - FI_CLM_ACTN_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_FI_ACTN_CD
   referenceTable: CLM_FI_ACTN_CD
@@ -1109,6 +1716,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - BENE_LRD_USED_CNT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_LRD_USE_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_LRD_USE_CNT').used
@@ -1119,6 +1728,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_UNCOMPD_CARE_PMT_AMT
+  cclfMapping:
+    - CCLF1.CLM_HIPPS_UNCOMPD_CARE_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_HIPPS_UNCOMPD_CARE_AMT 
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_HIPPS_UNCOMPD_CARE_AMT').used.value
@@ -1126,6 +1739,8 @@
   appliesTo:
     - Inpatient
     - SNF
+  ccwMapping:
+    - BENE_TOT_COINSRNC_DAYS_CNT
   sources:
     - FISS
     - NCH
@@ -1142,6 +1757,11 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_DISP_CD
+  cclfMapping:
+    - CCLF5.CLM_DISP_CD
+    - CCLF6.CLM_DISP_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_DISP_CD
   referenceTable: CLM_DISP_CD
@@ -1159,7 +1779,12 @@
     - FISS
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - NCH_CARR_CLM_SBMTD_CHRG_AMT
+    - CLM_TOT_CHRG_AMT
+  cclfMapping:
+    - CCLF1.CLM_MDCR_INSTNL_TOT_CHRG_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMT_CHRG_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_SBMT_CHRG_AMT').exists() ).amount.value
@@ -1170,6 +1795,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_NON_UTLZTN_DAYS_CNT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_NCVRD_DAY_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_INSTNL_NCVRD_DAY_CNT').used
@@ -1180,6 +1807,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PASS_THRU_PER_DIEM_AMT
+  cclfMapping:
+    - CCLFA.CLM_INSTNL_PER_DIEM_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_PER_DIEM_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_INSTNL_PER_DIEM_AMT').used.value
@@ -1193,6 +1824,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_MDCR_NON_PMT_RSN_CD
+  cclfMapping:
+    - CCLF1.CLM_MDCR_NPMT_RSN_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_NPMT_RSN_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD').value.code
@@ -1202,6 +1837,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_CPTL_DRG_WT_NUM
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_DRG_WT_NUM
   fhirPath: ExplanationOfBenefit.adjudication.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM').value
@@ -1211,6 +1848,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT
+  cclfMapping:
+    - CCLF1.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_DSPRPRTNT_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_DSPRPRTNT_AMT').used.value
@@ -1220,6 +1861,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_CPTL_EXCPTN_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_EXCPTN_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_EXCPTN_AMT').used.value
@@ -1229,6 +1872,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_CPTL_FSP_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_FSP_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_CPTL_FSP_AMT').used.value
@@ -1238,6 +1883,10 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_CPTL_IME_AMT
+  cclfMapping:
+    - CCLF1.CLM_MDCR_IP_PPS_CPTL_IME_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_IME_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_CPTL_IME_AMT').used.value
@@ -1247,6 +1896,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_CPTL_OUTLIER_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_OUTLIER_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_OUTLIER_AMT').used.value
@@ -1256,6 +1907,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT').used.value
@@ -1264,6 +1917,8 @@
     - Inpatient
   sources:
     - NCH
+  ccwMapping:
+    - CLM_PPS_IND_CD
   referenceTable: CLM_PPS_IND_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_PPS_IND_CD
@@ -1274,6 +1929,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CLM_TOT_PPS_CPTL_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_TOT_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_PPS_CPTL_TOT_AMT').used.value
@@ -1286,6 +1943,8 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - 
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_CVRD_DAY_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_INSTNL_CVRD_DAY_CNT').used
@@ -1299,6 +1958,12 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - CARR_NUM
+    - FI_NUM
+  cclfMapping:
+    - CCLF1.CLM_CNTRCTR_NUM
+    - CCLF5.CLM_CNTRCTR_NUM
   referenceTable: CLM_CNTRCTR_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTRCTR_NUM
@@ -1313,10 +1978,14 @@
   sources:
     - FISS
     - NCH
+  ccwMapping:
+    - NCH_PRMRY_PYR_CD
+  cclfMapping:
+    - CCLF1.CLM_NCH_PRMRY_PYR_CD
   referenceTable: CLM_NCH_PRMRY_PYR_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_NCH_PRMRY_PYR_CD
-  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_PRMRY_PYR_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD').code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_PRMRY_PYR_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD').code
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_PRMRY_PYR_AMT
   appliesTo:
     - Inpatient
@@ -1325,6 +1994,8 @@
     - SNF
   sources:
     - NCH
+  ccwMapping:
+    - NCH_PRMRY_PYR_CLM_PD_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_INSTNL_PRMRY_PYR_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_INSTNL_PRMRY_PYR_AMT').used.value
@@ -1333,9 +2004,17 @@
     - Inpatient
     - HHA
     - SNF
+    - Carrier
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - CARR_LINE_PRFRMG_NPI_NUM
+    - RNDRNG_PHYSN_NPI
+    - PRF_PHYSN_NPI
+  cclfMapping:
+    - CCLF5.RNDRG_PRVDR_NPI_NUM
+    - CCLF5.CLM_RNDRG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_RNDRG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -1346,6 +2025,10 @@
     - SNF
   sources:
     - NCH
+  ccwMapping:
+    - NCH_PROFNL_CMPNT_CHRG_AMT
+  cclfMapping:
+    - CCLFA.CLM_INSTNL_PRFNL_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_PRFNL_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_INSTNL_PRFNL_AMT').used.value
@@ -1357,6 +2040,10 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - NCH_BENE_BLOOD_DDCTBL_LBLTY_AM
+  cclfMapping:
+    - CCLFA.CLM_BLOOD_LBLTY_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLOOD_LBLTY_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_BLOOD_LBLTY_AMT').used.value
@@ -1365,6 +2052,10 @@
     - Inpatient
   sources:
     - NCH
+  ccwMapping:
+    - NCH_BENE_IP_DDCTBL_AMT
+  cclfMapping:
+    - CCLFA.CLM_MDCR_IP_BENE_DDCTBL_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_IP_BENE_DDCTBL_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_IP_BENE_DDCTBL_AMT').used.value
@@ -1376,6 +2067,11 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - NCH_BENE_PTA_COINSRNC_LBLTY_AM
+    - NCH_BENE_PTB_COINSRNC_AMT
+  cclfMapping:
+    - CCLFA.CLM_MDCR_COINSRNC_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_MDCR_COINSRNC_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_COINSRNC_AMT').used.value
@@ -1389,6 +2085,10 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - OT_PHYSN_NPI
+  cclfMapping:
+    - CCLF1.OTHR_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_OTHR_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='otheroperating').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -1397,6 +2097,8 @@
     - Inpatient
   sources:
     - NCH
+  ccwMapping:
+    - NCH_DRG_OUTLIER_APRVD_PMT_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_DRG_OUTLIER_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_INSTNL_DRG_OUTLIER_AMT').used.value
@@ -1412,12 +2114,25 @@
     - FISS
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLG_PRVDR_OSCAR_NUM
+  ccwMapping:
+    - PRVDR_NUM
+  cclfMapping:
+    - CCLF1.PRVDR_OSCAR_NUM
+    - CCLF1.CLM_BLG_PRVDR_OSCAR_NUM
+    - CCLF2.PRVDR_OSCAR_NUM
+    - CCLF2.CLM_FAC_PRVDR_OSCAR_NUM
+    - CCLF3.PRVDR_OSCAR_NUM
+    - CCLF3.CLM_BLG_PRVDR_OSCAR_NUM
+    - CCLF4.PRVDR_OSCAR_NUM
+    - CCLF4.CLM_BLG_PRVDR_OSCAR_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='http://terminology.hl7.org/NamingSystem/CCN').value
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT
   appliesTo:
     - Outpatient
   sources:
     - NCH
+  ccwMapping:
+    - CLM_OP_BENE_PMT_AMT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_INSTNL_BENE_PD_AMT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_INSTNL_BENE_PD_AMT').used.value
@@ -1430,9 +2145,12 @@
     - NCH
     - FISS
     - MCS
+  ccwMapping:
+    - CLM_OP_PRVDR_PMT_AMT
+    - NCH_CLM_PRVDR_PMT_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_PRVDR_PMT_AMT
-  fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_INSTNL_BENE_PD_AMT').used.value
+  fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_PRVDR_PMT_AMT').used.value
 - inputPath: LineItemComponent.CLM_REV_DSCNT_IND_CD
   appliesTo:
     - Outpatient
@@ -1443,6 +2161,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_DSCNT_IND_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_REV_DSCNT_IND_CD
   referenceTable: CLM_REV_DSCNT_IND_CD
@@ -1454,6 +2174,8 @@
     - Hospice
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_OTAF_PMT_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_OTAF_ONE_IND_CD
   referenceTable: CLM_OTAF_IND_CD
@@ -1468,6 +2190,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_PACKG_IND_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_REV_PACKG_IND_CD
   referenceTable: CLM_REV_PACKG_IND_CD
@@ -1482,6 +2206,8 @@
   sources:
     - NCH
     - FISS
+  ccwMapping:
+    - REV_CNTR_PMT_MTHD_IND_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_REV_PMT_MTHD_CD
   referenceTable: CLM_REV_PMT_MTHD_CD
@@ -1495,6 +2221,8 @@
     - SNF
   sources:
     - NCH
+  ccwMapping:
+    - REV_CNTR_STUS_IND_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_REV_CNTR_STUS_CD
   referenceTable: CLM_REV_CNTR_STUS_CD
@@ -1506,12 +2234,16 @@
     - NCH
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_HOSPC_PRD_CNT
+  ccwMapping: 
+    - BENE_HOSPC_PRD_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_HOSPC_PRD_CNT').used
 - inputPath: SupportingInfoComponent.CLM_HHA_LUP_IND_CD
   appliesTo:
     - HHA
   sources:
     - NCH
+  ccwMapping:
+    - CLM_HHA_LUPA_IND_CD
   referenceTable: CLM_HHA_LUP_IND_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_HHA_LUP_IND_CD
@@ -1521,6 +2253,8 @@
     - HHA
   sources:
     - NCH
+  ccwMapping:
+    - CLM_HHA_RFRL_CD
   referenceTable: CLM_HHA_RFRL_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_HHA_RFRL_CD
@@ -1530,6 +2264,8 @@
     - HHA
   sources:
     - NCH
+  ccwMapping:
+    - CLM_HHA_TOT_VISIT_CNT
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_HHA_TOT_VISIT_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_MDCR_HHA_TOT_VISIT_CNT').used
@@ -1554,7 +2290,13 @@
     - NCH
     - MCS
     - FISS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - RFR_PHYSN_NPI
+  cclfMapping:
+    - CCLF5.CLM_RFRG_PRVDR_NPI_NUM
+    - CCLF6.ORDRG_PRVDR_NPI_NUM
+    - CCLF6.CLM_RFRG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_RFRG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='referring').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -1565,7 +2307,9 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - NCH_CARR_CLM_ALOWD_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ALOWD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_ALOWD_CHRG_AMT').exists() ).amount.value
@@ -1576,10 +2320,21 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_BENE_PMT_AMT').exists() ).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_BENE_PD_AMT
+  appliesTo:
+    - Carrier
+    - DME
+  sources:
+    - NCH
+    - MCS
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BENE_PD_AMT
+  fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_BENE_PD_AMT').exists() ).amount.value
 - inputPath: ExplanationOfBenefit-Base.CLM_RIC_CD
   appliesTo:
     - Inpatient
@@ -1592,16 +2347,30 @@
   sources:
     - FISS
     - MCS
-    - VIPS
+    - VMS
   referenceTable: CLM_RIC_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_RIC_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD').value.code
+- inputPath: ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD
+  appliesTo:
+    - Inpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - NCH
+  referenceTable: DGNS_DRG_OUTLIER_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: DGNS_DRG_OUTLIER_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='DGNS_DRG_OUTLIER_CD').exists()).code.coding.code
 - inputPath: LineItemComponent.CLM_LINE_ANSTHSA_UNIT_CNT
   appliesTo:
     - Carrier
   sources:
     - NCH
+  ccwMapping:
+    - CARR_LINE_ANSTHSA_UNIT_CNT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_ANSTHSA_UNIT_CNT
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT').value
@@ -1611,7 +2380,11 @@
     - DME
   sources:
     - NCH
-    - VIPS
+    - VMS
+  ccwMapping:
+    - TAX_NUM
+  cclfMapping:
+    - CCLF5.CLM_RNDRG_PRVDR_TAX_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_TAX_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='urn:oid:2.16.840.1.113883.4.4').value
@@ -1622,6 +2395,8 @@
   sources:
     - NCH
     - MCS
+  ccwMapping:
+    - CARR_LINE_RX_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_RX_NUM
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM').value
@@ -1632,7 +2407,13 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - LINE_1ST_EXPNS_DT
+  cclfMapping:
+    - CCLF2.CLM_LINE_FROM_DT
+    - CCLF5.CLM_LINE_FROM_DT
+    - CCLF6.CLM_LINE_FROM_DT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_FROM_DT
   fhirPath: ExplanationOfBenefit.item.serviced.start
@@ -1643,7 +2424,9 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - LINE_COINSRNC_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_MDCR_COINSRNC_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_MDCR_COINSRNC_AMT')).amount.value
@@ -1654,7 +2437,11 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - LINE_ICD_DGNS_CD
+  cclfMapping:
+    - CCLF5.CLM_LINE_DGNS_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_DGNS_CD
   fhirPath: ExplanationOfBenefit.item.diagnosisSequence
@@ -1666,7 +2453,13 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - LINE_LAST_EXPNS_DT
+  cclfMapping:
+    - CCLF2.CLM_LINE_THRU_DT
+    - CCLF5.CLM_LINE_THRU_DT
+    - CCLF6.CLM_LINE_THRU_DT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_THRU_DT
   fhirPath: ExplanationOfBenefit.item.serviced.end
@@ -1677,7 +2470,12 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - LINE_PLACE_OF_SRVC_CD
+  cclfMapping:
+    - CCLF5.CLM_POS_CD
+    - CCLF6.CLM_POS_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_POS_CD
   fhirPath: ExplanationOfBenefit.item.location.coding.where(system='https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set').code
@@ -1687,9 +2485,22 @@
     - DME
   sources:
     - NCH
-    - VIPS
+    - VMS
+  ccwMapping:
+    - PRTCPTNG_IND_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_PRTCPTG_CD
+- inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
+  appliesTo:
+    - Carrier
+    - DME
+  sources:
+    - NCH
+    - VMS
+  ccwMapping:
+    - CARR_LINE_PRVDR_TYPE_CD
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_RNDRG_PRVDR_TYPE_CD
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
@@ -1697,7 +2508,12 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  cclfMapping: 
+    - CCLF5.CLM_CARR_PMT_DNL_CD
+    - CCLF6.CLM_CARR_PMT_DNL_CD
+  ccwMapping:
+    - CARR_CLM_PMT_DNL_CD
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_CARR_PMT_DNL_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD').value.code
@@ -1708,7 +2524,9 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - CARR_CLM_PRMRY_PYR_PD_AMT
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_MDCR_PRFNL_PRMRY_PYR_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRMRY_PYR_AMT').exists() ).amount.value
@@ -1719,7 +2537,9 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - CARR_CLM_PRVDR_ASGNMT_IND_SW
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW').value.code
@@ -1730,7 +2550,9 @@
   sources:
     - NCH
     - MCS
-    - VIPS
+    - VMS
+  ccwMapping:
+    - CLM_CLNCL_TRIL_NUM
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_CLNCL_TRIL_NUM
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CLNCL-TRIL-NUM').value
@@ -1740,6 +2562,8 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - LINE_HCT_HGB_RSLT_NUM
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_HCT_HGB_RSLT_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).value
@@ -1749,6 +2573,8 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - LINE_HCT_HGB_TYPE_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_HCT_HGB_TYPE_CD
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).code.coding
@@ -1758,6 +2584,8 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - CARR_LINE_CLIA_LAB_NUM
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_CARR_CLNCL_LAB_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).performer.identifier.value
@@ -1767,6 +2595,8 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - LINE_BENE_PRMRY_PYR_PD_AMT
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_BENE_PRMRY_PYR_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BENE_PRMRY_PYR_PD_AMT')).amount.value
@@ -1776,6 +2606,9 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - CARR_LINE_MTUS_CD
+    - DMERC_LINE_MTUS_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_MTUS_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD').value.code
@@ -1786,6 +2619,9 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - CARR_LINE_MTUS_CNT
+    - DMERC_LINE_MTUS_CNT
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_MTUS_CNT
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT').value
@@ -1795,6 +2631,9 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - CARR_LINE_PRCNG_LCLTY_CD
+    - DMERC_LINE_PRCNG_STATE_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRCNG_LCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD').value.code
@@ -1803,6 +2642,8 @@
     - Carrier
   sources:
     - NCH
+  ccwMapping:
+    - CARR_LINE_RDCD_PMT_PHYS_ASTN_C
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PHYSN_ASTNT_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD').value.code
@@ -1812,6 +2653,10 @@
   sources:
     - NCH
     - MCS
+  ccwMapping:
+    - HPSA_SCRCTY_IND_CD
+  cclfMapping:
+    - CCLFB.CLM_LINE_CARR_HPSA_SCRCTY_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_CARR_HPSA_SCRCTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-CARR-HPSA-SCRCTY-CD').value.code
@@ -1821,6 +2666,11 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - LINE_BENE_PRMRY_PYR_CD
+  cclfMapping:
+    - CCLF5.CLM_LINE_PRMRY_PYR_CD
+    - CCLF6.CLM_PRMRY_PYR_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRMRY_PYR_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRMRY-PYR-CD').value.code
@@ -1830,6 +2680,11 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - LINE_CMS_TYPE_SRVC_CD
+  cclfMapping:
+    - CCLF5.CLM_FED_TYPE_SRVC_CD
+    - CCLF6.CLM_FED_TYPE_SRVC_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_FED_TYPE_SRVC_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FED-TYPE-SRVC-CD').value.code
@@ -1840,6 +2695,8 @@
   sources:
     - NCH
     - MCS
+  ccwMapping:
+     - LINE_PMT_80_100_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PMT_80_100_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD').value.code
@@ -1849,6 +2706,11 @@
     - DME
   sources:
     - NCH
+  ccwMapping:
+    - LINE_PRCSG_IND_CD
+  cclfMapping:
+    - CCLF5.CLM_PRCSG_IND_CD
+    - CCLF6.CLM_PRCSG_IND_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRCSG_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD').value.code
@@ -1858,18 +2720,25 @@
     - DME
   sources:
     - NCH
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - LINE_SERVICE_DEDUCTIBLE
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_SRVC_DDCTBL_SW
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW').value.code
 - inputPath: LineItemComponent.CLM_PRVDR_SPCLTY_CD
   appliesTo:
     - Carrier
+    - DME
   sources:
     - NCH
-    - VIPS
+    - VMS
     - MCS
+  ccwMapping:
+    - PRVDR_SPCLTY
+  cclfMapping:
+    - CCLF5.CLM_PRVDR_SPCLTY_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_PRVDR_SPCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD').value.code
@@ -1878,7 +2747,9 @@
     - DME
   sources:
     - NCH
-    - VIPS
+    - VMS
+  ccwMapping:
+    - DMERC_LINE_SCRN_SVGS_AMT
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_DMERC_SCRN_SVGS_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_DMERC_SCRN_SVGS_AMT')).amount.value
@@ -1887,16 +2758,40 @@
     - DME
   sources:
     - NCH
-    - VIPS
+    - VMS
+  ccwMapping:
+    - DMERC_LINE_SUPPLR_TYPE_CD
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_SUPLR_TYPE_CD
-  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SUPLR-TYPE-CD').value.code
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_DME_PRICE_AMT
   appliesTo:
     - DME
     - Carrier
   sources:
     - NCH
+  ccwMapping:
+    - LINE_DME_PRCHS_PRICE_AMT
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_DME_PRICE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_DME_PRICE_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - DME
+    - Carrier
+    - HHA
+    - Hospice
+    - SNF
+  sources:
+    - FISS
+    - MCS
+    - NCH
+  cclfMapping:
+    - CCLF1.CLM_ADJSTMT_TYPE_CD
+    - CCLF5.CLM_ADJSMT_TYPE_CD
+    - CCLF6.CLM_ADJSMT_TYPE_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_ADJSTMT_TYPE_CD
+  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code
