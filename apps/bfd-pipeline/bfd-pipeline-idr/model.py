@@ -7,6 +7,8 @@ from pydantic import BaseModel, BeforeValidator
 
 from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE
 
+type DbType = str | float | int | bool | date | datetime
+
 
 def transform_null_date_to_max(value: date | None) -> date:
     if value is None:

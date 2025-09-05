@@ -12,7 +12,7 @@ from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
-from model import LoadProgress, T
+from model import DbType, LoadProgress, T
 from timer import Timer
 
 cursor_execute_timer = Timer("cursor_execute")
@@ -20,8 +20,6 @@ cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
 
 logger = logging.getLogger(__name__)
-
-type DbType = str | float | int | bool | date | datetime
 
 
 def print_timers() -> None:
