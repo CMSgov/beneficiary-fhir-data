@@ -84,7 +84,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       } "Add claim query code";
     } "Set EOB period";
 
-    src.CLM_IDR_LD_DT as idrLdDt -> tgt.created = create('Extension') as tgtExtension then{
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt.extension = create('Extension') as tgtExtension then{
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
       src -> tgtExtension.value = idrLdDt "add date";
     } "add idr load date";
@@ -115,9 +115,9 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         } "Add coding";
       } "CLM_NRLN_RIC_CD";
     src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSMT-TYPE-CD" "Add url";
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
       src -> tgtExtension.value = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSMT-TYPE-CD",
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
         tgtCoding.code = adjTypeCd "Add code";
       } "Add coding";
     } "CLM_ADJSTMT_TYPE_CD";
@@ -826,6 +826,9 @@ group createProviderOrg(source src: ExplanationOfBenefitBase, target tgt: Organi
         src -> tgtId.value = ccn "set ccn";
       } "Add OSCAR/CCN num";
   src -> tgt.name = "PROVIDER ORG SOURCED FROM NPPES" "Add provider org";
+  src.CLM_BLG_PRVDR_ZIP5_CD as zip5 -> tgt.address = create('Address') as tgtAddress then{
+    zip5-> tgtAddress.postalCode = zip5 "add zip code";
+  } "Add zip code";
 }
 
 group createBillingPractitioner(source src: ExplanationOfBenefitBase, target tgt: Organization){
@@ -843,5 +846,8 @@ group createBillingPractitioner(source src: ExplanationOfBenefitBase, target tgt
   src.blg_name_professional as familyName -> tgt.name = create('HumanName') as tgtName then {
     familyName -> tgtName.family = familyName "set family name";
   } "add family name";
+  src.CLM_BLG_PRVDR_ZIP5_CD as zip5 -> tgt.address = create('Address') as tgtAddress then{
+    zip5-> tgtAddress.postalCode = zip5 "add zip code";
+  } "Add zip code";
   //src -> tgt.name = "PROVIDER ORG SOURCED FROM NPPES" "Add provider org";
 }

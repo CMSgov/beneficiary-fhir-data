@@ -566,9 +566,6 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     elif clm_type_cd == 40:
         # outpatient
         claim["CLM_DCMTN"]["CLM_NRLN_RIC_CD"] = "W"  # outpatient
-        claim['CLM']['CLM_INSTNL']['CLM_OP_SRVC_TYPE_CD'] = random.choice(
-            generator.code_systems["CLM_OP_SRVC_TYPE_CD"]
-        )
     elif clm_type_cd == 10:
         claim["CLM_DCMTN"]["CLM_NRLN_RIC_CD"] = random.choice(["U", "V", "W"])
     elif clm_type_cd in (71, 72):
@@ -587,6 +584,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim["CLM"]["CLM_BLG_PRVDR_OSCAR_NUM"] = random.choice(avail_oscar_codes_institutional)
         claim["CLM"]["CLM_MDCR_COINSRNC_AMT"] = round(random.uniform(0, 25), 2)
+        claim['CLM']['CLM_BLG_PRVDR_ZIP5_CD'] = random.choice(['75205','77550','77005'])
 
     if clm_type_cd == 40 or (clm_type_cd > 70 and clm_type_cd <= 82):
         claim["CLM"]["PRVDR_RFRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
@@ -711,7 +709,10 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         institutional_parts["CLM_DT_SGNTR_SK"] = claim["CLM"]["CLM_DT_SGNTR_SK"]
         institutional_parts["CLM_TYPE_CD"] = claim["CLM"]["CLM_TYPE_CD"]
         institutional_parts["CLM_NUM_SK"] = claim["CLM"]["CLM_NUM_SK"]
-        
+        if clm_type_cd == 40:
+            institutional_parts['CLM_OP_SRVC_TYPE_CD'] = random.choice(
+                generator.code_systems["CLM_OP_SRVC_TYPE_CD"]
+            )
         institutional_parts["CLM_FI_ACTN_CD"] = random.choice(
             generator.code_systems["CLM_FI_ACTN_CD"]
         )

@@ -248,6 +248,20 @@
   sourceColumn: PRVDR_BLG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
   notes: CLM_BLG_PRVDR_NPI_NUM is in CCLF, but not always present. PRVDR_BLG_PRVDR_NPI_NUM is always present on institutional claims.
+- inputPath: ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+  sources:
+    - NCH
+  ccwMapping:
+    - PRVDR_ZIP
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BLG_PRVDR_ZIP5_CD
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).address.postalCode
 - inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
   appliesTo:
     - Inpatient

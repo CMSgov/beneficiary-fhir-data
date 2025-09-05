@@ -50,7 +50,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
     } "Set EOB period";
 
-    src.CLM_IDR_LD_DT as idrLdDt -> tgt.created = create('Extension') as tgtExtension then{
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt.extension = create('Extension') as tgtExtension then{
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
       src -> tgtExtension.value = idrLdDt "add date";
     } "add idr load date";
@@ -136,9 +136,9 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     } "Add total charge amount";
 
     src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSMT-TYPE-CD" "Add url";
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
       src -> tgtExtension.value = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSMT-TYPE-CD",
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
         tgtCoding.code = adjTypeCd "Add code";
       } "Add coding";
     } "CLM_ADJSTMT_TYPE_CD";
@@ -199,7 +199,7 @@ group addRxNum(source src: SupportingInfoComponent, target tgt: BackboneElement)
       src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
       src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_RX_NUM") "Add Coding";
   } "Add category";
-  src.CLM_LINE_RX_NUM as rxNum -> tgt.value = cast(rxNum,'integer') "Add RX Num";
+  src.CLM_LINE_RX_NUM as rxNum -> tgt.value = rxNum "Add RX Num";
 }
 
 group addPharmacyServiceType(source src: SupportingInfoComponent, target tgt: BackboneElement){
