@@ -990,6 +990,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD",
+                "path": "LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD",
+                "label": "Claim Rendering Provider Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }

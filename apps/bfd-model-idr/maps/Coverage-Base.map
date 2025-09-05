@@ -167,6 +167,17 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
         src -> tgtExtension.value = pbpNum "Add value";
     } "Add PBP number";
 
+    //This can be obtained from the contract + PBP by joining V2_MDCR_CNTRCT_PBP_SGMT with V2_MDCR_CNTRCT_PBP_NUM on CNTRCT_PBP_SK. 
+    src.CNTRCT_PBP_SGMT_NUM as segmentNum -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CNTRCT-PBP-SGMT-NUM" "Add url";
+        src -> tgtExtension.value = segmentNum "Add value";
+    } "Add Segment number";
+
+    src.BENE_ENRLMT_EMPLR_SBSDY_SW as switch -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW" "Add url";
+        src -> tgtExtension.value = switch "Add value";
+    } "Add RDS switch ";
+
     //Coverage Type Code Extension
     src.BENE_CVRG_TYPE_CD as cvrgTypeCd -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD" "Add url";

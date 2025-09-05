@@ -169,6 +169,19 @@
                 ]
             },
             {
+                "id": "ExplanationOfBenefit-Base.CLM_IDR_LD_DT",
+                "path": "ExplanationOfBenefit-Base.CLM_IDR_LD_DT",
+                "label": "Claim IDR Load Date",
+                "definition": "Date the claim was loaded into the IDR",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
+                    }
+                ]
+            },
+            {
                 "id": "ExplanationOfBenefit-Base.CLM_SRC_ID",
                 "path": "ExplanationOfBenefit-Base.CLM_SRC_ID",
                 "label": "Claim Source ID",
@@ -618,6 +631,30 @@
                 "id": "ExplanationOfBenefit-Base.CLM_RIC_CD",
                 "path": "ExplanationOfBenefit-Base.CLM_RIC_CD",
                 "label": "Near Line Record Identification Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD",
+                "label": "Claim Adjustment Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD",
+                "label": "Billing Provider State Code",
                 "min": 0,
                 "max": "1",
                 "type": [

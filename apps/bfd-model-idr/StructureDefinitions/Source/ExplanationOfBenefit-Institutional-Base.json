@@ -306,6 +306,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD",
+                "path": "ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD",
+                "label": "Claim Diagnosis Related Group Outlier Stay Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]
