@@ -1,18 +1,29 @@
 package gov.cms.bfd.server.ng.eob;
 
 import gov.cms.bfd.server.ng.FhirUtil;
+import gov.cms.bfd.server.ng.SecurityLabels;
+import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.ClaimLine;
+import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,6 +35,10 @@ import org.springframework.stereotype.Component;
 public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+
+  // Cache the security labels map to avoid repeated I/O and parsing
+  private static final Map<String, List<Map<String, Object>>> SECURITY_LABELS_MAP =
+      SecurityLabels.securityLabelsMap();
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -61,8 +76,34 @@ public class EobHandler {
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
+
+    return buildEobBundleExcludingSamhsa(eobs, true);
+  }
+
+  /**
+   * Converts a list of {@link Claim} objects into a FHIR {@link Bundle} of Explanation of Benefits
+   * (EOBs). Optionally filters out claims that contain SAMHSA-coded procedures based on the
+   * provided flag.
+   *
+   * @param claims the list of {@link Claim} objects to be converted into FHIR EOBs
+   * @param excludeSamhsa a boolean flag indicating whether to filter out claims containing
+   *     SAMHSA-coded procedures
+   * @return a FHIR {@link Bundle} containing the converted Explanation of Benefits (EOBs)
+   */
+  protected Bundle buildEobBundleExcludingSamhsa(List<Claim> claims, boolean excludeSamhsa) {
+
+    var filteredClaims = claims;
+    if (excludeSamhsa) {
+      filteredClaims =
+          claims.stream()
+              // keep claims that do NOT contain any SAMHSA-coded procedures
+              .filter(claim -> !claimHasSamhsa(claim))
+              .toList();
+    }
+
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+        filteredClaims.stream().map(Claim::toFhir).map(Resource.class::cast),
+        claimRepository::claimLastUpdated);
   }
 
   /**
@@ -81,8 +122,188 @@ public class EobHandler {
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var claim = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
+    var eobs = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated).stream().toList();
+    var bundle = buildEobBundleExcludingSamhsa(eobs, true);
+    return bundle.getEntry().stream()
+        .map(Bundle.BundleEntryComponent::getResource)
+        .map(ExplanationOfBenefit.class::cast)
+        .findFirst();
+  }
 
-    return claim.map(Claim::toFhir);
+  private String getDiagnosisCode(ClaimProcedure e) {
+    return normalize(e.getDiagnosisCode().orElse(""));
+  }
+
+  private String getClaimProcedureCode(ClaimProcedure e) {
+    return normalize(e.getProcedureCode().orElse(""));
+  }
+
+  private String getCode(Map<String, Object> entry) {
+    var codeObj = entry.get("code");
+    return normalize(codeObj.toString());
+  }
+
+  /**
+   * Normalizes a code string for SAMHSA comparison.
+   *
+   * <p>Rules:
+   *
+   * <ul>
+   *   <li>Rejects null (throws {@link NullPointerException})
+   *   <li>Trims leading/trailing whitespace
+   *   <li>Removes '.' characters
+   *   <li>Lowers case
+   * </ul>
+   *
+   * @param code non-null input value
+   * @return normalized code
+   * @throws NullPointerException if code is null
+   */
+  private String normalize(String code) {
+    Objects.requireNonNull(code, "code must not be null");
+    return code.trim().replace(".", "").toLowerCase();
+  }
+
+  /**
+   * Compares two code strings for equality after SAMHSA normalization.
+   *
+   * <p>Normalization steps for both inputs:
+   *
+   * <ul>
+   *   <li>Rejects null (throws {@link NullPointerException})
+   *   <li>Trims leading/trailing whitespace
+   *   <li>Removes all '.' characters
+   *   <li>Converts to lowercase
+   * </ul>
+   *
+   * <p>This ensures comparisons are insensitive to case, dots, and padding.
+   *
+   * @param source the first code string (must not be null)
+   * @param target the second code string (must not be null)
+   * @return true if the normalized forms are equal; false otherwise
+   * @throws NullPointerException if either input is null
+   */
+  private boolean compare(String source, String target) {
+    return normalize(source).equals(normalize(target));
+  }
+
+  // Returns true if the given claim contains any procedure that matches a SAMHSA
+  // security label code from the dictionary.
+  private boolean claimHasSamhsa(Claim claim) {
+    var claimFromDate = claim.getBillablePeriod().getClaimFromDate();
+    var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
+
+    // clm_from_dt of the claim comes after clm_thru_dt, indicates bad data.
+    var referenceDay = claimFromDate.isAfter(claimThroughDate) ? claimFromDate : claimThroughDate;
+
+    return drgCodeMatches(claim, referenceDay)
+        || claim.getClaimItems().stream()
+            .anyMatch(
+                e -> {
+                  var cl = e.getClaimLine();
+                  var cp = e.getClaimProcedure();
+
+                  return procedureMatchesSamhsaCode(cp, referenceDay)
+                      || hcpcsCodeMatches(cl, referenceDay);
+                });
+  }
+
+  // Checks DRG.
+  private boolean drgCodeMatches(Claim claim, LocalDate claimDate) {
+    var entries = SECURITY_LABELS_MAP.get(SystemUrls.CMS_MS_DRG);
+    for (var entry : entries) {
+      if (claimCodeDateInvalidInSamhsaList(claimDate, entry)) return false;
+      if (claim.getDrgCode().filter(drgCode -> compare(getCode(entry), drgCode)).isPresent()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Checks HCPCS and cpt.
+  private boolean hcpcsCodeMatches(ClaimLine claimLine, LocalDate claimDate) {
+    var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
+    if (hcpcs.isEmpty()) {
+      return false;
+    }
+    for (String system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
+      var entries = SECURITY_LABELS_MAP.get(system);
+      for (var entry : entries) {
+        if (claimCodeDateInvalidInSamhsaList(claimDate, entry)) return false;
+        if (compare(getCode(entry), hcpcs)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Checks ICDs.
+  private boolean procedureMatchesSamhsaCode(ClaimProcedure proc, LocalDate claimDate) {
+    var diagnosisCode = getDiagnosisCode(proc);
+    var procedureCode = getClaimProcedureCode(proc);
+    var icdIndicator = proc.getIcdIndicator().orElse(IcdIndicator.ICD_10); // Fallback ICD10
+
+    // Procedure codes live under the CMS procedure system
+    // diagnosis codes under the HL7 CM system.
+    var procedureEntries = SECURITY_LABELS_MAP.get(icdIndicator.getProcedureSystem());
+    var diagnosisEntries = SECURITY_LABELS_MAP.get(icdIndicator.getDiagnosisSystem());
+
+    // Check procedure code against its system entries.
+    if (!procedureCode.isEmpty()) {
+      boolean procMatch =
+          procedureEntries.stream()
+              .anyMatch(
+                  e -> {
+                    if (claimCodeDateInvalidInSamhsaList(claimDate, e)) return false;
+                    return compare(getCode(e), procedureCode);
+                  });
+      if (procMatch) {
+        return true;
+      }
+    }
+
+    // Only check diagnosis when indicator explicitly identifies ICD-9 or ICD-10.
+    if (!diagnosisCode.isEmpty()) {
+      boolean diagMatch =
+          diagnosisEntries.stream().anyMatch(e -> compare(getCode(e), diagnosisCode));
+      if (diagMatch) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Converts a {@link Date} object to a {@link LocalDate} using the system's default time zone.
+   *
+   * @param date the {@link Date} object to be converted; must not be null
+   * @return the corresponding {@link LocalDate} representation of the given {@link Date}
+   * @throws NullPointerException if the provided {@link Date} is null
+   */
+  private LocalDate dateToLocalDate(Date date) {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+  }
+
+  /**
+   * Retrieves the end date from the provided YAML entry map. If the "endDate" value in the map is
+   * the string "ACTIVE" (case-insensitive), the current date is returned. Otherwise, the "endDate"
+   * value is treated as a {@link Date} object and converted to a {@link LocalDate}.
+   *
+   * @param claimEntry a map containing the YAML entry data, where "endDate" is expected to be
+   *     either the string "ACTIVE" or a {@link Date} object.
+   * @return the end date as a {@link LocalDate}, or the current date if "endDate" is "ACTIVE".
+   */
+  private LocalDate getYmlItemEndDate(Map<String, Object> claimEntry) {
+    return dateToLocalDate(
+        claimEntry.get("endDate").toString().equalsIgnoreCase("ACTIVE")
+            ? new Date()
+            : (Date) claimEntry.get("endDate"));
+  }
+
+  private boolean claimCodeDateInvalidInSamhsaList(LocalDate claimDate, Map<String, Object> entry) {
+    return !(dateToLocalDate((Date) entry.get("startDate")).isBefore(claimDate)
+        && claimDate.isBefore(getYmlItemEndDate(entry)));
   }
 }

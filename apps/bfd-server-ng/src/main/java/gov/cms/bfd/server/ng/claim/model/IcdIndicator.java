@@ -29,7 +29,7 @@ public enum IcdIndicator {
 
   private final String code;
   private final String procedureSystem;
-  private final String diagnosisSytem;
+  private final String diagnosisSystem;
 
   /**
    * Formats a raw diagnosis code string according to the rules for this specific ICD system. For
