@@ -4,6 +4,7 @@ import sys
 import time
 from datetime import datetime
 
+from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 import extractor
@@ -103,7 +104,7 @@ def extract_and_load(
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
         # but it seems to be wrapped in a ProgrammingError.
         # Unclear the best way to handle this, it will require a bit more trial and error
-        except (ReauthenticationRequest, RetryRequest) as ex:
+        except (ReauthenticationRequest, RetryRequest, ForbiddenError) as ex:
             logger.warning("received transient error, retrying...", exc_info=ex)
             data_extractor.reconnect()
             if attempt == max_attempts - 1:
