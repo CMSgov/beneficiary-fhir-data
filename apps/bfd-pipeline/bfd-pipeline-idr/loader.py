@@ -1,5 +1,6 @@
 import logging
 import os
+import string
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
 
@@ -130,7 +131,7 @@ class PostgresLoader:
                 with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:  # type: ignore
                     for row in results:
                         model_dump = row.model_dump()
-                        copy.write_row([_remove_non_utf8(model_dump[k]) for k in insert_cols])
+                        copy.write_row([_remove_non_printable(model_dump[k]) for k in insert_cols])
                 copy_timer.stop()
 
                 if len(results) > 0:
@@ -200,10 +201,10 @@ class PostgresLoader:
         return data_loaded
 
 
-def _remove_non_utf8(val: DbType) -> DbType:
-    # Some IDR values have non-UTF8 characters
+def _remove_non_printable(val: DbType) -> DbType:
+    # Some IDR values have non-printable characters
     if type(val) is str:
-        return bytes(val, "utf-8").decode("utf-8", "ignore")
+        return "".join(s for s in val if s in string.printable)
     return val
 
 
