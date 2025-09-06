@@ -96,12 +96,6 @@ public class Configuration {
     return Objects.requireNonNullElseGet(jdbcConnectionDetails, () -> new JdbcConfiguration(this));
   }
 
-  private DatabaseOptions.AuthenticationType getAuthenticationType() {
-    return useRds()
-        ? DatabaseOptions.AuthenticationType.JDBC
-        : DatabaseOptions.AuthenticationType.RDS;
-  }
-
   private DatabaseOptions.DataSourceType getDataSourceType() {
     return useRds()
         ? DatabaseOptions.DataSourceType.AWS_WRAPPER
@@ -150,7 +144,7 @@ public class Configuration {
         .databaseUrl(jdbcOptions.getJdbcUrl())
         .databaseUsername(jdbcOptions.getUsername())
         .databasePassword(jdbcOptions.getPassword())
-        .authenticationType(getAuthenticationType())
+        .authenticationType(DatabaseOptions.AuthenticationType.JDBC)
         .dataSourceType(getDataSourceType())
         .awsJdbcWrapperOptions(jdbcWrapperOptions)
         .hikariOptions(hikariOptions)

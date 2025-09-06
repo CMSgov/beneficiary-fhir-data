@@ -7,6 +7,8 @@ from pydantic import BaseModel, BeforeValidator
 
 from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE
 
+type DbType = str | float | int | bool | date | datetime
+
 
 def transform_null_date_to_max(value: date | None) -> date:
     if value is None:
@@ -241,10 +243,14 @@ class IdrBeneficiary(IdrBaseModel):
         # src_rec_insrt_ts/src_rec_updt_ts for this.
         return f"""
             WITH ordered_xref AS (
-                SELECT bene_sk, bene_xref_sk, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, bene_xref_sk 
-                    ORDER BY src_rec_updt_ts DESC
-                ) AS row_order
+                SELECT bene_sk,
+                    bene_xref_sk, 
+                    bene_hicn_num, 
+                    src_rec_crte_ts, 
+                    ROW_NUMBER() OVER (
+                        PARTITION BY bene_sk, bene_xref_sk 
+                        ORDER BY src_rec_updt_ts DESC
+                    ) AS row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
             ), 
             current_xref AS (
@@ -257,7 +263,10 @@ class IdrBeneficiary(IdrBaseModel):
                     bx.idr_updt_ts
                 FROM ordered_xref ox
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
-                    ON bx.bene_sk = ox.bene_sk AND bx.bene_xref_sk = ox.bene_xref_sk
+                    ON bx.bene_sk = ox.bene_sk 
+                    AND bx.bene_xref_sk = ox.bene_xref_sk
+                    AND bx.bene_hicn_num = ox.bene_hicn_num
+                    AND bx.src_rec_crte_ts = ox.src_rec_crte_ts
                 WHERE ox.row_order = 1
             )
             SELECT {{COLUMNS}}
@@ -541,7 +550,7 @@ class IdrClaim(IdrBaseModel):
     ]
     idr_updt_ts_dcmtn: Annotated[
         datetime,
-        {ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_updt_ts"},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
 
