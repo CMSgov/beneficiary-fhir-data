@@ -514,7 +514,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.bundleCallResultShouldNotBeEmpty[bundleF
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "H00.36",
+            "code" : "H00.34",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
@@ -9672,7 +9672,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.bundleCallResultShouldNotContainSamhsaCp
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "H00.36",
+            "code" : "H00.34",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
@@ -18830,7 +18830,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.bundleCallResultShouldNotContainSamhsaDr
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "H00.36",
+            "code" : "H00.34",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
@@ -27988,7 +27988,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.bundleCallResultShouldNotContainSamhsaHc
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "H00.36",
+            "code" : "H00.34",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
@@ -37146,7 +37146,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.bundleCallResultShouldNotContainSamhsaIC
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "H00.36",
+            "code" : "H00.34",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
@@ -46304,7 +46304,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.bundleCallResultShouldNotContainSamhsaIC
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "H00.36",
+            "code" : "H00.34",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },

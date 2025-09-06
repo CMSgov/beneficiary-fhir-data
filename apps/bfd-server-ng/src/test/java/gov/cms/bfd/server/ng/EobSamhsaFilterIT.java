@@ -112,11 +112,11 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   void claimWithWrongCode() {
     // Wrongly added HCPCS Samhsa code should not be removed
     // even it is a Samhsa code it is in wrong system
-    // Samhsa code H0036 becomes H00.36 in ICD-10
+    // Samhsa code H0034 becomes H00.34 in ICD-10
     var fetched = eobRead().withId(claimWithHcpcsInIcd).execute();
     var diag = fetched.getDiagnosis().get(4).getDiagnosisCodeableConcept().getCoding().getFirst();
 
-    assertEquals("H00.36", diag.getCode());
+    assertEquals("H00.34", diag.getCode());
     assertEquals(SystemUrls.ICD_10_CM, diag.getSystem());
   }
 
