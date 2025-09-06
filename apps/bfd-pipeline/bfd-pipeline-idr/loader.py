@@ -202,7 +202,7 @@ class PostgresLoader:
 
 def _remove_non_utf8(val: DbType) -> DbType:
     # Some IDR values have non-UTF8 characters
-    if val is str:
+    if type(val) is str:
         return bytes(val, "utf-8").decode("utf-8", "ignore")
     return val
 
