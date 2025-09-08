@@ -165,7 +165,7 @@ resource "aws_cloudwatch_log_group" "runner" {
 }
 
 resource "aws_codebuild_project" "runner" {
-  depends_on = [aws_codebuild_source_credential.github]
+  depends_on = [aws_codebuild_source_credential.github, aws_iam_role_policy_attachment.codebuild]
   for_each   = local.codebuild_runner_config
 
   name               = each.value.name
