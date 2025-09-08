@@ -69,9 +69,10 @@ class PostgresLoader:
                     INSERT INTO idr.load_progress(
                         table_name, 
                         last_ts, 
+                        last_id,
                         batch_start_ts, 
                         batch_complete_ts)
-                    VALUES(%(table)s, '{DEFAULT_MIN_DATE}', %(start_ts)s, '{DEFAULT_MIN_DATE}')
+                    VALUES(%(table)s, '{DEFAULT_MIN_DATE}', 0, %(start_ts)s, '{DEFAULT_MIN_DATE}')
                     ON CONFLICT (table_name) DO UPDATE 
                     SET batch_start_ts = EXCLUDED.batch_start_ts
                     """,
@@ -173,15 +174,19 @@ class PostgresLoader:
                                 if last[col] is not None
                             ]
                         )
+                        batch_id_col = model.batch_id_col()
+                        batch_id = last[batch_id_col] if batch_id_col else 0
                         cur.execute(
                             """
                             UPDATE idr.load_progress
-                            SET last_ts = %(last_ts)s
+                            SET last_ts = %(last_ts)s,
+                                last_id = %(last_id)s
                             WHERE table_name = %(table)s
                             """,
                             {
                                 "table": table,
                                 "last_ts": max_timestamp,
+                                "last_id": batch_id,
                             },
                         )
                 commit_timer.start()

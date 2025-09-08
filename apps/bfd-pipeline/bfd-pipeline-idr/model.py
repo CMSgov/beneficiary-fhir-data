@@ -55,6 +55,7 @@ def transform_null_int(value: int | None) -> float:
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
+BATCH_ID = "batch_id"
 UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
@@ -115,12 +116,30 @@ class IdrBaseModel(BaseModel):
         return cls._extract_meta_keys(UPDATE_TIMESTAMP)
 
     @classmethod
+    def batch_id_col_alias(cls) -> str | None:
+        col = cls._single_or_default(BATCH_ID)
+        if col:
+            return cls._format_column_alias(col)
+        return None
+
+    @classmethod
+    def batch_id_col(cls) -> str | None:
+        return cls._single_or_default(BATCH_ID)
+
+    @classmethod
     def update_timestamp_col_alias(cls) -> list[str]:
         return [cls._format_column_alias(col) for col in cls.update_timestamp_col()]
 
     @classmethod
     def _extract_meta_keys(cls, meta_key: str) -> list[str]:
         return [key for key in cls.model_fields if cls._extract_meta(key, meta_key)]
+
+    @classmethod
+    def _single_or_default(cls, meta_key: str) -> str | None:
+        keys = cls._extract_meta_keys(meta_key)
+        if len(keys) > 1:
+            raise LookupError(f"cls {cls.__name__} has more than one key for {meta_key}")
+        return keys[0] if len(keys) == 1 else None
 
     @classmethod
     def _extract_meta(cls, key: str, meta_key: str) -> object | None:
@@ -171,10 +190,20 @@ class IdrBaseModel(BaseModel):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
+DEATH_DATE_CUTOFF_YEARS = 3
+
+
+def _bene_filter(alias: str) -> str:
+    return f"""NOT(
+            {alias}.bene_vrfy_death_day_sw = 'Y' 
+            AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
+        )
+    """
+
 
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_HSTRY}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY}]
     bene_xref_efctv_sk: int
     bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
     bene_1st_name: str
@@ -277,6 +306,7 @@ class IdrBeneficiary(IdrBaseModel):
                 ON {xref}.bene_sk = {hstry}.bene_xref_sk 
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
+            AND {_bene_filter(hstry)}
             {{ORDER_BY}}
         """
 
@@ -307,7 +337,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
 
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_buyin_cd: str
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -326,16 +356,22 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp tp
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = tp.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -354,16 +390,22 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus stus
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = stus.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
@@ -383,16 +425,22 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt entlmt
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = entlmt.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
@@ -410,11 +458,17 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn rsn
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = rsn.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
@@ -448,7 +502,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_cntrct_num: str
     bene_pbp_num: str
@@ -467,16 +521,22 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         # equivalent to "select distinct on", but Snowflake has different syntax for that,
         # so it's unfortunately not portable
-        return """
+        hstry = ALIAS_HSTRY
+        return f"""
             WITH dupes as (
-                SELECT {COLUMNS}, ROW_NUMBER() OVER (
+                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
                     PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
-                {ORDER_BY} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
-                {WHERE_CLAUSE}
-                {ORDER_BY}
+                {{ORDER_BY}} DESC) as row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
+                {{WHERE_CLAUSE}}
+                AND EXISTS(
+                    SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                    WHERE {hstry}.bene_sk = usg.bene_sk
+                    AND {_bene_filter(hstry)}
+                )
+                {{ORDER_BY}}
             )
-            SELECT {COLUMNS} FROM dupes WHERE row_order = 1
+            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
             """
 
 
@@ -1114,6 +1174,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
+    last_id: int
     batch_start_ts: datetime
     batch_complete_ts: datetime
 
@@ -1128,7 +1189,7 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return f"""
-        SELECT table_name, last_ts, batch_start_ts, batch_complete_ts 
+        SELECT table_name, last_ts, last_id, batch_start_ts, batch_complete_ts 
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s
         """
