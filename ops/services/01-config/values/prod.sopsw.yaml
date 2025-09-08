@@ -217,7 +217,6 @@
 /bfd/${env}/server/nonsensitive/c4dic/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/enabled: "false"
 /bfd/${env}/server/nonsensitive/samhsa_v2/shadow: "true"
-/bfd/${env}/server-ng/nonsensitive/eob_enabled: "false"
 /bfd/${env}/server/nonsensitive/new_relic/app_name: BFD Server prod
 /bfd/${env}/server/nonsensitive/heathcheck/request_timeout_seconds: "15"
 /bfd/${env}/server/nonsensitive/heathcheck/request_backoff_seconds: "1"
@@ -530,6 +529,7 @@
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-platform-splunk-on-call-incident
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-platform-slack-bfd-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-warnings
+/bfd/${env}/server-ng/nonsensitive/eob_enabled: "false"
 /bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/lambda_errors/breach_topic: bfd-platform-splunk-on-call-incident
 /bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/lambda_errors/ok_topic: UNDEFINED
 /bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/sns_failures/breach_topic: bfd-platform-slack-bfd-alerts

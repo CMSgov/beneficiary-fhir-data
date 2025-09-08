@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
@@ -48,11 +46,11 @@ public class ServerConfigurationIT extends IntegrationTestBase {
 
   @Test
   void eobEndpointIsDisabledWhenConfigured() {
-    IGenericClient fhirClient = getFhirClient();
-    IReadExecutable<?> readRequest =
+    var fhirClient = getFhirClient();
+    var readRequest =
         fhirClient.read().resource("ExplanationOfBenefit").withId(BENE_ID_PART_A_ONLY);
 
-    ResourceNotFoundException thrown =
+    var thrown =
         assertThrows(
             ResourceNotFoundException.class,
             readRequest::execute,

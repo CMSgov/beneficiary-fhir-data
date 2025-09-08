@@ -62,9 +62,9 @@ public class V3Server extends RestfulServer {
   }
 
   private boolean isResourceProviderEnabled(IResourceProvider provider) {
-    Configuration.Nonsensitive nonsensitiveConfig = configuration.getNonsensitive();
+    var nonsensitiveConfig = configuration.getNonsensitive();
 
-    boolean keepProvider =
+    var keepProvider =
         switch (provider) {
           case EobResourceProvider eob ->
               checkAndLogProviderStatus(
@@ -78,7 +78,7 @@ public class V3Server extends RestfulServer {
                   nonsensitiveConfig.isCoverageEnabled(),
                   provider.getResourceType().getSimpleName());
           default -> {
-            LOGGER.debug(
+            LOGGER.warn(
                 "Keeping {} endpoint by default (no specific flag configured).",
                 provider.getResourceType().getSimpleName());
             yield true;
