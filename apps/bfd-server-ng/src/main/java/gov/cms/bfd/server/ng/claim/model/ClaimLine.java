@@ -33,8 +33,7 @@ public class ClaimLine {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhir(
-          ClaimItem claimItem) {
+  Optional<ExplanationOfBenefit.ItemComponent> toFhir(ClaimItem claimItem) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -75,7 +74,8 @@ public class ClaimLine {
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
-    line.setDiagnosisSequence(List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
+    line.setDiagnosisSequence(
+        List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
 
     claimLineInstitutional
         .map(ClaimLineInstitutional::getExtensions)

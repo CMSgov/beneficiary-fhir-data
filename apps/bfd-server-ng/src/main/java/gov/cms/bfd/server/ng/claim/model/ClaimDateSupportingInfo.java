@@ -28,7 +28,6 @@ class ClaimDateSupportingInfo {
         noncoveredThroughDate.toFhir(supportingInfoFactory),
         benefitsExhaustedDate.toFhir(supportingInfoFactory),
         qualifyStayFromDate.toFhir(supportingInfoFactory),
-        qualifyStayThruDate.toFhir(supportingInfoFactory)
-    );
+        qualifyStayThruDate.toFhir(supportingInfoFactory));
   }
 }
