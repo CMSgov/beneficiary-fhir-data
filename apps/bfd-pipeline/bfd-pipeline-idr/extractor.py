@@ -68,7 +68,9 @@ class Extractor(ABC):
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
         min_transaction_date = get_min_transaction_date()
+
         batch_id_order = ""
+        batch_id_clause = ""
         batch_id_col = cls.batch_id_col_alias()
         if batch_id_col is not None:
             batch_id_order = f", {batch_id_col}"
@@ -87,27 +89,24 @@ class Extractor(ABC):
         previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
         # If we've completed the last batch, there shouldn't be any additional records
         # with the same timestamp
-        op = ">" if previous_batch_complete else ">="
+        timestamp_op = ">" if previous_batch_complete or batch_id_col is not None else ">="
         # insertion timestamps aren't always representative of the time the data is available in
         # Snowflake, so we should always start loading from the most recent timestamp
         # that we've already fetched
         compare_timestamp = max(min_transaction_date, progress.last_ts)
 
-        batch_id_col = cls.batch_id_col_alias()
-        batch_id_clause = ""
-        batch_id_order = ""
         if batch_id_col is not None:
             batch_id_clause = f"""OR (
                 {batch_timestamp_clause} = %(timestamp)s AND {batch_id_col} >= {progress.last_id}
                 )"""
-            batch_id_order = f", {batch_id_col}"
+
         # Saved progress found, start processing from where we left off
         return self.extract_many(
             cls,
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE {batch_timestamp_clause} {op} %(timestamp)s
+                    WHERE {batch_timestamp_clause} {timestamp_op} %(timestamp)s
                     {batch_id_clause}
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
