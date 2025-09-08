@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
@@ -16,7 +17,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 public class ServerConfigurationIT extends IntegrationTestBase {
 
-  final String EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT =
+  static final String EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT =
       "HAPI-0302: Unknown resource type 'ExplanationOfBenefit'";
 
   @DynamicPropertySource
@@ -48,34 +49,30 @@ public class ServerConfigurationIT extends IntegrationTestBase {
   @Test
   void eobEndpointIsDisabledWhenConfigured() {
     IGenericClient fhirClient = getFhirClient();
+    IReadExecutable<?> readRequest =
+        fhirClient.read().resource("ExplanationOfBenefit").withId(BENE_ID_PART_A_ONLY);
+
     ResourceNotFoundException thrown =
         assertThrows(
             ResourceNotFoundException.class,
-            () -> {
-              fhirClient
-                  .read()
-                  .resource("ExplanationOfBenefit")
-                  .withId(BENE_ID_PART_A_ONLY)
-                  .execute();
-            },
+            readRequest::execute,
             "Expected ResourceNotFoundException because ExplanationOfBenefit endpoint should be disabled.");
+
     assertTrue(thrown.getMessage().contains(EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT));
 
     assertDoesNotThrow(
         () -> {
-          Patient patient =
-              fhirClient.read().resource(Patient.class).withId(BENE_ID_PART_A_ONLY).execute();
+          fhirClient.read().resource(Patient.class).withId(BENE_ID_PART_A_ONLY).execute();
         },
         "Expected Patient endpoint to be accessible and not throw an exception.");
 
     assertDoesNotThrow(
         () -> {
-          Coverage coverage =
-              fhirClient
-                  .read()
-                  .resource(Coverage.class)
-                  .withId(String.format("part-b-" + BENE_ID_PART_A_ONLY))
-                  .execute();
+          fhirClient
+              .read()
+              .resource(Coverage.class)
+              .withId(String.format("part-b-" + BENE_ID_PART_A_ONLY))
+              .execute();
         },
         "Expected Coverage endpoint to be accessible and not throw an exception.");
   }

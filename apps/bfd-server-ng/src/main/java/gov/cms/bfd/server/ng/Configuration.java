@@ -5,6 +5,7 @@ import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 /** Root configuration class. */
 @Data
 @ConfigurationProperties(prefix = "bfd")
-public class Configuration {
+public class Configuration implements Serializable {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
 
   /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
