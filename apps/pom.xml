@@ -87,7 +87,7 @@
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.30.32</aws-java-sdk-bom.version>
+        <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.9</spring-data-jpa.version>
