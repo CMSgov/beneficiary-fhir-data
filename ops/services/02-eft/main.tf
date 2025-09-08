@@ -13,7 +13,7 @@ module "terraservice" {
   greenfield           = true
   service              = local.service
   relative_module_root = "ops/services/02-eft"
-  subnet_layers        = ["private"]
+  subnet_layers        = ["data"]
   ssm_hierarchy_roots  = local.ssm_hierarchy_roots
 }
 
@@ -32,7 +32,7 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  subnets                  = module.terraservice.subnets_map["private"]
+  subnets                  = module.terraservice.subnets_map["data"]
   azs                      = keys(module.terraservice.default_azs)
 
   full_name = "bfd-${local.env}-${local.service}"
