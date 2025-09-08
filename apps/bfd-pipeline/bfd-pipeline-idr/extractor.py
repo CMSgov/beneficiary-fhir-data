@@ -68,6 +68,10 @@ class Extractor(ABC):
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
         min_transaction_date = get_min_transaction_date()
+        batch_id_order = ""
+        batch_id_col = cls.batch_id_col_alias()
+        if batch_id_col is not None:
+            batch_id_order = f", {batch_id_col}"
         logger.info("extracting %s", cls.table())
         if progress is None:
             # No saved progress, process the whole table from the beginning
@@ -76,7 +80,7 @@ class Extractor(ABC):
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
                     f"WHERE {batch_timestamp_clause} >= '{min_transaction_date}'",
-                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
+                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
                 {},
             )
 
