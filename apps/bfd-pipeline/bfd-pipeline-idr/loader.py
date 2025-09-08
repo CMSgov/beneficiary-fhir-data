@@ -1,6 +1,5 @@
 import logging
 import os
-import string
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
 
@@ -132,7 +131,7 @@ class PostgresLoader:
                 with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:  # type: ignore
                     for row in results:
                         model_dump = row.model_dump()
-                        copy.write_row([_remove_non_printable(model_dump[k]) for k in insert_cols])
+                        copy.write_row([_remove_null_bytes(model_dump[k]) for k in insert_cols])
                 copy_timer.stop()
 
                 if len(results) > 0:
@@ -206,10 +205,15 @@ class PostgresLoader:
         return data_loaded
 
 
-def _remove_non_printable(val: DbType) -> DbType:
-    # Some IDR values have non-printable characters
+def _remove_null_bytes(val: DbType) -> DbType:
+    # Some IDR strings have null bytes.
+    # Postgres doesn't allow these in text fields.
+    # We can't use a UTF-8 validator here since technically these are valid UTF-8
+    # and we can't use string.printable because that only contains ASCII fields
+    # so neither of those validation techniques will remove null bytes
+    # and still allow other valid UTF-8 characters.
     if type(val) is str:
-        return "".join(s for s in val if s in string.printable)
+        return val.replace("\x00", "")
     return val
 
 
