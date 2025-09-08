@@ -12,7 +12,7 @@ public class ClaimLineInstitutionalExtensions {
   @Embedded ClaimRevenueDiscountIndicatorCode claimRevenueDiscountIndicatorCode;
 
   @Embedded
-  ClaimObligatedToAcceptasFinalOneIndicatorCode claimObligatedToAcceptasFinalOneIndicatorCode;
+  ClaimObligatedToAcceptAsFinalOneIndicatorCode claimObligatedToAcceptasFinalOneIndicatorCode;
 
   @Embedded ClaimRevenuePackageIndicatorCode claimRevenuePackageIndicatorCode;
   @Embedded ClaimRevenuePaymentMethodCode claimRevenuePaymentMethodCode;

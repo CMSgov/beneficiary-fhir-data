@@ -335,11 +335,20 @@ public enum ClaimTypeCode {
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
-    if (isBetween(1000, 1999)) {
+    if (isPacStage1()) {
       return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
     }
     return Optional.empty();
   }
+
+  boolean isPacStage1() {
+      return isBetween(1000, 1999);
+  }
+
+  boolean isPacStage2() {
+    return isBetween(2000, 2999);
+  }
+
 
   boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);

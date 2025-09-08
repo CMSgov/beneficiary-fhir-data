@@ -139,7 +139,7 @@ public class Claim {
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
     getClaimFiss()
-        .flatMap(f -> f.toFhirOutcome(claimTypeCode.getCode()))
+        .flatMap(f -> f.toFhirOutcome(claimTypeCode))
         .ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();

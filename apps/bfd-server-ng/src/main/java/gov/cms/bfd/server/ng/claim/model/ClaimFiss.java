@@ -24,8 +24,8 @@ public class ClaimFiss {
   @Column(name = "clm_crnt_stus_cd")
   private ClaimCurrentStatusCode claimCurrentStatusCode;
 
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(int claimTypecode) {
-    if (claimTypecode >= 2000 && claimTypecode < 3000) {
+  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {
+    if (claimTypecode.isPacStage2()) {
       return Optional.ofNullable(claimCurrentStatusCode.getOutcome());
     }
     return Optional.empty();

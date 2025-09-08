@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-public class ClaimObligatedToAcceptasFinalOneIndicatorCode {
+public class ClaimObligatedToAcceptAsFinalOneIndicatorCode {
   @Column(name = "clm_otaf_one_ind_cd")
   private Optional<String> otafOneIndicatorCode;
 
