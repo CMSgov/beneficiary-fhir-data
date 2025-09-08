@@ -88,6 +88,15 @@ class Extractor(ABC):
         # Snowflake, so we should always start loading from the most recent timestamp
         # that we've already fetched
         compare_timestamp = max(min_transaction_date, progress.last_ts)
+
+        batch_id_col = cls.batch_id_col_alias()
+        batch_id_clause = ""
+        batch_id_order = ""
+        if batch_id_col is not None:
+            batch_id_clause = f"""OR (
+                {batch_timestamp_clause} = %(timestamp)s AND {batch_id_col} >= {progress.last_id}
+                )"""
+            batch_id_order = f", {batch_id_col}"
         # Saved progress found, start processing from where we left off
         return self.extract_many(
             cls,
@@ -95,8 +104,9 @@ class Extractor(ABC):
                 "{WHERE_CLAUSE}",
                 f"""
                     WHERE {batch_timestamp_clause} {op} %(timestamp)s
+                    {batch_id_clause}
                     """,
-            ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
+            ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
             {"timestamp": compare_timestamp},
         )
 
