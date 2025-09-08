@@ -171,6 +171,16 @@ class IdrBaseModel(BaseModel):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
+DEATH_DATE_CUTOFF_YEARS = 3
+
+
+def _bene_filter(alias: str) -> str:
+    return f"""NOT(
+            {alias}.bene_vrfy_death_day_sw = 'Y' 
+            AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
+        )
+    """
+
 
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
@@ -277,6 +287,7 @@ class IdrBeneficiary(IdrBaseModel):
                 ON {xref}.bene_sk = {hstry}.bene_xref_sk 
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
+            AND {_bene_filter(hstry)}
             {{ORDER_BY}}
         """
 
@@ -326,11 +337,17 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp tp
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = tp.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
@@ -354,11 +371,17 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus stus
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = stus.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
@@ -383,11 +406,17 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt entlmt
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = entlmt.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
@@ -410,11 +439,17 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn rsn
+            {{WHERE_CLAUSE}}
+            AND EXISTS(
+                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                WHERE {hstry}.bene_sk = rsn.bene_sk
+                AND {_bene_filter(hstry)}
+            )
+            {{ORDER_BY}}
         """
 
 
@@ -438,16 +473,22 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         # equivalent to "select distinct on", but Snowflake has different syntax for that,
         # so it's unfortunately not portable
-        return """
+        hstry = ALIAS_HSTRY
+        return f"""
             WITH dupes as (
-                SELECT {COLUMNS}, ROW_NUMBER() OVER (
+                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
                     PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
-                {ORDER_BY} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
-                {WHERE_CLAUSE}
-                {ORDER_BY}
+                {{ORDER_BY}} DESC) as row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
+                {{WHERE_CLAUSE}}
+                AND EXISTS(
+                    SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
+                    WHERE {hstry}.bene_sk = usg.bene_sk
+                    AND {_bene_filter(hstry)}
+                )
+                {{ORDER_BY}}
             )
-            SELECT {COLUMNS} FROM dupes WHERE row_order = 1
+            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
             """
 
 
