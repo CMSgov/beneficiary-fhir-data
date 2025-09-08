@@ -66,6 +66,12 @@ data "aws_subnets" "private" {
   }
 }
 
+data "aws_subnet" "private" {
+  for_each = toset(data.aws_subnets.private.ids)
+
+  id = each.key
+}
+
 resource "aws_security_group" "this" {
   description            = "Egress-only security group for CodeBuild Runners"
   name                   = "bfd-${data.aws_vpc.this.tags.stack}-codebuild-egress"
