@@ -105,6 +105,51 @@ resource "aws_iam_policy" "codebuild_kms" {
   policy = data.aws_iam_policy_document.codebuild_kms.json
 }
 
+data "aws_iam_policy_document" "codebuild_vpc" {
+  statement {
+    sid = "AllowDescribeAndCreateNetworkInterface"
+    actions = [
+      "ec2:CreateNetworkInterface",
+      "ec2:DescribeDhcpOptions",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeVpcs"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid       = "ConditionallyAllowCreateNIPermission"
+    actions   = ["ec2:CreateNetworkInterfacePermission"]
+    resources = ["arn:aws:ec2:${local.region}:${local.account_id}:network-interface/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:AuthorizedService"
+      values   = ["codebuild.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ec2:Subnet"
+      values   = values(data.aws_subnet.private)[*].arn
+    }
+  }
+}
+
+resource "aws_iam_policy" "codebuild_vpc" {
+  for_each = local.codebuild_runner_config
+
+  name = "${each.value.name}-vpc"
+  path = local.iam_path
+  description = join("", [
+    "Grants permissions for the ${each.value.name} CodeBuild Runner to use the ${local.env_vpc} VPC"
+  ])
+  policy = data.aws_iam_policy_document.codebuild_vpc.json
+}
+
 data "aws_iam_policy_document" "codebuild_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -132,6 +177,7 @@ resource "aws_iam_role_policy_attachment" "codebuild" {
     "${runner}-github" = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_github[runner].arn }
     "${runner}-ecr"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_ecr[runner].arn }
     "${runner}-kms"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_kms[runner].arn }
+    "${runner}-vpc"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_vpc[runner].arn }
   }]...)
 
   role       = each.value.role
