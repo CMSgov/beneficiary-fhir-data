@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
@@ -94,24 +94,31 @@ def extract_and_load(
         progress.batch_start_ts if progress else "none",
         progress.batch_complete_ts if progress else "none",
     )
-    max_attempts = 5
+    last_error = datetime.min
     loader = PostgresLoader(connection_string)
-    for attempt in range(max_attempts):
+    error_count = 0
+    max_errors = 3
+    while True:
         try:
             data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
             data_loaded = loader.load(data_iter, cls, batch_start, progress)
             return (loader, data_loaded)
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
         # but it seems to be wrapped in a ProgrammingError.
-        # Unclear the best way to handle this, it will require a bit more trial and error
+        # Unclear the best way to handle this, it will require a bit more trial and error.
         except (ReauthenticationRequest, RetryRequest, ForbiddenError) as ex:
-            logger.warning("received transient error, retrying...", exc_info=ex)
-            data_extractor.reconnect()
-            if attempt == max_attempts - 1:
+            time_expired = datetime.now(UTC) - last_error > timedelta(seconds=10)
+            if time_expired:
+                error_count = 0
+            error_count += 1
+            if error_count < max_errors:
+                last_error = datetime.now(UTC)
+                logger.warning("received transient error, retrying...", exc_info=ex)
+                data_extractor.reconnect()
+            else:
                 logger.error("max attempts exceeded")
                 raise ex
             time.sleep(1)
-    return (loader, False)
 
 
 def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]) -> None:
