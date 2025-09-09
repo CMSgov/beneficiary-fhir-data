@@ -530,20 +530,20 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
 
   // CMS
-    /** CMS ICD - ICD-9. */
+  /** CMS ICD - ICD-9. */
   public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
 
-    /** CMS ICD - ICD-10. */
+  /** CMS ICD - ICD-10. */
   public static final String CMS_ICD_10 = "http://www.cms.gov/Medicare/Coding/ICD10";
 
-    /** CMS - DRG Classification and Software. */
+  /** CMS - DRG Classification and Software. */
   public static final String CMS_MS_DRG =
       "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software";
 
-    /** CMS - HCPCS Code Sets */
+  /** CMS - HCPCS Code Sets */
   public static final String CMS_HCPCS = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
 
-    /** CMS - HIPPS Code Sets */
+  /** CMS - HIPPS Code Sets */
   public static final String CMS_HIPPS =
       "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes";
 
@@ -553,17 +553,17 @@ public class SystemUrls {
   public static final String NUBC_PATIENT_DISCHARGE_STATUS =
       "https://www.nubc.org/CodeSystem/PatDischargeStatus";
 
-    /** NUBC - point of origin */
+  /** NUBC - point of origin */
   public static final String NUBC_POINT_OF_ORIGIN = "https://www.nubc.org/CodeSystem/PointOfOrigin";
 
-    /** NUBC - type of admit or visit */
+  /** NUBC - type of admit or visit */
   public static final String NUBC_TYPE_OF_ADMIT =
       "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit";
 
-    /** NUBC - type of bill */
+  /** NUBC - type of bill */
   public static final String NUBC_TYPE_OF_BILL = "https://www.nubc.org/CodeSystem/TypeOfBill";
 
-    /** NUBC - revenue code */
+  /** NUBC - revenue code */
   public static final String NUBC_REVENUE_CODES = "https://www.nubc.org/CodeSystem/RevenueCodes";
 
   // Other
@@ -588,33 +588,33 @@ public class SystemUrls {
   /** <a href="https://terminology.hl7.org/6.2.0/NamingSystem-cmsMBI.html">CMS MBI.</a> */
   public static final String CMS_MBI = "http://hl7.org/fhir/sid/us-mbi";
 
-    /** HL7 - US-NPI */
+  /** HL7 - US-NPI */
   public static final String NPI = "http://hl7.org/fhir/sid/us-npi";
 
-    /** HL7 - NDC */
+  /** HL7 - NDC */
   public static final String NDC = "http://hl7.org/fhir/sid/ndc";
 
-    /** HL7 - CCN */
+  /** HL7 - CCN */
   public static final String CMS_CERTIFICATION_NUMBERS =
       "http://terminology.hl7.org/NamingSystem/CCN";
 
-    /** HL7 - ICD-9 */
+  /** HL7 - ICD-9 */
   public static final String ICD_9_CM = "http://hl7.org/fhir/sid/icd-9-cm";
 
-    /** HL7 - ICD-10 */
+  /** HL7 - ICD-10 */
   public static final String ICD_10_CM = "http://hl7.org/fhir/sid/icd-10-cm";
 
-    /** units of measure */
+  /** units of measure */
   public static final String UNITS_OF_MEASURE = "http://unitsofmeasure.org";
 
-    /** AMA - CPT */
+  /** AMA - CPT */
   public static final String AMA_CPT = "http://www.ama-assn.org/go/cpt";
 
-    /** X12 - claim adjustment reason code */
+  /** X12 - claim adjustment reason code */
   public static final String X12_CLAIM_ADJUSTMENT_REASON_CODES =
       "https://x12.org/codes/claim-adjustment-reason-codes";
 
-    /** X12 - claim adjustment group code */
+  /** X12 - claim adjustment group code */
   public static final String X12_CLAIM_ADJUSTMENT_GROUP_CODES =
       "https://x12.org/codes/claim-adjustment-group-codes";
 
