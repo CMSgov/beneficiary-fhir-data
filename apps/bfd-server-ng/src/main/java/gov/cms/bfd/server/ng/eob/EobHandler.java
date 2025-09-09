@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.eob;
 
 import gov.cms.bfd.server.ng.FhirUtil;
+import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
@@ -40,10 +41,11 @@ public class EobHandler {
    * Returns a {@link Patient} by their {@link IdType}.
    *
    * @param fhirId FHIR ID
+   * @param samhsaFilterMode SAMHSA filter mode
    * @return patient
    */
-  public Optional<ExplanationOfBenefit> find(final Long fhirId) {
-    return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange());
+  public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
+    return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
   }
 
   /**
@@ -55,6 +57,7 @@ public class EobHandler {
    * @param lastUpdated last updated
    * @param startIndex start index
    * @param sourceIds sourceIds
+   * @param samhsaFilterMode SAMHSA filter mode
    * @return bundle
    */
   public Bundle searchByBene(
@@ -63,7 +66,8 @@ public class EobHandler {
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       Optional<Integer> startIndex,
-      List<ClaimSourceId> sourceIds) {
+      List<ClaimSourceId> sourceIds,
+      SamhsaFilterMode samhsaFilterMode) {
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
@@ -73,23 +77,15 @@ public class EobHandler {
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
 
-    var filteredClaims = filterClaimsExcludingSamhsa(claims, true);
+    var filteredClaims = filterClaimsExcludingSamhsa(claims, samhsaFilterMode);
     return FhirUtil.bundleOrDefault(
         filteredClaims.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
   }
 
-  /**
-   * Returns a filtered list of claims with optional SAMHSA exclusion applied. This performs only
-   * in-memory filtering logic and intentionally avoids any bundle creation or additional database
-   * lookups so that callers can build a single bundle as the final step.
-   *
-   * @param claims input claims
-   * @param excludeSamhsa whether to exclude SAMHSA-coded claims
-   * @return filtered claims
-   */
-  protected List<Claim> filterClaimsExcludingSamhsa(List<Claim> claims, boolean excludeSamhsa) {
-    if (!excludeSamhsa) {
-      return claims; // no filtering requested
+  protected List<Claim> filterClaimsExcludingSamhsa(
+      List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+    if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
+      return claims;
     }
     return claims.stream().filter(claim -> !claimHasSamhsa(claim)).toList();
   }
@@ -100,23 +96,30 @@ public class EobHandler {
    * @param claimUniqueId claim ID
    * @param serviceDate service date
    * @param lastUpdated last updated
+   * @param samhsaFilterMode SAMHSA filter mode
    * @return bundle
    */
   public Bundle searchById(
-      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
+      Long claimUniqueId,
+      DateTimeRange serviceDate,
+      DateTimeRange lastUpdated,
+      SamhsaFilterMode samhsaFilterMode) {
+    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated, samhsaFilterMode);
     return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
-      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
+      Long claimUniqueId,
+      DateTimeRange serviceDate,
+      DateTimeRange lastUpdated,
+      SamhsaFilterMode samhsaFilterMode) {
     var claimOpt = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
     if (claimOpt.isEmpty()) {
       return Optional.empty();
     }
     var claim = claimOpt.get();
     // Apply SAMHSA exclusion in-memory without constructing a bundle.
-    if (claimHasSamhsa(claim)) {
+    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
       return Optional.empty();
     }
     return Optional.of(claim.toFhir());
@@ -132,21 +135,17 @@ public class EobHandler {
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
-    var claimFromDate = claim.getBillablePeriod().getClaimFromDate();
     var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
 
-    // clm_from_dt of the claim comes after clm_thru_dt, indicates bad data.
-    var referenceDay = claimFromDate.isAfter(claimThroughDate) ? claimFromDate : claimThroughDate;
-
-    return drgCodeMatches(claim, referenceDay)
+    return drgCodeMatches(claim, claimThroughDate)
         || claim.getClaimItems().stream()
             .anyMatch(
                 e -> {
                   var cl = e.getClaimLine();
                   var cp = e.getClaimProcedure();
 
-                  return procedureMatchesSamhsaCode(cp, referenceDay)
-                      || hcpcsCodeMatches(cl, referenceDay);
+                  return procedureMatchesSamhsaCode(cp, claimThroughDate)
+                      || hcpcsCodeMatches(cl, claimThroughDate);
                 });
   }
 

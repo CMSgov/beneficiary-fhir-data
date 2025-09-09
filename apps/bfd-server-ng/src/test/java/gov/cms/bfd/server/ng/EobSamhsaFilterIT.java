@@ -14,11 +14,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
+import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Integration test that verifies SAMHSA-coded claims are filtered end-to-end.
@@ -74,6 +78,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   protected final List<String> codeToCheck =
       List.of(DRG, HCPCS, CPT, ICD9_DIAGNOSIS, ICD9_PROCEDURE, ICD10_DIAGNOSIS, ICD10_PROCEDURE);
 
+  @Autowired private EobHandler eobHandler;
+
   private Bundle bundle;
   private List<ExplanationOfBenefit> eob;
 
@@ -91,6 +97,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
         assertThrows(
             ResourceNotFoundException.class, () -> eobRead().withId(claimUniqueId2).execute());
     assertTrue(exception.getMessage().contains("HTTP 404 Not Found: HAPI-0971:"));
+    var searchWithoutSamhsa = eobHandler.find(claimUniqueId, SamhsaFilterMode.INCLUDE);
+    assertTrue(searchWithoutSamhsa.isPresent());
   }
 
   @Test
