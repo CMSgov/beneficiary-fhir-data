@@ -80,8 +80,9 @@ public class Claim {
    *
    * @return optional DRG code
    */
-  public Optional<String> getDrgCode() {
-    return getClaimInstitutional().flatMap(ClaimInstitutional::getDrgCode);
+  public Optional<Integer> getDrgCode() {
+    return getClaimInstitutional()
+        .flatMap(i -> i.getSupportingInfo().getDiagnosisDrgCode().getDiagnosisDrgCode());
   }
 
   /**

@@ -153,7 +153,10 @@ public class EobHandler {
   private boolean drgCodeMatches(Claim claim, LocalDate claimDate) {
     var entries = SECURITY_LABELS_MAP.get(SystemUrls.CMS_MS_DRG);
     for (var entry : entries) {
-      if (claim.getDrgCode().filter(drgCode -> compare(drgCode, claimDate, entry)).isPresent()) {
+      if (claim
+          .getDrgCode()
+          .filter(drgCode -> compare(drgCode.toString(), claimDate, entry))
+          .isPresent()) {
         return true;
       }
     }

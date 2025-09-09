@@ -24,19 +24,4 @@ public class ClaimInstitutional {
   @Embedded private PpsDrgWeight ppsDrgWeight;
   @Embedded private ClaimInstitutionalExtensions extensions;
   @Embedded private BenefitBalanceInstitutional benefitBalanceInstitutional;
-
-  /**
-   * Accessor for the institutional DRG (dgns_drg_cd) value. Kept here so callers in other packages
-   * do not need visibility into the internal supporting info embeddable types.
-   *
-   * @return optional DRG code (trimmed) if present and non-blank
-   */
-  public java.util.Optional<String> getDrgCode() {
-    var code = supportingInfo.getDiagnosisDrgCode().getDiagnosisDrgCode();
-    // code is guaranteed non-null; only filter out blank values
-    if (code.isBlank()) {
-      return java.util.Optional.empty();
-    }
-    return java.util.Optional.of(code.trim());
-  }
 }

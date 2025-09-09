@@ -44,7 +44,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void coverageSearchById(SearchStyleEnum searchStyle) {
-    String validId = "part-a-405764107";
+    String validId = String.format("part-a-%s", BENE_ID_ALL_PARTS_WITH_XREF);
 
     var coverageBundle =
         searchBundle()
@@ -62,7 +62,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void coverageSearchByIdEmpty(SearchStyleEnum searchStyle) {
-    String nonExistentId = "part-a-9999999";
+    String nonExistentId = String.format("part-a-%s", BENE_ID_NO_COVERAGE);
 
     var coverageBundle =
         searchBundle()
@@ -78,34 +78,32 @@ public class CoverageSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void coverageSearchByBeneficiary(SearchStyleEnum searchStyle) {
-    long beneficiaryId = 405764107;
-
-    var coverageBundle =
-        searchBundle()
-            .where(
-                new ReferenceClientParam(Coverage.SP_BENEFICIARY).hasId("Patient/" + beneficiaryId))
-            .usingStyle(searchStyle)
-            .execute();
-
-    assertEquals(
-        2,
-        coverageBundle.getEntry().size(),
-        "Should find all Coverage resources for the given beneficiary");
-    coverageBundle
-        .getEntry()
-        .sort(Comparator.comparing(entry -> entry.getResource().getIdElement().getIdPart()));
-  }
-
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void coverageSearchByBeneficiaryEmpty(SearchStyleEnum searchStyle) {
-    long beneficiaryIdWithNoCoverage = 9999999;
 
     var coverageBundle =
         searchBundle()
             .where(
                 new ReferenceClientParam(Coverage.SP_BENEFICIARY)
-                    .hasId("Patient/" + beneficiaryIdWithNoCoverage))
+                    .hasId("Patient/" + BENE_ID_ALL_PARTS_WITH_XREF))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        3,
+        coverageBundle.getEntry().size(),
+        "Should find all Coverage resources for the given beneficiary");
+
+    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void coverageSearchByBeneficiaryEmpty(SearchStyleEnum searchStyle) {
+
+    var coverageBundle =
+        searchBundle()
+            .where(
+                new ReferenceClientParam(Coverage.SP_BENEFICIARY)
+                    .hasId("Patient/" + BENE_ID_NO_COVERAGE))
             .usingStyle(searchStyle)
             .execute();
 
@@ -119,11 +117,14 @@ public class CoverageSearchIT extends IntegrationTestBase {
   private static Stream<Arguments> coverageSearchWithLastUpdated() {
     return Stream.of(
         Arguments.of(
-            new TokenClientParam(Coverage.SP_RES_ID).exactly().identifier("part-a-405764107"),
-            405764107L),
+            new TokenClientParam(Coverage.SP_RES_ID)
+                .exactly()
+                .identifier(String.format("part-a-%s", BENE_ID_ALL_PARTS_WITH_XREF)),
+            Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF)),
         Arguments.of(
-            new ReferenceClientParam(Coverage.SP_BENEFICIARY).hasId("Patient/405764107"),
-            405764107L));
+            new ReferenceClientParam(Coverage.SP_BENEFICIARY)
+                .hasId(String.format("Patient/%s", BENE_ID_ALL_PARTS_WITH_XREF)),
+            Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF)));
   }
 
   @ParameterizedTest
@@ -142,8 +143,6 @@ public class CoverageSearchIT extends IntegrationTestBase {
     var lowerBound = lastUpdated.minusNanos(1_000_000); // 1 millisecond before
     var upperBound = lastUpdated.plusNanos(1_000_000); // 1 millisecond after
 
-    // Search using an inclusive range that is guaranteed to contain the value
-    System.out.println("Testing inclusive range for bene_sk: " + beneSk);
     var coverageBundle =
         searchBundle()
             .where(searchCriteria)
@@ -161,7 +160,6 @@ public class CoverageSearchIT extends IntegrationTestBase {
         "A small inclusive range around the exact timestamp should find a match");
 
     // Search for strictly greater than (gt) the exact timestamp
-    System.out.println("Testing 'gt' for bene_sk: " + beneSk);
     coverageBundle =
         searchBundle()
             .where(searchCriteria)
@@ -191,35 +189,32 @@ public class CoverageSearchIT extends IntegrationTestBase {
 
   @Test
   void coverageSearchWithNoParametersBadRequest() {
-    assertThrows(InvalidRequestException.class, () -> searchBundle().execute());
+    var bundle = searchBundle();
+    assertThrows(InvalidRequestException.class, bundle::execute);
+  }
+
+  private static Stream<Arguments> coverageSearchForBeneWithSinglePartShouldReturnOneEntry() {
+    return Stream.of(
+        Arguments.of(BENE_ID_PART_A_ONLY, "part-a"),
+        Arguments.of(BENE_ID_PART_B_ONLY, "part-b"),
+        Arguments.of(BENE_ID_DUAL_ONLY, "dual"));
   }
 
   @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void coverageSearchForBeneWithOnlyPartAShouldReturnOneEntry(SearchStyleEnum searchStyle) {
-    var coverageBundle = searchByBeneficiary(BENE_ID_PART_A_ONLY, searchStyle);
+  @MethodSource
+  void coverageSearchForBeneWithSinglePartShouldReturnOneEntry(String beneSk, String part) {
+    var coverageBundle = searchByBeneficiary(beneSk, SearchStyleEnum.GET);
     assertEquals(
         1,
         coverageBundle.getEntry().size(),
         "Should find exactly one Coverage resource for a Part A-only beneficiary");
     assertEquals(
-        "part-a-" + BENE_ID_PART_A_ONLY,
+        part + "-" + beneSk,
         coverageBundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
-  }
-
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void coverageSearchForBeneWithOnlyPartBShouldReturnOneEntry(SearchStyleEnum searchStyle) {
-    var coverageBundle = searchByBeneficiary(BENE_ID_PART_B_ONLY, searchStyle);
-    assertEquals(
-        1,
-        coverageBundle.getEntry().size(),
-        "Should find exactly one Coverage resource for a Part B-only beneficiary");
-    assertEquals(
-        "part-b-" + BENE_ID_PART_B_ONLY,
-        coverageBundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expect
+        .scenario("singleCoverage" + part)
+        .serializer("fhir+json")
+        .toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -246,13 +241,15 @@ public class CoverageSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
-  void coverageSearchForBeneWithExpiredCoverageShouldReturnEmptyBundle(
-      SearchStyleEnum searchStyle) {
+  void coverageSearchForBeneWithExpiredCoverage(SearchStyleEnum searchStyle) {
     var coverageBundle = searchByBeneficiary(BENE_ID_EXPIRED_COVERAGE, searchStyle);
     assertEquals(
-        0,
+        2,
         coverageBundle.getEntry().size(),
         "Should find no Coverage for a beneficiary whose entitlement periods are all in the past.");
+    for (var coverage : getCoverageFromBundle(coverageBundle)) {
+      assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
+    }
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
   }
 
