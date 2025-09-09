@@ -152,7 +152,7 @@ class SnowflakeExtractor(Extractor):
         self.batch_size = batch_size
 
     def reconnect(self) -> None:
-        SnowflakeExtractor._connect()
+        self.conn = SnowflakeExtractor._connect()
 
     @staticmethod
     def _connect() -> SnowflakeConnection:
