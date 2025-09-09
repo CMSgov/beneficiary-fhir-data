@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.218.0-SNAPSHOT</version>
+    <version>2.220.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -66,7 +66,7 @@
         <!-- The version of Java that we'll use for everything. -->
         <javaSourceVersion>21</javaSourceVersion>
 
-        <project.build.outputTimestamp>2025-08-26T19:22:57Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-09-09T16:32:39Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -77,24 +77,32 @@
         <sonar.coverage.jacoco.itReportPath>
             ${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.itReportPath>
-        <sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria>e1,e2,e3</sonar.issue.ignore.multicriteria>
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
         <sonar.issue.ignore.multicriteria.e1.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
-        <sonar.issue.ignore.multicriteria.e2.ruleKey>javaarchitecture:S7027</sonar.issue.ignore.multicriteria.e2.ruleKey>
+        <!-- rule for "A field should not duplicate the name of its containing class"
+            we want to allow this because of how we structure the fhir mappings -
+            sometimes we'll have a class for one specific database field and
+            the class name will match the field name.-->
+        <sonar.issue.ignore.multicriteria.e2.ruleKey>java:S1700</sonar.issue.ignore.multicriteria.e2.ruleKey>
         <sonar.issue.ignore.multicriteria.e2.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e2.resourceKey>
+        <sonar.issue.ignore.multicriteria.e3.ruleKey>javaarchitecture:S7027</sonar.issue.ignore.multicriteria.e3.ruleKey>
+        <sonar.issue.ignore.multicriteria.e3.resourceKey>
+            **/*.java
+        </sonar.issue.ignore.multicriteria.e3.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.30.32</aws-java-sdk-bom.version>
+        <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
-        <spring-data-jpa.version>3.4.6</spring-data-jpa.version>
+        <spring-data-jpa.version>3.4.9</spring-data-jpa.version>
         <spring-framework.version>6.2.8</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
         <spring-boot.version>3.4.4</spring-boot.version>
@@ -155,7 +163,7 @@
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
-        <hapi-fhir.version>8.0.0</hapi-fhir.version>
+        <hapi-fhir.version>8.4.0</hapi-fhir.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
         <org.apache.poi.version>5.4.0</org.apache.poi.version>
@@ -231,7 +239,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace/>
+        <jib.namespace />
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 

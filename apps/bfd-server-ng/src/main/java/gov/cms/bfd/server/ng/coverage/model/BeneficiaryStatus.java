@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Extension;
 /** Entity representing Beneficiary Status. */
 @Entity
 @Getter
-@Table(name = "beneficiary_status_current", schema = "idr")
+@Table(name = "beneficiary_status_latest", schema = "idr")
 public class BeneficiaryStatus {
 
   @Id
