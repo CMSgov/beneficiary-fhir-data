@@ -190,7 +190,7 @@ class IdrBaseModel(BaseModel):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
-DEATH_DATE_CUTOFF_YEARS = 3
+DEATH_DATE_CUTOFF_YEARS = 4
 
 
 def _bene_filter(alias: str) -> str:
