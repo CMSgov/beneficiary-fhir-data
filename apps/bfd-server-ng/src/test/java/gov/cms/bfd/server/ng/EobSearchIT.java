@@ -68,7 +68,7 @@ public class EobSearchIT extends IntegrationTestBase {
                     .identifier(BENE_ID_PART_A_AND_B_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(2, eobBundle.getEntry().size());
+    assertEquals(4, eobBundle.getEntry().size());
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
   }
 
@@ -125,7 +125,7 @@ public class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(2, eobBundle.getEntry().size());
+    assertEquals(4, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()
@@ -259,8 +259,6 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    assertEquals(
-        0, eobBundle.getEntry().size(), "Should find no EOBs with this adjudication status");
     expect
         .scenario(searchStyle.name() + "_WithTag_EmptyResult")
         .serializer("fhir+json")

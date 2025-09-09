@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @AllArgsConstructor
 public enum HhaLupaIndicatorCode {
   /** */
-  LUPA("L", "Low utilization payment adjustment (LUPA) claim");
+  L("L", "Low utilization payment adjustment (LUPA) claim");
 
   private final String code;
   private final String display;

@@ -29,6 +29,7 @@ tables = [
     },
     {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
     {"csv_name": "SYNTHETIC_BENE_TP.csv", "table": "v2_mdcr_bene_tp"},
+    {"csv_name": "SYNTHETIC_CLM_FISS.csv", "table": "v2_mdcr_clm_fiss"},
 ]
 
 

@@ -22,11 +22,11 @@ public class ClaimFiss {
   private Claim claim;
 
   @Column(name = "clm_crnt_stus_cd")
-  private ClaimCurrentStatusCode claimCurrentStatusCode;
+  private Optional<ClaimCurrentStatusCode> claimCurrentStatusCode;
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {
     if (claimTypecode.isPacStage2()) {
-      return Optional.ofNullable(claimCurrentStatusCode.getOutcome());
+      return claimCurrentStatusCode.map(ClaimCurrentStatusCode::getOutcome);
     }
     return Optional.empty();
   }

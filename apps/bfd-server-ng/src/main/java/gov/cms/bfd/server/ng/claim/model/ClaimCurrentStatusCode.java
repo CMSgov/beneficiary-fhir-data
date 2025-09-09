@@ -10,12 +10,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @AllArgsConstructor
 public enum ClaimCurrentStatusCode {
-  SUSPENDED("S", ExplanationOfBenefit.RemittanceOutcome.QUEUED),
-  DENIED("D", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
-  PAID("P", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
-  REJECTED("R", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
-  RETURN("T", ExplanationOfBenefit.RemittanceOutcome.PARTIAL),
-  INACTIVE("I", ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+  S("S", ExplanationOfBenefit.RemittanceOutcome.QUEUED),
+  D("D", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+  P("P", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+  R("R", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+  T("T", ExplanationOfBenefit.RemittanceOutcome.PARTIAL),
+  I("I", ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
 
   private final String code;
   private final ExplanationOfBenefit.RemittanceOutcome outcome;

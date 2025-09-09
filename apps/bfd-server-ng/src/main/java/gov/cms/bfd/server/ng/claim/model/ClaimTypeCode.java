@@ -342,13 +342,12 @@ public enum ClaimTypeCode {
   }
 
   boolean isPacStage1() {
-      return isBetween(1000, 1999);
+    return isBetween(1000, 1999);
   }
 
   boolean isPacStage2() {
     return isBetween(2000, 2999);
   }
-
 
   boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);

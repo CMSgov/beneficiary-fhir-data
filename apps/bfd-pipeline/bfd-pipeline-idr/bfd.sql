@@ -235,7 +235,9 @@ CREATE TABLE idr.claim_fiss (
     clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
     clm_crnt_stus_cd VARCHAR(1) NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ NOT NULL
+    idr_updt_ts TIMESTAMPTZ NOT NULL,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.claim_institutional (

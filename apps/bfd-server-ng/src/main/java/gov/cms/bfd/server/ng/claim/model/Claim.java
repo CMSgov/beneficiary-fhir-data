@@ -138,9 +138,7 @@ public class Claim {
     // will actually set EOB.outcome.
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
-    getClaimFiss()
-        .flatMap(f -> f.toFhirOutcome(claimTypeCode))
-        .ifPresent(eob::setOutcome);
+    getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();
     var initialSupportingInfo =

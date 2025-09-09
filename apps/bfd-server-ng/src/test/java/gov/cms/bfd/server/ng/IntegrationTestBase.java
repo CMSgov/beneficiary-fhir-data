@@ -38,6 +38,10 @@ public class IntegrationTestBase {
   protected static final String BENE_ID_NON_CURRENT = "181968400";
   protected static final String BENE_ID_NO_COVERAGE = "289169129";
 
+  protected static final String CLAIM_ID_ADJUDICATED = "1071939711295";
+  protected static final String CLAIM_ID_PHASE_1 = "1071939711297";
+  protected static final String CLAIM_ID_PHASE_2 = "1071939711298";
+
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
   }
