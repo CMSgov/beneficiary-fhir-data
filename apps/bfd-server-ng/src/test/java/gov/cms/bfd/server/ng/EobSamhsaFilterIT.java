@@ -188,8 +188,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   /** When SAMHSA filter is active, DRG claim is filtered and not returned (404). */
   @Test
   void eobCallResultShouldNotContainSamhsaDrgCode() {
-    var eoBenefits = eobRead().withId(claimUniqueIdForDrg).execute();
-    assertFalse(containsSamhsaCodeAnywhere(List.of(eoBenefits), DRG));
+    var eoBenefits = eobRead().withId(claimUniqueIdForDrg);
+    assertThrows(ResourceNotFoundException.class, eoBenefits::execute);
   }
 
   /** When SAMHSA filter is active, DRG claim is filtered and not returned (404). */
@@ -323,7 +323,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   @Test
   void securityLabelsYamlSerializationTest() {
     // Load and deserialize security_labels.yml using SecurityLabels utility
-    var labelsMap = SecurityLabels.securityLabelsMap();
+    var labelsMap = SecurityLabel.securityLabelsMap();
     var totalItems = labelsMap.values().stream().mapToInt(List::size).sum();
     // Serialize back to YAML
     var yaml = new org.yaml.snakeyaml.Yaml();
@@ -336,10 +336,10 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     assertEquals(682, totalItems, "Expected 682 items, got: " + totalItems);
 
     // security_labels.yml should have the samhsa codes above.
-    assertTrue(checkSamhsaCode(ICD10_PROCEDURE, labelsMap));
-    assertTrue(checkSamhsaCode(ICD10_DIAGNOSIS, labelsMap));
-    assertTrue(checkSamhsaCode(HCPCS, labelsMap));
-    assertTrue(checkSamhsaCode(CPT, labelsMap));
+    assertTrue(checkSamhsaCode(SecurityLabel.normalize(ICD10_PROCEDURE), labelsMap));
+    assertTrue(checkSamhsaCode(SecurityLabel.normalize(ICD10_DIAGNOSIS), labelsMap));
+    assertTrue(checkSamhsaCode(SecurityLabel.normalize(HCPCS), labelsMap));
+    assertTrue(checkSamhsaCode(SecurityLabel.normalize(CPT), labelsMap));
   }
 
   private IReadTyped<ExplanationOfBenefit> eobRead() {
@@ -380,11 +380,10 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     }
   }
 
-  private boolean checkSamhsaCode(
-      String samhsaCode, Map<String, List<Map<String, Object>>> labelsMap) {
+  private boolean checkSamhsaCode(String samhsaCode, Map<String, List<SecurityLabel>> labelsMap) {
     return labelsMap.values().stream()
         .flatMap(List::stream)
-        .anyMatch(entry -> samhsaCode.equals(entry.get("code") + ""));
+        .anyMatch(entry -> samhsaCode.equals(entry.getCode()));
   }
 
   private static class EobJsonScanException extends RuntimeException {
