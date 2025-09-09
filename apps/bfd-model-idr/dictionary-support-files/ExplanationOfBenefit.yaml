@@ -2290,7 +2290,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_HHA_RFRL_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_HHA_RFRL_CD').exists()).code.coding.code
-- inputPath: SupportingInfoComponent.CLM_MDCR_HHA_TOT_VISIT_CNT
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT
   appliesTo:
     - HHA
   sources:

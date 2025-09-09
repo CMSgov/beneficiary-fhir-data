@@ -445,7 +445,6 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             claim["CLM"]["CLM_FROM_DT"], claim["CLM"]["CLM_THRU_DT"]
         )
         claim["CLM"]["PRVDR_PRSCRBNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
-        claim["CLM"]["PRVDR_PRSCRBNG_PRVDR_LAST_NAME"] = "JOHNSON"
         claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
         claim["CLM"]["CLM_SBMT_FRMT_CD"] = random.choice(generator.code_systems["CLM_SBMT_FRMT_CD"])
         claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = "Z0001"

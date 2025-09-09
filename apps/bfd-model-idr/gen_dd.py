@@ -64,6 +64,8 @@ for walk_info in os.walk(dd_support_folder):
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
+                if 'suppressInDD' in entry and entry['suppressInDD']:
+                    continue
                 if "fhirPath" not in entry:
                     print(entry['inputPath'])
                 if "fhirPath" in entry:
@@ -74,10 +76,10 @@ for walk_info in os.walk(dd_support_folder):
                         entry['FHIR Resource'] = 'Patient'
                     elif(any(x in coverage_parts for x in entry['appliesTo'])):
                         entry['FHIR Resource'] = 'Coverage'
-                        entry['Coverage Type'] = entry['appliesTo']
+                        entry['Coverage / Claim Type'] = entry['appliesTo']
                     elif(any(x in claim_profiles for x in entry['appliesTo'])):
                         entry['FHIR Resource'] = 'ExplanationOfBenefit'
-                        entry['Claim Type'] = entry['appliesTo']
+                        entry['Coverage / Claim Type'] = entry['appliesTo']
 
 
 
@@ -136,8 +138,7 @@ dd_df.to_csv(
         "Field Name",
         "Description",
         "FHIR Resource",
-        "Coverage Type",
-        "Claim Type",
+        "Coverage / Claim Type",
         "fhirPath",
         "example",
         "notes",
@@ -154,8 +155,7 @@ export_columns = [
     "Field Name",
     "Description",
     "FHIR Resource",
-    "Coverage Type",
-    "Claim Type",
+    "Coverage / Claim Type",
     "fhirPath",
     "example",
     "notes",
@@ -188,17 +188,16 @@ with pd.ExcelWriter("out/bfd_data_dictionary.xlsx", engine="xlsxwriter") as writ
     worksheet.set_column("C:C", 65, text_format)
     worksheet.set_column("D:D", 20, text_format)
     worksheet.set_column("E:E", 20, text_format)
-    worksheet.set_column("F:F", 20, text_format)
-    worksheet.set_column("G:G", 55, text_format)
+    worksheet.set_column("F:F", 55, text_format)
+    worksheet.set_column("G:G", 25, text_format)
     worksheet.set_column("H:H", 25, text_format)
-    worksheet.set_column("I:I", 25, text_format)
-    worksheet.set_column("J:J", 18, text_format)
-    worksheet.set_column("K:K", 20, text_format)
-    worksheet.set_column("L:L", 5, text_format)
-    worksheet.set_column("M:M", 10, text_format)
-    worksheet.set_column("N:N", 20, text_format)
+    worksheet.set_column("I:I", 18, text_format)
+    worksheet.set_column("J:J", 20, text_format)
+    worksheet.set_column("K:K", 5, text_format)
+    worksheet.set_column("L:L", 10, text_format)
+    worksheet.set_column("M:M", 20, text_format)
+    worksheet.set_column("N:N", 30, text_format)
     worksheet.set_column("O:O", 30, text_format)
-    worksheet.set_column("P:P", 30, text_format)
 
     tips_df.to_excel(writer, sheet_name="Tips and Tricks", index=True)
     worksheet = writer.sheets["Tips and Tricks"]

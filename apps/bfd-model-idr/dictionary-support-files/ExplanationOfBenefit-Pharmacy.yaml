@@ -103,18 +103,14 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_PRSCRBNG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='prescribing').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
-- inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_TYPE
+- inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_LAST_NAME
   appliesTo:
     - Pharmacy
   sources:
     - NCH
   bfdDerived: True
-- inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_LAST_NAME
-  appliesTo:
-    - Pharmacy
-  sources:
-    - NCH
-  bfdDerived: True
+  sourceView: V2_MDCR_PRVDR_HSTRY
+  sourceColumn: PRVDR_LAST_NAME
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='prescribing').provider.reference.substring(1)).name.family
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_PD_DT
   appliesTo:

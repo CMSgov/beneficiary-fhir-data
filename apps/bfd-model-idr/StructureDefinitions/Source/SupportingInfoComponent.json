@@ -177,6 +177,45 @@
                 ]
             },
             {
+                "id": "SupportingInfoComponent.CLM_BILL_FAC_TYPE_CD",
+                "path": "SupportingInfoComponent.CLM_BILL_FAC_TYPE_CD",
+                "label": "Bill Facility Type Code",
+                "definition": "A CODE IDENTIFYING THE TYPE OF FACILITY THAT PROVIDED CARE TO A BENEFICIARY ON AN INSTITUTIONAL CLAIM. IT IS THE FIRST DIGIT OF THE TYPE OF BILL (TOB).",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_BILL_CLSFCTN_CD",
+                "path": "SupportingInfoComponent.CLM_BILL_CLSFCTN_CD",
+                "label": "Claim Bill Classification Code",
+                "definition": "A CODE CLASSIFYING THE TYPE OF SERVICE PROVIDED TO A BENEFICIARY ON AN INSTITUTIONAL CLAIM. IT IS THE SECOND DIGIT OF THE TYPE OF BILL (TOB).",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_BILL_FREQ_CD",
+                "path": "SupportingInfoComponent.CLM_BILL_FREQ_CD",
+                "label": "Bill Frequency Code",
+                "definition": "A CODE INDICATING THE SEQUENCE OF AN INSTITUTIONAL CLAIM IN THE BENEFICIARYS CURRENT EPISODE OF CARE. IT IS THE THIRD DIGIT OF THE TYPE OF BILL (TOB).",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT",
                 "path": "SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT",
                 "label": "Weekly Process Date",

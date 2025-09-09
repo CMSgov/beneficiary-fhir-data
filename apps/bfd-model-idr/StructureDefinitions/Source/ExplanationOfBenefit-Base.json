@@ -663,6 +663,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BENE_PD_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_BENE_PD_AMT",
+                "label": "Paid to Beneficiary Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }

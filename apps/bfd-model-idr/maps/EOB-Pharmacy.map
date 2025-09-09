@@ -104,7 +104,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       } "Set reason";
     } "Add benefit payment status";
 
-    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as prvdrNPI where prvdrNPI != '0' and src.PRVDR_PRSCRBNG_PRVDR_NPI_TYPE = '1' -> tgt then addPrescriberPractitionerCareTeamMember(src,tgt) "Add prescriber practitioner";
+    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as prvdrNPI where prvdrNPI != '0' -> tgt then addPrescriberPractitionerCareTeamMember(src,tgt) "Add prescriber practitioner";
 
     // Insurance coverage
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
