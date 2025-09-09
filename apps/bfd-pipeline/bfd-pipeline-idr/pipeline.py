@@ -93,7 +93,7 @@ def extract_and_load(
         progress.batch_start_ts if progress else "none",
         progress.batch_complete_ts if progress else "none",
     )
-    last_error = datetime.min
+    last_error = datetime.min.replace(tzinfo=UTC)
     loader = PostgresLoader(connection_string)
     error_count = 0
     max_errors = 3
