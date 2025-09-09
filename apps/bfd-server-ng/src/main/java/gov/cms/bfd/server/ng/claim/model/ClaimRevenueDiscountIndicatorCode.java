@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+/** The "Revenue Discount Indicator Code" for a claim. */
 public class ClaimRevenueDiscountIndicatorCode {
   @Column(name = "clm_rev_dscnt_ind_cd")
   private Optional<String> discountIndicatorCode;

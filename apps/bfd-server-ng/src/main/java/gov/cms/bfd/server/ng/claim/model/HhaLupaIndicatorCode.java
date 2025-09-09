@@ -9,10 +9,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/**
+ * Home Health Agency (HHA) Low Utilization Payment Adjustment (LUPA) indicator codes for claims.
+ */
 @Getter
 @AllArgsConstructor
 public enum HhaLupaIndicatorCode {
-  /** */
+  /** L. */
   L("L", "Low utilization payment adjustment (LUPA) claim");
 
   private final String code;

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
+/** Revenue center ANSI adjustment reason codes for claims. */
 @Getter
 @AllArgsConstructor
 public enum RevenueCenterAnsiReasonCode {
@@ -561,12 +562,18 @@ public enum RevenueCenterAnsiReasonCode {
    * Convert from a database code.
    *
    * @param code database code
-   * @return claim admission type code
+   * @return ANSI adjustment reason code
    */
   public static Optional<RevenueCenterAnsiReasonCode> tryFromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
+  /**
+   * Converts this ANSI reason code into a list of FHIR {@link Coding} objects for multiple code
+   * systems.
+   *
+   * @return list of FHIR codings
+   */
   public Optional<List<Coding>> toFhirCodings() {
     return Optional.of(
         List.of(

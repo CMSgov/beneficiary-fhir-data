@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Extension;
 
+/** Embedded container for institutional claim line extensions. */
 @Embeddable
 public class ClaimLineInstitutionalExtensions {
   @Embedded ClaimRevenueDiscountIndicatorCode claimRevenueDiscountIndicatorCode;

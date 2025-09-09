@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** The "Qualify Stay From Date" for a claim. */
 @Embeddable
 public class QualifyStayFromDate {
   @Column(name = "clm_qlfy_stay_from_dt")

@@ -1204,6 +1204,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -1220,7 +1234,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -1236,22 +1250,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -2458,6 +2458,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -2474,7 +2488,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -2490,22 +2504,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -3712,6 +3712,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -3728,7 +3742,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -3744,22 +3758,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -4966,6 +4966,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -4982,7 +4996,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -4998,22 +5012,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -6221,6 +6221,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -6237,7 +6251,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -6253,22 +6267,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -7476,6 +7476,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -7492,7 +7506,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -7508,22 +7522,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -10472,6 +10472,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -10488,7 +10502,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -10504,22 +10518,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -13468,6 +13468,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -13484,7 +13498,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -13500,22 +13514,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -16464,6 +16464,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -16480,7 +16494,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -16496,22 +16510,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -18316,6 +18316,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -18332,7 +18346,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -18348,22 +18362,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -20168,6 +20168,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -20184,7 +20198,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -20200,22 +20214,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -25503,6 +25503,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -25519,7 +25533,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -25535,22 +25549,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -27355,6 +27355,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -27371,7 +27385,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -27387,22 +27401,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19
@@ -29207,6 +29207,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "drg",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "8",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_HHA_LUP_IND_CD",
             "display" : "Claim Lupa Indicator Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -29223,7 +29237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -29239,22 +29253,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
         "code" : {
           "coding" : [ {
             "code" : "1",
-            "display" : "THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN",
+            "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
-          } ]
-        },
-        "sequence" : 18
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "drg",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "code" : {
-          "coding" : [ {
-            "code" : "8",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
         "sequence" : 19

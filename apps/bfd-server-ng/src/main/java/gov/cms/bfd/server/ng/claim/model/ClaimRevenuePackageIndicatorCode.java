@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+/** The "Revenue Package Indicator Code" for a claim. */
 public class ClaimRevenuePackageIndicatorCode {
   @Column(name = "clm_rev_packg_ind_cd")
   private Optional<String> revenuePackageIndicatorCode;

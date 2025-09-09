@@ -6,6 +6,10 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+/**
+ * Represents the "Revenue Payment Method Code" for a claim. This code indicates the method by which
+ * revenue-related payments are processed.
+ */
 public class ClaimRevenuePaymentMethodCode {
   @Column(name = "clm_rev_pmt_mthd_cd")
   private Optional<String> revenuePaymentMethodCode;

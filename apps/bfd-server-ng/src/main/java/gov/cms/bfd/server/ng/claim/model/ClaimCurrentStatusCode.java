@@ -10,11 +10,17 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @AllArgsConstructor
 public enum ClaimCurrentStatusCode {
+  /** S. */
   S("S", ExplanationOfBenefit.RemittanceOutcome.QUEUED),
+  /** D. */
   D("D", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+  /** P. */
   P("P", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+  /** R. */
   R("R", ExplanationOfBenefit.RemittanceOutcome.COMPLETE),
+  /** T. */
   T("T", ExplanationOfBenefit.RemittanceOutcome.PARTIAL),
+  /** I. */
   I("I", ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
 
   private final String code;
