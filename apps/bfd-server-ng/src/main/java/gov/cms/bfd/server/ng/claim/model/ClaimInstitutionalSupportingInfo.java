@@ -37,9 +37,9 @@ class ClaimInstitutionalSupportingInfo {
             patientStatusCode.map(c -> c.toFhir(supportingInfoFactory)),
             Optional.of(claimAdmissionTypeCode.toFhir(supportingInfoFactory)),
             mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
+            Optional.of(diagnosisDrgCode.toFhir(supportingInfoFactory)),
             hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
-            hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
-            Optional.of(diagnosisDrgCode.toFhir(supportingInfoFactory)))
+            hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }

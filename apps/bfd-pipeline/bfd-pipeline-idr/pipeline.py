@@ -12,6 +12,7 @@ from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
 from loader import PostgresLoader, get_connection_string
 from model import (
     IdrBeneficiary,
+    IdrBeneficiaryDualEligibility,
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
     IdrBeneficiaryMbiId,
@@ -142,6 +143,7 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
         IdrBeneficiaryThirdParty,
         IdrBeneficiaryEntitlement,
         IdrBeneficiaryEntitlementReason,
+        IdrBeneficiaryDualEligibility,
         # Ignore for now, we'll likely source these elsewhere when we load contract data
         # IdrContractPbpNumber,
         # IdrElectionPeriodUsage,

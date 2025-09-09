@@ -49,12 +49,14 @@ public class EobReadIT extends IntegrationTestBase {
 
   @Test
   void eobReadIdNotFound() {
-    assertThrows(ResourceNotFoundException.class, () -> eobRead().withId("999").execute());
+    var readWithId = eobRead().withId("999");
+    assertThrows(ResourceNotFoundException.class, readWithId::execute);
   }
 
   @Test
   void eobReadInvalidIdBadRequest() {
-    assertThrows(InvalidRequestException.class, () -> eobRead().withId("abc").execute());
+    var readWithId = eobRead().withId("abc");
+    assertThrows(InvalidRequestException.class, readWithId::execute);
   }
 
   @ParameterizedTest

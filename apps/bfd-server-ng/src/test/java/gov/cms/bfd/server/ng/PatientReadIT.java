@@ -92,12 +92,14 @@ public class PatientReadIT extends IntegrationTestBase {
 
   @Test
   void patientReadIdNotFound() {
-    assertThrows(ResourceNotFoundException.class, () -> patientRead().withId("999").execute());
+    var readWithId = patientRead().withId("999");
+    assertThrows(ResourceNotFoundException.class, readWithId::execute);
   }
 
   @Test
   void patientReadInvalidIdBadRequest() {
-    assertThrows(InvalidRequestException.class, () -> patientRead().withId("abc").execute());
+    var readWithId = patientRead().withId("abc");
+    assertThrows(InvalidRequestException.class, readWithId::execute);
   }
 
   @ParameterizedTest

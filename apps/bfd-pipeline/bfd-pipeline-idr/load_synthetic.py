@@ -11,6 +11,14 @@ tables = [
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
     {"csv_name": "SYNTHETIC_BENE_MBI_ID.csv", "table": "v2_mdcr_bene_mbi_id"},
     {"csv_name": "SYNTHETIC_BENE_XREF.csv", "table": "v2_mdcr_bene_xref"},
+    {"csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT.csv", "table": "v2_mdcr_bene_mdcr_entlmt"},
+    {
+        "csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv",
+        "table": "v2_mdcr_bene_mdcr_entlmt_rsn",
+    },
+    {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
+    {"csv_name": "SYNTHETIC_BENE_TP.csv", "table": "v2_mdcr_bene_tp"},
+    {"csv_name": "SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", "table": "v2_mdcr_bene_cmbnd_dual_mdcr"},
     {"csv_name": "SYNTHETIC_CLM.csv", "table": "v2_mdcr_clm"},
     {"csv_name": "SYNTHETIC_CLM_INSTNL.csv", "table": "v2_mdcr_clm_instnl"},
     {"csv_name": "SYNTHETIC_CLM_PRFNL.csv", "table": "v2_mdcr_clm_prfnl"},
@@ -22,13 +30,6 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_LINE_PRFNL.csv", "table": "v2_mdcr_clm_line_prfnl"},
     {"csv_name": "SYNTHETIC_CLM_ANSI_SGNTR.csv", "table": "v2_mdcr_clm_ansi_sgntr"},
     {"csv_name": "SYNTHETIC_CLM_PROD.csv", "table": "v2_mdcr_clm_prod"},
-    {"csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT.csv", "table": "v2_mdcr_bene_mdcr_entlmt"},
-    {
-        "csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv",
-        "table": "v2_mdcr_bene_mdcr_entlmt_rsn",
-    },
-    {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
-    {"csv_name": "SYNTHETIC_BENE_TP.csv", "table": "v2_mdcr_bene_tp"},
     {"csv_name": "SYNTHETIC_CLM_FISS.csv", "table": "v2_mdcr_clm_fiss"},
 ]
 

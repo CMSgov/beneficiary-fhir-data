@@ -164,15 +164,13 @@ public class PatientSearchIT extends IntegrationTestBase {
 
   @Test
   void patientSearchByIdentifierMissingSystem() {
-    assertThrows(
-        InvalidRequestException.class,
-        () ->
-            searchBundle()
-                .where(
-                    new TokenClientParam(Patient.SP_IDENTIFIER)
-                        .exactly()
-                        .identifier(BENE_ID_PART_A_ONLY))
-                .execute());
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(Patient.SP_IDENTIFIER)
+                    .exactly()
+                    .identifier(BENE_ID_PART_A_ONLY));
+    assertThrows(InvalidRequestException.class, searchWithIdentifier::execute);
   }
 
   private static Stream<Arguments> patientSearchByDate() {
@@ -180,8 +178,8 @@ public class PatientSearchIT extends IntegrationTestBase {
         Arguments.of(
             new TokenClientParam(Patient.SP_RES_ID)
                 .exactly()
-                .identifier(BENE_ID_PART_A_AND_B_WITH_XREF),
-            BENE_ID_PART_A_AND_B_WITH_XREF),
+                .identifier(BENE_ID_ALL_PARTS_WITH_XREF),
+            BENE_ID_ALL_PARTS_WITH_XREF),
         Arguments.of(
             new TokenClientParam(Patient.SP_IDENTIFIER)
                 .exactly()
@@ -266,38 +264,31 @@ public class PatientSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EmptySource
   void patientSearchEmptyIdBadRequest(String id) {
-    assertThrows(
-        InvalidRequestException.class,
-        () ->
-            searchBundle()
-                .where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier(id))
-                .execute());
+    var searchWithIdentifier =
+        searchBundle().where(new TokenClientParam(Patient.SP_RES_ID).exactly().identifier(id));
+    assertThrows(InvalidRequestException.class, searchWithIdentifier::execute);
   }
 
   @ParameterizedTest
   @EmptySource
   void patientSearchEmptyIdentifierBadRequest(String id) {
-    assertThrows(
-        InvalidRequestException.class,
-        () ->
-            searchBundle()
-                .where(
-                    new TokenClientParam(Patient.SP_IDENTIFIER)
-                        .exactly()
-                        .systemAndIdentifier(Patient.SP_IDENTIFIER, id))
-                .execute());
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(Patient.SP_IDENTIFIER)
+                    .exactly()
+                    .systemAndIdentifier(Patient.SP_IDENTIFIER, id));
+    assertThrows(InvalidRequestException.class, searchWithIdentifier::execute);
   }
 
   @Test
   void patientSearchDateOnlyBadRequest() {
-    assertThrows(
-        InvalidRequestException.class,
-        () ->
-            searchBundle()
-                .where(
-                    new DateClientParam(Constants.PARAM_LASTUPDATED)
-                        .afterOrEquals()
-                        .day(DateUtil.toDate(ZonedDateTime.parse("2024-01-01T00:00:00Z"))))
-                .execute());
+    var searchWithDate =
+        searchBundle()
+            .where(
+                new DateClientParam(Constants.PARAM_LASTUPDATED)
+                    .afterOrEquals()
+                    .day(DateUtil.toDate(ZonedDateTime.parse("2024-01-01T00:00:00Z"))));
+    assertThrows(InvalidRequestException.class, searchWithDate::execute);
   }
 }
