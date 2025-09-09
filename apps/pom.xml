@@ -77,11 +77,15 @@
         <sonar.coverage.jacoco.itReportPath>
             ${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.itReportPath>
-        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
         <sonar.issue.ignore.multicriteria.e1.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e1.resourceKey>
+        <sonar.issue.ignore.multicriteria.e2.ruleKey>javaarchitecture:S7027</sonar.issue.ignore.multicriteria.e2.ruleKey>
+        <sonar.issue.ignore.multicriteria.e2.resourceKey>
+            **/*.java
+        </sonar.issue.ignore.multicriteria.e2.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
