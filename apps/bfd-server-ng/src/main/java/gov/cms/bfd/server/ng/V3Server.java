@@ -64,26 +64,22 @@ public class V3Server extends RestfulServer {
   private boolean isResourceProviderEnabled(IResourceProvider provider) {
     var nonsensitiveConfig = configuration.getNonsensitive();
 
-    var keepProvider =
-        switch (provider) {
-          case EobResourceProvider eob ->
-              checkAndLogProviderStatus(
-                  nonsensitiveConfig.isEobEnabled(), provider.getResourceType().getSimpleName());
-          case PatientResourceProvider patientProvider ->
-              checkAndLogProviderStatus(
-                  nonsensitiveConfig.isPatientEnabled(),
-                  provider.getResourceType().getSimpleName());
-          case CoverageResourceProvider coverageProvider ->
-              checkAndLogProviderStatus(
-                  nonsensitiveConfig.isCoverageEnabled(),
-                  provider.getResourceType().getSimpleName());
-          default -> {
-            LOGGER.warn(
-                "Keeping {} endpoint by default (no specific flag configured).",
-                provider.getResourceType().getSimpleName());
-            yield true;
-          }
-        };
-    return keepProvider;
+    return switch (provider) {
+      case EobResourceProvider eob ->
+          checkAndLogProviderStatus(
+              nonsensitiveConfig.isEobEnabled(), provider.getResourceType().getSimpleName());
+      case PatientResourceProvider patientProvider ->
+          checkAndLogProviderStatus(
+              nonsensitiveConfig.isPatientEnabled(), provider.getResourceType().getSimpleName());
+      case CoverageResourceProvider coverageProvider ->
+          checkAndLogProviderStatus(
+              nonsensitiveConfig.isCoverageEnabled(), provider.getResourceType().getSimpleName());
+      default -> {
+        LOGGER.warn(
+            "Keeping {} endpoint by default (no specific flag configured).",
+            provider.getResourceType().getSimpleName());
+        yield true;
+      }
+    };
   }
 }
