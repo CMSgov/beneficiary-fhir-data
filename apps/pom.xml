@@ -87,10 +87,10 @@
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
-        <aws-java-sdk-bom.version>2.30.32</aws-java-sdk-bom.version>
+        <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
-        <spring-data-jpa.version>3.4.6</spring-data-jpa.version>
+        <spring-data-jpa.version>3.4.9</spring-data-jpa.version>
         <spring-framework.version>6.2.8</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
         <spring-boot.version>3.4.4</spring-boot.version>
@@ -151,7 +151,7 @@
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
-        <hapi-fhir.version>8.0.0</hapi-fhir.version>
+        <hapi-fhir.version>8.4.0</hapi-fhir.version>
         <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
         <jersey.version>2.25.1</jersey.version>
         <org.apache.poi.version>5.4.0</org.apache.poi.version>
