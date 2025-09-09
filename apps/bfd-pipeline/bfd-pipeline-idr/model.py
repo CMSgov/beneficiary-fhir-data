@@ -644,6 +644,7 @@ class IdrClaimDateSignature(IdrBaseModel):
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
         """
 
+
 class IdrClaimFiss(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -677,6 +678,7 @@ class IdrClaimFiss(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
+
 
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
