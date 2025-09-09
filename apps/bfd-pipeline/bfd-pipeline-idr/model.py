@@ -409,6 +409,35 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         """
 
 
+class IdrBeneficiaryDualEligibility(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_mdcd_elgblty_end_dt: date
+    bene_dual_stus_cd: str
+    bene_dual_type_cd: str
+    geo_usps_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_dual_eligibility"
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
+        return """
+            SELECT {COLUMNS}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr
+            {WHERE_CLAUSE}
+            {ORDER_BY}
+        """
+
+
 class IdrElectionPeriodUsage(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
