@@ -11,6 +11,7 @@
     - FISS
     - MCS
     - NCH
+    - VMS
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_UNIQ_ID
   ccwMapping:
@@ -230,7 +231,7 @@
     - CCLF6.CLM_IDR_LD_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_IDR_LD_DT
-  fhirPath: ExplanationOfBenefit.created.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
+  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
@@ -262,6 +263,7 @@
     - FISS
     - NCH
     - MCS
+    - VMS
   ccwMapping:
     - ORG_NPI_NUM
     - PRVDR_NPI
@@ -284,6 +286,9 @@
     - SNF
   sources:
     - NCH
+    - FISS
+    - MCS
+    - VMS
   ccwMapping:
     - PRVDR_ZIP
   sourceView: V2_MDCR_CLM
@@ -329,11 +334,13 @@
     - Inpatient
     - SNF
     - Outpatient
-    - HHA
-    - Hospice
+    - Carrier
+    - DME
   sources:
     - FISS
     - NCH
+    - MCS
+    - VMS
   ccwMapping:
     - NCH_BENE_PTB_DDCTBL_AMT
     - NCH_IP_TOT_DDCTN_AMT
@@ -366,7 +373,6 @@
     - Outpatient
   sources:
     - NCH
-    - FISS
   cclfMapping:
     - CCLF1.CLM_OP_SRVC_TYPE_CD
   referenceTable: CLM_OP_SRVC_TYPE_CD
@@ -419,9 +425,12 @@
     - HHA
     - Hospice
     - SNF
+    - Carrier
+    - DME
   sources:
     - FISS
     - NCH
+    - MCS
   ccwMapping:
     - CLM_PMT_AMT
   cclfMapping:
@@ -495,9 +504,13 @@
     - SNF
     - HHA
     - Hospice
+    - Carrier
+    - DME
   sources:
     - FISS
     - NCH
+    - VMS
+    - MCS
   ccwMapping:
     - FST_DGNS_E_CD
     - RSN_VISIT_CD1
@@ -542,8 +555,8 @@
     - ICD_DGNS_E_CD12
     - PRNCPAL_DGNS_CD
   cclfMapping:
-    - CCLF1.PRNCPL_DGNS_CD: "ExplanationOfBenefit.diagnosis.where(type.coding.system='http://terminology.hl7.org/CodeSystem/ex-diagnosistype' and type.coding.code='principal').diagnosis.coding.code"
-    - CCLF1.ADMTG_DGNS_CD: "ExplanationOfBenefit.diagnosis.where(type.coding.system='http://terminology.hl7.org/CodeSystem/ex-diagnosistype' and type.coding.code='admitting').diagnosis.coding.code"
+    - CCLF1.PRNCPL_DGNS_CD
+    - CCLF1.ADMTG_DGNS_CD
     - CCLF4.CLM_DGNS_CD
     - CCLF5.CLM_DGNS_1_CD
     - CCLF5.CLM_DGNS_2_CD
@@ -568,9 +581,13 @@
     - SNF
     - HHA
     - Hospice
+    - DME
+    - Carrier
   sources:
     - FISS
     - NCH
+    - VMS
+    - MCS
   ccwMapping:
     - FST_DGNS_E_VRSN_CD
     - RSN_VISIT_VRSN_CD1
@@ -709,7 +726,6 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA
     - Hospice
   sources:
     - FISS
@@ -750,7 +766,6 @@
     - Inpatient
     - Outpatient
     - SNF
-    - HHA
     - Hospice
   sources:
     - FISS
@@ -849,18 +864,12 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_SBMT_CHRG_AMT')).amount.value
 - inputPath: LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT
   appliesTo:
-    - Inpatient
-    - Outpatient
-    - HHA
-    - Hospice
-    - SNF
     - Carrier
     - DME
   sources:
-    - FISS
     - NCH
-    - MCS
     - VMS
+    - MCS
   ccwMapping:
     - LINE_ALOWD_CHRG_AMT
   cclfMapping:
@@ -869,6 +878,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_ALOWD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_ALOWD_CHRG_AMT')).amount.value
+  notes: Technically this variable is available in partially-adjudicated claims, but is consolidated (and represented) in CLM_ALOWD_CHRG_AMT in both adjudicated + partially-adjudicated claims. Financial fields on 1XXX claim type codes should be expected to change.
 - inputPath: LineItemComponent.CLM_LINE_NUM
   appliesTo:
     - Inpatient
@@ -877,7 +887,7 @@
     - Hospice
     - SNF
     - DME
-    - CARRIER
+    - Carrier
   sources:
     - FISS
     - NCH
@@ -899,9 +909,13 @@
     - HHA
     - Hospice
     - SNF
+    - Carrier
+    - DME
   sources:
     - NCH
     - FISS
+    - MCS
+    - VMS
   ccwMapping:
     - HCPCS_CD
   cclfMapping:
@@ -915,6 +929,9 @@
   appliesTo:
     - Outpatient
     - HHA
+    - Inpatient
+    - Hospice
+    - SNF
   sources:
     - NCH
     - FISS
@@ -924,7 +941,7 @@
     - CCLF2.CLM_REV_APC_HIPPS_CD
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_REV_APC_HIPPS_CD
-  fhirPath: ExplanationOfBenefit.item.productOrService.where(coding.system='https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes').coding.code
+  fhirPath: ExplanationOfBenefit.item.productOrService.coding.where(system='https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes').code
 - inputPath: LineItemComponent.CLM_LINE_NDC_CD
   appliesTo:
     - Inpatient
@@ -933,10 +950,12 @@
     - Hospice
     - Outpatient
     - Carrier
+    - DME
   sources:
     - NCH
     - FISS
     - MCS
+    - VMS
   ccwMapping:
     - LINE_NDC_CD
     - REV_CNTR_IDE_NDC_UPC_NUM
@@ -950,9 +969,12 @@
     - HHA
     - Hospice
     - SNF
+    - Carrier
+    - DME
   sources:
     - NCH
     - FISS
+    - MCS
   ccwMapping:
     - REV_CNTR_NDC_QTY
   sourceView: V2_MDCR_CLM_LINE
@@ -965,9 +987,12 @@
     - HHA
     - Hospice
     - SNF
+    - Carrier
+    - DME
   sources:
     - NCH
     - FISS
+    - MCS
   ccwMapping:
     - REV_CNTR_NDC_QTY_QLFR_CD
   sourceView: V2_MDCR_CLM_LINE
@@ -980,9 +1005,13 @@
     - HHA
     - Hospice
     - SNF
+    - Carrier
+    - DME
   sources:
     - NCH
     - FISS
+    - MCS
+    - VMS
   ccwMapping:
     - LINE_SRVC_CNT
     - REV_CNTR_UNIT_CNT
@@ -1016,6 +1045,7 @@
     - HHA
     - Hospice
     - SNF
+    - Outpatient
   sources: 
     - NCH
     - FISS
@@ -1033,9 +1063,12 @@
     - Hospice
     - Carrier
     - DME
+    - SNF
   sources:
     - NCH
     - FISS
+    - MCS
+    - VMS
   ccwMapping:
     - HCPCS_1ST_MDFR_CD
   cclfMapping:
@@ -1052,9 +1085,12 @@
     - Hospice
     - Carrier
     - DME
+    - SNF
   sources:
     - NCH
     - FISS
+    - MCS
+    - VMS
   ccwMapping:
     - HCPCS_2ND_MDFR_CD
   cclfMapping:
@@ -1071,9 +1107,12 @@
     - Hospice
     - Carrier
     - DME
+    - SNF
   sources:
     - NCH
     - FISS
+    - MCS 
+    - VMS
   ccwMapping:
     - HCPCS_3RD_MDFR_CD
   cclfMapping:
@@ -1090,9 +1129,12 @@
     - Hospice
     - Carrier
     - DME
+    - SNF
   sources:
     - NCH
     - FISS
+    - MCS 
+    - VMS
   ccwMapping:
     - HCPCS_4TH_MDFR_CD
   cclfMapping:
@@ -1109,9 +1151,12 @@
     - Hospice
     - Carrier
     - DME
+    - SNF
   sources:
     - NCH
     - FISS
+    - MCS 
+    - VMS
   cclfMapping:
     - CCLF2.HCPCS_5_MDFR_CD
     - CCLF5.HCPCS_5_MDFR_CD
@@ -1169,8 +1214,8 @@
   notes: ANSI reason and group codes are unordered. 
 - inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD
   appliesTo:
-    - Inpatient
     - Outpatient
+    - Inpatient
     - SNF
     - HHA 
     - Hospice
@@ -1301,7 +1346,6 @@
     - SNF
   sources:
     - NCH
-    - FISS
   ccwMapping:
     - REV_CNTR_PTNT_RSPNSBLTY_PMT
   sourceView: V2_MDCR_CLM_LINE
@@ -1339,7 +1383,6 @@
   sources:
     - NCH
     - FISS
-    - VMS
     - MCS
   ccwMapping:
     - LINE_NCH_PMT_AMT
@@ -1391,6 +1434,9 @@
   appliesTo:
     - Inpatient
     - Outpatient
+    - HHA
+    - Hospice
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1402,6 +1448,10 @@
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT
   appliesTo:
     - Inpatient
+    - HHA
+    - Hospice
+    - SNF
+    - Outpatient
   sources:
     - FISS
     - NCH
@@ -1506,9 +1556,17 @@
 - inputPath: SupportingInfoComponent.CLM_SUBMSN_DT
   appliesTo:
     - Inpatient
+    - Carrier
+    - DME
+    - SNF
+    - HHA
+    - Hospice
+    - Outpatient
   sources:
     - FISS
     - NCH
+    - MCS
+    - VMS
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_SUBMSN_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='clmrecvddate').timing
@@ -1551,6 +1609,7 @@
     - Inpatient
     - SNF
     - Outpatient
+    - Carrier
   sources: 
     - NCH
   ccwMapping:
@@ -1577,6 +1636,7 @@
 - inputPath: SupportingInfoComponent.CLM_ADMSN_SRC_CD
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1652,6 +1712,12 @@
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+    - DME
+    - Carrier
   sources:
     - NCH
   ccwMapping:
@@ -1684,6 +1750,8 @@
 - inputPath: SupportingInfoComponent.CLM_QLFY_STAY_FROM_DT
   appliesTo:
     - SNF
+    - Inpatient
+    - HHA
   sources:
     - NCH
     - FISS
@@ -1695,6 +1763,8 @@
 - inputPath: SupportingInfoComponent.CLM_QLFY_STAY_THRU_DT
   appliesTo:
     - SNF
+    - Inpatient
+    - HHA
   sources:
     - NCH
     - FISS
@@ -1717,6 +1787,8 @@
 - inputPath: SupportingInfoComponent.CLM_MDCR_EXHSTD_DT
   appliesTo:
     - Inpatient
+    - Hospice
+    - SNF
   sources:
     - NCH
   ccwMapping:
@@ -1743,6 +1815,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1784,6 +1857,8 @@
     - Hospice
     - HHA
     - Outpatient
+    - Carrier
+    - DME
   sources:
     - FISS
     - NCH
@@ -1865,6 +1940,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DRG_WT_NUM
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1876,6 +1952,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1889,6 +1966,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_EXCPTN_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1900,6 +1978,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_FSP_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1911,6 +1990,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_IME_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1924,6 +2004,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1935,6 +2016,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1946,6 +2028,10 @@
 - inputPath: SupportingInfoComponent.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
   sources:
     - NCH
   ccwMapping:
@@ -1957,6 +2043,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_TOT_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - FISS
     - NCH
@@ -1968,14 +2055,11 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_CVRD_DAY_CNT
   appliesTo:
     - Inpatient
-    - HHA
     - Hospice
     - SNF
   sources:
     - FISS
     - NCH
-  ccwMapping:
-    - 
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_CVRD_DAY_CNT
   fhirPath: ExplanationOfBenefit.benefitBalance.financial.where(type.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance' and type.coding.code='CLM_INSTNL_CVRD_DAY_CNT').used
@@ -1986,9 +2070,13 @@
     - Hospice
     - SNF
     - Outpatient
+    - Carrier
+    - DME
   sources:
     - FISS
     - NCH
+    - MCS
+    - VMS
   ccwMapping:
     - CARR_NUM
     - FI_NUM
@@ -2009,6 +2097,7 @@
   sources:
     - FISS
     - NCH
+    - MCS
   ccwMapping:
     - NCH_PRMRY_PYR_CD
   cclfMapping:
@@ -2023,6 +2112,7 @@
     - HHA
     - Hospice
     - SNF
+    - Outpatient
   sources:
     - NCH
   ccwMapping:
@@ -2035,10 +2125,18 @@
     - Inpatient
     - HHA
     - SNF
-    - Carrier
   sources:
     - NCH
     - FISS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_RNDRG_PRVDR_NPI_NUM
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
+- inputPath: ExplanationOfBenefit-Base.CLM_RNDRG_PRVDR_NPI_NUM
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
   ccwMapping:
     - CARR_LINE_PRFRMG_NPI_NUM
     - RNDRNG_PHYSN_NPI
@@ -2046,7 +2144,7 @@
   cclfMapping:
     - CCLF5.RNDRG_PRVDR_NPI_NUM
     - CCLF5.CLM_RNDRG_PRVDR_NPI_NUM
-  sourceView: V2_MDCR_CLM
+  sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
@@ -2081,6 +2179,7 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - NCH
   ccwMapping:
@@ -2098,6 +2197,7 @@
   sources:
     - NCH
     - FISS
+    - VMS
   ccwMapping:
     - NCH_BENE_PTA_COINSRNC_LBLTY_AM
     - NCH_BENE_PTB_COINSRNC_AMT
@@ -2126,8 +2226,10 @@
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_DRG_OUTLIER_AMT
   appliesTo:
     - Inpatient
+    - SNF
   sources:
     - NCH
+    - FISS
   ccwMapping:
     - NCH_DRG_OUTLIER_APRVD_PMT_AMT
   sourceView: V2_MDCR_CLM_INSTNL
@@ -2176,6 +2278,7 @@
     - NCH
     - FISS
     - MCS
+    - VMS
   ccwMapping:
     - CLM_OP_PRVDR_PMT_AMT
     - NCH_CLM_PRVDR_PMT_AMT
@@ -2203,6 +2306,8 @@
     - Outpatient
     - HHA
     - Hospice
+    - Inpatient
+    - SNF
   sources:
     - NCH
   ccwMapping:
@@ -2295,6 +2400,7 @@
     - HHA
   sources:
     - NCH
+    - FISS
   ccwMapping:
     - CLM_HHA_TOT_VISIT_CNT
   sourceView: V2_MDCR_CLM_INSTNL
@@ -2317,6 +2423,8 @@
     - Outpatient
     - Carrier
     - DME
+    - HHA
+    - Hospice
   sources:
     - NCH
     - MCS
@@ -2387,8 +2495,6 @@
   appliesTo:
     - Inpatient
     - SNF
-    - HHA
-    - Hospice
   sources:
     - NCH
   referenceTable: DGNS_DRG_OUTLIER_CD
@@ -2435,10 +2541,16 @@
   appliesTo:
     - Carrier
     - DME
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
   sources:
     - NCH
     - MCS
     - VMS
+    - FISS
   ccwMapping:
     - LINE_1ST_EXPNS_DT
   cclfMapping:
@@ -2481,10 +2593,16 @@
   appliesTo:
     - Carrier
     - DME
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
   sources:
     - NCH
     - MCS
     - VMS
+    - FISS
   ccwMapping:
     - LINE_LAST_EXPNS_DT
   cclfMapping:
@@ -2527,10 +2645,9 @@
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
   appliesTo:
     - Carrier
-    - DME
   sources:
     - NCH
-    - VMS
+    - MCS
   ccwMapping:
     - CARR_LINE_PRVDR_TYPE_CD
   referenceTable: CLM_PRVDR_TYPE_CD
@@ -2543,8 +2660,6 @@
     - DME
   sources:
     - NCH
-    - MCS
-    - VMS
   cclfMapping: 
     - CCLF5.CLM_CARR_PMT_DNL_CD
     - CCLF6.CLM_CARR_PMT_DNL_CD
@@ -2599,6 +2714,7 @@
     - DME
   sources:
     - NCH
+    - VMS
   ccwMapping:
     - LINE_HCT_HGB_RSLT_NUM
   sourceView: V2_MDCR_CLM_LINE_PRFNL
@@ -2619,7 +2735,6 @@
 - inputPath: SupportingInfoComponent.CLM_LINE_CARR_CLNCL_LAB_NUM
   appliesTo:
     - Carrier
-    - DME
   sources:
     - NCH
   ccwMapping:
@@ -2722,6 +2837,7 @@
     - DME
   sources:
     - NCH
+    - VMS
   ccwMapping:
     - LINE_CMS_TYPE_SRVC_CD
   cclfMapping:
@@ -2776,10 +2892,8 @@
 - inputPath: LineItemComponent.CLM_PRVDR_SPCLTY_CD
   appliesTo:
     - Carrier
-    - DME
   sources:
     - NCH
-    - VMS
     - MCS
   ccwMapping:
     - PRVDR_SPCLTY
@@ -2818,6 +2932,7 @@
     - Carrier
   sources:
     - NCH
+    - VMS
   ccwMapping:
     - LINE_DME_PRCHS_PRICE_AMT
   sourceView: V2_MDCR_CLM_LINE_PRFNL
@@ -2836,6 +2951,7 @@
     - FISS
     - MCS
     - NCH
+    - VMS
   cclfMapping:
     - CCLF1.CLM_ADJSTMT_TYPE_CD
     - CCLF5.CLM_ADJSMT_TYPE_CD

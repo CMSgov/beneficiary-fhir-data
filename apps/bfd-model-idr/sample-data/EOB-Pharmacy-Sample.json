@@ -78,6 +78,10 @@
         {
             "ROW_NUM": 13,
             "CLM_LINE_RX_NUM": "900001"
+        },
+        {
+            "ROW_NUM": 14,
+            "CLM_DSPNSNG_STUS_CD":"P"
         }
     ],
     "lineItemComponents": [

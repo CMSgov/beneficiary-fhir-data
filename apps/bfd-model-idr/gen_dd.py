@@ -25,14 +25,32 @@ sample_sources = {
     "ExplanationOfBenefit-Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
     "Coverage": "out/Coverage-FFS.json",
 }
-sample_resources = {}
+sample_sources_by_profile = {
+    "PartA": "out/Coverage-FFS.json",
+    "PartB": "out/Coverage-FFS-PartB.json",
+    "PartC": "out/Coverage-PartC.json",
+    "PartD": "out/Coverage-PartD.json",
+    "DUAL": "out/Coverage-Dual.json",
+    "Inpatient": "out/ExplanationOfBenefit.json",
+    "SNF": "out/ExplanationOfBenefit-SNF.json",
+    "HHA": "out/ExplanationOfBenefit-HHA.json",
+    "Hospice": "out/ExplanationOfBenefit-Hospice.json",
+    "Outpatient": "out/ExplanationOfBenefit-Outpatient.json",
+    "Carrier": "out/ExplanationOfBenefit-Carrier.json",
+    "DME": "out/ExplanationOfBenefit-DME.json",
+    "Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
+    "Patient": "out/Patient.json"
+}
+
+sample_resources_by_profile = {}
 dd_df = []
 idr_table_descriptors = {}
 structure_def_names_descriptions = {}
 
-for resource_type in sample_sources:
-    with Path(sample_sources[resource_type]).open() as file:
-        sample_resources[resource_type] = json.load(file)
+for resource_type in sample_sources_by_profile:
+    with Path(sample_sources_by_profile[resource_type]).open() as file:
+        sample_resources_by_profile[resource_type] = json.load(file)
+
 
 for walk_info in os.walk(structure_def_folder):
     files = list(filter(lambda file: ".json" in file, walk_info[2]))
@@ -66,8 +84,6 @@ for walk_info in os.walk(dd_support_folder):
             for entry in data:
                 if 'suppressInDD' in entry and entry['suppressInDD']:
                     continue
-                if "fhirPath" not in entry:
-                    print(entry['inputPath'])
                 if "fhirPath" in entry:
                     entry["appliesTo"].sort()
                     if "sources" in entry:
@@ -81,19 +97,18 @@ for walk_info in os.walk(dd_support_folder):
                         entry['FHIR Resource'] = 'ExplanationOfBenefit'
                         entry['Coverage / Claim Type'] = entry['appliesTo']
 
-
-
+                    #This opportunistically populates examples based upon the samples created from executing FML
                     result = subprocess.run(
                         [
                             "node",
                             "eval_fhirpath.js",
-                            json.dumps(sample_resources[current_resource_type]),
+                            json.dumps(sample_resources_by_profile[entry['appliesTo'][0]]),
                             entry["fhirPath"],
                         ],
                         check=True,
                         stdout=subprocess.PIPE,
                     )
-                    entry["example"] = json.loads(result.stdout)
+                    entry['example']=json.loads(result.stdout)
                     if "iif" in entry["fhirPath"] or "union" in entry["fhirPath"]:
                         pass
                     elif len(entry["example"]) > 0:

@@ -231,7 +231,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
 
     //The following adds rendering providers for professional claims, since those come in at a line item
-    src.lineItemComponents as itemComponent where itemComponent.providerSequence.exists() -> tgt then addRenderingCareTeamMemberProfessional(itemComponent,tgt) "Add rendering practitioners for professional claims";
+    src.lineItemComponents as itemComponent2 where itemComponent2.providerSequence.exists() -> tgt then addRenderingCareTeamMemberProfessional(itemComponent2,tgt) "Add rendering practitioners for professional claims";
 
     //Add header level adjudication.
     src -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then {

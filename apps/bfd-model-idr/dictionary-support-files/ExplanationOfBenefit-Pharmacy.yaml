@@ -108,7 +108,6 @@
     - Pharmacy
   sources:
     - NCH
-  bfdDerived: True
   sourceView: V2_MDCR_PRVDR_HSTRY
   sourceColumn: PRVDR_LAST_NAME
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='prescribing').provider.reference.substring(1)).name.family
@@ -540,7 +539,7 @@
     - CCLF7.CLM_IDR_LD_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_IDR_LD_DT
-  fhirPath: ExplanationOfBenefit.created.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
+  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
 - inputPath: SupportingInfoComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Pharmacy

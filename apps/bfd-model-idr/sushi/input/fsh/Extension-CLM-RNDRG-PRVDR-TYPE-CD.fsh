@@ -7,4 +7,4 @@ Id: CLM-PRVDR-PRTCPTG-CD
 * ^context[=].expression = "Practitioner"
 * value[x] only Coding
 * value[x] 1..1
-* value[x].system = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD"
+* value[x].system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD"

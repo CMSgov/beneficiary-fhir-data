@@ -3,7 +3,7 @@
     "lastUpdated": "2025-01-07T03:02:28.000000Z",
     "CLM_FINL_ACTN_IND":"Y",
     "CLM_BENE_XREF_EFCTV_SK":"12345",
-    "CLM_TYPE_CD":60,
+    "CLM_TYPE_CD":30,
     "CLM_UNIQ_ID":"NON-UNIQUE-ID-HERE",
     "CLM_CNTL_NUM":"DOOPITY-DOOP-DOOP",
     "CLM_FROM_DT":"2025-01-03",
@@ -51,8 +51,7 @@
         {"ROW_NUM":"19","CLM_QLFY_STAY_THRU_DT":"2025-01-01"},
         {"ROW_NUM":"20","CLM_HHA_LUP_IND_CD":"L"},
         {"ROW_NUM":"21","CLM_HHA_RFRL_CD":"C"},
-        {"ROW_NUM":"22","DGNS_DRG_OUTLIER_CD":"6"},
-        {"ROW_NUM":"23","CLM_PPS_IND_CD":"2"}
+        {"ROW_NUM":"22","DGNS_DRG_OUTLIER_CD":"6"}
         
     ],
     "lineItemComponents":[
