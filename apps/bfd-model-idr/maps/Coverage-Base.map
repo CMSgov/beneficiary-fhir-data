@@ -167,7 +167,8 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
         src -> tgtExtension.value = pbpNum "Add value";
     } "Add PBP number";
 
-    //This can be obtained from the contract + PBP by joining V2_MDCR_CNTRCT_PBP_SGMT with V2_MDCR_CNTRCT_PBP_NUM on CNTRCT_PBP_SK. 
+    //This can be obtained by taking the BENE_CNTRCT_NUM + BENE_PBP_NUM to get the CNTRCT_PBP_SK from V2_MDCR_CNTRCT_PBP_NUM and finding the CNTRCT_PBP_SGMT_NUM in V2_MDCR_CNTRCT_PBP_SGMT using that CNTRCT_PBP_SK
+    //This field isn't always populated, if there are >1 segments returned, do not populate this extension.
     src.CNTRCT_PBP_SGMT_NUM as segmentNum -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CNTRCT-PBP-SGMT-NUM" "Add url";
         src -> tgtExtension.value = segmentNum "Add value";
