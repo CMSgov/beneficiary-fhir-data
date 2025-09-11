@@ -36,6 +36,7 @@ public class EobReadIT extends IntegrationTestBase {
   void eobReadPhase1() {
     var eob = eobRead().withId(CLAIM_ID_PHASE_1).execute();
     assertFalse(eob.isEmpty());
+    assertEquals("PARTIAL", eob.getOutcome().name());
     expect.serializer("fhir+json").toMatchSnapshot(eob);
   }
 
