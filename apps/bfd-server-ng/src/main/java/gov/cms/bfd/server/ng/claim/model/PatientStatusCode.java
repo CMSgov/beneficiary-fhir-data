@@ -9,7 +9,10 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Patient status info. */
+/**
+ * Patient status info. Suppress SonarQube warning that constant names should comply with naming
+ * conventions
+ */
 @AllArgsConstructor
 @Getter
 @SuppressWarnings("java:S115")

@@ -8,7 +8,10 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Claim Admission Type codes. */
+/**
+ * Claim Admission Type codes. Suppress SonarQube warning that constant names should comply with
+ * naming conventions
+ */
 @AllArgsConstructor
 @Getter
 @SuppressWarnings("java:S115")

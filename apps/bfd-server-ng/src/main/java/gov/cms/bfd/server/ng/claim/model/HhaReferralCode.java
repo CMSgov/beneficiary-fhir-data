@@ -9,7 +9,10 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Home Health Agency (HHA) referral codes for claims. */
+/**
+ * Home Health Agency (HHA) referral codes for claims. Suppress SonarQube warning that constant
+ * names should comply with naming conventions
+ */
 @Getter
 @AllArgsConstructor
 @SuppressWarnings("java:S115")

@@ -70,7 +70,7 @@ class BenefitBalanceInstitutional {
             lifetimeReserveDaysUsed),
         BenefitBalanceInstitutionalType.CLM_MDCR_HHA_TOT_VISIT_CNT.toFhirIntType(totalHHAVisits),
         BenefitBalanceInstitutionalType.CLM_MDCR_HOSPC_PRD_CNT.toFhirIntType(
-                totalHospicePeriodCount),
+            totalHospicePeriodCount),
         BenefitBalanceInstitutionalType.CLM_INSTNL_MDCR_COINS_DAY_CNT.toFhirIntType(
             totalCoinsuranceDays),
         BenefitBalanceInstitutionalType.CLM_INSTNL_CVRD_DAY_CNT.toFhirIntType(
