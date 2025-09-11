@@ -81,7 +81,7 @@ class Extractor(ABC):
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
-                    f"WHERE {batch_timestamp_clause} >= '{min_transaction_date}'",
+                    f"(WHERE {batch_timestamp_clause} >= '{min_transaction_date}')",
                 ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
                 {},
             )
@@ -110,8 +110,8 @@ class Extractor(ABC):
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE {batch_timestamp_clause} {timestamp_op} %(timestamp)s
-                    {batch_id_clause}
+                    (WHERE {batch_timestamp_clause} {timestamp_op} %(timestamp)s
+                    {batch_id_clause})
                     """,
             ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
             {"timestamp": compare_timestamp},
