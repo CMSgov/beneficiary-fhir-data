@@ -116,12 +116,9 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
-          mvn --threads 1C \
+          mvn --activate-profiles codebuild \
+          --threads 1C \
           --no-transfer-progress \
-          -Dmaven.build.cache.enabled=true \
-          -Dapidocgen.skip=false \
-          -Dmaven.jacoco.skip=false \
-          -Dmaven.source.skip=true \
           clean install
         working-directory: ./apps
 

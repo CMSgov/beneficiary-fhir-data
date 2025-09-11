@@ -1387,6 +1387,18 @@
 
     <profiles>
         <profile>
+            <id>codebuild</id>
+            <properties>
+                <maven.build.cache.skipCache>false</maven.build.cache.skipCache>
+                <maven.source.skip>true</maven.source.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <maven.jacoco.skip>false</maven.jacoco.skip>
+                <apidocgen.skip>false</apidocgen.skip>
+                <bfdOps.skip>true</bfdOps.skip>
+                <tests.thread.count>8</tests.thread.count>
+            </properties>
+        </profile>
+        <profile>
             <id>prepare-release</id>
             <properties>
                 <maven.build.cache.skipCache>true</maven.build.cache.skipCache>
