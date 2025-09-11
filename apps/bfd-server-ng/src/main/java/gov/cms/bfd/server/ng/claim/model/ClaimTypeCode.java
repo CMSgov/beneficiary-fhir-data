@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Reference;
 /** Claim type codes. */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("java:S115")
 public enum ClaimTypeCode {
   /** 1 - MEDICARE PART D ORIGINAL CLAIM. */
   _1(1, "MEDICARE PART D ORIGINAL CLAIM"),

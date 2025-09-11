@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Coding;
 /** Revenue center ANSI adjustment reason codes for claims. */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("java:S115")
 public enum RevenueCenterAnsiReasonCode {
   /** 1 - Deductible Amount. */
   _1("1", "Deductible Amount"),

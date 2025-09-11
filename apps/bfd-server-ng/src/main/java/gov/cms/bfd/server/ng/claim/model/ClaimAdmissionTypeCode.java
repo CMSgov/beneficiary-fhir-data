@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Claim Admission Type codes. */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum ClaimAdmissionTypeCode {
   /** 0 - Unknown Value (but present in data). */
   _0("0", "Unknown Value (but present in data)"),

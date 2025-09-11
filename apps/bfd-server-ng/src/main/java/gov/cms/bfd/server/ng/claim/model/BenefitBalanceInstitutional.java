@@ -26,7 +26,7 @@ class BenefitBalanceInstitutional {
   private int totalHHAVisits;
 
   @Column(name = "clm_mdcr_hospc_prd_cnt")
-  private int totalHospicePeriodTrailers;
+  private int totalHospicePeriodCount;
 
   @Column(name = "clm_mdcr_ip_pps_dsprprtnt_amt")
   private double ppsDisproportionateAmount;
@@ -70,7 +70,7 @@ class BenefitBalanceInstitutional {
             lifetimeReserveDaysUsed),
         BenefitBalanceInstitutionalType.CLM_MDCR_HHA_TOT_VISIT_CNT.toFhirIntType(totalHHAVisits),
         BenefitBalanceInstitutionalType.CLM_MDCR_HOSPC_PRD_CNT.toFhirIntType(
-            totalHospicePeriodTrailers),
+                totalHospicePeriodCount),
         BenefitBalanceInstitutionalType.CLM_INSTNL_MDCR_COINS_DAY_CNT.toFhirIntType(
             totalCoinsuranceDays),
         BenefitBalanceInstitutionalType.CLM_INSTNL_CVRD_DAY_CNT.toFhirIntType(

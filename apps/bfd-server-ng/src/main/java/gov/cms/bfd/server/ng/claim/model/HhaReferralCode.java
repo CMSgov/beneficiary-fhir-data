@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Home Health Agency (HHA) referral codes for claims. */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("java:S115")
 public enum HhaReferralCode {
   /**
    * 1 - PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL

@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Claim admission codes. */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum ClaimAdmissionSourceCode {
   /**
    * 1 - NON-HEALTH CARE FACILITY POINT OF ORIGIN (NON-NEWBORN)/RESERVED FOR NATIONAL ASSIGNMENT

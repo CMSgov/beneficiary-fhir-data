@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.Coding;
 /** Deductible coinsurance codes. */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("java:S115")
 public enum ClaimLineDeductibleCoinsuranceCode {
   /** 0 - Charges are subject to deductible and coinsurance. */
   _0("0", "Charges are subject to deductible and coinsurance"),

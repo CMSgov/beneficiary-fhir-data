@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Patient status info. */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum PatientStatusCode {
   /** 01 - DISCHARGED TO HOME OR SELF CARE (ROUTINE DISCHARGE). */
   _01("01", "DISCHARGED TO HOME OR SELF CARE (ROUTINE DISCHARGE)"),
