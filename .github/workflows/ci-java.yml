@@ -108,12 +108,6 @@ jobs:
           params: |
             SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key
 
-      - name: Save Maven cache
-        if: ${{ github.event_type != 'merge_group' }}
-        uses: skjolber/maven-cache-github-action@v3.1.2
-        with:
-          step: save
-
       - name: 'Run Maven Build'
         run: |
           mvn --activate-profiles codebuild \
@@ -121,11 +115,6 @@ jobs:
           --no-transfer-progress \
           clean install
         working-directory: ./apps
-
-      - name: Restore Maven cache
-        uses: skjolber/maven-cache-github-action@v3.1.2
-        with:
-          step: restore
 
       - name: 'Generate, Upload Build Reports'
         if: ${{ github.event_type != 'merge_group' }}
