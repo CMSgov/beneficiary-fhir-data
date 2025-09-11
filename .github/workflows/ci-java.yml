@@ -116,6 +116,7 @@ jobs:
           -Dmaven.build.cache.enabled=false \
           -Dapidocgen.skip=false \
           -Dmaven.jacoco.skip=false \
+          -Dmaven.source.skip=true \
           clean install
         working-directory: ./apps
 
