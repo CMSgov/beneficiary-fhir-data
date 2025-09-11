@@ -109,16 +109,27 @@ jobs:
           params: |
             SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key
 
+      - name: Save Maven cache
+        if: ${{ github.event_type != 'merge_group' }}
+        uses: skjolber/maven-cache-github-action@v3.1.2
+        with:
+          step: save
+
       - name: 'Run Maven Build'
         run: |
           mvn --threads 1C \
           --no-transfer-progress \
-          -Dmaven.build.cache.enabled=false \
+          -Dmaven.build.cache.enabled=true \
           -Dapidocgen.skip=false \
           -Dmaven.jacoco.skip=false \
           -Dmaven.source.skip=true \
           clean install
         working-directory: ./apps
+
+      - name: Restore Maven cache
+        uses: skjolber/maven-cache-github-action@v3.1.2
+        with:
+          step: restore
 
       - name: 'Generate, Upload Build Reports'
         if: ${{ github.event_type != 'merge_group' }}
@@ -138,5 +149,11 @@ jobs:
           -Dsonar.exclusions='*.java' \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
         working-directory: ./apps
+
+      - name: Save Maven cache
+        if: ${{ github.event_type != 'merge_group' }}
+        uses: skjolber/maven-cache-github-action@v3.1.2
+        with:
+          step: save
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
