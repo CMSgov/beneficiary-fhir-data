@@ -31,8 +31,8 @@
     <ciManagement>
         <!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245,
             Sonar (at least) can use this information. -->
-        <system>jenkins</system>
-        <url>https://jenkins-east.cloud.cms.gov/</url>
+        <system>github</system>
+        <url>https://github.com/CMSgov/beneficiary-fhir-data/actions</url>
     </ciManagement>
 
     <scm>
