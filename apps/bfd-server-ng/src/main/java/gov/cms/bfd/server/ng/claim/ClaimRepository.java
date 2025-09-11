@@ -1,9 +1,11 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /** Repository methods for claims. */
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class ClaimRepository {
   private EntityManager entityManager;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoggingInterceptor.class);
 
   /**
    * Search for a claim by its ID.
@@ -29,23 +35,29 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    return withParams(
-            entityManager.createQuery(
-                String.format(
-                    """
+    Optional<Claim> optionalClaim =
+        withParams(
+                entityManager.createQuery(
+                    String.format(
+                        """
                     %s
                     WHERE c.claimUniqueId = :claimUniqueId
                     %s
                     """,
-                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
-                Claim.class),
-            claimThroughDate,
-            lastUpdated,
-            new ArrayList<>())
-        .setParameter("claimUniqueId", claimUniqueId)
-        .getResultList()
-        .stream()
-        .findFirst();
+                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                    Claim.class),
+                claimThroughDate,
+                lastUpdated,
+                new ArrayList<>())
+            .setParameter("claimUniqueId", claimUniqueId)
+            .getResultList()
+            .stream()
+            .findFirst();
+
+    if (optionalClaim.isPresent()) {
+      logBeneSkIfPresent(optionalClaim.get());
+    }
+    return optionalClaim;
   }
 
   /**
@@ -85,21 +97,27 @@ public class ClaimRepository {
             .setParameter("limit", limit.orElse(5000))
             .setParameter("offset", offset.orElse(0))
             .getResultList();
-    return withParams(
-            entityManager.createQuery(
-                String.format(
-                    """
+    List<Claim> claims =
+        withParams(
+                entityManager.createQuery(
+                    String.format(
+                        """
                         %s
                         WHERE c.claimUniqueId IN (:claimIds)
                         %s
                         """,
-                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
-                Claim.class),
-            claimThroughDate,
-            lastUpdated,
-            sourceIds)
-        .setParameter("claimIds", claimIds)
-        .getResultList();
+                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                    Claim.class),
+                claimThroughDate,
+                lastUpdated,
+                sourceIds)
+            .setParameter("claimIds", claimIds)
+            .getResultList();
+
+    if (claims.size() > 0) {
+      logBeneSkIfPresent(claims.getFirst());
+    }
+    return claims;
   }
 
   /**
@@ -164,5 +182,16 @@ public class ClaimRepository {
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())
         .setParameter("sourceIds", sourceIds);
+  }
+
+  private static void logBeneSkIfPresent(Claim claim) {
+    Optional.ofNullable(claim)
+        .map(Claim::getBeneficiary)
+        .map(BeneficiarySimple::getBeneSk)
+        .filter(beneSk -> beneSk != null)
+        .ifPresent(
+            beneSk -> {
+              LOGGER.atInfo().setMessage("bene_sk_requested").addKeyValue("bene_sk", beneSk).log();
+            });
   }
 }

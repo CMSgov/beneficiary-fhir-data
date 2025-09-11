@@ -4,11 +4,14 @@ import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /** Repository for querying beneficiary information. */
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private EntityManager entityManager;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoggingInterceptor.class);
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -46,10 +51,11 @@ public class BeneficiaryRepository {
    * @return beneficiary record
    */
   public Optional<Beneficiary> findById(long beneSk, DateTimeRange lastUpdatedRange) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
+    Optional<Beneficiary> optionalBeneficiary =
+        entityManager
+            .createQuery(
+                String.format(
+                    """
               SELECT bene
               FROM Beneficiary bene
               WHERE bene.beneSk = :beneSk
@@ -57,15 +63,18 @@ public class BeneficiaryRepository {
                 AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :upperBound)
               ORDER BY bene.obsoleteTimestamp DESC
               """,
-                lastUpdatedRange.getLowerBoundSqlOperator(),
-                lastUpdatedRange.getUpperBoundSqlOperator()),
-            Beneficiary.class)
-        .setParameter("beneSk", beneSk)
-        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-        .getResultList()
-        .stream()
-        .findFirst();
+                    lastUpdatedRange.getLowerBoundSqlOperator(),
+                    lastUpdatedRange.getUpperBoundSqlOperator()),
+                Beneficiary.class)
+            .setParameter("beneSk", beneSk)
+            .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+            .getResultList()
+            .stream()
+            .findFirst();
+
+    logBeneSkIfPresent(optionalBeneficiary);
+    return optionalBeneficiary;
   }
 
   /**
@@ -128,5 +137,15 @@ public class BeneficiaryRepository {
         .stream()
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
+  }
+
+  private static void logBeneSkIfPresent(Optional<Beneficiary> beneficiaryCoverage) {
+    beneficiaryCoverage
+        .map(Beneficiary::getBeneSk)
+        .filter(beneSk -> beneSk != null)
+        .ifPresent(
+            beneSk -> {
+              LOGGER.atInfo().setMessage("bene_sk_requested").addKeyValue("bene_sk", beneSk).log();
+            });
   }
 }
