@@ -126,6 +126,7 @@ jobs:
           BFD_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           mvn sonar:sonar \
+          --no-transfer-progress \
           -Dmaven.build.cache.enabled=false \
           -DskipITs \
           -DskipTests \
