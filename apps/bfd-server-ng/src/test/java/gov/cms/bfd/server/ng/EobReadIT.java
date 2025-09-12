@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -19,16 +20,32 @@ public class EobReadIT extends IntegrationTestBase {
 
   @Test
   void eobReadValidLong() {
-    var eob = eobRead().withId(1071939711295L).execute();
+    var eob = eobRead().withId(Long.parseLong(CLAIM_ID_ADJUDICATED)).execute();
     assertFalse(eob.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(eob);
   }
 
   @Test
   void eobReadValidString() {
-    var patient = eobRead().withId("1071939711295").execute();
+    var patient = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();
     assertFalse(patient.isEmpty());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
+  }
+
+  @Test
+  void eobReadPhase1() {
+    var eob = eobRead().withId(CLAIM_ID_PHASE_1).execute();
+    assertFalse(eob.isEmpty());
+    assertEquals("PARTIAL", eob.getOutcome().name());
+    expect.serializer("fhir+json").toMatchSnapshot(eob);
+  }
+
+  @Test
+  void eobReadPhase2() {
+    var eob = eobRead().withId(CLAIM_ID_PHASE_2).execute();
+    assertFalse(eob.isEmpty());
+    assertEquals("QUEUED", eob.getOutcome().name());
+    expect.serializer("fhir+json").toMatchSnapshot(eob);
   }
 
   @Test
