@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.coverage;
 
+import gov.cms.bfd.server.ng.LoggerConstants;
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
@@ -28,7 +29,7 @@ public class CoverageRepository {
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, DateTimeRange lastUpdatedRange) {
 
-    Optional<BeneficiaryCoverage> beneficiaryCoverage =
+    var beneficiaryCoverage =
         entityManager
             .createQuery(
                 String.format(
@@ -63,10 +64,13 @@ public class CoverageRepository {
   private static void logBeneSkIfPresent(Optional<BeneficiaryCoverage> beneficiaryCoverage) {
     beneficiaryCoverage
         .map(BeneficiaryCoverage::getBeneSk)
-        .filter(beneSk -> beneSk != null)
         .ifPresent(
             beneSk -> {
-              LOGGER.atInfo().setMessage("bene_sk_requested").addKeyValue("bene_sk", beneSk).log();
+              LOGGER
+                  .atInfo()
+                  .setMessage(LoggerConstants.BENE_SK_REQUESTED)
+                  .addKeyValue("bene_sk", beneSk)
+                  .log();
             });
   }
 }

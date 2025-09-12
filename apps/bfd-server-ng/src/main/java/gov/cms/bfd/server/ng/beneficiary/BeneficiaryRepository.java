@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.LoggerConstants;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -51,7 +52,7 @@ public class BeneficiaryRepository {
    * @return beneficiary record
    */
   public Optional<Beneficiary> findById(long beneSk, DateTimeRange lastUpdatedRange) {
-    Optional<Beneficiary> optionalBeneficiary =
+    var optionalBeneficiary =
         entityManager
             .createQuery(
                 String.format(
@@ -142,10 +143,13 @@ public class BeneficiaryRepository {
   private static void logBeneSkIfPresent(Optional<Beneficiary> beneficiaryCoverage) {
     beneficiaryCoverage
         .map(Beneficiary::getBeneSk)
-        .filter(beneSk -> beneSk != null)
         .ifPresent(
             beneSk -> {
-              LOGGER.atInfo().setMessage("bene_sk_requested").addKeyValue("bene_sk", beneSk).log();
+              LOGGER
+                  .atInfo()
+                  .setMessage(LoggerConstants.BENE_SK_REQUESTED)
+                  .addKeyValue("bene_sk", beneSk)
+                  .log();
             });
   }
 }

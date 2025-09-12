@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.LoggerConstants;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
@@ -35,7 +36,7 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    Optional<Claim> optionalClaim =
+    var optionalClaim =
         withParams(
                 entityManager.createQuery(
                     String.format(
@@ -97,7 +98,7 @@ public class ClaimRepository {
             .setParameter("limit", limit.orElse(5000))
             .setParameter("offset", offset.orElse(0))
             .getResultList();
-    List<Claim> claims =
+    var claims =
         withParams(
                 entityManager.createQuery(
                     String.format(
@@ -188,10 +189,13 @@ public class ClaimRepository {
     Optional.ofNullable(claim)
         .map(Claim::getBeneficiary)
         .map(BeneficiarySimple::getBeneSk)
-        .filter(beneSk -> beneSk != null)
         .ifPresent(
             beneSk -> {
-              LOGGER.atInfo().setMessage("bene_sk_requested").addKeyValue("bene_sk", beneSk).log();
+              LOGGER
+                  .atInfo()
+                  .setMessage(LoggerConstants.BENE_SK_REQUESTED)
+                  .addKeyValue("bene_sk", beneSk)
+                  .log();
             });
   }
 }
