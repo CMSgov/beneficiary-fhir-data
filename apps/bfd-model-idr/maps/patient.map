@@ -20,7 +20,7 @@ group createPatient(source src: Bene, target patient: BFDPatient){
         src.BENE_MIDL_NAME as middleName -> tgtName.given = middleName "Populate middle name";
         src.BENE_LAST_NAME as lastName -> tgtName.family = lastName "Populate last name";
     } "add name";
-    src.BENE_DOB as dob -> patient.birthDate = dob "set dob";
+    src.BENE_BRTH_DT as dob -> patient.birthDate = dob "set dob";
     src.BENE_DEATH_DT as dod where (src.BENE_VRFY_DEATH_DAY_SW = "true")  -> patient.deceased = dod "Set death date";
     src.BENE_SEX_CD as sex -> patient.gender = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#AdministrativeSex', 'code');
     src.BENE_SEX_CD as sex -> patient.extension = create('Extension') as sexExtension then {

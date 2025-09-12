@@ -9,10 +9,13 @@
     "CLM_FROM_DT":"2025-01-03",
     "CLM_THRU_DT":"2025-01-11",
     "CLM_EFCTV_DT":"2025-01-18",
+    "CLM_IDR_LD_DT":"2025-01-18",
     "CLM_SRC_ID":"20000",
     "CLM_CNTRCTR_NUM": "10312",
+    "CLM_ADJSTMT_TYPE_CD": "0",
     "CLM_DISP_CD": "1",
     "PRVDR_BLG_PRVDR_NPI_NUM":"1548226988",
+    "CLM_BLG_PRVDR_ZIP5_CD":"77550",
     "diagnoses":[
         {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"1","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"A","CLM_POA_IND":"~"},
         {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"2","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"D","CLM_POA_IND":"Y"},
@@ -47,7 +50,9 @@
         {"ROW_NUM":"18","CLM_QLFY_STAY_FROM_DT":"2025-01-02"},
         {"ROW_NUM":"19","CLM_QLFY_STAY_THRU_DT":"2025-01-01"},
         {"ROW_NUM":"20","CLM_HHA_LUP_IND_CD":"L"},
-        {"ROW_NUM":"21","CLM_HHA_RFRL_CD":"C"}
+        {"ROW_NUM":"21","CLM_HHA_RFRL_CD":"C"},
+        {"ROW_NUM":"22","DGNS_DRG_OUTLIER_CD":"6"},
+        {"ROW_NUM":"23","CLM_PPS_IND_CD":"2"}
         
     ],
     "lineItemComponents":[

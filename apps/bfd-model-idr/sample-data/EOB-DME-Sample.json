@@ -9,9 +9,11 @@
     "CLM_FROM_DT":"2025-01-03",
     "CLM_THRU_DT":"2025-01-11",
     "CLM_EFCTV_DT":"2025-01-18",
+    "CLM_IDR_LD_DT":"2025-01-18",
     "CLM_SRC_ID":"20000",
     "CLM_CNTRCTR_NUM": "10312",
     "CLM_DISP_CD": "1",
+    "CLM_ADJSTMT_TYPE_CD": "0",
     "PRVDR_BLG_PRVDR_NPI_NUM":"1548226988",
     "diagnoses":[
         {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"1","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"P","CLM_POA_IND":"~"},
@@ -66,7 +68,6 @@
     "CLM_NCVRD_CHRG_AMT":"11.50",
     "CLM_BLOOD_LBLTY_AMT":"121.10",
     "family_name_rndrg":"Dazed",
-    "CLM_RNDRG_PRVDR_NPI_NUM":"1942945159",
     "CLM_BLG_PRVDR_OSCAR_NUM":"00024",
     "clm_blg_prvdr_npi_type":"1",
     "blg_name_professional":"test"

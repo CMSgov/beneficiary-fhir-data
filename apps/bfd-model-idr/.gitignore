@@ -4,3 +4,4 @@ out/*
 !out/.gitkeep
 sushi/fsh-generated/*
 validator_cli.jar
+ReferenceTables/source-to-target-mappings

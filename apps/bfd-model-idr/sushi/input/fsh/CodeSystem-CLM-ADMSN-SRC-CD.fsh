@@ -1,7 +1,7 @@
 CodeSystem: CLM_ADMSN_SRC_CD
-Title: "Clm Admsn Src Cd"
+Title: "Claim Admission Source Code"
 Id: CLM-ADMSN-SRC-CD
-Description: "Code system for clm admsn src cd"
+Description: "Indicates the source of the beneficiary’s referral for admission or visit."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
 * ^status = #active
 * ^content = #complete
