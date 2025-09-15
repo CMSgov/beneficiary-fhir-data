@@ -223,7 +223,8 @@ public class SystemUrls {
   /**
    * <a href="https://terminology.hl7.org/1.0.0/CodeSystem-v3-NullFlavor.html">Hl7 Null Flavor.</a>
    */
-  public static String HL7_NULL_FLAVOR = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
+  public static final String HL7_NULL_FLAVOR =
+      "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
 
   /** <a href="https://terminology.hl7.org/2.1.0/CodeSystem-v2-0203.html">Hl7 Identifier.</a> */
   public static final String HL7_IDENTIFIER = "http://terminology.hl7.org/CodeSystem/v2-0203";
@@ -320,15 +321,15 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator";
 
   /** URL. */
-  public static String CARIN_CODE_SYSTEM_ADJUDICATION =
+  public static final String CARIN_CODE_SYSTEM_ADJUDICATION =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication";
 
   /** URL. */
-  public static String CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE =
+  public static final String CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole";
 
   /** URL. */
-  public static String CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS =
+  public static final String CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus";
 
   // CMS Blue Button
@@ -448,7 +449,63 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD";
 
-  /** Blue Button code system - benefit balance. */
+  /** Blue Button structure definition - discount indicator code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_DISCOUNT_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD";
+
+  /** Blue Button code system - discount indicator code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_DISCOUNT_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD";
+
+  /** Blue Button structure definition - otaf one indicator code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_OTAF_ONE_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD";
+
+  /** Blue Button code system - otaf one indicator code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_OTAF_ONE_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-ONE-IND-CD";
+
+  /** Blue Button structure definition - package indicator code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_PACKAGE_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD";
+
+  /** Blue Button code system - otaf one indicator code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_PACKAGE_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD";
+
+  /** Blue Button structure definition - payment method code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_PAYMENT_METHOD_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PMT-MTHD-CD";
+
+  /** Blue Button code system - payment method code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_PAYMENT_METHOD_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD";
+
+  /** Blue Button structure definition - center status code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_CENTER_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD";
+
+  /** Blue Button code system - center status code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_LUPA_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE";
+
+  /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
@@ -473,40 +530,40 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
 
   // CMS
-  /** URL. */
+  /** CMS ICD - ICD-9. */
   public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
 
-  /** URL. */
+  /** CMS ICD - ICD-10. */
   public static final String CMS_ICD_10 = "http://www.cms.gov/Medicare/Coding/ICD10";
 
-  /** URL. */
+  /** CMS - DRG Classification and Software. */
   public static final String CMS_MS_DRG =
       "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software";
 
-  /** URL. */
+  /** CMS - HCPCS Code Sets. */
   public static final String CMS_HCPCS = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
 
-  /** URL. */
+  /** CMS - HIPPS Code Sets. */
   public static final String CMS_HIPPS =
       "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes";
 
   // NUBC
 
-  /** URL. */
+  /** NUBC - patient discharge status. */
   public static final String NUBC_PATIENT_DISCHARGE_STATUS =
       "https://www.nubc.org/CodeSystem/PatDischargeStatus";
 
-  /** URL. */
+  /** NUBC - point of origin. */
   public static final String NUBC_POINT_OF_ORIGIN = "https://www.nubc.org/CodeSystem/PointOfOrigin";
 
-  /** URL. */
+  /** NUBC - type of admit or visit. */
   public static final String NUBC_TYPE_OF_ADMIT =
       "https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit";
 
-  /** URL. */
+  /** NUBC - type of bill. */
   public static final String NUBC_TYPE_OF_BILL = "https://www.nubc.org/CodeSystem/TypeOfBill";
 
-  /** URL. */
+  /** NUBC - revenue code. */
   public static final String NUBC_REVENUE_CODES = "https://www.nubc.org/CodeSystem/RevenueCodes";
 
   // Other
@@ -531,31 +588,35 @@ public class SystemUrls {
   /** <a href="https://terminology.hl7.org/6.2.0/NamingSystem-cmsMBI.html">CMS MBI.</a> */
   public static final String CMS_MBI = "http://hl7.org/fhir/sid/us-mbi";
 
-  /** URL. */
+  /** HL7 - US-NPI. */
   public static final String NPI = "http://hl7.org/fhir/sid/us-npi";
 
-  /** URL. */
+  /** HL7 - NDC. */
   public static final String NDC = "http://hl7.org/fhir/sid/ndc";
 
-  /** URL. */
+  /** HL7 - CCN. */
   public static final String CMS_CERTIFICATION_NUMBERS =
       "http://terminology.hl7.org/NamingSystem/CCN";
 
-  /** URL. */
+  /** HL7 - ICD-9. */
   public static final String ICD_9_CM = "http://hl7.org/fhir/sid/icd-9-cm";
 
-  /** URL. */
+  /** HL7 - ICD-10. */
   public static final String ICD_10_CM = "http://hl7.org/fhir/sid/icd-10-cm";
 
-  /** URL. */
+  /** units of measure. */
   public static final String UNITS_OF_MEASURE = "http://unitsofmeasure.org";
 
-  /** URL. */
+  /** AMA - CPT. */
   public static final String AMA_CPT = "http://www.ama-assn.org/go/cpt";
 
-  /** URL. */
+  /** X12 - claim adjustment reason code. */
   public static final String X12_CLAIM_ADJUSTMENT_REASON_CODES =
       "https://x12.org/codes/claim-adjustment-reason-codes";
+
+  /** X12 - claim adjustment group code. */
+  public static final String X12_CLAIM_ADJUSTMENT_GROUP_CODES =
+      "https://x12.org/codes/claim-adjustment-group-codes";
 
   /** <a href="https://www.usps.com">USPS</a>. */
   public static final String USPS = "https://www.usps.com";
