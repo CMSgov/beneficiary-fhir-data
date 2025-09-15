@@ -55,6 +55,9 @@ jobs:
     if: needs.workflow.outputs.files
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ inputs.branch || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -71,6 +74,9 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
