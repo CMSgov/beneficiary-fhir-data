@@ -206,7 +206,7 @@ class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY}]
     bene_xref_efctv_sk: int
-    bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
+    bene_mbi_id: str
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_null_string)]
     bene_last_name: str
