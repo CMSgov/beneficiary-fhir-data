@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-          ref: ${{ inputs.branch || github.ref_name }}
+          ref: ${{ inputs.branch || github.head_ref || github.ref_name }}
       - id: workflow_files
         name: Set output
         run: |
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-          ref: ${{ inputs.branch || github.ref_name }}
+          ref: ${{ inputs.branch || github.head_ref || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -76,7 +76,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.branch || github.ref_name }}
+          ref: ${{ inputs.branch || github.head_ref || github.ref_name }}
       - name: 'Setup JDK'
         uses: actions/setup-java@v4
         with:
@@ -125,7 +125,7 @@ jobs:
       - name: 'Generate, Upload Build Reports'
         if: ${{ github.event_type != 'merge_group' }}
         env:
-          BFD_BRANCH: ${{ inputs.branch || github.ref_name }}
+          BFD_BRANCH: ${{ inputs.branch || github.head_ref || github.ref_name }}
         run: |
           mvn sonar:sonar \
           -DskipITs \
