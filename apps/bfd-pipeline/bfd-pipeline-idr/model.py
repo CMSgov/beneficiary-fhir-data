@@ -193,11 +193,12 @@ T = TypeVar("T", bound=IdrBaseModel)
 DEATH_DATE_CUTOFF_YEARS = 4
 
 
-def _bene_filter(alias: str) -> str:
-    return f"""NOT(
-            {alias}.bene_vrfy_death_day_sw = 'Y' 
+def _deceased_bene_filter(alias: str) -> str:
+    return f"""
+            SELECT bene_sk
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {alias}
+            WHERE {alias}.bene_vrfy_death_day_sw = 'Y' 
             AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
-        )
     """
 
 
@@ -297,6 +298,9 @@ class IdrBeneficiary(IdrBaseModel):
                     AND bx.bene_hicn_num = ox.bene_hicn_num
                     AND bx.src_rec_crte_ts = ox.src_rec_crte_ts
                 WHERE ox.row_order = 1
+            ),
+            deceased_benes AS (
+                {_deceased_bene_filter(hstry)}
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
@@ -306,7 +310,8 @@ class IdrBeneficiary(IdrBaseModel):
                 ON {xref}.bene_sk = {hstry}.bene_xref_sk 
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
-            AND {_bene_filter(hstry)}
+            AND {hstry}.bene_mbi_id IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
         """
 
@@ -361,10 +366,9 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp tp
             {{WHERE_CLAUSE}}
-            AND EXISTS(
-                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
-                WHERE {hstry}.bene_sk = tp.bene_sk
-                AND {_bene_filter(hstry)}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = tp.bene_sk
             )
             {{ORDER_BY}}
         """
@@ -395,10 +399,9 @@ class IdrBeneficiaryStatus(IdrBaseModel):
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus stus
             {{WHERE_CLAUSE}}
-            AND EXISTS(
-                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
-                WHERE {hstry}.bene_sk = stus.bene_sk
-                AND {_bene_filter(hstry)}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = stus.bene_sk
             )
             {{ORDER_BY}}
         """
@@ -430,10 +433,9 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt entlmt
             {{WHERE_CLAUSE}}
-            AND EXISTS(
-                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
-                WHERE {hstry}.bene_sk = entlmt.bene_sk
-                AND {_bene_filter(hstry)}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = entlmt.bene_sk
             )
             {{ORDER_BY}}
         """
@@ -463,10 +465,9 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn rsn
             {{WHERE_CLAUSE}}
-            AND EXISTS(
-                SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
-                WHERE {hstry}.bene_sk = rsn.bene_sk
-                AND {_bene_filter(hstry)}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = rsn.bene_sk
             )
             {{ORDER_BY}}
         """
@@ -493,11 +494,16 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr dual
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = dual.bene_sk
+            )
+            {{ORDER_BY}}
         """
 
 
@@ -529,10 +535,9 @@ class IdrElectionPeriodUsage(IdrBaseModel):
                 {{ORDER_BY}} DESC) as row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
                 {{WHERE_CLAUSE}}
-                AND EXISTS(
-                    SELECT 1 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry} 
-                    WHERE {hstry}.bene_sk = usg.bene_sk
-                    AND {_bene_filter(hstry)}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = usg.bene_sk
                 )
                 {{ORDER_BY}}
             )
