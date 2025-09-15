@@ -4,6 +4,15 @@ on:
     - cron: '13 8 * * 1-5'  # Early morning continental US hours, Monday through Friday
   pull_request:
   merge_group:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Specific branch to target
+        required: false
+        default: ''
+  push:
+    branches:
+      - master
 
 permissions:
   id-token: write
@@ -32,6 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          ref: ${{ inputs.branch || github.ref_name }}
       - id: workflow_files
         name: Set output
         run: |
@@ -57,7 +67,7 @@ jobs:
   mvn-verify:
     runs-on: codebuild-bfd-non-prod-platform-large-${{ github.run_id }}-${{ github.run_attempt }}
     needs: workflow
-    if: needs.workflow.outputs.files
+    if: ${{ needs.workflow.outputs.files || (github.actor != 'actions-user' && github.ref_name == 'master') }}
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v4
@@ -98,26 +108,28 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
-          mvn --threads 1C \
+          mvn clean install \
+          --threads 1C \
           --no-transfer-progress \
-          -Dmaven.build.cache.enabled=false \
           -Dapidocgen.skip=false \
-          -Dmaven.jacoco.skip=false \
-          clean install
+          -Dmaven.build.cache.enabled=false \
+          -Dmaven.jacoco.skip=false
         working-directory: ./apps
 
       - name: 'Generate, Upload Build Reports'
+        if: ${{ github.event_type != 'merge_group' }}
         run: |
           mvn sonar:sonar \
-          -Dsonar.ci.autoconfig.disabled=true \
-          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-          -Dsonar.host.url="$SONAR_HOST_URL" \
-          -Dsonar.token="$SONAR_TOKEN" \
-          -Dmaven.build.cache.enabled=false \
           -DskipITs \
           -DskipTests \
+          --no-transfer-progress \
+          -Dmaven.build.cache.enabled=false \
+          -Dsonar.ci.autoconfig.disabled=true \
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml \
           -Dsonar.exclusions='*.java' \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml
+          -Dsonar.host.url="$SONAR_HOST_URL" \
+          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+          -Dsonar.token="$SONAR_TOKEN"
         working-directory: ./apps
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
