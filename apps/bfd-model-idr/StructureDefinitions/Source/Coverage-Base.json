@@ -404,6 +404,30 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "Coverage-Base.CNTRCT_PBP_SGMT_NUM",
+                "path": "Coverage-Base.CNTRCT_PBP_SGMT_NUM",
+                "label": "Contract PBP Segment Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Coverage-Base.BENE_ENRLMT_EMPLR_SBSDY_SW",
+                "path": "Coverage-Base.BENE_ENRLMT_EMPLR_SBSDY_SW",
+                "label": "Retiree Drug Subsidy Switch",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
