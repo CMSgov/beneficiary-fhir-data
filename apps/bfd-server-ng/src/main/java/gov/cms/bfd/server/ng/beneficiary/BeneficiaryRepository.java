@@ -1,18 +1,15 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.LoggerConstants;
+import gov.cms.bfd.server.ng.Logger;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /** Repository for querying beneficiary information. */
@@ -20,8 +17,6 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private EntityManager entityManager;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(LoggingInterceptor.class);
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -73,8 +68,9 @@ public class BeneficiaryRepository {
             .getResultList()
             .stream()
             .findFirst();
-
-    logBeneSkIfPresent(optionalBeneficiary);
+    if (optionalBeneficiary.isPresent()) {
+      Logger.logBeneSkIfPresent(optionalBeneficiary.get().getBeneSk());
+    }
     return optionalBeneficiary;
   }
 
@@ -138,18 +134,5 @@ public class BeneficiaryRepository {
         .stream()
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
-  }
-
-  private static void logBeneSkIfPresent(Optional<Beneficiary> beneficiaryCoverage) {
-    beneficiaryCoverage
-        .map(Beneficiary::getBeneSk)
-        .ifPresent(
-            beneSk -> {
-              LOGGER
-                  .atInfo()
-                  .setMessage(LoggerConstants.BENE_SK_REQUESTED)
-                  .addKeyValue("bene_sk", beneSk)
-                  .log();
-            });
   }
 }

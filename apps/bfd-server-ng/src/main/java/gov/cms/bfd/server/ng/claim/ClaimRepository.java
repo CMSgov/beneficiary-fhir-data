@@ -1,12 +1,10 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.LoggerConstants;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.Logger;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
@@ -14,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /** Repository methods for claims. */
@@ -23,8 +19,6 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class ClaimRepository {
   private EntityManager entityManager;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(LoggingInterceptor.class);
 
   /**
    * Search for a claim by its ID.
@@ -56,7 +50,7 @@ public class ClaimRepository {
             .findFirst();
 
     if (optionalClaim.isPresent()) {
-      logBeneSkIfPresent(optionalClaim.get());
+      Logger.logBeneSkIfPresent(optionalClaim.get().getBeneficiary().getBeneSk());
     }
     return optionalClaim;
   }
@@ -115,8 +109,8 @@ public class ClaimRepository {
             .setParameter("claimIds", claimIds)
             .getResultList();
 
-    if (claims.size() > 0) {
-      logBeneSkIfPresent(claims.getFirst());
+    if (!claims.isEmpty()) {
+      Logger.logBeneSkIfPresent(claims.getFirst().getBeneficiary().getBeneSk());
     }
     return claims;
   }
@@ -183,19 +177,5 @@ public class ClaimRepository {
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())
         .setParameter("sourceIds", sourceIds);
-  }
-
-  private static void logBeneSkIfPresent(Claim claim) {
-    Optional.ofNullable(claim)
-        .map(Claim::getBeneficiary)
-        .map(BeneficiarySimple::getBeneSk)
-        .ifPresent(
-            beneSk -> {
-              LOGGER
-                  .atInfo()
-                  .setMessage(LoggerConstants.BENE_SK_REQUESTED)
-                  .addKeyValue("bene_sk", beneSk)
-                  .log();
-            });
   }
 }
