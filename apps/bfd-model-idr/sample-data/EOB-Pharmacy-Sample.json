@@ -13,18 +13,19 @@
     "CLM_FROM_DT": "2024-01-15",
     "CLM_THRU_DT": "2024-01-15",
     "CLM_EFCTV_DT": "2024-01-15",
+    "CLM_IDR_LD_DT":"2025-01-18",
     "CLM_SRVC_PRVDR_GNRC_ID_NUM": "1942945159",
     "clm_srvc_prvdr_gnrc_id_type": "1",
     "CLM_PD_DT": "2024-01-20",
     "CLM_CMS_PROC_DT": "2024-01-18",
     "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": "1942945159",
-    "PRVDR_PRSCRBNG_PRVDR_LAST_NAME": "JOHNSON",
-    "PRVDR_PRSCRBNG_PRVDR_NPI_TYPE": "1",
+    "PRVDR_LAST_NAME": "JOHNSON",
     "CLM_SBMT_CHRG_AMT": "100.00",
     "CLM_SBMTR_CNTRCT_NUM": "H1234",
     "CLM_SBMTR_CNTRCT_PBP_NUM": "001",
     "CNTRCT_PBP_NAME": "Super Saver Medicare Rx Saver Plus (PDP)",
     "CLM_SBMT_FRMT_CD": "X",
+    "CLM_ADJSTMT_TYPE_CD": "0",
     "supportingInfoComponents": [
         {
             "ROW_NUM": 1,
@@ -73,6 +74,14 @@
         {
             "ROW_NUM": 12,
             "CLM_CTSTRPHC_CVRG_IND_CD": "C"
+        },
+        {
+            "ROW_NUM": 13,
+            "CLM_LINE_RX_NUM": "900001"
+        },
+        {
+            "ROW_NUM": 14,
+            "CLM_DSPNSNG_STUS_CD":"P"
         }
     ],
     "lineItemComponents": [

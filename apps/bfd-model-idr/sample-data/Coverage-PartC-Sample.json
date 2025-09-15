@@ -8,7 +8,9 @@
     "BENE_ENRLMT_END_DT":"9999-12-31",
     "currentDate":"2025-03-30",
     "BENE_CNTRCT_NUM":"H1234",
+    "BENE_PBP_NUM":"001",
     "BENE_CVRG_TYPE_CD":"3",
     "CNTRCT_PBP_NAME":"Sample Medicare Advantage Plan",
     "CNTRCT_PLAN_CNTCT_TEL_NUM":"1-800-555-1234"
+    
 }

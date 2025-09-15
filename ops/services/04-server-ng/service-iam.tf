@@ -110,10 +110,6 @@ resource "aws_iam_role_policy_attachment" "service_role" {
   policy_arn = each.value
 }
 
-data "aws_iam_policy" "ecs_execution_role" {
-  name = "AmazonECSTaskExecutionRolePolicy"
-}
-
 data "aws_iam_policy_document" "ecs_task_execution_role_assume" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -122,6 +118,59 @@ data "aws_iam_policy_document" "ecs_task_execution_role_assume" {
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
+}
+
+data "aws_iam_policy_document" "execution_ecr" {
+  statement {
+    sid = "AllowGetAuthTokenECR"
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+    # This particular action has no conditions or resource types that can constrain access.
+    # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonelasticcontainerregistry.html
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowPullFromECRRepos"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+    ]
+    resources = [
+      data.aws_ecr_repository.log_router.arn,
+      data.aws_ecr_repository.server.arn,
+      "arn:aws:ecr:us-east-1:593207742271:repository/aws-guardduty-agent-fargate",
+      "arn:aws:ecr:us-west-2:733349766148:repository/aws-guardduty-agent-fargate"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "execution_ecr" {
+  name        = "${local.name_prefix}-execution-ecr-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.service} Execution Role to pull images from ECR Repositories specified in the Task Definition"
+  policy      = data.aws_iam_policy_document.execution_ecr.json
+}
+
+data "aws_iam_policy_document" "execution_logs" {
+  statement {
+    sid     = "AllowLogStreamControl"
+    actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
+    resources = [
+      "${aws_cloudwatch_log_group.log_router_messages.arn}:*",
+      "${aws_cloudwatch_log_group.server_messages.arn}:*",
+      "${aws_cloudwatch_log_group.server_access.arn}:*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "execution_logs" {
+  name        = "${local.name_prefix}-execution-logs-policy"
+  path        = local.iam_path
+  description = "Grants permissions for the ${local.service} Execution Role to write to corresponding CloudWatch Log Groups and Log Streams"
+  policy      = data.aws_iam_policy_document.execution_logs.json
 }
 
 resource "aws_iam_role" "execution_role" {
@@ -133,7 +182,12 @@ resource "aws_iam_role" "execution_role" {
   force_detach_policies = true
 }
 
-resource "aws_iam_role_policy_attachment" "execution_role" {
+resource "aws_iam_role_policy_attachment" "execution" {
+  for_each = {
+    ecr  = aws_iam_policy.execution_ecr.arn
+    logs = aws_iam_policy.execution_logs.arn
+  }
+
   role       = aws_iam_role.execution_role.name
-  policy_arn = data.aws_iam_policy.ecs_execution_role.arn
+  policy_arn = each.value
 }

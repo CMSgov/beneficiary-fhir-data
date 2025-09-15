@@ -1,7 +1,7 @@
 CodeSystem: CLM_BILL_CLSFCTN_CD
-Title: "Clm Bill Clsfctn Cd"
+Title: "Claim Bill Classification Code"
 Id: CLM-BILL-CLSFCTN-CD
-Description: "Code system for clm bill clsfctn cd"
+Description: "The second digit of the type of bill (TOB2) is used to indicate with greater specificity where the service was provided (e.g., a department within a hospital). In FHIR, CMS concatenates the first and second digits."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD"
 * ^status = #active
 * ^content = #complete
