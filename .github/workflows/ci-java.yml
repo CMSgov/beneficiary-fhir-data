@@ -7,7 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: Specific branch to target
+        description: >-
+          branch: Override the branch targeted for this build.
+          Default to the selected _ref_ in the `Use workflow from` gui field or `ref` argument from the cli.
         required: false
         default: null
   push:
