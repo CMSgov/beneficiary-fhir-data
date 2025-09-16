@@ -499,7 +499,7 @@ group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organizati
     
     src -> tgt.id = "cms-org" "set org id";
     src -> tgt.active = true "set org as active";
-    src -> tgt.name = 'Centers for Medicare and Medicaid Services' "set org name";
+    src -> tgt.name = 'Centers for Medicare & Medicaid Services' "set org name";
     src -> tgt.contact = create('BackboneElement') as tgtContact then{
         src -> tgtContact.purpose = create('CodeableConcept') as purposeCC,
             purposeCC.coding = create('Coding') as tempCode,
