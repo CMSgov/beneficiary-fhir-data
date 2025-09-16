@@ -13,6 +13,7 @@ import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -73,21 +74,26 @@ public class EobHandler {
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
       return new Bundle();
     }
+
     var claims =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
 
-    var filteredClaims = filterClaimsExcludingSamhsa(claims, samhsaFilterMode);
+    var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
     return FhirUtil.bundleOrDefault(
         filteredClaims.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
   }
 
-  protected List<Claim> filterClaimsExcludingSamhsa(
-      List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+  protected List<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
     if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
       return claims;
     }
-    return claims.stream().filter(claim -> !claimHasSamhsa(claim)).toList();
+    // Ordering may have changed during filtering, ensure we re-order before returning the final
+    // result
+    return claims.stream()
+        .filter(claim -> !claimHasSamhsa(claim))
+        .sorted(Comparator.comparing(Claim::getClaimUniqueId))
+        .toList();
   }
 
   /**

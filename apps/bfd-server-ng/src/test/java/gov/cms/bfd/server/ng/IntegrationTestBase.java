@@ -50,6 +50,8 @@ public class IntegrationTestBase {
 
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
+  private static final String FHIR_JSON = "fhir+json";
+
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
   }
@@ -61,6 +63,10 @@ public class IntegrationTestBase {
   protected IGenericClient getFhirClient() {
     FhirContext ctx = FhirContext.forR4Cached();
     return ctx.newRestfulGenericClient(getServerUrl());
+  }
+
+  protected Expect expect() {
+    return expect.serializer(FHIR_JSON);
   }
 
   protected List<Patient> getPatientsFromBundle(Bundle patientBundle) {
