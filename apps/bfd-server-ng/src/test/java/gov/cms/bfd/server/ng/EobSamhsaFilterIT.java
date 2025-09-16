@@ -199,7 +199,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
       assertEquals(claimId.toString(), read.getIdPart());
     }
 
-    expect().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
+    expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
 
   private static Stream<Arguments> ensureDiagnosis() {

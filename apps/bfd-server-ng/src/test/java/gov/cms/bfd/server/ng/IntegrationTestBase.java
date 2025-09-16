@@ -65,7 +65,7 @@ public class IntegrationTestBase {
     return ctx.newRestfulGenericClient(getServerUrl());
   }
 
-  protected Expect expect() {
+  protected Expect expectFhir() {
     return expect.serializer(FHIR_JSON);
   }
 

@@ -23,7 +23,7 @@ public class PatientReadIT extends IntegrationTestBase {
   void patientReadValidLong() {
     var patient = patientRead().withId(Long.parseLong(BENE_ID_PART_A_ONLY)).execute();
     assertFalse(patient.isEmpty());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -31,7 +31,7 @@ public class PatientReadIT extends IntegrationTestBase {
     var patient = patientRead().withId(BENE_ID_PART_A_ONLY).execute();
     assertEquals(1, patient.getIdentifier().size());
     assertEquals(0, patient.getLink().size());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -51,7 +51,7 @@ public class PatientReadIT extends IntegrationTestBase {
         other.getDisplay(),
         String.format("Link display should be '%s'", CURRENT_MERGED_BENE_SK));
 
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -78,7 +78,7 @@ public class PatientReadIT extends IntegrationTestBase {
             .anyMatch(HISTORICAL_MERGED_BENE_SK::equals),
         String.format("Expected to find a link with display '%s'", HISTORICAL_MERGED_BENE_SK));
 
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -87,7 +87,7 @@ public class PatientReadIT extends IntegrationTestBase {
     assertFalse(patient.isEmpty());
     assertEquals(1, patient.getIdentifier().size());
     assertEquals(0, patient.getLink().size());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
