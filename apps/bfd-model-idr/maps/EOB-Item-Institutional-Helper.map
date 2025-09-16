@@ -33,7 +33,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_RDCD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReducedAmt(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_MSP1_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP1(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_MSP2_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP2(amt, tgtAdjudication) "Add amount";
-    src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCoinsuranceAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_MDCR_COINSRNC_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCoinsuranceAmt(amt, tgtAdjudication) "Add amount";
     src.CLM_BENE_PRMRY_PYR_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addBenePrmyAmt(amt, tgtAdjudication) "Add amount";
 
@@ -77,9 +77,10 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
         } "Add coding";
     } "Add location codeable concept";
     
-    src.CLM_LINE_FROM_DT as profFromDate where profFromDate>'2015-01-01' -> tgt.serviced = create('Period') as tgtPeriod then{
-        profFromDate -> tgtPeriod.start = profFromDate "add start";
-        src.CLM_LINE_THRU_DT as profThruDate -> tgtPeriod.end = profThruDate "add end";
+    //only pull in valid dates here.
+    src.CLM_LINE_FROM_DT as clmLineFromDt -> tgt.serviced = create('Period') as tgtPeriod then{
+        clmLineFromDt -> tgtPeriod.start = clmLineFromDt "add start";
+        src.CLM_LINE_THRU_DT as clmLineThruDt -> tgtPeriod.end = clmLineThruDt "add end";
     } "Add serviced period";
 
 
@@ -95,14 +96,15 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     //In claims data, CLM_LINE_DGNS_CD refers to the diagnosis that supports the given claim line
     //diagnosisRelatedLine is a computed value that is input "for FML purposes" to correspond to the sequence number
     //present on the diagnosis in EoB.diagnosis that corresponds to the value in CLM_LINE_DGNS_CD.
-    src.diagnosisRelatedLine as claimLineDiagnosis -> tgt.diagnosisSequence = claimLineDiagnosis "Add diagnosis sequence number";
+    src.diagnosisRelatedLine as claimLineDiagnosis -> tgt.diagnosisSequence = cast(claimLineDiagnosis,"positiveInt") "Add diagnosis sequence number";
 
 }
 
 group addSuplrTypeCd(source src: String, target tgt: Extension){
-    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SUPLR-TYPE-CD" "Add extension url";
+    //This is purposeful (use of PRVDR-TYPE-CD.) Suplr-type-cd is a subset of the overall set. We can combine the extensions + code systems.
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD" "Add extension url";
     src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SUPLR-TYPE-CD" "Set system";
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD" "Set system";
         inputCode -> tgtCoding.code = inputCode "set code";
       } "Set value";
 }

@@ -26,7 +26,7 @@ public class ClaimLineInstitutional {
   private LocalDate revenueCenterDate;
 
   @Embedded private ClaimLineHippsCode hippsCode;
-
+  @Embedded private ClaimLineInstitutionalExtensions extensions;
   @Embedded private AdjudicationChargeInstitutional adjudicationCharge;
 
   @Nullable

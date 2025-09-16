@@ -129,7 +129,7 @@ conceptmap "CLM_SRC_ID" {
   s:"20000" = t:"NationalClaimsHistory"
   s:"21000" = t:"FISS"
   s:"22000" = t:"MCS"
-  s:"23000" = t:"VIPS"
+  s:"23000" = t:"VMS"
   s:"24000" = t:"EDPS"
   s:"25000" = t:"EncounterMedicaidDuals"
 }

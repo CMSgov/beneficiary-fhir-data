@@ -1,5 +1,0 @@
-system,code,display
-"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD",0,BENEFICIARY INSURED DUE TO AGE (OASI)
-"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD",1,BENEFICIARY INSURED DUE TO DISABILITY
-"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD",2,BENEFICIARY INSURED DUE TO END STAGE RENAL DISEASE (ESRD)
-"https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD",3,BENEFICIARY INSURED DUE TO DISABILITY AND CURRENT ESRD

@@ -49,6 +49,11 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
       src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
     } "Set EOB period";
+
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt.extension = create('Extension') as tgtExtension then{
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
+      src -> tgtExtension.value = idrLdDt "add date";
+    } "add idr load date";
     
     src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
 
@@ -99,7 +104,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       } "Set reason";
     } "Add benefit payment status";
 
-    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as prvdrNPI where prvdrNPI != '0' and src.PRVDR_PRSCRBNG_PRVDR_NPI_TYPE = '1' -> tgt then addPrescriberPractitionerCareTeamMember(src,tgt) "Add prescriber practitioner";
+    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as prvdrNPI where prvdrNPI != '0' -> tgt then addPrescriberPractitionerCareTeamMember(src,tgt) "Add prescriber practitioner";
 
     // Insurance coverage
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
@@ -130,7 +135,13 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
      src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totChargeAmt, tgtMoney) "Add Money";
     } "Add total charge amount";
 
-    
+    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
+      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
+      src -> tgtExtension.value = create('Coding') as tgtCoding then{
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
+        tgtCoding.code = adjTypeCd "Add code";
+      } "Add coding";
+    } "CLM_ADJSTMT_TYPE_CD";
 
 
 }
@@ -177,7 +188,20 @@ group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt:
     
     // Catastrophic coverage
     src.CLM_CTSTRPHC_CVRG_IND_CD as catCov -> tgt then addCatastrophicCoverage(src, tgt) "Add catastrophic coverage";
+
+    src.CLM_LINE_RX_NUM as rxNumber -> tgt then addRxNum(src, tgt) "Add rx num";
+
+    src.CLM_DSPNSNG_STUS_CD as dispCd -> tgt then addDispCd(src, tgt) "Add dispensing status code";
+
     
+}
+
+group addRxNum(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_RX_NUM") "Add Coding";
+  } "Add category";
+  src.CLM_LINE_RX_NUM as rxNum -> tgt.value = rxNum "Add RX Num";
 }
 
 group addPharmacyServiceType(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -287,6 +311,16 @@ group addCatastrophicCoverage(source src: SupportingInfoComponent, target tgt: B
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_CTSTRPHC_CVRG_IND_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD", val) "Add coding";
     } "Add CC";
+}
+
+group addDispCd(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_DSPNSNG_STUS_CD") "Add Coding";
+  } "Add category";
+  src -> tgt.code = create('CodeableConcept') as tgtCC then{
+      src.CLM_DSPNSNG_STUS_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD", val) "Add coding";
+  } "Add CC";
 }
 
 group addRefillsAuthorized(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -399,7 +433,7 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
         vccnFeeAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(vccnFeeAmt, tgtMoney) "Add vaccination administration fee amount";
     } "Add Vaccination Administration Fee";
 }
-
+//Name 
 group addPrescriberPractitionerCareTeamMember(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
   src -> tgt.contained = create('Practitioner') as tgtPract then {
     src -> tgtPract.id = "careteam-prescriber-practitioner" "Set practitioner id";
@@ -413,7 +447,7 @@ group addPrescriberPractitionerCareTeamMember(source src: ExplanationOfBenefitPh
     src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
     } "Create NPI identifier";
     src as family_name -> tgtPract.name = create('HumanName') as tgtName then {
-      src -> tgtName.family = "LAST NAME FROM NPPES" "set family name";
+      src -> tgtName.family = "LAST NAME HERE" "set family name";
       src -> tgtName.use = "official" "set name use";
     } "add family name";
   } "Add prescriber practitioner";
@@ -465,7 +499,7 @@ group createPharmacyPractitioner(source src: ExplanationOfBenefitPharmacy, targe
   } "Create NPI identifier";
 
   src -> tgt.name = create('HumanName') as tgtName then {
-    src -> tgtName.family = "LAST NAME FROM NPPES" "set family name";
+    src -> tgtName.family = "LAST NAME HERE" "set family name";
     src -> tgtName.use = "official" "set name use";
   } "add family name";
 } 

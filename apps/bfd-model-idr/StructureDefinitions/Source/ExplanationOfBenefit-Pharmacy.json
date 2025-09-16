@@ -36,6 +36,7 @@
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_BENE_XREF_EFCTV_SK",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_BENE_XREF_EFCTV_SK",
                 "label": "Beneficiary Source Key",
+                "definition": "Beneficiary Source Key",
                 "min": 1,
                 "max": "1",
                 "type": [
@@ -223,23 +224,10 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_TYPE",
-                "path": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_TYPE",
-                "label": "Prescribing Provider NPI Type",
-                "definition": "The type of prescribing provider (1 for practitioner, 2 for organization).",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_PHRMCY_SRVC_TYPE_CD",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_PHRMCY_SRVC_TYPE_CD",
-                "label": "Pharmacy Service Type Code",
-                "definition": "The type of pharmacy used. This variable indicates the type of pharmacy that dispensed the prescription.",
+                "id": "ExplanationOfBenefit-Pharmacy.PRVDR_LAST_NAME",
+                "path": "ExplanationOfBenefit-Pharmacy.PRVDR_LAST_NAME",
+                "label": "Prescribing Provider Last Name",
+                "definition": "Last name of the prescribing provider",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -304,7 +292,7 @@
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_CMPND_CD",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_CMPND_CD",
                 "label": "Compound Code",
-                "definition": "This field indicates whether or not the dispensed drug was compounded or mixed.",
+                "description": "This field indicates whether or not the dispensed drug was compounded or mixed.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -550,6 +538,31 @@
                         "targetProfile": [
                             "https://bfd.cms.gov/fhir/StructureDefinition/LineItemComponent"
                         ]
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD",
+                "label": "Claim Adjustment Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
+                "label": "Claim IDR Load Date",
+                "definition": "Date the claim was loaded into the IDR",
+                "min": 1,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "date"
                     }
                 ]
             }

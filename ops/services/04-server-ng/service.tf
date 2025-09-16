@@ -37,13 +37,21 @@ module "data_strategies" {
   cluster_name = data.aws_ecs_cluster.main.cluster_name
 }
 
+data "aws_ecr_repository" "log_router" {
+  name = local.log_router_repository_name
+}
+
 data "aws_ecr_image" "log_router" {
-  repository_name = local.log_router_repository_name
+  repository_name = data.aws_ecr_repository.log_router.name
   image_tag       = local.log_router_version
 }
 
+data "aws_ecr_repository" "server" {
+  name = local.server_repository_name
+}
+
 data "aws_ecr_image" "server" {
-  repository_name = local.server_repository_name
+  repository_name = data.aws_ecr_repository.server.name
   image_tag       = local.server_version
 }
 

@@ -148,5 +148,6 @@ Sometimes a field may be condensed at the IDR level, and fanned into multiple di
 To generate the data dictionary:
 
 ```sh
+./compile-all-resources.sh
 uv run gen_dd.py
 ```
