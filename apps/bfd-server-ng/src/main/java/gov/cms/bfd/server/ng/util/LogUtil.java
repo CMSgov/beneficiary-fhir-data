@@ -4,6 +4,12 @@ import org.slf4j.LoggerFactory;
 
 /** Utility class used for logging. */
 public class LogUtil {
+
+  // Private constructor to prevent instantiation
+  private LogUtil() {
+    // Intentionally empty
+  }
+
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LogUtil.class);
 
   /**

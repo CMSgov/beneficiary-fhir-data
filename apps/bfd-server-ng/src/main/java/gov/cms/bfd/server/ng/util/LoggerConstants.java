@@ -3,6 +3,11 @@ package gov.cms.bfd.server.ng.util;
 /** Constants used for logging. */
 public class LoggerConstants {
 
+  // Private constructor to prevent instantiation
+  private LoggerConstants() {
+    // Intentionally empty
+  }
+
   /** Name of message for logging bene_sk. */
   public static final String BENE_SK_REQUESTED = "bene_sk Requested";
 
