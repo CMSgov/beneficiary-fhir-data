@@ -1008,40 +1008,32 @@ public final class RifLoader {
 
   /** Trim the LoadedFiles and LoadedBatches tables if necessary. */
   private void trimLoadedFiles() {
-    EntityManager em = appState.getEntityManagerFactory().createEntityManager();
-    EntityTransaction txn = null;
-    try {
-      txn = em.getTransaction();
-      txn.begin();
-      final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
+    try (TransactionManager transactionManager =
+         new TransactionManager(appState.getEntityManagerFactory())) {
 
-      em.clear(); // Must be done before JPQL statements
-      em.flush();
-      List<Long> oldIds =
-          em.createQuery(
-                  "select f.loadedFileId from LoadedFile f where created < :oldDate", Long.class)
-              .setParameter("oldDate", oldDate)
-              .getResultList();
+      transactionManager.executeFunction(entityManager -> {
+        final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
 
-      if (oldIds.size() > 0) {
-        LOGGER.info("Deleting old files: {}", oldIds.size());
-        em.createQuery("delete from LoadedBatch where loadedFileId in :ids")
-            .setParameter("ids", oldIds)
-            .executeUpdate();
-        em.createQuery("delete from LoadedFile where loadedFileId in :ids")
-            .setParameter("ids", oldIds)
-            .executeUpdate();
-        txn.commit();
-      } else {
-        txn.rollback();
-      }
-    } finally {
-      if (em != null && em.isOpen()) {
-        if (txn != null && txn.isActive()) {
-          txn.rollback();
+        entityManager.clear(); // Must be done before JPQL statements
+        entityManager.flush();
+
+        List<Long> oldIds = entityManager
+            .createQuery("select f.loadedFileId from LoadedFile f where created < :oldDate", Long.class)
+            .setParameter("oldDate", oldDate)
+            .getResultList();
+
+        if (oldIds.size() > 0) {
+          LOGGER.info("Deleting old files: {}", oldIds.size());
+          entityManager.createQuery("delete from LoadedBatch where loadedFileId in :ids")
+              .setParameter("ids", oldIds)
+              .executeUpdate();
+          entityManager.createQuery("delete from LoadedFile where loadedFileId in :ids")
+              .setParameter("ids", oldIds)
+              .executeUpdate();
         }
-        em.close();
-      }
+
+        return null; // void operation, etc
+      });
     }
   }
 
