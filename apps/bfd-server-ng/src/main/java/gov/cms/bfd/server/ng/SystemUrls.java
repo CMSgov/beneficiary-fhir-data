@@ -474,10 +474,10 @@ public class SystemUrls {
 
   // CMS
   /** URL. */
-  public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
+  public static final String CMS_ICD_9_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD9";
 
   /** URL. */
-  public static final String CMS_ICD_10 = "http://www.cms.gov/Medicare/Coding/ICD10";
+  public static final String CMS_ICD_10_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD10";
 
   /** URL. */
   public static final String CMS_MS_DRG =
@@ -542,10 +542,10 @@ public class SystemUrls {
       "http://terminology.hl7.org/NamingSystem/CCN";
 
   /** URL. */
-  public static final String ICD_9_CM = "http://hl7.org/fhir/sid/icd-9-cm";
+  public static final String ICD_9_CM_DIAGNOSIS = "http://hl7.org/fhir/sid/icd-9-cm";
 
   /** URL. */
-  public static final String ICD_10_CM = "http://hl7.org/fhir/sid/icd-10-cm";
+  public static final String ICD_10_CM_DIAGNOSIS = "http://hl7.org/fhir/sid/icd-10-cm";
 
   /** URL. */
   public static final String UNITS_OF_MEASURE = "http://unitsofmeasure.org";

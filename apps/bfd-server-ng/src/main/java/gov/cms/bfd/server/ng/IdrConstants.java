@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 
 /** Constants representing specific values found in the IDR database. */
 public class IdrConstants {
@@ -16,10 +15,6 @@ public class IdrConstants {
 
   /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
   public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
-
-  /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
-  public static final ZonedDateTime DEFAULT_ZONED_DATE =
-      (LocalDate.of(9999, 12, 31)).atStartOfDay(DateUtil.ZONE_ID_UTC);
 
   /** The code for partially adjudicated claims. */
   public static final String ADJUDICATION_STATUS_PARTIAL = "PartiallyAdjudicated";

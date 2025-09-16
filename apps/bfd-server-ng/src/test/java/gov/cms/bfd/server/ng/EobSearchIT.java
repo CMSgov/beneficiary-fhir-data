@@ -104,7 +104,6 @@ public class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchByDate() {
-
     var lastUpdated =
         entityManager
             .createQuery(
