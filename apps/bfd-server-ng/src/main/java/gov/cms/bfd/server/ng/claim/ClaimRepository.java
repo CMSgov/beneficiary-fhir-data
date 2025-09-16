@@ -1,10 +1,10 @@
 package gov.cms.bfd.server.ng.claim;
 
-import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.Logger;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
@@ -49,7 +49,8 @@ public class ClaimRepository {
             .stream()
             .findFirst();
 
-    optionalClaim.ifPresent(claim -> Logger.logBeneSkIfPresent(claim.getBeneficiary().getBeneSk()));
+    optionalClaim.ifPresent(
+        claim -> LogUtil.logBeneSkIfPresent(claim.getBeneficiary().getBeneSk()));
     return optionalClaim;
   }
 
@@ -109,7 +110,7 @@ public class ClaimRepository {
 
     claims.stream()
         .findFirst()
-        .ifPresent(claim -> Logger.logBeneSkIfPresent(claim.getBeneficiary().getBeneSk()));
+        .ifPresent(claim -> LogUtil.logBeneSkIfPresent(claim.getBeneficiary().getBeneSk()));
     return claims;
   }
 

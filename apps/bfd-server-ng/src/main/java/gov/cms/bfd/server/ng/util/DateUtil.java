@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.LocalDate;

@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.controller;
 
-import gov.cms.bfd.server.ng.LoggerConstants;
+import gov.cms.bfd.server.ng.util.LoggerConstants;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;

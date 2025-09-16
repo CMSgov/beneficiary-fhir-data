@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.util;
 
 /** Constants used for logging. */
 public class LoggerConstants {

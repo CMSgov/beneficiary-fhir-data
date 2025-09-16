@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.coverage;
 
-import gov.cms.bfd.server.ng.Logger;
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -52,7 +52,7 @@ public class CoverageRepository {
             .stream()
             .findFirst();
 
-    beneficiaryCoverage.ifPresent(coverage -> Logger.logBeneSkIfPresent(coverage.getBeneSk()));
+    beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSkIfPresent(coverage.getBeneSk()));
     return beneficiaryCoverage;
   }
 }

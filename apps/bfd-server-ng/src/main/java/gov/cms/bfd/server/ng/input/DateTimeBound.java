@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import java.time.ZonedDateTime;
 import java.util.Date;
 

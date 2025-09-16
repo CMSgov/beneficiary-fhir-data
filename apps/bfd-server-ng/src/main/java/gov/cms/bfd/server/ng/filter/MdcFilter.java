@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.filter;
 
-import gov.cms.bfd.server.ng.LoggerConstants;
+import gov.cms.bfd.server.ng.util.LoggerConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

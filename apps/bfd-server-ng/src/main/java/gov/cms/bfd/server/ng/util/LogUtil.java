@@ -1,10 +1,10 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.util;
 
 import org.slf4j.LoggerFactory;
 
-/** Class used for logging. */
-public class Logger {
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Logger.class);
+/** Utility class used for logging. */
+public class LogUtil {
+  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LogUtil.class);
 
   /**
    * For logging bene_sk.
