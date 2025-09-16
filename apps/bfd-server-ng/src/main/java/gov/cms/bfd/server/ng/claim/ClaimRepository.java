@@ -49,8 +49,7 @@ public class ClaimRepository {
             .stream()
             .findFirst();
 
-    optionalClaim.ifPresent(
-        claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return optionalClaim;
   }
 

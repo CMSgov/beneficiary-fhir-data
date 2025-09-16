@@ -69,8 +69,7 @@ public class BeneficiaryRepository {
             .stream()
             .findFirst();
 
-    optionalBeneficiary.ifPresent(
-        beneficiary -> LogUtil.logBeneSk(beneficiary.getBeneSk()));
+    optionalBeneficiary.ifPresent(beneficiary -> LogUtil.logBeneSk(beneficiary.getBeneSk()));
     return optionalBeneficiary;
   }
 
