@@ -70,7 +70,7 @@ public class BeneficiaryRepository {
             .findFirst();
 
     optionalBeneficiary.ifPresent(
-        beneficiary -> LogUtil.logBeneSkIfPresent(beneficiary.getBeneSk()));
+        beneficiary -> LogUtil.logBeneSk(beneficiary.getBeneSk()));
     return optionalBeneficiary;
   }
 

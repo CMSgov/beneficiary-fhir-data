@@ -11,7 +11,7 @@ public class LogUtil {
    *
    * @param beneSk the bene_sk
    */
-  public static void logBeneSkIfPresent(Long beneSk) {
+  public static void logBeneSk(Long beneSk) {
     LOGGER
         .atInfo()
         .setMessage(LoggerConstants.BENE_SK_REQUESTED)

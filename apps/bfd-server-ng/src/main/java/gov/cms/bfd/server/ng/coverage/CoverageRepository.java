@@ -52,7 +52,7 @@ public class CoverageRepository {
             .stream()
             .findFirst();
 
-    beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSkIfPresent(coverage.getBeneSk()));
+    beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSk(coverage.getBeneSk()));
     return beneficiaryCoverage;
   }
 }
