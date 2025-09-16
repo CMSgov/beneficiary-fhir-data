@@ -27,8 +27,9 @@ group createC4DICBundle(source src: OperationC4DIC, target bundle: C4DICBundle){
     
     //Create C4DIC Patient resource from beneficiary
 
-    //Any time that urn:uuid is used, generate a uuid. FHIR Mapping language nominally supports a uuid function, but it's not implemented with the validator yet.
-    //For the hardcoded ones here, I've generated them as uuid5's with the DNS namespace. 
+    // Any time that urn:uuid is used, generate a uuid. FHIR Mapping language nominally supports a uuid function, but it's not implemented with the validator yet.
+    // For the hardcoded ones here, I've generated them as uuid5's with the DNS namespace. do not hardcode these exact urns. Generate them 
+    // See https://hl7.org/fhir/R4/bundle.html#bundle-unique for understanding how bundles are resolved.
     src.beneficiary as beneficiary -> bundle.entry = create('BackboneElement') as patientEntry then{
         //see above note on UUIds.
         //beneficiary.BENE_SK as bene_sk -> patientEntry.fullUrl = append("urn:uuid", bene_sk) "Set Patient fullUrl";
@@ -123,11 +124,7 @@ group createC4DICCoveragePartA(source src: CoverageBase, target tgt: C4DICCovera
         tgtReference.reference = beneSk "Set bene_sk";
         //tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
     
-    src -> tgt.relationship = create('CodeableConcept') as relationshipCode,
-        relationshipCode.coding = create('Coding') as tempCode,
-        tempCode.system = "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
-        tempCode.code = "self",
-        tempCode.display = "self" "set code";
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
     
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
         tgtSubscriberRef.reference = beneSk "Set subscriber reference";
@@ -151,21 +148,10 @@ group createC4DICCoveragePartA(source src: CoverageBase, target tgt: C4DICCovera
     } "create and set payor reference";
     
     //Part A Type
-    src -> tgt.type = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "https://nahdo.org/sopt", 
-            tgtCoding.code = "1",
-            tgtCoding.display = "MEDICARE" "Add SOPT coding";
-        } "Add coding 1";
-    } "Add Type";
+    src -> tgt.type = cc("https://nahdo.org/sopt","1") "Add type";
     
     src -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "plan" "Add plan coding";
-            } "Add coding 2";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
         src -> tgtBBElement.value = "Part A" "Add value";
     } "Add Class";
     
@@ -226,11 +212,7 @@ group createC4DICCoveragePartB(source src: CoverageBase, target tgt: C4DICCovera
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
         tgtReference.reference = beneSk "Set bene_sk";
     
-    src -> tgt.relationship = create('CodeableConcept') as relationshipCode,
-        relationshipCode.coding = create('Coding') as tempCode,
-        tempCode.system = "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
-        tempCode.code = "self",
-        tempCode.display = "self" "set code";
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
     
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
         tgtSubscriberRef.reference = beneSk "Set subscriber reference";
@@ -242,21 +224,10 @@ group createC4DICCoveragePartB(source src: CoverageBase, target tgt: C4DICCovera
     } "create and set payor reference";
     
     //Part B Type
-    src -> tgt.type = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "https://nahdo.org/sopt", 
-            tgtCoding.code = "121",
-            tgtCoding.display = "MEDICARE FFS" "Add SOPT coding";
-        } "Add coding 1";
-    } "Add Type";
+    src -> tgt.type = cc("https://nahdo.org/sopt","121") "Add type";
     
     src -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "plan" "Add plan coding";
-            } "Add coding 2";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
         src -> tgtBBElement.value = "Part B" "Add value";
     } "Add Class";
     
@@ -305,11 +276,7 @@ group createC4DICCoveragePartC(source src: CoverageBase, target tgt: C4DICCovera
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
         tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
     
-    src -> tgt.relationship = create('CodeableConcept') as relationshipCode,
-        relationshipCode.coding = create('Coding') as tempCode,
-        tempCode.system = "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
-        tempCode.code = "self",
-        tempCode.display = "self" "set code";
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
     
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
         tgtSubscriberRef.reference = append("Patient/",beneSk) "Set subscriber reference";
@@ -333,21 +300,10 @@ group createC4DICCoveragePartC(source src: CoverageBase, target tgt: C4DICCovera
     } "create and set payor reference";
     
     //Part C Type
-    src -> tgt.type = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "https://nahdo.org/sopt", 
-            tgtCoding.code = "11",
-            tgtCoding.display = "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)" "Add SOPT coding";
-        } "Add coding 1";
-    } "Add Type";
+    src -> tgt.type = cc("https://nahdo.org/sopt","11") "Add type";
     
     src -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "plan" "Add plan coding";
-            } "Add coding 2";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
         src -> tgtBBElement.value = "Part C" "Add value";
     } "Add Class";
     
@@ -378,11 +334,7 @@ group createC4DICCoveragePartD(source src: CoverageBase, target tgt: C4DICCovera
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
         tgtReference.reference = beneSk "Set bene_sk";
     
-    src -> tgt.relationship = create('CodeableConcept') as relationshipCode,
-        relationshipCode.coding = create('Coding') as tempCode,
-        tempCode.system = "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
-        tempCode.code = "self",
-        tempCode.display = "self" "set code";
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
     
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
         tgtSubscriberRef.reference = beneSk "Set subscriber reference";
@@ -406,63 +358,32 @@ group createC4DICCoveragePartD(source src: CoverageBase, target tgt: C4DICCovera
     } "create and set payor reference";
     
     //Part D Type
-    src -> tgt.type = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "https://nahdo.org/sopt", 
-            tgtCoding.code = "122",
-            tgtCoding.display = "Medicare Drug Benefit" "Add SOPT coding";
-        } "Add coding 1";
-    } "Add Type";
+    src -> tgt.type = cc("https://nahdo.org/sopt","122") "Add type";
     
     //Plan class
     src -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "plan" "Add plan coding";
-            } "Add coding 2";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
         src -> tgtBBElement.value = "Part D" "Add value";
     } "Add Class";
     
     //RX elements for Part D
     src.BENE_PDP_ENRLMT_MMBR_ID_NUM as pdpEnrlmtMbrIdNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "rxid" "Add rxid coding";
-            } "Add coding";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxid") "Add type";
         src -> tgtBBElement.value = pdpEnrlmtMbrIdNum "Add member ID value";
     } "Add Member ID class";
     
     src.BENE_PDP_ENRLMT_GRP_NUM as pdpEnrlmtGrpNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "rxgroup" "Add rxgroup coding";
-            } "Add coding";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxgroup") "Add type";
         src -> tgtBBElement.value = pdpEnrlmtGrpNum "Add group number value";
     } "Add Group Number class";
     
     src.BENE_PDP_ENRLMT_PRCSR_NUM as pdpEnrlmtPrcsrNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "rxpcn" "Add rxpcn coding";
-            } "Add coding";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxpcn") "Add type";
         src -> tgtBBElement.value = pdpEnrlmtPrcsrNum "Add processor number value";
     } "Add Processor Number class";
     
     src.BENE_PDP_ENRLMT_BANK_ID_NUM as pdpEnrlmtBankIdNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "rxbin" "Add rxbin coding";
-            } "Add coding";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxbin") "Add type";
         src -> tgtBBElement.value = pdpEnrlmtBankIdNum "Add bank ID value";
     } "Add Bank ID class";
     
@@ -492,13 +413,9 @@ group createC4DICCoverageDual(source src: CoverageBase, target tgt: C4DICCoverag
     
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
         tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
-    
-    src -> tgt.relationship = create('CodeableConcept') as relationshipCode,
-        relationshipCode.coding = create('Coding') as tempCode,
-        tempCode.system = "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
-        tempCode.code = "self",
-        tempCode.display = "self" "set code";
-    
+
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
+
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
         tgtSubscriberRef.reference = append("Patient/",beneSk) "Set subscriber reference";
     
@@ -521,21 +438,10 @@ group createC4DICCoverageDual(source src: CoverageBase, target tgt: C4DICCoverag
     } "create and set payor reference";
     
     //Dual Type
-    src -> tgt.type = create('CodeableConcept') as tgtCC then{
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "https://nahdo.org/sopt", 
-            tgtCoding.code = "14",
-            tgtCoding.display = "Dual Eligibility Medicare/Medicaid Organization" "Add SOPT coding";
-        } "Add coding 1";
-    } "Add Type";
-    
+    src -> tgt.type = cc("https://nahdo.org/sopt","14") "Add type";
+
     src -> tgt.class = create('BackboneElement') as tgtBBElement then{
-        src -> tgtBBElement.type = create('CodeableConcept') as tgtCC then{
-            src -> tgtCC.coding = create('Coding') as tgtCoding then {
-                src -> tgtCoding.system = "http://terminology.hl7.org/CodeSystem/coverage-class", 
-                tgtCoding.code = "plan" "Add plan coding";
-            } "Add coding 2";
-        } "Add Type";
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
         src -> tgtBBElement.value = "Dual Medicare/Medicaid" "Add value";
     } "Add Class";
     
@@ -600,6 +506,7 @@ group createC4DICOrganizationInsurer(source src: CoverageBase, target tgt: C4DIC
     src.coveragePart as part -> tgt.id = append("insurer-org-part-",part) "identify specific org id";
     src -> tgt.active = true "set org as active";
     src.CNTRCT_PBP_NAME as orgName -> tgt.name = orgName "set org name";
+    //This is commented out pending investigation into V2_MDCR_CNTRCT_PBP_CNTCT for viability of the phone numbers.
     /*
     src -> tgt.contact = create('BackboneElement') as tgtContact then{
         src -> tgtContact.purpose = create('CodeableConcept') as purposeCC,
@@ -607,8 +514,6 @@ group createC4DICOrganizationInsurer(source src: CoverageBase, target tgt: C4DIC
             tempCode.system="http://terminology.hl7.org/CodeSystem/contactentity-type",
             tempCode.code="PATINF",
             tempCode.display="Patient" "set target contact purpose";
-
-        //check V2_MDCR_CNTRCT_PBP_CNTCT for potential phone numbers here. 
         
         src.CNTRCT_PLAN_CNTCT_TEL_NUM as phoneNum -> tgtContact.telecom = create('ContactPoint') as tgtTele,
             tgtTele.system="phone",

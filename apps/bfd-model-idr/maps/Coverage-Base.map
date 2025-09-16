@@ -2,7 +2,7 @@
 //Must appear in order map -> conceptmap -> uses -> imports -> groups
 map "https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base" = "BFD-Coverage-Base-Map"
 
-uses "https://bfd.cms.gov/fhir/StructureDefinition/Coverage-Base" alias CoverageBase as source
+uses "http://hl7.org/fhir/StructureDefinition/Coverage-Base" alias CoverageBase as source
 //hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
 
 //The first specified target is what the default output will output as the ResourceType
