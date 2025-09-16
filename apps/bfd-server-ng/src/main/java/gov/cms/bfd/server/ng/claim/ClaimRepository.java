@@ -49,9 +49,7 @@ public class ClaimRepository {
             .stream()
             .findFirst();
 
-    if (optionalClaim.isPresent()) {
-      Logger.logBeneSkIfPresent(optionalClaim.get().getBeneficiary().getBeneSk());
-    }
+    optionalClaim.ifPresent(claim -> Logger.logBeneSkIfPresent(claim.getBeneficiary().getBeneSk()));
     return optionalClaim;
   }
 
@@ -109,9 +107,9 @@ public class ClaimRepository {
             .setParameter("claimIds", claimIds)
             .getResultList();
 
-    if (!claims.isEmpty()) {
-      Logger.logBeneSkIfPresent(claims.getFirst().getBeneficiary().getBeneSk());
-    }
+    claims.stream()
+        .findFirst()
+        .ifPresent(claim -> Logger.logBeneSkIfPresent(claim.getBeneficiary().getBeneSk()));
     return claims;
   }
 
