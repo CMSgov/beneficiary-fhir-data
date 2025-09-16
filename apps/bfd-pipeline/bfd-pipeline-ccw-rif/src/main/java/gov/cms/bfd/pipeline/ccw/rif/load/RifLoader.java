@@ -26,7 +26,6 @@ import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
@@ -1009,31 +1008,37 @@ public final class RifLoader {
   /** Trim the LoadedFiles and LoadedBatches tables if necessary. */
   private void trimLoadedFiles() {
     try (TransactionManager transactionManager =
-         new TransactionManager(appState.getEntityManagerFactory())) {
+        new TransactionManager(appState.getEntityManagerFactory())) {
 
-      transactionManager.executeFunction(entityManager -> {
-        final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
+      transactionManager.executeFunction(
+          entityManager -> {
+            final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
 
-        entityManager.clear(); // Must be done before JPQL statements
-        entityManager.flush();
+            entityManager.clear(); // Must be done before JPQL statements
+            entityManager.flush();
 
-        List<Long> oldIds = entityManager
-            .createQuery("select f.loadedFileId from LoadedFile f where created < :oldDate", Long.class)
-            .setParameter("oldDate", oldDate)
-            .getResultList();
+            List<Long> oldIds =
+                entityManager
+                    .createQuery(
+                        "select f.loadedFileId from LoadedFile f where created < :oldDate",
+                        Long.class)
+                    .setParameter("oldDate", oldDate)
+                    .getResultList();
 
-        if (oldIds.size() > 0) {
-          LOGGER.info("Deleting old files: {}", oldIds.size());
-          entityManager.createQuery("delete from LoadedBatch where loadedFileId in :ids")
-              .setParameter("ids", oldIds)
-              .executeUpdate();
-          entityManager.createQuery("delete from LoadedFile where loadedFileId in :ids")
-              .setParameter("ids", oldIds)
-              .executeUpdate();
-        }
+            if (oldIds.size() > 0) {
+              LOGGER.info("Deleting old files: {}", oldIds.size());
+              entityManager
+                  .createQuery("delete from LoadedBatch where loadedFileId in :ids")
+                  .setParameter("ids", oldIds)
+                  .executeUpdate();
+              entityManager
+                  .createQuery("delete from LoadedFile where loadedFileId in :ids")
+                  .setParameter("ids", oldIds)
+                  .executeUpdate();
+            }
 
-        return null; // void operation, etc
-      });
+            return null; // void operation, etc
+          });
     }
   }
 
