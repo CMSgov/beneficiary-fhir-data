@@ -132,12 +132,12 @@ jobs:
           -DskipTests \
           --no-transfer-progress \
           -Dmaven.build.cache.enabled=false \
-          -Dsonar.branch.name="$BFD_BRANCH" \
-          -Dsonar.ci.autoconfig.disabled=true \
+          ${{ (github.event_type == 'scheduled' || github.event_type == 'workflow_dispatch') && '-Dsonar.branch.name="$BFD_BRANCH"' || '' }} -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml \
           -Dsonar.exclusions='*.java' \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+          -Dsonar.scm.revision=${{ github.sha }} \
           -Dsonar.token="$SONAR_TOKEN"
         working-directory: ./apps
 
