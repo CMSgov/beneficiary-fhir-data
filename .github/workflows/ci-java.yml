@@ -135,7 +135,7 @@ jobs:
           -Dsonar.exclusions='*.java' \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-          -Dsonar.projectVersion="$(git log -1 --format=%H) \
+          -Dsonar.projectVersion="$(git log -1 --format=%H)" \
           -Dsonar.token="$SONAR_TOKEN"
         working-directory: ./apps
 
