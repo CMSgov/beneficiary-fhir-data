@@ -124,13 +124,15 @@ jobs:
 
       - name: 'Generate, Upload Build Reports'
         if: ${{ github.event_type != 'merge_group' }}
+        env:
+          BFD_BRANCH: ${{ inputs.branch }}
         run: |
           mvn sonar:sonar \
           -DskipITs \
           -DskipTests \
           --no-transfer-progress \
           -Dmaven.build.cache.enabled=false \
-          ${{ inputs.branch != null && '-Dsonar.branch.name=${{ inputs.branch }}' || null }} -Dsonar.ci.autoconfig.disabled=true \
+          ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml \
           -Dsonar.exclusions='*.java' \
           -Dsonar.host.url="$SONAR_HOST_URL" \
