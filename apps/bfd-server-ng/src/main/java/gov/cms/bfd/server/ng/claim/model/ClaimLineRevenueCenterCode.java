@@ -8,9 +8,13 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-/** Revenue centers. */
+/**
+ * Revenue centers. Suppress SonarQube warning that constant names should comply with naming
+ * conventions
+ */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum ClaimLineRevenueCenterCode {
   /** 0001 - TOTAL CHARGE. */
   _0001("0001", "TOTAL CHARGE"),

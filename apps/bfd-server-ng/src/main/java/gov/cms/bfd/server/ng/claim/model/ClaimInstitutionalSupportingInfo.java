@@ -24,6 +24,12 @@ class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_mdcr_instnl_mco_pd_sw")
   private Optional<McoPaidSwitch> mcoPaidSwitch;
 
+  @Column(name = "clm_hha_lup_ind_cd")
+  private Optional<HhaLupaIndicatorCode> hhaLupaIndicatorCode;
+
+  @Column(name = "clm_hha_rfrl_cd")
+  private Optional<HhaReferralCode> hhaReferralCode;
+
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
@@ -33,7 +39,9 @@ class ClaimInstitutionalSupportingInfo {
             patientStatusCode.map(c -> c.toFhir(supportingInfoFactory)),
             Optional.of(claimAdmissionTypeCode.toFhir(supportingInfoFactory)),
             mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
-            diagnosisDrgCode.toFhir(supportingInfoFactory))
+            diagnosisDrgCode.toFhir(supportingInfoFactory),
+            hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
+            hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }

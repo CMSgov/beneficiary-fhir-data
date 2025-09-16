@@ -1,7 +1,7 @@
 CodeSystem: CLM_BILL_FAC_TYPE_CD
-Title: "Clm Bill Fac Type Cd"
+Title: "Claim Bill Facility Type Code"
 Id: CLM-BILL-FAC-TYPE-CD
-Description: "Code system for clm bill fac type cd"
+Description: "The first digit of the type of bill (TOB1) is used to identify the type of facility that provided care to the beneficiary (e.g., hospital or SNF)."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD"
 * ^status = #active
 * ^content = #complete

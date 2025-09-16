@@ -1,11 +1,12 @@
 import json
 import re
 import html
+import argparse
 
 
 def gen_enum(fsh_output_file: str, int_codes=False):
     with open(
-        f"../../bfd-model/bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}",
+        f"../../bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}.json",
         "r",
     ) as f:
         content = f.read()
@@ -36,12 +37,11 @@ def get_enum_val(concept, int_codes):
 
 
 if __name__ == "__main__":
-    gen_enum("CodeSystem-CLM-REV-CNTR-CD.json")
-    gen_enum("CodeSystem-CLM-DDCTBL-COINSRNC-CD.json")
-    gen_enum("CodeSystem-Benefit-Balance.json")
-    gen_enum("CodeSystem-CLM-TYPE-CD.json", int_codes=True)
-    gen_enum("CodeSystem-Benefit-Balance.json")
-    gen_enum("CodeSystem-Supporting-Information.json")
-    gen_enum("CodeSystem-CLM-ADMSN-SRC-CD.json")
-    gen_enum("CodeSystem-BENE-PTNT-STUS-CD.json")
-    gen_enum("CodeSystem-CLM-ADMSN-TYPE-CD.json")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="The JSON file name")
+    parser.add_argument(
+    "--int-codes", action="store_true", help="Use int codes instead of string codes"
+    )
+    args = parser.parse_args()
+
+    gen_enum(args.file, args.int_codes)

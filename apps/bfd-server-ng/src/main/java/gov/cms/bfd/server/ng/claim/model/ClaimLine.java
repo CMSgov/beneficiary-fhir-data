@@ -8,12 +8,14 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.PositiveIntType;
 
 /** Claim line info. */
 @Embeddable
@@ -33,14 +35,14 @@ public class ClaimLine {
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhir(
-      Optional<ClaimLineInstitutional> claimLineInstitutional) {
+  Optional<ExplanationOfBenefit.ItemComponent> toFhir(ClaimItem claimItem) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(claimLineNumber.get());
 
+    var claimLineInstitutional = claimItem.getClaimLineInstitutional();
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     claimLineInstitutional
@@ -73,6 +75,13 @@ public class ClaimLine {
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
+
+    line.setDiagnosisSequence(
+        List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
+
+    claimLineInstitutional
+        .map(ClaimLineInstitutional::getExtensions)
+        .ifPresent(e -> line.setExtension(e.toFhir()));
 
     return Optional.of(line);
   }
