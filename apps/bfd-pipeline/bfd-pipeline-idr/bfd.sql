@@ -491,7 +491,7 @@ SELECT DISTINCT
 FROM idr.beneficiary bene
 LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
     ON bene.bene_mbi_id = bene_mbi.bene_mbi_id
-    where bene.idr_ltst_trans_flg = 'Y';
+    WHERE bene.idr_ltst_trans_flg = 'Y';
 
 CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
     RETURNS VOID AS $$
