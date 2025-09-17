@@ -66,7 +66,6 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   // Code: F10.10 System: icd-9-cm [clm_dgns_cd]
   private static final String ICD9_DIAGNOSIS = "291";
-
   private static final String ICD9_DIAGNOSIS2 = "V65.42";
 
   // Code: HZ2ZZZZ System: ICD9 [clm_prcdr_cd]
@@ -75,6 +74,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   // Code: H0005 System: HCPCS [clm_line_hcpcs_cd]
   private static final String HCPCS = "H0005";
+  private static final String HCPCS2 = "H0050";
 
   // Code: 896 System: DRG [dgns_drg_cd]
   private static final String DRG = "896";
@@ -256,7 +256,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> ensureHcpcs() {
     return Stream.of(
         Arguments.of(claimUniqueIdForHcpcs, HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(claimUniqueIdForCpt, CPT, SystemUrls.AMA_CPT));
+        Arguments.of(claimUniqueIdForCpt, CPT, SystemUrls.AMA_CPT),
+        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, HCPCS2, SystemUrls.CMS_HCPCS));
   }
 
   @MethodSource
