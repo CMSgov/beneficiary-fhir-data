@@ -49,6 +49,7 @@ CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_mbi_efctv_dt DATE NOT NULL,
     bene_mbi_obslt_dt DATE NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
@@ -491,7 +492,7 @@ SELECT DISTINCT
 FROM idr.beneficiary bene
 LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
     ON bene.bene_mbi_id = bene_mbi.bene_mbi_id
-    WHERE bene.idr_ltst_trans_flg = 'Y';
+    WHERE bene_mbi.idr_ltst_trans_flg = 'Y';
 
 CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
     RETURNS VOID AS $$

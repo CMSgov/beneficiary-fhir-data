@@ -29,7 +29,7 @@ public class PatientReadIT extends IntegrationTestBase {
   @Test
   void patientReadValidString() {
     var patient = patientRead().withId(BENE_ID_PART_A_ONLY).execute();
-    assertEquals(1, patient.getIdentifier().size());
+    assertEquals(0, patient.getIdentifier().size());
     assertEquals(0, patient.getLink().size());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }
@@ -85,7 +85,7 @@ public class PatientReadIT extends IntegrationTestBase {
   void patientReadUnMergedWithHistoricKillCredit() {
     var patient = patientRead().withId(HISTORICAL_MERGED_BENE_SK_KILL_CREDIT).execute();
     assertFalse(patient.isEmpty());
-    assertEquals(1, patient.getIdentifier().size());
+    assertEquals(0, patient.getIdentifier().size());
     assertEquals(0, patient.getLink().size());
     expect.serializer("fhir+json").toMatchSnapshot(patient);
   }

@@ -96,7 +96,7 @@ public class PatientSearchIT extends IntegrationTestBase {
     var patient = patients.getFirst();
 
     assertEquals(0, patient.getLink().size());
-    assertEquals(1, patient.getIdentifier().size());
+    assertEquals(0, patient.getIdentifier().size());
 
     expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
   }
