@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.FhirUtil;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;

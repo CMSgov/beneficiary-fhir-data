@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
 import java.util.Optional;
 import lombok.Getter;

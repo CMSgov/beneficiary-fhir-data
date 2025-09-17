@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;

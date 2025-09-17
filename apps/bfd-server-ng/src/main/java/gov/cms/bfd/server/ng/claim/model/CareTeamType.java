@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SequenceGenerator;
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;

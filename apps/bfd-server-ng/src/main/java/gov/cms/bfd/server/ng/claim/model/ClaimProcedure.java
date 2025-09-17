@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
+import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;

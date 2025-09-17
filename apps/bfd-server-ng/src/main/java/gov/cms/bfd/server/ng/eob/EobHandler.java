@@ -1,9 +1,7 @@
 package gov.cms.bfd.server.ng.eob;
 
-import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
-import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
@@ -13,6 +11,8 @@ import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;

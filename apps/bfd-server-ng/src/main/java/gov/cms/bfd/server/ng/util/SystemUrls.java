@@ -1,7 +1,13 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.util;
 
 /** URLs used for FHIR systems. */
 public class SystemUrls {
+
+  // Private constructor to prevent instantiation
+  private SystemUrls() {
+    // Intentionally empty
+  }
+
   // Profiles
 
   /**
