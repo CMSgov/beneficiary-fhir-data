@@ -151,8 +151,10 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
             data_extractor,
             connection_string,
         )
+        logger.info("refreshing overshare data")
         if data_loaded:
             bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
+        logger.info("overshare data refreshed")
 
         load_all(
             data_extractor,
