@@ -107,7 +107,7 @@ public class SecurityLabel {
    * @return a map where each key is a "system" value, and the value is a list of entries (maps)
    *     associated with that system
    */
-  public static Map<String, List<SecurityLabel>> securityLabelsMap() {
+  public static Map<String, List<SecurityLabel>> getSecurityLabels() {
     var inputStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("security_labels.yml");
 

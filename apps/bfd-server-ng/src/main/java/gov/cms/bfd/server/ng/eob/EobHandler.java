@@ -38,7 +38,7 @@ public class EobHandler {
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS_MAP =
-      SecurityLabel.securityLabelsMap();
+      SecurityLabel.getSecurityLabels();
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -83,19 +83,18 @@ public class EobHandler {
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
     return FhirUtil.bundleOrDefault(
-        filteredClaims.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+        filteredClaims.map(Claim::toFhir), claimRepository::claimLastUpdated);
   }
 
-  protected List<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+  private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
     if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
-      return claims;
+      return claims.stream();
     }
     // Ordering may have changed during filtering, ensure we re-order before returning the final
     // result
     return claims.stream()
         .filter(claim -> !claimHasSamhsa(claim))
-        .sorted(Comparator.comparing(Claim::getClaimUniqueId))
-        .toList();
+        .sorted(Comparator.comparing(Claim::getClaimUniqueId));
   }
 
   /**
@@ -133,11 +132,8 @@ public class EobHandler {
     return Optional.of(claim.toFhir());
   }
 
-  private boolean compare(String target, LocalDate claimDate, SecurityLabel entry) {
-    if (!isClaimDateWithinBounds(claimDate, entry)) {
-      return false;
-    }
-    return entry.matches(target);
+  private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {
+    return isClaimDateWithinBounds(claimDate, entry) && entry.matches(targetCode);
   }
 
   // Returns true if the given claim contains any procedure that matches a SAMHSA
@@ -159,14 +155,14 @@ public class EobHandler {
   private boolean drgCodeIsSamhsa(Claim claim, LocalDate claimDate) {
     var entries = SECURITY_LABELS_MAP.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
-    return entries.stream().anyMatch(e -> compare(drg, claimDate, e));
+    return entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
   }
 
   private boolean hcpcsCodeMatches(ClaimLine claimLine, LocalDate claimDate) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
     return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
         .flatMap(s -> SECURITY_LABELS_MAP.get(s).stream())
-        .anyMatch(c -> compare(hcpcs, claimDate, c));
+        .anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
   }
 
   // Checks ICDs.
@@ -181,9 +177,11 @@ public class EobHandler {
     var diagnosisEntries = SECURITY_LABELS_MAP.get(icdIndicator.getDiagnosisSystem());
 
     var procedureHasSamhsa =
-        procedureEntries.stream().anyMatch(pEntries -> compare(procedureCode, claimDate, pEntries));
+        procedureEntries.stream()
+            .anyMatch(pEntries -> isCodeSamhsa(procedureCode, claimDate, pEntries));
     var diagnosisHasSamhsa =
-        diagnosisEntries.stream().anyMatch(dEntry -> compare(diagnosisCode, claimDate, dEntry));
+        diagnosisEntries.stream()
+            .anyMatch(dEntry -> isCodeSamhsa(diagnosisCode, claimDate, dEntry));
 
     return procedureHasSamhsa || diagnosisHasSamhsa;
   }

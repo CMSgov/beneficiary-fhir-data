@@ -35,7 +35,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private final FhirContext context = FhirContext.forR4();
 
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
-      SecurityLabel.securityLabelsMap();
+      SecurityLabel.getSecurityLabels();
 
   protected static long claimUniqueIdForIcd10Diagnosis = 4146709784142L; // icd-10
   protected static long claimUniqueIdForIcd10Procedure = 6647624169509L; // icd10
