@@ -85,16 +85,16 @@ public class SecurityLabel {
     Objects.requireNonNull(this.endDate);
   }
 
-  private static Map<String, List<SecurityLabel>> readYamlToMap(InputStream inputStream) {
+  private static Map<String, List<SecurityLabel>> readSecurityLabels(InputStream inputStream) {
     try {
-      var resultMap = new HashMap<String, List<SecurityLabel>>();
+      var securityLabels = new HashMap<String, List<SecurityLabel>>();
       var yamlData =
           new YAMLMapper().readValue(inputStream, new TypeReference<List<SecurityLabel>>() {});
       for (var entry : yamlData) {
         entry.validate();
-        resultMap.computeIfAbsent(entry.getSystem(), k -> new ArrayList<>()).add(entry);
+        securityLabels.computeIfAbsent(entry.getSystem(), k -> new ArrayList<>()).add(entry);
       }
-      return resultMap;
+      return securityLabels;
     } catch (Exception e) {
       throw new RuntimeException("Failed to read YAML file", e);
     }
@@ -115,7 +115,7 @@ public class SecurityLabel {
       throw new IllegalArgumentException("File not found in classpath: security_labels.yml");
     }
 
-    return readYamlToMap(inputStream);
+    return readSecurityLabels(inputStream);
   }
 
   /**

@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -65,6 +66,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   // Code: F10.10 System: icd-9-cm [clm_dgns_cd]
   private static final String ICD9_DIAGNOSIS = "291";
+
+  private static final String ICD9_DIAGNOSIS2 = "V65.42";
 
   // Code: HZ2ZZZZ System: ICD9 [clm_prcdr_cd]
   private static final String ICD9_PROCEDURE = "94.45";
@@ -132,14 +135,14 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     var codeToCheck = "H00.34";
     assertTrue(isSensitiveCode(SystemUrls.CMS_HCPCS, normalize(codeToCheck)));
     var fetched = eobRead().withId(claimWithHcpcsInIcd).execute();
-    var diag =
+    var diagnosis =
         fetched.getDiagnosis().stream()
             .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
             .filter(d -> d.getCode().equals(codeToCheck))
             .findFirst();
-    assertTrue(diag.isPresent());
-    assertEquals(codeToCheck, diag.get().getCode());
-    assertEquals(SystemUrls.ICD_10_CM_DIAGNOSIS, diag.get().getSystem());
+    assertTrue(diagnosis.isPresent());
+    assertEquals(codeToCheck, diagnosis.get().getCode());
+    assertEquals(SystemUrls.ICD_10_CM_DIAGNOSIS, diagnosis.get().getSystem());
   }
 
   private static Stream<Arguments> shouldFilterSamhsa() {
@@ -210,7 +213,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
         Arguments.of(
             claimUniqueIdWithMultipleSamhsaCodes, ICD10_DIAGNOSIS2, SystemUrls.ICD_10_CM_DIAGNOSIS),
         Arguments.of(
-            claimUniqueIdWithMultipleSamhsaCodes, ICD9_DIAGNOSIS, SystemUrls.ICD_9_CM_DIAGNOSIS));
+            claimUniqueIdWithMultipleSamhsaCodes, ICD9_DIAGNOSIS2, SystemUrls.ICD_9_CM_DIAGNOSIS));
   }
 
   @MethodSource
@@ -220,7 +223,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     var icdDiagnosis =
         eob.getDiagnosis().stream()
             .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
-            .filter(d -> d.getCode().equals(code) && d.getSystem().equals(system))
+            .filter(
+                d -> normalize(d.getCode()).equals(normalize(code)) && d.getSystem().equals(system))
             .findFirst();
     assertTrue(icdDiagnosis.isPresent());
   }
@@ -303,6 +307,20 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     for (var code : codesToCheck) {
       assertTrue(checkSamhsaCode(SecurityLabel.normalize(code)));
     }
+
+    // Ensure the security labels file doesn't contain any unexpected systems
+    var allowedSystems =
+        Set.of(
+            SystemUrls.ICD_9_CM_DIAGNOSIS,
+            SystemUrls.CMS_ICD_9_PROCEDURE,
+            SystemUrls.ICD_10_CM_DIAGNOSIS,
+            SystemUrls.CMS_ICD_10_PROCEDURE,
+            SystemUrls.AMA_CPT,
+            SystemUrls.CMS_HCPCS,
+            SystemUrls.CMS_MS_DRG);
+    var samhsaSystems = SECURITY_LABELS.keySet();
+
+    assertEquals(allowedSystems, samhsaSystems);
   }
 
   private IReadTyped<ExplanationOfBenefit> eobRead() {

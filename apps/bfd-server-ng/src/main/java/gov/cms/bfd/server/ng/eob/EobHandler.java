@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.SystemUrls;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.ClaimItem;
 import gov.cms.bfd.server.ng.claim.model.ClaimLine;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
@@ -17,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -124,7 +126,7 @@ public class EobHandler {
       return Optional.empty();
     }
     var claim = claimOpt.get();
-    // Apply SAMHSA exclusion in-memory without constructing a bundle.
+
     if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
       return Optional.empty();
     }
@@ -142,45 +144,29 @@ public class EobHandler {
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
     var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
+    var drgSamhsa = drgCodeIsSamhsa(claim, claimThroughDate);
+    var claimItemSamhsa =
+        claim.getClaimItems().stream().anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate));
 
-    return drgCodeMatches(claim, claimThroughDate)
-        || claim.getClaimItems().stream()
-            .anyMatch(
-                e -> {
-                  var cl = e.getClaimLine();
-                  var cp = e.getClaimProcedure();
-
-                  return procedureMatchesSamhsaCode(cp, claimThroughDate)
-                      || hcpcsCodeMatches(cl, claimThroughDate);
-                });
+    return drgSamhsa || claimItemSamhsa;
   }
 
-  private boolean drgCodeMatches(Claim claim, LocalDate claimDate) {
-    var entries = SECURITY_LABELS_MAP.get(SystemUrls.CMS_MS_DRG);
-    for (var entry : entries) {
-      if (claim
-          .getDrgCode()
-          .filter(drgCode -> compare(drgCode.toString(), claimDate, entry))
-          .isPresent()) {
-        return true;
-      }
-    }
+  private boolean claimItemIsSamhsa(ClaimItem claimItem, LocalDate claimThroughDate) {
+    return procedureMatchesSamhsaCode(claimItem.getClaimProcedure(), claimThroughDate)
+        || hcpcsCodeMatches(claimItem.getClaimLine(), claimThroughDate);
+  }
 
-    return false;
+  private boolean drgCodeIsSamhsa(Claim claim, LocalDate claimDate) {
+    var entries = SECURITY_LABELS_MAP.get(SystemUrls.CMS_MS_DRG);
+    var drg = claim.getDrgCode().map(Object::toString).orElse("");
+    return entries.stream().anyMatch(e -> compare(drg, claimDate, e));
   }
 
   private boolean hcpcsCodeMatches(ClaimLine claimLine, LocalDate claimDate) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
-
-    for (var system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
-      var entries = SECURITY_LABELS_MAP.get(system);
-      for (var entry : entries) {
-        if (compare(hcpcs, claimDate, entry)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
+        .flatMap(s -> SECURITY_LABELS_MAP.get(s).stream())
+        .anyMatch(c -> compare(hcpcs, claimDate, c));
   }
 
   // Checks ICDs.
@@ -194,17 +180,12 @@ public class EobHandler {
     var procedureEntries = SECURITY_LABELS_MAP.get(icdIndicator.getProcedureSystem());
     var diagnosisEntries = SECURITY_LABELS_MAP.get(icdIndicator.getDiagnosisSystem());
 
-    // Check procedure code against its system entries.
-    if (!procedureCode.isEmpty()) {
-      var procMatch =
-          procedureEntries.stream()
-              .anyMatch(pEntries -> compare(procedureCode, claimDate, pEntries));
-      if (procMatch) {
-        return true;
-      }
-    }
+    var procedureHasSamhsa =
+        procedureEntries.stream().anyMatch(pEntries -> compare(procedureCode, claimDate, pEntries));
+    var diagnosisHasSamhsa =
+        diagnosisEntries.stream().anyMatch(dEntry -> compare(diagnosisCode, claimDate, dEntry));
 
-    return diagnosisEntries.stream().anyMatch(dEntry -> compare(diagnosisCode, claimDate, dEntry));
+    return procedureHasSamhsa || diagnosisHasSamhsa;
   }
 
   private boolean isClaimDateWithinBounds(LocalDate claimDate, SecurityLabel entry) {
