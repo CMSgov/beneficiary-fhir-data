@@ -209,6 +209,7 @@ class GeneratorUtil:
 
             # Create the MBI object with all required fields
             mbi_obj["BENE_MBI_EFCTV_DT"] = str(efctv_dt)
+            mbi_obj["IDR_LTST_TRANS_FLG"] = "Y"
             if mbi_idx != num_mbis - 1:
                 # Calculate obsolescence date
                 obslt_dt = self.fake.date_between_dates(
@@ -495,6 +496,7 @@ class GeneratorUtil:
                 "BENE_MBI_ID",
                 "BENE_MBI_EFCTV_DT",
                 "BENE_MBI_OBSLT_DT",
+                "IDR_LTST_TRANS_FLG",
                 "IDR_TRANS_EFCTV_TS",
                 "IDR_INSRT_TS",
                 "IDR_UPDT_TS",
