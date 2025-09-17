@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.filter;
 
+import gov.cms.bfd.server.ng.util.LoggerConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,14 +21,6 @@ import org.springframework.stereotype.Component;
 @Order(1)
 @WebFilter(filterName = "MdcFilter")
 public class MdcFilter implements Filter {
-  /** Name of the URI key for logging. */
-  public static final String URI_KEY = "uri";
-
-  /** Name of the request ID key for logging. */
-  public static final String REQUEST_ID_KEY = "requestId";
-
-  /** Name of the remote address key for logging. */
-  public static final String REMOTE_ADDRESS_KEY = "remoteAddress";
 
   @Override
   public void doFilter(
@@ -35,15 +28,15 @@ public class MdcFilter implements Filter {
       throws IOException, ServletException {
 
     if (servletRequest instanceof HttpServletRequest httpRequest) {
-      MDC.put(URI_KEY, httpRequest.getRequestURI());
-      MDC.put(REQUEST_ID_KEY, httpRequest.getRequestId());
-      MDC.put(REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
+      MDC.put(LoggerConstants.URI_KEY, httpRequest.getRequestURI());
+      MDC.put(LoggerConstants.REQUEST_ID_KEY, httpRequest.getRequestId());
+      MDC.put(LoggerConstants.REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
     }
     filterChain.doFilter(servletRequest, servletResponse);
 
     // Clean up to prevent leaks
-    MDC.remove(URI_KEY);
-    MDC.remove(REQUEST_ID_KEY);
-    MDC.remove(REMOTE_ADDRESS_KEY);
+    MDC.remove(LoggerConstants.URI_KEY);
+    MDC.remove(LoggerConstants.REQUEST_ID_KEY);
+    MDC.remove(LoggerConstants.REMOTE_ADDRESS_KEY);
   }
 }

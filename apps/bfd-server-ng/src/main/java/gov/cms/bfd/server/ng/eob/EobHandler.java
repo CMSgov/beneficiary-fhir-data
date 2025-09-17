@@ -1,11 +1,11 @@
 package gov.cms.bfd.server.ng.eob;
 
-import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

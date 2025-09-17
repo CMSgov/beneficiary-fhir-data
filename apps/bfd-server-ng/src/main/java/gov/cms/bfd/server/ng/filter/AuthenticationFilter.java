@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.filter;
 
-import gov.cms.bfd.server.ng.CertificateUtil;
+import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;

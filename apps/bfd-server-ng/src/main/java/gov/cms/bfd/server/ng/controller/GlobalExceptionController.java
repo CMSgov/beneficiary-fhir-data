@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.controller;
 
-import gov.cms.bfd.server.ng.filter.MdcFilter;
+import gov.cms.bfd.server.ng.util.LoggerConstants;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -48,9 +48,9 @@ public class GlobalExceptionController implements ErrorController {
     // MDC filter, so we need to add them to the log here explicitly,
     logBuilder
         .setMessage(responseMessage)
-        .addKeyValue(MdcFilter.URI_KEY, originalUri)
-        .addKeyValue(MdcFilter.REQUEST_ID_KEY, request.getRequestId())
-        .addKeyValue(MdcFilter.REMOTE_ADDRESS_KEY, request.getRemoteAddr())
+        .addKeyValue(LoggerConstants.URI_KEY, originalUri)
+        .addKeyValue(LoggerConstants.REQUEST_ID_KEY, request.getRequestId())
+        .addKeyValue(LoggerConstants.REMOTE_ADDRESS_KEY, request.getRemoteAddr())
         .log();
 
     return responseMessage;

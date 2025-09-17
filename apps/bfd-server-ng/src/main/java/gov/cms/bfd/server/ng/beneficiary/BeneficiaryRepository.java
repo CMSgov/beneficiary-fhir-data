@@ -1,9 +1,10 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
-import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -46,10 +47,11 @@ public class BeneficiaryRepository {
    * @return beneficiary record
    */
   public Optional<Beneficiary> findById(long beneSk, DateTimeRange lastUpdatedRange) {
-    return entityManager
-        .createQuery(
-            String.format(
-                """
+    var optionalBeneficiary =
+        entityManager
+            .createQuery(
+                String.format(
+                    """
               SELECT bene
               FROM Beneficiary bene
               WHERE bene.beneSk = :beneSk
@@ -57,15 +59,18 @@ public class BeneficiaryRepository {
                 AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :upperBound)
               ORDER BY bene.obsoleteTimestamp DESC
               """,
-                lastUpdatedRange.getLowerBoundSqlOperator(),
-                lastUpdatedRange.getUpperBoundSqlOperator()),
-            Beneficiary.class)
-        .setParameter("beneSk", beneSk)
-        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-        .getResultList()
-        .stream()
-        .findFirst();
+                    lastUpdatedRange.getLowerBoundSqlOperator(),
+                    lastUpdatedRange.getUpperBoundSqlOperator()),
+                Beneficiary.class)
+            .setParameter("beneSk", beneSk)
+            .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+            .getResultList()
+            .stream()
+            .findFirst();
+
+    optionalBeneficiary.ifPresent(beneficiary -> LogUtil.logBeneSk(beneficiary.getBeneSk()));
+    return optionalBeneficiary;
   }
 
   /**
