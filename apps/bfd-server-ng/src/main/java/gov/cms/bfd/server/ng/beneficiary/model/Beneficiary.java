@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import gov.cms.bfd.server.ng.DateUtil;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.List;
