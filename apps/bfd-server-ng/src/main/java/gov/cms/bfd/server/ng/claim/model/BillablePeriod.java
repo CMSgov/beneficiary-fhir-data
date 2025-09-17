@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
@@ -22,6 +23,7 @@ import org.hl7.fhir.r4.model.Period;
  *   <li>{@code claimQueryCode}: The code representing the query type for the claim.
  * </ul>
  */
+@Getter
 @Embeddable
 public class BillablePeriod {
   @Column(name = "clm_from_dt")
@@ -32,24 +34,6 @@ public class BillablePeriod {
 
   @Column(name = "clm_query_cd")
   private String claimQueryCode;
-
-  /**
-   * Returns the start date of the claim's billable period.
-   *
-   * @return claimFromDate
-   */
-  public LocalDate getClaimFromDate() {
-    return claimFromDate;
-  }
-
-  /**
-   * Returns the end date of the claim's billable period.
-   *
-   * @return claimThroughDate
-   */
-  public LocalDate getClaimThroughDate() {
-    return claimThroughDate;
-  }
 
   Period toFhir() {
     var period = new Period();
