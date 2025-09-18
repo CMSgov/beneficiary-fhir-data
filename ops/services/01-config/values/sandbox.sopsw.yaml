@@ -838,6 +838,7 @@
 /bfd/${env}/server-ng/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
 /bfd/${env}/server-ng/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
 /bfd/${env}/server-ng/nonsensitive/heathcheck/testing_bene_id: "-88888888888888"
+/bfd/${env}/server-ng/nonsensitive/lb_is_public: "true"
 /bfd/${env}/server-ng/nonsensitive/client_certificates/bluebutton_backend_dpr_data_server_client_test: |-
   -----BEGIN CERTIFICATE-----
   MIIFETCCAvmgAwIBAgIEGBhgATANBgkqhkiG9w0BAQsFADA5MTcwNQYDVQQDEy5i
