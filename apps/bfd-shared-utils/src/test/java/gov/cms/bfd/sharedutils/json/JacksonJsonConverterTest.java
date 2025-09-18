@@ -17,7 +17,7 @@ public class JacksonJsonConverterTest {
     final var sample = new SampleBean(1, "hello", List.of("world!"));
     final var json = converter.objectToJson(sample);
     assertEquals(
-        """
+"""
 {
   "anInt" : 1,
   "manyStrings" : [ "world!" ],

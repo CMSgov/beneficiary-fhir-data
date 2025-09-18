@@ -273,7 +273,7 @@
         <build.helper.maven.plugin.version>3.6.0</build.helper.maven.plugin.version>
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <exec.maven.plugin.version>3.1.1</exec.maven.plugin.version>
-        <fmt.maven.plugin.version>2.25</fmt.maven.plugin.version>
+        <fmt.maven.plugin.version>2.28</fmt.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <versions.maven.plugin.version>2.18.0</versions.maven.plugin.version>
         <antlr4.version>4.13.2</antlr4.version>
