@@ -7,13 +7,21 @@
         <ignoreVersion type="regex">.*[aA]lpha.*</ignoreVersion>
         <ignoreVersion type="regex">.*[aA]lpha[0-9]{1,}</ignoreVersion>
         <ignoreVersion type="regex">.*[bB]eta[0-9]{1,}</ignoreVersion>
-        <ignoreVersion type="regex">.*.Final</ignoreVersion>
         <ignoreVersion type="regex">.*CR.</ignoreVersion>
         <ignoreVersion type="regex">.*[rR][cC]*.*</ignoreVersion>
         <ignoreVersion type="regex">.*-M\d+</ignoreVersion>
         <ignoreVersion type="regex">.*-B\d+</ignoreVersion>
     </ignoreVersions>
+
     <rules>
+        <!--
+            org.hibernate.orm should generally be kept at a version used by HAPI FHIR
+        -->
+        <rule groupId="org.hibernate.orm" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="range">[6.4.5,)</ignoreVersion>
+            </ignoreVersions>
+        </rule>
         <!--
             jakarta.persistence 3.2 is not compatible with Spring Data JPA v3.
             This will need to be updated when v4 is released.
