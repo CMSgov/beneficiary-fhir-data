@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;

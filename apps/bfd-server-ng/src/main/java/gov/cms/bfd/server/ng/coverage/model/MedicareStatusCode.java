@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import gov.cms.bfd.server.ng.IdrConstants;
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.IdrConstants;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

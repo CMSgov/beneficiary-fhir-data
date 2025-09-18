@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 

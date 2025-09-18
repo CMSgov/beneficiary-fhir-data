@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.converter;
 
-import gov.cms.bfd.server.ng.IdrConstants;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import gov.cms.bfd.server.ng.DateUtil;
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

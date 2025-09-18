@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -23,10 +24,11 @@ public class CoverageRepository {
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, DateTimeRange lastUpdatedRange) {
 
-    return entityManager
-        .createQuery(
-            String.format(
-                """
+    var beneficiaryCoverage =
+        entityManager
+            .createQuery(
+                String.format(
+                    """
                 SELECT b
                 FROM BeneficiaryCoverage b
                 LEFT JOIN FETCH b.beneficiaryStatus bs
@@ -40,14 +42,17 @@ public class CoverageRepository {
                   AND b.beneSk = b.xrefSk
                 ORDER BY b.obsoleteTimestamp DESC
                 """,
-                lastUpdatedRange.getLowerBoundSqlOperator(),
-                lastUpdatedRange.getUpperBoundSqlOperator()),
-            BeneficiaryCoverage.class)
-        .setParameter("id", beneSk)
-        .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-        .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-        .getResultList()
-        .stream()
-        .findFirst();
+                    lastUpdatedRange.getLowerBoundSqlOperator(),
+                    lastUpdatedRange.getUpperBoundSqlOperator()),
+                BeneficiaryCoverage.class)
+            .setParameter("id", beneSk)
+            .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+            .getResultList()
+            .stream()
+            .findFirst();
+
+    beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSk(coverage.getBeneSk()));
+    return beneficiaryCoverage;
   }
 }

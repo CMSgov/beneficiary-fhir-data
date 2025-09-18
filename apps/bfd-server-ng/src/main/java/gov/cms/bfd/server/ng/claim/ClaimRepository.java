@@ -1,9 +1,10 @@
 package gov.cms.bfd.server.ng.claim;
 
-import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.time.ZonedDateTime;
@@ -29,23 +30,27 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    return withParams(
-            entityManager.createQuery(
-                String.format(
-                    """
+    var optionalClaim =
+        withParams(
+                entityManager.createQuery(
+                    String.format(
+                        """
                     %s
                     WHERE c.claimUniqueId = :claimUniqueId
                     %s
                     """,
-                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
-                Claim.class),
-            claimThroughDate,
-            lastUpdated,
-            new ArrayList<>())
-        .setParameter("claimUniqueId", claimUniqueId)
-        .getResultList()
-        .stream()
-        .findFirst();
+                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                    Claim.class),
+                claimThroughDate,
+                lastUpdated,
+                new ArrayList<>())
+            .setParameter("claimUniqueId", claimUniqueId)
+            .getResultList()
+            .stream()
+            .findFirst();
+
+    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+    return optionalClaim;
   }
 
   /**
@@ -85,21 +90,27 @@ public class ClaimRepository {
             .setParameter("limit", limit.orElse(5000))
             .setParameter("offset", offset.orElse(0))
             .getResultList();
-    return withParams(
-            entityManager.createQuery(
-                String.format(
-                    """
+    var claims =
+        withParams(
+                entityManager.createQuery(
+                    String.format(
+                        """
                         %s
                         WHERE c.claimUniqueId IN (:claimIds)
                         %s
                         """,
-                    getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
-                Claim.class),
-            claimThroughDate,
-            lastUpdated,
-            sourceIds)
-        .setParameter("claimIds", claimIds)
-        .getResultList();
+                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                    Claim.class),
+                claimThroughDate,
+                lastUpdated,
+                sourceIds)
+            .setParameter("claimIds", claimIds)
+            .getResultList();
+
+    claims.stream()
+        .findFirst()
+        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+    return claims;
   }
 
   /**

@@ -1,11 +1,11 @@
 package gov.cms.bfd.server.ng.coverage;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.FhirUtil;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

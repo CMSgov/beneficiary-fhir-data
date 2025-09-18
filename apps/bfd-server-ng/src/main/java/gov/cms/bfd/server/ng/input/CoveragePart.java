@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

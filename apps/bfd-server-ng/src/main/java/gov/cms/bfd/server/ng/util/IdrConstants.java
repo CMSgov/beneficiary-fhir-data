@@ -1,10 +1,16 @@
-package gov.cms.bfd.server.ng;
+package gov.cms.bfd.server.ng.util;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 /** Constants representing specific values found in the IDR database. */
 public class IdrConstants {
+
+  // Private constructor to prevent instantiation
+  private IdrConstants() {
+    // Intentionally empty
+  }
+
   /** The string value IDR uses to represent "true". */
   public static final String YES = "Y";
 
