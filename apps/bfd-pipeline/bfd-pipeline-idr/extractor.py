@@ -75,6 +75,7 @@ class Extractor(ABC):
         if batch_id_col is not None:
             batch_id_order = f", {batch_id_col}"
         logger.info("extracting %s", cls.table())
+        order_by = f"ORDER BY {batch_timestamp_clause} {batch_id_order}"
         if progress is None:
             # No saved progress, process the whole table from the beginning
             return self.extract_many(
@@ -82,7 +83,7 @@ class Extractor(ABC):
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
                     f"WHERE ({batch_timestamp_clause} >= '{min_transaction_date}')",
-                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
+                ).replace("{ORDER_BY}", order_by),
                 {},
             )
 
@@ -115,7 +116,7 @@ class Extractor(ABC):
                         {batch_id_clause}
                     )
                     """,
-            ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause} {batch_id_order}"),
+            ).replace("{ORDER_BY}", order_by),
             {"timestamp": compare_timestamp},
         )
 
