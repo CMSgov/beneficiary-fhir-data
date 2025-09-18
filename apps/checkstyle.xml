@@ -35,7 +35,7 @@ checks and options -->
              via RegEx if we want to avoid documenting certain variable names.
         -->
         <module name="JavadocVariable">
-            <property name="scope" value="public" />
+            <property name="accessModifiers" value="public" />
         </module>
 
         <!-- Ensures @Override is present when using @InheritDoc.
