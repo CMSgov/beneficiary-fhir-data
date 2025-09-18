@@ -86,21 +86,22 @@ def extract_and_load(
 ) -> tuple[PostgresLoader, bool]:
     logger.info("loading %s", cls.table())
     batch_start = datetime.now()
-    progress = get_progress(connection_string, cls.table(), batch_start)
 
-    logger.info(
-        "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
-        cls.table(),
-        progress.last_ts if progress else "none",
-        progress.batch_start_ts if progress else "none",
-        progress.batch_complete_ts if progress else "none",
-    )
     last_error = datetime.min.replace(tzinfo=UTC)
     loader = PostgresLoader(connection_string)
     error_count = 0
     max_errors = 3
     while True:
         try:
+            progress = get_progress(connection_string, cls.table(), batch_start)
+
+            logger.info(
+                "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
+                cls.table(),
+                progress.last_ts if progress else "none",
+                progress.batch_start_ts if progress else "none",
+                progress.batch_complete_ts if progress else "none",
+            )
             data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
             data_loaded = loader.load(data_iter, cls, batch_start, progress)
             return (loader, data_loaded)
