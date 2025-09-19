@@ -208,7 +208,7 @@ public abstract class EndpointJsonComparatorBase extends ServerRequiredTest {
     if (endpointId.equals("metadata")) {
       replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
       replaceIgnoredFieldsWithFillerText(
-          jsonNode, "version", Optional.of(Pattern.compile("\\d+\\.\\d+\\.\\d+-SNAPSHOT")));
+          jsonNode, "version", Optional.of(Pattern.compile("\\d+\\.\\d+\\.\\d+(?:-SNAPSHOT)?")));
     }
 
     String jsonResponse;
