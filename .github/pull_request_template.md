@@ -52,7 +52,5 @@ Please indicate if this PR does any of the following:
 
 ### Validation
 
-**Have you fully verified and tested these changes? * Please provide reproducible testing instructions, code snippets, or screenshots as applicable.**
-* [ ] Is the acceptance criteria met?
-* [ ] Has SonarQube been reviewed?
+**Have you fully verified and tested these changes? Is the acceptance criteria met? Please provide reproducible testing instructions, code snippets, or screenshots as applicable.**
     
