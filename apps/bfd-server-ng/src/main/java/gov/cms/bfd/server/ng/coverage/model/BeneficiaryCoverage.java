@@ -11,9 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Reference;
@@ -53,6 +56,44 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   private Optional<BeneficiaryDualEligibility> getDualEligibility() {
     return Optional.ofNullable(beneficiaryDualEligibility);
+  }
+
+  /**
+   * Returns a stream of all coverage related entities (including this) that have a bfd_updated_ts
+   * value. Nulls are filtered out by callers.
+   *
+   * @return stream of timestamps for all coverage related entities present
+   */
+  public Stream<ZonedDateTime> coverageUpdatedTimestamps() {
+    Stream<ZonedDateTime> root =
+        meta == null ? Stream.empty() : Stream.ofNullable(meta.getUpdatedTimestamp());
+    Stream<ZonedDateTime> status =
+        beneficiaryStatus == null
+            ? Stream.empty()
+            : Stream.ofNullable(beneficiaryStatus.getBfdUpdatedTimestamp());
+    Stream<ZonedDateTime> entitlementReason =
+        beneficiaryEntitlementReason == null
+            ? Stream.empty()
+            : Stream.ofNullable(beneficiaryEntitlementReason.getBfdUpdatedTimestamp());
+    Stream<ZonedDateTime> thirdParties =
+        beneficiaryThirdParties == null
+            ? Stream.empty()
+            : beneficiaryThirdParties.stream()
+                .map(BeneficiaryThirdParty::getBfdUpdatedTimestamp)
+                .filter(Objects::nonNull);
+    Stream<ZonedDateTime> entitlements =
+        beneficiaryEntitlements == null
+            ? Stream.empty()
+            : beneficiaryEntitlements.stream()
+                .map(BeneficiaryEntitlement::getBfdUpdatedTimestamp)
+                .filter(Objects::nonNull);
+    Stream<ZonedDateTime> dual =
+        beneficiaryDualEligibility == null
+            ? Stream.empty()
+            : Stream.ofNullable(beneficiaryDualEligibility.getBfdUpdatedTimestamp());
+    return Stream.of(root, status, entitlementReason, thirdParties, entitlements, dual)
+        .flatMap(s -> s)
+        .filter(Objects::nonNull);
   }
 
   /**

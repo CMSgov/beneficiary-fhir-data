@@ -360,6 +360,9 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[missingAlldual]=[
 {
   "id" : "dual-289169129",
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
   "resourceType" : "Coverage"
 }
 ]
@@ -368,6 +371,9 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[missingAllpart-A]=[
 {
   "id" : "part-a-289169129",
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
   "resourceType" : "Coverage"
 }
 ]
@@ -376,6 +382,9 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithNoCoverageReturnsEmpty[missingAllpart-B]=[
 {
   "id" : "part-b-289169129",
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
   "resourceType" : "Coverage"
 }
 ]
@@ -713,6 +722,9 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithMissingTpDataShouldS
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithOnlyFutureEntitlementPeriodsShouldBeEmpty=[
 {
   "id" : "part-b-971050241",
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
   "resourceType" : "Coverage"
 }
 ]
@@ -831,6 +843,9 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithOnlyPastEntitlementP
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId[missingPartB]=[
 {
   "id" : "part-b-178083966",
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
   "resourceType" : "Coverage"
 }
 ]
@@ -967,6 +982,9 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId[validPart
 gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId[missingPartA]=[
 {
   "id" : "part-a-365359727",
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
   "resourceType" : "Coverage"
 }
 ]

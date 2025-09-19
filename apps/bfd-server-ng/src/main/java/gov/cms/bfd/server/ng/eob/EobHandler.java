@@ -11,8 +11,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,10 +25,10 @@ public class EobHandler {
   private final ClaimRepository claimRepository;
 
   /**
-   * Returns a {@link Patient} by their {@link IdType}.
+   * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
-   * @return patient
+   * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId) {
     return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange());
@@ -61,8 +60,9 @@ public class EobHandler {
     var eobs =
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
+    var resources = eobs.stream().map(Claim::toFhir).toList();
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+        resources.stream().map(r -> (Resource) r), claimRepository::claimLastUpdated);
   }
 
   /**
@@ -76,7 +76,11 @@ public class EobHandler {
   public Bundle searchById(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
     var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
-    return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
+    if (eob.isPresent()) {
+      return FhirUtil.bundleOrDefault(
+          eob.map(r -> (Resource) r), claimRepository::claimLastUpdated);
+    }
+    return FhirUtil.bundleOrDefault(Optional.empty(), claimRepository::claimLastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(

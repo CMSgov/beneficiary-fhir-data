@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
@@ -18,6 +22,9 @@ public class BeneficiaryStatus {
 
   @Column(name = "bene_mdcr_stus_cd")
   private Optional<MedicareStatusCode> medicareStatusCode;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * create create Medicare Status Extension.
