@@ -89,10 +89,10 @@ class Extractor(ABC):
 
         previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
         # If we've completed the last batch, there shouldn't be any additional records
-        # with the same timestamp.
+        # with the same timestamp/id.
         # Additionally, if there's a batch_id column, records with the same timestamp will be
         # filtered by the batch_id filter.
-        timestamp_op = ">" if previous_batch_complete or batch_id_col is not None else ">="
+        filter_op = ">" if previous_batch_complete or batch_id_col is not None else ">="
         # insertion timestamps aren't always representative of the time the data is available in
         # Snowflake, so we should always start loading from the most recent timestamp
         # that we've already fetched
@@ -102,7 +102,7 @@ class Extractor(ABC):
             batch_id_clause = f"""
                 OR (
                     {batch_timestamp_clause} = %(timestamp)s 
-                    AND {batch_id_col} >= {progress.last_id}
+                    AND {batch_id_col} {filter_op} {progress.last_id}
                 )"""
 
         # Saved progress found, start processing from where we left off
@@ -112,7 +112,7 @@ class Extractor(ABC):
                 "{WHERE_CLAUSE}",
                 f"""
                     WHERE (
-                        {batch_timestamp_clause} {timestamp_op} %(timestamp)s
+                        {batch_timestamp_clause} {filter_op} %(timestamp)s
                         {batch_id_clause}
                     )
                     """,

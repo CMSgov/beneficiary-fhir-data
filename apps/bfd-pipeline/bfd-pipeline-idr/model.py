@@ -475,7 +475,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcd_elgblty_end_dt: date
     bene_dual_stus_cd: str
@@ -547,7 +547,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
 
 
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_drug_plan_ind_cd: str
     cntrct_pbp_type_cd: str
 
@@ -579,7 +579,7 @@ def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
 
 
 class IdrClaim(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
@@ -671,7 +671,7 @@ class IdrClaim(IdrBaseModel):
 
 
 class IdrClaimDateSignature(IdrBaseModel):
-    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_SGNTR}]
+    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR}]
     clm_cms_proc_dt: date
     clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     clm_dschrg_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
@@ -720,7 +720,7 @@ class IdrClaimDateSignature(IdrBaseModel):
 
 
 class IdrClaimFiss(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
@@ -755,7 +755,7 @@ class IdrClaimFiss(IdrBaseModel):
 
 
 class IdrClaimInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_admsn_type_cd: str
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
@@ -821,7 +821,7 @@ class IdrClaimInstitutional(IdrBaseModel):
 
 
 class IdrClaimItem(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
     # columns from V2_MDCR_CLM_LINE
     clm_line_num: Annotated[int, BeforeValidator(transform_null_int)]
@@ -1039,7 +1039,7 @@ def transform_default_hipps_code(value: str | None) -> str:
 
 
 class IdrClaimLineInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
     clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -1089,7 +1089,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 
 class IdrClaimAnsiSignature(IdrBaseModel):
-    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1126,7 +1126,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 
 
 class IdrClaimProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1164,7 +1164,7 @@ class IdrClaimProfessional(IdrBaseModel):
 
 
 class IdrClaimLineProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
