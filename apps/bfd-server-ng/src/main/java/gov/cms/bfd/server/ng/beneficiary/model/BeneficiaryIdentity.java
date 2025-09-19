@@ -27,7 +27,7 @@ public class BeneficiaryIdentity {
   protected long beneSk;
 
   @Column(name = "bene_mbi_id")
-  private Optional<String> mbi;
+  private String mbi;
 
   @Column(name = "bene_xref_efctv_sk_computed")
   private long xrefSk;
@@ -47,7 +47,7 @@ public class BeneficiaryIdentity {
     if (mbi.isEmpty()) {
       return Optional.empty();
     }
-    var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(mbi.get());
+    var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(mbi);
     var period = new Period();
     mbiEffectiveDate.ifPresent(e -> period.setStart(DateUtil.toDate(e)));
     mbiObsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(o)));

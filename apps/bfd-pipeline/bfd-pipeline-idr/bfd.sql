@@ -165,6 +165,7 @@ CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
     last_ts TIMESTAMPTZ NOT NULL,
+    last_id BIGINT NOT NULL,
     batch_start_ts TIMESTAMPTZ NOT NULL,
     batch_complete_ts TIMESTAMPTZ NOT NULL
 );
