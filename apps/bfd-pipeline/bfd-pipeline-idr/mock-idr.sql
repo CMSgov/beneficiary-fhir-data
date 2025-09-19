@@ -37,6 +37,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_mbi_efctv_dt DATE,
     bene_mbi_obslt_dt DATE,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ,
     idr_trans_obslt_ts TIMESTAMPTZ,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,

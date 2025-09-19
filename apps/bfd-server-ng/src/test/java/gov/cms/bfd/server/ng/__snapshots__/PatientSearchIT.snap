@@ -478,6 +478,9 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
       "gender" : "male",
       "id" : "232323232",
       "identifier" : [ {
+        "period" : {
+          "start" : "2020-04-21T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -551,6 +554,9 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
       "gender" : "male",
       "id" : "232323232",
       "identifier" : [ {
+        "period" : {
+          "start" : "2020-04-21T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -624,6 +630,9 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
       "gender" : "male",
       "id" : "232323232",
       "identifier" : [ {
+        "period" : {
+          "start" : "2020-04-21T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -697,6 +706,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
       "gender" : "male",
       "id" : "178083966",
       "identifier" : [ {
+        "period" : {
+          "end" : "2019-12-02T00:00:00+00:00",
+          "start" : "2030-06-27T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -770,6 +783,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
       "gender" : "male",
       "id" : "178083966",
       "identifier" : [ {
+        "period" : {
+          "end" : "2019-12-02T00:00:00+00:00",
+          "start" : "2030-06-27T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -843,6 +860,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
       "gender" : "male",
       "id" : "178083966",
       "identifier" : [ {
+        "period" : {
+          "end" : "2019-12-02T00:00:00+00:00",
+          "start" : "2030-06-27T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
