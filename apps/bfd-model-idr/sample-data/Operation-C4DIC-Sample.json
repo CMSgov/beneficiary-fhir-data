@@ -1,0 +1,103 @@
+{
+    "resourceType": "Operation-C4DIC",
+    "beneficiary": {
+        "resourceType": "Beneficiary",
+        "BENE_1ST_NAME": "John",
+        "BENE_LAST_NAME": "Doe",
+        "BENE_MIDL_NAME": "Michael",
+        "BENE_BRTH_DT": "1950-05-15",
+        "lastUpdated": "2020-01-07T03:02:28.000000Z",
+        "mbi": [
+            {
+                "BENE_MBI_ID": "1AB2CD3EF4G",
+                "BENE_MBI_EFCTV_DT": "2018-04-01",
+                "BENE_MBI_OBSLT_DT": null
+            }
+        ],
+        "XREF_EFCTV_BENE_SK": "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c",
+        "BENE_SK": "123456789",
+        "BENE_SEX_CD": "1"
+    },
+    "coverageArray": [
+        {
+            "resourceType": "Coverage-Base",
+            "coveragePart": "A",
+            "BENE_MBI_ID": "1AB2CD3EF4G",
+            "XREF_EFCTV_BENE_SK": "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c",
+            "lastUpdated": "2024-01-15T10:30:00.000Z",
+            "BENE_MDCR_ENTLMT_STUS_CD": "10",
+            "BENE_BUYIN_CD": "0",
+            "BENE_MDCR_STUS_CD": "10",
+            "BENE_RNG_BGN_DT": "2018-04-01",
+            "BENE_RNG_END_DT": "9999-12-31",
+            "currentDate": "2024-01-15",
+            "BENE_MDCR_ENTLMT_RSN_CD": "1"
+        },
+        {
+            "resourceType": "Coverage-Base",
+            "coveragePart": "B",
+            "BENE_MBI_ID": "1AB2CD3EF4G",
+            "XREF_EFCTV_BENE_SK": "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c",
+            "lastUpdated": "2024-01-15T10:30:00.000Z",
+            "BENE_MDCR_ENTLMT_STUS_CD": "10",
+            "BENE_BUYIN_CD": "0",
+            "BENE_MDCR_STUS_CD": "10",
+            "BENE_RNG_BGN_DT": "2018-04-01",
+            "BENE_RNG_END_DT": "9999-12-31",
+            "currentDate": "2024-01-15",
+            "BENE_MDCR_ENTLMT_RSN_CD": "1"
+        },
+        {
+            "resourceType": "Coverage-Base",
+            "coveragePart": "C",
+            "BENE_MBI_ID": "1AB2CD3EF4G",
+            "XREF_EFCTV_BENE_SK": "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c",
+            "lastUpdated": "2024-01-15T10:30:00.000Z",
+            "BENE_ENRLMT_BGN_DT": "2018-04-01",
+            "BENE_ENRLMT_END_DT": "9999-12-31",
+            "currentDate": "2024-01-15",
+            "BENE_CNTRCT_NUM": "H1234",
+            "BENE_PBP_NUM": "001",
+            "BENE_CVRG_TYPE_CD": "11",
+            "CNTRCT_PBP_NAME": "Sample Medicare Advantage Plan for Part C Only!",
+            "CNTRCT_PLAN_CNTCT_TEL_NUM": "1-800-555-0123"
+        },
+        {
+            "resourceType": "Coverage-Base",
+            "coveragePart": "D",
+            "BENE_MBI_ID": "1AB2CD3EF4G",
+            "XREF_EFCTV_BENE_SK": "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c",
+            "lastUpdated": "2024-01-15T10:30:00.000Z",
+            "BENE_ENRLMT_BGN_DT": "2018-04-01",
+            "BENE_ENRLMT_END_DT": "9999-12-31",
+            "currentDate": "2024-01-15",
+            "BENE_CNTRCT_NUM": "H1234",
+            "BENE_PBP_NUM": "001",
+            "BENE_CVRG_TYPE_CD": "11",
+            "CNTRCT_PBP_NAME": "Sample Medicare Advantage Plan for Part D Only!",
+            "CNTRCT_PLAN_CNTCT_TEL_NUM": "1-800-555-0123",
+            "BENE_PDP_ENRLMT_MMBR_ID_NUM": "M123456789",
+            "BENE_PDP_ENRLMT_GRP_NUM": "G987654321",
+            "BENE_PDP_ENRLMT_PRCSR_NUM": "P123456",
+            "BENE_PDP_ENRLMT_BANK_ID_NUM": "BIN123456",
+            "BENE_LIS_EFCTV_CD": "Y",
+            "BENE_LIS_COPMT_LVL_CD": "1",
+            "BENE_LIS_PTD_PRM_PCT": "100.0",
+            "CNTRCT_PBP_SGMT_NUM": "000"
+        },
+        {
+            "resourceType": "Coverage-Base",
+            "coveragePart": "DUAL",
+            "BENE_MBI_ID": "1AB2CD3EF4G",
+            "XREF_EFCTV_BENE_SK": "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c",
+            "lastUpdated": "2024-01-15T10:30:00.000Z",
+            "BENE_DUAL_STUS_CD": "01",
+            "BENE_DUAL_TYPE_CD": "01",
+            "BENE_MDCD_ELGBLTY_BGN_DT": "2018-04-01",
+            "BENE_MDCD_ELGBLTY_END_DT": "9999-12-31",
+            "currentDate": "2024-01-15",
+            "GEO_USPS_STATE_CD": "CA"
+        }
+    ],
+    "lastUpdated": "2024-01-15T10:30:00.000Z"
+}

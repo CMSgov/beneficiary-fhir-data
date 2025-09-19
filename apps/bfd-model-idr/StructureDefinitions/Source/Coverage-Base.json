@@ -1,7 +1,7 @@
 {
     "resourceType": "StructureDefinition",
     "id": "Coverage-Base",
-    "url": "https://bfd.cms.gov/fhir/StructureDefinition/Coverage-Base",
+    "url": "http://hl7.org/fhir/StructureDefinition/Coverage-Base",
     "name": "Coverage-Base",
     "status": "draft",
     "fhirVersion": "4.0.1",

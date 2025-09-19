@@ -1,0 +1,525 @@
+//See this link for lexer order -> https://github.com/hapifhir/org.hl7.fhir.core/blob/c06051838f9bcd5fc0b552df960f5bf2fcf2dbb4/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/utils/StructureMapUtilities.java#L757
+//Must appear in order map -> conceptmap -> uses -> imports -> groups
+map "https://bfd.cms.gov/MappingLanguage/Maps/Operation-C4DIC" = "BFD-Operation-C4DIC-Map"
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Operation-C4DIC" alias OperationC4DIC as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Beneficiary" alias Bene as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
+uses "https://bfd.cms.gov/fhir/StructureDefinition/Coverage-Base" alias CoverageBase as source
+
+//The first specified target is what the default output will output as the ResourceType
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias C4DICBundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias C4DICPatient as target
+uses "http://hl7.org/fhir/StructureDefinition/Coverage" alias C4DICCoverage as target
+uses "http://hl7.org/fhir/StructureDefinition/Organization" alias C4DICOrganization as target
+
+imports "https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Helper" 
+
+//Main group to create the C4DIC Bundle
+group createC4DICBundle(source src: OperationC4DIC, target bundle: C4DICBundle){
+    
+    //Set bundle metadata
+    src -> bundle.type = "collection" "Set bundle type to collection";
+    src -> bundle.meta = create('Meta') as bundleMeta then{
+        src.lastUpdated as lastUpdated -> bundleMeta.lastUpdated = lastUpdated "Set lastUpdated";
+    } "add bundle metadata";
+    
+    //Create C4DIC Patient resource from beneficiary
+
+    // Any time that urn:uuid is used, generate a uuid. FHIR Mapping language nominally supports a uuid function, but it's not implemented with the validator yet.
+    // For the hardcoded ones here, I've generated them as uuid5's with the DNS namespace. do not hardcode these exact urns. Generate them 
+    // See https://hl7.org/fhir/R4/bundle.html#bundle-unique for understanding how bundles are resolved.
+    src.beneficiary as beneficiary -> bundle.entry = create('BackboneElement') as patientEntry then{
+        //see above note on UUIds.
+        //beneficiary.BENE_SK as bene_sk -> patientEntry.fullUrl = append("urn:uuid", bene_sk) "Set Patient fullUrl";
+        beneficiary -> patientEntry.fullUrl = "urn:uuid:2fc772f7-e2b3-5d9c-bd58-6153578f4c6c" "Set Patient fullUrl";
+        beneficiary -> patientEntry.resource = create('Patient') as patientResource then createC4DICPatient(beneficiary, patientResource) "Create C4DIC Patient";
+    } "Add Patient entry";
+    
+    //Create C4DIC Coverage resources for each coverage in the array
+    src.coverageArray as coverageItem -> bundle.entry = create('BackboneElement') as coverageEntry then{
+        coverageItem.coveragePart as part where part = "A" -> coverageEntry then{
+            src -> coverageEntry.fullUrl = "urn:uuid:7f5f3c4f-5426-5552-923e-363643ed76fa" "Set Part A fullUrl";
+            coverageItem -> coverageEntry.resource = create('Coverage') as coverageResource then createC4DICCoveragePartA(coverageItem, coverageResource) "Create Part A Coverage";
+        } "Create Part A Coverage";
+        coverageItem.coveragePart as part where part = "B" -> coverageEntry then{
+            src -> coverageEntry.fullUrl = "urn:uuid:c3df6a72-1a7f-5b37-bede-c0f8965d568c" "Set Part B fullUrl";
+            coverageItem -> coverageEntry.resource = create('Coverage') as coverageResource then createC4DICCoveragePartB(coverageItem, coverageResource) "Create Part B Coverage";
+        } "Create Part B Coverage";
+        coverageItem.coveragePart as part where part = "C" -> coverageEntry then{
+            src -> coverageEntry.fullUrl = "urn:uuid:8e05962e-fd9a-5f84-b9c6-5e0172de2dff" "Set Part C fullUrl";
+            coverageItem -> coverageEntry.resource = create('Coverage') as coverageResource then createC4DICCoveragePartC(coverageItem, coverageResource) "Create Part C Coverage";
+        } "Create Part C Coverage";
+        coverageItem.coveragePart as part where part = "D" -> coverageEntry then{
+            src -> coverageEntry.fullUrl = "urn:uuid:1df2dc64-7465-5df7-bd9f-c57fe36cc327" "Set Part D fullUrl";
+            coverageItem -> coverageEntry.resource = create('Coverage') as coverageResource then createC4DICCoveragePartD(coverageItem, coverageResource) "Create Part D Coverage";
+        } "Create Part D Coverage";
+        coverageItem.coveragePart as part where part = "DUAL" -> coverageEntry then{
+            src -> coverageEntry.fullUrl = "urn:uuid:4cd47cbd-d10d-5707-9244-524232bfda0a" "Set DUAL fullUrl";
+            coverageItem -> coverageEntry.resource = create('Coverage') as coverageResource then createC4DICCoverageDual(coverageItem, coverageResource) "Create DUAL Coverage";
+        } "Create DUAL Coverage";
+    } "Add Coverage entry";
+    
+    //Create Organization resources as needed
+    src.coverageArray as coverageItem -> bundle.entry = create('BackboneElement') as orgEntry then{
+        //We only need to populate a single CMS Org. 
+        coverageItem.coveragePart as part where part = "A" -> orgEntry then{
+            //src -> orgEntry.fullUrl = "urn:uuid:cms-org" "Set CMS Organization fullUrl";
+            src -> orgEntry.fullUrl = "urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "Set CMS Organization fullUrl";
+            coverageItem -> orgEntry.resource = create('Organization') as orgResource then createC4DICOrganizationCMS(coverageItem, orgResource) "Create CMS Organization";
+        } "Create CMS Organization";
+
+        //If C and D orgs are the same, we only need to populate one.
+        coverageItem.coveragePart as part where part = "C" -> orgEntry then{
+            //src -> orgEntry.fullUrl = append("urn:uuid:insurer-org-part-", part) "Set Insurer Organization fullUrl";
+            src -> orgEntry.fullUrl = "urn:uuid:8090e5e0-7441-5ab6-b6ca-915583a12e72" "Set Insurer Organization fullUrl";
+            coverageItem -> orgEntry.resource = create('Organization') as orgResource then createC4DICOrganizationInsurer(coverageItem, orgResource) "Create Insurer Organization";
+        } "Create Insurer Organization";
+        coverageItem.coveragePart as part where part = "D" -> orgEntry then{
+            //src -> orgEntry.fullUrl = append("urn:uuid:insurer-org-part-", part) "Set Insurer Organization fullUrl";
+            src -> orgEntry.fullUrl = "urn:uuid:21a76dd8-7bef-50bd-9ecd-a3cbb68e6c7e" "Set Insurer Organization fullUrl";
+            coverageItem -> orgEntry.resource = create('Organization') as orgResource then createC4DICOrganizationInsurer(coverageItem, orgResource) "Create Insurer Organization";
+        } "Create Insurer Organization";
+    } "Add Organization entry";
+}
+
+//Create C4DIC Patient resource
+group createC4DICPatient(source src: Bene, target patient: C4DICPatient){
+    
+    src.BENE_SK as bene_sk -> patient.id = bene_sk "Assign BENE_SK as identifier";
+    
+    src -> patient.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient" "Set C4DIC Patient profile";
+    } "add metadata";
+    
+    src -> patient.name = create('HumanName') as tgtName then{
+        src.BENE_1ST_NAME as firstName -> tgtName.given = firstName "Populate first name";
+        src.BENE_MIDL_NAME as middleName -> tgtName.given = middleName "Populate middle name";
+        src.BENE_LAST_NAME as lastName -> tgtName.family = lastName "Populate last name";
+    } "add name";
+    
+    src.BENE_BRTH_DT as dob -> patient.birthDate = dob "set dob";
+    src.BENE_SEX_CD as sex -> patient.gender = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#AdministrativeSex', 'code');
+    
+    //Add US Core extensions
+    src.BENE_SEX_CD as sex -> patient.extension = create('Extension') as sexExtension then {
+        src -> sexExtension.url = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex" "Set sex extension url";
+        src -> sexExtension.value = translate(sex, 'https://bfd.cms.gov/MappingLanguage/Maps/Patient-Helper#FederalAdministrativeSex', 'code') "Add sex value";
+    } "add sex";
+
+}
+
+//Create C4DIC Coverage for Part A
+group createC4DICCoveragePartA(source src: CoverageBase, target tgt: C4DICCoverage){
+    src -> tgt.id = "coverage-part-a" "Add Part A ID"; 
+    
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" "Set C4DIC Coverage profile";
+    } "add metadata";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = beneSk "Set bene_sk";
+        //tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
+    
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
+        tgtSubscriberRef.reference = beneSk "Set subscriber reference";
+    
+    src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    
+    //Add identifier with assigner
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+        src -> tgtID.type = create('CodeableConcept') as idCC,
+            idCC.coding = create('Coding') as tempCode,
+            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+            tempCode.code = "MB",
+            tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+        src.BENE_MBI_ID as mbi -> tgtID.value = mbi "Set identifier Value";
+        src -> tgtID.assigner = create('Reference') as assignerRef,
+            assignerRef.reference = "urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "Set assigner reference";
+    } "Add MBI with assigner";
+    
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "set reference";
+    } "create and set payor reference";
+    
+    //Part A Type
+    src -> tgt.type = cc("https://nahdo.org/sopt","1") "Add type";
+    
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
+        src -> tgtBBElement.value = "Part A" "Add value";
+    } "Add Class";
+    
+    //Coverage period
+    src -> tgt.period = create('Period') as tgtPeriod then{
+        src.BENE_RNG_BGN_DT as begin -> tgtPeriod.start = begin "add start date";
+        src.BENE_RNG_END_DT as end where end < '9999-12-31' -> tgtPeriod.end = end "add end date";
+    } "Add period of coverage";
+    
+    //Status
+    src.currentDate as currentDate -> tgt then{
+        src.BENE_RNG_END_DT as endDate -> tgt then{
+            src.BENE_RNG_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
+            src.BENE_RNG_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
+        } "Add end date as variable";
+    } "Add status";
+
+    //Current Entitlement Reason Code Extension
+    src.BENE_MDCR_ENTLMT_RSN_CD as entlmtRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD" "add system";
+            src -> tgtCoding.code = entlmtRsnCd "Add code";
+        } "Add coding";
+    } "Add current entitlement reason code";
+
+    //C4DIC Additional Card Information Extension
+    src -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension" "Add url";
+        src -> tgtExtension.value = create('Annotation') as tgtAnnotation then{
+            src -> tgtAnnotation.text = "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley." "Add placeholder text";
+        } "Add annotation value";
+    } "Add C4DIC Additional Card Information extension";
+
+}
+
+//Create C4DIC Coverage for Part B
+group createC4DICCoveragePartB(source src: CoverageBase, target tgt: C4DICCoverage){
+    src -> tgt.id = "coverage-part-b" "add part B ID";
+    
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" "Set C4DIC Coverage profile";
+    } "add metadata";
+    
+    //Add identifier with assigner
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+        src -> tgtID.type = create('CodeableConcept') as idCC,
+            idCC.coding = create('Coding') as tempCode,
+            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+            tempCode.code = "MB",
+            tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+            src.BENE_MBI_ID as mbi -> tgtID.value = mbi "Set identifier Value";
+        src -> tgtID.assigner = create('Reference') as assignerRef,
+            assignerRef.reference = "urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "Set assigner reference";
+    } "Add MBI with assigner";
+
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = beneSk "Set bene_sk";
+    
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
+        tgtSubscriberRef.reference = beneSk "Set subscriber reference";
+    
+    src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "set reference";
+    } "create and set payor reference";
+    
+    //Part B Type
+    src -> tgt.type = cc("https://nahdo.org/sopt","121") "Add type";
+    
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
+        src -> tgtBBElement.value = "Part B" "Add value";
+    } "Add Class";
+    
+    //Coverage period
+    src -> tgt.period = create('Period') as tgtPeriod then{
+        src.BENE_RNG_BGN_DT as begin -> tgtPeriod.start = begin "add start date";
+        src.BENE_RNG_END_DT as end where end < '9999-12-31' -> tgtPeriod.end = end "add end date";
+    } "Add period of coverage";
+    
+    //Status
+    src.currentDate as currentDate -> tgt then{
+        src.BENE_RNG_END_DT as endDate -> tgt then{
+            src.BENE_RNG_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
+            src.BENE_RNG_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
+        } "Add end date as variable";
+    } "Add status";
+    
+    //Current Entitlement Reason Code Extension
+    src.BENE_MDCR_ENTLMT_RSN_CD as entlmtRsnCd -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD" "Add url";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD" "add system";
+            src -> tgtCoding.code = entlmtRsnCd "Add code";
+        } "Add coding";
+    } "Add current entitlement reason code";
+
+    //C4DIC Additional Card Information Extension
+    src -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension" "Add url";
+        src -> tgtExtension.value = create('Annotation') as tgtAnnotation then{
+            src -> tgtAnnotation.text = "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley." "Add placeholder text";
+        } "Add annotation value";
+    } "Add C4DIC Additional Card Information extension";
+
+}
+
+//Create C4DIC Coverage for Part C
+group createC4DICCoveragePartC(source src: CoverageBase, target tgt: C4DICCoverage){
+    src -> tgt.id = "coverage-part-c" "Add Part C ID";
+    
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" "Set C4DIC Coverage profile";
+    } "add metadata";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
+    
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
+        tgtSubscriberRef.reference = append("Patient/",beneSk) "Set subscriber reference";
+    
+    src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    
+    //We don't have the member ID on part C, but it's required, so we add CMS as a placeholder.
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+        src -> tgtID.type = create('CodeableConcept') as idCC,
+            idCC.coding = create('Coding') as tempCode,
+            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+            tempCode.code = "MB",
+            tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+        src.BENE_MBI_ID as mbi -> tgtID.value = mbi "Set identifier Value";
+        src -> tgtID.assigner = create('Reference') as assignerRef,
+            assignerRef.reference = "urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "Set assigner reference";
+    } "Add MBI with assigner";
+    
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="urn:uuid:8090e5e0-7441-5ab6-b6ca-915583a12e72" "set reference";
+    } "create and set payor reference";
+    
+    //Part C Type
+    src -> tgt.type = cc("https://nahdo.org/sopt","11") "Add type";
+    
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
+        src -> tgtBBElement.value = "Part C" "Add value";
+    } "Add Class";
+    
+    //Coverage period
+    src -> tgt.period = create('Period') as tgtPeriod then{
+        src.BENE_ENRLMT_BGN_DT as begin -> tgtPeriod.start = begin "add start date";
+        src.BENE_ENRLMT_END_DT as end where end < '9999-12-31' -> tgtPeriod.end = end "add end date";
+    } "Add period of coverage";
+    
+    //Status
+    src.currentDate as currentDate -> tgt then{
+        src.BENE_ENRLMT_END_DT as endDate -> tgt then{
+            src.BENE_ENRLMT_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
+            src.BENE_ENRLMT_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
+        } "Add end date as variable";
+    } "Add status";
+}
+
+//Create C4DIC Coverage for Part D with RX elements
+group createC4DICCoveragePartD(source src: CoverageBase, target tgt: C4DICCoverage){
+    src -> tgt.id = "coverage-part-d" "Add Part D ID";
+    
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" "Set C4DIC Coverage profile";
+    } "add metadata";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = beneSk "Set bene_sk";
+    
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
+        tgtSubscriberRef.reference = beneSk "Set subscriber reference";
+    
+    src.BENE_PDP_ENRLMT_MMBR_ID_NUM as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    
+    //Add identifier using rxid with assigner
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+        src -> tgtID.type = create('CodeableConcept') as idCC,
+            idCC.coding = create('Coding') as tempCode,
+            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+            tempCode.code = "MB",
+            tgtID.system = "https://bluebutton.cms.gov/fhir/NamingSystem/Part-D-RXID" "Set identifier system";
+        src.BENE_PDP_ENRLMT_MMBR_ID_NUM as rxid -> tgtID.value = rxid "Set identifier Value using rxid";
+        src -> tgtID.assigner = create('Reference') as assignerRef,
+            assignerRef.reference = "urn:uuid:21a76dd8-7bef-50bd-9ecd-a3cbb68e6c7e" "Set assigner reference";
+    } "Add rxid as identifier with assigner";
+    
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="urn:uuid:21a76dd8-7bef-50bd-9ecd-a3cbb68e6c7e" "set reference";
+    } "create and set payor reference";
+    
+    //Part D Type
+    src -> tgt.type = cc("https://nahdo.org/sopt","122") "Add type";
+    
+    //Plan class
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
+        src -> tgtBBElement.value = "Part D" "Add value";
+    } "Add Class";
+    
+    //RX elements for Part D
+    src.BENE_PDP_ENRLMT_MMBR_ID_NUM as pdpEnrlmtMbrIdNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxid") "Add type";
+        src -> tgtBBElement.value = pdpEnrlmtMbrIdNum "Add member ID value";
+    } "Add Member ID class";
+    
+    src.BENE_PDP_ENRLMT_GRP_NUM as pdpEnrlmtGrpNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxgroup") "Add type";
+        src -> tgtBBElement.value = pdpEnrlmtGrpNum "Add group number value";
+    } "Add Group Number class";
+    
+    src.BENE_PDP_ENRLMT_PRCSR_NUM as pdpEnrlmtPrcsrNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxpcn") "Add type";
+        src -> tgtBBElement.value = pdpEnrlmtPrcsrNum "Add processor number value";
+    } "Add Processor Number class";
+    
+    src.BENE_PDP_ENRLMT_BANK_ID_NUM as pdpEnrlmtBankIdNum -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","rxbin") "Add type";
+        src -> tgtBBElement.value = pdpEnrlmtBankIdNum "Add bank ID value";
+    } "Add Bank ID class";
+    
+    //Coverage period
+    src -> tgt.period = create('Period') as tgtPeriod then{
+        src.BENE_ENRLMT_BGN_DT as begin -> tgtPeriod.start = begin "add start date";
+        src.BENE_ENRLMT_END_DT as end where end < '9999-12-31' -> tgtPeriod.end = end "add end date";
+    } "Add period of coverage";
+    
+    //Status
+    src.currentDate as currentDate -> tgt then{
+        src.BENE_ENRLMT_END_DT as endDate -> tgt then{
+            src.BENE_ENRLMT_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
+            src.BENE_ENRLMT_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
+        } "Add end date as variable";
+    } "Add status";
+}
+
+//Create C4DIC Coverage for DUAL
+group createC4DICCoverageDual(source src: CoverageBase, target tgt: C4DICCoverage){
+    src -> tgt.id = "coverage-dual" "Add DUAL ID";
+    
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" "Set C4DIC Coverage profile";
+    } "add metadata";
+    
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
+        tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
+
+    src -> tgt.relationship = cc("http://terminology.hl7.org/CodeSystem/subscriber-relationship","self") "set code";
+
+    src.XREF_EFCTV_BENE_SK as beneSk -> tgt.subscriber = create('Reference') as tgtSubscriberRef,
+        tgtSubscriberRef.reference = append("Patient/",beneSk) "Set subscriber reference";
+    
+    src.BENE_MBI_ID as subId -> tgt.subscriberId = subId "Add subscriber ID";
+    
+    //Add identifier with assigner
+    src -> tgt.identifier = create('Identifier') as tgtID then{
+        src -> tgtID.type = create('CodeableConcept') as idCC,
+            idCC.coding = create('Coding') as tempCode,
+            tempCode.system = "http://terminology.hl7.org/CodeSystem/v2-0203",
+            tempCode.code = "MB",
+            tgtID.system = "http://hl7.org/fhir/sid/us-mbi" "Set identifier system and value";
+        src.BENE_MBI_ID as mbi -> tgtID.value = mbi "Set identifier Value";
+        src -> tgtID.assigner = create('Reference') as assignerRef,
+            assignerRef.reference = "urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "Set assigner reference";
+    } "Add MBI with assigner";
+    
+    src -> tgt.payor = create('Reference') as payorReference then{
+        src -> payorReference.reference="urn:uuid:9063749a-860d-5199-b5ad-186e33b4f1a9" "set reference";
+    } "create and set payor reference";
+    
+    //Dual Type
+    src -> tgt.type = cc("https://nahdo.org/sopt","14") "Add type";
+
+    src -> tgt.class = create('BackboneElement') as tgtBBElement then{
+        src -> tgtBBElement.type = cc("http://terminology.hl7.org/CodeSystem/coverage-class","plan") "Add type";
+        src -> tgtBBElement.value = "Dual Medicare/Medicaid" "Add value";
+    } "Add Class";
+    
+    //Coverage period
+    src -> tgt.period = create('Period') as tgtPeriod then{
+        src.BENE_MDCD_ELGBLTY_BGN_DT as begin -> tgtPeriod.start = begin "add start date";
+        src.BENE_MDCD_ELGBLTY_END_DT as end where end < '9999-12-31' -> tgtPeriod.end = end "add end date";
+    } "Add period of coverage";
+    
+    //Status
+    src.currentDate as currentDate -> tgt then{
+        src.BENE_MDCD_ELGBLTY_END_DT as endDate -> tgt then{
+            src.BENE_MDCD_ELGBLTY_BGN_DT as beginDate where beginDate<=currentDate and currentDate<=endDate -> tgt.status = "active" "Set active status";
+            src.BENE_MDCD_ELGBLTY_BGN_DT as beginDate where beginDate>currentDate or currentDate>endDate -> tgt.status = "cancelled" "Set cancelled status";
+        } "Add end date as variable";
+    } "Add status";
+
+    //C4DIC Additional Card Information Extension
+    src -> tgt.extension = create('Extension') as tgtExtension then{
+        src -> tgtExtension.url = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension" "Add url";
+        src -> tgtExtension.value = create('Annotation') as tgtAnnotation then{
+            src -> tgtAnnotation.text = "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley." "Add placeholder text";
+        } "Add annotation value";
+    } "Add C4DIC Additional Card Information extension";
+}
+
+//Create C4DIC Organization for CMS
+group createC4DICOrganizationCMS(source src: CoverageBase, target tgt: C4DICOrganization) {
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" "set profile";
+    } "add metadata";
+    
+    src -> tgt.id = "cms-org" "set org id";
+    src -> tgt.active = true "set org as active";
+    src -> tgt.name = 'Centers for Medicare & Medicaid Services' "set org name";
+    src -> tgt.contact = create('BackboneElement') as tgtContact then{
+        src -> tgtContact.purpose = create('CodeableConcept') as purposeCC,
+            purposeCC.coding = create('Coding') as tempCode,
+            tempCode.system="http://terminology.hl7.org/CodeSystem/contactentity-type",
+            tempCode.code="PATINF",
+            tempCode.display="Patient" "set target contact purpose";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTele,
+            tgtTele.system="phone",
+            tgtTele.value="1-800-633-4227" "set main telephone";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTeleTTY,
+            tgtTeleTTY.system="phone",
+            tgtTeleTTY.value="TTY: 1-877-486-2048" "set TTY";
+        src -> tgtContact.telecom = create('ContactPoint') as tgtTeleURL,
+            tgtTeleURL.system="url",
+            tgtTeleURL.value="www.medicare.gov" "set url";
+    } "set organization contact info";
+}
+
+//Create C4DIC Organization for Insurer
+group createC4DICOrganizationInsurer(source src: CoverageBase, target tgt: C4DICOrganization) {
+    src -> tgt.meta = create('Meta') as tgtMeta then{
+        src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" "set profile";
+    } "add metadata";
+    
+    src.coveragePart as part -> tgt.id = append("insurer-org-part-",part) "identify specific org id";
+    src -> tgt.active = true "set org as active";
+    src.CNTRCT_PBP_NAME as orgName -> tgt.name = orgName "set org name";
+    //This is commented out pending investigation into V2_MDCR_CNTRCT_PBP_CNTCT for viability of the phone numbers.
+    /*
+    src -> tgt.contact = create('BackboneElement') as tgtContact then{
+        src -> tgtContact.purpose = create('CodeableConcept') as purposeCC,
+            purposeCC.coding = create('Coding') as tempCode,
+            tempCode.system="http://terminology.hl7.org/CodeSystem/contactentity-type",
+            tempCode.code="PATINF",
+            tempCode.display="Patient" "set target contact purpose";
+        
+        src.CNTRCT_PLAN_CNTCT_TEL_NUM as phoneNum -> tgtContact.telecom = create('ContactPoint') as tgtTele,
+            tgtTele.system="phone",
+            tgtTele.value=phoneNum "set main telephone";
+            
+    } "set organization contact info";
+    */
+}
+

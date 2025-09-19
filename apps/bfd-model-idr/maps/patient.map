@@ -3,7 +3,7 @@
 map "https://bfd.cms.gov/MappingLanguage/Maps/Patient" = "BFD-Patient-Map"
 
 
-uses "https://bfd.cms.gov/fhir/StructureDefinition/Beneficiary" alias Bene as source
+uses "http://hl7.org/fhir/StructureDefinition/Beneficiary" alias Bene as source
 uses "https://bfd.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as target
@@ -89,9 +89,7 @@ group createPatient(source src: Bene, target patient: BFDPatient){
         tgtReference.display = bene_sks "Set BENE_SK";
     } "Create Patient links";
 
-
     src.mbi as bene_mbis -> patient.identifier = create('Identifier') as ptIdentifier then SetMBI(bene_mbis,ptIdentifier) "Set Bene MBIs";
-
 
     src -> patient.meta = create('Meta') as tgtMeta then{
         src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
