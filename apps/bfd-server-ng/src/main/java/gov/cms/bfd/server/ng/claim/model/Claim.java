@@ -85,6 +85,16 @@ public class Claim {
   }
 
   /**
+   * Accessor for institutional DRG code, if this is an institutional claim.
+   *
+   * @return optional DRG code
+   */
+  public Optional<Integer> getDrgCode() {
+    return getClaimInstitutional()
+        .flatMap(i -> i.getSupportingInfo().getDiagnosisDrgCode().getDiagnosisDrgCode());
+  }
+
+  /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
    * @return ExplanationOfBenefit

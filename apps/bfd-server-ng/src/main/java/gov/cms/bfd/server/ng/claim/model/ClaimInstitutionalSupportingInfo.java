@@ -6,9 +6,11 @@ import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
+@Getter
 class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_admsn_src_cd")
   private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;

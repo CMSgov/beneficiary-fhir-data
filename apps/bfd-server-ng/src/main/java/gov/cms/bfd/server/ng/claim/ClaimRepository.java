@@ -35,10 +35,10 @@ public class ClaimRepository {
                 entityManager.createQuery(
                     String.format(
                         """
-                    %s
-                    WHERE c.claimUniqueId = :claimUniqueId
-                    %s
-                    """,
+                        %s
+                        WHERE c.claimUniqueId = :claimUniqueId
+                        %s
+                        """,
                         getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
                     Claim.class),
                 claimThroughDate,
@@ -77,14 +77,14 @@ public class ClaimRepository {
         entityManager
             .createNativeQuery(
                 """
-                        SELECT c.clm_uniq_id
-                        FROM idr.claim c
-                        JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
-                        WHERE b.bene_xref_efctv_sk_computed = :beneSk
-                        ORDER BY c.clm_uniq_id
-                        LIMIT :limit
-                        OFFSET :offset
-                        """,
+                SELECT c.clm_uniq_id
+                FROM idr.claim c
+                JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
+                WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                ORDER BY c.clm_uniq_id
+                LIMIT :limit
+                OFFSET :offset
+                """,
                 Long.class)
             .setParameter("beneSk", beneSk)
             .setParameter("limit", limit.orElse(5000))
@@ -142,6 +142,7 @@ public class ClaimRepository {
       JOIN FETCH c.claimItems AS cl
       LEFT JOIN FETCH c.claimInstitutional ci
       LEFT JOIN FETCH cl.claimLineInstitutional cli
+      LEFT JOIN FETCH c.claimFiss cf
       LEFT JOIN FETCH cli.ansiSignature a
     """;
   }
