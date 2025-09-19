@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,9 @@ public enum ClaimDiagnosisType {
   /** Present on admission. */
   PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** E code. */
-  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE);
+  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
+  /** R code. */
+  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE);
 
   private final String idrCode;
   private final String fhirCode;

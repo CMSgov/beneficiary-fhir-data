@@ -1,15 +1,19 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
-/** Deductible coinsurance codes. */
+/**
+ * Deductible coinsurance codes. Suppress SonarQube warning that constant names should comply with
+ * naming conventions
+ */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("java:S115")
 public enum ClaimLineDeductibleCoinsuranceCode {
   /** 0 - Charges are subject to deductible and coinsurance. */
   _0("0", "Charges are subject to deductible and coinsurance"),

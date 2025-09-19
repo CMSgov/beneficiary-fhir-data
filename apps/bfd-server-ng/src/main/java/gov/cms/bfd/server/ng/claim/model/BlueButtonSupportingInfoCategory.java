@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -26,7 +26,15 @@ enum BlueButtonSupportingInfoCategory {
   /** CLM_PPS_IND_CD - Claim PPS Indicator Code. */
   CLM_PPS_IND_CD("CLM_PPS_IND_CD", "Claim PPS Indicator Code"),
   /** CLM_NCH_PRMRY_PYR_CD - NCH Primary Payer Code. */
-  CLM_NCH_PRMRY_PYR_CD("CLM_NCH_PRMRY_PYR_CD", "NCH Primary Payer Code");
+  CLM_NCH_PRMRY_PYR_CD("CLM_NCH_PRMRY_PYR_CD", "NCH Primary Payer Code"),
+  /** CLM_QLFY_STAY_FROM_DT - Qualified Stay From Date. */
+  CLM_QLFY_STAY_FROM_DT("CLM_QLFY_STAY_FROM_DT", "Qualified Stay From Date"),
+  /** CLM_QLFY_STAY_THRU_DT - Qualified Stay Thru Date. */
+  CLM_QLFY_STAY_THRU_DT("CLM_QLFY_STAY_THRU_DT", "Qualified Stay Thru Date"),
+  /** CLM_HHA_LUP_IND_CD - Claim Lupa Indicator Code. */
+  CLM_HHA_LUP_IND_CD("CLM_HHA_LUP_IND_CD", "Claim Lupa Indicator Code"),
+  /** CLM_HHA_RFRL_CD - Claim Referral Code. */
+  CLM_HHA_RFRL_CD("CLM_HHA_RFRL_CD", "Claim Referral Code");
 
   private final String code;
   private final String display;

@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.DateUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -65,6 +65,11 @@ public class Claim {
   @Nullable
   @OneToOne
   @JoinColumn(name = "clm_uniq_id")
+  private ClaimFiss claimFiss;
+
+  @Nullable
+  @OneToOne
+  @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
   @OneToMany(fetch = FetchType.EAGER)
@@ -73,6 +78,10 @@ public class Claim {
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
+  }
+
+  private Optional<ClaimFiss> getClaimFiss() {
+    return Optional.ofNullable(claimFiss);
   }
 
   /**
@@ -110,7 +119,7 @@ public class Claim {
 
     claimItems.forEach(
         item -> {
-          item.getClaimLine().toFhir(item.getClaimLineInstitutional()).ifPresent(eob::addItem);
+          item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
@@ -123,6 +132,13 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
+
+    // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
+    // based on claim type. At most one Optional will be non-empty, so only one call
+    // will actually set EOB.outcome.
+    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
+    claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
+    getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();
     var initialSupportingInfo =

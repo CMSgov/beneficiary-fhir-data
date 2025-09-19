@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.SystemUrls;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -9,9 +9,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Claim admission codes. */
+/**
+ * Claim admission codes. Suppress SonarQube warning that constant names should comply with naming
+ * conventions
+ */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum ClaimAdmissionSourceCode {
   /**
    * 1 - NON-HEALTH CARE FACILITY POINT OF ORIGIN (NON-NEWBORN)/RESERVED FOR NATIONAL ASSIGNMENT
