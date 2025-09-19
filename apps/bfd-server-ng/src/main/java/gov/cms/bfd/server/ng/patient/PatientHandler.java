@@ -28,7 +28,12 @@ public class PatientHandler {
    */
   public Optional<Patient> find(final Long fhirId) {
     var beneficiary = beneficiaryRepository.findById(fhirId, new DateTimeRange());
-    return beneficiary.map(this::toFhir);
+    if (beneficiary.isEmpty()) return Optional.empty();
+    var patient = toFhir(beneficiary.get());
+    // If meta.lastUpdated is null here do nothing. The
+    // beneficiaryToFHIR translation or repository logic is expected to set
+    // the resource lastUpdated when available.
+    return Optional.of(patient);
   }
 
   /**
@@ -41,8 +46,15 @@ public class PatientHandler {
   public Bundle searchByLogicalId(final Long fhirId, final DateTimeRange lastUpdated) {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
+    if (beneficiary.isPresent()) {
+      var bene = beneficiary.get();
+      var patient = toFhir(bene);
+      // lastUpdated already set from entity meta
+      return FhirUtil.bundleOrDefault(
+          Optional.of(patient), beneficiaryRepository::beneficiaryLastUpdated);
+    }
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        Optional.empty(), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   /**
@@ -56,8 +68,15 @@ public class PatientHandler {
     var xrefBeneSk = beneficiaryRepository.getXrefSkFromMbi(identifier);
     var beneficiary = xrefBeneSk.flatMap(x -> beneficiaryRepository.findById(x, lastUpdated));
 
+    if (beneficiary.isPresent()) {
+      var bene = beneficiary.get();
+      var patient = toFhir(bene);
+      // lastUpdated already set from entity meta
+      return FhirUtil.bundleOrDefault(
+          Optional.of(patient), beneficiaryRepository::beneficiaryLastUpdated);
+    }
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        Optional.empty(), beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {

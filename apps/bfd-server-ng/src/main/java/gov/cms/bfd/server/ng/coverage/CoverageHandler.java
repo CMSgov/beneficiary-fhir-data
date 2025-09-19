@@ -1,17 +1,19 @@
 package gov.cms.bfd.server.ng.coverage;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Component;
 public class CoverageHandler {
 
   private final CoverageRepository coverageRepository;
-  private final BeneficiaryRepository beneficiaryRepository;
 
   /**
    * Reads a Coverage resource based on a composite ID ({part}-{bene_sk}).
@@ -37,8 +38,16 @@ public class CoverageHandler {
     var beneficiaryOpt =
         coverageRepository.searchBeneficiaryWithCoverage(
             coverageCompositeId.beneSk(), new DateTimeRange());
-
-    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
+    if (beneficiaryOpt.isEmpty()) return Optional.empty();
+    var beneficiary = beneficiaryOpt.get();
+    var coverage = beneficiary.toFhir(coverageCompositeId);
+    if (coverage != null && coverage.getMeta() != null) {
+      beneficiary
+          .coverageUpdatedTimestamps()
+          .max(ZonedDateTime::compareTo)
+          .ifPresent(ts -> coverage.getMeta().setLastUpdated(DateUtil.toDate(ts)));
+    }
+    return Optional.ofNullable(coverage);
   }
 
   /**
@@ -53,13 +62,18 @@ public class CoverageHandler {
     var beneficiaryOpt =
         coverageRepository.searchBeneficiaryWithCoverage(parsedCoverageId.beneSk(), lastUpdated);
     if (beneficiaryOpt.isEmpty()) {
-      return FhirUtil.defaultBundle(beneficiaryRepository::beneficiaryLastUpdated);
+      return FhirUtil.defaultBundle(coverageRepository::coverageLastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
     var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId);
-
-    return FhirUtil.bundleOrDefault(
-        coverage.map(c -> c), beneficiaryRepository::beneficiaryLastUpdated);
+    var maxTsOpt = beneficiary.coverageUpdatedTimestamps().max(ZonedDateTime::compareTo);
+    coverage.ifPresent(
+        cov ->
+            maxTsOpt.ifPresent(
+                ts -> {
+                  if (cov.getMeta() != null) cov.getMeta().setLastUpdated(DateUtil.toDate(ts));
+                }));
+    return FhirUtil.bundleOrDefault(coverage.map(c -> c), coverageRepository::coverageLastUpdated);
   }
 
   /**
@@ -76,18 +90,28 @@ public class CoverageHandler {
             .searchBeneficiaryWithCoverage(beneSk, lastUpdated)
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
-      return FhirUtil.bundleOrDefault(List.of(), beneficiaryRepository::beneficiaryLastUpdated);
+      return FhirUtil.bundleOrDefault(List.of(), coverageRepository::coverageLastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
+    var maxTsOpt = beneficiary.coverageUpdatedTimestamps().max(ZonedDateTime::compareTo);
     var coverages =
         Arrays.stream(CoveragePart.values())
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresent(
                         new CoverageCompositeId(c, beneficiary.getBeneSk())))
-            .flatMap(Optional::stream);
-
+            .flatMap(Optional::stream)
+            .map(
+                cov -> {
+                  maxTsOpt.ifPresent(
+                      ts -> {
+                        if (cov.getMeta() != null)
+                          cov.getMeta().setLastUpdated(DateUtil.toDate(ts));
+                      });
+                  return cov;
+                })
+            .toList();
     return FhirUtil.bundleOrDefault(
-        coverages.map(c -> c), beneficiaryRepository::beneficiaryLastUpdated);
+        coverages.stream().map(r -> (Resource) r), coverageRepository::coverageLastUpdated);
   }
 }

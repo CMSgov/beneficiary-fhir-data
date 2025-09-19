@@ -5,9 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -15,10 +17,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Claim ANSI signature table. */
 @Entity
 @Table(name = "claim_ansi_signature", schema = "idr")
+@Getter
 public class ClaimAnsiSignature {
   @Id
   @Column(name = "clm_ansi_sgntr_sk", insertable = false, updatable = false)
   private long ansiSignatureSk;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   @Column(name = "clm_1_rev_cntr_ansi_grp_cd")
   private Optional<RevenueCenterAnsiGroupCode> revenueCenterAnsiGroupCode1;

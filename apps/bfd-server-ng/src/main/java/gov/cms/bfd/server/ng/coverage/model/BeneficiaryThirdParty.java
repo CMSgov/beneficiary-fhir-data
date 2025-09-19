@@ -1,7 +1,11 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
@@ -17,6 +21,9 @@ public class BeneficiaryThirdParty {
 
   @Column(name = "bene_buyin_cd")
   private Optional<String> buyInCode;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * create BuyIn Code Extension.

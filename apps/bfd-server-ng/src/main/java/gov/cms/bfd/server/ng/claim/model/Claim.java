@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
-import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -12,15 +11,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Reference;
 import org.jetbrains.annotations.Nullable;
 
 /** Claim table. */
@@ -76,122 +72,114 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private Set<ClaimItem> claimItems;
 
-  private Optional<ClaimInstitutional> getClaimInstitutional() {
+  Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
 
-  private Optional<ClaimFiss> getClaimFiss() {
+  Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
   }
 
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
-   * @return ExplanationOfBenefit
+   * @return ExplanationOfBenefit representing this claim
    */
   public ExplanationOfBenefit toFhir() {
-    var eob = new ExplanationOfBenefit();
-    eob.setId(String.valueOf(claimUniqueId));
-    eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
-    eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
-    eob.setUse(ExplanationOfBenefit.Use.CLAIM);
-    eob.setType(claimTypeCode.toFhirType());
-    claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
-
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId));
-    eob.setIdentifier(identifiers.toFhir());
-    eob.setBillablePeriod(billablePeriod.toFhir());
-    eob.setCreated(DateUtil.toDate(claimEffectiveDate));
-    claimTypeCode
-        .toFhirInsurerPartAB()
-        .ifPresent(
-            i -> {
-              eob.addContained(i);
-              eob.setInsurer(new Reference(i));
-            });
-    var institutional = getClaimInstitutional();
-    Stream.of(
-            claimExtensions.toFhir(),
-            institutional.map(i -> i.getExtensions().toFhir()).orElse(List.of()),
-            List.of(claimDateSignature.getClaimProcessDate().toFhir()))
-        .flatMap(Collection::stream)
-        .forEach(eob::addExtension);
-
-    claimItems.forEach(
-        item -> {
-          item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
-          item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
-          item.getClaimProcedure()
-              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
-              .ifPresent(eob::addDiagnosis);
-        });
-    billingProvider
-        .toFhir(claimTypeCode)
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });
-
-    // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
-    // based on claim type. At most one Optional will be non-empty, so only one call
-    // will actually set EOB.outcome.
-    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
-    claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
-    getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
-
-    var supportingInfoFactory = new SupportingInfoFactory();
-    var initialSupportingInfo =
-        List.of(
-            bloodPints.toFhir(supportingInfoFactory),
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            typeOfBillCode.toFhir(supportingInfoFactory));
-    Stream.of(
-            initialSupportingInfo,
-            claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
-            institutional
-                .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
-                .orElse(List.of()))
-        .flatMap(Collection::stream)
-        .forEach(eob::addSupportingInfo);
-
-    careTeam
-        .toFhir()
-        .forEach(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
-            });
-
-    institutional.ifPresent(
-        i -> {
-          eob.addAdjudication(i.getPpsDrgWeight().toFhir());
-          eob.addBenefitBalance(
-              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), getClaimValues()));
-        });
-
-    claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
-    eob.addTotal(adjudicationCharge.toFhir());
-    eob.setPayment(claimPaymentAmount.toFhir());
-
-    return sortedEob(eob);
+    return ClaimToFhirTranslator.toFhir(this);
   }
 
-  private List<ClaimValue> getClaimValues() {
-    return claimItems.stream().map(ClaimItem::getClaimValue).toList();
+  /**
+   * Returns the latest bfd_updated_ts across this claim and related entities that are part of the
+   * FHIR representation (claim items, institutional lines, ansi signatures, institutional claim).
+   * If none are available, returns the claim's own meta timestamp.
+   *
+   * @return the latest updated timestamp for this claim or null if not available
+   */
+  public ZonedDateTime getLatestUpdatedTimestamp() {
+    var candidate = meta == null ? null : meta.getUpdatedTimestamp();
+
+    candidate = getMaxFromClaimDateSignature(candidate);
+    candidate = getMaxFromClaimInstitutional(candidate);
+    candidate = getMaxFromClaimFiss(candidate);
+    candidate = getMaxFromClaimItems(candidate);
+
+    return candidate;
   }
 
-  private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {
-    eob.getCareTeam()
-        .sort(Comparator.comparing(ExplanationOfBenefit.CareTeamComponent::getSequence));
-    eob.getProcedure()
-        .sort(Comparator.comparing(ExplanationOfBenefit.ProcedureComponent::getSequence));
-    eob.getDiagnosis()
-        .sort(Comparator.comparing(ExplanationOfBenefit.DiagnosisComponent::getSequence));
-    eob.getSupportingInfo()
-        .sort(
-            Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
-    eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
-    return eob;
+  private ZonedDateTime getMaxFromClaimDateSignature(ZonedDateTime candidate) {
+    candidate = max(candidate, claimDateSignature.getBfdUpdatedTimestamp());
+    return candidate;
+  }
+
+  private ZonedDateTime getMaxFromClaimInstitutional(ZonedDateTime candidate) {
+    return getClaimInstitutional()
+        .map(ClaimInstitutional::getBfdUpdatedTimestamp)
+        .map(ts -> max(candidate, ts))
+        .orElse(candidate);
+  }
+
+  private ZonedDateTime getMaxFromClaimFiss(ZonedDateTime candidate) {
+    return getClaimFiss()
+        .map(ClaimFiss::getBfdUpdatedTimestamp)
+        .map(ts -> max(candidate, ts))
+        .orElse(candidate);
+  }
+
+  private ZonedDateTime getMaxFromClaimItems(ZonedDateTime candidate) {
+    if (claimItems != null) {
+      for (var item : claimItems) {
+        if (item == null) continue;
+        candidate = getMaxFromClaimItem(candidate, item);
+      }
+    }
+    return candidate;
+  }
+
+  private ZonedDateTime getMaxFromClaimItem(ZonedDateTime candidate, ClaimItem item) {
+    candidate = max(candidate, item.getBfdUpdatedTimestamp());
+    var lineInstOpt = item.getClaimLineInstitutional();
+    if (lineInstOpt.isPresent()) {
+      var lineInst = lineInstOpt.get();
+      candidate = getMaxFromLineInstitutional(candidate, lineInst);
+    }
+    return candidate;
+  }
+
+  private ZonedDateTime getMaxFromLineInstitutional(
+      ZonedDateTime candidate, ClaimLineInstitutional lineInst) {
+    // lineInst is present because we only call this when the optional is present.
+    // bfd_updated_ts columns are NOT NULL in the DDL, so use the timestamps
+    // directly.
+    candidate = max(candidate, lineInst.getBfdUpdatedTimestamp());
+    var ansiOpt = lineInst.getAnsiSignature();
+    if (ansiOpt.isPresent()) {
+      candidate = max(candidate, ansiOpt.get().getBfdUpdatedTimestamp());
+    }
+    return candidate;
+  }
+
+  private ZonedDateTime max(ZonedDateTime a, ZonedDateTime b) {
+    if (a == null) return b;
+    if (b == null) return a;
+    return a.isAfter(b) ? a : b;
+  }
+
+  /**
+   * Returns a list of ANSI signatures attached to this claim (one per institutional line where
+   * present).
+   *
+   * @return list of {@link ClaimAnsiSignature} instances attached to this claim (may be empty)
+   */
+  public List<ClaimAnsiSignature> getAnsiSignatures() {
+    if (claimItems == null) return List.of();
+    return claimItems.stream()
+        .map(ClaimItem::getClaimLineInstitutional)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .map(ClaimLineInstitutional::getAnsiSignature)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .toList();
   }
 }

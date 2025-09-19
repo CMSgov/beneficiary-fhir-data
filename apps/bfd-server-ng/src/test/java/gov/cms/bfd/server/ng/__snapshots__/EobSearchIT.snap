@@ -69,6 +69,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -1321,6 +1390,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "code" : "other",
             "display" : "Other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
           } ]
         }
       } ],
@@ -2577,6 +2715,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -3829,6 +4036,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "code" : "other",
             "display" : "Other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
           } ]
         }
       } ],
@@ -5086,6 +5362,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -6339,6 +6684,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "code" : "other",
             "display" : "Other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
           } ]
         }
       } ],
@@ -9337,6 +9751,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -12331,6 +12814,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "code" : "other",
             "display" : "Other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
           } ]
         }
       } ],
@@ -15329,6 +15881,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -17181,6 +17802,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -19031,6 +19721,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "code" : "other",
             "display" : "Other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
           } ]
         }
       } ],
@@ -24368,6 +25127,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -26220,6 +27048,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
           } ]
         }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
       } ],
       "benefitBalance" : [ {
         "category" : {
@@ -28070,6 +28967,75 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "code" : "other",
             "display" : "Other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "PR",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "PR",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "22",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "22",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "B10",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "B10",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          } ]
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "adjustmentreason",
+            "display" : "Adjustment Reason",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "CO",
+            "system" : "https://x12.org/codes/claim-adjustment-group-codes"
+          }, {
+            "code" : "CO",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          }, {
+            "code" : "4",
+            "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
+          }, {
+            "code" : "4",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
           } ]
         }
       } ],
