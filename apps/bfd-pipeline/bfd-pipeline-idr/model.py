@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
 from typing import Annotated, TypeVar
@@ -72,15 +73,25 @@ ALIAS_HSTRY = "hstry"
 ALIAS_XREF = "xref"
 
 
-class IdrBaseModel(BaseModel):
+class IdrBaseModel(BaseModel, ABC):
     @staticmethod
-    def table() -> str: ...
+    @abstractmethod
+    def table() -> str:
+        """BFD table name populated by this model."""
 
     @staticmethod
-    def _current_fetch_query(start_time: datetime) -> str: ...
+    def should_replace() -> bool:
+        """Whether to merge or replace data when loading this table."""
+        return False
+
+    @staticmethod
+    @abstractmethod
+    def _current_fetch_query(start_time: datetime) -> str:
+        """Query to populate the table for non-historical data."""
 
     @classmethod
     def _historical_fetch_query(cls, start_time: datetime) -> str:
+        """Query to populate the table for historical data."""
         return cls._current_fetch_query(start_time)
 
     @classmethod
@@ -295,6 +306,42 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
             {WHERE_CLAUSE}
             {ORDER_BY}
+        """
+
+
+class IdrBeneficiaryOvershareMbi(IdrBaseModel):
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_overshare_mbi"
+
+    @staticmethod
+    def should_replace() -> bool:
+        return True
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
+        # The xref data in the bene_hstry table is not completely reliable
+        # because sometimes HICNs can be reused, causing two records to be
+        # xref'd even if they're not the same person.
+
+        # We'll only trust xref records that have a valid entry in the bene_xref
+        # table (this means it's coming from CME). For any MBIs tied to more than
+        # one bene_sk that doesn't have a valid xref, we will prevent it from being
+        # shown since it may be incorrectly linked to more than one person.
+        return """
+            SELECT hstry.bene_mbi_id
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry hstry
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref xref
+                WHERE hstry.bene_xref_efctv_sk = xref.bene_sk
+                AND hstry.bene_sk = xref.bene_xref_sk
+                AND xref.bene_kill_cred_cd = '2'
+            ) AND hstry.bene_mbi_id IS NOT NULL
+            GROUP BY hstry.bene_mbi_id
+            HAVING COUNT(DISTINCT hstry.bene_sk) > 1
         """
 
 

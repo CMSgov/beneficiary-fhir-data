@@ -16,6 +16,7 @@ from model import (
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
     IdrBeneficiaryMbiId,
+    IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrClaim,
@@ -125,20 +126,10 @@ def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
     load_all(
         data_extractor,
         connection_string,
+        # Overshare MBIs must be loaded before other beneficiary information
+        IdrBeneficiaryOvershareMbi,
         IdrBeneficiaryMbiId,
-    )
-
-    (bene_loader, data_loaded) = extract_and_load(
         IdrBeneficiary,
-        data_extractor,
-        connection_string,
-    )
-    if data_loaded:
-        bene_loader.run_sql("SELECT idr.refresh_overshare_mbis()")
-
-    load_all(
-        data_extractor,
-        connection_string,
         IdrBeneficiaryStatus,
         IdrBeneficiaryThirdParty,
         IdrBeneficiaryEntitlement,

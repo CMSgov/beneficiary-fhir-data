@@ -108,7 +108,7 @@ class PostgresLoader:
                 cur.execute(
                     f"CREATE TEMPORARY TABLE {temp_table} (LIKE {table}) ON COMMIT DROP"  # type: ignore
                 )
-                immutable = len(model.update_timestamp_col()) == 0
+                immutable = not model.update_timestamp_col()
                 meta_keys = (
                     ["bfd_created_ts"] if immutable else ["bfd_created_ts", "bfd_updated_ts"]
                 )
@@ -133,19 +133,27 @@ class PostgresLoader:
                         copy.write_row([model_dump[k] for k in insert_cols])
                 copy_timer.stop()
 
-                if len(results) > 0:
+                if results:
                     # For immutable tables, we may still be attempting to re-load some data
                     # due to a batch cancellation.
                     # In these cases, we can assume any conflicting rows have already been loaded so
                     # "DO NOTHING" is appropriate here.
+                    # Additionally, if there are no extra columns to update, we can skip it.
                     on_conflict = (
                         "DO NOTHING"
-                        if immutable
+                        if immutable or not update_set
                         else f"DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s"
                     )
                     timestamp_placeholders = ",".join("%(timestamp)s" for _ in meta_keys)
                     # Upsert into the main table
                     insert_timer.start()
+
+                    if model.should_replace():
+                        # Delete before inserting since we've specified that the data should be replaced
+                        # rather than merged.
+                        # Note that this is executed within a transaction,
+                        # so consumers won't see an empty table.
+                        cur.execute(f"DELETE FROM {table}")  # type: ignore
                     cur.execute(
                         f"""
                         INSERT INTO {table}({cols_str}, {",".join(meta_keys)})
@@ -164,7 +172,7 @@ class PostgresLoader:
                         progress is None or progress.is_historical()
                     )
                     update_cols = model.update_timestamp_col()
-                    if len(batch_timestamp_cols) > 0:
+                    if batch_timestamp_cols:
                         max_timestamp = max(
                             [
                                 _convert_date(last[col])
