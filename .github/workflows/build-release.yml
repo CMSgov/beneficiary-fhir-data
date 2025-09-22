@@ -280,7 +280,7 @@ jobs:
       - name: Get bfd-server-war m2 directory
         id: get-server-war-dir
         run: |
-          server_war_dir="$(realpath "$(find ~/.m2 -type d -path '*/bfd-server-war/*' | head -n1)")"
+          server_war_dir="$(realpath "$(find ~/.m2/repository -type d -path '*/bfd-server-war/*' | head -n1)")"
           ls "$server_war_dir"
 
           echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
