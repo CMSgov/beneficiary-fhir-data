@@ -69,7 +69,7 @@ public class PatientHandler {
       if (!beneficiary.isMergedBeneficiary()
           && patient.getIdentifier().stream()
               .noneMatch(identifier -> identifier.getValue().equals(id.getMbi()))) {
-        id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+        patient.addIdentifier(id.toFhirIdentifier());
       }
 
       id.toFhirLink(Long.parseLong(patient.getId())).ifPresent(patient::addLink);
