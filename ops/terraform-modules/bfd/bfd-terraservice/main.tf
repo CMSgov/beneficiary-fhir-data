@@ -1,7 +1,7 @@
 locals {
   established_envs = !var.greenfield ? ["test", "prod-sbx", "prod"] : ["test", "sandbox", "prod"]
 
-  region = data.aws_region.current.name
+  region = data.aws_region.current.region
 
   bfd_version = data.external.bfd_version.result.bfd_version
 
