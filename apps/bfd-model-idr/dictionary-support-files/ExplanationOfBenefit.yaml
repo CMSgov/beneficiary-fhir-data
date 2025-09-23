@@ -2418,6 +2418,14 @@
   sourceView: V2_MDCR_CLM_FISS
   sourceColumn: CLM_CRNT_STUS_CD
   fhirPath: ExplanationOfBenefit.outcome
+- inputPath: ExplanationOfBenefit-Professional-Base.CLM_AUDT_TRL_STUS_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - MCS
+  sourceView: V2_MDCR_CLM_LCTN_HSTRY
+  sourceColumn: CLM_AUDT_TRL_STUS_CD
+  fhirPath: ExplanationOfBenefit.outcome
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient

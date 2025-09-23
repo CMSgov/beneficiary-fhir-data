@@ -170,7 +170,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
    
     //Partial for PAC data, complete for adjudicated. Of note, we do this by source. So even if final action on PAC source, still "partial"
     src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 2000) -> tgt.outcome = "partial" "Add phase 1 outcome";
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 2000) -> tgt then {
+      src.profComponents as profComponents -> tgt then {
+        profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
+      } "Set professional outcome";
+    }
     //Check on 1000-2000 phases w/ the CLM_CRNT_STUS_CD. We can 
     src.CLM_TYPE_CD as typeCd where(typeCd >= 2000 and typeCd < 3000) -> tgt then {
       //Bifurcate by if it's institutional or professional. 
@@ -178,7 +182,9 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
       } "Set institutional outcome";
 
-      //We will add the professional "array" here.
+      src.profComponents as profComponents -> tgt then {
+        profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
+      } "Set professional outcome";
     } "Complete additional outcomes";
     
     //When we get to carrier/DME, we'll do the same with MCS/VMS status. 

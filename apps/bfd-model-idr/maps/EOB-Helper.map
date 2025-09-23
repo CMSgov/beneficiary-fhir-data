@@ -144,6 +144,41 @@ conceptmap "ADJUDICATION-STATUS" {
   s:"23000" = t:"PartiallyAdjudicated"
 }
 
+conceptmap "CLM_AUDT_TRL_STUS_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"A" = t:"queued"
+  s:"B" = t:"queued"
+  s:"C" = t:"partial"
+  s:"D" = t:"complete"
+  s:"E" = t:"complete"
+  s:"F" = t:"complete"
+  s:"G" = t:"complete"
+  s:"J" = t:"queued"
+  s:"K" = t:"queued"
+  s:"L" = t:"partial"
+  s:"M" = t:"complete"
+  s:"N" = t:"complete"
+  s:"P" = t:"complete"
+  s:"Q" = t:"complete"
+  s:"R" = t:"complete"
+  s:"U" = t:"complete"
+  s:"V" = t:"complete"
+  s:"W" = t:"complete"
+  s:"X" = t:"complete"
+  s:"Y" = t:"complete"
+  s:"Z" = t:"complete"
+  s:"1" = t:"queued"
+  s:"2" = t:"queued"
+  s:"3" = t:"queued"
+  s:"4" = t:"complete"
+  s:"5" = t:"complete"
+  s:"6" = t:"error"
+  s:"8" = t:"complete"
+  s:"9" = t:"complete"
+}
+
 conceptmap "CLM-CRNT-STUS-CD" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://hl7.org/fhir/string"

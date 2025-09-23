@@ -79,6 +79,13 @@ uv run compile_resources.py \
 
 uv run compile_resources.py \
     -m maps/EOB-Base.map \
+    -i sample-data/EOB-Carrier-MCS-Sample.json \
+    -o out/ExplanationOfBenefit-MCS.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
+    --test
+
+uv run compile_resources.py \
+    -m maps/EOB-Base.map \
     -i sample-data/EOB-Carrier-Sample.json \
     -o out/ExplanationOfBenefit-Carrier.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
