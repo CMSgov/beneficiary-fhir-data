@@ -1,26 +1,38 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import java.util.Optional;
+import java.util.Arrays;
+
+import lombok.AllArgsConstructor;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-@Embeddable
-class ClaimRecordTypeCode {
-  @Column(name = "clm_nrln_ric_cd")
-  private Optional<String> claimRecordType;
+@AllArgsConstructor
+public enum ClaimRecordTypeCode {
+    M("M", "Part B DMEPOS claim record (processed by DME Regional Carrier)"),
+    O("O", "Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"),
+    U("U", "Both Part A and B institutional home health agency (HHA) claim records"),
+    V("V", "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"),
+    W("W", "Part B institutional claim record (outpatient [HOP], HHA)");
 
-  Optional<Extension> toFhir() {
+    private final String code;
+    private final String display;
 
-    return claimRecordType.map(
-        c ->
-            new Extension()
-                .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_RECORD_TYPE)
-                .setValue(
-                    new Coding()
-                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_RECORD_TYPE)
-                        .setCode(c)));
-  }
+    /**
+     * Convert from a database code.
+     *
+     * @param code database code
+     * @return claim record type code
+     */
+    public static ClaimRecordTypeCode fromCode(String code) {
+        return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().get();
+    }
+
+    ExplanationOfBenefit.SupportingInformationComponent toFhir(
+            SupportingInfoFactory supportingInfoFactory) {
+        return supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_NRLN_RIC_CD.toFhir())
+                .setCode(new CodeableConcept(new Coding().setDisplay(display).setCode(code)));
+    }
 }
