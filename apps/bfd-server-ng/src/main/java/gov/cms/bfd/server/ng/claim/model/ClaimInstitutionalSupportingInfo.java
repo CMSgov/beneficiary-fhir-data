@@ -43,7 +43,7 @@ class ClaimInstitutionalSupportingInfo {
             diagnosisDrgCode.toFhir(supportingInfoFactory),
             hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
             hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
-                    claimRecordTypeCode.map(s -> s.toFhir(supportingInfoFactory)))
+            claimRecordTypeCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }

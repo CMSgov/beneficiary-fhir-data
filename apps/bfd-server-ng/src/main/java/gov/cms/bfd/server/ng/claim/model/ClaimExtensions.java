@@ -13,9 +13,7 @@ class ClaimExtensions {
   @Embedded private ClaimDispositionCode claimDispositionCode;
 
   List<Extension> toFhir() {
-    return Stream.of(
-            claimContractorNumber.toFhir(),
-            claimDispositionCode.toFhir())
+    return Stream.of(claimContractorNumber.toFhir(), claimDispositionCode.toFhir())
         .flatMap(Optional::stream)
         .toList();
   }

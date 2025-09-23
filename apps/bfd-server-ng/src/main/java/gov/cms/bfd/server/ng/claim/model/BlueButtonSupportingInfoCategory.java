@@ -35,8 +35,8 @@ enum BlueButtonSupportingInfoCategory {
   CLM_HHA_LUP_IND_CD("CLM_HHA_LUP_IND_CD", "Claim Lupa Indicator Code"),
   /** CLM_HHA_RFRL_CD - Claim Referral Code. */
   CLM_HHA_RFRL_CD("CLM_HHA_RFRL_CD", "Claim Referral Code"),
-    /** CLM_NRLN_RIC_CD - Near Line Record Identification Code. */
-    CLM_NRLN_RIC_CD("CLM_NRLN_RIC_CD", "Near Line Record Identification Code");
+  /** CLM_NRLN_RIC_CD - Near Line Record Identification Code. */
+  CLM_NRLN_RIC_CD("CLM_NRLN_RIC_CD", "Near Line Record Identification Code");
 
   private final String code;
   private final String display;
