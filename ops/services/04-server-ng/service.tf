@@ -270,9 +270,11 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
 }
 
 resource "aws_ecs_service" "server" {
-  lifecycle {
-    ignore_changes = [task_definition, desired_count, load_balancer, capacity_provider_strategy]
-  }
+  depends_on = [
+    aws_iam_role_policy_attachment.service_role,
+    aws_iam_role_policy_attachment.execution,
+    aws_iam_role_policy_attachment.deploy
+  ]
 
   cluster                            = data.aws_ecs_cluster.main.arn
   availability_zone_rebalancing      = "ENABLED"
@@ -291,7 +293,31 @@ resource "aws_ecs_service" "server" {
     target_group_arn = aws_lb_target_group.this[0].arn
     container_name   = local.service
     container_port   = local.server_port
+
+    advanced_configuration {
+      role_arn                   = aws_iam_role.deploy.arn
+      production_listener_rule   = data.external.lb_listener_default_rule[local.blue_state].result.arn
+      test_listener_rule         = data.external.lb_listener_default_rule[local.green_state].result.arn
+      alternate_target_group_arn = aws_lb_target_group.this[1].arn
+    }
   }
+
+  deployment_controller {
+    type = "ECS"
+  }
+
+  deployment_configuration {
+    strategy             = "BLUE_GREEN"
+    bake_time_in_minutes = 0
+  }
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
+
+  sigint_rollback       = true
+  wait_for_steady_state = true
 
   dynamic "capacity_provider_strategy" {
     for_each = local.server_capacity_provider_strategies
@@ -300,10 +326,6 @@ resource "aws_ecs_service" "server" {
       base              = capacity_provider_strategy.value.base
       weight            = capacity_provider_strategy.value.weight
     }
-  }
-
-  deployment_controller {
-    type = "CODE_DEPLOY"
   }
 
   network_configuration {

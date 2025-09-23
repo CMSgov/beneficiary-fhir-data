@@ -191,3 +191,105 @@ resource "aws_iam_role_policy_attachment" "execution" {
   role       = aws_iam_role.execution_role.name
   policy_arn = each.value
 }
+
+data "aws_iam_policy_document" "deploy_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ecs.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "deploy_ecs" {
+  statement {
+    sid       = "AllowECSServiceModification"
+    actions   = ["ecs:DescribeServices", "ecs:UpdateServicePrimaryTaskSet"]
+    resources = ["arn:aws:ecs::${local.account_id}:service/${local.service}"]
+  }
+
+  statement {
+    sid       = "AllowECSServiceTaskSetModification"
+    actions   = ["ecs:CreateTaskSet", "ecs:DeleteTaskSet", ]
+    resources = ["arn:aws:ecs::${local.account_id}:task-set/${local.service}/*"]
+  }
+}
+
+resource "aws_iam_policy" "deploy_ecs" {
+  name   = "${local.name_prefix}-deploy-ecs-policy"
+  path   = local.iam_path
+  policy = data.aws_iam_policy_document.deploy_ecs.json
+}
+
+data "aws_iam_policy_document" "deploy_elbv2" {
+  statement {
+    sid = "AllowELBDescribe"
+    actions = [
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeRules",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetHealth"
+    ]
+    # Unfortunately, these Describe Actions do not allow for any resource restrictions or conditions
+    # See https://docs.aws.amazon.com/service-authorization/latest/reference/list_awselasticloadbalancingv2.html#awselasticloadbalancingv2-listener-rule_net
+    resources = ["*"]
+  }
+
+  statement {
+    sid       = "AllowRegistrationOfTargetGroupTargets"
+    actions   = ["elasticloadbalancing:RegisterTargets", "elasticloadbalancing:DeregisterTargets"]
+    resources = aws_lb_target_group.this[*].arn
+  }
+
+  statement {
+    sid       = "AllowELBListenerModification"
+    actions   = ["elasticloadbalancing:ModifyListener", "elasticloadbalancing:ModifyRule"]
+    resources = [for _, v in aws_lb_listener.this : v.arn]
+  }
+
+  statement {
+    sid       = "AllowELBListenerRuleModification"
+    actions   = ["elasticloadbalancing:ModifyRule"]
+    resources = [for _, v in aws_lb_listener.this : "${replace(v.arn, "listener/", "listener-rule/")}/*"]
+  }
+}
+
+resource "aws_iam_policy" "deploy_elbv2" {
+  name   = "${local.name_prefix}-deploy-elbv2-policy"
+  path   = local.iam_path
+  policy = data.aws_iam_policy_document.deploy_elbv2.json
+}
+
+data "aws_iam_policy_document" "deploy_iam" {
+  statement {
+    sid       = "AllowPassRole"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.service_role.arn, aws_iam_role.execution_role.arn]
+  }
+}
+
+resource "aws_iam_policy" "deploy_iam" {
+  name   = "${local.name_prefix}-deploy-iam-policy"
+  path   = local.iam_path
+  policy = data.aws_iam_policy_document.deploy_iam.json
+}
+
+resource "aws_iam_role" "deploy" {
+  name = "${local.name_prefix}-deploy"
+  # path                  = local.iam_path
+  permissions_boundary  = local.permissions_boundary_arn
+  assume_role_policy    = data.aws_iam_policy_document.deploy_assume.json
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "deploy" {
+  for_each = {
+    ecs   = aws_iam_policy.deploy_ecs.arn
+    elbv2 = aws_iam_policy.deploy_elbv2.arn
+    iam   = aws_iam_policy.deploy_iam.arn
+  }
+
+  role       = aws_iam_role.deploy.name
+  policy_arn = each.value
+}
