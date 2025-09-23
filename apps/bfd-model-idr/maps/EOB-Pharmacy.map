@@ -110,7 +110,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
-        claimType -> tgtReference.display = translate(claimType,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_TO_COVERAGE_PART','code') "Add temp coverage placeholder";
+        claimType -> tgtReference.display = "Part D" "Add coverage type";
       } "Add reference for coverage";
       
       // Submitter contract number
