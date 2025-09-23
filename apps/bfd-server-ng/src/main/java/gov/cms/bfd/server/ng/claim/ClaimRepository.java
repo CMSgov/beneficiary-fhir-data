@@ -20,6 +20,19 @@ import org.springframework.stereotype.Repository;
 public class ClaimRepository {
   private EntityManager entityManager;
 
+  private static final String CLAIM_TABLES =
+      """
+      SELECT c
+      FROM Claim c
+      JOIN FETCH c.beneficiary b
+      JOIN FETCH c.claimDateSignature AS cds
+      JOIN FETCH c.claimItems AS cl
+      LEFT JOIN FETCH c.claimInstitutional ci
+      LEFT JOIN FETCH cl.claimLineInstitutional cli
+      LEFT JOIN FETCH c.claimFiss cf
+      LEFT JOIN FETCH cli.ansiSignature a
+    """;
+
   /**
    * Search for a claim by its ID.
    *
@@ -39,7 +52,7 @@ public class ClaimRepository {
                         WHERE c.claimUniqueId = :claimUniqueId
                         %s
                         """,
-                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                        CLAIM_TABLES, getFilters(claimThroughDate, lastUpdated)),
                     Claim.class),
                 claimThroughDate,
                 lastUpdated,
@@ -99,7 +112,7 @@ public class ClaimRepository {
                         WHERE c.claimUniqueId IN (:claimIds)
                         %s
                         """,
-                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
+                        CLAIM_TABLES, getFilters(claimThroughDate, lastUpdated)),
                     Claim.class),
                 claimThroughDate,
                 lastUpdated,
@@ -131,20 +144,6 @@ public class ClaimRepository {
         .stream()
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
-  }
-
-  private String getClaimTables() {
-    return """
-      SELECT c
-      FROM Claim c
-      JOIN FETCH c.beneficiary b
-      JOIN FETCH c.claimDateSignature AS cds
-      JOIN FETCH c.claimItems AS cl
-      LEFT JOIN FETCH c.claimInstitutional ci
-      LEFT JOIN FETCH cl.claimLineInstitutional cli
-      LEFT JOIN FETCH c.claimFiss cf
-      LEFT JOIN FETCH cli.ansiSignature a
-    """;
   }
 
   private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
