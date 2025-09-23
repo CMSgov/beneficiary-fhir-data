@@ -243,6 +243,9 @@ resource "aws_ecs_service" "rda" {
     type = "ECS"
   }
 
+  sigint_rollback       = true
+  wait_for_steady_state = true
+
   network_configuration {
     assign_public_ip = false
     security_groups  = [aws_security_group.rda.id]
