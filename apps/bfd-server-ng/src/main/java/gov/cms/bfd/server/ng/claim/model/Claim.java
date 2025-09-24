@@ -41,6 +41,12 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
+  @Column(name = "clm_nrln_ric_cd")
+  private Optional<ClaimNearLineRecordTypeCode> claimNearLineRecordTypeCode;
+
+  @Column(name = "clm_ric_cd")
+  private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
+
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -141,11 +147,23 @@ public class Claim {
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();
+    var recordTypeCodes =
+        Stream.concat(
+            claimRecordTypeCode.stream()
+                .map(recordTypeCode -> recordTypeCode.toFhir(supportingInfoFactory)),
+            claimNearLineRecordTypeCode.stream()
+                .map(
+                    nearLineRecordTypeCode ->
+                        nearLineRecordTypeCode.toFhir(supportingInfoFactory)));
     var initialSupportingInfo =
-        List.of(
-            bloodPints.toFhir(supportingInfoFactory),
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            typeOfBillCode.toFhir(supportingInfoFactory));
+        Stream.concat(
+                Stream.of(
+                    bloodPints.toFhir(supportingInfoFactory),
+                    nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+                    typeOfBillCode.toFhir(supportingInfoFactory)),
+                recordTypeCodes)
+            .toList();
+
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
