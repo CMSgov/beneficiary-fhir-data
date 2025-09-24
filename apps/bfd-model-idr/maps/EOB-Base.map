@@ -105,17 +105,17 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         } "Add coding";
     } "CLM_CNTRCTR_NUM";
 
-    /*
+    // No longer used, but kept since might be used again
     //This field can be used to set the Coverage type. 
     //When adding a claim type that can be covered under part B (or PDE, whichever comes first), add the insurance logic here.
-    src.CLM_NRLN_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
-          tgtCoding.code = ricCd "Add code";
-        } "Add coding";
-      } "CLM_NRLN_RIC_CD";
-      */
+    //src.CLM_NRLN_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
+    //    src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
+    //    src -> tgtExtension.value = create('Coding') as tgtCoding then{
+    //      src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
+    //      tgtCoding.code = ricCd "Add code";
+    //    } "Add coding";
+    //  } "CLM_NRLN_RIC_CD";
+
     src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
       src -> tgtExtension.value = create('Coding') as tgtCoding then{
@@ -123,16 +123,16 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         tgtCoding.code = adjTypeCd "Add code";
       } "Add coding";
     } "CLM_ADJSTMT_TYPE_CD";
-    /*
+
+    // No longer used, but kept since might be used again
     //This is intentional. The IDR stores partially-adjudicated RIC codes in a separate field, but the content / meaning is the same. We can just re-use the extension.
-    src.CLM_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
-          tgtCoding.code = ricCd "Add code";
-        } "Add coding";
-    } "CLM_NRLN_RIC_CD";
-    */
+    //src.CLM_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
+    //    src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
+    //    src -> tgtExtension.value = create('Coding') as tgtCoding then{
+    //      src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
+    //      tgtCoding.code = ricCd "Add code";
+    //    } "Add coding";
+    //} "CLM_NRLN_RIC_CD";
 
     src.CLM_DISP_CD as dispCd -> tgt.extension = create('Extension') as tgtExtension then {
         src -> tgtExtension.url =  "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD" "Add url";
