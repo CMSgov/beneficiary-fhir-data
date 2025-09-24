@@ -23,10 +23,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 import org.jetbrains.annotations.Nullable;
 
-/** Claim table. */
+/**
+ * Claim table. Suppress SonarQube Monster Class warning that dependencies to other class should be
+ * reduced from 21 to the max 20. Ignore. Class itself is relatively short in lines of code.
+ */
 @Entity
 @Getter
 @Table(name = "claim", schema = "idr")
+@SuppressWarnings("java:S6539")
 public class Claim {
   @Id
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
