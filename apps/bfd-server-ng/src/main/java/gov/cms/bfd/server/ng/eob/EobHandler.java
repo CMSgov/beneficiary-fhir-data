@@ -171,8 +171,6 @@ public class EobHandler {
     var procedureCode = proc.getProcedureCode().orElse("");
     var icdIndicator = proc.getIcdIndicator().orElse(IcdIndicator.ICD_10);
 
-    // Procedure codes live under the CMS procedure system
-    // diagnosis codes under the HL7 CM system.
     var procedureEntries = SECURITY_LABELS_MAP.get(icdIndicator.getProcedureSystem());
     var diagnosisEntries = SECURITY_LABELS_MAP.get(icdIndicator.getDiagnosisSystem());
 

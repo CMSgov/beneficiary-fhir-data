@@ -12,7 +12,9 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +52,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   protected static long claimUniqueIdForDrgWithExpiredCode522 = 9688880648059L;
   protected static long claimUniqueIdForDrgWithExpiredCode523 = 3159002171180L;
   protected static long claimUniqueIdForCpt = 4722020775430L;
+  protected static long claimUniqueIdForFutureHcpcs = 6871761612138L;
+  protected static long claimUniqueIdForFutureHcpcsAfterStart = 6871761612139L;
 
   protected static long claimUniqueIdWithNoSamhsa = 566745788569L;
   protected static long claimUniqueIdWithMultipleSamhsaCodes = 3233800161009L;
@@ -80,31 +84,37 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   // System: HCPCS [clm_line_hcpcs_cd]
   private static final String HCPCS = "H0005";
   private static final String HCPCS2 = "H0050";
+  private static final String FUTURE_HCPCS = "G0534";
 
   // System: DRG [dgns_drg_cd]
   private static final String DRG = "896";
   private static final String DRG2 = "897";
+  private static final String DRG_EXPIRED1 = "522";
+  private static final String DRG_EXPIRED2 = "523";
 
   // System: CPT [clm_line_hcpcs_cd]
   private static final String CPT = "99408";
   private static final String CPT2 = "0078U";
 
-  protected final List<String> codesToCheck =
+  protected final List<List<String>> samhsaCodesToCheck =
       List.of(
-          DRG,
-          DRG2,
-          HCPCS,
-          HCPCS2,
-          CPT,
-          CPT2,
-          ICD9_DIAGNOSIS,
-          ICD9_DIAGNOSIS2,
-          ICD10_DIAGNOSIS,
-          ICD10_DIAGNOSIS2,
-          ICD9_PROCEDURE,
-          ICD9_PROCEDURE2,
-          ICD10_PROCEDURE,
-          ICD10_PROCEDURE2);
+          List.of(SystemUrls.CMS_MS_DRG, DRG),
+          List.of(SystemUrls.CMS_MS_DRG, DRG2),
+          List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED1),
+          List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED2),
+          List.of(SystemUrls.CMS_HCPCS, HCPCS),
+          List.of(SystemUrls.CMS_HCPCS, HCPCS2),
+          List.of(SystemUrls.CMS_HCPCS, FUTURE_HCPCS),
+          List.of(SystemUrls.AMA_CPT, CPT),
+          List.of(SystemUrls.AMA_CPT, CPT2),
+          List.of(SystemUrls.ICD_9_CM_DIAGNOSIS, ICD9_DIAGNOSIS),
+          List.of(SystemUrls.ICD_9_CM_DIAGNOSIS, ICD9_DIAGNOSIS2),
+          List.of(SystemUrls.ICD_10_CM_DIAGNOSIS, ICD10_DIAGNOSIS),
+          List.of(SystemUrls.ICD_10_CM_DIAGNOSIS, ICD10_DIAGNOSIS2),
+          List.of(SystemUrls.CMS_ICD_9_PROCEDURE, ICD9_PROCEDURE),
+          List.of(SystemUrls.CMS_ICD_9_PROCEDURE, ICD9_PROCEDURE2),
+          List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE),
+          List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE2));
 
   @Autowired private EobHandler eobHandler;
 
@@ -142,9 +152,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   @Test
   void claimWithWrongCode() {
-    // Wrongly added HCPCS Samhsa code should not be removed
-    // even it is a Samhsa code it is in wrong system
-    // Samhsa code H0034 becomes H00.34 in ICD-10
+    // SAMHSA code with a mismatched system should not be removed
     var codeToCheck = "H00.34";
     assertTrue(isSensitiveCode(SystemUrls.CMS_HCPCS, normalize(codeToCheck)));
     var fetched = eobRead().withId(claimWithHcpcsInIcd).execute();
@@ -166,27 +174,43 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(
                 claimUniqueIdForDrgWithExpiredCode522,
                 claimUniqueIdWithNoSamhsa,
-                claimWithHcpcsInIcd)),
+                claimWithHcpcsInIcd),
+            List.of(claimWithHcpcsInIcd)),
         Arguments.of(
-            beneSk2, List.of(claimUniqueIdForHcpcs, claimUniqueIdForIcd10Diagnosis), List.of()),
-        Arguments.of(beneSk3, List.of(claimUniqueIdForIcd10Procedure), List.of()),
-        Arguments.of(beneSk4, List.of(claimUniqueIdForIcd9Diagnosis), List.of()),
+            beneSk2,
+            List.of(claimUniqueIdForHcpcs, claimUniqueIdForIcd10Diagnosis),
+            List.of(),
+            List.of()),
+        Arguments.of(beneSk3, List.of(claimUniqueIdForIcd10Procedure), List.of(), List.of()),
+        Arguments.of(beneSk4, List.of(claimUniqueIdForIcd9Diagnosis), List.of(), List.of()),
         Arguments.of(
             beneSk5,
             List.of(claimUniqueIdForIcd9Procedure, claimUniqueIdForDrg, claimUniqueIdForCpt),
+            List.of(),
             List.of()),
-        Arguments.of(beneSk6, List.of(), List.of(claimUniqueIdForDrgWithExpiredCode523)));
+        Arguments.of(
+            beneSk6,
+            List.of(claimUniqueIdForFutureHcpcsAfterStart),
+            List.of(claimUniqueIdForDrgWithExpiredCode523, claimUniqueIdForFutureHcpcs),
+            List.of()));
   }
 
   @MethodSource
   @ParameterizedTest
-  void shouldFilterSamhsa(long beneSk, List<Long> samhsaClaimIds, List<Long> nonSamhsaClaimIds) {
+  void shouldFilterSamhsa(
+      long beneSk,
+      List<Long> samhsaClaimIds,
+      List<Long> nonSamhsaClaimIds,
+      List<Long> skipBundleVerification) {
     var bundle = searchBundle(beneSk).execute();
-
-    // Bundle from endpoint should not contain the code
-    assertFalse(
-        codesToCheck.stream()
-            .anyMatch(e -> containsSamhsaCodeAnywhere(getEobFromBundle(bundle), e)));
+    // Before checking for SAMHSA codes, filter any cases that won't pass verification due to
+    // system/code mismatches.
+    var bundleClaimsToCheck =
+        getEobFromBundle(bundle).stream()
+            .filter(c -> !skipBundleVerification.contains(Long.parseLong(c.getIdPart())))
+            .toList();
+    // Bundle from endpoint should not contain any sensitive codes
+    assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));
 
     // Ensure listed claims are valid
     var foundClaimIds = getClaimIdsByBene(beneSk, SamhsaFilterMode.INCLUDE);
@@ -195,10 +219,13 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
       assertTrue(foundClaimIds.contains(claimId));
     }
 
-    var foundClaims = getClaimsByBene(beneSk, SamhsaFilterMode.INCLUDE);
-    var foundSamhsa =
-        codesToCheck.stream().anyMatch(e -> containsSamhsaCodeAnywhere(foundClaims, e));
-    assertEquals(!samhsaClaimIds.isEmpty(), foundSamhsa);
+    var foundSamhsaClaims =
+        getClaimsByBene(beneSk, SamhsaFilterMode.INCLUDE).stream()
+            .filter(c -> samhsaClaimIds.contains(Long.parseLong(c.getIdPart())))
+            .toList();
+    assertFalse(foundSamhsaClaims.isEmpty());
+    // All claims marked as SAMHSA should contain at least one valid code.
+    assertTrue(allClaimsContainSamhsaCode(foundSamhsaClaims, false));
 
     var foundClaimIdsNoSamhsa = getClaimIdsByBene(beneSk, SamhsaFilterMode.EXCLUDE);
     // Ensure non-SAMHSA claims don't contain SAMHSA claim IDs
@@ -217,6 +244,11 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
+
+  // The following group of tests is used to ensure the validity of the test data.
+  // Since the tests above are largely checking for the absence of some codes,
+  // the only way to ensure the data is set up correctly is to make sure the relevant codes
+  // do appear in the responses when filtering is not enabled.
 
   private static Stream<Arguments> ensureDiagnosis() {
     return Stream.of(
@@ -273,7 +305,9 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
         Arguments.of(claimUniqueIdForHcpcs, HCPCS, SystemUrls.CMS_HCPCS),
         Arguments.of(claimUniqueIdForCpt, CPT, SystemUrls.AMA_CPT),
         Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, HCPCS2, SystemUrls.CMS_HCPCS),
-        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, CPT2, SystemUrls.AMA_CPT));
+        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, CPT2, SystemUrls.AMA_CPT),
+        Arguments.of(claimUniqueIdForFutureHcpcs, FUTURE_HCPCS, SystemUrls.CMS_HCPCS),
+        Arguments.of(claimUniqueIdForFutureHcpcsAfterStart, FUTURE_HCPCS, SystemUrls.CMS_HCPCS));
   }
 
   @MethodSource
@@ -292,8 +326,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     return Stream.of(
         Arguments.of(claimUniqueIdForDrg, DRG, SystemUrls.CMS_MS_DRG),
         Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, DRG2, SystemUrls.CMS_MS_DRG),
-        Arguments.of(claimUniqueIdForDrgWithExpiredCode522, "522", SystemUrls.CMS_MS_DRG),
-        Arguments.of(claimUniqueIdForDrgWithExpiredCode523, "523", SystemUrls.CMS_MS_DRG));
+        Arguments.of(claimUniqueIdForDrgWithExpiredCode522, DRG_EXPIRED1, SystemUrls.CMS_MS_DRG),
+        Arguments.of(claimUniqueIdForDrgWithExpiredCode523, DRG_EXPIRED2, SystemUrls.CMS_MS_DRG));
   }
 
   @MethodSource
@@ -325,8 +359,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     // security_labels.yml has 680 active and 2 inactive items
     assertEquals(682, totalItems, "Expected 682 items, got: " + totalItems);
 
-    for (var code : codesToCheck) {
-      assertTrue(checkSamhsaCode(SecurityLabel.normalize(code)));
+    for (var code : samhsaCodesToCheck) {
+      assertTrue(checkSamhsaCode(SecurityLabel.normalize(code.get(1))));
     }
 
     // Ensure the security labels file doesn't contain any unexpected systems
@@ -352,16 +386,35 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     return SECURITY_LABELS.get(system).stream().anyMatch(s -> s.getCode().equals(code));
   }
 
-  private boolean containsSamhsaCodeAnywhere(List<ExplanationOfBenefit> fhirClaims, String code) {
-    var targetNorm = normalize(code);
-    return fhirClaims.stream().anyMatch(e -> eobJsonHasCode(e, targetNorm));
+  private boolean allClaimsContainSamhsaCode(
+      List<ExplanationOfBenefit> fhirClaims, boolean validateDates) {
+    return fhirClaims.stream().allMatch(e -> containsAnySamhsaCode(e, validateDates));
   }
 
-  private boolean eobJsonHasCode(ExplanationOfBenefit eob, String targetNorm) {
-    // This can produce false positives, but it will be safer to set up the test data to avoid this
-    // than to try to limit the fields we check against
+  private boolean anyClaimsContainSamhsaCode(
+      List<ExplanationOfBenefit> fhirClaims, boolean validateDates) {
+    return fhirClaims.stream().anyMatch(e -> containsAnySamhsaCode(e, validateDates));
+  }
+
+  private boolean containsAnySamhsaCode(ExplanationOfBenefit eob, boolean validateDates) {
+    var eobEnd = eob.getBillablePeriod().getEnd();
     var json = normalize(context.newJsonParser().encodeResourceToString(eob));
-    return json.contains(":" + targetNorm) || json.contains(String.format(":\"%s\"", targetNorm));
+    for (var entry : SECURITY_LABELS.values().stream().flatMap(Collection::stream).toList()) {
+      if (validateDates && eobEnd.after(DateUtil.toDate(entry.getEndDateAsDate()))) {
+        continue;
+      }
+      if (validateDates && eobEnd.before(DateUtil.toDate(entry.getStartDateAsDate()))) {
+        continue;
+      }
+      var target = normalize(entry.getCode());
+      // This can produce false positives, but it will be safer to set up the test data to avoid
+      // this than to try to limit the fields we check against
+      if (json.contains("\"code\":" + target)
+          || json.contains(String.format("\"code\":\"%s\"", target))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean checkSamhsaCode(String samhsaCode) {
