@@ -43,27 +43,27 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
-  protected static long claimUniqueIdForIcd10Diagnosis = 4146709784142L; // icd-10
-  protected static long claimUniqueIdForIcd10Procedure = 6647624169509L; // icd10
-  protected static long claimUniqueIdForIcd9Diagnosis = 5312173004042L; // icd-9
-  protected static long claimUniqueIdForIcd9Procedure = 6103633914327L; // icd9
-  protected static long claimUniqueIdForHcpcs = 7095549187112L;
-  protected static long claimUniqueIdForDrg = 9644464937468L;
-  protected static long claimUniqueIdForDrgWithExpiredCode522 = 9688880648059L;
-  protected static long claimUniqueIdForDrgWithExpiredCode523 = 3159002171180L;
-  protected static long claimUniqueIdForCpt = 4722020775430L;
-  protected static long claimUniqueIdForFutureHcpcs = 6871761612138L;
-  protected static long claimUniqueIdForFutureHcpcsAfterStart = 6871761612139L;
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS = 4146709784142L; // icd-10
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L; // icd10
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS = 5312173004042L; // icd-9
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE = 6103633914327L; // icd9
+  private static final long CLAIM_UNIQUE_ID_FOR_HCPCS = 7095549187112L;
+  private static final long CLAIM_UNIQUE_ID_FOR_DRG = 9644464937468L;
+  private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522 = 9688880648059L;
+  private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523 = 3159002171180L;
+  private static final long CLAIM_UNIQUE_ID_FOR_CPT = 4722020775430L;
+  private static final long CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS = 6871761612138L;
+  private static final long CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START = 6871761612139L;
 
-  protected static long claimUniqueIdWithNoSamhsa = 566745788569L;
-  protected static long claimUniqueIdWithMultipleSamhsaCodes = 3233800161009L;
-  protected static long claimWithHcpcsInIcd = 6288598524935L;
-  protected static long beneSk = 412457726;
-  protected static long beneSk2 = 794471559;
-  protected static long beneSk3 = 455108118;
-  protected static long beneSk4 = 167719446;
-  protected static long beneSk5 = 27590072;
-  protected static long beneSk6 = 186315498;
+  private static final long CLAIM_UNIQUE_ID_WITH_NO_SAMHSA = 566745788569L;
+  private static final long CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES = 3233800161009L;
+  private static final long CLAIM_WITH_HCPCS_IN_ICD = 6288598524935L;
+  private static final long BENE_SK = 412457726;
+  private static final long BENE_SK2 = 794471559;
+  private static final long BENE_SK3 = 455108118;
+  private static final long BENE_SK4 = 167719446;
+  private static final long BENE_SK5 = 27590072;
+  private static final long BENE_SK6 = 186315498;
 
   // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
@@ -155,7 +155,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     // SAMHSA code with a mismatched system should not be removed
     var codeToCheck = "H00.34";
     assertTrue(isSensitiveCode(SystemUrls.CMS_HCPCS, normalize(codeToCheck)));
-    var fetched = eobRead().withId(claimWithHcpcsInIcd).execute();
+    var fetched = eobRead().withId(CLAIM_WITH_HCPCS_IN_ICD).execute();
     var diagnosis =
         fetched.getDiagnosis().stream()
             .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
@@ -169,29 +169,33 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> shouldFilterSamhsa() {
     return Stream.of(
         Arguments.of(
-            beneSk,
-            List.of(claimUniqueIdWithMultipleSamhsaCodes),
+            BENE_SK,
+            List.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES),
             List.of(
-                claimUniqueIdForDrgWithExpiredCode522,
-                claimUniqueIdWithNoSamhsa,
-                claimWithHcpcsInIcd),
-            List.of(claimWithHcpcsInIcd)),
+                CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                CLAIM_UNIQUE_ID_WITH_NO_SAMHSA,
+                CLAIM_WITH_HCPCS_IN_ICD),
+            List.of(CLAIM_WITH_HCPCS_IN_ICD)),
         Arguments.of(
-            beneSk2,
-            List.of(claimUniqueIdForHcpcs, claimUniqueIdForIcd10Diagnosis),
+            BENE_SK2,
+            List.of(CLAIM_UNIQUE_ID_FOR_HCPCS, CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS),
             List.of(),
             List.of()),
-        Arguments.of(beneSk3, List.of(claimUniqueIdForIcd10Procedure), List.of(), List.of()),
-        Arguments.of(beneSk4, List.of(claimUniqueIdForIcd9Diagnosis), List.of(), List.of()),
+        Arguments.of(BENE_SK3, List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE), List.of(), List.of()),
+        Arguments.of(BENE_SK4, List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS), List.of(), List.of()),
         Arguments.of(
-            beneSk5,
-            List.of(claimUniqueIdForIcd9Procedure, claimUniqueIdForDrg, claimUniqueIdForCpt),
+            BENE_SK5,
+            List.of(
+                CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE,
+                CLAIM_UNIQUE_ID_FOR_DRG,
+                CLAIM_UNIQUE_ID_FOR_CPT),
             List.of(),
             List.of()),
         Arguments.of(
-            beneSk6,
-            List.of(claimUniqueIdForFutureHcpcsAfterStart),
-            List.of(claimUniqueIdForDrgWithExpiredCode523, claimUniqueIdForFutureHcpcs),
+            BENE_SK6,
+            List.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START),
+            List.of(
+                CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523, CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS),
             List.of()));
   }
 
@@ -253,12 +257,17 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> ensureDiagnosis() {
     return Stream.of(
         Arguments.of(
-            claimUniqueIdForIcd10Diagnosis, ICD10_DIAGNOSIS, SystemUrls.ICD_10_CM_DIAGNOSIS),
-        Arguments.of(claimUniqueIdForIcd9Diagnosis, ICD9_DIAGNOSIS, SystemUrls.ICD_9_CM_DIAGNOSIS),
+            CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS, ICD10_DIAGNOSIS, SystemUrls.ICD_10_CM_DIAGNOSIS),
         Arguments.of(
-            claimUniqueIdWithMultipleSamhsaCodes, ICD10_DIAGNOSIS2, SystemUrls.ICD_10_CM_DIAGNOSIS),
+            CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS, ICD9_DIAGNOSIS, SystemUrls.ICD_9_CM_DIAGNOSIS),
         Arguments.of(
-            claimUniqueIdWithMultipleSamhsaCodes, ICD9_DIAGNOSIS2, SystemUrls.ICD_9_CM_DIAGNOSIS));
+            CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES,
+            ICD10_DIAGNOSIS2,
+            SystemUrls.ICD_10_CM_DIAGNOSIS),
+        Arguments.of(
+            CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES,
+            ICD9_DIAGNOSIS2,
+            SystemUrls.ICD_9_CM_DIAGNOSIS));
   }
 
   @MethodSource
@@ -277,14 +286,17 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> ensureProcedure() {
     return Stream.of(
         Arguments.of(
-            claimUniqueIdForIcd10Procedure, ICD10_PROCEDURE, SystemUrls.CMS_ICD_10_PROCEDURE),
-        Arguments.of(claimUniqueIdForIcd9Procedure, ICD9_PROCEDURE, SystemUrls.CMS_ICD_9_PROCEDURE),
+            CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE, ICD10_PROCEDURE, SystemUrls.CMS_ICD_10_PROCEDURE),
         Arguments.of(
-            claimUniqueIdWithMultipleSamhsaCodes,
+            CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE, ICD9_PROCEDURE, SystemUrls.CMS_ICD_9_PROCEDURE),
+        Arguments.of(
+            CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES,
             ICD10_PROCEDURE2,
             SystemUrls.CMS_ICD_10_PROCEDURE),
         Arguments.of(
-            claimUniqueIdWithMultipleSamhsaCodes, ICD9_PROCEDURE2, SystemUrls.CMS_ICD_9_PROCEDURE));
+            CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES,
+            ICD9_PROCEDURE2,
+            SystemUrls.CMS_ICD_9_PROCEDURE));
   }
 
   @MethodSource
@@ -302,12 +314,13 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private static Stream<Arguments> ensureHcpcs() {
     return Stream.of(
-        Arguments.of(claimUniqueIdForHcpcs, HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(claimUniqueIdForCpt, CPT, SystemUrls.AMA_CPT),
-        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, HCPCS2, SystemUrls.CMS_HCPCS),
-        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, CPT2, SystemUrls.AMA_CPT),
-        Arguments.of(claimUniqueIdForFutureHcpcs, FUTURE_HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(claimUniqueIdForFutureHcpcsAfterStart, FUTURE_HCPCS, SystemUrls.CMS_HCPCS));
+        Arguments.of(CLAIM_UNIQUE_ID_FOR_HCPCS, HCPCS, SystemUrls.CMS_HCPCS),
+        Arguments.of(CLAIM_UNIQUE_ID_FOR_CPT, CPT, SystemUrls.AMA_CPT),
+        Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, HCPCS2, SystemUrls.CMS_HCPCS),
+        Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, CPT2, SystemUrls.AMA_CPT),
+        Arguments.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS, FUTURE_HCPCS, SystemUrls.CMS_HCPCS),
+        Arguments.of(
+            CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START, FUTURE_HCPCS, SystemUrls.CMS_HCPCS));
   }
 
   @MethodSource
@@ -324,10 +337,12 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private static Stream<Arguments> ensureDrg() {
     return Stream.of(
-        Arguments.of(claimUniqueIdForDrg, DRG, SystemUrls.CMS_MS_DRG),
-        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, DRG2, SystemUrls.CMS_MS_DRG),
-        Arguments.of(claimUniqueIdForDrgWithExpiredCode522, DRG_EXPIRED1, SystemUrls.CMS_MS_DRG),
-        Arguments.of(claimUniqueIdForDrgWithExpiredCode523, DRG_EXPIRED2, SystemUrls.CMS_MS_DRG));
+        Arguments.of(CLAIM_UNIQUE_ID_FOR_DRG, DRG, SystemUrls.CMS_MS_DRG),
+        Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, DRG2, SystemUrls.CMS_MS_DRG),
+        Arguments.of(
+            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522, DRG_EXPIRED1, SystemUrls.CMS_MS_DRG),
+        Arguments.of(
+            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523, DRG_EXPIRED2, SystemUrls.CMS_MS_DRG));
   }
 
   @MethodSource
