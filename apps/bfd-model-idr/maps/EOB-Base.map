@@ -182,7 +182,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
       } "Set professional outcome";
     } "Complete additional outcomes";
-    
+    src.CLM_SRC_ID as sourceSk where sourceSk = '23000' -> tgt.outcome = "partial" "Set NCH outcome to partial.";
     //When we get to carrier/DME, we'll do the same with MCS/VMS status. 
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
