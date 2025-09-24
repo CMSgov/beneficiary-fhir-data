@@ -1,6 +1,9 @@
 package gov.cms.bfd.server.ng;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -58,41 +61,50 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   protected static long beneSk5 = 27590072;
   protected static long beneSk6 = 186315498;
 
-  // Code: F10.10 System: icd-10-cm [clm_dgns_cd]
+  // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
   private static final String ICD10_DIAGNOSIS2 = "F55.2";
 
-  // Code: HZ2ZZZZ System: ICD10 [clm_prcdr_cd]
+  // System: ICD10 [clm_prcdr_cd]
   private static final String ICD10_PROCEDURE = "HZ2ZZZZ";
+  private static final String ICD10_PROCEDURE2 = "HZ57ZZZ";
 
-  // Code: F10.10 System: icd-9-cm [clm_dgns_cd]
+  // System: icd-9-cm [clm_dgns_cd]
   private static final String ICD9_DIAGNOSIS = "291";
   private static final String ICD9_DIAGNOSIS2 = "V65.42";
 
-  // Code: HZ2ZZZZ System: ICD9 [clm_prcdr_cd]
+  // System: ICD9 [clm_prcdr_cd]
   private static final String ICD9_PROCEDURE = "94.45";
   private static final String ICD9_PROCEDURE2 = "94.66";
 
-  // Code: H0005 System: HCPCS [clm_line_hcpcs_cd]
+  // System: HCPCS [clm_line_hcpcs_cd]
   private static final String HCPCS = "H0005";
   private static final String HCPCS2 = "H0050";
 
-  // Code: 896 System: DRG [dgns_drg_cd]
+  // System: DRG [dgns_drg_cd]
   private static final String DRG = "896";
+  private static final String DRG2 = "897";
 
-  // Code: 99408 System: CPT [clm_line_hcpcs_cd]
+  // System: CPT [clm_line_hcpcs_cd]
   private static final String CPT = "99408";
+  private static final String CPT2 = "0078U";
 
   protected final List<String> codesToCheck =
       List.of(
           DRG,
+          DRG2,
           HCPCS,
+          HCPCS2,
           CPT,
+          CPT2,
           ICD9_DIAGNOSIS,
+          ICD9_DIAGNOSIS2,
+          ICD10_DIAGNOSIS,
           ICD10_DIAGNOSIS2,
           ICD9_PROCEDURE,
-          ICD10_DIAGNOSIS,
-          ICD10_PROCEDURE);
+          ICD9_PROCEDURE2,
+          ICD10_PROCEDURE,
+          ICD10_PROCEDURE2);
 
   @Autowired private EobHandler eobHandler;
 
@@ -236,7 +248,9 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
             claimUniqueIdForIcd10Procedure, ICD10_PROCEDURE, SystemUrls.CMS_ICD_10_PROCEDURE),
         Arguments.of(claimUniqueIdForIcd9Procedure, ICD9_PROCEDURE, SystemUrls.CMS_ICD_9_PROCEDURE),
         Arguments.of(
-            claimUniqueIdWithMultipleSamhsaCodes, ICD10_PROCEDURE, SystemUrls.CMS_ICD_10_PROCEDURE),
+            claimUniqueIdWithMultipleSamhsaCodes,
+            ICD10_PROCEDURE2,
+            SystemUrls.CMS_ICD_10_PROCEDURE),
         Arguments.of(
             claimUniqueIdWithMultipleSamhsaCodes, ICD9_PROCEDURE2, SystemUrls.CMS_ICD_9_PROCEDURE));
   }
@@ -258,7 +272,8 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     return Stream.of(
         Arguments.of(claimUniqueIdForHcpcs, HCPCS, SystemUrls.CMS_HCPCS),
         Arguments.of(claimUniqueIdForCpt, CPT, SystemUrls.AMA_CPT),
-        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, HCPCS2, SystemUrls.CMS_HCPCS));
+        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, HCPCS2, SystemUrls.CMS_HCPCS),
+        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, CPT2, SystemUrls.AMA_CPT));
   }
 
   @MethodSource
@@ -274,7 +289,9 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   }
 
   private static Stream<Arguments> ensureDrg() {
-    return Stream.of(Arguments.of(claimUniqueIdForDrg, DRG, SystemUrls.CMS_MS_DRG));
+    return Stream.of(
+        Arguments.of(claimUniqueIdForDrg, DRG, SystemUrls.CMS_MS_DRG),
+        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, DRG2, SystemUrls.CMS_MS_DRG));
   }
 
   @MethodSource
