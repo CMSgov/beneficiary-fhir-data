@@ -237,9 +237,12 @@ data "aws_iam_policy_document" "deploy_elbv2" {
   }
 
   statement {
-    sid       = "AllowRegistrationOfTargetGroupTargets"
-    actions   = ["elasticloadbalancing:RegisterTargets", "elasticloadbalancing:DeregisterTargets"]
-    resources = aws_lb_target_group.this[*].arn
+    sid     = "AllowRegistrationOfTargetGroupTargets"
+    actions = ["elasticloadbalancing:RegisterTargets", "elasticloadbalancing:DeregisterTargets"]
+    resources = [
+      for name in aws_lb_target_group.this[*].name
+      : "arn:aws:elasticloadbalancing:us-east-1:${local.account_id}:targetgroup/${name}/*"
+    ]
   }
 
   statement {
