@@ -1,9 +1,20 @@
+data "aws_iam_policy_document" "service_assume_role" {
+  for_each = toset(["ecs-tasks", "ecs"])
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["${each.value}.amazonaws.com"]
+    }
+  }
+}
+
 data "aws_iam_policy_document" "kms" {
   statement {
     sid = "AllowEnvCMKAccess"
     actions = [
       "kms:Decrypt",
-      "kms:GenerateDataKey",
+      "kms:GenerateDataKey*",
       "kms:ReEncrypt",
       "kms:DescribeKey",
       "kms:CreateGrant",
@@ -79,21 +90,11 @@ resource "aws_iam_policy" "ssm_params" {
   policy      = data.aws_iam_policy_document.ssm_params.json
 }
 
-data "aws_iam_policy_document" "ecs_service_role_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
-}
-
 resource "aws_iam_role" "service_role" {
   name                  = "${local.name_prefix}-service-role"
   path                  = local.iam_path
   description           = "Role for the ${local.env} ${local.service} ECS service containers"
-  assume_role_policy    = data.aws_iam_policy_document.ecs_service_role_assume.json
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs-tasks"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
@@ -108,16 +109,6 @@ resource "aws_iam_role_policy_attachment" "service_role" {
 
   role       = aws_iam_role.service_role.name
   policy_arn = each.value
-}
-
-data "aws_iam_policy_document" "ecs_task_execution_role_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
 }
 
 data "aws_iam_policy_document" "execution_ecr" {
@@ -160,6 +151,7 @@ data "aws_iam_policy_document" "execution_logs" {
     actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
     resources = [
       "${aws_cloudwatch_log_group.log_router_messages.arn}:*",
+      "${aws_cloudwatch_log_group.service_connect_messages.arn}:*",
       "${aws_cloudwatch_log_group.server_messages.arn}:*",
       "${aws_cloudwatch_log_group.server_access.arn}:*"
     ]
@@ -177,7 +169,7 @@ resource "aws_iam_role" "execution_role" {
   name                  = "${local.name_prefix}-execution-role"
   path                  = local.iam_path
   description           = "${local.env} ${local.service} ECS task execution role"
-  assume_role_policy    = data.aws_iam_policy_document.ecs_task_execution_role_assume.json
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs-tasks"].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
@@ -190,16 +182,6 @@ resource "aws_iam_role_policy_attachment" "execution" {
 
   role       = aws_iam_role.execution_role.name
   policy_arn = each.value
-}
-
-data "aws_iam_policy_document" "deploy_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ecs.amazonaws.com"]
-    }
-  }
 }
 
 data "aws_iam_policy_document" "deploy_ecs" {
@@ -280,9 +262,13 @@ resource "aws_iam_policy" "deploy_iam" {
 
 resource "aws_iam_role" "deploy" {
   name = "${local.name_prefix}-deploy"
+  # A bug in AWS's input validation is causing valid Roles with IAM Paths to be considered invalid
+  # when used as the Role for ECS Blue/Green deployments. This means we must create this deploy
+  # Role without the typical IAM Path.
+  # TODO: Re-introduce IAM Path when API IAM Role validation is fixed
   # path                  = local.iam_path
   permissions_boundary  = local.permissions_boundary_arn
-  assume_role_policy    = data.aws_iam_policy_document.deploy_assume.json
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs"].json
   force_detach_policies = true
 }
 
@@ -294,5 +280,76 @@ resource "aws_iam_role_policy_attachment" "deploy" {
   }
 
   role       = aws_iam_role.deploy.name
+  policy_arn = each.value
+}
+
+resource "aws_iam_policy" "service_connect_kms" {
+  name        = "${local.name_prefix}-service-connect-kms-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} Service's Service Connect Role to use the ${local.env} CMK"
+  policy      = data.aws_iam_policy_document.kms.json
+}
+
+data "aws_iam_policy_document" "service_connect_pca" {
+  statement {
+    sid       = "AllowDescribePCA"
+    actions   = ["acm-pca:DescribeCertificateAuthority"]
+    resources = [data.aws_acmpca_certificate_authority.pace.arn]
+  }
+
+  statement {
+    sid       = "AllowGetAndIssueCertificate"
+    actions   = ["acm-pca:GetCertificate", "acm-pca:IssueCertificate"]
+    resources = [data.aws_acmpca_certificate_authority.pace.arn]
+  }
+}
+
+resource "aws_iam_policy" "service_connect_pca" {
+  name        = "${local.name_prefix}-service-connect-pca-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} Service's Service Connect Role to use the PACE Private CA."
+  policy      = data.aws_iam_policy_document.service_connect_pca.json
+}
+
+data "aws_iam_policy_document" "service_connect_secrets_manager" {
+  statement {
+    actions = [
+      "secretsmanager:CreateSecret",
+      "secretsmanager:TagResource",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:UpdateSecret",
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:DeleteSecret",
+      "secretsmanager:RotateSecret",
+      "secretsmanager:UpdateSecretVersionStage"
+    ]
+    resources = ["arn:aws:secretsmanager:${local.region}:${local.account_id}:secret:ecs-sc!*"]
+  }
+}
+
+resource "aws_iam_policy" "service_connect_secrets_manager" {
+  name        = "${local.name_prefix}-service-connect-secrets-manager-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} Service's Service Connect Role to use Secrets Manager for Service Connect related Secrets."
+  policy      = data.aws_iam_policy_document.service_connect_secrets_manager.json
+}
+
+resource "aws_iam_role" "service_connect" {
+  name                  = "${local.name_prefix}-service-connect"
+  path                  = local.iam_path
+  permissions_boundary  = local.permissions_boundary_arn
+  assume_role_policy    = data.aws_iam_policy_document.service_assume_role["ecs"].json
+  force_detach_policies = true
+}
+
+resource "aws_iam_role_policy_attachment" "service_connect" {
+  for_each = {
+    kms             = aws_iam_policy.service_connect_kms.arn
+    pca             = aws_iam_policy.service_connect_pca.arn
+    secrets_manager = aws_iam_policy.service_connect_secrets_manager.arn
+  }
+
+  role       = aws_iam_role.service_connect.name
   policy_arn = each.value
 }

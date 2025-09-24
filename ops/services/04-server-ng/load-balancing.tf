@@ -137,7 +137,7 @@ resource "aws_lb_target_group" "this" {
 
   name                 = "${local.name_prefix}-tg-${count.index}"
   port                 = local.server_port
-  protocol             = "HTTP"
+  protocol             = "HTTPS"
   vpc_id               = local.vpc.id
   deregistration_delay = 30
   target_type          = "ip"
@@ -147,7 +147,7 @@ resource "aws_lb_target_group" "this" {
     timeout             = 5
     unhealthy_threshold = 5
     port                = local.server_port
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     path                = "/v3/fhir/metadata"
     matcher             = "200,401"
   }

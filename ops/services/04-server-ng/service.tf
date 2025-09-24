@@ -61,6 +61,12 @@ resource "aws_cloudwatch_log_group" "log_router_messages" {
   skip_destroy = true
 }
 
+resource "aws_cloudwatch_log_group" "service_connect_messages" {
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
 resource "aws_cloudwatch_log_group" "server_messages" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
   kms_key_id   = local.env_key_arn
@@ -269,11 +275,17 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
   description                  = "Grants ${local.env} ${local.service} ECS service containers access to the ${local.env} database"
 }
 
+resource "aws_service_discovery_http_namespace" "server" {
+  name   = "${local.env}.service-connect.cmscloud.internal"
+  region = "us-east-1"
+}
+
 resource "aws_ecs_service" "server" {
   depends_on = [
     aws_iam_role_policy_attachment.service_role,
     aws_iam_role_policy_attachment.execution,
-    aws_iam_role_policy_attachment.deploy
+    aws_iam_role_policy_attachment.deploy,
+    aws_iam_role_policy_attachment.service_connect
   ]
 
   cluster                            = data.aws_ecs_cluster.main.arn
@@ -332,6 +344,40 @@ resource "aws_ecs_service" "server" {
     assign_public_ip = false
     security_groups  = [aws_security_group.server.id]
     subnets          = local.app_subnet_ids
+  }
+
+  service_connect_configuration {
+    enabled   = true
+    namespace = aws_service_discovery_http_namespace.server.arn
+
+    log_configuration {
+      log_driver = "awslogs"
+      options = {
+        "awslogs-group"         = aws_cloudwatch_log_group.service_connect_messages.name
+        "awslogs-region"        = local.region
+        "awslogs-stream-prefix" = "${local.service}-${local.bfd_version}"
+      }
+    }
+
+    service {
+      discovery_name        = local.service
+      port_name             = "${local.service}-${local.server_port}-tcp"
+      ingress_port_override = 0
+
+      client_alias {
+        dns_name = "${local.service}.${aws_service_discovery_http_namespace.server.name}"
+        port     = local.server_port
+      }
+
+      tls {
+        kms_key  = local.env_key_arn
+        role_arn = aws_iam_role.service_connect.arn
+
+        issuer_cert_authority {
+          aws_pca_authority_arn = data.aws_acmpca_certificate_authority.pace.arn
+        }
+      }
+    }
   }
 }
 
