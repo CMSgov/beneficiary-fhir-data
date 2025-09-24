@@ -8,7 +8,7 @@ CREATE TABLE idr.beneficiary (
     -- bene_xref_efctv_sk_computed should always be used instead
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
-        -- if kill credit is not present AND set to 2, the merge may be invalid, and we should act like it's not present
+        -- The merge is only valid if kill credit is present AND set to 2. If not, we should act like it's not present.
         AS (CASE WHEN bene_xref_efctv_sk != bene_sk AND bene_kill_cred_cd != '2' THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_1st_name VARCHAR(30) NOT NULL,
