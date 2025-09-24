@@ -291,7 +291,9 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> ensureDrg() {
     return Stream.of(
         Arguments.of(claimUniqueIdForDrg, DRG, SystemUrls.CMS_MS_DRG),
-        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, DRG2, SystemUrls.CMS_MS_DRG));
+        Arguments.of(claimUniqueIdWithMultipleSamhsaCodes, DRG2, SystemUrls.CMS_MS_DRG),
+        Arguments.of(claimUniqueIdForDrgWithExpiredCode522, "522", SystemUrls.CMS_MS_DRG),
+        Arguments.of(claimUniqueIdForDrgWithExpiredCode523, "523", SystemUrls.CMS_MS_DRG));
   }
 
   @MethodSource
