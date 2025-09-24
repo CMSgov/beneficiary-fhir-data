@@ -2421,6 +2421,8 @@
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_AUDT_TRL_STUS_CD
   appliesTo:
     - Carrier
+    - DME
+    - VMS
   sources:
     - MCS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
