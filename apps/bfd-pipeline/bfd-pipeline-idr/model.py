@@ -45,7 +45,7 @@ def transform_null_float(value: float | None) -> float:
     return value
 
 
-def transform_null_int(value: int | None) -> float:
+def transform_null_int(value: int | None) -> int:
     if value is None:
         return 0
     return value
