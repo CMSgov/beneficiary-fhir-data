@@ -4,6 +4,13 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6"
     }
+    # "null" is added here as Tofu requires existing providers in state to be available even if the
+    # provider does not have any associated resources anymore. Essentially, this provider is only
+    # defined here so that its usage in state can be removed in a subsequent apply
+    # TODO: Remove the "null" provider after BFD-4293's full deployment
+    null = {
+      source  = "hashicorp/null"
+    }
   }
 }
 
