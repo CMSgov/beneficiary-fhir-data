@@ -276,7 +276,7 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
 }
 
 resource "aws_service_discovery_http_namespace" "server" {
-  name   = "${local.env}.service-connect.cmscloud.internal"
+  name   = "${local.name_prefix}.service-connect.cmscloud.internal"
   region = "us-east-1"
 }
 
