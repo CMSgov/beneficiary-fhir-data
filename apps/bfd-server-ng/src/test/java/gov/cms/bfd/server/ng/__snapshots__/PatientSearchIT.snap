@@ -2,12 +2,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -104,12 +98,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEAR
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -206,12 +194,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -443,12 +425,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -516,12 +492,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -589,12 +559,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -662,12 +626,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Galveston",
-        "line" : [ "2904 61st" ],
-        "postalCode" : "77551",
-        "state" : "TX"
-      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -735,12 +693,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Galveston",
-        "line" : [ "2904 61st" ],
-        "postalCode" : "77551",
-        "state" : "TX"
-      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -808,12 +760,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Galveston",
-        "line" : [ "2904 61st" ],
-        "postalCode" : "77551",
-        "state" : "TX"
-      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -929,12 +875,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -1031,12 +971,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -1133,12 +1067,6 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
 {
   "entry" : [ {
     "resource" : {
-      "address" : [ {
-        "city" : "Lisbon",
-        "line" : [ "14152 ND-27" ],
-        "postalCode" : "58054",
-        "state" : "ND"
-      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
