@@ -127,14 +127,16 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    claimItems.forEach(
-        item -> {
-          item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
-          item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
-          item.getClaimProcedure()
-              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
-              .ifPresent(eob::addDiagnosis);
-        });
+    claimItems.stream()
+        .sorted(Comparator.comparing(c -> c.getClaimItemId().getBfdRowId()))
+        .forEach(
+            item -> {
+              item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
+              item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
+              item.getClaimProcedure()
+                  .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
+                  .ifPresent(eob::addDiagnosis);
+            });
     billingProvider
         .toFhir(claimTypeCode)
         .ifPresent(
