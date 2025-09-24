@@ -43,10 +43,10 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
-  private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS = 4146709784142L; // icd-10
-  private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L; // icd10
-  private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS = 5312173004042L; // icd-9
-  private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE = 6103633914327L; // icd9
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS = 4146709784142L;
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L;
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS = 5312173004042L;
+  private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE = 6103633914327L;
   private static final long CLAIM_UNIQUE_ID_FOR_HCPCS = 7095549187112L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG = 9644464937468L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522 = 9688880648059L;
