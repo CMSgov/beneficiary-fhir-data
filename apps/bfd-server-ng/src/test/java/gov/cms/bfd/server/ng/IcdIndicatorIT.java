@@ -12,6 +12,10 @@ import org.junit.jupiter.api.Test;
 
 // Integration test for ICD code formatting.
 public class IcdIndicatorIT extends IntegrationTestBase {
+  private static final String FORMATTED_ICD_9_CODE_25000 = "250.00";
+  private static final String FORMATTED_ICD_9_CODE_E8889 = "E888.9";
+  private static final String FORMATTED_ICD_9_CODE_V1005 = "V10.05";
+
   private IReadTyped<ExplanationOfBenefit> eobRead() {
     return getFhirClient().read().resource(ExplanationOfBenefit.class);
   }
@@ -33,24 +37,25 @@ public class IcdIndicatorIT extends IntegrationTestBase {
             .collect(
                 Collectors.toMap(
                     c -> c,
-                    c -> IcdIndicator.ICD_9.formatCode(c),
+                    IcdIndicator.ICD_9::formatCode,
                     (a, b) -> a,
                     java.util.LinkedHashMap::new));
 
-    var expectedOrder = List.of("304.92", "250.00", "E888.9", "V10.05");
+    var expectedOrder =
+        List.of(
+            "304.92",
+            FORMATTED_ICD_9_CODE_25000,
+            FORMATTED_ICD_9_CODE_E8889,
+            FORMATTED_ICD_9_CODE_V1005);
     assertEquals(expectedOrder, eobCodes, "ICD-9 codes should be formatted and ordered");
-    assertEquals("250.00", independentlyFormatted.get("25000"));
-    assertEquals("E888.9", independentlyFormatted.get("E8889"));
-    assertEquals("V10.05", independentlyFormatted.get("V1005"));
+    assertEquals(FORMATTED_ICD_9_CODE_25000, independentlyFormatted.get("25000"));
+    assertEquals(FORMATTED_ICD_9_CODE_E8889, independentlyFormatted.get("E8889"));
+    assertEquals(FORMATTED_ICD_9_CODE_V1005, independentlyFormatted.get("V1005"));
 
     // Snapshot a compact payload instead of the entire EOB to reduce churn.
-    var snapshotPayload =
-        new java.util.LinkedHashMap<String, Object>() {
-          {
-            put("eobDiagnosisCodes", eobCodes);
-            put("formattedFromIndicator", independentlyFormatted);
-          }
-        };
+    var snapshotPayload = new java.util.LinkedHashMap<String, Object>();
+    snapshotPayload.put("eobDiagnosisCodes", eobCodes);
+    snapshotPayload.put("formattedFromIndicator", independentlyFormatted);
     expect.scenario("eobAndIcd9Formats").toMatchSnapshot(snapshotPayload);
   }
 
@@ -63,7 +68,12 @@ public class IcdIndicatorIT extends IntegrationTestBase {
             .toList();
 
     // Expected order should reflect CLM_VAL_SQNC_NUM in the CSV for signature 322823692140.
-    var expected = List.of("304.92", "250.00", "E888.9", "V10.05");
+    var expected =
+        List.of(
+            "304.92",
+            FORMATTED_ICD_9_CODE_25000,
+            FORMATTED_ICD_9_CODE_E8889,
+            FORMATTED_ICD_9_CODE_V1005);
     assertEquals(expected, codes, "ICD-9 diagnosis codes should be formatted and ordered");
 
     var snapshotPayload = java.util.Map.of("codes", codes);
@@ -76,14 +86,10 @@ public class IcdIndicatorIT extends IntegrationTestBase {
     var icd9Diag = IcdIndicator.ICD_9.formatCode("12345");
     var icd9Proc = IcdIndicator.ICD_9.formatProcedureCode("12345");
 
-    var snapshotPayload =
-        new java.util.LinkedHashMap<String, String>() {
-          {
-            put("icd9Proc", icd9Proc);
-            put("icd10", icd10);
-            put("icd9Diag", icd9Diag);
-          }
-        };
+    var snapshotPayload = new java.util.LinkedHashMap<String, String>();
+    snapshotPayload.put("icd9Proc", icd9Proc);
+    snapshotPayload.put("icd10", icd10);
+    snapshotPayload.put("icd9Diag", icd9Diag);
 
     expect.scenario("icdFormattedValues").toMatchSnapshot(snapshotPayload);
   }
