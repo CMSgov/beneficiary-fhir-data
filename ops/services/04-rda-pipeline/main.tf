@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -242,6 +242,9 @@ resource "aws_ecs_service" "rda" {
   deployment_controller {
     type = "ECS"
   }
+
+  sigint_rollback       = true
+  wait_for_steady_state = true
 
   network_configuration {
     assign_public_ip = false

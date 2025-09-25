@@ -1,5 +1,5 @@
 locals {
-  region = data.aws_region.current.name
+  region = data.aws_region.current.region
 
   account_types = ["prod", "non-prod"]
   account_type  = try(one([for x in local.account_types : x if terraform.workspace == x]), null)

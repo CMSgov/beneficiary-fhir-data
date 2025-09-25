@@ -12,8 +12,8 @@ This Module defines a single Lambda function, its Log Group, and corresponding I
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.10.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
 
