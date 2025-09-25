@@ -2,7 +2,7 @@ locals {
   db_environment        = coalesce(var.db_environment_override, local.env)
   db_cluster_identifier = "bfd-${local.db_environment}-aurora-cluster"
 
-  log_router_repository_default = !var.greenfield ? "bfd-mgmt-server-fluent-bit" : "bfd-platform-server-fluent-bit"
+  log_router_repository_default = "bfd-platform-server-fluent-bit"
   log_router_repository_name    = coalesce(var.log_router_repository_override, local.log_router_repository_default)
   server_repository_name        = coalesce(var.server_repository_override, "bfd-server-ng")
   log_router_version            = coalesce(var.log_router_version_override, local.bfd_version)

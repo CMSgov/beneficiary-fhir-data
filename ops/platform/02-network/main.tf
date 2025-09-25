@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-platform-service"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/platform/02-network"
 }

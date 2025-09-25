@@ -1,5 +1,5 @@
 locals {
-  verifier_repository_default = !var.greenfield ? "bfd-mgmt-pipeline-ccw-manifests-verifier-lambda" : "bfd-platform-pipeline-ccw-manifests-verifier-lambda"
+  verifier_repository_default = "bfd-platform-pipeline-ccw-manifests-verifier-lambda"
   verifier_repository_name    = coalesce(var.manifests_verifier_repository_override, local.verifier_repository_default)
   verifier_version            = coalesce(var.manifests_verifier_version_override, local.bfd_version)
   verifier_alert_topics_ssm   = nonsensitive(lookup(local.ssm_config, "/bfd/${local.service}/verifier/alert_topics", null))
