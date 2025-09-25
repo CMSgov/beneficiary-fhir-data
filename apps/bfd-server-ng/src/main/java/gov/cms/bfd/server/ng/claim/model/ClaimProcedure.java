@@ -60,11 +60,12 @@ public class ClaimProcedure {
           }
         });
 
+    String formattedProcedureCode = icdIndicator.get().formatProcedureCode(procedureCode.get());
     procedure.setProcedure(
         new CodeableConcept(
             new Coding()
                 .setSystem(icdIndicator.get().getProcedureSystem())
-                .setCode(procedureCode.get())));
+                .setCode(formattedProcedureCode)));
 
     return Optional.of(procedure);
   }
@@ -76,15 +77,17 @@ public class ClaimProcedure {
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(bfdRowId);
     diagnosisType.ifPresent(
-        d -> {
-          diagnosis.addType(
-              new CodeableConcept(new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode())));
-        });
+        d ->
+            diagnosis.addType(
+                new CodeableConcept(
+                    new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode()))));
 
     String formattedCode = icdIndicator.get().formatCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
         new CodeableConcept(
-            new Coding().setSystem(icdIndicator.get().getDiagnosisSytem()).setCode(formattedCode)));
+            new Coding()
+                .setSystem(icdIndicator.get().getDiagnosisSystem())
+                .setCode(formattedCode)));
 
     this.claimPoaIndicator.ifPresent(
         poaCode -> {
