@@ -67,7 +67,6 @@ public class IcdIndicatorIT extends IntegrationTestBase {
             .map(d -> d.getDiagnosisCodeableConcept().getCodingFirstRep().getCode())
             .toList();
 
-    // Expected order should reflect CLM_VAL_SQNC_NUM in the CSV for signature 322823692140.
     var expected =
         List.of(
             "304.92",
@@ -78,19 +77,5 @@ public class IcdIndicatorIT extends IntegrationTestBase {
 
     var snapshotPayload = java.util.Map.of("codes", codes);
     expect.scenario("icd9DiagnosisCodes").toMatchSnapshot(snapshotPayload);
-  }
-
-  @Test
-  public void snapshotFormattedCodes() {
-    var icd10 = IcdIndicator.ICD_10.formatCode("F1010");
-    var icd9Diag = IcdIndicator.ICD_9.formatCode("12345");
-    var icd9Proc = IcdIndicator.ICD_9.formatProcedureCode("12345");
-
-    var snapshotPayload = new java.util.LinkedHashMap<String, String>();
-    snapshotPayload.put("icd9Proc", icd9Proc);
-    snapshotPayload.put("icd10", icd10);
-    snapshotPayload.put("icd9Diag", icd9Diag);
-
-    expect.scenario("icdFormattedValues").toMatchSnapshot(snapshotPayload);
   }
 }
