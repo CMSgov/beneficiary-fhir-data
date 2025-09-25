@@ -7,7 +7,6 @@
 !.gitignore
 !.gitattributes
 !.github
-!.sensitive-files
 !.terraform-docs.yml
 !.python-version
 !.opentofu-version
