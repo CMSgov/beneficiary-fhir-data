@@ -256,10 +256,10 @@ class BatchLoader:
 
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
-        with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:  # type: ignore
+        with cur.copy(f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN") as copy:  # type: ignore
             for row in results:
                 model_dump = row.model_dump()
-                copy.write_row([_remove_null_bytes(model_dump[k]) for k in insert_cols])
+                copy.write_row([_remove_null_bytes(model_dump[k]) for k in self.insert_cols])
 
 
 def _remove_null_bytes(val: DbType) -> DbType:
