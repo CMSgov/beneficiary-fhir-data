@@ -566,7 +566,31 @@
                         "code": "string"
                     }
                 ]
-            }
+            },
+          {
+            "id": "SupportingInfoComponent.CLM_NRLN_RIC_CD",
+            "path": "SupportingInfoComponent.CLM_NRLN_RIC_CD",
+            "label": "Near Line Record Identification Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_RIC_CD",
+            "path": "SupportingInfoComponent.CLM_RIC_CD",
+            "label": "Record Identification Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          }
         ]
     }
 }
