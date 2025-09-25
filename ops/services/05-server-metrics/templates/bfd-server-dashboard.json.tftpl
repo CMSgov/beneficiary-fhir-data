@@ -533,8 +533,8 @@
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('{AWS/NetworkELB,LoadBalancer,TargetGroup} bfd-${env}-server-ecs-nlb healthyhostcount', 'Average', 60)", "label": "Healthy Hosts", "id": "e2", "period": 60 } ],
-                    [ { "expression": "SEARCH('{AWS/NetworkELB,LoadBalancer,TargetGroup} bfd-${env}-server-ecs-nlb unhealthyhostcount', 'Average', 60)", "label": "Unhealthy Hosts", "id": "e1", "yAxis": "right", "period": 60 } ]
+                    [ { "expression": "SEARCH('{AWS/NetworkELB,LoadBalancer,TargetGroup} bfd-${env}-server-nlb healthyhostcount', 'Average', 60)", "label": "Healthy Hosts", "id": "e2", "period": 60 } ],
+                    [ { "expression": "SEARCH('{AWS/NetworkELB,LoadBalancer,TargetGroup} bfd-${env}-server-nlb unhealthyhostcount', 'Average', 60)", "label": "Unhealthy Hosts", "id": "e1", "yAxis": "right", "period": 60 } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -554,7 +554,7 @@
                         "min": 0
                     }
                 },
-                "title": "Healthy and Unhealthy Hosts in bfd-${env}-server-ecs NLB",
+                "title": "Healthy and Unhealthy Hosts in bfd-${env}-server NLB",
                 "legend": {
                     "position": "hidden"
                 }

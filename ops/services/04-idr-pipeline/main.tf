@@ -10,10 +10,9 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/04-idr-pipeline"
-  subnet_layers        = !var.greenfield ? ["app", "data"] : ["private"]
+  subnet_layers        = ["private"]
 }
 
 locals {
@@ -30,8 +29,8 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
-  data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
+  app_subnets              = module.terraservice.subnets_map["private"]
+  data_subnets             = module.terraservice.subnets_map["private"]
 
   is_prod = local.env == "prod"
 

@@ -1,5 +1,5 @@
 locals {
-  established_envs = !var.greenfield ? ["test", "prod-sbx", "prod"] : ["test", "sandbox", "prod"]
+  established_envs = ["test", "sandbox", "prod"]
 
   region = data.aws_region.current.region
 
@@ -13,12 +13,7 @@ locals {
   # There are no tags from which we can divine the environment a VPC is associated. Fortunately, we
   # know the name of our VPCs, and they should _never_ change, so it's OK to just check the name of
   # the VPC and return its associated env.
-  vpcs_to_env = !var.greenfield ? {
-    "bfd-test-vpc"     = "test"
-    "bfd-prod-sbx-vpc" = "prod-sbx"
-    "bfd-prod-vpc"     = "prod"
-    "bfd-mgmt-vpc"     = "mgmt"
-    } : {
+  vpcs_to_env = {
     "bfd-east-test"         = "test"
     "bfd-sandbox-east-prod" = "sandbox"
     "bfd-east-prod"         = "prod"
@@ -45,17 +40,12 @@ locals {
     local.ssm_flattened_data.values
   )
 
-  platform_key_alias = var.greenfield ? "alias/bfd-platform-cmk" : "alias/bfd-mgmt-cmk"
+  platform_key_alias = "alias/bfd-platform-cmk"
   platform_key_arn   = one(data.aws_kms_key.platform[*].arn)
   env_key_alias      = "alias/bfd-${local.parent_env}-cmk"
   env_key_arn        = one(data.aws_kms_key.env[*].arn)
 
-  # OIT/CMS Cloud configured Security Groups that exist only in the legacy account
-  legacy_tools_sg      = lookup(local.ssm_config, "/bfd/common/enterprise_tools_security_group", null)
-  legacy_management_sg = lookup(local.ssm_config, "/bfd/common/management_security_group", null)
-  legacy_vpn_sg        = lookup(local.ssm_config, "/bfd/common/vpn_security_group", null)
-
-  # OIT/CMS Cloud configured Security Groups that exist in the Greenfield accounts
+  # OIT/CMS Cloud configured Security Groups that exist in all accounts
   cms_cloud_vpn_sg             = "cmscloud-vpn"
   cms_cloud_security_tools_sg  = "cmscloud-security-tools"
   cms_cloud_shared_services_sg = "cmscloud-shared-services"
@@ -153,9 +143,7 @@ data "aws_subnets" "main" {
     values = [local.env_vpc.id]
   }
 
-  tags = !var.greenfield ? {
-    Layer = each.key
-    } : {
+  tags = {
     GroupName = each.key
   }
 }
@@ -178,39 +166,7 @@ data "aws_vpc_peering_connection" "main" {
   id       = each.value
 }
 
-data "aws_security_group" "vpn" {
-  count = local.legacy_vpn_sg != null && !var.greenfield ? 1 : 0
-
-  vpc_id = local.env_vpc.id
-  filter {
-    name   = "tag:Name"
-    values = [local.legacy_vpn_sg]
-  }
-}
-
-data "aws_security_group" "management" {
-  count = local.legacy_management_sg != null && !var.greenfield ? 1 : 0
-
-  vpc_id = local.env_vpc.id
-  filter {
-    name   = "tag:Name"
-    values = [local.legacy_management_sg]
-  }
-}
-
-data "aws_security_group" "tools" {
-  count = local.legacy_tools_sg != null && !var.greenfield ? 1 : 0
-
-  vpc_id = local.env_vpc.id
-  filter {
-    name   = "tag:Name"
-    values = [local.legacy_tools_sg]
-  }
-}
-
 data "aws_security_group" "cms_cloud_vpn" {
-  count = local.cms_cloud_vpn_sg != null && var.greenfield ? 1 : 0
-
   vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
@@ -219,8 +175,6 @@ data "aws_security_group" "cms_cloud_vpn" {
 }
 
 data "aws_security_group" "cms_cloud_security_tools" {
-  count = local.cms_cloud_security_tools_sg != null && var.greenfield ? 1 : 0
-
   vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"
@@ -229,8 +183,6 @@ data "aws_security_group" "cms_cloud_security_tools" {
 }
 
 data "aws_security_group" "cms_cloud_shared_services" {
-  count = local.cms_cloud_shared_services_sg != null && var.greenfield ? 1 : 0
-
   vpc_id = local.env_vpc.id
   filter {
     name   = "tag:Name"

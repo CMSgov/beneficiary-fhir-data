@@ -25,7 +25,6 @@
 | <a name="input_relative_module_root"></a> [relative\_module\_root](#input\_relative\_module\_root) | The solution's relative path from the root of beneficiary-fhir-data repository | `string` | n/a | yes |
 | <a name="input_service"></a> [service](#input\_service) | Service _or_ terraservice name. | `string` | n/a | yes |
 | <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags to merge into final default\_tags output | `map(string)` | `{}` | no |
-| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
 | <a name="input_lookup_kms_key"></a> [lookup\_kms\_key](#input\_lookup\_kms\_key) | Toggles whether or not this module does data lookups for the platform KMS key.<br/>If false, the KMS-related outputs will all be null. Set to false for services that create the key<br/>or are otherwise applied prior to the keys existing | `bool` | `true` | no |
 | <a name="input_ssm_hierarchy_roots"></a> [ssm\_hierarchy\_roots](#input\_ssm\_hierarchy\_roots) | List of SSM Hierarchy roots. Module executes a recursive lookup for all roots for `common` and service-specific hierarchies. | `list(string)` | <pre>[<br/>  "bfd"<br/>]</pre> | no |
 

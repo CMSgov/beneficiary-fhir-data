@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = true
   service              = local.service
   relative_module_root = "ops/services/02-eft"
   subnet_layers        = ["data"]

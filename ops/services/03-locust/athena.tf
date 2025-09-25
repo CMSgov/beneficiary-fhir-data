@@ -12,8 +12,7 @@ module "bucket_athena" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? local.locust_stats_bucket : null
-  bucket_prefix      = var.greenfield ? local.locust_stats_bucket : null
+  bucket_prefix      = local.locust_stats_bucket
   force_destroy      = local.is_ephemeral_env
 
   ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
