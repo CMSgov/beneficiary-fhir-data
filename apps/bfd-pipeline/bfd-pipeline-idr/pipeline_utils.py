@@ -5,8 +5,8 @@ import time
 
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from loader import PostgresLoader
-from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
+from hamilton_loader import PostgresLoader
+from hamilton_extractor import PostgresExtractor, SnowflakeExtractor
 
 from model import (
     LoadProgress,
@@ -33,26 +33,22 @@ def get_progress(
         {LoadProgress.query_placeholder(): table_name},
     )
 
-def make_extractor(mode: str, connection_string: str, batch_size: int) -> Extractor:
-    if mode == "local":
-        return PostgresExtractor(connection_string=connection_string,
-                                 batch_size=batch_size)
-    elif mode == "synthetic":
-        return PostgresExtractor(connection_string=connection_string,
-                                 batch_size=batch_size)
-    else:
-        return SnowflakeExtractor(batch_size=batch_size)
-
-
 def extract_and_load(
         cls: type[T],
-        make_extractor: Extractor,
         connection_string: str,
         mode: str,
         batch_size: int
 ) -> tuple[PostgresLoader, bool]:
     logger = configure_worker_logger()
-    data_extractor = make_extractor(mode, connection_string, batch_size)
+
+    if mode == "local":
+        data_extractor = PostgresExtractor(connection_string=connection_string,
+                                 batch_size=batch_size)
+    elif mode == "synthetic":
+        data_extractor = PostgresExtractor(connection_string=connection_string,
+                                 batch_size=batch_size)
+    else:
+        data_extractor = SnowflakeExtractor(batch_size=batch_size)
 
     logger.info("loading %s", cls.table())
     batch_start = datetime.now()
