@@ -14,8 +14,8 @@ This module exports the full properties of the created `aws_s3_bucket` resource 
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.10.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
 
@@ -29,6 +29,7 @@ This module exports the full properties of the created `aws_s3_bucket` resource 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_bucket_kms_key_arn"></a> [bucket\_kms\_key\_arn](#input\_bucket\_kms\_key\_arn) | ARN of the KMS Key that will be used as the Bucket Key. Objects must be uploaded using this key exclusively. | `string` | n/a | yes |
+| <a name="input_additional_bucket_policy_docs"></a> [additional\_bucket\_policy\_docs](#input\_additional\_bucket\_policy\_docs) | List of JSON policy document strings that are combined with the default secure Bucket policy. | `list(string)` | `[]` | no |
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Full Bucket name. Maps to `aws_s3_bucket.bucket`. Conflicts with 'bucket\_prefix'. | `string` | `null` | no |
 | <a name="input_bucket_prefix"></a> [bucket\_prefix](#input\_bucket\_prefix) | Bucket name prefix. Maps to `aws_s3_bucket.bucket_prefix`. Conflicts with 'bucket\_name'. | `string` | `null` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Enable bucket force destroy. Maps to `aws_s3_bucket.force_destroy`. | `bool` | `false` | no |
@@ -58,6 +59,7 @@ No modules.
 | [aws_s3_bucket_public_access_block.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_ssm_parameter.bucket_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_iam_policy_document.combined](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.

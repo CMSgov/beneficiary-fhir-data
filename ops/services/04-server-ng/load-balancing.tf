@@ -51,8 +51,8 @@ resource "aws_acm_certificate" "this" {
 resource "aws_lb_listener" "this" {
   for_each = local.listeners
   lifecycle {
-    # CodeDeploy will swap the target group during a blue/green deployment, so we need to ignore any
-    # changes
+    # ECS blue/green will swap the target group during a blue/green deployment, so we need to ignore
+    # any changes
     ignore_changes = [default_action]
   }
 
@@ -64,12 +64,35 @@ resource "aws_lb_listener" "this" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.this[0].arn
+    target_group_arn = each.key == local.green_state ? aws_lb_target_group.this[1].arn : aws_lb_target_group.this[0].arn
   }
 
   mutual_authentication {
     mode = "passthrough"
   }
+}
+
+# This is an unfortunately necessary external data source as ECS Blue/Green requires that a Rule—not
+# a listener—ARN must be specified for ECS native Blue/Green deployments and both the
+# aws_lb_listener resource and aws_lb_listener_rule data resource do not provide any means of
+# getting the default listener rule arn. As of 09/23/25, PR #43941 is open to support
+# retrieval of the default rule via the aws_lb_listener_rule data resource, and this should be
+# revisited once it's been merged
+data "external" "lb_listener_default_rule" {
+  for_each = local.listeners
+
+  program = [
+    "bash",
+    "-c",
+    <<EOF
+    arn="$(
+      aws elbv2 describe-rules --listener-arn "${aws_lb_listener.this[each.key].arn}" \
+        --query 'Rules[?IsDefault==`true`].RuleArn' \
+        --output text
+    )"
+    echo "{\"arn\":\"$arn\"}"
+    EOF
+  ]
 }
 
 resource "aws_security_group" "lb" {
@@ -114,7 +137,7 @@ resource "aws_lb_target_group" "this" {
 
   name                 = "${local.name_prefix}-tg-${count.index}"
   port                 = local.server_port
-  protocol             = "HTTP"
+  protocol             = "HTTPS"
   vpc_id               = local.vpc.id
   deregistration_delay = 30
   target_type          = "ip"
@@ -124,7 +147,7 @@ resource "aws_lb_target_group" "this" {
     timeout             = 5
     unhealthy_threshold = 5
     port                = local.server_port
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     path                = "/v3/fhir/metadata"
     matcher             = "200,401"
   }

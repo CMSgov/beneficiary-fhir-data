@@ -8,8 +8,8 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | 1.10.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>5 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
 
@@ -65,8 +65,10 @@ No modules.
 | [aws_subnet.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
 | [aws_subnets.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
-| [external_external.github_token](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
-| [http_http.latest_bfd_release](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
+| [aws_vpc_peering_connection.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc_peering_connection) | data source |
+| [aws_vpc_peering_connections.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc_peering_connections) | data source |
+| [aws_vpcs.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpcs) | data source |
+| [external_external.bfd_version](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -78,6 +80,8 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_account_id"></a> [account\_id](#output\_account\_id) | The account ID associated with the current caller identity |
+| <a name="output_all_connections"></a> [all\_connections](#output\_all\_connections) | Map of all peering connections in all VPCs to their properties |
+| <a name="output_bfd_version"></a> [bfd\_version](#output\_bfd\_version) | The BFD version that is being deployed. Corresponds to the most recent tag of the checked-out repository |
 | <a name="output_canary"></a> [canary](#output\_canary) | Canary output used to ensure that any Terraservice using the root.tofu.tf also uses this module. |
 | <a name="output_cms_cloud_security_tools_sg"></a> [cms\_cloud\_security\_tools\_sg](#output\_cms\_cloud\_security\_tools\_sg) | Greenfield only. The OIT/CMS Cloud provided Security Tools Security Group (data.aws\_security\_group). |
 | <a name="output_cms_cloud_shared_services_sg"></a> [cms\_cloud\_shared\_services\_sg](#output\_cms\_cloud\_shared\_services\_sg) | Greenfield only. The OIT/CMS Cloud provided Shared Services Security Group (data.aws\_security\_group). |
@@ -90,7 +94,6 @@ No modules.
 | <a name="output_env_key_alias"></a> [env\_key\_alias](#output\_env\_key\_alias) | Alias name for the current environment's CMK. |
 | <a name="output_env_key_arn"></a> [env\_key\_arn](#output\_env\_key\_arn) | ARN of the current region's primary environment CMK. |
 | <a name="output_is_ephemeral_env"></a> [is\_ephemeral\_env](#output\_is\_ephemeral\_env) | Returns true when environment is \_ephemeral\_, false when \_established\_ |
-| <a name="output_latest_bfd_release"></a> [latest\_bfd\_release](#output\_latest\_bfd\_release) | This is the latest CMSgov/beneficiary-fhir-data release. Excludes Pre-Releases. |
 | <a name="output_legacy_management_sg"></a> [legacy\_management\_sg](#output\_legacy\_management\_sg) | The OIT/CMS Cloud provided remote management Security Group (data.aws\_security\_group). |
 | <a name="output_legacy_tools_sg"></a> [legacy\_tools\_sg](#output\_legacy\_tools\_sg) | The OIT/CMS Cloud provided enterprise tools Security Group (data.aws\_security\_group). |
 | <a name="output_legacy_vpn_sg"></a> [legacy\_vpn\_sg](#output\_legacy\_vpn\_sg) | The OIT/CMS Cloud provided VPN Security Group (data.aws\_security\_group). |
