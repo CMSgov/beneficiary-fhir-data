@@ -23,3 +23,9 @@
 *.ipr
 *.iws
 *.pid
+
+# Ignore Terraform state-related files
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+.terraform/
