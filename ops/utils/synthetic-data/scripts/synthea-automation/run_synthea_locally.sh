@@ -23,7 +23,7 @@ help() {
 # setup vars with defaults; override from ars as appropriate
 # root directory of BFD git branch
 BFD_ROOT_DIR=${PWD}
-# root directory for checkout of Synthea git master 
+# root directory for checkout of Synthea git master
 BUILD_ROOT_DIR="/tmp"
 # comma-separated string denoting which BFD db environments to populate with synthetic data
 TARGET_ENV="test"
@@ -41,6 +41,7 @@ TARGET_CONTRACT="Y9999"
 USE_TARGET_CONTRACT="false"
 
 # setup for args we'll handle
+# shellcheck disable=SC2034
 args=$(getopt -l "num:build_root:target_env:synthea_jar:synthea_validate:cleanup:help" -o "n:b:t:j:v:c:h" -- "$@")
 
 # parse the args
@@ -134,7 +135,6 @@ TARGET_SYNTHEA_DIR=${BUILD_ROOT_DIR}/synthea
 # we'll need to keep track of 'begin' and 'end' bene_id values necessary to perform
 # various Synthea generation and validation tasks.
 BEG_BENE_ID=
-END_BENE_ID=
 
 # Need to support up to 3 concurrent environments (prod, prod-sbx, test) for a given run;
 # each environment uses a distinct S3 bucket; lower-case the TARGET_ENV string to ensure
@@ -197,7 +197,7 @@ BFD_END_STATE_PROPERTIES="end_state.properties"
 # file that is a copy of the end_state.properties file from a
 # previous synthea generation run.
 BFD_END_STATE_PROPERTIES_ORIG="${BFD_END_STATE_PROPERTIES}_orig"
-# the directory for synthea output 
+# the directory for synthea output
 BFD_SYNTHEA_OUTPUT_LOCATION="${TARGET_SYNTHEA_DIR}/output/bfd"
 # directory where Mitre synthea mapping files will be downlowded to.
 MAPPING_FILES_LOCATION="${TARGET_SYNTHEA_DIR}/src/main/resources/export"
@@ -340,10 +340,10 @@ split_future_loads(){
 # S3 folder where the BFD ETL pipeline will discover the synthetic RIF files and
 # load them into the appropriate BFD database.
 upload_synthea_results_to_s3(){
-  
+
   echo "upload synthea results to S3"
   cd "${BFD_SYNTHEA_AUTO_LOCATION}"
-  
+
   ## list out the future folders inside the output directory
   FOLDERS=()
   readarray -t FOLDERS < <(find "${BFD_SYNTHEA_OUTPUT_LOCATION}" -maxdepth 1 -mindepth 1 -type d -execdir basename {} ';')
@@ -354,7 +354,7 @@ upload_synthea_results_to_s3(){
   for s3_bucket in "${S3_BUCKETS[@]}"; do
     echo "uploading RIF files to: ${s3_bucket}"
     python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}" "upload_synthea_results" "${s3_bucket}"
-    
+
     if [ "$GENERATE_FUTURE" == 'true' ]; then
         # for each future folder, also upload it to the environment
         curr_num=1
@@ -364,8 +364,8 @@ upload_synthea_results_to_s3(){
             python3 ./s3_utilities.py "${BFD_SYNTHEA_OUTPUT_LOCATION}/${folder_name}" "upload_synthea_result_folder" "${s3_bucket}"
         done
     fi
-    
-    
+
+
   done
   deactivate
 }
