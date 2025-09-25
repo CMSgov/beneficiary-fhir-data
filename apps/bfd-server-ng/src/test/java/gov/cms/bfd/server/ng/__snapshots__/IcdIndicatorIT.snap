@@ -6,8 +6,3 @@ gov.cms.bfd.server.ng.IcdIndicatorIT.eobContainsAllFormattedIcd9DiagnosisCodes[i
 gov.cms.bfd.server.ng.IcdIndicatorIT.eobReadAndIcd9Formatting[eobAndIcd9Formats]=[
 {eobDiagnosisCodes=[304.92, 250.00, E888.9, V10.05], formattedFromIndicator={30492=304.92, 25000=250.00, E8889=E888.9, V1005=V10.05}}
 ]
-
-
-gov.cms.bfd.server.ng.IcdIndicatorIT.snapshotFormattedCodes[icdFormattedValues]=[
-{icd9Proc=12.345, icd10=F10.10, icd9Diag=123.45}
-]
