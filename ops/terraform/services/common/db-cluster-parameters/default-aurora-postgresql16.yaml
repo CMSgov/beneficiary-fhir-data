@@ -1,6 +1,0 @@
----
-# this is a dynamic parameter and will be applied immediately without requiring any downtime
-# https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html
-- apply_method: "immediate"
-  name: "rds.force_ssl"
-  value: 1

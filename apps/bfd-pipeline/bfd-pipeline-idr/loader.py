@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from model import LoadProgress, T
+from model import DbType, LoadProgress, T
 from timer import Timer
 
 idr_query_timer = Timer("idr_query")
@@ -138,9 +138,10 @@ class BatchLoader:
             INSERT INTO idr.load_progress(
                 table_name, 
                 last_ts, 
+                last_id,
                 batch_start_ts, 
                 batch_complete_ts)
-            VALUES(%(table)s, '{DEFAULT_MIN_DATE}', %(start_ts)s, '{DEFAULT_MIN_DATE}')
+            VALUES(%(table)s, '{DEFAULT_MIN_DATE}', 0, %(start_ts)s, '{DEFAULT_MIN_DATE}')
             ON CONFLICT (table_name) DO UPDATE 
             SET batch_start_ts = EXCLUDED.batch_start_ts
             """,
@@ -195,15 +196,19 @@ class BatchLoader:
                     if last[col] is not None
                 ]
             )
+            batch_id_col = self.model.batch_id_col()
+            batch_id = last[batch_id_col] if batch_id_col else 0
             cur.execute(
                 """
             UPDATE idr.load_progress
-            SET last_ts = %(last_ts)s
+            SET last_ts = %(last_ts)s,
+                last_id = %(last_id)s
             WHERE table_name = %(table)s
             """,
                 {
                     "table": self.table,
                     "last_ts": max_timestamp,
+                    "last_id": batch_id,
                 },
             )
 
@@ -251,10 +256,22 @@ class BatchLoader:
 
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
-        with cur.copy(f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN") as copy:  # type: ignore
+        with cur.copy(f"COPY {temp_table} ({cols_str}) FROM STDIN") as copy:  # type: ignore
             for row in results:
                 model_dump = row.model_dump()
-                copy.write_row([model_dump[k] for k in self.insert_cols])
+                copy.write_row([_remove_null_bytes(model_dump[k]) for k in insert_cols])
+
+
+def _remove_null_bytes(val: DbType) -> DbType:
+    # Some IDR strings have null bytes.
+    # Postgres doesn't allow these in text fields.
+    # We can't use a UTF-8 validator here since technically these are valid UTF-8
+    # and we can't use string.printable because that only contains ASCII fields
+    # so neither of those validation techniques will remove null bytes
+    # and still allow other valid UTF-8 characters.
+    if type(val) is str:
+        return val.replace("\x00", "")
+    return val
 
 
 def _convert_date(date_field: date | datetime) -> datetime:

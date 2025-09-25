@@ -1,7 +1,0 @@
-ops/ansible/playbooks-ccs/files/client_data_server_local_test_env_test_keypair.pem
-ops/ansible/playbooks-ccs/files/client_data_server_local_test_env_prod_keypair.pem
-ops/ansible/playbooks-ccs/files/client_data_server_local_test_env_dpr_keypair.pem
-ops/terraform/env/mgmt/base_config/values/mgmt.yaml
-ops/terraform/services/base/values/prod-sbx.yaml
-ops/terraform/services/base/values/prod.yaml
-ops/terraform/services/base/values/test.yaml

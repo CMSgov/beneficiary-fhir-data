@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/05-server-metrics"
 }
@@ -26,5 +25,5 @@ locals {
   ssm_config       = module.terraservice.ssm_config
 
   target_service = "server"
-  namespace      = !var.greenfield ? "bfd-${local.env}/${local.target_service}/ecs" : "bfd-${local.env}/${local.target_service}"
+  namespace      = "bfd-${local.env}/${local.target_service}"
 }

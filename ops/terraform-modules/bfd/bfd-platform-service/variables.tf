@@ -1,8 +1,3 @@
-variable "greenfield" {
-  default     = false
-  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
-}
-
 variable "relative_module_root" {
   description = "The solution's relative path from the root of beneficiary-fhir-data repository"
   type        = string

@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/05-server-insights"
 }
@@ -34,7 +33,7 @@ locals {
   azs                      = keys(module.terraservice.default_azs)
 
   project              = "bfd"
-  full_name            = !var.greenfield ? "bfd-insights-${local.project}-${local.env}" : "bfd-${local.env}-insights-${local.project}"
+  full_name            = "bfd-${local.env}-insights-${local.project}"
   full_name_underscore = replace(local.full_name, "-", "_")
   database             = local.full_name
   tags = {
