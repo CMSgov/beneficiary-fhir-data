@@ -75,6 +75,8 @@ def save_output_files(
     df.to_csv("out/SYNTHETIC_CLM_LINE_INSTNL.csv", index=False)
     df = pd.json_normalize(clm_dcmtn)
     df.to_csv("out/SYNTHETIC_CLM_DCMTN.csv", index=False)
+    df = pd.json_normalize(clm_lctn_hstry)
+    df.to_csv("out/SYNTHETIC_CLM_LCTN_HSTRY.csv", index=False)
     df = pd.json_normalize(clm_fiss)
     df.to_csv("out/SYNTHETIC_CLM_FISS.csv", index=False)
     df = pd.json_normalize(clm_prfnl)
@@ -1264,6 +1266,7 @@ def main():
                 if "CLM_LINE_INSTNL" in pac_claim and len(pac_claim["CLM_LINE_INSTNL"]) > 0:
                     CLM_LINE_INSTNL.extend(pac_claim["CLM_LINE_INSTNL"])
                 CLM_FISS.append(pac_claim["CLM_FISS"])
+                CLM_LCTN_HSTRY.append(pac_claim["CLM_LCTN_HSTRY"])
 
     save_output_files(
         CLM,
