@@ -1,5 +1,6 @@
 {
   "name": "beneficiary-fhir-data",
+  "version": "",
   "description": "The BFD Server is an API designed to serve Medicare beneficiaries' demographic, enrollment, and claims data using the HL7® FHIR® Standard format.",
   "longDescription": "It's the vision of this project to provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data. This aligns with the overarching mission to enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.",
   "status": "Production",
@@ -17,10 +18,15 @@
   "repositoryURL": "https://github.com/CMSgov/beneficiary-fhir-data",
   "repositoryHost": "github.com/CMSgov",
   "repositoryVisibility": "public",
+  "homepageURL": "",
+  "downloadURL": "",
+  "disclaimerURL": "",
+  "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 34495,
+  "laborHours": 35599,
   "reuseFrequency": {
-    "forks": 33
+    "forks": 33,
+    "clones": 0
   },
   "platforms": [
     "windows",
@@ -36,29 +42,28 @@
     "Java",
     "HCL",
     "Python",
-    "Shell",
-    "PLpgSQL",
-    "Groovy",
-    "Rust",
     "GLSL",
-    "Kotlin",
-    "Jinja",
-    "Dockerfile",
+    "PLpgSQL",
+    "Shell",
+    "Rust",
     "Liquid",
+    "Dockerfile",
     "HTML",
-    "Go",
     "Ruby",
     "CSS",
-    "Smarty",
     "JavaScript",
     "SCSS"
   ],
   "maintenance": "internal",
   "contractNumber": "0",
+  "SBOM": "https://github.com/CMSgov/beneficiary-fhir-data/network/dependencies",
+  "relatedCode": [],
+  "reusedCode": [],
+  "partners": [],
   "date": {
     "created": "2019-08-22T18:41:16Z",
-    "lastModified": "2025-05-06T13:34:00Z",
-    "metaDataLastUpdated": "2025-05-08T15:31:44.414Z"
+    "lastModified": "2025-09-25T21:52:17Z",
+    "metaDataLastUpdated": "2025-09-26T12:00:50.692Z"
   },
   "tags": [
     "fhir",
@@ -74,9 +79,8 @@
     "email": "opensource@cms.hhs.gov",
     "name": "CMS Open Source Program Office"
   },
-  "feedbackMechanisms": [
-    "https://github.com/CMSgov/beneficiary-fhir-data/issues"
-  ],
+  "feedbackMechanism": "https://github.com/CMSgov/beneficiary-fhir-data/issues",
+  "AIUseCaseID": "0",
   "localisation": false,
   "repositoryType": "APIs",
   "userInput": true,
@@ -86,7 +90,6 @@
     "blue-button"
   ],
   "systems": [],
-  "upstream": "https://github.com/CMSgov/beneficiary-fhir-data/network/dependencies",
   "subsetInHealthcare": [
     "Operational",
     "Medicare"
@@ -96,5 +99,9 @@
     "Patients",
     "Government"
   ],
-  "maturityModelTier": 3
+  "maturityModelTier": 3,
+  "feedbackMechanisms": [
+    "https://github.com/CMSgov/beneficiary-fhir-data/issues"
+  ],
+  "upstream": "https://github.com/CMSgov/beneficiary-fhir-data/network/dependencies"
 }
