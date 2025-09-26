@@ -27,6 +27,7 @@ def save_output_files(
     clm_line_instnl,
     clm_dcmtn,
     clm_fiss,
+    clm_lctn_hstry,
     clm_prfnl,
     clm_line_prfnl,
     clm_line_rx,
@@ -74,6 +75,8 @@ def save_output_files(
     df.to_csv("out/SYNTHETIC_CLM_LINE_INSTNL.csv", index=False)
     df = pd.json_normalize(clm_dcmtn)
     df.to_csv("out/SYNTHETIC_CLM_DCMTN.csv", index=False)
+    df = pd.json_normalize(clm_lctn_hstry)
+    df.to_csv("out/SYNTHETIC_CLM_LCTN_HSTRY.csv", index=False)
     df = pd.json_normalize(clm_fiss)
     df.to_csv("out/SYNTHETIC_CLM_FISS.csv", index=False)
     df = pd.json_normalize(clm_prfnl)
@@ -999,6 +1002,17 @@ def gen_pac_version_of_claim(claim, max_date):
     )
     add_meta_timestamps(pac_claim["CLM_FISS"], claim["CLM"], max_date)
 
+    pac_claim["CLM_LCTN_HSTRY"] = {}
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_DT_SGNTR_SK"] = pac_claim["CLM"]["CLM_DT_SGNTR_SK"]
+    pac_claim["CLM_LCTN_HSTRY"]["GEO_BENE_SK"] = pac_claim["CLM"]["GEO_BENE_SK"]
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_NUM_SK"] = pac_claim["CLM"]["CLM_NUM_SK"]
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_TYPE_CD"] = pac_claim["CLM"]["CLM_TYPE_CD"]
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_LCTN_CD_SQNC_NUM"] = "1"
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_AUDT_TRL_STUS_CD"] = random.choice(
+        ["A", "F", "I", "S", "M", "P", "R", "D", "T", "U", "1", "2", "4", "8"]
+    )
+    add_meta_timestamps(pac_claim["CLM_LCTN_HSTRY"], claim["CLM"], max_date)
+
     for i in range(len(pac_claim["CLM_LINE"])):
         pac_claim["CLM_LINE"][i]["CLM_LINE_NUM"] = i + 1
         pac_claim["CLM_LINE"][i]["CLM_UNIQ_ID"] = pac_claim["CLM"]["CLM_UNIQ_ID"]
@@ -1195,6 +1209,7 @@ def main():
     CLM_PROD = []
     CLM_DCMTN = []
     CLM_FISS = []
+    CLM_LCTN_HSTRY = []
     CLM_PRFNL = []
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
@@ -1251,6 +1266,7 @@ def main():
                 if "CLM_LINE_INSTNL" in pac_claim and len(pac_claim["CLM_LINE_INSTNL"]) > 0:
                     CLM_LINE_INSTNL.extend(pac_claim["CLM_LINE_INSTNL"])
                 CLM_FISS.append(pac_claim["CLM_FISS"])
+                CLM_LCTN_HSTRY.append(pac_claim["CLM_LCTN_HSTRY"])
 
     save_output_files(
         CLM,
@@ -1262,6 +1278,7 @@ def main():
         CLM_LINE_INSTNL,
         CLM_DCMTN,
         CLM_FISS,
+        CLM_LCTN_HSTRY,
         CLM_PRFNL,
         CLM_LINE_PRFNL,
         CLM_LINE_RX,
