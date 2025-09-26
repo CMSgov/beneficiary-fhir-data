@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -98,7 +99,12 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId));
+    // Use the most recent bfd_updated_ts across the claim and its related child
+    // tables when setting lastUpdated.
+    var overriddenMeta =
+        meta.toFhir(claimTypeCode, claimSourceId)
+            .setLastUpdated(DateUtil.toDate(getMostRecentUpdated()));
+    eob.setMeta(overriddenMeta);
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -179,6 +185,55 @@ public class Claim {
 
   private List<ClaimValue> getClaimValues() {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
+  }
+
+  private ZonedDateTime getMostRecentUpdated() {
+    // Collect timestamps (claim + child entities) then pick the max.
+    var ciStream =
+        Optional.ofNullable(claimInstitutional)
+            .map(ClaimInstitutional::getBfdUpdatedTimestamp)
+            .stream();
+    var cfStream = getClaimFiss().map(ClaimFiss::getBfdUpdatedTimestamp).stream();
+    var cdsStream =
+        Optional.ofNullable(claimDateSignature)
+            .map(ClaimDateSignature::getBfdUpdatedTimestamp)
+            .stream();
+
+    var itemsStream =
+        claimItems == null
+            ? Stream.<ZonedDateTime>empty()
+            : claimItems.stream()
+                .flatMap(
+                    item -> {
+                      var itemTs = Optional.ofNullable(item.getBfdUpdatedTimestamp()).stream();
+                      var lineStream =
+                          item.getClaimLineInstitutional()
+                              .map(
+                                  cli ->
+                                      Stream.concat(
+                                          Optional.ofNullable(cli.getBfdUpdatedTimestamp())
+                                              .stream(),
+                                          cli.getAnsiSignature()
+                                              .map(
+                                                  ansi ->
+                                                      Optional.ofNullable(
+                                                          ansi.getBfdUpdatedTimestamp())
+                                                          .stream())
+                                              .orElseGet(Stream::empty)))
+                              .orElseGet(Stream::empty);
+                      return Stream.concat(itemTs, lineStream);
+                    });
+
+    var allCandidates =
+        Stream.concat(
+            Stream.of(meta.getUpdatedTimestamp()),
+            Stream.concat(
+                ciStream, Stream.concat(cfStream, Stream.concat(cdsStream, itemsStream))));
+
+    return allCandidates
+        .filter(java.util.Objects::nonNull)
+        .max(Comparator.naturalOrder())
+        .orElse(meta.getUpdatedTimestamp());
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

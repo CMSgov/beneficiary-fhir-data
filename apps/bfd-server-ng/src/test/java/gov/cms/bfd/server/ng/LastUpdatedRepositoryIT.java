@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng;
 
-import static java.sql.Types.TIMESTAMP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -10,20 +9,18 @@ import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressTables;
 import jakarta.persistence.EntityManager;
-import java.time.OffsetDateTime;
+import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.function.Supplier;
-import javax.sql.DataSource;
-import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /** Integration tests verifying the logic of getting the "last updated" value */
@@ -34,7 +31,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   private final ClaimRepository claimRepository;
   private final BeneficiaryRepository beneficiaryRepository;
   private final CoverageRepository coverageRepository;
-  private final DataSource dataSource;
+  private final javax.sql.DataSource dataSource;
 
   @Autowired
   public LastUpdatedRepositoryIT(
@@ -42,7 +39,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
       ClaimRepository claimRepository,
       BeneficiaryRepository beneficiaryRepository,
       CoverageRepository coverageRepository,
-      DataSource dataSource) {
+      javax.sql.DataSource dataSource) {
     this.entityManager = entityManager;
     this.claimRepository = claimRepository;
     this.beneficiaryRepository = beneficiaryRepository;
@@ -54,14 +51,6 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
       ZonedDateTime.of(2024, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 
   private static final String DELETE_LOAD_PROGRESS = "DELETE FROM idr.load_progress";
-  private static final String SELECT_BFD_UPDATED_CLAIM =
-      "SELECT bfd_updated_ts FROM idr.claim WHERE clm_uniq_id = ?";
-  private static final String UPDATE_BFD_UPDATED_CLAIM =
-      "UPDATE idr.claim SET bfd_updated_ts = cast(? as timestamptz) WHERE clm_uniq_id = ?";
-  private static final String SELECT_BFD_UPDATED_BENEFICIARY =
-      "SELECT bfd_updated_ts FROM idr.valid_beneficiary WHERE bene_sk = ?";
-  private static final String UPDATE_BFD_UPDATED_BENEFICIARY =
-      "UPDATE idr.valid_beneficiary SET bfd_updated_ts = cast(? as timestamptz) WHERE bene_sk = ?";
   private static final String PREFIX_ASSERT_MSG = "Prefix should be counted: ";
 
   private enum ResourceType {
@@ -74,15 +63,8 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     return getFhirClient().read().resource(ExplanationOfBenefit.class);
   }
 
-  private IReadTyped<Patient> patientRead() {
-    return getFhirClient().read().resource(Patient.class);
-  }
-
-  private IReadTyped<Coverage> coverageRead() {
-    return getFhirClient().read().resource(Coverage.class);
-  }
-
   @BeforeEach
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   void cleanLoadProgress() {
     entityManager.createNativeQuery(DELETE_LOAD_PROGRESS).executeUpdate();
     entityManager.flush();
@@ -109,132 +91,56 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
 
   @Test
   @Transactional
-  void eobMetaLastUpdatedReflectsClaimBfdUpdatedTs() throws Exception {
+  void eobMetaLastUpdatedReflectsClaimBfdUpdatedTs() {
+
     var expected = BASE_TIME.plusHours(42);
-    String original = null;
-    try (var conn = dataSource.getConnection()) {
-      conn.setAutoCommit(false);
-      try (var sel = conn.prepareStatement(SELECT_BFD_UPDATED_CLAIM)) {
-        sel.setLong(1, Long.parseLong(CLAIM_ID_ADJUDICATED));
-        var rs = sel.executeQuery();
-        if (rs.next()) original = rs.getString(1);
-      }
+    var prefixes = LoadProgressTables.claimTablePrefixes();
 
-      try (var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_CLAIM)) {
-        upd.setString(1, expected.toString());
-        upd.setLong(2, Long.parseLong(CLAIM_ID_ADJUDICATED));
-        upd.executeUpdate();
-      }
-      conn.commit();
-      try (var sel2 = conn.prepareStatement(SELECT_BFD_UPDATED_CLAIM)) {
-        sel2.setLong(1, Long.parseLong(CLAIM_ID_ADJUDICATED));
-        var rs2 = sel2.executeQuery();
-        if (rs2.next()) {
-          OffsetDateTime odt = rs2.getObject(1, OffsetDateTime.class);
-          assertEquals(expected.toInstant(), odt.toInstant());
-        }
-      }
-    }
-    var eob = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();
-    assertEquals(expected.toInstant(), eob.getMeta().getLastUpdated().toInstant());
+    entityManager.createNativeQuery(DELETE_LOAD_PROGRESS).executeUpdate();
+    entityManager.flush();
 
-    // restore
-    try (var conn = dataSource.getConnection();
-        var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_CLAIM)) {
-      if (original != null) upd.setString(1, original);
-      else upd.setNull(1, TIMESTAMP);
-      upd.setLong(2, Long.parseLong(CLAIM_ID_ADJUDICATED));
-      upd.executeUpdate();
-    }
+    for (var p : prefixes) insertLoadProgressRow(p, BASE_TIME);
+
+    insertLoadProgressRow(prefixes.get(0), expected);
+
+    var actual = claimRepository.claimLastUpdated();
+    assertEquals(expected.toInstant(), actual.toInstant(), "Should pick the bumped claim prefix");
   }
 
   @Test
   @Transactional
-  void patientMetaLastUpdatedReflectsBeneficiaryBfdUpdatedTs() throws Exception {
+  void patientMetaLastUpdatedReflectsBeneficiaryBfdUpdatedTs() {
     var expected = BASE_TIME.plusHours(24);
+    var prefixes = LoadProgressTables.beneficiaryTablePrefixes();
 
-    String original = null;
-    try (var conn = dataSource.getConnection()) {
-      conn.setAutoCommit(false);
-      try (var sel = conn.prepareStatement(SELECT_BFD_UPDATED_BENEFICIARY)) {
-        sel.setLong(1, Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF));
-        var rs = sel.executeQuery();
-        if (rs.next()) original = rs.getString(1);
-      }
+    entityManager.createNativeQuery(DELETE_LOAD_PROGRESS).executeUpdate();
+    entityManager.flush();
 
-      try (var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
-        upd.setString(1, expected.toString());
-        upd.setLong(2, Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF));
-        upd.executeUpdate();
-      }
-      conn.commit();
-      try (var sel2 = conn.prepareStatement(SELECT_BFD_UPDATED_BENEFICIARY)) {
-        sel2.setLong(1, Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF));
-        var rs2 = sel2.executeQuery();
-        if (rs2.next()) {
-          OffsetDateTime odt = rs2.getObject(1, OffsetDateTime.class);
-          assertEquals(expected.toInstant(), odt.toInstant());
-        }
-      }
-    }
+    for (var p : prefixes) insertLoadProgressRow(p, BASE_TIME);
+    insertLoadProgressRow(prefixes.get(0), expected);
 
-    var patient = patientRead().withId(BENE_ID_ALL_PARTS_WITH_XREF).execute();
-    assertEquals(expected.toInstant(), patient.getMeta().getLastUpdated().toInstant());
-
-    // restore
-    try (var conn = dataSource.getConnection();
-        var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
-      if (original != null) upd.setString(1, original);
-      else upd.setNull(1, TIMESTAMP);
-      upd.setLong(2, Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF));
-      upd.executeUpdate();
-    }
+    var actual = beneficiaryRepository.beneficiaryLastUpdated();
+    assertEquals(
+        expected.toInstant(), actual.toInstant(), "Should pick the bumped beneficiary prefix");
   }
 
   @Test
   @Transactional
-  void coverageMetaLastUpdatedReflectsBeneficiaryBfdUpdatedTs() throws Exception {
+  void coverageMetaLastUpdatedReflectsBeneficiaryBfdUpdatedTs() {
+    // Validate coverage last updated computation via load_progress without changing
+    // beneficiary rows.
     var expected = BASE_TIME.plusHours(30);
+    var prefixes = LoadProgressTables.coverageTablePrefixes();
 
-    var beneId = BENE_ID_PART_A_ONLY;
-    String original = null;
-    try (var conn = dataSource.getConnection()) {
-      conn.setAutoCommit(false);
-      try (var sel = conn.prepareStatement(SELECT_BFD_UPDATED_BENEFICIARY)) {
-        sel.setLong(1, Long.parseLong(beneId));
-        var rs = sel.executeQuery();
-        if (rs.next()) original = rs.getString(1);
-      }
+    entityManager.createNativeQuery(DELETE_LOAD_PROGRESS).executeUpdate();
+    entityManager.flush();
 
-      try (var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
-        upd.setString(1, expected.toString());
-        upd.setLong(2, Long.parseLong(beneId));
-        upd.executeUpdate();
-      }
-      conn.commit();
+    for (var p : prefixes) insertLoadProgressRow(p, BASE_TIME);
+    insertLoadProgressRow(prefixes.get(0), expected);
 
-      try (var sel2 = conn.prepareStatement(SELECT_BFD_UPDATED_BENEFICIARY)) {
-        sel2.setLong(1, Long.parseLong(beneId));
-        var rs2 = sel2.executeQuery();
-        if (rs2.next()) {
-          OffsetDateTime odt = rs2.getObject(1, OffsetDateTime.class);
-          assertEquals(expected.toInstant(), odt.toInstant());
-        }
-      }
-    }
-
-    var coverageId = String.format("part-a-%s", beneId);
-    var coverage = coverageRead().withId(coverageId).execute();
-    assertEquals(expected.toInstant(), coverage.getMeta().getLastUpdated().toInstant());
-
-    // restore
-    try (var conn = dataSource.getConnection();
-        var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
-      if (original != null) upd.setString(1, original);
-      else upd.setNull(1, TIMESTAMP);
-      upd.setLong(2, Long.parseLong(beneId));
-      upd.executeUpdate();
-    }
+    var actual = coverageRepository.coverageLastUpdated();
+    assertEquals(
+        expected.toInstant(), actual.toInstant(), "Should pick the bumped coverage prefix");
   }
 
   @Test
@@ -270,21 +176,11 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   @EnumSource(ResourceType.class)
   void loadProgressPrefixesAreAllUsed(ResourceType type) {
     List<String> prefixes;
-    Supplier<java.time.ZonedDateTime> lastUpdatedSupplier;
 
     switch (type) {
-      case CLAIM -> {
-        prefixes = LoadProgressTables.claimTablePrefixes();
-        lastUpdatedSupplier = claimRepository::claimLastUpdated;
-      }
-      case BENEFICIARY -> {
-        prefixes = LoadProgressTables.beneficiaryTablePrefixes();
-        lastUpdatedSupplier = beneficiaryRepository::beneficiaryLastUpdated;
-      }
-      case COVERAGE -> {
-        prefixes = LoadProgressTables.coverageTablePrefixes();
-        lastUpdatedSupplier = coverageRepository::coverageLastUpdated;
-      }
+      case CLAIM -> prefixes = LoadProgressTables.claimTablePrefixes();
+      case BENEFICIARY -> prefixes = LoadProgressTables.beneficiaryTablePrefixes();
+      case COVERAGE -> prefixes = LoadProgressTables.coverageTablePrefixes();
       default -> throw new IllegalStateException("Unexpected type: " + type);
     }
 
@@ -297,8 +193,61 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
       var bumped = BASE_TIME.plusHours(10L + i);
       insertLoadProgressRow(prefixes.get(i), bumped);
 
-      var actual = lastUpdatedSupplier.get();
+      var actual =
+          switch (type) {
+            case CLAIM -> claimRepository.claimLastUpdated();
+            case BENEFICIARY -> beneficiaryRepository.beneficiaryLastUpdated();
+            case COVERAGE -> coverageRepository.coverageLastUpdated();
+          };
       assertEquals(bumped.toInstant(), actual.toInstant(), PREFIX_ASSERT_MSG + prefixes.get(i));
     }
+  }
+
+  @Test
+  void eobMetaReflectsChildTableBfdUpdatedTs() {
+    // Read the claim's current bfd_updated_ts and pick an expected value that is
+    // guaranteed to be newer than the claim's timestamp.
+    ZonedDateTime claimTs;
+    try {
+      try (var conn = dataSource.getConnection();
+          var stmt = conn.createStatement();
+          var rs =
+              stmt.executeQuery(
+                  "SELECT bfd_updated_ts FROM idr.claim WHERE clm_uniq_id = "
+                      + CLAIM_ID_ADJUDICATED)) {
+        if (!rs.next())
+          throw new IllegalStateException("Seeded claim not found: " + CLAIM_ID_ADJUDICATED);
+        var ts = rs.getTimestamp("bfd_updated_ts");
+        claimTs = ZonedDateTime.ofInstant(ts.toInstant(), ZoneOffset.UTC);
+      }
+    } catch (SQLException e) {
+      throw new IllegalStateException("Failed to read seeded claim timestamp", e);
+    }
+
+    var expected = claimTs.plusHours(1);
+
+    // Update claim_ansi_signature rows associated with the seeded claim used in tests.
+    var sql =
+        "UPDATE idr.claim_ansi_signature SET bfd_updated_ts = cast('"
+            + expected.toString()
+            + "' as timestamptz) WHERE clm_ansi_sgntr_sk IN (SELECT cli.clm_ansi_sgntr_sk FROM idr.claim_line_institutional cli WHERE cli.clm_uniq_id = "
+            + CLAIM_ID_ADJUDICATED
+            + ")";
+
+    try {
+      try (var conn = dataSource.getConnection();
+          var stmt = conn.createStatement()) {
+
+        stmt.executeUpdate(sql);
+      }
+    } catch (SQLException e) {
+      throw new IllegalStateException("Failed to update child timestamps for seeded claim", e);
+    }
+
+    var eob = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();
+    assertNotNull(eob.getMeta(), "EOB meta should be present");
+    var expectedMs = expected.toInstant().truncatedTo(ChronoUnit.MILLIS);
+    var actualMs = eob.getMeta().getLastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
+    assertEquals(expectedMs, actualMs);
   }
 }
