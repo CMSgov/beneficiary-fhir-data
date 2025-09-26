@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -8,6 +9,7 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Getter;
 
@@ -20,6 +22,9 @@ public class ClaimItem {
   @Embedded private ClaimLine claimLine;
   @Embedded private ClaimProcedure claimProcedure;
   @Embedded private ClaimValue claimValue;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne

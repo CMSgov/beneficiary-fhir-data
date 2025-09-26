@@ -11,8 +11,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,10 +24,10 @@ public class EobHandler {
   private final ClaimRepository claimRepository;
 
   /**
-   * Returns a {@link Patient} by their {@link IdType}.
+   * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
-   * @return patient
+   * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId) {
     return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange());

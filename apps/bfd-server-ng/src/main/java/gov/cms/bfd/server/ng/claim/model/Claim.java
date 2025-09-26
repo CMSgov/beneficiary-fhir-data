@@ -80,7 +80,7 @@ public class Claim {
     return Optional.ofNullable(claimInstitutional);
   }
 
-  private Optional<ClaimFiss> getClaimFiss() {
+  Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
   }
 

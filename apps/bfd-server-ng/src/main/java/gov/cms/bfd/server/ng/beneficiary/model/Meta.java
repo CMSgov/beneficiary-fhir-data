@@ -5,9 +5,11 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
+import lombok.Getter;
 
 /** FHIR metadata information. */
 @Embeddable
+@Getter
 public class Meta {
   @Column(name = "bfd_updated_ts", nullable = false)
   private ZonedDateTime updatedTimestamp;

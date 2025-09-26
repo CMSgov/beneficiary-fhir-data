@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressTables;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class BeneficiaryRepository {
-  private EntityManager entityManager;
+  private final EntityManager entityManager;
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -121,14 +122,16 @@ public class BeneficiaryRepository {
    * @return last updated timestamp
    */
   public ZonedDateTime beneficiaryLastUpdated() {
+    var prefixes = LoadProgressTables.beneficiaryTablePrefixes();
     return entityManager
         .createQuery(
             """
             SELECT MAX(p.batchCompletionTimestamp)
             FROM LoadProgress p
-            WHERE p.tableName LIKE 'idr.beneficiary%'
+            WHERE p.tableName IN :tables
             """,
             ZonedDateTime.class)
+        .setParameter("tables", prefixes)
         .getResultList()
         .stream()
         .findFirst()

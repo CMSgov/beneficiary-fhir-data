@@ -2,8 +2,11 @@ package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressTables;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -12,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class CoverageRepository {
-  private EntityManager entityManager;
+  private final EntityManager entityManager;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -54,5 +57,30 @@ public class CoverageRepository {
 
     beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSk(coverage.getBeneSk()));
     return beneficiaryCoverage;
+  }
+
+  /**
+   * Returns the last updated timestamp for all coverage related tables.
+   *
+   * <p>Uses the {@code load_progress.batch_completion_timestamp} max across the set of coverage
+   * tables defined in {@link LoadProgressTables#coverageTablePrefixes()}.
+   *
+   * @return last updated timestamp for coverage
+   */
+  public ZonedDateTime coverageLastUpdated() {
+    var prefixes = LoadProgressTables.coverageTablePrefixes();
+    return entityManager
+        .createQuery(
+            """
+            SELECT MAX(p.batchCompletionTimestamp)
+            FROM LoadProgress p
+            WHERE p.tableName IN :tables
+            """,
+            ZonedDateTime.class)
+        .setParameter("tables", prefixes)
+        .getResultList()
+        .stream()
+        .findFirst()
+        .orElse(DateUtil.MIN_DATETIME);
   }
 }
