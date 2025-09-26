@@ -535,12 +535,11 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_MEDICAID_STATE_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
 
-  // CMS
   /** CMS ICD - ICD-9. */
-  public static final String CMS_ICD_9 = "http://www.cms.gov/Medicare/Coding/ICD9";
+  public static final String CMS_ICD_9_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD9";
 
   /** CMS ICD - ICD-10. */
-  public static final String CMS_ICD_10 = "http://www.cms.gov/Medicare/Coding/ICD10";
+  public static final String CMS_ICD_10_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD10";
 
   /** CMS - DRG Classification and Software. */
   public static final String CMS_MS_DRG =
@@ -605,10 +604,10 @@ public class SystemUrls {
       "http://terminology.hl7.org/NamingSystem/CCN";
 
   /** HL7 - ICD-9. */
-  public static final String ICD_9_CM = "http://hl7.org/fhir/sid/icd-9-cm";
+  public static final String ICD_9_CM_DIAGNOSIS = "http://hl7.org/fhir/sid/icd-9-cm";
 
   /** HL7 - ICD-10. */
-  public static final String ICD_10_CM = "http://hl7.org/fhir/sid/icd-10-cm";
+  public static final String ICD_10_CM_DIAGNOSIS = "http://hl7.org/fhir/sid/icd-10-cm";
 
   /** units of measure. */
   public static final String UNITS_OF_MEASURE = "http://unitsofmeasure.org";

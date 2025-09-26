@@ -6,14 +6,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
+@Getter
 class DiagnosisDrgCode {
   @Convert(converter = NonZeroIntConverter.class)
-  @Column(name = "dgns_drg_cd")
+  @Column(name = "dgns_drg_cd") // SAMHSA
   private Optional<Integer> diagnosisDrgCode;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(

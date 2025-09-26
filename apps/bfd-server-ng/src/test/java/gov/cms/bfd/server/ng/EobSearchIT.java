@@ -45,7 +45,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -57,7 +57,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -72,7 +72,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(4, eobBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -102,12 +102,11 @@ public class EobSearchIT extends IntegrationTestBase {
             .offset(offset)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
-    expect.scenario("offset" + offset).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario("offset" + offset).toMatchSnapshot(eobBundle);
   }
 
   @Test
   void eobSearchByDate() {
-
     var lastUpdated =
         entityManager
             .createQuery(
@@ -208,10 +207,7 @@ public class EobSearchIT extends IntegrationTestBase {
     assertEquals(
         2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
-    expect
-        .scenario(searchStyle.name() + "_WithTag_" + validTag)
-        .serializer("fhir+json")
-        .toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name() + "_WithTag_" + validTag).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -236,9 +232,8 @@ public class EobSearchIT extends IntegrationTestBase {
     assertEquals(
         2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
-    expect
+    expectFhir()
         .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")
-        .serializer("fhir+json")
         .toMatchSnapshot(eobBundle);
   }
 
@@ -260,10 +255,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    expect
-        .scenario(searchStyle.name() + "_WithTag_EmptyResult")
-        .serializer("fhir+json")
-        .toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name() + "_WithTag_EmptyResult").toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest

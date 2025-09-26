@@ -11,11 +11,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum IcdIndicator {
   /** Not specified (default to ICD 9). */
-  DEFAULT("", SystemUrls.CMS_ICD_9, SystemUrls.ICD_9_CM),
+  DEFAULT("", SystemUrls.CMS_ICD_9_PROCEDURE, SystemUrls.ICD_9_CM_DIAGNOSIS),
   /** ICD 9. */
-  ICD_9("9", SystemUrls.CMS_ICD_9, SystemUrls.ICD_9_CM),
+  ICD_9("9", SystemUrls.CMS_ICD_9_PROCEDURE, SystemUrls.ICD_9_CM_DIAGNOSIS),
   /** ICD 10. */
-  ICD_10("0", SystemUrls.CMS_ICD_10, SystemUrls.ICD_10_CM);
+  ICD_10("0", SystemUrls.CMS_ICD_10_PROCEDURE, SystemUrls.ICD_10_CM_DIAGNOSIS);
 
   /**
    * Convert from a database code.
@@ -29,7 +29,7 @@ public enum IcdIndicator {
 
   private final String code;
   private final String procedureSystem;
-  private final String diagnosisSytem;
+  private final String diagnosisSystem;
 
   /**
    * Formats a raw diagnosis code string according to the rules for this specific ICD system. For
