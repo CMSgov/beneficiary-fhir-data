@@ -580,6 +580,7 @@
   vsGw+sS7bWHQvlVGAQRIj2tVVFi61hGMaKCIRM22ta9BVHIkjbFWyl1gtMUKu0EU
   hRN/BZNg/yzHfGXzKuQg+/MDrKLx3k1QGDgz3dqIZ9bG2B3oSmPNH49ebMbjwRUs
   T1n0VQm7cg==
+  -----END CERTIFICATE-----
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/max: 12
 /bfd/${env}/server-ng/nonsensitive/ecs/resources/cpu: 4096
