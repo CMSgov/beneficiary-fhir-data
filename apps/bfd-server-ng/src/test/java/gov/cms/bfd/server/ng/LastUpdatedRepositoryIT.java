@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static java.sql.Types.TIMESTAMP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -138,13 +139,12 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     assertEquals(expected.toInstant(), eob.getMeta().getLastUpdated().toInstant());
 
     // restore
-    if (original != null) {
-      try (var conn = dataSource.getConnection();
-          var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_CLAIM)) {
-        upd.setString(1, original);
-        upd.setLong(2, Long.parseLong(CLAIM_ID_ADJUDICATED));
-        upd.executeUpdate();
-      }
+    try (var conn = dataSource.getConnection();
+        var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_CLAIM)) {
+      if (original != null) upd.setString(1, original);
+      else upd.setNull(1, TIMESTAMP);
+      upd.setLong(2, Long.parseLong(CLAIM_ID_ADJUDICATED));
+      upd.executeUpdate();
     }
   }
 
@@ -182,13 +182,12 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     assertEquals(expected.toInstant(), patient.getMeta().getLastUpdated().toInstant());
 
     // restore
-    if (original != null) {
-      try (var conn = dataSource.getConnection();
-          var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
-        upd.setString(1, original);
-        upd.setLong(2, Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF));
-        upd.executeUpdate();
-      }
+    try (var conn = dataSource.getConnection();
+        var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
+      if (original != null) upd.setString(1, original);
+      else upd.setNull(1, TIMESTAMP);
+      upd.setLong(2, Long.parseLong(BENE_ID_ALL_PARTS_WITH_XREF));
+      upd.executeUpdate();
     }
   }
 
@@ -229,13 +228,12 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     assertEquals(expected.toInstant(), coverage.getMeta().getLastUpdated().toInstant());
 
     // restore
-    if (original != null) {
-      try (var conn = dataSource.getConnection();
-          var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
-        upd.setString(1, original);
-        upd.setLong(2, Long.parseLong(beneId));
-        upd.executeUpdate();
-      }
+    try (var conn = dataSource.getConnection();
+        var upd = conn.prepareStatement(UPDATE_BFD_UPDATED_BENEFICIARY)) {
+      if (original != null) upd.setString(1, original);
+      else upd.setNull(1, TIMESTAMP);
+      upd.setLong(2, Long.parseLong(beneId));
+      upd.executeUpdate();
     }
   }
 
