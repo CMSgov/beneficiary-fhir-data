@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/01-config"
 }
@@ -74,19 +73,7 @@ locals {
     # erroneously specified for copying
     local.ephemeral_vals
   ) : local.parent_ssm_config
-  # TODO: Remove
-  ng_env_config = !var.greenfield ? {
-    for k, v in local.untemplated_env_config
-    # At this point, replace all ${env}/$env with the actual environment name so that the SSM
-    # parameter contains the name of its environment as expected
-    : "/ng/${trim(replace(k, format(local.template_var_regex, "env"), local.env), "/")}" => {
-      str_val      = replace(v.str_val, format(local.template_var_regex, "env"), local.env)
-      is_sensitive = v.is_sensitive
-      source       = v.source
-    }
-  } : {}
-  # TODO: Remove merge() when ng_env_config is removed
-  env_config = merge({
+  env_config = {
     for k, v in local.untemplated_env_config
     # At this point, replace all ${env}/$env with the actual environment name so that the SSM
     # parameter contains the name of its environment as expected
@@ -95,7 +82,7 @@ locals {
       is_sensitive = v.is_sensitive
       source       = v.source
     }
-  }, local.ng_env_config)
+  }
 }
 
 data "external" "decrypted_sops" {
@@ -113,11 +100,11 @@ data "external" "decrypted_sops" {
 resource "aws_ssm_parameter" "this" {
   for_each = local.env_config
 
-  name           = each.key
-  tier           = "Intelligent-Tiering"
-  value          = each.value.str_val
-  type           = each.value.is_sensitive ? "SecureString" : "String"
-  key_id         = each.value.is_sensitive ? local.env_key_arn : null
+  name   = each.key
+  tier   = "Intelligent-Tiering"
+  value  = each.value.str_val
+  type   = each.value.is_sensitive ? "SecureString" : "String"
+  key_id = each.value.is_sensitive ? local.env_key_arn : null
 
   tags = {
     source_file    = each.value.source

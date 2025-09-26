@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/02-insights"
 }
@@ -33,11 +32,9 @@ locals {
   azs                      = keys(module.terraservice.default_azs)
 }
 
-# Temporary placeholder for Greenfield Insights Bucket structure to enable applying server-insights.
-# Legacy has a single Bucket, but Greenfield will have a bucket per-environment, per-consumer
+# Temporary placeholder for Insights Bucket structure to enable applying server-insights.
 # TODO: Make this Terraservice more useful
 module "bucket_insights_bfd" {
-  count  = !var.greenfield ? 0 : 1
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn

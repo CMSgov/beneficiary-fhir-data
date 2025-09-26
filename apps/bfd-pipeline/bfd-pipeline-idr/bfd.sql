@@ -49,6 +49,7 @@ CREATE TABLE idr.beneficiary_mbi_id (
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_mbi_efctv_dt DATE NOT NULL,
     bene_mbi_obslt_dt DATE NOT NULL,
+    idr_ltst_trans_flg VARCHAR(1) NOT NULL,
     idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
@@ -165,6 +166,7 @@ CREATE TABLE idr.load_progress(
     id INT GENERATED ALWAYS AS IDENTITY,
     table_name TEXT NOT NULL UNIQUE,
     last_ts TIMESTAMPTZ NOT NULL,
+    last_id BIGINT NOT NULL,
     batch_start_ts TIMESTAMPTZ NOT NULL,
     batch_complete_ts TIMESTAMPTZ NOT NULL
 );
@@ -490,7 +492,8 @@ SELECT DISTINCT
     bene_mbi.bene_mbi_obslt_dt
 FROM idr.beneficiary bene
 LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
-    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id;
+    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id
+    WHERE bene_mbi.idr_ltst_trans_flg = 'Y';
 
 CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
     RETURNS VOID AS $$

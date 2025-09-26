@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,7 +10,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/06-server-alarms"
 }
@@ -30,11 +29,11 @@ locals {
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
   target_service = "server"
-  namespace      = !var.greenfield ? "bfd-${local.env}/${local.target_service}/ecs" : "bfd-${local.env}/${local.target_service}"
+  namespace      = "bfd-${local.env}/${local.target_service}"
 
-  slo_dashboard                      = !var.greenfield ? "bfd-${local.env}-server-ecs-slos" : "bfd-${local.env}-server-slos"
+  slo_dashboard                      = "bfd-${local.env}-server-slos"
   slo_dashboard_url                  = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=${local.slo_dashboard}"
-  default_dashboard                  = !var.greenfield ? "bfd-${local.env}-server-ecs" : "bfd-${local.env}-server"
+  default_dashboard                  = "bfd-${local.env}-server"
   default_dashboard_url              = "https://${local.region}.console.aws.amazon.com/cloudwatch/home?region=${local.region}#dashboards:name=${local.default_dashboard}"
   default_dashboard_message_fragment = <<-EOF
 View the relevant CloudWatch dashboards below for more information:

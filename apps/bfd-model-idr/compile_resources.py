@@ -139,7 +139,7 @@ def main():
     print("Compiling FML ")
     compiled_map_path = f"StructureMaps/BFD-{Path(args.map).stem}-StructureMap.json"
     compile_cmd = (
-        f"java -jar validator_cli.jar -ig {args.map} -compile {args.resource} -version 4.0.1 \
+        f"java -jar validator_cli.jar -version 4.0.1 -ig {args.map} -compile {args.resource} \
         -output {compiled_map_path}"
     )
     print("Input compilation command was:" + compile_cmd)

@@ -1,5 +1,5 @@
 locals {
-  ccw_rif_role_name = !var.greenfield ? "bfd-${local.env}-ccw-rif" : "${local.name_prefix}-ccw-rif-upload-role"
+  ccw_rif_role_name = "${local.name_prefix}-ccw-rif-upload-role"
 }
 
 data "aws_iam_policy_document" "service_assume_role" {

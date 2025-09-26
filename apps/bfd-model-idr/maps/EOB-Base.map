@@ -257,7 +257,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
-        //claimType -> tgtReference.display = translate(claimType,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_TO_COVERAGE_PART','code') "Add temp coverage placeholder";
         src.CLM_NRLN_RIC_CD as nearLineAdjudicated -> tgtReference.display = translate(nearLineAdjudicated,"https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#RIC_CD",'code') "Add coverage type";
         src.CLM_RIC_CD as nearLinePartiallyAdjudicated -> tgtReference.display = translate(nearLinePartiallyAdjudicated,"https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#RIC_CD",'code') "Add coverage type";
         //CLM_RIC_CD not in MCS :shrug:
@@ -808,7 +807,7 @@ group createInsurerOrgPartAB(source src: ExplanationOfBenefitBase, target tgtOrg
     src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
   } "Set organization metadata";
   src -> tgtOrg.active = "true" "set org status";
-  src -> tgtOrg.name = "Centers for Medicare and Medicaid Services" "set org name";
+  src -> tgtOrg.name = "Centers for Medicare & Medicaid Services" "set org name";
 }
 
 group createProviderOrg(source src: ExplanationOfBenefitBase, target tgt: Organization){

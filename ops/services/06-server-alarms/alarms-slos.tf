@@ -1048,7 +1048,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_availability_failures_sum" {
   metric_name = local.slos_metrics.availability_failure_count
   namespace   = local.namespace
 
-  # TODO: Intentionally disabled for Greenfield Server until availability solution is moved out of Jenkins; fix this
+  # TODO: Intentionally disabled for until availability solution is refactored out of Jenkins
   # alarm_actions = each.value.alarm_actions
 
   datapoints_to_alarm = "1"
@@ -1104,7 +1104,7 @@ resource "aws_cloudwatch_metric_alarm" "slo_availability_uptime_percent" {
     }
   }
 
-  # TODO: Intentionally disabled for Greenfield Server until availability solution is moved out of Jenkins; fix this
+  # TODO: Intentionally disabled for until availability solution is refactored out of Jenkins
   # alarm_actions = each.value.alarm_actions
 
   datapoints_to_alarm = "1"

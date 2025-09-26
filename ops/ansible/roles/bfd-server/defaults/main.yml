@@ -1,8 +1,0 @@
----
-env_name_std: 'unknown-environment'
-ref_dir: /usr/local/bfd-server
-user: bfd
-tmp: "{{ ref_dir }}/tmp"
-logs: "{{ ref_dir }}"
-service_port: 8443
-client_certificates: []
