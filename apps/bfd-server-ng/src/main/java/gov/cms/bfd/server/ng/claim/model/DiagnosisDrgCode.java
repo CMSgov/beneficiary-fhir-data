@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 class DiagnosisDrgCode {
   @Convert(converter = NonZeroIntConverter.class)
-  @Column(name = "dgns_drg_cd")
+  @Column(name = "dgns_drg_cd") // SAMHSA
   private Optional<Integer> diagnosisDrgCode;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
