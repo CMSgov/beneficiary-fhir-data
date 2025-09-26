@@ -4,8 +4,10 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
+import lombok.Getter;
 
 @Embeddable
+@Getter
 class Meta {
   @Column(name = "bfd_updated_ts", nullable = false)
   private ZonedDateTime updatedTimestamp;

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressTables;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
@@ -18,7 +19,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class ClaimRepository {
-  private EntityManager entityManager;
+  private final EntityManager entityManager;
+
+  private static final String CLAIM_TABLES_BASE =
+      """
+      SELECT c
+      FROM Claim c
+      JOIN FETCH c.beneficiary b
+      JOIN FETCH c.claimDateSignature AS cds
+      JOIN FETCH c.claimItems AS cl
+      LEFT JOIN FETCH c.claimInstitutional ci
+      LEFT JOIN FETCH cl.claimLineInstitutional cli
+      LEFT JOIN FETCH cli.ansiSignature a
+    """;
 
   /**
    * Search for a claim by its ID.
@@ -30,27 +43,7 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    var optionalClaim =
-        withParams(
-                entityManager.createQuery(
-                    String.format(
-                        """
-                    %s
-                    WHERE c.claimUniqueId = :claimUniqueId
-                    %s
-                    """,
-                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
-                    Claim.class),
-                claimThroughDate,
-                lastUpdated,
-                new ArrayList<>())
-            .setParameter("claimUniqueId", claimUniqueId)
-            .getResultList()
-            .stream()
-            .findFirst();
-
-    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-    return optionalClaim;
+    return queryById(claimUniqueId, claimThroughDate, lastUpdated, CLAIM_TABLES_BASE);
   }
 
   /**
@@ -90,17 +83,17 @@ public class ClaimRepository {
             .setParameter("limit", limit.orElse(5000))
             .setParameter("offset", offset.orElse(0))
             .getResultList();
+    var jpql =
+        String.format(
+            """
+            %s
+            WHERE c.claimUniqueId IN (:claimIds)
+            %s
+            """,
+            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
     var claims =
         withParams(
-                entityManager.createQuery(
-                    String.format(
-                        """
-                        %s
-                        WHERE c.claimUniqueId IN (:claimIds)
-                        %s
-                        """,
-                        getClaimTables(), getFilters(claimThroughDate, lastUpdated)),
-                    Claim.class),
+                entityManager.createQuery(jpql, Claim.class),
                 claimThroughDate,
                 lastUpdated,
                 sourceIds)
@@ -116,34 +109,23 @@ public class ClaimRepository {
   /**
    * Returns the last updated timestamp for the claims data ingestion process.
    *
-   * @return last updated timestamp
+   * @return the most recent timestamp.
    */
   public ZonedDateTime claimLastUpdated() {
+    var prefixes = LoadProgressTables.claimTablePrefixes();
     return entityManager
         .createQuery(
             """
             SELECT MAX(p.batchCompletionTimestamp)
             FROM LoadProgress p
-            WHERE p.tableName LIKE 'idr.claim%'
+            WHERE p.tableName IN :tables
             """,
             ZonedDateTime.class)
+        .setParameter("tables", prefixes)
         .getResultList()
         .stream()
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
-  }
-
-  private String getClaimTables() {
-    return """
-      SELECT c
-      FROM Claim c
-      JOIN FETCH c.beneficiary b
-      JOIN FETCH c.claimDateSignature AS cds
-      JOIN FETCH c.claimItems AS cl
-      LEFT JOIN FETCH c.claimInstitutional ci
-      LEFT JOIN FETCH cl.claimLineInstitutional cli
-      LEFT JOIN FETCH cli.ansiSignature a
-    """;
   }
 
   private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
@@ -175,5 +157,27 @@ public class ClaimRepository {
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())
         .setParameter("sourceIds", sourceIds);
+  }
+
+  private Optional<Claim> queryById(
+      long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated, String base) {
+    var jpql =
+        String.format(
+            """
+              %s
+              WHERE c.claimUniqueId = :claimUniqueId
+              %s
+            """,
+            base, getFilters(claimThroughDate, lastUpdated));
+    var results =
+        withParams(
+                entityManager.createQuery(jpql, Claim.class),
+                claimThroughDate,
+                lastUpdated,
+                new ArrayList<>())
+            .setParameter("claimUniqueId", claimUniqueId)
+            .getResultList();
+
+    return results.stream().findFirst();
   }
 }
