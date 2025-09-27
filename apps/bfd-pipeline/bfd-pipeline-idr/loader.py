@@ -230,7 +230,6 @@ class BatchLoader:
         timestamp_placeholders = ",".join("%(timestamp)s" for _ in self.meta_keys)
 
         # Upsert into the main table
-        insert_timer.start()
         if self.model.should_replace():
             # Delete before inserting since we've specified that the data should be
             # replaced rather than merged.
@@ -245,7 +244,6 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
-        insert_timer.stop()
 
     def _copy_data(self, cur: psycopg.Cursor, results: list[T]) -> None:
         # Use COPY to load the batch into Postgres.
