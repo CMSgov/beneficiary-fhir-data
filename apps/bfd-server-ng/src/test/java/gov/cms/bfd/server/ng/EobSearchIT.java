@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Bundle;
@@ -21,10 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class EobSearchIT extends IntegrationTestBase {
-  @Autowired private EntityManager entityManager;
 
   private IQuery<Bundle> searchBundle() {
     return getFhirClient()

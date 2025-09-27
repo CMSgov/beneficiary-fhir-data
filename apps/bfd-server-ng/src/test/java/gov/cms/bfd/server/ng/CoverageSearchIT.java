@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -25,12 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class CoverageSearchIT extends IntegrationTestBase {
-
-  @Autowired private EntityManager entityManager;
-
   private IQuery<Bundle> searchBundle() {
     return getFhirClient().search().forResource(Coverage.class).returnBundle(Bundle.class);
   }

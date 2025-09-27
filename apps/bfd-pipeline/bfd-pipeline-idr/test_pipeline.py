@@ -44,7 +44,7 @@ class TestPipeline:
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
         conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")
-        assert cur.rowcount == 24
+        assert cur.rowcount == 25
         rows = cur.fetchmany(2)
 
         assert rows[0]["bene_sk"] == 10464258
@@ -78,7 +78,7 @@ class TestPipeline:
         cur = conn.execute(
             "select * from idr.beneficiary where bene_kill_cred_cd != '' order by bene_sk"
         )
-        assert cur.rowcount == 6
+        assert cur.rowcount == 5
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 174441863
 
@@ -106,6 +106,12 @@ class TestPipeline:
         assert cur.rowcount == 4
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 47347082
+
+        cur = conn.execute("select * from idr.beneficiary_overshare_mbi order by bene_mbi_id")
+        assert cur.rowcount == 2
+        rows = cur.fetchmany(2)
+        assert rows[0]["bene_mbi_id"] == "5OH0K85GU23"
+        assert rows[1]["bene_mbi_id"] == "6LM1C27GV22"
 
         cur = conn.execute("select * from idr.claim order by clm_uniq_id")
         assert cur.rowcount == 144

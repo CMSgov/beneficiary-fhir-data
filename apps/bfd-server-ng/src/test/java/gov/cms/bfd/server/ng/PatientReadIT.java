@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class PatientReadIT extends IntegrationTestBase {
   private IReadTyped<Patient> patientRead() {
@@ -94,6 +95,27 @@ public class PatientReadIT extends IntegrationTestBase {
   void patientReadIdNotFound() {
     var readWithId = patientRead().withId("999");
     assertThrows(ResourceNotFoundException.class, readWithId::execute);
+  }
+
+  @ValueSource(strings = {OVERSHARE_BENE_SK1, OVERSHARE_BENE_SK2})
+  @ParameterizedTest
+  void patientOvershareIdNotFound(String beneSk) {
+    var mbis =
+        entityManager
+            .createNativeQuery(
+                "SELECT bene_mbi_id FROM idr.beneficiary WHERE bene_sk = :beneSk", String.class)
+            .setParameter("beneSk", Long.parseLong(beneSk))
+            .getResultList();
+    assertEquals(1, mbis.size());
+    var overshare =
+        entityManager
+            .createNativeQuery(
+                "SELECT * FROM idr.beneficiary_overshare_mbi WHERE bene_mbi_id = :mbi")
+            .setParameter("mbi", mbis.getFirst())
+            .getResultList();
+    assertEquals(1, overshare.size());
+    var readWithBeneSk = patientRead().withId(beneSk);
+    assertThrows(ResourceNotFoundException.class, readWithBeneSk::execute);
   }
 
   @Test

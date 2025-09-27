@@ -4,6 +4,7 @@ import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -11,6 +12,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
@@ -23,6 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class IntegrationTestBase {
   @LocalServerPort protected int port;
   protected Expect expect;
+  @Autowired protected EntityManager entityManager;
 
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
@@ -31,6 +34,9 @@ public class IntegrationTestBase {
   protected static final String HISTORICAL_MERGED_MBI_KILL_CREDIT = "2B19C89AA37";
   protected static final String HISTORICAL_MERGED_MBI = "2B19C89AA36";
   protected static final String HISTORICAL_AND_CURRENT_MBI = "2B19C89AA35";
+  protected static final String OVERSHARE_MBI = "2B19C89AA38";
+  protected static final String OVERSHARE_BENE_SK1 = "617782586";
+  protected static final String OVERSHARE_BENE_SK2 = "617782587";
 
   protected static final String BENE_ID_PART_A_ONLY = "178083966";
   protected static final String BENE_ID_PART_B_ONLY = "365359727";
