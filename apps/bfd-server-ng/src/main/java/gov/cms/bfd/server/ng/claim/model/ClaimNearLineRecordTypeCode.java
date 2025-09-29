@@ -9,13 +9,13 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
- * Claim Record Type Codes. Suppress SonarQube warning that constant names should comply with naming
- * conventions
+ * Claim Near Line Record Type Codes. Suppress SonarQube warning that constant names should comply
+ * with naming conventions
  */
 @AllArgsConstructor
 @Getter
 @SuppressWarnings("java:S115")
-public enum ClaimRecordTypeCode {
+public enum ClaimNearLineRecordTypeCode {
   /** M - Part B DMEPOS claim record (processed by DME Regional Carrier). */
   M("M", "Part B DMEPOS claim record (processed by DME Regional Carrier)"),
   /**
@@ -46,7 +46,7 @@ public enum ClaimRecordTypeCode {
    * @param code database code
    * @return claim record type code
    */
-  public static Optional<ClaimRecordTypeCode> fromCode(String code) {
+  public static Optional<ClaimNearLineRecordTypeCode> fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
