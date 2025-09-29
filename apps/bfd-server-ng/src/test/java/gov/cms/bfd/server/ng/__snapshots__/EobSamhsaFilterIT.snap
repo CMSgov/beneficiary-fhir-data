@@ -593,16 +593,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
         } ]
       } ],
       "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+        "valueDate" : "2020-09-11"
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
         "valueCoding" : {
           "code" : "01112",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-        "valueCoding" : {
-          "code" : "V",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
@@ -617,8 +614,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
+        "valueCoding" : {
+          "code" : "V",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
+        }
       } ],
       "id" : "3159002171180",
       "identifier" : [ {
@@ -2663,6 +2663,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
       },
       "created" : "2025-08-26T00:00:00+00:00",
       "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+        "valueDate" : "2020-09-11"
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
         "valueCoding" : {
           "code" : "04111",
@@ -2674,9 +2677,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
           "code" : "AB",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
       } ],
       "id" : "6871761612138",
       "identifier" : [ {
@@ -3736,16 +3736,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
         } ]
       } ],
       "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+        "valueDate" : "2019-12-03"
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
         "valueCoding" : {
           "code" : "15202",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-        "valueCoding" : {
-          "code" : "V",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
@@ -3754,20 +3751,23 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "U",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
         "valueCoding" : {
           "code" : "1",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-12-03"
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "U",
+          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
+        "valueCoding" : {
+          "code" : "V",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
+        }
       } ],
       "id" : "566745788569",
       "identifier" : [ {
@@ -5788,6 +5788,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
         } ]
       } ],
       "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+        "valueDate" : "2019-09-30"
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
         "valueCoding" : {
           "code" : "02102",
@@ -5800,20 +5803,17 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "42",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
         "valueCoding" : {
           "code" : "1",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-09-30"
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "42",
+          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
+        }
       } ],
       "id" : "6288598524935",
       "identifier" : [ {
@@ -7993,16 +7993,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
         } ]
       } ],
       "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+        "valueDate" : "2020-09-11"
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
         "valueCoding" : {
           "code" : "01011",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-        "valueCoding" : {
-          "code" : "V",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
@@ -8011,20 +8008,23 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "44",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
         "valueCoding" : {
           "code" : "7",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "44",
+          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
+        "valueCoding" : {
+          "code" : "V",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
+        }
       } ],
       "id" : "9688880648059",
       "identifier" : [ {

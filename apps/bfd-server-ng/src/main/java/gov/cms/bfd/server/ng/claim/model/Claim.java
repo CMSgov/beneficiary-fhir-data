@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
 import org.jetbrains.annotations.Nullable;
 
@@ -204,6 +205,9 @@ public class Claim {
         .sort(
             Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
     eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
+    // Sorting the extensions isn't strictly necessary, but it can interfere with the snapshot tests
+    // if the order changes.
+    eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
   }
 }
