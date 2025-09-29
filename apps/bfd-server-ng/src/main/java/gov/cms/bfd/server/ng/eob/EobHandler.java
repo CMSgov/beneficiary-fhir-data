@@ -169,6 +169,10 @@ public class EobHandler {
   private boolean procedureMatchesSamhsaCode(ClaimProcedure proc, LocalDate claimDate) {
     var diagnosisCode = proc.getDiagnosisCode().orElse("");
     var procedureCode = proc.getProcedureCode().orElse("");
+    // If the ICD indicator isn't something valid, it's probably a PAC claim with a mistake in the
+    // data entry.
+    // PAC claims will almost always be using ICD 10 these days, so ICD 10 is the safer assumption
+    // here.
     var icdIndicator = proc.getIcdIndicator().orElse(IcdIndicator.ICD_10);
 
     var procedureEntries = SECURITY_LABELS_MAP.get(icdIndicator.getProcedureSystem());
