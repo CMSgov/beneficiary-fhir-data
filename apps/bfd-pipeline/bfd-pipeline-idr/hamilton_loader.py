@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
 
@@ -7,7 +8,7 @@ import psycopg
 
 from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
-from timer import Timer
+from hamilton_timer import Timer
 
 idr_query_timer = Timer("idr_query")
 temp_table_timer = Timer("temp_table")
@@ -15,16 +16,7 @@ copy_timer = Timer("copy")
 insert_timer = Timer("insert")
 commit_timer = Timer("commit")
 
-logger = logging.getLogger(__name__)
-
-
-def print_timers() -> None:
-    idr_query_timer.print_results()
-    temp_table_timer.print_results()
-    copy_timer.print_results()
-    insert_timer.print_results()
-    commit_timer.print_results()
-
+logger = logging.getLogger("pipeline_worker")
 
 def get_connection_string() -> str:
     port = os.environ.get("BFD_DB_PORT") or "5432"

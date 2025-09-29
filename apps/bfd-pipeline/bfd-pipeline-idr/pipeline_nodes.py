@@ -6,7 +6,7 @@ from datetime import datetime
 
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from loader import PostgresLoader
+from hamilton_loader import PostgresLoader
 from model import (
     IdrBeneficiary,
     IdrBeneficiaryDualEligibility,

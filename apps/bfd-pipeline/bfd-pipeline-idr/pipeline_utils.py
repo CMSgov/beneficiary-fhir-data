@@ -13,16 +13,15 @@ from model import (
     T,
 )
 
-def configure_worker_logger() -> logging.Logger:
-    logger = logging.getLogger("pipeline_worker")
+def configure_logger(name: str = "pipeline_worker") -> logging.Logger:
+    logger = logging.getLogger(name)
     if not logger.handlers:
         console_handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
+        formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(name)s %(message)s")
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
     logger.setLevel(logging.INFO)
     return logger
-
 
 def get_progress(
         connection_string: str, table_name: str, start_time: datetime
@@ -39,7 +38,7 @@ def extract_and_load(
         mode: str,
         batch_size: int
 ) -> tuple[PostgresLoader, bool]:
-    logger = configure_worker_logger()
+    logger = configure_logger()
 
     if mode == "local":
         data_extractor = PostgresExtractor(connection_string=connection_string,

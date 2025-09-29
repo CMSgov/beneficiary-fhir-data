@@ -13,22 +13,15 @@ from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
 from model import LoadProgress, T
-from timer import Timer
+from hamilton_timer import Timer
 
 cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pipeline_worker")
 
 type DbType = str | float | int | bool | date | datetime
-
-
-def print_timers() -> None:
-    cursor_execute_timer.print_results()
-    cursor_fetch_timer.print_results()
-    transform_timer.print_results()
-
 
 def get_min_transaction_date() -> datetime:
     min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
