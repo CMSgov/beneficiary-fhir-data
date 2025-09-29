@@ -37,7 +37,7 @@ public class EobHandler {
   private final ClaimRepository claimRepository;
 
   // Cache the security labels map to avoid repeated I/O and parsing
-  private static final Map<String, List<SecurityLabel>> SECURITY_LABELS_MAP =
+  private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
   /**
@@ -140,7 +140,7 @@ public class EobHandler {
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
     var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
-    var drgSamhsa = drgCodeIsSamhsa(claim, claimThroughDate);
+    var drgSamhsa = drgIsSamhsa(claim, claimThroughDate);
     var claimItemSamhsa =
         claim.getClaimItems().stream().anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate));
 
@@ -148,35 +148,35 @@ public class EobHandler {
   }
 
   private boolean claimItemIsSamhsa(ClaimItem claimItem, LocalDate claimThroughDate) {
-    return procedureMatchesSamhsaCode(claimItem.getClaimProcedure(), claimThroughDate)
-        || hcpcsCodeMatches(claimItem.getClaimLine(), claimThroughDate);
+    return procedureIsSamhsa(claimItem.getClaimProcedure(), claimThroughDate)
+        || hcpcsIsSamhsa(claimItem.getClaimLine(), claimThroughDate);
   }
 
-  private boolean drgCodeIsSamhsa(Claim claim, LocalDate claimDate) {
-    var entries = SECURITY_LABELS_MAP.get(SystemUrls.CMS_MS_DRG);
+  private boolean drgIsSamhsa(Claim claim, LocalDate claimDate) {
+    var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
     return entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
   }
 
-  private boolean hcpcsCodeMatches(ClaimLine claimLine, LocalDate claimDate) {
+  private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
     return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
-        .flatMap(s -> SECURITY_LABELS_MAP.get(s).stream())
+        .flatMap(s -> SECURITY_LABELS.get(s).stream())
         .anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
   }
 
   // Checks ICDs.
-  private boolean procedureMatchesSamhsaCode(ClaimProcedure proc, LocalDate claimDate) {
-    var diagnosisCode = proc.getDiagnosisCode().orElse("");
-    var procedureCode = proc.getProcedureCode().orElse("");
+  private boolean procedureIsSamhsa(ClaimProcedure procedure, LocalDate claimDate) {
+    var diagnosisCode = procedure.getDiagnosisCode().orElse("");
+    var procedureCode = procedure.getProcedureCode().orElse("");
     // If the ICD indicator isn't something valid, it's probably a PAC claim with a mistake in the
     // data entry.
     // PAC claims will almost always be using ICD 10 these days, so ICD 10 is the safer assumption
     // here.
-    var icdIndicator = proc.getIcdIndicator().orElse(IcdIndicator.ICD_10);
+    var icdIndicator = procedure.getIcdIndicator().orElse(IcdIndicator.ICD_10);
 
-    var procedureEntries = SECURITY_LABELS_MAP.get(icdIndicator.getProcedureSystem());
-    var diagnosisEntries = SECURITY_LABELS_MAP.get(icdIndicator.getDiagnosisSystem());
+    var procedureEntries = SECURITY_LABELS.get(icdIndicator.getProcedureSystem());
+    var diagnosisEntries = SECURITY_LABELS.get(icdIndicator.getDiagnosisSystem());
 
     var procedureHasSamhsa =
         procedureEntries.stream()
