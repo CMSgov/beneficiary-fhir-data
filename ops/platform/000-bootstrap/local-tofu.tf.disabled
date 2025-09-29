@@ -5,9 +5,8 @@ locals {
   account_types = ["prod", "non-prod"]
   # Instead of just defaulting to terraform.workspace, we use one() to ensure an error is generated
   # if the workspace does not exactly match one of the above account types. Further validation is
-  # handled by the Terraservice module. This is only:necessary if greenfield is true, since we don't
-  # use the account_type in the legacy environment
-  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace])) : "invalid-account-type"
+  # handled by the Terraservice module.
+  account_type = coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace]))
 
   _canary_exists = module.terraservice.canary
 }
@@ -25,11 +24,6 @@ variable "account_type" {
     condition     = var.account_type == null || one([for x in local.account_types : x if var.account_type == x]) != null
     error_message = "Invalid account type. Must be one of 'prod' or 'non-prod'."
   }
-}
-
-variable "greenfield" {
-  default     = false
-  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
 }
 
 provider "aws" {

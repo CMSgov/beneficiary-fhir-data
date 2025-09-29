@@ -2,7 +2,7 @@
 # _all_ Terraservices, so be careful!
 
 locals {
-  established_envs = !var.greenfield ? ["test", "prod-sbx", "prod"] : ["test", "sandbox", "prod"]
+  established_envs = ["test", "sandbox", "prod"]
   parent_env = coalesce(
     var.parent_env,
     try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), "invalid-workspace"),
@@ -10,11 +10,6 @@ locals {
   )
 
   _canary_exists = module.terraservice.canary
-}
-
-variable "greenfield" {
-  default     = true
-  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
 }
 
 variable "region" {
@@ -60,12 +55,11 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket         = !var.greenfield ? "bfd-tf-state" : "bfd-${local.parent_env}-tf-state"
-    key            = !var.greenfield ? "ops/services/${local.service}/terraform.tfstate" : "ops/services/${local.service}/tofu.tfstate"
-    region         = var.region
-    dynamodb_table = !var.greenfield ? "bfd-tf-table" : null
-    encrypt        = true
-    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-${local.parent_env}-cmk"
-    use_lockfile   = var.greenfield
+    bucket       = "bfd-${local.parent_env}-tf-state"
+    key          = "ops/services/${local.service}/tofu.tfstate"
+    region       = var.region
+    encrypt      = true
+    kms_key_id   = "alias/bfd-${local.parent_env}-cmk"
+    use_lockfile = true
   }
 }

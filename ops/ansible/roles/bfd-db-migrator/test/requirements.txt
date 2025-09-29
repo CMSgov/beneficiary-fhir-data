@@ -1,5 +1,0 @@
-ansible==2.9.27
-lxml
-docker
-requests==2.31.0
-urllib3==1.26.18

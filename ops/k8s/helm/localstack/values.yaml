@@ -1,7 +1,0 @@
-# Default values for postgres.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-namespace: dev
-appName: dev-localstack
-image: localstack/localstack:2.2.0

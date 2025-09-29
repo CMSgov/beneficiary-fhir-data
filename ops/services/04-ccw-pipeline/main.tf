@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,10 +10,9 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/04-ccw-pipeline"
-  subnet_layers        = !var.greenfield ? ["app", "data"] : ["public", "private"]
+  subnet_layers        = ["public", "private"]
 }
 
 locals {
@@ -30,8 +29,8 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
-  data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
+  app_subnets              = module.terraservice.subnets_map["private"]
+  data_subnets             = module.terraservice.subnets_map["private"]
 
   is_prod = local.env == "prod"
 
@@ -71,7 +70,7 @@ module "bucket_ccw" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? "bfd-${local.env}-etl-${local.account_id}" : (!local.is_ephemeral_env ? local.name_prefix : null)
+  bucket_name        = !local.is_ephemeral_env ? local.name_prefix : null
   bucket_prefix      = local.is_ephemeral_env ? local.name_prefix : null
   force_destroy      = local.is_ephemeral_env
 

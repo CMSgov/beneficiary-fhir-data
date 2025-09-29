@@ -1,5 +1,5 @@
 locals {
-  region     = data.aws_region.current.name
+  region     = data.aws_region.current.region
   account_id = data.aws_caller_identity.current.account_id
 
   lambda_filename = "trigger_glue_crawler"
