@@ -202,27 +202,7 @@ public class Claim {
     var itemsStream =
         claimItems == null
             ? Stream.<ZonedDateTime>empty()
-            : claimItems.stream()
-                .flatMap(
-                    item -> {
-                      var itemTs = Optional.ofNullable(item.getBfdUpdatedTimestamp()).stream();
-                      var lineStream =
-                          item.getClaimLineInstitutional()
-                              .map(
-                                  cli ->
-                                      Stream.concat(
-                                          Optional.ofNullable(cli.getBfdUpdatedTimestamp())
-                                              .stream(),
-                                          cli.getAnsiSignature()
-                                              .map(
-                                                  ansi ->
-                                                      Optional.ofNullable(
-                                                          ansi.getBfdUpdatedTimestamp())
-                                                          .stream())
-                                              .orElseGet(Stream::empty)))
-                              .orElseGet(Stream::empty);
-                      return Stream.concat(itemTs, lineStream);
-                    });
+            : claimItems.stream().flatMap(this::streamItemTimestamps);
 
     var allCandidates =
         Stream.concat(
@@ -248,5 +228,22 @@ public class Claim {
             Comparator.comparing(ExplanationOfBenefit.SupportingInformationComponent::getSequence));
     eob.getItem().sort(Comparator.comparing(ExplanationOfBenefit.ItemComponent::getSequence));
     return eob;
+  }
+
+  private Stream<ZonedDateTime> streamItemTimestamps(ClaimItem item) {
+    var itemTs = Optional.ofNullable(item.getBfdUpdatedTimestamp()).stream();
+    var lineInstitutionalStream =
+        item.getClaimLineInstitutional()
+            .map(
+                cli -> {
+                  var cliTs = Optional.ofNullable(cli.getBfdUpdatedTimestamp()).stream();
+                  var ansiTs =
+                      cli.getAnsiSignature()
+                          .map(ansi -> Optional.ofNullable(ansi.getBfdUpdatedTimestamp()).stream())
+                          .orElseGet(Stream::empty);
+                  return Stream.concat(cliTs, ansiTs);
+                })
+            .orElseGet(Stream::empty);
+    return Stream.concat(itemTs, lineInstitutionalStream);
   }
 }
