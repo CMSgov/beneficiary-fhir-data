@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import time
 
 import ray
 from hamilton import driver
@@ -16,7 +17,10 @@ def main() -> None:
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
     ray.init(
-        logging_level="info", num_cpus=parallelism)
+        logging_level="debug",
+        num_cpus=parallelism,
+        include_dashboard=True,
+        dashboard_port=8265)
 
     class DictResultBuilder:
         @staticmethod
