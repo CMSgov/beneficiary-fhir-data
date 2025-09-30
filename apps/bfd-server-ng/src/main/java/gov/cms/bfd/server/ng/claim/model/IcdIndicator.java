@@ -44,7 +44,7 @@ public enum IcdIndicator {
    */
   public String formatCode(String rawCode) {
     // If the code contains a dot, it's already formatted.
-    if (rawCode.indexOf('.') >= 0) return rawCode;
+    if (rawCode.contains(".")) return rawCode;
 
     if (this == ICD_10) return formatIcd10(rawCode);
     if (this == ICD_9) return formatIcd9Diagnosis(rawCode);
@@ -53,22 +53,21 @@ public enum IcdIndicator {
   }
 
   private String formatIcd10(String rawCode) {
-    if (rawCode.length() > 3) return insertDot(rawCode, 3);
-    return rawCode;
+    return insertDot(rawCode, 3);
   }
 
   private String formatIcd9Diagnosis(String rawCode) {
     // Fully numeric insert dot after 3rd char when long enough.
-    if (rawCode.matches("\\d+") && rawCode.length() > 3) {
+    if (rawCode.matches("\\d+")) {
       return insertDot(rawCode, 3);
     }
 
     // Codes starting with 'E' . after 4th char when long enough.
-    if (Character.toUpperCase(rawCode.charAt(0)) == 'E' && rawCode.length() > 4) {
+    if (Character.toUpperCase(rawCode.charAt(0)) == 'E') {
       return insertDot(rawCode, 4);
     }
     // Codes starting with 'V' . after 3rd char when long enough.
-    if (Character.toUpperCase(rawCode.charAt(0)) == 'V' && rawCode.length() > 3) {
+    if (Character.toUpperCase(rawCode.charAt(0)) == 'V') {
       return insertDot(rawCode, 3);
     }
 
