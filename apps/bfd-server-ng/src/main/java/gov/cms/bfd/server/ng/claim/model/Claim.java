@@ -109,12 +109,8 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    // Use the most recent bfd_updated_ts across the claim and its related child
-    // tables when setting lastUpdated.
-    var overriddenMeta =
-        meta.toFhir(claimTypeCode, claimSourceId)
-            .setLastUpdated(DateUtil.toDate(getMostRecentUpdated()));
-    eob.setMeta(overriddenMeta);
+    var latestTs = getMostRecentUpdated();
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, latestTs));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -149,9 +145,6 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
-    // based on claim type. At most one Optional will be non-empty, so only one call
-    // will actually set EOB.outcome.
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
@@ -211,20 +204,10 @@ public class Claim {
 
   private ZonedDateTime getMostRecentUpdated() {
     // Collect timestamps (claim + child entities) then pick the max.
-    var ciStream =
-        Optional.ofNullable(claimInstitutional)
-            .map(ClaimInstitutional::getBfdUpdatedTimestamp)
-            .stream();
+    var ciStream = getClaimInstitutional().map(ClaimInstitutional::getBfdUpdatedTimestamp).stream();
     var cfStream = getClaimFiss().map(ClaimFiss::getBfdUpdatedTimestamp).stream();
-    var cdsStream =
-        Optional.ofNullable(claimDateSignature)
-            .map(ClaimDateSignature::getBfdUpdatedTimestamp)
-            .stream();
-
-    var itemsStream =
-        claimItems == null
-            ? Stream.<ZonedDateTime>empty()
-            : claimItems.stream().flatMap(this::streamItemTimestamps);
+    var cdsStream = Stream.of(claimDateSignature.getBfdUpdatedTimestamp());
+    var itemsStream = claimItems.stream().flatMap(this::streamItemTimestamps);
 
     var allCandidates =
         Stream.concat(

@@ -3,8 +3,7 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.loadprogress.LoadProgressTables;
-import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class ClaimRepository {
   private final EntityManager entityManager;
+  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
 
   private static final String CLAIM_TABLES_BASE =
       """
@@ -107,25 +107,12 @@ public class ClaimRepository {
   }
 
   /**
-   * Returns the last updated timestamp for the claims data ingestion process.
+   * Returns the most recent batch completion timestamp across all LoadProgress rows.
    *
    * @return the most recent timestamp.
    */
   public ZonedDateTime claimLastUpdated() {
-    var prefixes = LoadProgressTables.claimTablePrefixes();
-    return entityManager
-        .createQuery(
-            """
-            SELECT MAX(p.batchCompletionTimestamp)
-            FROM LoadProgress p
-            WHERE p.tableName IN :tables
-            """,
-            ZonedDateTime.class)
-        .setParameter("tables", prefixes)
-        .getResultList()
-        .stream()
-        .findFirst()
-        .orElse(DateUtil.MIN_DATETIME);
+    return loadProgressLastUpdatedProvider.lastUpdated();
   }
 
   private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {

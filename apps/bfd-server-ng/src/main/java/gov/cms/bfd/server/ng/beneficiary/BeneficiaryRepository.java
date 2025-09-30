@@ -3,8 +3,7 @@ package gov.cms.bfd.server.ng.beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.loadprogress.LoadProgressTables;
-import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
+  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -98,7 +98,7 @@ public class BeneficiaryRepository {
   /**
    * Retrieves the xrefSk from the mbi.
    *
-   * @param mbi original beneSk
+   * @param mbi Medicare Beneficiary Identifier
    * @return xrefSk for the bene
    */
   public Optional<Long> getXrefSkFromMbi(String mbi) {
@@ -117,24 +117,12 @@ public class BeneficiaryRepository {
   }
 
   /**
-   * Returns the last updated timestamp for the beneficiary data ingestion process.
+   * Returns the most recent batch completion timestamp across all LoadProgress rows. Delegates to
+   * {@link LoadProgressLastUpdatedProvider#lastUpdated()} for the timestamp.
    *
    * @return last updated timestamp
    */
   public ZonedDateTime beneficiaryLastUpdated() {
-    var prefixes = LoadProgressTables.beneficiaryTablePrefixes();
-    return entityManager
-        .createQuery(
-            """
-            SELECT MAX(p.batchCompletionTimestamp)
-            FROM LoadProgress p
-            WHERE p.tableName IN :tables
-            """,
-            ZonedDateTime.class)
-        .setParameter("tables", prefixes)
-        .getResultList()
-        .stream()
-        .findFirst()
-        .orElse(DateUtil.MIN_DATETIME);
+    return loadProgressLastUpdatedProvider.lastUpdated();
   }
 }

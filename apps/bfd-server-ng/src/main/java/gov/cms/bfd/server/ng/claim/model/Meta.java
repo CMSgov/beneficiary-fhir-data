@@ -21,4 +21,15 @@ class Meta {
     claimSourceId.toFhirAdjudicationStatus().ifPresent(meta::addTag);
     return meta;
   }
+
+  org.hl7.fhir.r4.model.Meta toFhir(
+      ClaimTypeCode claimTypeCode, ClaimSourceId claimSourceId, ZonedDateTime overrideLastUpdated) {
+    var meta =
+        new org.hl7.fhir.r4.model.Meta()
+            .setLastUpdated(DateUtil.toDate(overrideLastUpdated))
+            .setSource(claimSourceId.getSource());
+    claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
+    claimSourceId.toFhirAdjudicationStatus().ifPresent(meta::addTag);
+    return meta;
+  }
 }
