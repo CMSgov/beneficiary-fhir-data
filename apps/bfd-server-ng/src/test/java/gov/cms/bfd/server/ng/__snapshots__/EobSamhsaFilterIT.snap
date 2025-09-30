@@ -613,12 +613,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
           "code" : "1",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-        "valueCoding" : {
-          "code" : "V",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
-        }
       } ],
       "id" : "3159002171180",
       "identifier" : [ {
@@ -2436,11 +2430,30 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_NRLN_RIC_CD",
+            "display" : "Near Line Record Identification Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V",
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "9999-12-31",
           "start" : "9999-12-31"
@@ -2452,7 +2465,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -2466,7 +2479,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2480,7 +2493,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2494,7 +2507,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2508,7 +2521,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2522,7 +2535,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2536,7 +2549,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 11,
+        "sequence" : 12,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2550,7 +2563,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 13,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -2569,7 +2582,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -2586,7 +2599,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -2606,7 +2619,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -2620,7 +2633,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       } ],
       "total" : [ {
         "amount" : {
@@ -3762,12 +3775,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
           "code" : "U",
           "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-        "valueCoding" : {
-          "code" : "V",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
-        }
       } ],
       "id" : "566745788569",
       "identifier" : [ {
@@ -4758,11 +4765,30 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_NRLN_RIC_CD",
+            "display" : "Near Line Record Identification Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V",
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2019-12-03",
           "start" : "2019-11-17"
@@ -4774,7 +4800,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -4788,7 +4814,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -4802,7 +4828,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -4816,7 +4842,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -4830,7 +4856,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -4844,7 +4870,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -4858,7 +4884,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 11,
+        "sequence" : 12,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -4872,7 +4898,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 13,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -4891,7 +4917,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -4909,7 +4935,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -4926,7 +4952,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -4946,7 +4972,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -4960,7 +4986,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -8019,12 +8045,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
           "code" : "44",
           "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-        "valueCoding" : {
-          "code" : "V",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
-        }
       } ],
       "id" : "9688880648059",
       "identifier" : [ {
@@ -8833,11 +8853,30 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_NRLN_RIC_CD",
+            "display" : "Near Line Record Identification Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "V",
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "9999-12-31",
           "start" : "9999-12-31"
@@ -8849,7 +8888,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -8863,7 +8902,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8877,7 +8916,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8891,7 +8930,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8905,7 +8944,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8919,7 +8958,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8933,7 +8972,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 11,
+        "sequence" : 12,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8947,7 +8986,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 13,
         "timingDate" : "9999-12-31"
       }, {
         "category" : {
@@ -8966,7 +9005,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -8984,7 +9023,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -9001,7 +9040,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -9021,7 +9060,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -9035,7 +9074,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsa[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {

@@ -1642,12 +1642,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "code" : "5",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
     }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-    "valueCoding" : {
-      "code" : "V",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
-    }
   } ],
   "id" : "1071939711295",
   "identifier" : [ {
@@ -2900,12 +2894,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "valueCoding" : {
       "code" : "5",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD",
-    "valueCoding" : {
-      "code" : "V",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
     }
   } ],
   "id" : "1071939711295",
