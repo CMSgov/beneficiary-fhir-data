@@ -3,7 +3,7 @@ locals {
   alerter_lambda_lookback       = local.ssm_config["/bfd/${local.service}/error_alerter/log_lookback_seconds"]
   alerter_lambda_slack_hook_ssm = lookup(local.ssm_config, "/bfd/${local.service}/error_alerter/slack_webhook_ssm", null)
 
-  alerter_name_prefix      = !var.greenfield ? "bfd-${local.env}-${local.target_service}-ecs" : "bfd-${local.env}-${local.target_service}"
+  alerter_name_prefix      = "bfd-${local.env}-${local.target_service}"
   alerter_lambda_name      = "error-alerter"
   alerter_lambda_full_name = "${local.alerter_name_prefix}-${local.alerter_lambda_name}"
   alerter_lambda_src       = replace(local.alerter_lambda_name, "-", "_")

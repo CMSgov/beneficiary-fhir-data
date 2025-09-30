@@ -5,16 +5,10 @@ locals {
   account_types = ["prod", "non-prod"]
   # Instead of just defaulting to terraform.workspace, we use one() to ensure an error is generated
   # if the workspace does not exactly match one of the above account types. Further validation is
-  # handled by the Terraservice module. This is only:necessary if greenfield is true, since we don't
-  # use the account_type in the legacy environment
-  account_type = var.greenfield ? coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace])) : "invalid-account-type"
+  # handled by the Terraservice module.
+  account_type = coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace]))
 
   _canary_exists = module.terraservice.canary
-}
-
-variable "greenfield" {
-  default     = true
-  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
 }
 
 variable "region" {
@@ -60,12 +54,11 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket         = !var.greenfield ? "bfd-tf-state" : "bfd-platform-${local.account_type}-tf-state"
-    key            = !var.greenfield ? "ops/platform/${local.service}/terraform.tfstate" : "ops/platform/${local.service}/tofu.tfstate"
-    region         = var.region
-    dynamodb_table = !var.greenfield ? "bfd-tf-table" : null
-    encrypt        = true
-    kms_key_id     = !var.greenfield ? "alias/bfd-tf-state" : "alias/bfd-platform-cmk"
-    use_lockfile   = var.greenfield
+    bucket       = "bfd-platform-${local.account_type}-tf-state"
+    key          = "ops/platform/${local.service}/tofu.tfstate"
+    region       = var.region
+    encrypt      = true
+    kms_key_id   = "alias/bfd-platform-cmk"
+    use_lockfile = true
   }
 }

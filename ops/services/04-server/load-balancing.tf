@@ -1,9 +1,9 @@
 locals {
   lb_blue_is_public             = nonsensitive(tobool(local.ssm_config["/bfd/${local.service}/lb_is_public"]))
   lb_internal_vpc_peering_cidrs = [for connection in module.terraservice.all_connections : connection.foreign_cidr if connection.env == local.parent_env]
-  lb_internal_vpcs_cidrs        = !var.greenfield ? [one(data.aws_vpc.mgmt[*].cidr_block), local.vpc.cidr_block] : [local.vpc.cidr_block]
+  lb_internal_vpcs_cidrs        = [local.vpc.cidr_block]
   lb_internal_ingress_cidrs     = concat(local.lb_internal_vpc_peering_cidrs, local.lb_internal_vpcs_cidrs)
-  lb_internal_ingress_pl_ids    = concat([data.aws_ec2_managed_prefix_list.vpn.id], data.aws_ec2_managed_prefix_list.jenkins[*].id)
+  lb_internal_ingress_pl_ids    = [data.aws_ec2_managed_prefix_list.vpn.id]
   lb_ingress_port               = 443
   lb_protocol                   = "TCP"
   lb_name_prefix                = "${local.name_prefix}-nlb"

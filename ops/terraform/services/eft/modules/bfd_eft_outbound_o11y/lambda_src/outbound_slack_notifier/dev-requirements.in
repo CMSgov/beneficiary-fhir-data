@@ -1,5 +1,0 @@
-black==24.3.0
-isort
-pylint
-setuptools>=78.1.1
-

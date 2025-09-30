@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
     sops = {
       source  = "carlpett/sops"
@@ -14,7 +14,6 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-platform-service"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/01-config"
 }
@@ -33,7 +32,7 @@ locals {
   root_yaml_file       = "${path.module}/values/platform.root.sopsw.yaml"
   valid_root_sops_yaml = data.external.root_sops_yaml.result.valid_sops
 
-  account_yaml_file       = var.greenfield ? "${path.module}/values/platform.${local.account_type}.sopsw.yaml" : "${path.module}/values/platform.legacy.sopsw.yaml"
+  account_yaml_file       = "${path.module}/values/platform.${local.account_type}.sopsw.yaml"
   valid_account_sops_yaml = data.external.account_sops_yaml.result.valid_sops
 
   decrypted_root_data    = yamldecode(data.sops_external.root.raw)
@@ -96,13 +95,13 @@ data "sops_external" "account" {
 }
 
 resource "aws_ssm_parameter" "this" {
-  for_each = !var.greenfield ? merge(local.platform_ssm_config, { for k, v in local.platform_ssm_config : "/ng${k}" => v }) : local.platform_ssm_config
+  for_each = local.platform_ssm_config
 
-  name           = each.key
-  tier           = "Intelligent-Tiering"
-  value          = each.value.str_val
-  type           = each.value.is_sensitive ? "SecureString" : "String"
-  key_id         = each.value.is_sensitive ? local.key_arn : null
+  name   = each.key
+  tier   = "Intelligent-Tiering"
+  value  = each.value.str_val
+  type   = each.value.is_sensitive ? "SecureString" : "String"
+  key_id = each.value.is_sensitive ? local.key_arn : null
 
   tags = {
     source_file    = each.value.source

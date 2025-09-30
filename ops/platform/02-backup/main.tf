@@ -14,7 +14,6 @@ data "aws_iam_role" "backup" {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-platform-service"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/platform/02-backup"
 }

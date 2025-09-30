@@ -1,5 +1,5 @@
 locals {
-  ccw_runner_repository_default = !var.greenfield ? "bfd-mgmt-pipeline-ccw-runner" : "bfd-platform-pipeline-ccw-runner"
+  ccw_runner_repository_default = "bfd-platform-pipeline-ccw-runner"
   ccw_runner_repository_name    = coalesce(var.ccw_runner_repository_override, local.ccw_runner_repository_default)
   ccw_runner_version            = coalesce(var.ccw_runner_version_override, local.bfd_version)
   ccw_runner_lambda_name        = "ccw-runner"

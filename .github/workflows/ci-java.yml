@@ -125,7 +125,7 @@ jobs:
         working-directory: ./apps
 
       - name: 'Generate, Upload Build Reports'
-        if: ${{ github.event_type != 'merge_group' }}
+        if: ${{ github.event_name != 'merge_group' }}
         env:
           BFD_BRANCH: ${{ inputs.branch }}
         run: |
