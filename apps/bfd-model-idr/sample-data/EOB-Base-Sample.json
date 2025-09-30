@@ -52,7 +52,8 @@
         {"ROW_NUM":"20","CLM_HHA_LUP_IND_CD":"L"},
         {"ROW_NUM":"21","CLM_HHA_RFRL_CD":"C"},
         {"ROW_NUM":"22","DGNS_DRG_OUTLIER_CD":"6"},
-        {"ROW_NUM":"23","CLM_PPS_IND_CD":"2"}
+        {"ROW_NUM":"23","CLM_PPS_IND_CD":"2"},
+        {"ROW_NUM":"24","CLM_NRLN_RIC_CD":"V"}
         
     ],
     "lineItemComponents":[
