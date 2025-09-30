@@ -43,8 +43,6 @@ public enum IcdIndicator {
    * @return The correctly formatted diagnosis code string for use in FHIR.
    */
   public String formatCode(String rawCode) {
-    if (rawCode == null || rawCode.isEmpty()) return rawCode;
-
     // If the code contains a dot, it's already formatted.
     if (rawCode.indexOf('.') >= 0) return rawCode;
 
@@ -55,28 +53,23 @@ public enum IcdIndicator {
   }
 
   private String formatIcd10(String rawCode) {
-    if (rawCode.length() > 3) return rawCode.substring(0, 3) + "." + rawCode.substring(3);
+    if (rawCode.length() > 3) return insertDot(rawCode, 3);
     return rawCode;
   }
 
   private String formatIcd9Diagnosis(String rawCode) {
     // Fully numeric insert dot after 3rd char when long enough.
     if (rawCode.matches("\\d+") && rawCode.length() > 3) {
-      return rawCode.substring(0, 3) + "." + rawCode.substring(3);
+      return insertDot(rawCode, 3);
     }
 
     // Codes starting with 'E' . after 4th char when long enough.
-    if (!rawCode.isEmpty()
-        && Character.toUpperCase(rawCode.charAt(0)) == 'E'
-        && rawCode.length() > 4) {
-      return rawCode.substring(0, 4) + "." + rawCode.substring(4);
+    if (Character.toUpperCase(rawCode.charAt(0)) == 'E' && rawCode.length() > 4) {
+      return insertDot(rawCode, 4);
     }
-
     // Codes starting with 'V' . after 3rd char when long enough.
-    if (!rawCode.isEmpty()
-        && Character.toUpperCase(rawCode.charAt(0)) == 'V'
-        && rawCode.length() > 3) {
-      return rawCode.substring(0, 3) + "." + rawCode.substring(3);
+    if (Character.toUpperCase(rawCode.charAt(0)) == 'V' && rawCode.length() > 3) {
+      return insertDot(rawCode, 3);
     }
 
     return rawCode;
@@ -89,16 +82,22 @@ public enum IcdIndicator {
    * @return formatted procedure code
    */
   public String formatProcedureCode(String rawCode) {
-    if (rawCode == null || rawCode.isEmpty()) return rawCode;
     if (rawCode.indexOf('.') >= 0) return rawCode;
 
     if (this == ICD_9) {
       if (rawCode.length() > 2) {
-        return rawCode.substring(0, 2) + "." + rawCode.substring(2);
+        return insertDot(rawCode, 2);
       }
       return rawCode;
     }
 
+    return rawCode;
+  }
+
+  private static String insertDot(String rawCode, int position) {
+    if (rawCode.length() > position) {
+      return rawCode.substring(0, position) + "." + rawCode.substring(position);
+    }
     return rawCode;
   }
 }
