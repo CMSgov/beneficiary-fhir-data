@@ -78,6 +78,7 @@ class PostgresLoader:
                         "start_ts": batch_start,
                     },
                 )
+                conn.commit()
                 data_loaded = False
                 num_rows = 0
 
