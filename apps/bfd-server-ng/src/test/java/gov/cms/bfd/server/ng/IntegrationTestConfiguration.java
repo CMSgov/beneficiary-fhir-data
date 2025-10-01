@@ -41,15 +41,16 @@ public class IntegrationTestConfiguration {
     runPython(container, "uv", "sync");
     runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
 
-      container.execInContainer(
-              "psql",
-              "-U", "bfdtest",
-              "-d", "testdb",
-              "-c", "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm SET \"clm_idr_ld_dt\" = CURRENT_DATE;"
-      );
+    container.execInContainer(
+        "psql",
+        "-U",
+        "bfdtest",
+        "-d",
+        "testdb",
+        "-c",
+        "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm SET \"clm_idr_ld_dt\" = CURRENT_DATE;");
 
-
-      runPython(container, "uv", "run", "pipeline.py", "synthetic");
+    runPython(container, "uv", "run", "pipeline.py", "synthetic");
 
     return container;
   }
