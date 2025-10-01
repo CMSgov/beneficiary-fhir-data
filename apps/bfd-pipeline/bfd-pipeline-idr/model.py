@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, TypeVar
@@ -6,6 +7,8 @@ from typing import Annotated, TypeVar
 from pydantic import BaseModel, BeforeValidator
 
 from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE
+
+type DbType = str | float | int | bool | date | datetime
 
 
 def transform_null_date_to_max(value: date | None) -> date:
@@ -44,7 +47,7 @@ def transform_null_float(value: float | None) -> float:
     return value
 
 
-def transform_null_int(value: int | None) -> float:
+def transform_null_int(value: int | None) -> int:
     if value is None:
         return 0
     return value
@@ -53,6 +56,7 @@ def transform_null_int(value: int | None) -> float:
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
+BATCH_ID = "batch_id"
 UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
@@ -72,19 +76,29 @@ ALIAS_HSTRY = "hstry"
 ALIAS_XREF = "xref"
 
 
-class IdrBaseModel(BaseModel):
+class IdrBaseModel(BaseModel, ABC):
     @staticmethod
-    def table() -> str: ...
+    @abstractmethod
+    def table() -> str:
+        """BFD table name populated by this model."""
+
+    @staticmethod
+    def should_replace() -> bool:
+        """Whether to merge or replace data when loading this table."""
+        return False
 
     @staticmethod
     def cutoff_date(quantity_days: int) -> datetime:
         return datetime.now(UTC) - timedelta(days=quantity_days)
 
     @staticmethod
-    def _current_fetch_query(start_time: datetime) -> str: ...
+    @abstractmethod
+    def _current_fetch_query(start_time: datetime) -> str:
+        """Query to populate the table for non-historical data."""
 
     @classmethod
     def _historical_fetch_query(cls, start_time: datetime) -> str:
+        """Query to populate the table for historical data."""
         return cls._current_fetch_query(start_time)
 
     @classmethod
@@ -121,12 +135,30 @@ class IdrBaseModel(BaseModel):
         return cls._extract_meta_keys(UPDATE_TIMESTAMP)
 
     @classmethod
+    def batch_id_col_alias(cls) -> str | None:
+        col = cls._single_or_default(BATCH_ID)
+        if col:
+            return cls._format_column_alias(col)
+        return None
+
+    @classmethod
+    def batch_id_col(cls) -> str | None:
+        return cls._single_or_default(BATCH_ID)
+
+    @classmethod
     def update_timestamp_col_alias(cls) -> list[str]:
         return [cls._format_column_alias(col) for col in cls.update_timestamp_col()]
 
     @classmethod
     def _extract_meta_keys(cls, meta_key: str) -> list[str]:
         return [key for key in cls.model_fields if cls._extract_meta(key, meta_key)]
+
+    @classmethod
+    def _single_or_default(cls, meta_key: str) -> str | None:
+        keys = cls._extract_meta_keys(meta_key)
+        if len(keys) > 1:
+            raise LookupError(f"cls {cls.__name__} has more than one key for {meta_key}")
+        return keys[0] if len(keys) == 1 else None
 
     @classmethod
     def _extract_meta(cls, key: str, meta_key: str) -> object | None:
@@ -177,12 +209,23 @@ class IdrBaseModel(BaseModel):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
+DEATH_DATE_CUTOFF_YEARS = 4
+
+
+def _deceased_bene_filter(alias: str) -> str:
+    return f"""
+            SELECT bene_sk
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {alias}
+            WHERE {alias}.bene_vrfy_death_day_sw = 'Y' 
+            AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
+    """
+
 
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_HSTRY}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY}]
     bene_xref_efctv_sk: int
-    bene_mbi_id: Annotated[str, BeforeValidator(transform_null_string)]
+    bene_mbi_id: str
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_null_string)]
     bene_last_name: str
@@ -249,10 +292,14 @@ class IdrBeneficiary(IdrBaseModel):
         # src_rec_insrt_ts/src_rec_updt_ts for this.
         return f"""
             WITH ordered_xref AS (
-                SELECT bene_sk, bene_xref_sk, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, bene_xref_sk 
-                    ORDER BY src_rec_updt_ts DESC
-                ) AS row_order
+                SELECT bene_sk,
+                    bene_xref_sk, 
+                    bene_hicn_num, 
+                    src_rec_crte_ts, 
+                    ROW_NUMBER() OVER (
+                        PARTITION BY bene_sk, bene_xref_sk 
+                        ORDER BY src_rec_updt_ts DESC
+                    ) AS row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
             ), 
             current_xref AS (
@@ -265,8 +312,14 @@ class IdrBeneficiary(IdrBaseModel):
                     bx.idr_updt_ts
                 FROM ordered_xref ox
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
-                    ON bx.bene_sk = ox.bene_sk AND bx.bene_xref_sk = ox.bene_xref_sk
+                    ON bx.bene_sk = ox.bene_sk 
+                    AND bx.bene_xref_sk = ox.bene_xref_sk
+                    AND bx.bene_hicn_num = ox.bene_hicn_num
+                    AND bx.src_rec_crte_ts = ox.src_rec_crte_ts
                 WHERE ox.row_order = 1
+            ),
+            deceased_benes AS (
+                {_deceased_bene_filter(hstry)}
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
@@ -276,6 +329,8 @@ class IdrBeneficiary(IdrBaseModel):
                 ON {xref}.bene_sk = {hstry}.bene_xref_sk 
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
+            AND {hstry}.bene_mbi_id IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
         """
 
@@ -284,6 +339,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
     bene_mbi_efctv_dt: date
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
+    idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
@@ -305,8 +361,44 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         """
 
 
+class IdrBeneficiaryOvershareMbi(IdrBaseModel):
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_overshare_mbi"
+
+    @staticmethod
+    def should_replace() -> bool:
+        return True
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
+        # The xref data in the bene_hstry table is not completely reliable
+        # because sometimes HICNs can be reused, causing two records to be
+        # xref'd even if they're not the same person.
+
+        # We'll only trust xref records that have a valid entry in the bene_xref
+        # table (this means it's coming from CME). For any MBIs tied to more than
+        # one bene_sk that doesn't have a valid xref, we will prevent it from being
+        # shown since it may be incorrectly linked to more than one person.
+        return """
+            SELECT hstry.bene_mbi_id
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry hstry
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref xref
+                WHERE hstry.bene_xref_efctv_sk = xref.bene_sk
+                AND hstry.bene_sk = xref.bene_xref_sk
+                AND xref.bene_kill_cred_cd = '2'
+            ) AND hstry.bene_mbi_id IS NOT NULL
+            GROUP BY hstry.bene_mbi_id
+            HAVING COUNT(DISTINCT hstry.bene_sk) > 1
+        """
+
+
 class IdrBeneficiaryThirdParty(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_buyin_cd: str
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -325,16 +417,21 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp tp
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = tp.bene_sk
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -353,16 +450,21 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus stus
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = stus.bene_sk
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
@@ -382,16 +484,21 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt entlmt
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = entlmt.bene_sk
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
@@ -409,16 +516,21 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn rsn
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = rsn.bene_sk
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcd_elgblty_end_dt: date
     bene_dual_stus_cd: str
@@ -438,16 +550,21 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr
-            {WHERE_CLAUSE}
-            {ORDER_BY}
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr dual
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = dual.bene_sk
+            )
+            {{ORDER_BY}}
         """
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_cntrct_num: str
     bene_pbp_num: str
@@ -466,21 +583,26 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         # equivalent to "select distinct on", but Snowflake has different syntax for that,
         # so it's unfortunately not portable
-        return """
+        hstry = ALIAS_HSTRY
+        return f"""
             WITH dupes as (
-                SELECT {COLUMNS}, ROW_NUMBER() OVER (
+                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
                     PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
-                {ORDER_BY} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg
-                {WHERE_CLAUSE}
-                {ORDER_BY}
+                {{ORDER_BY}} DESC) as row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = usg.bene_sk
+                )
+                {{ORDER_BY}}
             )
-            SELECT {COLUMNS} FROM dupes WHERE row_order = 1
+            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
             """
 
 
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_drug_plan_ind_cd: str
     cntrct_pbp_type_cd: str
 
@@ -498,7 +620,7 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 
 def claim_type_clause(start_time: datetime) -> str:
-    
+
     start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
@@ -517,7 +639,7 @@ def claim_type_clause(start_time: datetime) -> str:
 
 
 class IdrClaim(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
@@ -583,7 +705,7 @@ class IdrClaim(IdrBaseModel):
     ]
     idr_updt_ts_dcmtn: Annotated[
         datetime,
-        {ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_updt_ts"},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -609,7 +731,7 @@ class IdrClaim(IdrBaseModel):
 
 
 class IdrClaimDateSignature(IdrBaseModel):
-    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_SGNTR}]
+    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR}]
     clm_cms_proc_dt: date
     clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     clm_dschrg_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
@@ -658,7 +780,7 @@ class IdrClaimDateSignature(IdrBaseModel):
 
 
 class IdrClaimFiss(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
@@ -693,7 +815,7 @@ class IdrClaimFiss(IdrBaseModel):
 
 
 class IdrClaimInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_admsn_type_cd: str
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
@@ -759,7 +881,7 @@ class IdrClaimInstitutional(IdrBaseModel):
 
 
 class IdrClaimItem(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
     # columns from V2_MDCR_CLM_LINE
     clm_line_num: Annotated[int, BeforeValidator(transform_null_int)]
@@ -977,7 +1099,7 @@ def transform_default_hipps_code(value: str | None) -> str:
 
 
 class IdrClaimLineInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
     clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -1027,7 +1149,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 
 class IdrClaimAnsiSignature(IdrBaseModel):
-    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True}]
+    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1064,7 +1186,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 
 
 class IdrClaimProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1102,7 +1224,7 @@ class IdrClaimProfessional(IdrBaseModel):
 
 
 class IdrClaimLineProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1157,6 +1279,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
 class LoadProgress(IdrBaseModel):
     table_name: str
     last_ts: datetime
+    last_id: int
     batch_start_ts: datetime
     batch_complete_ts: datetime
 
@@ -1171,7 +1294,7 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return f"""
-        SELECT table_name, last_ts, batch_start_ts, batch_complete_ts 
+        SELECT table_name, last_ts, last_id, batch_start_ts, batch_complete_ts 
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s
         """

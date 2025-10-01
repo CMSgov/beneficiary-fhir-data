@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,10 +10,9 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/04-rda-pipeline"
-  subnet_layers        = !var.greenfield ? ["data"] : ["private"]
+  subnet_layers        = ["private"]
 }
 
 locals {
@@ -30,7 +29,7 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
+  data_subnets             = module.terraservice.subnets_map["private"]
 
   name_prefix = "bfd-${local.env}-${local.service}"
 
@@ -68,8 +67,7 @@ module "bucket_rda" {
   source = "../../terraform-modules/general/secure-bucket"
 
   bucket_kms_key_arn = local.env_key_arn
-  bucket_name        = !var.greenfield ? local.name_prefix : null
-  bucket_prefix      = var.greenfield ? local.name_prefix : null
+  bucket_prefix      = local.name_prefix
   force_destroy      = local.is_ephemeral_env
 
   ssm_param_name = "/bfd/${local.env}/${local.service}/nonsensitive/bucket"
@@ -242,6 +240,9 @@ resource "aws_ecs_service" "rda" {
   deployment_controller {
     type = "ECS"
   }
+
+  sigint_rollback       = true
+  wait_for_steady_state = true
 
   network_configuration {
     assign_public_ip = false

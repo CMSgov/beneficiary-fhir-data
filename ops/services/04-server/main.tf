@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,10 +10,9 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/04-server"
-  subnet_layers        = !var.greenfield ? ["app", "dmz"] : ["public", "private"]
+  subnet_layers        = ["public", "private"]
 }
 
 locals {
@@ -31,14 +30,14 @@ locals {
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
-  app_subnets              = !var.greenfield ? module.terraservice.subnets_map["app"] : module.terraservice.subnets_map["private"]
-  dmz_subnets              = !var.greenfield ? module.terraservice.subnets_map["dmz"] : module.terraservice.subnets_map["public"]
+  app_subnets              = module.terraservice.subnets_map["private"]
+  dmz_subnets              = module.terraservice.subnets_map["public"]
   azs                      = keys(module.terraservice.default_azs)
 
   app_subnet_ids = local.app_subnets[*].id
   dmz_subnet_ids = local.dmz_subnets[*].id
 
-  name_prefix = !var.greenfield ? "bfd-${local.env}-${local.service}-ecs" : "bfd-${local.env}-${local.service}"
+  name_prefix = "bfd-${local.env}-${local.service}"
 
   green_state = "green"
   blue_state  = "blue"

@@ -41,7 +41,7 @@ locals {
     key => coalesce(lookup(data.external.client_ssls.result, key, null), "NONE")
   }
 
-  dashboard_name_prefix = !var.greenfield ? "bfd-${local.env}-${local.target_service}-ecs" : "bfd-${local.env}-${local.target_service}"
+  dashboard_name_prefix = "bfd-${local.env}-${local.target_service}"
 }
 
 data "external" "client_ssls" {
@@ -60,7 +60,7 @@ data "external" "client_ssls" {
 resource "aws_cloudwatch_dashboard" "bfd_dashboard" {
   dashboard_name = local.dashboard_name_prefix
   dashboard_body = templatefile(
-    !var.greenfield ? "${path.module}/templates/bfd-server-dashboard.json.tftpl" : "${path.module}/templates/bfd-server-dashboard.greenfield.json.tftpl",
+    "${path.module}/templates/bfd-server-dashboard.json.tftpl",
     merge({
       namespace = local.namespace
       env       = local.env

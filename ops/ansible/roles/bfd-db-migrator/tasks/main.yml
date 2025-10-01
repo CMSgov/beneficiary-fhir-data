@@ -1,3 +1,0 @@
----
-- name: Configure DB Migrator service
-  import_tasks: migrator.yml

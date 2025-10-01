@@ -1,9 +1,0 @@
-*
-!common/
-!config/
-!services/server-load/node/node.py
-!services/server-load/common/
-!v1/
-!v2/
-!requirements.txt
-!high_volume_suite.py

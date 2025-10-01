@@ -1,8 +1,0 @@
-*
-!synthea-with-dependencies.jar
-!docker_entrypoint.sh
-!national_bfd.sh
-!prepare-and-run-synthea.py
-!split-future-claims.py
-!run_synthea
-!src/

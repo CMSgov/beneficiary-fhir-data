@@ -1,7 +1,7 @@
 {
     "resourceType": "StructureDefinition",
     "id": "Beneficiary",
-    "url": "https://bfd.cms.gov/fhir/StructureDefinition/Beneficiary",
+    "url": "http://hl7.org/fhir/StructureDefinition/Beneficiary",
     "name": "Beneficary",
     "status": "draft",
     "fhirVersion": "4.0.1",

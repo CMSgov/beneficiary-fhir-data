@@ -2,7 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 
 import psycopg
 import snowflake.connector
@@ -12,7 +12,7 @@ from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
-from model import LoadProgress, T
+from model import DbType, LoadProgress, T
 from timer import Timer
 
 cursor_execute_timer = Timer("cursor_execute")
@@ -20,8 +20,6 @@ cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
 
 logger = logging.getLogger(__name__)
-
-type DbType = str | float | int | bool | date | datetime
 
 
 def print_timers() -> None:
@@ -46,6 +44,9 @@ class Extractor(ABC):
     def reconnect(self) -> None:
         pass
 
+    def _coalesce_dates(self, cols: list[str]) -> list[str]:
+        return [f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cols]
+
     def _greatest_col(self, cols: list[str]) -> str:
         return f"GREATEST({','.join(cols)})"
 
@@ -62,42 +63,61 @@ class Extractor(ABC):
         fetch_query = self.get_query(cls, is_historical)
         batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
         # GREATEST doesn't work with nulls so we need to coalesce here
-        update_timestamp_cols = [
-            f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cls.update_timestamp_col_alias()
-        ]
+        batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
+        update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
         min_transaction_date = get_min_transaction_date()
+
+        batch_id_order = ""
+        batch_id_clause = ""
+        batch_id_col = cls.batch_id_col_alias()
+        if batch_id_col is not None:
+            batch_id_order = f", {batch_id_col}"
         logger.info("extracting %s", cls.table())
+        order_by = f"ORDER BY {batch_timestamp_clause} {batch_id_order}"
         if progress is None:
             # No saved progress, process the whole table from the beginning
             return self.extract_many(
                 cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
-                    f"WHERE {batch_timestamp_clause} >= '{min_transaction_date}'",
-                ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
+                    f"WHERE ({batch_timestamp_clause} >= '{min_transaction_date}')",
+                ).replace("{ORDER_BY}", order_by),
                 {},
             )
 
         previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
         # If we've completed the last batch, there shouldn't be any additional records
-        # with the same timestamp
-        op = ">" if previous_batch_complete else ">="
+        # with the same timestamp/id.
+        # Additionally, if there's a batch_id column, records with the same timestamp will be
+        # filtered by the batch_id filter.
+        filter_op = ">" if previous_batch_complete or batch_id_col is not None else ">="
         # insertion timestamps aren't always representative of the time the data is available in
         # Snowflake, so we should always start loading from the most recent timestamp
         # that we've already fetched
         compare_timestamp = max(min_transaction_date, progress.last_ts)
+
+        if batch_id_col is not None:
+            batch_id_clause = f"""
+                OR (
+                    {batch_timestamp_clause} = %(timestamp)s 
+                    AND {batch_id_col} {filter_op} {progress.last_id}
+                )"""
+
         # Saved progress found, start processing from where we left off
         return self.extract_many(
             cls,
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
-                    WHERE {batch_timestamp_clause} {op} %(timestamp)s
+                    WHERE (
+                        {batch_timestamp_clause} {filter_op} %(timestamp)s
+                        {batch_id_clause}
+                    )
                     """,
-            ).replace("{ORDER_BY}", f"ORDER BY {batch_timestamp_clause}"),
+            ).replace("{ORDER_BY}", order_by),
             {"timestamp": compare_timestamp},
         )
 
@@ -136,7 +156,7 @@ class SnowflakeExtractor(Extractor):
         self.batch_size = batch_size
 
     def reconnect(self) -> None:
-        SnowflakeExtractor._connect()
+        self.conn = SnowflakeExtractor._connect()
 
     @staticmethod
     def _connect() -> SnowflakeConnection:
