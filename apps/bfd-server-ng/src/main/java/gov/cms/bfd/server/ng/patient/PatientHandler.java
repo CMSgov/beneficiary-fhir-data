@@ -68,8 +68,8 @@ public class PatientHandler {
       // check for merged bene and if mbi identifier has already been added to the patient
       if (!beneficiary.isMergedBeneficiary()
           && patient.getIdentifier().stream()
-              .noneMatch(identifier -> identifier.getValue().equals(id.getMbi().orElse("")))) {
-        id.toFhirIdentifier().ifPresent(patient::addIdentifier);
+              .noneMatch(identifier -> identifier.getValue().equals(id.getMbi()))) {
+        patient.addIdentifier(id.toFhirIdentifier());
       }
 
       id.toFhirLink(Long.parseLong(patient.getId())).ifPresent(patient::addLink);

@@ -21,7 +21,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.9 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -34,7 +34,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 |------|-------------|------|---------|:--------:|
 | <a name="input_disable_rds_scheduling_override"></a> [disable\_rds\_scheduling\_override](#input\_disable\_rds\_scheduling\_override) | If true, RDS off hours scheduled scale-in actions will be disabled for this environment. Defaults<br/>  to false. | `bool` | `false` | no |
 | <a name="input_ephemeral_rds_snapshot_id_override"></a> [ephemeral\_rds\_snapshot\_id\_override](#input\_ephemeral\_rds\_snapshot\_id\_override) | Specify DB Cluster Snapshot ID from `seed_env`. Will cause the Cluster to be created from a<br/>Snapshot. Defaults to null which, for ephemeral environments, indicates latest snapshot from the<br/>seed cluster on initial definition, falling back to previously specified snapshot on subsequent<br/>execution. | `string` | `null` | no |
-| <a name="input_greenfield"></a> [greenfield](#input\_greenfield) | Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed. | `bool` | `false` | no |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
 | <a name="input_secondary_region"></a> [secondary\_region](#input\_secondary\_region) | n/a | `string` | `"us-west-2"` | no |

@@ -1,4 +1,0 @@
----
-plugin: community.docker.docker_containers
-use_ssh_client: no
-verbose_output: no

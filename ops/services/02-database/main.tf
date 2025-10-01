@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.9"
+      version = "~> 6"
     }
   }
 }
@@ -10,10 +10,9 @@ terraform {
 module "terraservice" {
   source = "../../terraform-modules/bfd/bfd-terraservice"
 
-  greenfield           = var.greenfield
   service              = local.service
   relative_module_root = "ops/services/02-database"
-  subnet_layers        = !var.greenfield ? ["data"] : ["private"]
+  subnet_layers        = ["private"]
 }
 
 locals {
@@ -32,8 +31,8 @@ locals {
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
   vpc                      = module.terraservice.vpc
   azs                      = module.terraservice.default_azs
-  data_subnets             = !var.greenfield ? module.terraservice.subnets_map["data"] : module.terraservice.subnets_map["private"]
-  external_sgs             = !var.greenfield ? [module.terraservice.legacy_tools_sg, module.terraservice.legacy_vpn_sg, module.terraservice.legacy_management_sg] : [module.terraservice.cms_cloud_vpn_sg]
+  data_subnets             = module.terraservice.subnets_map["private"]
+  external_sgs             = [module.terraservice.cms_cloud_vpn_sg]
 
   rds_aurora_family                       = "aurora-postgresql16"
   rds_cluster_id                          = nonsensitive(local.ssm_config["/bfd/database/rds_cluster_identifier"])

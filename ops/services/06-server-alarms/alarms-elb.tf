@@ -15,15 +15,15 @@ data "aws_sns_topic" "elb_high_alert_sns" {
 }
 
 data "aws_lb" "main" {
-  name = !var.greenfield ? "bfd-${local.env}-${local.target_service}-ecs-nlb" : "bfd-${local.env}-${local.target_service}-nlb"
+  name = "bfd-${local.env}-${local.target_service}-nlb"
 }
 
 data "aws_lb_target_group" "tg_0" {
-  name = !var.greenfield ? "bfd-${local.env}-${local.target_service}-ecs-tg-0" : "bfd-${local.env}-${local.target_service}-tg-0"
+  name = "bfd-${local.env}-${local.target_service}-tg-0"
 }
 
 data "aws_lb_target_group" "tg_1" {
-  name = !var.greenfield ? "bfd-${local.env}-${local.target_service}-ecs-tg-1" : "bfd-${local.env}-${local.target_service}-tg-1"
+  name = "bfd-${local.env}-${local.target_service}-tg-1"
 }
 
 resource "aws_cloudwatch_metric_alarm" "elb_healthy_hosts" {

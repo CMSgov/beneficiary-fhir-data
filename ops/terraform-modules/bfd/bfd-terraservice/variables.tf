@@ -1,8 +1,3 @@
-variable "greenfield" {
-  default     = false
-  description = "Temporary feature flag enabling compatibility for applying Terraform in the legacy and Greenfield accounts. Will be removed when Greenfield migration is completed."
-}
-
 variable "lookup_kms_keys" {
   default     = true
   description = <<-EOF

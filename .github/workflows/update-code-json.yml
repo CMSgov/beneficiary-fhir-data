@@ -27,9 +27,16 @@ jobs:
       
       - name: Install SCC
         run: go install github.com/boyter/scc/v3@latest
+
+      - name: "Generate an App Token"
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
+          private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
       
       - name: Update code.json
         uses: DSACMS/automated-codejson-generator@main
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
           BRANCH: 'master'

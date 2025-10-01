@@ -1,8 +1,8 @@
 locals {
   # The below IAM Roles may not exist in an account that has not enabled AutoScaling or RDS
   # AutoScaling, so we need to enable their policy fragements dynamically
-  autoscaling_iam_role_arn     = one(data.aws_iam_roles.autoscaling.arns)
-  rds_autoscaling_iam_role_arn = one(data.aws_iam_roles.rds_autoscaling.arns)
+  autoscaling_iam_role_arn         = one(data.aws_iam_roles.autoscaling.arns)
+  rds_autoscaling_iam_role_arn     = one(data.aws_iam_roles.rds_autoscaling.arns)
   kms_default_deletion_window_days = 30
 }
 
@@ -222,7 +222,7 @@ data "aws_iam_policy_document" "data" {
     ]
     resources = ["*"]
   }
-  
+
   # Allow ECS Fargate to generate a data key and describe the key
   statement {
     sid    = "AllowECSFargateKeyUsage"

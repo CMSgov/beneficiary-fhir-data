@@ -1,6 +1,0 @@
----
-env_name_std: 'unknown-environment'
-ref_dir: /bluebutton-data-pipeline
-user: bb-etl
-tmp: '{{ ref_dir }}/tmp'
-logs: '{{ ref_dir }}'

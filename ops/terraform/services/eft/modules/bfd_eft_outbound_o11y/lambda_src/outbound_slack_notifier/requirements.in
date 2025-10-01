@@ -1,4 +1,0 @@
-aws-lambda-powertools[all]
-setuptools>=78.1.1
-aws-xray-sdk>=2.14.0
-urllib3>=2.5.0

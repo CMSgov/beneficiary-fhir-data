@@ -1,8 +1,0 @@
-*
-!common/
-!config/
-!services/server-load
-!v1/
-!v2/
-!requirements.txt
-!high_volume_suite.py
