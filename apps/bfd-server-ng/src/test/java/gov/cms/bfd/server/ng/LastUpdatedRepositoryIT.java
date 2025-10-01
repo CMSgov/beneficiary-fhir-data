@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.gclient.IReadTyped;
-import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -29,10 +29,10 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   private static final String EOB_META_LAST_UPDATED_MSG = "EOB meta.lastUpdated should be set";
   private static final String NON_EXISTENT_ID = "999999999999999";
 
-  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
+  private final LoadProgressRepository loadProgressLastUpdatedProvider;
 
   @Autowired
-  public LastUpdatedRepositoryIT(LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider) {
+  public LastUpdatedRepositoryIT(LoadProgressRepository loadProgressLastUpdatedProvider) {
     this.loadProgressLastUpdatedProvider = loadProgressLastUpdatedProvider;
   }
 

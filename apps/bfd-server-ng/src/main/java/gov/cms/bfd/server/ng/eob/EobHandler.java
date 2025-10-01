@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+  private final LoadProgressRepository loadProgressRepository;
 
   /**
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
@@ -60,7 +62,7 @@ public class EobHandler {
         claimRepository.findByBeneXrefSk(
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(Claim::toFhir), claimRepository::claimLastUpdated);
+        eobs.stream().map(Claim::toFhir), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -74,7 +76,7 @@ public class EobHandler {
   public Bundle searchById(
       Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
     var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
-    return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
+    return FhirUtil.bundleOrDefault(eob.map(e -> e), loadProgressRepository::lastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(

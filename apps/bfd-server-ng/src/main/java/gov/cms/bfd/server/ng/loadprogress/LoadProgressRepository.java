@@ -8,13 +8,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 /**
- * Central provider for computing the most recent {@code batchCompletionTimestamp} across all
- * LoadProgress rows. Using a shared provider keeps repository code small and prevents divergence in
- * how the fallback value is handled.
+ * Repository for computing the most recent {@code batchCompletionTimestamp} across all LoadProgress
+ * rows. Using a shared repository keeps repository code small and prevents divergence in how the
+ * fallback value is handled.
  */
 @Repository
 @AllArgsConstructor
-public class LoadProgressLastUpdatedProvider {
+public class LoadProgressRepository {
   private final EntityManager entityManager;
 
   /**
