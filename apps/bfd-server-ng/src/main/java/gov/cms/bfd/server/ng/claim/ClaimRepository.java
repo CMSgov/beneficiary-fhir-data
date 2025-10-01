@@ -3,11 +3,9 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class ClaimRepository {
   private final EntityManager entityManager;
-  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
 
   private static final String CLAIM_TABLES_BASE =
       """
@@ -104,15 +101,6 @@ public class ClaimRepository {
         .findFirst()
         .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return claims;
-  }
-
-  /**
-   * Returns the most recent batch completion timestamp across all LoadProgress rows.
-   *
-   * @return the most recent timestamp.
-   */
-  public ZonedDateTime claimLastUpdated() {
-    return loadProgressLastUpdatedProvider.lastUpdated();
   }
 
   private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {

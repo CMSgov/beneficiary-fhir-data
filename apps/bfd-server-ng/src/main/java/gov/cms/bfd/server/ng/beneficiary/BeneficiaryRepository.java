@@ -3,10 +3,8 @@ package gov.cms.bfd.server.ng.beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
-  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -114,15 +111,5 @@ public class BeneficiaryRepository {
         .getResultList()
         .stream()
         .findFirst();
-  }
-
-  /**
-   * Returns the most recent batch completion timestamp across all LoadProgress rows. Delegates to
-   * {@link LoadProgressLastUpdatedProvider#lastUpdated()} for the timestamp.
-   *
-   * @return last updated timestamp
-   */
-  public ZonedDateTime beneficiaryLastUpdated() {
-    return loadProgressLastUpdatedProvider.lastUpdated();
   }
 }

@@ -6,11 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.gclient.IReadTyped;
-import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
-import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.coverage.CoverageRepository;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import jakarta.persistence.EntityManager;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -32,21 +29,11 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   private static final String EOB_META_LAST_UPDATED_MSG = "EOB meta.lastUpdated should be set";
   private static final String NON_EXISTENT_ID = "999999999999999";
 
-  private final EntityManager entityManager;
-  private final ClaimRepository claimRepository;
-  private final BeneficiaryRepository beneficiaryRepository;
-  private final CoverageRepository coverageRepository;
+  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
 
   @Autowired
-  public LastUpdatedRepositoryIT(
-      EntityManager entityManager,
-      ClaimRepository claimRepository,
-      BeneficiaryRepository beneficiaryRepository,
-      CoverageRepository coverageRepository) {
-    this.entityManager = entityManager;
-    this.claimRepository = claimRepository;
-    this.beneficiaryRepository = beneficiaryRepository;
-    this.coverageRepository = coverageRepository;
+  public LastUpdatedRepositoryIT(LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider) {
+    this.loadProgressLastUpdatedProvider = loadProgressLastUpdatedProvider;
   }
 
   private static final ZonedDateTime BASE_TIME =
@@ -78,7 +65,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     for (int i = 0; i < tables.size(); i++)
       insertLoadProgressRow(tables.get(i), BASE_TIME.plusHours(i));
     var expected = BASE_TIME.plusHours(tables.size() - 1L);
-    var actual = claimRepository.claimLastUpdated();
+    var actual = loadProgressLastUpdatedProvider.lastUpdated();
     assertEquals(
         expected.toInstant(),
         actual.toInstant(),
@@ -97,7 +84,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     insertLoadProgressRow(TABLE_CLAIM_ITEM, BASE_TIME);
 
     insertLoadProgressRow(TABLE_CLAIM_ITEM, expected);
-    var actual = claimRepository.claimLastUpdated();
+    var actual = loadProgressLastUpdatedProvider.lastUpdated();
     assertEquals(
         expected.toInstant(),
         actual.toInstant(),
@@ -113,7 +100,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     insertLoadProgressRow(TABLE_BENEFICIARY, BASE_TIME);
     insertLoadProgressRow(TABLE_BENEFICIARY_MBI_ID, BASE_TIME);
     insertLoadProgressRow(TABLE_BENEFICIARY, expected); // bump
-    var actual = beneficiaryRepository.beneficiaryLastUpdated();
+    var actual = loadProgressLastUpdatedProvider.lastUpdated();
     assertEquals(expected.toInstant(), actual.toInstant(), "Should pick bumped beneficiary row");
   }
 
@@ -126,7 +113,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     insertLoadProgressRow(TABLE_BENEFICIARY_ENTITLEMENT, BASE_TIME);
     insertLoadProgressRow(TABLE_BENEFICIARY, BASE_TIME);
     insertLoadProgressRow(TABLE_BENEFICIARY_ENTITLEMENT, expected); // bump
-    var actual = coverageRepository.coverageLastUpdated();
+    var actual = loadProgressLastUpdatedProvider.lastUpdated();
     assertEquals(
         expected.toInstant(), actual.toInstant(), "Should pick bumped coverage-related row");
   }
@@ -137,7 +124,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     for (int i = 0; i < tables.size(); i++)
       insertLoadProgressRow(tables.get(i), BASE_TIME.plusMinutes(i));
     var expected = BASE_TIME.plusMinutes(tables.size() - 1L);
-    var actual = beneficiaryRepository.beneficiaryLastUpdated();
+    var actual = loadProgressLastUpdatedProvider.lastUpdated();
     assertEquals(
         expected.toInstant(),
         actual.toInstant(),
@@ -163,12 +150,15 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   void lastUpdatedFallsBackToMinDateTimeWhenNoRows() {
     entityManager.createNativeQuery(DELETE_LOAD_PROGRESS).executeUpdate();
     entityManager.flush();
-    assertEquals(DateUtil.MIN_DATETIME.toInstant(), claimRepository.claimLastUpdated().toInstant());
     assertEquals(
         DateUtil.MIN_DATETIME.toInstant(),
-        beneficiaryRepository.beneficiaryLastUpdated().toInstant());
+        loadProgressLastUpdatedProvider.lastUpdated().toInstant());
     assertEquals(
-        DateUtil.MIN_DATETIME.toInstant(), coverageRepository.coverageLastUpdated().toInstant());
+        DateUtil.MIN_DATETIME.toInstant(),
+        loadProgressLastUpdatedProvider.lastUpdated().toInstant());
+    assertEquals(
+        DateUtil.MIN_DATETIME.toInstant(),
+        loadProgressLastUpdatedProvider.lastUpdated().toInstant());
   }
 
   @Test
@@ -205,7 +195,8 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     var expected = BASE_TIME.plusMinutes(20);
     insertLoadProgressRow("idr.claim_line_institutional", expected);
 
-    var fallback = claimRepository.claimLastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
+    var fallback =
+        loadProgressLastUpdatedProvider.lastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
 
     // Use a patient reference that does not exist to force empty Bundle.
     var bundle =
@@ -234,7 +225,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     insertLoadProgressRow("idr.beneficiary_status", expected);
 
     var fallback =
-        beneficiaryRepository.beneficiaryLastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
+        loadProgressLastUpdatedProvider.lastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
 
     var bundle =
         getFhirClient()
@@ -262,7 +253,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     insertLoadProgressRow("idr.beneficiary_dual_eligibility", BASE_TIME.plusMinutes(9));
 
     var fallback =
-        coverageRepository.coverageLastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
+        loadProgressLastUpdatedProvider.lastUpdated().toInstant().truncatedTo(ChronoUnit.MILLIS);
 
     var bundle =
         getFhirClient()

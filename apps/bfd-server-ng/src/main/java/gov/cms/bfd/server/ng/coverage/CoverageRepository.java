@@ -2,10 +2,8 @@ package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.loadprogress.LoadProgressLastUpdatedProvider;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class CoverageRepository {
   private final EntityManager entityManager;
-  private final LoadProgressLastUpdatedProvider loadProgressLastUpdatedProvider;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -57,14 +54,5 @@ public class CoverageRepository {
 
     beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSk(coverage.getBeneSk()));
     return beneficiaryCoverage;
-  }
-
-  /**
-   * Returns the most recent batch completion timestamp across all tables tracked in LoadProgress.
-   *
-   * @return last updated timestamp
-   */
-  public ZonedDateTime coverageLastUpdated() {
-    return loadProgressLastUpdatedProvider.lastUpdated();
   }
 }
