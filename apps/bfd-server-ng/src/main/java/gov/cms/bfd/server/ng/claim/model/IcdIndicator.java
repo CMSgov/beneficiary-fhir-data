@@ -44,10 +44,15 @@ public enum IcdIndicator {
    */
   public String formatCode(String rawCode) {
     // If the code contains a dot, it's already formatted.
-    if (rawCode.contains(".")) return rawCode;
-
-    if (this == ICD_10) return formatIcd10(rawCode);
-    if (this == ICD_9) return formatIcd9Diagnosis(rawCode);
+    if (rawCode.contains(".")) {
+      return rawCode;
+    }
+    if (this == ICD_10) {
+      return formatIcd10(rawCode);
+    }
+    if (this == ICD_9) {
+      return formatIcd9Diagnosis(rawCode);
+    }
 
     return rawCode;
   }
