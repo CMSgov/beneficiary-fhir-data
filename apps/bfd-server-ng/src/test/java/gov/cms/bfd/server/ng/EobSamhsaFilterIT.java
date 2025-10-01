@@ -415,12 +415,12 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     var eobEnd = eob.getBillablePeriod().getEnd();
     var json = normalize(context.newJsonParser().encodeResourceToString(eob));
     for (var entry : SECURITY_LABELS.values().stream().flatMap(Collection::stream).toList()) {
-      if (validateDates && eobEnd.after(DateUtil.toDate(entry.getEndDateAsDate()))) {
+      var eobAfter = eobEnd.after(DateUtil.toDate(entry.getEndDateAsDate()));
+      var eobBefore = eobEnd.before(DateUtil.toDate(entry.getStartDateAsDate()));
+      if (validateDates && (eobAfter || eobBefore)) {
         continue;
       }
-      if (validateDates && eobEnd.before(DateUtil.toDate(entry.getStartDateAsDate()))) {
-        continue;
-      }
+
       var target = normalize(entry.getCode());
       // This can produce false positives, but it will be safer to set up the test data to avoid
       // this than to try to limit the fields we check against
