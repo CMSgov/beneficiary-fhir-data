@@ -17,10 +17,8 @@ def main() -> None:
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
     ray.init(
-        logging_level="debug",
-        num_cpus=parallelism,
-        include_dashboard=True,
-        dashboard_port=8265)
+        logging_level="info",
+        num_cpus=parallelism)
 
     class DictResultBuilder:
         @staticmethod
@@ -34,11 +32,6 @@ def main() -> None:
         .with_adapters(adapter)
         .build()
     )
-
-    graph = dr.graph
-    for node_name, node in graph.nodes.items():
-        print(f"Node: {node_name}")
-        print(f"  Dependencies (incoming edges): {list(node.input_types.keys())}")
 
     batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
     mode = sys.argv[1] if len(sys.argv) > 1 else ""

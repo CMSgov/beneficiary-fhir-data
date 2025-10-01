@@ -155,24 +155,24 @@ class SnowflakeExtractor(Extractor):
             cursor_execute_timer.start()
             cur = conn.cursor(DictCursor)
             cur.execute(sql, params)
-            cursor_execute_timer.stop()
+            cursor_execute_timer.stop(cls)
 
             cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use
             # queries that return dicts
             batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-            cursor_fetch_timer.stop()
+            cursor_fetch_timer.stop(cls)
 
             while len(batch) > 0:  # type: ignore
                 transform_timer.start()
                 data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                transform_timer.stop()
+                transform_timer.stop(cls)
 
                 yield data
 
                 cursor_fetch_timer.start()
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-                cursor_fetch_timer.stop()
+                cursor_fetch_timer.stop(cls)
             return
 
         finally:

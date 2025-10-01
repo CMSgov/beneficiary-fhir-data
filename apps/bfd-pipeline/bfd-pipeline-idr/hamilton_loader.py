@@ -88,7 +88,7 @@ class PostgresLoader:
                     # We unfortunately need to use a while true loop here since we need to wrap the
                     # iterator with the timer calls.
                     results = next(fetch_results, None)
-                    idr_query_timer.stop()
+                    idr_query_timer.stop(table)
                     if results is None:
                         break
 
@@ -116,7 +116,7 @@ class PostgresLoader:
                     exclude_cols = model.computed_keys() + meta_keys
                     for col in exclude_cols:
                         cur.execute(f"ALTER TABLE {temp_table} DROP COLUMN {col}")  # type: ignore
-                    temp_table_timer.stop()
+                    temp_table_timer.stop(table)
 
                     # Use COPY to load the batch into Postgres.
                     # COPY has a number of optimizations that make bulk loading more efficient
@@ -131,7 +131,7 @@ class PostgresLoader:
                         for row in results:
                             model_dump = row.model_dump()
                             copy.write_row([model_dump[k] for k in insert_cols])
-                    copy_timer.stop()
+                    copy_timer.stop(table)
 
                     if len(results) > 0:
                         # For immutable tables, we may still be attempting to re-load some data
@@ -154,7 +154,7 @@ class PostgresLoader:
                             """,  # type: ignore
                             {"timestamp": timestamp},
                         )
-                        insert_timer.stop()
+                        insert_timer.stop(table)
 
                         last = results[len(results) - 1].model_dump()
                         # Some tables that contain reference data (like contract info) may not have the
@@ -185,7 +185,7 @@ class PostgresLoader:
                             )
                     commit_timer.start()
                     conn.commit()
-                    commit_timer.stop()
+                    commit_timer.stop(table)
                 # Mark the batch as completed
                 cur.execute(
                     """
