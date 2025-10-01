@@ -1,6 +1,6 @@
 import os
 from collections.abc import Iterable
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
@@ -77,6 +77,10 @@ class IdrBaseModel(BaseModel):
     def table() -> str: ...
 
     @staticmethod
+    def cutoff_date(quantity_days: int) -> datetime:
+        return datetime.now(UTC) - timedelta(days=quantity_days)
+
+    @staticmethod
     def _current_fetch_query(start_time: datetime) -> str: ...
 
     @classmethod
@@ -84,7 +88,10 @@ class IdrBaseModel(BaseModel):
         return cls._current_fetch_query(start_time)
 
     @classmethod
-    def fetch_query(cls, is_historical: bool, start_time: datetime) -> str:
+    def fetch_query(cls, is_historical: bool) -> str:
+        # PAC data older than 60 days is not needed
+        start_time = cls.cutoff_date(60)
+
         if is_historical:
             return cls._historical_fetch_query(start_time)
         return cls._current_fetch_query(start_time)
@@ -490,17 +497,22 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
-def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
-    latest_claims_env = "IDR_LATEST_CLAIMS"
-    if latest_claims_env in os.environ and os.environ[latest_claims_env] in ("1", "true"):
-        return f"""
-            {ALIAS_CLM}.clm_type_cd IN (61,62,63,64)
-            AND {ALIAS_CLM}.clm_src_id = '20000' 
-            AND {ALIAS_CLM}.clm_finl_actn_ind = 'Y'
-            AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y'
-            """
+def claim_type_clause(start_time: datetime) -> str:
+    
+    start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
+    (
         {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+        AND
+        (
+            (
+                {ALIAS_CLM}.clm_src_id <> '20000' 
+                AND 
+                COALESCE({ALIAS_CLM}.idr_updt_ts,{ALIAS_CLM}.idr_insrt_ts,{ALIAS_CLM}.clm_idr_ld_dt)  >= {start_time_sql}
+            ) 
+            OR {ALIAS_CLM}.clm_src_id = '20000'
+        )
+        )
     """
 
 

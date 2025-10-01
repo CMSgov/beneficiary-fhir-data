@@ -69,11 +69,11 @@ def main() -> None:
 
 
 def get_progress(
-    connection_string: str, table_name: str, start_time: datetime
+    connection_string: str, table_name: str
 ) -> LoadProgress | None:
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
-        LoadProgress.fetch_query(False, start_time),
+        LoadProgress.fetch_query(False),
         {LoadProgress.query_placeholder(): table_name},
     )
 
@@ -85,7 +85,7 @@ def extract_and_load(
 ) -> tuple[PostgresLoader, bool]:
     logger.info("loading %s", cls.table())
     batch_start = datetime.now()
-    progress = get_progress(connection_string, cls.table(), batch_start)
+    progress = get_progress(connection_string, cls.table())
 
     logger.info(
         "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
@@ -98,7 +98,7 @@ def extract_and_load(
     loader = PostgresLoader(connection_string)
     for attempt in range(max_attempts):
         try:
-            data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
+            data_iter = data_extractor.extract_idr_data(cls, progress)
             data_loaded = loader.load(data_iter, cls, batch_start, progress)
             return (loader, data_loaded)
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
