@@ -1,13 +1,15 @@
 DROP SCHEMA IF EXISTS idr CASCADE;
 
 CREATE SCHEMA idr;
-CREATE TABLE idr.beneficiary(
+CREATE TABLE idr.beneficiary (
     -- columns from V2_MDCR_BENE_HSTRY
     bene_sk BIGINT NOT NULL, 
+    -- NOTE: this column should never be used for any queries
+    -- bene_xref_efctv_sk_computed should always be used instead
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
-        -- if kill credit is set to 1, the merge is invalid, and we should act like it's not present
-        AS (CASE WHEN bene_xref_efctv_sk = 0 OR bene_kill_cred_cd = '1' THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
+        -- The merge is only valid if kill credit is present AND set to 2. If not, we should act like it's not present.
+        AS (CASE WHEN bene_xref_efctv_sk != bene_sk AND bene_kill_cred_cd != '2' THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
     bene_1st_name VARCHAR(30) NOT NULL,
     bene_midl_name VARCHAR(15) NOT NULL,
@@ -57,6 +59,11 @@ CREATE TABLE idr.beneficiary_mbi_id (
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_mbi_id, idr_trans_efctv_ts)
+);
+
+CREATE TABLE idr.beneficiary_overshare_mbi (
+    bene_mbi_id VARCHAR(11) NOT NULL PRIMARY KEY,
+    bfd_created_ts TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE idr.beneficiary_third_party (
@@ -435,19 +442,10 @@ CREATE TABLE idr.claim_ansi_signature (
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
-CREATE MATERIALIZED VIEW idr.overshare_mbis AS 
-SELECT bene_mbi_id FROM idr.beneficiary
-WHERE bene_xref_efctv_sk != 0
-GROUP BY bene_mbi_id
-HAVING COUNT(DISTINCT bene_xref_efctv_sk) > 1;
-
--- required to refresh view with CONCURRENTLY
-CREATE UNIQUE INDEX ON idr.overshare_mbis (bene_mbi_id);
-
 CREATE VIEW idr.valid_beneficiary AS 
 SELECT *
 FROM idr.beneficiary b
-WHERE NOT EXISTS(SELECT 1 FROM idr.overshare_mbis om WHERE om.bene_mbi_id = b.bene_mbi_id);
+WHERE NOT EXISTS(SELECT 1 FROM idr.beneficiary_overshare_mbi om WHERE om.bene_mbi_id = b.bene_mbi_id);
 
 -- we use NOW() - 12 hours to represent "anywhere in the world" time
 
@@ -490,36 +488,7 @@ SELECT DISTINCT
     bene.bene_mbi_id,
     bene_mbi.bene_mbi_efctv_dt, 
     bene_mbi.bene_mbi_obslt_dt
-FROM idr.beneficiary bene
+FROM idr.valid_beneficiary bene
 LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
-    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id
-    WHERE bene_mbi.idr_ltst_trans_flg = 'Y';
-
-CREATE OR REPLACE FUNCTION idr.refresh_overshare_mbis()
-    RETURNS VOID AS $$
-    DECLARE comment_sql TEXT;
-BEGIN
-    -- Using "concurrently" will make the refresh slower, but it will not block any reads
-    -- on the view while the refresh is in progress
-    REFRESH MATERIALIZED VIEW CONCURRENTLY idr.overshare_mbis;
-    -- There's no implicit way to know when a materialized view was last updated
-    -- add a comment on the object in case we need to verify that it's being updated as expected
-    comment_sql := 'COMMENT ON MATERIALIZED VIEW idr.overshare_mbis is '
-        || quote_literal('{"last_refreshed": "' || now() || '"}');
-    EXECUTE comment_sql;
-END;
-$$
-LANGUAGE plpgsql
-
--- Only the owner of the view may refresh it, we need to set "security definer" so the function
--- can execute in the context of the creator
-SECURITY DEFINER;
--- search_path is the order in which schemas are searched when a name is referenced with no schema specified
--- Postgres recommends setting this on functions marked as "security definer" to prevent malicious users from
--- creating an object that shadows an existing one on a globally writable schema
-ALTER FUNCTION idr.refresh_overshare_mbis() SET search_path = idr;
--- Execute privilege is granted to PUBLIC by default
-REVOKE ALL ON FUNCTION idr.refresh_overshare_mbis() FROM PUBLIC;
-
--- This only needs to be executed by the pipeline
--- GRANT EXECUTE ON FUNCTION idr.refresh_overshare_mbis() TO api_pipeline_svcs;
+    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id 
+    AND bene_mbi.idr_ltst_trans_flg = 'Y';
