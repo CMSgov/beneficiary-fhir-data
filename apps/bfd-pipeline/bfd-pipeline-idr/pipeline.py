@@ -95,7 +95,7 @@ def extract_and_load(
     max_errors = 3
     while True:
         try:
-            progress = get_progress(connection_string, cls.table(), batch_start)
+            progress = get_progress(connection_string, cls.table())
 
             logger.info(
                 "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
@@ -104,7 +104,7 @@ def extract_and_load(
                 progress.batch_start_ts if progress else "none",
                 progress.batch_complete_ts if progress else "none",
             )
-            data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
+            data_iter = data_extractor.extract_idr_data(cls, progress)
             data_loaded = loader.load(data_iter, cls, batch_start, progress)
             return (loader, data_loaded)
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
