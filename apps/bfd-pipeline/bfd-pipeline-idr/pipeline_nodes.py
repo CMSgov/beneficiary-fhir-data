@@ -8,6 +8,7 @@ from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from hamilton_loader import PostgresLoader
 from model import (
+    IdrBeneficiaryOvershareMbi,
     IdrBeneficiary,
     IdrBeneficiaryDualEligibility,
     IdrBeneficiaryEntitlement,
@@ -60,7 +61,16 @@ def idr_claim(idr_claim_institutional: tuple[PostgresLoader, bool],
               ) -> tuple[PostgresLoader, bool]:
     return extract_and_load(cls=IdrClaim, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
 
-# Stage 3: Load auxiliary beneficiary tables in parallel
+# Stage 3: Load only overshared MBIs
+def idr_beneficiary_overshare_mbi(idr_claim: tuple[PostgresLoader, bool],
+              config_mode: str,
+              config_batch_size: int,
+              config_connection_string: str,
+              ) -> tuple[PostgresLoader, bool]:
+    return extract_and_load(cls=IdrBeneficiaryOvershareMbi, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
+
+
+# Stage 4: Load auxiliary beneficiary tables in parallel
 @parameterize(
     idr_beneficiary_status=dict(cls=value(IdrBeneficiaryStatus)),
     idr_beneficiary_third_party=dict(cls=value(IdrBeneficiaryThirdParty)),
@@ -69,14 +79,14 @@ def idr_claim(idr_claim_institutional: tuple[PostgresLoader, bool],
     idr_beneficiary_dual_eligibility=dict(cls=value(IdrBeneficiaryDualEligibility)),
     idr_beneficiary_mbi_id=dict(cls=value(IdrBeneficiaryMbiId))
 )
-def idr_beneficiary_aux_table(idr_claim: tuple[PostgresLoader, bool],
+def idr_beneficiary_aux_table(idr_beneficiary_overshare_mbi: tuple[PostgresLoader, bool],
                               cls: type,
                               config_connection_string: str,
                               config_mode: str,
                               config_batch_size: int) -> tuple[PostgresLoader, bool]:
     return extract_and_load(cls=cls, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
 
-# Stage 4: Load main beneficiary tables last
+# Stage 5: Load main beneficiary tables last
 def idr_beneficiary(idr_beneficiary_status: tuple[PostgresLoader, bool],
                     idr_beneficiary_third_party: tuple[PostgresLoader, bool],
                     idr_beneficiary_entitlement: tuple[PostgresLoader, bool],
