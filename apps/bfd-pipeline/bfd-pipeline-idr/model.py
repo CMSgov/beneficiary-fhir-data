@@ -629,7 +629,10 @@ def claim_type_clause(start_time: datetime) -> str:
             (
                 {ALIAS_CLM}.clm_src_id <> '20000' 
                 AND 
-                COALESCE({ALIAS_CLM}.idr_updt_ts,{ALIAS_CLM}.idr_insrt_ts,{ALIAS_CLM}.clm_idr_ld_dt)  >= {start_time_sql}
+                COALESCE(
+                    {ALIAS_CLM}.idr_updt_ts,
+                    {ALIAS_CLM}.idr_insrt_ts,
+                    {ALIAS_CLM}.clm_idr_ld_dt)  >= {start_time_sql}
             ) 
             OR {ALIAS_CLM}.clm_src_id = '20000'
         )
