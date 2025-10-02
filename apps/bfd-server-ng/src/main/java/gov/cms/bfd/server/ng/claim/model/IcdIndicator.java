@@ -6,16 +6,49 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/** Indicates the ICD code system used. */
+/**
+ * ICD indicator types for ICD-9 and ICD-10, providing code system URLs and formatting logic for
+ * diagnosis and procedure codes.
+ */
 @Getter
 @AllArgsConstructor
 public enum IcdIndicator {
   /** Not specified (default to ICD 9). */
-  DEFAULT("", SystemUrls.CMS_ICD_9_PROCEDURE, SystemUrls.ICD_9_CM_DIAGNOSIS),
+  DEFAULT("", SystemUrls.CMS_ICD_9_PROCEDURE, SystemUrls.ICD_9_CM_DIAGNOSIS) {
+    @Override
+    public String formatDiagnosisCode(String rawCode) {
+      return formatIcd9Diagnosis(rawCode);
+    }
+
+    @Override
+    public String formatProcedureCode(String rawCode) {
+      return formatIcd9Procedure(rawCode);
+    }
+  },
   /** ICD 9. */
-  ICD_9("9", SystemUrls.CMS_ICD_9_PROCEDURE, SystemUrls.ICD_9_CM_DIAGNOSIS),
+  ICD_9("9", SystemUrls.CMS_ICD_9_PROCEDURE, SystemUrls.ICD_9_CM_DIAGNOSIS) {
+    @Override
+    public String formatDiagnosisCode(String rawCode) {
+      return formatIcd9Diagnosis(rawCode);
+    }
+
+    @Override
+    public String formatProcedureCode(String rawCode) {
+      return formatIcd9Procedure(rawCode);
+    }
+  },
   /** ICD 10. */
-  ICD_10("0", SystemUrls.CMS_ICD_10_PROCEDURE, SystemUrls.ICD_10_CM_DIAGNOSIS);
+  ICD_10("0", SystemUrls.CMS_ICD_10_PROCEDURE, SystemUrls.ICD_10_CM_DIAGNOSIS) {
+    @Override
+    public String formatDiagnosisCode(String rawCode) {
+      return formatIcd10(rawCode);
+    }
+
+    @Override
+    public String formatProcedureCode(String rawCode) {
+      return rawCode;
+    }
+  };
 
   /**
    * Convert from a database code.
@@ -32,36 +65,32 @@ public enum IcdIndicator {
   private final String diagnosisSystem;
 
   /**
-   * Formats a raw diagnosis code string according to the rules for this specific ICD system. For
-   * ICD-10, it inserts a dot after the first 3 characters if the code is long enough. For ICD-9, If
-   * the code contains a '.' returns code the unchanged. If fully numeric and length > 3, inserts
-   * '.' after the 3rd char. If starts with 'E' and length > 4, insert '.' after the 4th char. If
-   * starts with 'V' and length > 3, insert '.' after the 3rd char. All other systems it returns the
-   * code as-is.
+   * Formats a raw diagnosis code by the rules of this ICD system.
    *
    * @param rawCode The raw diagnosis code string from the database.
-   * @return The correctly formatted diagnosis code string for use in FHIR.
+   * @return Formatted diagnosis code string.
    */
-  public String formatCode(String rawCode) {
-    // If the code contains a dot, it's already formatted.
+  public abstract String formatDiagnosisCode(String rawCode);
+
+  /**
+   * Formats a procedure code for this ICD system.
+   *
+   * @param rawCode raw procedure code
+   * @return formatted procedure code
+   */
+  public abstract String formatProcedureCode(String rawCode);
+
+  private static String formatIcd10(String rawCode) {
     if (rawCode.contains(".")) {
       return rawCode;
     }
-    if (this == ICD_10) {
-      return formatIcd10(rawCode);
-    }
-    if (this == ICD_9) {
-      return formatIcd9Diagnosis(rawCode);
-    }
-
-    return rawCode;
-  }
-
-  private String formatIcd10(String rawCode) {
     return insertDot(rawCode, 3);
   }
 
-  private String formatIcd9Diagnosis(String rawCode) {
+  private static String formatIcd9Diagnosis(String rawCode) {
+    if (rawCode.contains(".")) {
+      return rawCode;
+    }
     // Fully numeric insert dot after 3rd char when long enough.
     if (rawCode.matches("\\d+")) {
       return insertDot(rawCode, 3);
@@ -79,22 +108,14 @@ public enum IcdIndicator {
     return rawCode;
   }
 
-  /**
-   * Formats a procedure code for this ICD system.
-   *
-   * @param rawCode raw procedure code
-   * @return formatted procedure code
-   */
-  public String formatProcedureCode(String rawCode) {
-    if (rawCode.indexOf('.') >= 0) return rawCode;
-
-    if (this == ICD_9) {
-      if (rawCode.length() > 2) {
-        return insertDot(rawCode, 2);
-      }
+  private static String formatIcd9Procedure(String rawCode) {
+    if (rawCode.indexOf('.') >= 0) {
       return rawCode;
     }
 
+    if (rawCode.length() > 2) {
+      return insertDot(rawCode, 2);
+    }
     return rawCode;
   }
 

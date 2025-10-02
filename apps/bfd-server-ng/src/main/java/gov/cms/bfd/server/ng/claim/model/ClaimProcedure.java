@@ -84,7 +84,7 @@ public class ClaimProcedure {
                 new CodeableConcept(
                     new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode()))));
 
-    String formattedCode = icdIndicator.get().formatCode(diagnosisCode.get());
+    String formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
         new CodeableConcept(
             new Coding()

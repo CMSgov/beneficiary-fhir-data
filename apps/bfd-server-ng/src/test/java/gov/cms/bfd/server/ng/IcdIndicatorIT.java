@@ -42,7 +42,7 @@ public class IcdIndicatorIT extends IntegrationTestBase {
             .collect(
                 Collectors.toMap(
                     c -> c,
-                    IcdIndicator.ICD_9::formatCode,
+                    IcdIndicator.ICD_9::formatDiagnosisCode,
                     (a, b) -> a,
                     java.util.LinkedHashMap::new));
 
@@ -88,7 +88,7 @@ public class IcdIndicatorIT extends IntegrationTestBase {
             FORMATTED_ICD_9_CODE_V1005);
     assertEquals(expected, codes, "ICD-9 diagnosis codes should be formatted and ordered");
 
-    // Small payload: compare string representations rather than using snapshot storage.
+    // compare string representations rather than using snapshot storage.
     assertEquals(expected.toString(), codes.toString(), "Compact codes string should match");
   }
 }

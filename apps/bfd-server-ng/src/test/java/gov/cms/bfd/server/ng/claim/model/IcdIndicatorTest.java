@@ -8,38 +8,39 @@ import org.junit.jupiter.api.Test;
 class IcdIndicatorTest {
   private static final String ICD10_F1010 = "F10.10";
   private static final String ICD9_123_45 = "123.45";
+  private static final String ICD9_12345 = "12345";
   private static final String ICD9_PROC_12_345 = "12.345";
 
   @Test
   void icd10FormatsDiagnosisCorrectly() {
-    var formatted = IcdIndicator.ICD_10.formatCode("F1010");
+    var formatted = IcdIndicator.ICD_10.formatDiagnosisCode("F1010");
     assertEquals(ICD10_F1010, formatted);
 
-    var shortCode = IcdIndicator.ICD_10.formatCode("A12");
+    var shortCode = IcdIndicator.ICD_10.formatDiagnosisCode("A12");
     assertEquals("A12", shortCode);
   }
 
   @Test
   void icd9NumericDiagnosisFormatting() {
-    var formatted = IcdIndicator.ICD_9.formatCode("12345");
+    var formatted = IcdIndicator.ICD_9.formatDiagnosisCode(ICD9_12345);
     assertEquals(ICD9_123_45, formatted);
   }
 
   @Test
   void icd9EDiagnosisFormatting() {
-    var formatted = IcdIndicator.ICD_9.formatCode("E0000");
+    var formatted = IcdIndicator.ICD_9.formatDiagnosisCode("E0000");
     assertEquals("E000.0", formatted);
   }
 
   @Test
   void icd9VDiagnosisFormatting() {
-    var formatted = IcdIndicator.ICD_9.formatCode("V1234");
+    var formatted = IcdIndicator.ICD_9.formatDiagnosisCode("V1234");
     assertEquals("V12.34", formatted);
   }
 
   @Test
   void icd9ProcedureFormatting() {
-    var formatted = IcdIndicator.ICD_9.formatProcedureCode("12345");
+    var formatted = IcdIndicator.ICD_9.formatProcedureCode(ICD9_12345);
     assertEquals(ICD9_PROC_12_345, formatted);
 
     var shortProc = IcdIndicator.ICD_9.formatProcedureCode("12");
@@ -48,29 +49,34 @@ class IcdIndicatorTest {
 
   @Test
   void formattedCodesRemainUnchanged() {
-    assertEquals(ICD9_123_45, IcdIndicator.ICD_9.formatCode(ICD9_123_45));
-    assertEquals(ICD10_F1010, IcdIndicator.ICD_10.formatCode(ICD10_F1010));
+    assertEquals(ICD9_123_45, IcdIndicator.ICD_9.formatDiagnosisCode(ICD9_123_45));
+    assertEquals(ICD10_F1010, IcdIndicator.ICD_10.formatDiagnosisCode(ICD10_F1010));
     assertEquals(ICD9_PROC_12_345, IcdIndicator.ICD_9.formatProcedureCode(ICD9_PROC_12_345));
   }
 
   @Test
-  void defaultIndicatorReturnsRawCode() {
-    var raw = "ABC123";
-    var formatted = IcdIndicator.DEFAULT.formatCode(raw);
-    assertEquals(raw, formatted);
+  void defaultIndicatorUsesIcd9DiagnosisFormatting() {
+    var formatted = IcdIndicator.DEFAULT.formatDiagnosisCode(ICD9_12345);
+    assertEquals(ICD9_123_45, formatted);
+
+    var rawAlpha = "ABC123";
+    var formattedAlpha = IcdIndicator.DEFAULT.formatDiagnosisCode(rawAlpha);
+    assertEquals(rawAlpha, formattedAlpha);
   }
 
   @Test
-  void defaultIndicatorReturnsRawProcedureCode() {
-    var rawProcedureCode = "XYZ789";
-    var formatted = IcdIndicator.DEFAULT.formatProcedureCode(rawProcedureCode);
-    assertEquals(rawProcedureCode, formatted);
+  void defaultIndicatorUsesIcd9ProcedureFormatting() {
+    var formatted = IcdIndicator.DEFAULT.formatProcedureCode(ICD9_12345);
+    assertEquals(ICD9_PROC_12_345, formatted);
+
+    var shortProc = IcdIndicator.DEFAULT.formatProcedureCode("12");
+    assertEquals("12", shortProc);
   }
 
   @Test
   void icd9UnknownPatternReturnsRaw() {
     var raw = "ABC123";
-    var formatted = IcdIndicator.ICD_9.formatCode(raw);
+    var formatted = IcdIndicator.ICD_9.formatDiagnosisCode(raw);
     assertEquals(raw, formatted);
   }
 }
