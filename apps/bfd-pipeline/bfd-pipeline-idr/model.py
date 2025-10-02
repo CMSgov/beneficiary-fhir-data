@@ -622,7 +622,11 @@ def claim_type_clause(start_time: datetime) -> str:
         AND
         (
             (
-                {ALIAS_CLM}.clm_src_id IN ('{FISS_CLM_SOURCE}','{MCS_CLM_SOURCE}','{VMS_CLM_SOURCE}')
+                {ALIAS_CLM}.clm_src_id IN (
+                                '{FISS_CLM_SOURCE}',
+                                '{MCS_CLM_SOURCE}',
+                                '{VMS_CLM_SOURCE}'
+                            )
                 AND 
                 COALESCE(
                     {ALIAS_CLM}.idr_updt_ts,
