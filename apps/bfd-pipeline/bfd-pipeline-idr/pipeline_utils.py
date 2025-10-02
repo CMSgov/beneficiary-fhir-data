@@ -1,19 +1,19 @@
 import logging
 import sys
-from datetime import UTC, datetime, timedelta
 import time
+from datetime import UTC, datetime, timedelta
 
 from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from hamilton_loader import PostgresLoader
 from hamilton_extractor import PostgresExtractor, SnowflakeExtractor
-
+from hamilton_loader import PostgresLoader
 from model import (
     LoadProgress,
     T,
 )
+
 
 def configure_logger(name: str = "pipeline_worker") -> logging.Logger:
     logger = logging.getLogger(name)
@@ -42,10 +42,7 @@ def extract_and_load(
 ) -> tuple[PostgresLoader, bool]:
     logger = configure_logger()
 
-    if mode == "local":
-        data_extractor = PostgresExtractor(connection_string=connection_string,
-                                 batch_size=batch_size)
-    elif mode == "synthetic":
+    if mode == "local" or mode == "synthetic":
         data_extractor = PostgresExtractor(connection_string=connection_string,
                                  batch_size=batch_size)
     else:

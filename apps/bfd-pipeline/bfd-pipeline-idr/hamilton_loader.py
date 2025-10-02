@@ -1,14 +1,13 @@
 import logging
 import os
-import sys
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
 
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T
 from hamilton_timer import Timer
+from model import DbType, LoadProgress, T
 
 idr_query_timer = Timer("idr_query")
 temp_table_timer = Timer("temp_table")

@@ -1,19 +1,14 @@
-import logging
-import os
-import sys
-import time
-from datetime import datetime
-
-from snowflake.connector.network import ReauthenticationRequest, RetryRequest
+# ruff: noqa: ARG001
+from hamilton.function_modifiers import parameterize, value
 
 from hamilton_loader import PostgresLoader
 from model import (
-    IdrBeneficiaryOvershareMbi,
     IdrBeneficiary,
     IdrBeneficiaryDualEligibility,
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
     IdrBeneficiaryMbiId,
+    IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
     IdrClaim,
@@ -27,7 +22,7 @@ from model import (
     IdrClaimProfessional,
 )
 from pipeline_utils import extract_and_load
-from hamilton.function_modifiers import parameterize, value
+
 
 # Stage 1: Load auxiliary claim tables in parallel
 @parameterize(
@@ -44,7 +39,10 @@ def idr_claim_aux_table(cls: type,
                         config_connection_string: str,
                         config_mode: str,
                         config_batch_size: int) -> tuple[PostgresLoader, bool]:
-    return extract_and_load(cls=cls, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
+    return extract_and_load(cls=cls,
+                            connection_string=config_connection_string,
+                            mode=config_mode,
+                            batch_size=config_batch_size)
 
 # Stage 2: Load main claim table
 def idr_claim(idr_claim_institutional: tuple[PostgresLoader, bool],
@@ -59,7 +57,10 @@ def idr_claim(idr_claim_institutional: tuple[PostgresLoader, bool],
               config_batch_size: int,
               config_connection_string: str,
               ) -> tuple[PostgresLoader, bool]:
-    return extract_and_load(cls=IdrClaim, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
+    return extract_and_load(cls=IdrClaim,
+                            connection_string=config_connection_string,
+                            mode=config_mode,
+                            batch_size=config_batch_size)
 
 # Stage 3: Load only overshared MBIs
 def idr_beneficiary_overshare_mbi(idr_claim: tuple[PostgresLoader, bool],
@@ -67,7 +68,10 @@ def idr_beneficiary_overshare_mbi(idr_claim: tuple[PostgresLoader, bool],
               config_batch_size: int,
               config_connection_string: str,
               ) -> tuple[PostgresLoader, bool]:
-    return extract_and_load(cls=IdrBeneficiaryOvershareMbi, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
+    return extract_and_load(cls=IdrBeneficiaryOvershareMbi,
+                            connection_string=config_connection_string,
+                            mode=config_mode,
+                            batch_size=config_batch_size)
 
 
 # Stage 4: Load auxiliary beneficiary tables in parallel
@@ -84,7 +88,10 @@ def idr_beneficiary_aux_table(idr_beneficiary_overshare_mbi: tuple[PostgresLoade
                               config_connection_string: str,
                               config_mode: str,
                               config_batch_size: int) -> tuple[PostgresLoader, bool]:
-    return extract_and_load(cls=cls, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
+    return extract_and_load(cls=cls,
+                            connection_string=config_connection_string,
+                            mode=config_mode,
+                            batch_size=config_batch_size)
 
 # Stage 5: Load main beneficiary tables last
 def idr_beneficiary(idr_beneficiary_status: tuple[PostgresLoader, bool],
@@ -97,4 +104,7 @@ def idr_beneficiary(idr_beneficiary_status: tuple[PostgresLoader, bool],
                     config_mode: str,
                     config_batch_size: int
                     ) -> tuple[PostgresLoader, bool]:
-    return extract_and_load(cls=IdrBeneficiary, connection_string=config_connection_string, mode=config_mode, batch_size=config_batch_size)
+    return extract_and_load(cls=IdrBeneficiary,
+                            connection_string=config_connection_string,
+                            mode=config_mode,
+                            batch_size=config_batch_size)

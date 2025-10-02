@@ -1,15 +1,14 @@
-import logging
 import os
 import sys
-import time
 
 import ray
-from hamilton import driver
+from hamilton import base, driver
 from hamilton.plugins.h_ray import RayGraphAdapter
 
 import pipeline_nodes
 from hamilton_loader import get_connection_string
 from pipeline_utils import configure_logger
+
 
 def main() -> None:
     logger = configure_logger("driver")
@@ -20,12 +19,8 @@ def main() -> None:
         logging_level="info",
         num_cpus=parallelism)
 
-    class DictResultBuilder:
-        @staticmethod
-        def build_result(**kwargs) -> dict:
-            return kwargs
-
-    adapter = RayGraphAdapter(result_builder=DictResultBuilder)
+    dict_builder = base.DictResult
+    adapter = RayGraphAdapter(result_builder=dict_builder)
     dr = (
         driver.Builder()
         .with_modules(pipeline_nodes)

@@ -2,7 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 
 import psycopg
 import snowflake.connector
@@ -12,8 +12,8 @@ from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T
 from hamilton_timer import Timer
+from model import DbType, LoadProgress, T
 
 cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
