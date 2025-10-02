@@ -1,4 +1,5 @@
 # ruff: noqa: ARG001
+# type: ignore [reportUntypedFunctionDecorator]
 from hamilton.function_modifiers import parameterize, value
 
 from hamilton_loader import PostgresLoader

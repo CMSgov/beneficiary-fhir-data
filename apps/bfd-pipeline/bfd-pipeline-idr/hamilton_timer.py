@@ -19,7 +19,7 @@ class Timer:
     def start(self) -> None:
         self.perf_start = time.perf_counter()
 
-    def stop(self, table: type) -> None:
+    def stop(self, table: type | str) -> None:
         segment = time.perf_counter() - self.perf_start
         table_name = table
         logger.info("%s %s: %.6f seconds", table_name, self.name, segment)

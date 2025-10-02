@@ -1,3 +1,4 @@
+# type: ignore [reportUnknownMemberType]
 import os
 import sys
 
@@ -17,7 +18,7 @@ def main() -> None:
     parallelism = int(os.environ.get("PARALLELISM", "6"))
     ray.init(logging_level="info", num_cpus=parallelism)
 
-    dict_builder = base.DictResult
+    dict_builder = base.DictResult()
     adapter = RayGraphAdapter(result_builder=dict_builder)
     dr = driver.Builder().with_modules(pipeline_nodes).with_adapters(adapter).build()
 
@@ -30,9 +31,8 @@ def main() -> None:
     else:
         connection_string = get_connection_string()
 
-    final_vars = ["idr_beneficiary"]
     dr.execute(
-        final_vars=final_vars,
+        final_vars=["idr_beneficiary"],
         inputs={
             "config_mode": mode,
             "config_batch_size": batch_size,
