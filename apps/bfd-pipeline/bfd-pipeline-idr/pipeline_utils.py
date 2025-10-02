@@ -19,14 +19,17 @@ def configure_logger(name: str = "pipeline_worker") -> logging.Logger:
     logger = logging.getLogger(name)
     if not logger.handlers:
         console_handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(name)s %(message)s")
+        formatter = logging.Formatter(
+            "[%(levelname)s] %(asctime)s %(name)s %(message)s"
+        )
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
     logger.setLevel(logging.INFO)
     return logger
 
+
 def get_progress(
-        connection_string: str, table_name: str, start_time: datetime
+    connection_string: str, table_name: str, start_time: datetime
 ) -> LoadProgress | None:
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
@@ -34,17 +37,16 @@ def get_progress(
         {LoadProgress.query_placeholder(): table_name},
     )
 
+
 def extract_and_load(
-        cls: type[T],
-        connection_string: str,
-        mode: str,
-        batch_size: int
+    cls: type[T], connection_string: str, mode: str, batch_size: int
 ) -> tuple[PostgresLoader, bool]:
     logger = configure_logger()
 
     if mode == "local" or mode == "synthetic":
-        data_extractor = PostgresExtractor(connection_string=connection_string,
-                                 batch_size=batch_size)
+        data_extractor = PostgresExtractor(
+            connection_string=connection_string, batch_size=batch_size
+        )
     else:
         data_extractor = SnowflakeExtractor(batch_size=batch_size)
 
@@ -72,7 +74,12 @@ def extract_and_load(
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
         # but it seems to be wrapped in a ProgrammingError.
         # Unclear the best way to handle this, it will require a bit more trial and error
-        except (ReauthenticationRequest, RetryRequest, ForbiddenError, ProgrammingError) as ex:
+        except (
+            ReauthenticationRequest,
+            RetryRequest,
+            ForbiddenError,
+            ProgrammingError,
+        ) as ex:
             time_expired = datetime.now(UTC) - last_error > timedelta(seconds=10)
             if time_expired:
                 error_count = 0

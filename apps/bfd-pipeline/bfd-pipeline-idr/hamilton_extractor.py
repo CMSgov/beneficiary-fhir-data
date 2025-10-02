@@ -21,6 +21,7 @@ transform_timer = Timer("transform")
 
 logger = logging.getLogger("pipeline_worker")
 
+
 def get_min_transaction_date() -> datetime:
     min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
     if min_date is not None:
@@ -30,7 +31,9 @@ def get_min_transaction_date() -> datetime:
 
 class Extractor(ABC):
     @abstractmethod
-    def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+    def extract_many(
+        self, cls: type[T], sql: str, params: dict[str, DbType]
+    ) -> Iterator[list[T]]:
         pass
 
     def _coalesce_dates(self, cols: list[str]) -> list[str]:
@@ -43,19 +46,25 @@ class Extractor(ABC):
         query = cls.fetch_query(is_historical, start_time)
         columns = ",".join(cls.column_aliases())
         columns_raw = ",".join(cls.columns_raw())
-        return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
+        return query.replace("{COLUMNS}", columns).replace(
+            "{COLUMNS_NO_ALIAS}", columns_raw
+        )
 
     def extract_idr_data(
-            self, cls: type[T], progress: LoadProgress | None, start_time: datetime
+        self, cls: type[T], progress: LoadProgress | None, start_time: datetime
     ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
         # GREATEST doesn't work with nulls so we need to coalesce here
-        batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
+        batch_timestamp_cols = self._coalesce_dates(
+            cls.batch_timestamp_col_alias(is_historical)
+        )
         update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
-        batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
+        batch_timestamp_clause = self._greatest_col(
+            [*batch_timestamp_cols, *update_timestamp_cols]
+        )
         min_transaction_date = get_min_transaction_date()
 
         batch_id_order = ""
@@ -117,7 +126,7 @@ class PostgresExtractor(Extractor):
         self.batch_size = batch_size
 
     def extract_many(
-            self, cls: type[T], sql: str, params: Mapping[str, DbType]
+        self, cls: type[T], sql: str, params: Mapping[str, DbType]
     ) -> Iterator[list[T]]:
         conn = psycopg.connect(self.connection_string)
         try:
@@ -131,7 +140,9 @@ class PostgresExtractor(Extractor):
             if conn:
                 conn.close()
 
-    def extract_single(self, cls: type[T], sql: str, params: dict[str, DbType]) -> T | None:
+    def extract_single(
+        self, cls: type[T], sql: str, params: dict[str, DbType]
+    ) -> T | None:
         conn = psycopg.connect(self.connection_string)
         try:
             with conn.cursor(row_factory=class_row(cls)) as cur:
@@ -150,7 +161,9 @@ class SnowflakeExtractor(Extractor):
     @staticmethod
     def _connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
-            os.environ["IDR_PRIVATE_KEY"].encode(), password=None, backend=default_backend()
+            os.environ["IDR_PRIVATE_KEY"].encode(),
+            password=None,
+            backend=default_backend(),
         )
         private_key_bytes = private_key.private_bytes(
             encoding=serialization.Encoding.DER,
@@ -166,7 +179,9 @@ class SnowflakeExtractor(Extractor):
             schema=os.environ["IDR_SCHEMA"],
         )
 
-    def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+    def extract_many(
+        self, cls: type[T], sql: str, params: dict[str, DbType]
+    ) -> Iterator[list[T]]:
         cur = None
         conn = self._connect()
 

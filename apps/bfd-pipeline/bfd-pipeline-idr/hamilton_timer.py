@@ -10,6 +10,7 @@ if not logger.handlers:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
+
 class Timer:
     def __init__(self, name: str) -> None:
         self.perf_start = 0.0

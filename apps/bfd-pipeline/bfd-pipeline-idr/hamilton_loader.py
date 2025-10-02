@@ -17,6 +17,7 @@ commit_timer = Timer("commit")
 
 logger = logging.getLogger("pipeline_worker")
 
+
 def get_connection_string() -> str:
     port = os.environ.get("BFD_DB_PORT") or "5432"
     dbname = os.environ.get("BFD_DB_NAME") or "idr"
@@ -26,8 +27,8 @@ def get_connection_string() -> str:
 
 class PostgresLoader:
     def __init__(
-            self,
-            connection_string: str,
+        self,
+        connection_string: str,
     ) -> None:
         self.connection_string = connection_string
 
@@ -41,23 +42,24 @@ class PostgresLoader:
                 conn.close()
 
     def load(
-            self,
-            fetch_results: Iterator[list[T]],
-            model: type[T],
-            batch_start: datetime,
-            progress: LoadProgress | None,
+        self,
+        fetch_results: Iterator[list[T]],
+        model: type[T],
+        batch_start: datetime,
+        progress: LoadProgress | None,
     ) -> bool:
         conn = psycopg.connect(self.connection_string)
         return BatchLoader(conn, fetch_results, model, batch_start, progress).load()
 
+
 class BatchLoader:
     def __init__(
-            self,
-            conn: psycopg.Connection,
-            fetch_results: Iterator[list[T]],
-            model: type[T],
-            batch_start: datetime,
-            progress: LoadProgress | None,
+        self,
+        conn: psycopg.Connection,
+        fetch_results: Iterator[list[T]],
+        model: type[T],
+        batch_start: datetime,
+        progress: LoadProgress | None,
     ) -> None:
         self.conn = conn
         self.fetch_results = fetch_results
@@ -74,11 +76,13 @@ class BatchLoader:
         self.progress = progress
         self.immutable = not model.update_timestamp_col()
         self.meta_keys = (
-            ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
+            ["bfd_created_ts"]
+            if self.immutable
+            else ["bfd_created_ts", "bfd_updated_ts"]
         )
 
     def load(
-            self,
+        self,
     ) -> bool:
         timestamp = datetime.now(UTC)
         # trim the schema from the table name to create the temp table
@@ -253,8 +257,9 @@ class BatchLoader:
         with cur.copy(f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN") as copy:  # type: ignore
             for row in results:
                 model_dump = row.model_dump()
-                copy.write_row([_remove_null_bytes(model_dump[k]) for k in self.insert_cols])
-
+                copy.write_row(
+                    [_remove_null_bytes(model_dump[k]) for k in self.insert_cols]
+                )
 
 
 def _remove_null_bytes(val: DbType) -> DbType:

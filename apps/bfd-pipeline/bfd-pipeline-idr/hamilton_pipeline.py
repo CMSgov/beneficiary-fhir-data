@@ -15,35 +15,33 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
-    ray.init(
-        logging_level="info",
-        num_cpus=parallelism)
+    ray.init(logging_level="info", num_cpus=parallelism)
 
     dict_builder = base.DictResult
     adapter = RayGraphAdapter(result_builder=dict_builder)
-    dr = (
-        driver.Builder()
-        .with_modules(pipeline_nodes)
-        .with_adapters(adapter)
-        .build()
-    )
+    dr = driver.Builder().with_modules(pipeline_nodes).with_adapters(adapter).build()
 
     batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
-        connection_string = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
+        connection_string = (
+            "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
+        )
     elif mode == "synthetic":
         connection_string = get_connection_string()
     else:
         connection_string = get_connection_string()
 
-    final_vars=["idr_beneficiary"]
-    dr.execute(final_vars=final_vars,
-               inputs={
-                   "config_mode": mode,
-                   "config_batch_size": batch_size,
-                   "config_connection_string": connection_string
-               })
+    final_vars = ["idr_beneficiary"]
+    dr.execute(
+        final_vars=final_vars,
+        inputs={
+            "config_mode": mode,
+            "config_batch_size": batch_size,
+            "config_connection_string": connection_string,
+        },
+    )
+
 
 if __name__ == "__main__":
     main()
