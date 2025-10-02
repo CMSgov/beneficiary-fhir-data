@@ -29,6 +29,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -285,17 +286,7 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
         skipBundleVerification);
   }
 
-  private static Stream<Arguments> shouldNotFilterSamhsaIfAllowedCert() {
-    return Stream.of(
-        Arguments.of(BENE_SK),
-        Arguments.of(BENE_SK2),
-        Arguments.of(BENE_SK3),
-        Arguments.of(BENE_SK4),
-        Arguments.of(BENE_SK5),
-        Arguments.of(BENE_SK6));
-  }
-
-  @MethodSource
+  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6})
   @ParameterizedTest
   void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
