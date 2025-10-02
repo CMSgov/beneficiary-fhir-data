@@ -309,7 +309,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         } ]
       }
     } ],
-    "diagnosisSequence" : [ 1 ],
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",
@@ -884,7 +883,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         } ]
       }
     } ],
-    "diagnosisSequence" : [ 1 ],
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",
@@ -1935,7 +1933,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         } ]
       }
     } ],
-    "diagnosisSequence" : [ 1 ],
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
       "valueCoding" : {
@@ -3175,7 +3172,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         } ]
       }
     } ],
-    "diagnosisSequence" : [ 1 ],
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
       "valueCoding" : {

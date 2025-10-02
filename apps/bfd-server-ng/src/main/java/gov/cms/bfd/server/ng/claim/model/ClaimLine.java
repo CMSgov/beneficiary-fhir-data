@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 
 /** Claim line info. */
 @Embeddable
+@Getter
 public class ClaimLine {
 
   @Convert(converter = NonZeroIntConverter.class)
@@ -26,6 +28,9 @@ public class ClaimLine {
 
   @Column(name = "clm_line_rev_ctr_cd")
   private Optional<ClaimLineRevenueCenterCode> revenueCenterCode;
+
+  @Column(name = "clm_line_dgns_cd")
+  private Optional<String> diagnosisCode;
 
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
@@ -74,13 +79,39 @@ public class ClaimLine {
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
-    line.setDiagnosisSequence(
-        List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
+    //    line.setDiagnosisSequence(
+    //        List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
+
+    diagnosisRelatedLine(claimItem.getClaim())
+        .ifPresent(
+            sequenceValue -> {
+              line.setDiagnosisSequence(List.of(new PositiveIntType(sequenceValue)));
+            });
 
     claimLineInstitutional
         .map(ClaimLineInstitutional::getExtensions)
         .ifPresent(e -> line.setExtension(e.toFhir()));
 
     return Optional.of(line);
+  }
+
+  /**
+   * Finds the line number of a claim procedure that matches the diagnosis code from this claim
+   * line.
+   *
+   * @param claim The parent claim entity containing all claim procedures.
+   * @return The sequence number of the matching claim procedure
+   */
+  public Optional<Integer> diagnosisRelatedLine(Claim claim) {
+    var currentDiagnosisCode = this.getDiagnosisCode().get();
+    return claim.getClaimItems().stream()
+        .filter(
+            item ->
+                item.getClaimProcedure() != null
+                    && item.getClaimProcedure().getDiagnosisCode().isPresent())
+        .filter(
+            item -> item.getClaimProcedure().getDiagnosisCode().get().equals(currentDiagnosisCode))
+        .map(item -> item.getClaimItemId().getBfdRowId())
+        .findFirst();
   }
 }

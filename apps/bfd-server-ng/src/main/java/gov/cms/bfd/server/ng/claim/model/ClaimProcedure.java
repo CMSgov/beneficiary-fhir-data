@@ -8,12 +8,14 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Procedure and diagnosis info. */
 @Embeddable
+@Getter
 public class ClaimProcedure {
 
   @Convert(converter = NonZeroIntConverter.class)
