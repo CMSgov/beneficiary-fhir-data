@@ -103,15 +103,20 @@ public class ClaimLine {
    * @return The sequence number of the matching claim procedure
    */
   public Optional<Integer> diagnosisRelatedLine(Claim claim) {
-    var currentDiagnosisCode = this.getDiagnosisCode().get();
-    return claim.getClaimItems().stream()
-        .filter(
-            item ->
-                item.getClaimProcedure() != null
-                    && item.getClaimProcedure().getDiagnosisCode().isPresent())
-        .filter(
-            item -> item.getClaimProcedure().getDiagnosisCode().get().equals(currentDiagnosisCode))
-        .map(item -> item.getClaimItemId().getBfdRowId())
-        .findFirst();
+    return this.getDiagnosisCode()
+        .flatMap(
+            currentDiagnosisCode -> {
+              return claim.getClaimItems().stream()
+                  .filter(item -> item.getClaimProcedure() != null)
+                  .filter(item -> item.getClaimProcedure().getDiagnosisCode().isPresent())
+                  .filter(
+                      item ->
+                          item.getClaimProcedure()
+                              .getDiagnosisCode()
+                              .get()
+                              .equals(currentDiagnosisCode))
+                  .map(item -> item.getClaimItemId().getBfdRowId())
+                  .findFirst();
+            });
   }
 }
