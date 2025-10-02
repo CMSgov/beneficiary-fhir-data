@@ -22,14 +22,14 @@ public class EobReadIT extends IntegrationTestBase {
   void eobReadValidLong() {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_ADJUDICATED)).execute();
     assertFalse(eob.isEmpty());
-    expect.serializer("fhir+json").toMatchSnapshot(eob);
+    expectFhir().toMatchSnapshot(eob);
   }
 
   @Test
   void eobReadValidString() {
     var patient = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();
     assertFalse(patient.isEmpty());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -37,7 +37,7 @@ public class EobReadIT extends IntegrationTestBase {
     var eob = eobRead().withId(CLAIM_ID_PHASE_1).execute();
     assertFalse(eob.isEmpty());
     assertEquals("PARTIAL", eob.getOutcome().name());
-    expect.serializer("fhir+json").toMatchSnapshot(eob);
+    expectFhir().toMatchSnapshot(eob);
   }
 
   @Test
@@ -45,7 +45,7 @@ public class EobReadIT extends IntegrationTestBase {
     var eob = eobRead().withId(CLAIM_ID_PHASE_2).execute();
     assertFalse(eob.isEmpty());
     assertEquals("QUEUED", eob.getOutcome().name());
-    expect.serializer("fhir+json").toMatchSnapshot(eob);
+    expectFhir().toMatchSnapshot(eob);
   }
 
   @Test

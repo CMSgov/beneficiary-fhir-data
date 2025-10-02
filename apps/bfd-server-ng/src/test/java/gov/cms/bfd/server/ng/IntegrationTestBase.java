@@ -9,6 +9,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +57,8 @@ public class IntegrationTestBase {
 
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
+  private static final String FHIR_JSON = "fhir+json";
+
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
   }
@@ -67,6 +70,10 @@ public class IntegrationTestBase {
   protected IGenericClient getFhirClient() {
     FhirContext ctx = FhirContext.forR4Cached();
     return ctx.newRestfulGenericClient(getServerUrl());
+  }
+
+  protected Expect expectFhir() {
+    return expect.serializer(FHIR_JSON);
   }
 
   protected List<Patient> getPatientsFromBundle(Bundle patientBundle) {
@@ -81,6 +88,13 @@ public class IntegrationTestBase {
     return coverageBundle.getEntry().stream()
         .map(Bundle.BundleEntryComponent::getResource)
         .map(Coverage.class::cast)
+        .toList();
+  }
+
+  protected List<ExplanationOfBenefit> getEobFromBundle(Bundle eobBundle) {
+    return eobBundle.getEntry().stream()
+        .map(Bundle.BundleEntryComponent::getResource)
+        .map(ExplanationOfBenefit.class::cast)
         .toList();
   }
 

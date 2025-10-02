@@ -36,7 +36,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
-    expect.scenario("validPartA").serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().scenario("validPartA").toMatchSnapshot(coverage);
 
     var missingCoverageId = createCoverageId("part-b", BENE_ID_PART_A_ONLY);
     var missingCoverage = coverageRead().withId(missingCoverageId).execute();
@@ -44,7 +44,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     assertTrue(missingCoverage.getIdentifier().isEmpty());
     assertNotNull(missingCoverage, "Coverage resource should not be null for a valid ID");
     assertFalse(missingCoverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
-    expect.scenario("missingPartB").serializer("fhir+json").toMatchSnapshot(missingCoverage);
+    expectFhir().scenario("missingPartB").toMatchSnapshot(missingCoverage);
   }
 
   @Test
@@ -54,7 +54,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(validCoverageId).execute();
     assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
-    expect.scenario("validPartB").serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().scenario("validPartB").toMatchSnapshot(coverage);
 
     var missingCoverageId = createCoverageId("part-a", BENE_ID_PART_B_ONLY);
     var missingCoverage = coverageRead().withId(missingCoverageId).execute();
@@ -62,7 +62,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     assertTrue(missingCoverage.getIdentifier().isEmpty());
     assertNotNull(missingCoverage, "Coverage resource should not be null for a valid ID");
     assertFalse(missingCoverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
-    expect.scenario("missingPartA").serializer("fhir+json").toMatchSnapshot(missingCoverage);
+    expectFhir().scenario("missingPartA").toMatchSnapshot(missingCoverage);
   }
 
   @Test
@@ -147,7 +147,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(partId).execute();
     assertEquals(partId.toLowerCase(), coverage.getIdPart());
     assertTrue(coverage.getIdentifier().isEmpty());
-    expect.scenario("missingAll" + part).serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().scenario("missingAll" + part).toMatchSnapshot(coverage);
   }
 
   @ParameterizedTest
@@ -156,7 +156,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     final String partId = createCoverageId(part, BENE_ID_ALL_PARTS_WITH_XREF);
     var coverage = coverageRead().withId(partId).execute();
     assertEquals(partId.toLowerCase(), coverage.getIdPart());
-    expect.scenario("allCoverage" + part).serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().scenario("allCoverage" + part).toMatchSnapshot(coverage);
   }
 
   @Test
@@ -166,7 +166,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(partBId).execute();
     assertEquals(partBId, coverage.getIdPart());
     assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
-    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().toMatchSnapshot(coverage);
   }
 
   @Test
@@ -176,7 +176,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(partBId).execute();
     assertEquals(partBId, coverage.getIdPart());
     assertTrue(coverage.getIdentifier().isEmpty());
-    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().toMatchSnapshot(coverage);
   }
 
   @Test
@@ -187,7 +187,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     assertNotNull(coverage, "Coverage resource should not be null even without TPL data.");
     assertFalse(coverage.isEmpty(), "Coverage resource should not be empty.");
 
-    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().toMatchSnapshot(coverage);
   }
 
   @Test
@@ -204,7 +204,7 @@ public class CoverageReadIT extends IntegrationTestBase {
         DUAL_ONLY_BENE_COVERAGE_STATUS_CODE,
         ((Coding) dualStatusCodeExtension.getFirst().getValue()).getCode());
 
-    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().toMatchSnapshot(coverage);
   }
 
   @Test
@@ -215,7 +215,7 @@ public class CoverageReadIT extends IntegrationTestBase {
     assertEquals(dualId, coverage.getIdPart());
     assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
 
-    expect.serializer("fhir+json").toMatchSnapshot(coverage);
+    expectFhir().toMatchSnapshot(coverage);
   }
 
   @ParameterizedTest
