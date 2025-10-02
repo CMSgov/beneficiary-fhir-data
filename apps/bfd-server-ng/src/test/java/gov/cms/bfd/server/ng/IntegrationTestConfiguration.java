@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Map;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -34,10 +36,27 @@ public class IntegrationTestConfiguration {
             .withUsername("bfdtest")
             .withPassword("bfdtest")
             .waitingFor(Wait.forListeningPort())
-            .withInitScripts(
-                new ClassPathResource("mock-idr.sql").getPath(),
-                new ClassPathResource("bfd.sql").getPath());
+            .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
     container.start();
+    var flyway =
+        Flyway.configure()
+            .configuration(
+                Map.of(
+                    "flyway.schemas",
+                    "idr",
+                    "flyway.url",
+                    container.getJdbcUrl(),
+                    "flyway.user",
+                    container.getUsername(),
+                    "flyway.password",
+                    container.getPassword(),
+                    "flyway.locations",
+                    "filesystem:" + Paths.get(baseDir, "../bfd-db-migrator-ng/migrations")))
+            .load();
+    var result = flyway.migrate();
+    if (!result.success) {
+      throw new RuntimeException(result.exceptionObject);
+    }
     runPython(container, "uv", "sync");
     runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
     runPython(container, "uv", "run", "pipeline.py", "synthetic");

@@ -1,3 +1,5 @@
+import shutil
+import subprocess
 import time
 from collections.abc import Generator
 from datetime import UTC, datetime
@@ -30,9 +32,22 @@ def psql_url() -> Generator[str]:
         with Path("./mock-idr.sql").open() as f:
             conn.execute(f.read())  # type: ignore
         conn.commit()
-        with Path("./bfd.sql").open() as f:
-            conn.execute(f.read())  # type: ignore
-        conn.commit()
+        mvn = shutil.which("mvn") or "mvn"
+        try:
+            subprocess.run(
+                f"{mvn} flyway:migrate "
+                "-Dflyway.url="
+                f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
+                f"-Dflyway.user={postgres.username} "
+                f"-Dflyway.password={postgres.password}",
+                cwd="../../bfd-db-migrator-ng",
+                shell=True,
+                capture_output=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as ex:
+            print(ex.output)
+            raise
 
         load_from_csv(conn, "./test_samples1")
 
