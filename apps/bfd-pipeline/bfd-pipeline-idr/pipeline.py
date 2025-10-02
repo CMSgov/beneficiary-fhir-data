@@ -71,9 +71,7 @@ def main() -> None:
         )
 
 
-def get_progress(
-    connection_string: str, table_name: str
-) -> LoadProgress | None:
+def get_progress(connection_string: str, table_name: str) -> LoadProgress | None:
     return PostgresExtractor(connection_string, batch_size=1).extract_single(
         LoadProgress,
         LoadProgress.fetch_query(False),

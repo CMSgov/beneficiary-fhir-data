@@ -43,7 +43,7 @@ class TestPipeline:
     def test_pipeline(self, psql_url: str) -> None:
         conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
         datetime_now = datetime.now(UTC)
-        # These 
+        # These
         conn.execute(
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
@@ -55,7 +55,7 @@ class TestPipeline:
                 "timestamp": datetime_now,
                 "today": datetime_now.date(),
             },
-)
+        )
 
         conn.execute(
             """
@@ -63,10 +63,7 @@ class TestPipeline:
             SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
             WHERE clm_uniq_id = 1128619260039
             """,
-            {
-                "none": None,
-                "timestamp": datetime_now - timedelta(days=65)
-            },
+            {"none": None, "timestamp": datetime_now - timedelta(days=65)},
         )
 
         conn.execute(

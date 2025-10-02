@@ -56,12 +56,9 @@ class Extractor(ABC):
         columns_raw = ",".join(cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
-    def extract_idr_data(
-        self, cls: type[T], progress: LoadProgress | None
-    ) -> Iterator[list[T]]:
+    def extract_idr_data(self, cls: type[T], progress: LoadProgress | None) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical)
-        batch_timestamp_cols = cls.batch_timestamp_col_alias(is_historical)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
         update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
