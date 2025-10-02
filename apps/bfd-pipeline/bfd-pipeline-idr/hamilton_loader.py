@@ -88,6 +88,7 @@ class BatchLoader:
 
         with self.conn.cursor() as cur:
             self._insert_batch_start(cur)
+            self.conn.commit()
             data_loaded = False
             num_rows = 0
 
