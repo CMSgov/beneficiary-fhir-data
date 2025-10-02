@@ -1,3 +1,11 @@
+Run migrations against a localhost database:
+
 ```sh
-mvn flyway:migrate -Dflyway.url=jdbc:postgresql://localhost:5432/fhirdb -Dflyway.user=bfd -Dflyway.password=InsecureLocalDev
+./migrate-local.sh
+```
+
+Run migrations in a deployed environment (replace the value of `BFD_ENV` with the environment name you want to target)
+
+```sh
+BFD_ENV=1234-test ./migrate-env.sh
 ```
