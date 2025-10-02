@@ -52,7 +52,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         1,
         coverageBundle.getEntry().size(),
         "Should find exactly one Coverage for this composite ID");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -68,7 +68,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
 
     assertEquals(
         0, coverageBundle.getEntry().size(), "Should find no Coverage for a non-existent ID");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -88,7 +88,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         coverageBundle.getEntry().size(),
         "Should find all Coverage resources for the given beneficiary");
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -107,7 +107,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         0,
         coverageBundle.getEntry().size(),
         "Should find no Coverage for a beneficiary with no coverage data");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   private static Stream<Arguments> coverageSearchWithLastUpdated() {
@@ -207,10 +207,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
     assertEquals(
         part + "-" + beneSk,
         coverageBundle.getEntry().getFirst().getResource().getIdElement().getIdPart());
-    expect
-        .scenario("singleCoverage" + part)
-        .serializer("fhir+json")
-        .toMatchSnapshot(coverageBundle);
+    expectFhir().scenario("singleCoverage" + part).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -221,7 +218,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         0,
         coverageBundle.getEntry().size(),
         "Should find no Coverage for a beneficiary record that is not the current effective version.");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -232,7 +229,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         0,
         coverageBundle.getEntry().size(),
         "Should find no Coverage for a beneficiary who exists but has no entitlement records.");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -246,7 +243,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
     for (var coverage : getCoverageFromBundle(coverageBundle)) {
       assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
     }
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -257,7 +254,7 @@ public class CoverageSearchIT extends IntegrationTestBase {
         0,
         coverageBundle.getEntry().size(),
         "Should find no Coverage for a beneficiary whose entitlement periods all start in the future.");
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
@@ -272,6 +269,6 @@ public class CoverageSearchIT extends IntegrationTestBase {
     coverageBundle
         .getEntry()
         .sort(Comparator.comparing(entry -> entry.getResource().getIdElement().getIdPart()));
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(coverageBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 }

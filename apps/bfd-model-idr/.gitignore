@@ -1,5 +1,6 @@
 #ignore artifacts from FHIR Mapping Language
 StructureMaps/*
+!StructureMaps/.gitkeep
 out/*
 !out/.gitkeep
 sushi/fsh-generated/*
