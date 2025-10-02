@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime
 from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
@@ -61,6 +61,9 @@ ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
+FISS_CLM_SOURCE = "21000"
+MCS_CLM_SOURCE = "22000"
+VMS_CLM_SOURCE = "23000"
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
@@ -87,10 +90,6 @@ class IdrBaseModel(BaseModel, ABC):
         return False
 
     @staticmethod
-    def cutoff_date(quantity_days: int) -> datetime:
-        return datetime.now(UTC) - timedelta(days=quantity_days)
-
-    @staticmethod
     @abstractmethod
     def _current_fetch_query(start_time: datetime) -> str:
         """Query to populate the table for non-historical data."""
@@ -101,10 +100,7 @@ class IdrBaseModel(BaseModel, ABC):
         return cls._current_fetch_query(start_time)
 
     @classmethod
-    def fetch_query(cls, is_historical: bool) -> str:
-        # PAC data older than 60 days is not needed
-        start_time = cls.cutoff_date(60)
-
+    def fetch_query(cls, is_historical: bool, start_time: datetime) -> str:
         if is_historical:
             return cls._historical_fetch_query(start_time)
         return cls._current_fetch_query(start_time)
@@ -626,7 +622,7 @@ def claim_type_clause(start_time: datetime) -> str:
         AND
         (
             (
-                {ALIAS_CLM}.clm_src_id <> '20000' 
+                {ALIAS_CLM}.clm_src_id IN ('{FISS_CLM_SOURCE}','{MCS_CLM_SOURCE}','{VMS_CLM_SOURCE}')
                 AND 
                 COALESCE(
                     {ALIAS_CLM}.idr_updt_ts,

@@ -43,7 +43,13 @@ class TestPipeline:
     def test_pipeline(self, psql_url: str) -> None:
         conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
         datetime_now = datetime.now(UTC)
-        # These
+
+        # Update dates to CURRENT_DATE before pipeline.py
+        # Reason: PAC data older than 60 days is filtered by coalescing
+        # (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
+        # outdated idr_updt_ts, idr_insrt_ts, and clm_idr_ld_dt values.
+        # Update all values to current dates then change specific dates
+        # to older than 60 days to test the functionality.
         conn.execute(
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
