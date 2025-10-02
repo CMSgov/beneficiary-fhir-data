@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Bundle;
@@ -21,10 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class EobSearchIT extends IntegrationTestBase {
-  @Autowired private EntityManager entityManager;
 
   private IQuery<Bundle> searchBundle() {
     return getFhirClient()
@@ -45,7 +42,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -57,7 +54,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -72,7 +69,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(4, eobBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -102,12 +99,11 @@ public class EobSearchIT extends IntegrationTestBase {
             .offset(offset)
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
-    expect.scenario("offset" + offset).serializer("fhir+json").toMatchSnapshot(eobBundle);
+    expectFhir().scenario("offset" + offset).toMatchSnapshot(eobBundle);
   }
 
   @Test
   void eobSearchByDate() {
-
     var lastUpdated =
         entityManager
             .createQuery(
@@ -208,10 +204,7 @@ public class EobSearchIT extends IntegrationTestBase {
     assertEquals(
         2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
-    expect
-        .scenario(searchStyle.name() + "_WithTag_" + validTag)
-        .serializer("fhir+json")
-        .toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name() + "_WithTag_" + validTag).toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest
@@ -236,9 +229,8 @@ public class EobSearchIT extends IntegrationTestBase {
     assertEquals(
         2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
-    expect
+    expectFhir()
         .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")
-        .serializer("fhir+json")
         .toMatchSnapshot(eobBundle);
   }
 
@@ -260,10 +252,7 @@ public class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    expect
-        .scenario(searchStyle.name() + "_WithTag_EmptyResult")
-        .serializer("fhir+json")
-        .toMatchSnapshot(eobBundle);
+    expectFhir().scenario(searchStyle.name() + "_WithTag_EmptyResult").toMatchSnapshot(eobBundle);
   }
 
   @ParameterizedTest

@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class PatientReadIT extends IntegrationTestBase {
   private IReadTyped<Patient> patientRead() {
@@ -23,7 +24,7 @@ public class PatientReadIT extends IntegrationTestBase {
   void patientReadValidLong() {
     var patient = patientRead().withId(Long.parseLong(BENE_ID_PART_A_ONLY)).execute();
     assertFalse(patient.isEmpty());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -31,7 +32,7 @@ public class PatientReadIT extends IntegrationTestBase {
     var patient = patientRead().withId(BENE_ID_PART_A_ONLY).execute();
     assertEquals(1, patient.getIdentifier().size());
     assertEquals(0, patient.getLink().size());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -51,7 +52,7 @@ public class PatientReadIT extends IntegrationTestBase {
         other.getDisplay(),
         String.format("Link display should be '%s'", CURRENT_MERGED_BENE_SK));
 
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -78,7 +79,7 @@ public class PatientReadIT extends IntegrationTestBase {
             .anyMatch(HISTORICAL_MERGED_BENE_SK::equals),
         String.format("Expected to find a link with display '%s'", HISTORICAL_MERGED_BENE_SK));
 
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
@@ -87,13 +88,34 @@ public class PatientReadIT extends IntegrationTestBase {
     assertFalse(patient.isEmpty());
     assertEquals(1, patient.getIdentifier().size());
     assertEquals(0, patient.getLink().size());
-    expect.serializer("fhir+json").toMatchSnapshot(patient);
+    expectFhir().toMatchSnapshot(patient);
   }
 
   @Test
   void patientReadIdNotFound() {
     var readWithId = patientRead().withId("999");
     assertThrows(ResourceNotFoundException.class, readWithId::execute);
+  }
+
+  @ValueSource(strings = {OVERSHARE_BENE_SK1, OVERSHARE_BENE_SK2})
+  @ParameterizedTest
+  void patientOvershareIdNotFound(String beneSk) {
+    var mbis =
+        entityManager
+            .createNativeQuery(
+                "SELECT bene_mbi_id FROM idr.beneficiary WHERE bene_sk = :beneSk", String.class)
+            .setParameter("beneSk", Long.parseLong(beneSk))
+            .getResultList();
+    assertEquals(1, mbis.size());
+    var overshare =
+        entityManager
+            .createNativeQuery(
+                "SELECT * FROM idr.beneficiary_overshare_mbi WHERE bene_mbi_id = :mbi")
+            .setParameter("mbi", mbis.getFirst())
+            .getResultList();
+    assertEquals(1, overshare.size());
+    var readWithBeneSk = patientRead().withId(beneSk);
+    assertThrows(ResourceNotFoundException.class, readWithBeneSk::execute);
   }
 
   @Test

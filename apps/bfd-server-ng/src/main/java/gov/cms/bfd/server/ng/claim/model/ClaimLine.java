@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 
 /** Claim line info. */
 @Embeddable
+@Getter
 public class ClaimLine {
 
   @Convert(converter = NonZeroIntConverter.class)
