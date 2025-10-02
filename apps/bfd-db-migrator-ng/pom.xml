@@ -33,6 +33,7 @@
     <properties>
         <!-- List are defined as comma-separated values -->
         <flyway.schemas>idr</flyway.schemas>
+        <flyway.locations>filesystem:migrations</flyway.locations>
     </properties>
 
     <build>
