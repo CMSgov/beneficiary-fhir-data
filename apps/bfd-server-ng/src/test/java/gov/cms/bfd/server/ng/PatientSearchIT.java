@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,11 +26,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PatientSearchIT extends IntegrationTestBase {
-  @Autowired private EntityManager entityManager;
-
   private IQuery<Bundle> searchBundle() {
     return getFhirClient().search().forResource(Patient.class).returnBundle(Bundle.class);
   }
@@ -47,7 +43,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -77,7 +73,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .map(link -> link.getOther().getDisplay())
             .anyMatch(CURRENT_MERGED_BENE_SK::equals),
         String.format("Expected one link with display '%s'", CURRENT_MERGED_BENE_SK));
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -100,7 +96,7 @@ public class PatientSearchIT extends IntegrationTestBase {
     assertEquals(0, patient.getLink().size());
     assertEquals(1, patient.getIdentifier().size());
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -112,7 +108,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(0, patientBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -126,7 +122,7 @@ public class PatientSearchIT extends IntegrationTestBase {
                     .systemAndIdentifier(SystemUrls.CMS_MBI, HISTORICAL_AND_CURRENT_MBI))
             .usingStyle(searchStyle)
             .execute();
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -147,7 +143,7 @@ public class PatientSearchIT extends IntegrationTestBase {
         patient.getIdentifier().stream().map(Identifier::getValue).collect(Collectors.toSet());
     assertEquals(Set.of(HISTORICAL_MERGED_MBI, HISTORICAL_AND_CURRENT_MBI), identifiers);
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -161,7 +157,7 @@ public class PatientSearchIT extends IntegrationTestBase {
                     .systemAndIdentifier(SystemUrls.CMS_MBI, "999"))
             .execute();
     assertEquals(0, patientBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @Test
@@ -261,6 +257,26 @@ public class PatientSearchIT extends IntegrationTestBase {
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
     }
+  }
+
+  @Test
+  void patientOvershareIdNotFound() {
+    var overshare =
+        entityManager
+            .createNativeQuery(
+                "SELECT * FROM idr.beneficiary_overshare_mbi WHERE bene_mbi_id = :mbi")
+            .setParameter("mbi", OVERSHARE_MBI)
+            .getResultList();
+    assertEquals(1, overshare.size());
+
+    var searchWithId =
+        searchBundle()
+            .where(
+                new TokenClientParam(Patient.SP_IDENTIFIER)
+                    .exactly()
+                    .systemAndIdentifier(SystemUrls.CMS_MBI, OVERSHARE_MBI))
+            .execute();
+    assertEquals(0, searchWithId.getEntry().size());
   }
 
   @ParameterizedTest

@@ -28,7 +28,7 @@ public class ClaimProcedure {
   @Column(name = "clm_dgns_prcdr_icd_ind")
   private Optional<IcdIndicator> icdIndicator;
 
-  @Column(name = "clm_prcdr_cd")
+  @Column(name = "clm_prcdr_cd") // SAMHSA
   private Optional<String> procedureCode;
 
   @Column(name = "clm_prod_type_cd")
@@ -37,7 +37,7 @@ public class ClaimProcedure {
   @Column(name = "clm_poa_ind")
   private Optional<String> claimPoaIndicator;
 
-  @Column(name = "clm_dgns_cd")
+  @Column(name = "clm_dgns_cd") // SAMHSA
   private Optional<String> diagnosisCode;
 
   private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
@@ -78,15 +78,17 @@ public class ClaimProcedure {
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(bfdRowId);
     diagnosisType.ifPresent(
-        d -> {
-          diagnosis.addType(
-              new CodeableConcept(new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode())));
-        });
+        d ->
+            diagnosis.addType(
+                new CodeableConcept(
+                    new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode()))));
 
     String formattedCode = icdIndicator.get().formatCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
         new CodeableConcept(
-            new Coding().setSystem(icdIndicator.get().getDiagnosisSytem()).setCode(formattedCode)));
+            new Coding()
+                .setSystem(icdIndicator.get().getDiagnosisSystem())
+                .setCode(formattedCode)));
 
     this.claimPoaIndicator.ifPresent(
         poaCode -> {

@@ -330,7 +330,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl (
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_num_sk, clm_type_cd)
 );
 
--- Note: this table also has CLM_LINE_DGNS_CD but this is redundant with the values in V2_MDCR_CLM_PROD
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_uniq_id BIGINT NOT NULL,
     geo_bene_sk BIGINT NOT NULL,
@@ -349,6 +348,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_bene_pd_amt NUMERIC,
     clm_line_cvrd_pd_amt NUMERIC,
     clm_line_blood_ddctbl_amt NUMERIC,
+    -- Note: this is redundant with the value in V2_MDCR_CLM_PROD, it's just used to match the two claim lines
     clm_line_dgns_cd VARCHAR(7),
     clm_line_from_dt DATE,
     clm_line_mdcr_ddctbl_amt NUMERIC,

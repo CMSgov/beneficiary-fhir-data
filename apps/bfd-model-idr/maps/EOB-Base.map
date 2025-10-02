@@ -105,15 +105,17 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         } "Add coding";
     } "CLM_CNTRCTR_NUM";
 
+    // No longer used, but kept since might be used again
     //This field can be used to set the Coverage type. 
     //When adding a claim type that can be covered under part B (or PDE, whichever comes first), add the insurance logic here.
-    src.CLM_NRLN_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
-          tgtCoding.code = ricCd "Add code";
-        } "Add coding";
-      } "CLM_NRLN_RIC_CD";
+    //src.CLM_NRLN_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
+    //    src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
+    //    src -> tgtExtension.value = create('Coding') as tgtCoding then{
+    //      src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
+    //      tgtCoding.code = ricCd "Add code";
+    //    } "Add coding";
+    //  } "CLM_NRLN_RIC_CD";
+
     src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
       src -> tgtExtension.value = create('Coding') as tgtCoding then{
@@ -121,14 +123,16 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         tgtCoding.code = adjTypeCd "Add code";
       } "Add coding";
     } "CLM_ADJSTMT_TYPE_CD";
+
+    // No longer used, but kept since might be used again
     //This is intentional. The IDR stores partially-adjudicated RIC codes in a separate field, but the content / meaning is the same. We can just re-use the extension.
-    src.CLM_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
-          tgtCoding.code = ricCd "Add code";
-        } "Add coding";
-    } "CLM_NRLN_RIC_CD";
+    //src.CLM_RIC_CD as ricCd -> tgt.extension = create('Extension') as tgtExtension then {
+    //    src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD" "Add url";
+    //    src -> tgtExtension.value = create('Coding') as tgtCoding then{
+    //      src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
+    //      tgtCoding.code = ricCd "Add code";
+    //    } "Add coding";
+    //} "CLM_NRLN_RIC_CD";
 
     src.CLM_DISP_CD as dispCd -> tgt.extension = create('Extension') as tgtExtension then {
         src -> tgtExtension.url =  "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD" "Add url";
@@ -178,9 +182,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
       } "Set institutional outcome";
 
-      //We will add the professional "array" here.
+      src.profComponents as profComponents -> tgt then {
+        profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
+      } "Set professional outcome";
     } "Complete additional outcomes";
-    
+    src.CLM_SRC_ID as sourceSk where sourceSk = '23000' -> tgt.outcome = "partial" "Set NCH outcome to partial.";
     //When we get to carrier/DME, we'll do the same with MCS/VMS status. 
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
