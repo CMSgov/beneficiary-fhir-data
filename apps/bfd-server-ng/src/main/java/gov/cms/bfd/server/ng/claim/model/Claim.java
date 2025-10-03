@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -91,7 +92,7 @@ public class Claim {
     return Optional.ofNullable(claimInstitutional);
   }
 
-  private Optional<ClaimFiss> getClaimFiss() {
+  Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
   }
 
@@ -119,7 +120,8 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId));
+    var latestTs = getMostRecentUpdated();
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, latestTs));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -156,9 +158,6 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
-    // based on claim type. At most one Optional will be non-empty, so only one call
-    // will actually set EOB.outcome.
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
@@ -216,6 +215,25 @@ public class Claim {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
   }
 
+  private ZonedDateTime getMostRecentUpdated() {
+    // Collect timestamps (claim + child entities) then pick the max.
+    var ciStream = getClaimInstitutional().map(ClaimInstitutional::getBfdUpdatedTimestamp).stream();
+    var cfStream = getClaimFiss().map(ClaimFiss::getBfdUpdatedTimestamp).stream();
+    var cdsStream = Stream.of(claimDateSignature.getBfdUpdatedTimestamp());
+    var itemsStream = claimItems.stream().flatMap(this::streamItemTimestamps);
+
+    var allCandidates =
+        Stream.concat(
+            Stream.of(meta.getUpdatedTimestamp()),
+            Stream.concat(
+                ciStream, Stream.concat(cfStream, Stream.concat(cdsStream, itemsStream))));
+
+    return allCandidates
+        .filter(java.util.Objects::nonNull)
+        .max(Comparator.naturalOrder())
+        .orElse(meta.getUpdatedTimestamp());
+  }
+
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {
     eob.getCareTeam()
         .sort(Comparator.comparing(ExplanationOfBenefit.CareTeamComponent::getSequence));
@@ -231,5 +249,9 @@ public class Claim {
     // if the order changes.
     eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
+  }
+
+  private Stream<ZonedDateTime> streamItemTimestamps(ClaimItem item) {
+    return item.streamTimestamps();
   }
 }

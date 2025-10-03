@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import lombok.Getter;
 
 /** Institutional claims table. */
@@ -24,4 +25,7 @@ public class ClaimInstitutional {
   @Embedded private PpsDrgWeight ppsDrgWeight;
   @Embedded private ClaimInstitutionalExtensions extensions;
   @Embedded private BenefitBalanceInstitutional benefitBalanceInstitutional;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 }
