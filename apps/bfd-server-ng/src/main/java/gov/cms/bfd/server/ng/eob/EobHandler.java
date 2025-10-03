@@ -44,6 +44,7 @@ public class EobHandler {
    * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
+   * @param samhsaFilterMode SAMHSA filter mode
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
@@ -82,7 +83,18 @@ public class EobHandler {
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
     return FhirUtil.bundleOrDefault(
-        eobs.stream().map(Claim::toFhir), loadProgressRepository::lastUpdated);
+        filteredClaims.map(Claim::toFhir), loadProgressRepository::lastUpdated);
+  }
+
+  private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+    if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
+      return claims.stream();
+    }
+    // Ordering may have changed during filtering, ensure we re-order before returning the final
+    // result
+    return claims.stream()
+        .filter(claim -> !claimHasSamhsa(claim))
+        .sorted(Comparator.comparing(Claim::getClaimUniqueId));
   }
 
   /**
@@ -95,8 +107,11 @@ public class EobHandler {
    * @return bundle
    */
   public Bundle searchById(
-      Long claimUniqueId, DateTimeRange serviceDate, DateTimeRange lastUpdated) {
-    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated);
+      Long claimUniqueId,
+      DateTimeRange serviceDate,
+      DateTimeRange lastUpdated,
+      SamhsaFilterMode samhsaFilterMode) {
+    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated, samhsaFilterMode);
     return FhirUtil.bundleOrDefault(eob.map(e -> e), loadProgressRepository::lastUpdated);
   }
 
