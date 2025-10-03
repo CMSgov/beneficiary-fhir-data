@@ -19,4 +19,7 @@ public class LoggerConstants {
 
   /** Name of the remote address key for logging. */
   public static final String REMOTE_ADDRESS_KEY = "remoteAddress";
+
+  /** Name of the certificate alias key for logging. */
+  public static final String CERTIFICATE_ALIAS = "certificateAlias";
 }

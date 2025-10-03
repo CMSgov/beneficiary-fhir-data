@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -58,6 +61,10 @@ public class Configuration implements Serializable {
   @Getter(lazy = true)
   private final Map<String, String> clientCertsToAliases = getClientCertsToAliasesInternal();
 
+  @Getter(lazy = true)
+  private final Set<String> samhsaAllowedCertificateAliases =
+      getSamhsaAllowedCertificateAliasesInternal();
+
   /**
    * Determines if the profile requires auth.
    *
@@ -87,10 +94,14 @@ public class Configuration implements Serializable {
   }
 
   private Map<String, String> getClientCertsToAliasesInternal() {
-
     return nonsensitive.clientCertificates.entrySet().stream()
         .collect(
             Collectors.toMap(e -> StringUtils.deleteWhitespace(e.getValue()), Map.Entry::getKey));
+  }
+
+  private Set<String> getSamhsaAllowedCertificateAliasesInternal() {
+    final var setType = new TypeToken<Set<String>>() {}.getType();
+    return new Gson().fromJson(nonsensitive.samhsaAllowedCertificateAliasesJson, setType);
   }
 
   private JdbcConnectionDetails getJdbcConfiguration() {
@@ -223,5 +234,7 @@ public class Configuration implements Serializable {
     }
 
     private final Map<String, String> clientCertificates = new HashMap<>();
+
+    private String samhsaAllowedCertificateAliasesJson;
   }
 }

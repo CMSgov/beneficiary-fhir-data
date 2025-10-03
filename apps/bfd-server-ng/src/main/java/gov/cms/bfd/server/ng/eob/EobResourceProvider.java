@@ -13,8 +13,11 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
+import gov.cms.bfd.server.ng.util.CertificateUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -27,6 +30,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class EobResourceProvider implements IResourceProvider {
   private final EobHandler eobHandler;
+  private final CertificateUtil certificateUtil;
+  private final Configuration configuration;
   private static final String SERVICE_DATE = "service-date";
   private static final String START_INDEX = "startIndex";
 
@@ -39,11 +44,12 @@ public class EobResourceProvider implements IResourceProvider {
    * Returns a {@link ExplanationOfBenefit} by its ID.
    *
    * @param fhirId FHIR ID
+   * @param request HTTP request details
    * @return patient
    */
   @Read
-  public ExplanationOfBenefit find(@IdParam final IdType fhirId) {
-    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), SamhsaFilterMode.EXCLUDE);
+  public ExplanationOfBenefit find(@IdParam final IdType fhirId, final HttpServletRequest request) {
+    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), getFilterModeForRequest(request));
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
@@ -56,6 +62,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param lastUpdated last updated
    * @param startIndex start index
    * @param tag tag to filter by (e.g., Adjudicated status)
+   * @param request HTTP request details
    * @return bundle
    */
   @Search
@@ -66,7 +73,8 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
-      @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag) {
+      @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag,
+      final HttpServletRequest request) {
 
     var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
 
@@ -77,7 +85,7 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toDateTimeRange(lastUpdated),
         FhirInputConverter.toIntOptional(startIndex),
         sourceIds,
-        SamhsaFilterMode.EXCLUDE);
+        getFilterModeForRequest(request));
   }
 
   /**
@@ -86,6 +94,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param fhirId FHIR ID
    * @param serviceDate service date
    * @param lastUpdated last updated
+   * @param request HTTP request details
    * @return bundle
    */
   @Search
@@ -93,11 +102,20 @@ public class EobResourceProvider implements IResourceProvider {
       @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final IdType fhirId,
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
-          final DateRangeParam lastUpdated) {
+          final DateRangeParam lastUpdated,
+      final HttpServletRequest request) {
     return eobHandler.searchById(
         FhirInputConverter.toLong(fhirId),
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
-        SamhsaFilterMode.EXCLUDE);
+        getFilterModeForRequest(request));
+  }
+
+  private SamhsaFilterMode getFilterModeForRequest(HttpServletRequest request) {
+    final var certAlias = certificateUtil.getAliasAttribute(request);
+    final var samhsaAllowedCertificateAliases = configuration.getSamhsaAllowedCertificateAliases();
+    return certAlias.isEmpty() || !samhsaAllowedCertificateAliases.contains(certAlias.get())
+        ? SamhsaFilterMode.EXCLUDE
+        : SamhsaFilterMode.INCLUDE;
   }
 }
