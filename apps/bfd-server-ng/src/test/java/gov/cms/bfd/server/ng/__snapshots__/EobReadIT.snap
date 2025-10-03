@@ -157,6 +157,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
   "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+    "valueDate" : "2021-10-03"
+  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
     "valueCoding" : {
       "code" : "01211",
@@ -168,9 +171,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "code" : "55",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
     }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-    "valueDate" : "2021-10-03"
   } ],
   "id" : "1071939711297",
   "identifier" : [ {
@@ -732,6 +732,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
   "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+    "valueDate" : "2021-10-03"
+  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
     "valueCoding" : {
       "code" : "01211",
@@ -743,9 +746,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "code" : "55",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
     }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-    "valueDate" : "2021-10-03"
   } ],
   "id" : "1071939711298",
   "identifier" : [ {
@@ -1622,6 +1622,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
   "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+    "valueDate" : "2021-10-03"
+  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
     "valueCoding" : {
       "code" : "01211",
@@ -1639,9 +1642,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "code" : "5",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
     }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-    "valueDate" : "2021-10-03"
   } ],
   "id" : "1071939711295",
   "identifier" : [ {
@@ -2875,6 +2875,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
   "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
+    "valueDate" : "2021-10-03"
+  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
     "valueCoding" : {
       "code" : "01211",
@@ -2892,9 +2895,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "code" : "5",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
     }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-    "valueDate" : "2021-10-03"
   } ],
   "id" : "1071939711295",
   "identifier" : [ {

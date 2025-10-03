@@ -77,7 +77,8 @@
         <sonar.coverage.jacoco.itReportPath>
             ${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml
         </sonar.coverage.jacoco.itReportPath>
-        <sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
+        <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
         <sonar.issue.ignore.multicriteria.e1.resourceKey>
             **/*.java
@@ -90,14 +91,31 @@
         <sonar.issue.ignore.multicriteria.e2.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e2.resourceKey>
-        <sonar.issue.ignore.multicriteria.e3.ruleKey>javaarchitecture:S7027</sonar.issue.ignore.multicriteria.e3.ruleKey>
+        <!-- Rule for "Circular dependencies between classes in the same package".
+            This is common when using foreign keys in JPA.
+         -->
+        <sonar.issue.ignore.multicriteria.e3.ruleKey>
+            javaarchitecture:S7027
+        </sonar.issue.ignore.multicriteria.e3.ruleKey>
         <sonar.issue.ignore.multicriteria.e3.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e3.resourceKey>
+        <!-- Rule for "Constant names should comply with a naming convention"
+            This causes false positives with some enum names that start with a number.
+        -->
         <sonar.issue.ignore.multicriteria.e4.ruleKey>java:S115</sonar.issue.ignore.multicriteria.e4.ruleKey>
         <sonar.issue.ignore.multicriteria.e4.resourceKey>
             **/bfd-server-ng/src/main/java/gov/cms/bfd/server/ng/claim/model/*.java
         </sonar.issue.ignore.multicriteria.e4.resourceKey>
+        <!-- Rule for "Define and throw a dedicated exception instead of using a generic one".
+            This can be useful sometimes, such as making a public library or throwing exceptions that
+            are meant to be caught, we're generally just using RuntimeException to get around Java's
+            checked exception rules and this lint doesn't provide much value.
+        -->
+        <sonar.issue.ignore.multicriteria.e5.ruleKey>java:S112</sonar.issue.ignore.multicriteria.e5.ruleKey>
+        <sonar.issue.ignore.multicriteria.e5.resourceKey>
+            **/*.java
+        </sonar.issue.ignore.multicriteria.e5.resourceKey>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>

@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class EobResourceProvider implements IResourceProvider {
    */
   @Read
   public ExplanationOfBenefit find(@IdParam final IdType fhirId) {
-    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId));
+    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), SamhsaFilterMode.EXCLUDE);
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
@@ -75,7 +76,8 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
         FhirInputConverter.toIntOptional(startIndex),
-        sourceIds);
+        sourceIds,
+        SamhsaFilterMode.EXCLUDE);
   }
 
   /**
@@ -95,6 +97,7 @@ public class EobResourceProvider implements IResourceProvider {
     return eobHandler.searchById(
         FhirInputConverter.toLong(fhirId),
         FhirInputConverter.toDateTimeRange(serviceDate),
-        FhirInputConverter.toDateTimeRange(lastUpdated));
+        FhirInputConverter.toDateTimeRange(lastUpdated),
+        SamhsaFilterMode.EXCLUDE);
   }
 }

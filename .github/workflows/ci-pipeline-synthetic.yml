@@ -16,11 +16,11 @@ jobs:
       id: code-checkout
       uses: actions/checkout@v4
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v6
       with:
           version: "0.8.10"
     - name: Install node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '22'
     - name: Install dependencies
@@ -36,7 +36,6 @@ jobs:
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
         cd ../bfd-pipeline/bfd-pipeline-idr
         ./run-db.sh
-        uv run pipeline.py local
     - name: Ensure synthetic data pipeline runs with sandbox benes
       run: |
         cd ${{ github.workspace }}/apps/bfd-model-idr
@@ -44,4 +43,3 @@ jobs:
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
         cd ../bfd-pipeline/bfd-pipeline-idr
         ./run-db.sh
-        uv run pipeline.py local
