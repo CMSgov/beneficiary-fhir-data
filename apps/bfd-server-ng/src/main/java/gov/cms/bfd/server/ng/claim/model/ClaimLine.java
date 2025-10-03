@@ -10,6 +10,7 @@ import jakarta.persistence.Embedded;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -79,14 +80,7 @@ public class ClaimLine {
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
-    //    line.setDiagnosisSequence(
-    //        List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
-
-    diagnosisRelatedLine(claimItem.getClaim())
-        .ifPresent(
-            sequenceValue -> {
-              line.setDiagnosisSequence(List.of(new PositiveIntType(sequenceValue)));
-            });
+    line.setDiagnosisSequence(diagnosisRelatedLines(claimItem.getClaim()));
 
     claimLineInstitutional
         .map(ClaimLineInstitutional::getExtensions)
@@ -96,27 +90,25 @@ public class ClaimLine {
   }
 
   /**
-   * Finds the line number of a claim procedure that matches the diagnosis code from this claim
+   * Finds the line numbers of a claim procedure that matches the diagnosis code from this claim
    * line.
    *
    * @param claim The parent claim entity containing all claim procedures.
-   * @return The sequence number of the matching claim procedure
+   * @return The row ids of the matching claim procedure
    */
-  public Optional<Integer> diagnosisRelatedLine(Claim claim) {
-    return this.getDiagnosisCode()
-        .flatMap(
-            currentDiagnosisCode -> {
-              return claim.getClaimItems().stream()
-                  .filter(item -> item.getClaimProcedure() != null)
-                  .filter(item -> item.getClaimProcedure().getDiagnosisCode().isPresent())
-                  .filter(
-                      item ->
-                          item.getClaimProcedure()
-                              .getDiagnosisCode()
-                              .get()
-                              .equals(currentDiagnosisCode))
-                  .map(item -> item.getClaimItemId().getBfdRowId())
-                  .findFirst();
-            });
+  public List<PositiveIntType> diagnosisRelatedLines(Claim claim) {
+    Optional<String> diagnosisCodeOptional = this.getDiagnosisCode();
+    if (diagnosisCodeOptional.isEmpty()) {
+      return List.of();
+    }
+    String currentDiagnosisCode = diagnosisCodeOptional.get();
+
+    return claim.getClaimItems().stream()
+        .filter(
+            item ->
+                item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
+        .map(item -> item.getClaimItemId().getBfdRowId())
+        .map(PositiveIntType::new)
+        .collect(Collectors.toList());
   }
 }
