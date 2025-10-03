@@ -16,12 +16,12 @@ jobs:
           fetch-depth: 0  
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.22'
       
@@ -30,7 +30,7 @@ jobs:
 
       - name: "Generate an App Token"
         id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
