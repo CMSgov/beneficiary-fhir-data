@@ -1,6 +1,19 @@
-DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
+DO $$ DECLARE
+    r record;
+BEGIN
+    IF NOT EXISTS(
+        SELECT schema_name
+            FROM information_schema.schemata
+            WHERE schema_name = 'cms_vdm_view_mdcr_prd'
+    )
+    THEN
+        CREATE SCHEMA cms_vdm_view_mdcr_prd;
+    END IF;
 
-CREATE SCHEMA cms_vdm_view_mdcr_prd;
+    for r in (SELECT tablename FROM pg_tables where schemaname = 'cms_vdm_view_mdcr_prd') loop
+        execute 'DROP TABLE cms_vdm_view_mdcr_prd.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_sk BIGINT NOT NULL, 
