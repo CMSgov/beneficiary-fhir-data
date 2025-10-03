@@ -1,6 +1,6 @@
 import time
 from collections.abc import Generator
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
 
@@ -41,8 +41,65 @@ def psql_url() -> Generator[str]:
 
 class TestPipeline:
     def test_pipeline(self, psql_url: str) -> None:
-        run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
         conn = cast(psycopg.Connection[DictRow], psycopg.connect(psql_url, row_factory=dict_row))  # type: ignore
+        datetime_now = datetime.now(UTC)
+
+        # Update dates to CURRENT_DATE before pipeline.py
+        # Reason: PAC data older than 60 days is filtered by coalescing
+        # (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
+        # outdated idr_updt_ts, idr_insrt_ts, and clm_idr_ld_dt values.
+        # Update all values to current dates then change specific dates
+        # to older than 60 days to test the functionality.
+        conn.execute(
+            """
+            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+            SET idr_insrt_ts=%(timestamp)s,
+                idr_updt_ts=%(timestamp)s,
+                clm_idr_ld_dt=%(today)s
+            """,
+            {
+                "timestamp": datetime_now,
+                "today": datetime_now.date(),
+            },
+        )
+
+        conn.execute(
+            """
+            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+            SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
+            WHERE clm_uniq_id = 1128619260039
+            """,
+            {"none": None, "timestamp": datetime_now - timedelta(days=65)},
+        )
+
+        conn.execute(
+            """
+            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+            SET idr_updt_ts=%(timestamp)s
+            WHERE clm_uniq_id = 123359318723
+            """,
+            {"timestamp": datetime_now - timedelta(days=65)},
+        )
+
+        conn.execute(
+            """
+            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+            SET idr_insrt_ts=%(timestamp)s
+            WHERE clm_uniq_id = 9844382563835
+            """,
+            {"timestamp": None},
+        )
+
+        conn.execute(
+            """
+            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+            SET idr_updt_ts=%(timestamp)s
+            WHERE clm_uniq_id = 6919983105596
+            """,
+            {"timestamp": None},
+        )
+        run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
+
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")
         assert cur.rowcount == 25
         rows = cur.fetchmany(2)
@@ -114,18 +171,18 @@ class TestPipeline:
         assert rows[1]["bene_mbi_id"] == "6LM1C27GV22"
 
         cur = conn.execute("select * from idr.claim order by clm_uniq_id")
-        assert cur.rowcount == 144
+        assert cur.rowcount == 142
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
         assert rows[0]["clm_nrln_ric_cd"] == "W"
 
         cur = conn.execute("select * from idr.claim_institutional order by clm_uniq_id")
-        assert cur.rowcount == 74
+        assert cur.rowcount == 53
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
-        assert cur.rowcount == 144
+        assert cur.rowcount == 123
         rows = cur.fetchmany(1)
         assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
 
@@ -135,12 +192,12 @@ class TestPipeline:
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_item order by clm_uniq_id")
-        assert cur.rowcount == 1624
+        assert cur.rowcount == 1286
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_line_institutional order by clm_uniq_id")
-        assert cur.rowcount == 612
+        assert cur.rowcount == 433
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 

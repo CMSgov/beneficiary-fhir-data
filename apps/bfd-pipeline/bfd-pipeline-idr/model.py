@@ -1,4 +1,3 @@
-import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
@@ -62,6 +61,10 @@ ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
+FISS_CLM_SOURCE = "21000"
+MCS_CLM_SOURCE = "22000"
+VMS_CLM_SOURCE = "23000"
+NCH_CLM_SOURCE = "20000"
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
@@ -612,17 +615,28 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
-def claim_type_clause(start_time: datetime) -> str:  # noqa: ARG001
-    latest_claims_env = "IDR_LATEST_CLAIMS"
-    if latest_claims_env in os.environ and os.environ[latest_claims_env] in ("1", "true"):
-        return f"""
-            {ALIAS_CLM}.clm_type_cd IN (61,62,63,64)
-            AND {ALIAS_CLM}.clm_src_id = '20000' 
-            AND {ALIAS_CLM}.clm_finl_actn_ind = 'Y'
-            AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y'
-            """
+def claim_type_clause(start_time: datetime) -> str:
+    start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
+    (
         {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+        AND
+        (
+            (
+                {ALIAS_CLM}.clm_src_id IN (
+                                '{FISS_CLM_SOURCE}',
+                                '{MCS_CLM_SOURCE}',
+                                '{VMS_CLM_SOURCE}'
+                            )
+                AND 
+                COALESCE(
+                    {ALIAS_CLM}.idr_updt_ts,
+                    {ALIAS_CLM}.idr_insrt_ts,
+                    {ALIAS_CLM}.clm_idr_ld_dt)  >= {start_time_sql}
+            ) 
+            OR {ALIAS_CLM}.clm_src_id = '{NCH_CLM_SOURCE}'
+        )
+        )
     """
 
 
