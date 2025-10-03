@@ -11,6 +11,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 
 /** Claim item table. */
@@ -47,5 +48,30 @@ public class ClaimItem {
 
   Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
     return Optional.ofNullable(claimLineInstitutional);
+  }
+
+  /**
+   * Returns a stream of relevant timestamps for this ClaimItem, including the item's own updated
+   * timestamp and any timestamps from the associated ClaimLineInstitutional.
+   *
+   * @return stream of ZonedDateTimes
+   */
+  Stream<ZonedDateTime> streamTimestamps() {
+    var itemTs = Optional.ofNullable(bfdUpdatedTimestamp).stream();
+
+    var lineInstitutionalStream =
+        getClaimLineInstitutional()
+            .map(
+                cli -> {
+                  var cliTs = Optional.ofNullable(cli.getBfdUpdatedTimestamp()).stream();
+                  var ansiTs =
+                      cli.getAnsiSignature()
+                          .map(ansi -> Optional.ofNullable(ansi.getBfdUpdatedTimestamp()).stream())
+                          .orElseGet(Stream::empty);
+                  return Stream.concat(cliTs, ansiTs);
+                })
+            .orElseGet(Stream::empty);
+
+    return Stream.concat(itemTs, lineInstitutionalStream);
   }
 }

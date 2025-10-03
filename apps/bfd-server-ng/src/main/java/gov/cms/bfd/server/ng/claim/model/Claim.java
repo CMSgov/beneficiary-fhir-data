@@ -252,19 +252,6 @@ public class Claim {
   }
 
   private Stream<ZonedDateTime> streamItemTimestamps(ClaimItem item) {
-    var itemTs = Optional.ofNullable(item.getBfdUpdatedTimestamp()).stream();
-    var lineInstitutionalStream =
-        item.getClaimLineInstitutional()
-            .map(
-                cli -> {
-                  var cliTs = Optional.ofNullable(cli.getBfdUpdatedTimestamp()).stream();
-                  var ansiTs =
-                      cli.getAnsiSignature()
-                          .map(ansi -> Optional.ofNullable(ansi.getBfdUpdatedTimestamp()).stream())
-                          .orElseGet(Stream::empty);
-                  return Stream.concat(cliTs, ansiTs);
-                })
-            .orElseGet(Stream::empty);
-    return Stream.concat(itemTs, lineInstitutionalStream);
+    return item.streamTimestamps();
   }
 }
