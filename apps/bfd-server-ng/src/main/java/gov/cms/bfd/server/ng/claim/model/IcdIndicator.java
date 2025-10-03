@@ -92,7 +92,7 @@ public enum IcdIndicator {
       return rawCode;
     }
     // Fully numeric insert dot after 3rd char when long enough.
-    if (rawCode.matches("\\d+")) {
+    if (rawCode.chars().allMatch(Character::isDigit)) {
       return insertDot(rawCode, 3);
     }
 
@@ -112,11 +112,7 @@ public enum IcdIndicator {
     if (rawCode.indexOf('.') >= 0) {
       return rawCode;
     }
-
-    if (rawCode.length() > 2) {
-      return insertDot(rawCode, 2);
-    }
-    return rawCode;
+    return insertDot(rawCode, 2);
   }
 
   private static String insertDot(String rawCode, int position) {
