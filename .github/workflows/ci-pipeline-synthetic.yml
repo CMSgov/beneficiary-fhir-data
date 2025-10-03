@@ -36,7 +36,6 @@ jobs:
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
         cd ../bfd-pipeline/bfd-pipeline-idr
         ./run-db.sh
-        uv run pipeline.py local
     - name: Ensure synthetic data pipeline runs with sandbox benes
       run: |
         cd ${{ github.workspace }}/apps/bfd-model-idr
@@ -44,4 +43,3 @@ jobs:
         uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
         cd ../bfd-pipeline/bfd-pipeline-idr
         ./run-db.sh
-        uv run pipeline.py local

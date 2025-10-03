@@ -43,7 +43,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -73,7 +73,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .map(link -> link.getOther().getDisplay())
             .anyMatch(CURRENT_MERGED_BENE_SK::equals),
         String.format("Expected one link with display '%s'", CURRENT_MERGED_BENE_SK));
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -96,7 +96,7 @@ public class PatientSearchIT extends IntegrationTestBase {
     assertEquals(0, patient.getLink().size());
     assertEquals(1, patient.getIdentifier().size());
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -108,7 +108,7 @@ public class PatientSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
     assertEquals(0, patientBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -122,7 +122,7 @@ public class PatientSearchIT extends IntegrationTestBase {
                     .systemAndIdentifier(SystemUrls.CMS_MBI, HISTORICAL_AND_CURRENT_MBI))
             .usingStyle(searchStyle)
             .execute();
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -143,7 +143,7 @@ public class PatientSearchIT extends IntegrationTestBase {
         patient.getIdentifier().stream().map(Identifier::getValue).collect(Collectors.toSet());
     assertEquals(Set.of(HISTORICAL_MERGED_MBI, HISTORICAL_AND_CURRENT_MBI), identifiers);
 
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @ParameterizedTest
@@ -157,7 +157,7 @@ public class PatientSearchIT extends IntegrationTestBase {
                     .systemAndIdentifier(SystemUrls.CMS_MBI, "999"))
             .execute();
     assertEquals(0, patientBundle.getEntry().size());
-    expect.scenario(searchStyle.name()).serializer("fhir+json").toMatchSnapshot(patientBundle);
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 
   @Test

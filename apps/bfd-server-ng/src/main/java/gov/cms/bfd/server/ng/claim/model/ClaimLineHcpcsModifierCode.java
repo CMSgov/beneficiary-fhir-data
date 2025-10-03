@@ -5,10 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
 @Embeddable
+@Getter
 class ClaimLineHcpcsModifierCode {
   @Column(name = "hcpcs_1_mdfr_cd")
   private Optional<String> hcpcsModifierCode1;
