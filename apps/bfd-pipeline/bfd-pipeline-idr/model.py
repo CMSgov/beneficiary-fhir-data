@@ -64,6 +64,7 @@ COLUMN_MAP = "column_map"
 FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
+NCH_CLM_SOURCE = "20000"
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
@@ -633,7 +634,7 @@ def claim_type_clause(start_time: datetime) -> str:
                     {ALIAS_CLM}.idr_insrt_ts,
                     {ALIAS_CLM}.clm_idr_ld_dt)  >= {start_time_sql}
             ) 
-            OR {ALIAS_CLM}.clm_src_id = '20000'
+            OR {ALIAS_CLM}.clm_src_id = '{NCH_CLM_SOURCE}'
         )
         )
     """
