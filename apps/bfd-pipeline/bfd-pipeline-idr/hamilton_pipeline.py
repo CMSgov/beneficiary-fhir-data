@@ -11,6 +11,11 @@ from hamilton_loader import get_connection_string
 from pipeline_utils import configure_logger
 
 
+def parse_bool(var: str) -> bool:
+    # bool(str) interprets anything non-empty as true so we gotta do it manually
+    return var.lower() == "true" or var == "1"
+
+
 def main() -> None:
     logger = configure_logger("driver")
     logger.info("load start")
@@ -31,14 +36,55 @@ def main() -> None:
     else:
         connection_string = get_connection_string()
 
-    dr.execute(
-        final_vars=["idr_beneficiary"],
-        inputs={
-            "config_mode": mode,
-            "config_batch_size": batch_size,
-            "config_connection_string": connection_string,
-        },
-    )
+    # temporary flags to load a subset of data for testing
+    load_benes = parse_bool(os.environ.get("IDR_LOAD_BENES", "true"))
+    load_claims = parse_bool(os.environ.get("IDR_LOAD_CLAIMS", "true"))
+
+    print(f"load_benes: {load_benes}")
+    print(f"load_claims: {load_claims}")
+
+    if load_benes and load_claims:
+        dr.execute(
+            final_vars=["idr_beneficiary"],
+            inputs={
+                "config_mode": mode,
+                "config_batch_size": batch_size,
+                "config_connection_string": connection_string,
+            },
+        )
+    elif load_benes:
+        # Since the DAG contains the dependency ordering, we need to override all claims nodes
+        # in order to skip them and load only beneficiary data
+        overrides = {
+            "idr_claim": None,
+            "idr_claim_institutional": None,
+            "idr_claim_date_signature": None,
+            "idr_claim_fiss": None,
+            "idr_claim_item": None,
+            "idr_claim_line_institutional": None,
+            "idr_claim_ansi_signature": None,
+            "idr_claim_professional": None,
+            "idr_claim_line_professional": None,
+        }
+        dr.execute(
+            final_vars=["idr_beneficiary"],
+            overrides=overrides,
+            inputs={
+                "config_mode": mode,
+                "config_batch_size": batch_size,
+                "config_connection_string": connection_string,
+            },
+        )
+    elif load_claims:
+        # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
+        dr.execute(
+            final_vars=["idr_claim"],
+            inputs={
+                "config_mode": mode,
+                "config_batch_size": batch_size,
+                "config_connection_string": connection_string,
+            },
+        )
 
 
 if __name__ == "__main__":
