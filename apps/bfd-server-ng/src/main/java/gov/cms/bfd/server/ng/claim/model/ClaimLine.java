@@ -97,11 +97,11 @@ public class ClaimLine {
    * @return The row ids of the matching claim procedure
    */
   public List<PositiveIntType> diagnosisRelatedLines(Claim claim) {
-    Optional<String> diagnosisCodeOptional = this.getDiagnosisCode();
+    var diagnosisCodeOptional = this.getDiagnosisCode();
     if (diagnosisCodeOptional.isEmpty()) {
       return List.of();
     }
-    String currentDiagnosisCode = diagnosisCodeOptional.get();
+    var currentDiagnosisCode = diagnosisCodeOptional.get();
 
     return claim.getClaimItems().stream()
         .filter(
