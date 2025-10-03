@@ -829,7 +829,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -2096,7 +2095,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -3363,7 +3361,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -4630,7 +4627,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -5898,7 +5894,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -7166,7 +7161,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -7946,7 +7940,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -8544,7 +8537,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -9116,7 +9108,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -10175,7 +10166,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -10955,7 +10945,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -11553,7 +11542,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -12125,7 +12113,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -13184,7 +13171,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -13964,7 +13950,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -14562,7 +14547,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -15134,7 +15118,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -16193,7 +16176,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -16973,7 +16955,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -18058,7 +18039,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -18838,7 +18818,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -19923,7 +19902,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -20703,7 +20681,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -21318,7 +21295,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -21890,7 +21866,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -22479,7 +22454,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -23051,7 +23025,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -23640,7 +23613,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -24212,7 +24184,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -25271,7 +25242,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -26051,7 +26021,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -27136,7 +27105,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -27916,7 +27884,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -29001,7 +28968,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
           "valueCoding" : {
@@ -29781,7 +29747,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",

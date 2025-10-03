@@ -10,6 +10,7 @@ import jakarta.persistence.Embedded;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -28,6 +29,9 @@ public class ClaimLine {
 
   @Column(name = "clm_line_rev_ctr_cd")
   private Optional<ClaimLineRevenueCenterCode> revenueCenterCode;
+
+  @Column(name = "clm_line_dgns_cd")
+  private Optional<String> diagnosisCode;
 
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
@@ -76,13 +80,34 @@ public class ClaimLine {
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
-    line.setDiagnosisSequence(
-        List.of(new PositiveIntType(claimItem.getClaimItemId().getBfdRowId())));
+    line.setDiagnosisSequence(diagnosisRelatedLines(claimItem.getClaim()));
 
     claimLineInstitutional
         .map(ClaimLineInstitutional::getExtensions)
         .ifPresent(e -> line.setExtension(e.toFhir()));
 
     return Optional.of(line);
+  }
+
+  /**
+   * Finds the line numbers of a claim procedure that matches the diagnosis code from this claim
+   * line.
+   *
+   * @param claim The parent claim entity containing all claim procedures.
+   * @return The row ids of the matching claim procedure
+   */
+  public List<PositiveIntType> diagnosisRelatedLines(Claim claim) {
+    if (diagnosisCode.isEmpty()) {
+      return List.of();
+    }
+    var currentDiagnosisCode = diagnosisCode.get();
+
+    return claim.getClaimItems().stream()
+        .filter(
+            item ->
+                item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
+        .map(item -> item.getClaimItemId().getBfdRowId())
+        .map(PositiveIntType::new)
+        .collect(Collectors.toList());
   }
 }
