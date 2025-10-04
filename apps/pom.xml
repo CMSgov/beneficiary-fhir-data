@@ -162,7 +162,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
         <hikari.version>6.2.1</hikari.version>
-        <flyway.version>11.3.4</flyway.version>
+        <flyway.version>11.13.2</flyway.version>
         <newrelic.agent.version>8.18.0</newrelic.agent.version>
         <checkstyle.version>10.21.4</checkstyle.version>
         <guava.version>32.1.2-jre</guava.version>
