@@ -24,7 +24,8 @@ uv run pytest
 
 ## Loading synthetic data into a live environment
 
-Test data must be generated first (see details in `bfd-model-idr`).
+Test data must be generated first (see details in `bfd-model-idr`)
+(replace the value of `BFD_ENV` with the environment name you want to target).
 
 ```sh
 BFD_ENV=1234-test ./load-synthetic-env.sh
