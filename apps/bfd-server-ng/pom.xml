@@ -151,8 +151,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Provides a database schema mechanism. See the DatabaseSchemaManager
-                class. -->
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <scope>test</scope>

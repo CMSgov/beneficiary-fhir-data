@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -14,8 +14,7 @@
     <packaging>jar</packaging>
 
     <description>
-        An application integrated with Flyway and Hibernate responsible for executing database migrations and
-        validations against BFD datastores.
+        A project for running Flyway database migrations with Maven.
     </description>
 
     <dependencies>
@@ -24,14 +23,12 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
-            <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
     </dependencies>
 
     <properties>
-        <!-- List are defined as comma-separated values -->
         <flyway.schemas>idr</flyway.schemas>
         <flyway.locations>filesystem:migrations</flyway.locations>
     </properties>
@@ -41,7 +38,7 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>11.13.2</version>
+                <version>${flyway.version}</version>
             </plugin>
         </plugins>
     </build>

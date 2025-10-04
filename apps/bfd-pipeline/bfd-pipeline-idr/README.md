@@ -10,22 +10,24 @@ uv sync
 
 ## Development
 
-Initialize the database with test data. Test data must be generated first.
+Initialize the database with test data. Test data must be generated first (see details in `bfd-model-idr`).
 
 ```sh
 ./run-db.sh
 ```
 
-Run the app against a local database
-
-```sh
-uv run ./pipeline.py local
-```
-
 Run tests
 
 ```sh
-TESTCONTAINERS_RYUK_DISABLED=true uv run pytest
+uv run pytest
+```
+
+## Loading synthetic data into a live environment
+
+Test data must be generated first (see details in `bfd-model-idr`).
+
+```sh
+BFD_ENV=1234-test ./load-synthetic-env.sh
 ```
 
 ## Running against Snowflake data
@@ -49,7 +51,7 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 - Add the data to `model.py`, queries will be auto-generated using those fields
 - Add the data to `generator_util.py`, for synthetic data generation
 - If adding a new table, register it in the call to `load_all` in `pipeline.py`
-- If adding a new table, register it in the list of CSVs to load in `load_synthetic.py` 
+- If adding a new table, register it in the list of CSVs to load in `load_synthetic.py`
 
 ## Loading synthetic data
 

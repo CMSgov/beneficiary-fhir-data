@@ -38,6 +38,16 @@ public class IntegrationTestConfiguration {
             .waitingFor(Wait.forListeningPort())
             .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
     container.start();
+    runMigrator(container);
+
+    runPython(container, "uv", "sync");
+    runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
+    runPython(container, "uv", "run", "pipeline.py", "synthetic");
+
+    return container;
+  }
+
+  private void runMigrator(PostgreSQLContainer<?> container) {
     var flyway =
         Flyway.configure()
             .configuration(
@@ -57,11 +67,6 @@ public class IntegrationTestConfiguration {
     if (!result.success) {
       throw new RuntimeException(result.exceptionObject);
     }
-    runPython(container, "uv", "sync");
-    runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
-    runPython(container, "uv", "run", "pipeline.py", "synthetic");
-
-    return container;
   }
 
   private void runPython(PostgreSQLContainer<?> container, String... args)
