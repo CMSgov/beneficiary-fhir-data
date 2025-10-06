@@ -6,17 +6,20 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
+import org.jetbrains.annotations.NotNull;
 
 /** Entity representing BeneficiaryEntitlement. */
 @Entity
 @Getter
+@EqualsAndHashCode
 @Table(name = "beneficiary_entitlement_latest", schema = "idr")
-public class BeneficiaryEntitlement {
+public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement> {
 
   @EmbeddedId private BeneficiaryEntitlementId id;
 
@@ -71,5 +74,10 @@ public class BeneficiaryEntitlement {
 
   Coverage.CoverageStatus toFhirStatus() {
     return entitlementPeriod.toFhirStatus();
+  }
+
+  @Override
+  public int compareTo(@NotNull BeneficiaryEntitlement o) {
+    return this.id.compareTo(o.id);
   }
 }

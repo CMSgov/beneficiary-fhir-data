@@ -5,10 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Period;
 
 /** Entitlement period. */
+@Getter
 @Embeddable
 public class BeneficiaryEntitlementPeriod {
   @Column(name = "bene_rng_bgn_dt")
