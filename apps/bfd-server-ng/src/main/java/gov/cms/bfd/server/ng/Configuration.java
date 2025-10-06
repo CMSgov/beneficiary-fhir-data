@@ -202,7 +202,7 @@ public class Configuration implements Serializable {
       private Hikari hikari = new Hikari();
       private Wrapper wrapper = new Wrapper();
       private String clusterIdentifierTemplate = "bfd-%s-aurora-cluster";
-      private String name = "idr";
+      private String name = "fhirdb";
       private String port = "5432";
       private String connectionStringTemplate = "jdbc:postgresql://%s:%s/%s";
 

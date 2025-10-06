@@ -1,13 +1,10 @@
-DROP SCHEMA IF EXISTS idr CASCADE;
-
-CREATE SCHEMA idr;
 CREATE TABLE idr.beneficiary (
     -- columns from V2_MDCR_BENE_HSTRY
-    bene_sk BIGINT NOT NULL, 
+    bene_sk BIGINT NOT NULL,
     -- NOTE: this column should never be used for any queries
     -- bene_xref_efctv_sk_computed should always be used instead
-    bene_xref_efctv_sk BIGINT NOT NULL, 
-    bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS 
+    bene_xref_efctv_sk BIGINT NOT NULL,
+    bene_xref_efctv_sk_computed BIGINT NOT NULL GENERATED ALWAYS
         -- The merge is only valid if kill credit is present AND set to 2. If not, we should act like it's not present.
         AS (CASE WHEN bene_xref_efctv_sk != bene_sk AND bene_kill_cred_cd != '2' THEN bene_sk ELSE bene_xref_efctv_sk END) STORED,
     bene_mbi_id VARCHAR(11) NOT NULL,
@@ -442,7 +439,7 @@ CREATE TABLE idr.claim_ansi_signature (
     bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
 
-CREATE VIEW idr.valid_beneficiary AS 
+CREATE VIEW idr.valid_beneficiary AS
 SELECT *
 FROM idr.beneficiary b
 WHERE NOT EXISTS(SELECT 1 FROM idr.beneficiary_overshare_mbi om WHERE om.bene_mbi_id = b.bene_mbi_id);
@@ -450,7 +447,7 @@ WHERE NOT EXISTS(SELECT 1 FROM idr.beneficiary_overshare_mbi om WHERE om.bene_mb
 -- we use NOW() - 12 hours to represent "anywhere in the world" time
 
 CREATE VIEW idr.beneficiary_status_latest AS
-SELECT DISTINCT ON (bene_sk) * 
+SELECT DISTINCT ON (bene_sk) *
 FROM idr.beneficiary_status
 WHERE idr_ltst_trans_flg = 'Y' AND mdcr_stus_bgn_dt <= NOW() - INTERVAL '12 hours'
 ORDER BY bene_sk, mdcr_stus_bgn_dt DESC;
@@ -464,31 +461,31 @@ WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours
 ORDER BY bene_sk, bene_mdcr_entlmt_type_cd, bene_rng_bgn_dt DESC;
 
 CREATE VIEW idr.beneficiary_third_party_latest AS
-SELECT DISTINCT ON (bene_sk, bene_tp_type_cd) * 
+SELECT DISTINCT ON (bene_sk, bene_tp_type_cd) *
 FROM idr.beneficiary_third_party
 WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours'
 ORDER BY bene_sk, bene_tp_type_cd, bene_rng_bgn_dt DESC;
 
 CREATE VIEW idr.beneficiary_entitlement_reason_latest AS
-SELECT DISTINCT ON (bene_sk) * 
+SELECT DISTINCT ON (bene_sk) *
 FROM idr.beneficiary_entitlement_reason
 WHERE idr_ltst_trans_flg = 'Y' AND bene_rng_bgn_dt <= NOW() - INTERVAL '12 hours'
 ORDER BY bene_sk, bene_rng_bgn_dt DESC;
 
 CREATE VIEW idr.beneficiary_dual_eligibility_latest AS
-SELECT DISTINCT ON (bene_sk) * 
+SELECT DISTINCT ON (bene_sk) *
 FROM idr.beneficiary_dual_eligibility
 WHERE idr_ltst_trans_flg = 'Y' AND bene_mdcd_elgblty_bgn_dt <= NOW() - INTERVAL '12 hours'
 ORDER BY bene_sk, bene_mdcd_elgblty_bgn_dt DESC;
 
 CREATE VIEW idr.beneficiary_identity AS
-SELECT DISTINCT 
-    bene.bene_sk, 
-    bene.bene_xref_efctv_sk_computed, 
+SELECT DISTINCT
+    bene.bene_sk,
+    bene.bene_xref_efctv_sk_computed,
     bene.bene_mbi_id,
-    bene_mbi.bene_mbi_efctv_dt, 
+    bene_mbi.bene_mbi_efctv_dt,
     bene_mbi.bene_mbi_obslt_dt
 FROM idr.valid_beneficiary bene
-LEFT JOIN idr.beneficiary_mbi_id bene_mbi 
-    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id 
+LEFT JOIN idr.beneficiary_mbi_id bene_mbi
+    ON bene.bene_mbi_id = bene_mbi.bene_mbi_id
     AND bene_mbi.idr_ltst_trans_flg = 'Y';

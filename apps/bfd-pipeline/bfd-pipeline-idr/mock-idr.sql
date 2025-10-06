@@ -1,6 +1,25 @@
-DROP SCHEMA IF EXISTS cms_vdm_view_mdcr_prd CASCADE;
+DO $$ DECLARE
+    r record;
+BEGIN
+    -- This schema will already exist in a live environment, but
+    -- we'll need to create it here manually when running against localhost
+    IF NOT EXISTS(
+        SELECT schema_name
+            FROM information_schema.schemata
+            WHERE schema_name = 'cms_vdm_view_mdcr_prd'
+    )
+    THEN
+        CREATE SCHEMA cms_vdm_view_mdcr_prd;
+    END IF;
 
-CREATE SCHEMA cms_vdm_view_mdcr_prd;
+    -- In a live environment, we'll clean out whatever's there and replace it.
+    -- The tables in this schema are only meant for staging so there's nothing in here
+    -- that needs to persist between loads.
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd') 
+    LOOP
+        EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_sk BIGINT NOT NULL, 
