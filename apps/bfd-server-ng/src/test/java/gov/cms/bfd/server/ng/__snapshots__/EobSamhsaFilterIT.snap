@@ -8239,7 +8239,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 4, 1 ],
+        "diagnosisSequence" : [ 1, 4 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "28",
@@ -8486,7 +8486,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 3 ],
+        "diagnosisSequence" : [ 5 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
@@ -8717,7 +8717,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 2 ],
+        "diagnosisSequence" : [ 6 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "J2270",
@@ -9881,7 +9881,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -10037,7 +10036,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 2 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "US",
@@ -10202,7 +10200,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 3 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -10364,7 +10361,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 4 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "32",
@@ -10514,7 +10510,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 5 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -10676,7 +10671,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 6 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "22",
@@ -10829,7 +10823,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 7 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "22",
@@ -10979,7 +10972,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 8 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "U6",
@@ -11129,7 +11121,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 9 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "28",
@@ -11285,7 +11276,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 10 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -11426,7 +11416,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 11 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -11970,7 +11959,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 1 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "G0534",
@@ -13138,7 +13126,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "US",
@@ -13457,7 +13444,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 2 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -13698,7 +13684,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 3 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -15123,7 +15108,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -15276,7 +15260,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 2 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -15432,7 +15415,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 3 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -15600,7 +15582,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 4 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
@@ -15750,7 +15731,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 5 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PD",
@@ -15891,7 +15871,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 6 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "28",
@@ -16053,7 +16032,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 7 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "U6",
@@ -16215,7 +16193,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 8 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -16377,7 +16354,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 9 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99453",
@@ -17393,7 +17369,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 1 ],
+        "diagnosisSequence" : [ 1, 4 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "28",
@@ -17640,7 +17616,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 2 ],
+        "diagnosisSequence" : [ 5 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
@@ -17871,7 +17847,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "sequence" : 1
         } ],
-        "diagnosisSequence" : [ 3 ],
+        "diagnosisSequence" : [ 6 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "J2270",
