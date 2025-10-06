@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
@@ -616,10 +617,16 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 
 def claim_type_clause(start_time: datetime) -> str:
+    latest_claims_env = "IDR_LATEST_CLAIMS"
     start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
         {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+        {
+        " AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y' "
+        if latest_claims_env in os.environ and os.environ[latest_claims_env] in ("1", "true")
+        else ""
+    }
         AND
         (
             (
