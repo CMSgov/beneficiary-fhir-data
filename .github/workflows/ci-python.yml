@@ -53,12 +53,8 @@ jobs:
         id: code-checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          # Install a specific version of uv.
-          version: "0.8.10"
+          ref: ${{ inputs.branch }}
+      - uses: astral-sh/setup-uv@v6
       - name: Run Python Tests per project
         id: run-pytest-set
         run: |
