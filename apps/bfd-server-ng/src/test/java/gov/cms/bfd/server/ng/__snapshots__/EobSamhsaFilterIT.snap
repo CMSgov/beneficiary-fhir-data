@@ -8239,7 +8239,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
-        "diagnosisSequence" : [ 4, 1 ],
+        "diagnosisSequence" : [ 1, 4 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "28",
