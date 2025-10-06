@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -118,12 +121,21 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   @Autowired private EobHandler eobHandler;
 
-  private IQuery<Bundle> searchBundle(long patient) {
-    return searchBundle(String.valueOf(patient));
+  private IQuery<Bundle> searchBundle(long patient, SamhsaCertType samhsaCertType) {
+    return searchBundle(String.valueOf(patient), samhsaCertType);
   }
 
-  private IQuery<Bundle> searchBundle(String patient) {
-    return getFhirClient()
+  private IQuery<Bundle> searchBundle(String patient, SamhsaCertType samhsaCertType) {
+    final var fhirClient = getFhirClient();
+
+    if (samhsaCertType != SamhsaCertType.NO_CERT) {
+      final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+      headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", samhsaCertType.certValue);
+
+      fhirClient.registerInterceptor(headersInterceptor);
+    }
+
+    return fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
         .returnBundle(Bundle.class)
@@ -199,14 +211,13 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of()));
   }
 
-  @MethodSource
-  @ParameterizedTest
-  void shouldFilterSamhsa(
+  private void shouldFilterSamhsa(
+      SamhsaCertType samhsaCertType,
       long beneSk,
       List<Long> samhsaClaimIds,
       List<Long> nonSamhsaClaimIds,
       List<Long> skipBundleVerification) {
-    var bundle = searchBundle(beneSk).execute();
+    var bundle = searchBundle(beneSk, samhsaCertType).execute();
     // Before checking for SAMHSA codes, filter any cases that won't pass verification due to
     // system/code mismatches.
     var bundleClaimsToCheck =
@@ -247,6 +258,41 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     }
 
     expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
+  }
+
+  @MethodSource({"shouldFilterSamhsa"})
+  @ParameterizedTest
+  void shouldFilterSamhsaNoCert(
+      long beneSk,
+      List<Long> samhsaClaimIds,
+      List<Long> nonSamhsaClaimIds,
+      List<Long> skipBundleVerification) {
+    shouldFilterSamhsa(
+        SamhsaCertType.NO_CERT, beneSk, samhsaClaimIds, nonSamhsaClaimIds, skipBundleVerification);
+  }
+
+  @MethodSource({"shouldFilterSamhsa"})
+  @ParameterizedTest
+  void shouldFilterSamhsaSamhsaNotAllowedCert(
+      long beneSk,
+      List<Long> samhsaClaimIds,
+      List<Long> nonSamhsaClaimIds,
+      List<Long> skipBundleVerification) {
+    shouldFilterSamhsa(
+        SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT,
+        beneSk,
+        samhsaClaimIds,
+        nonSamhsaClaimIds,
+        skipBundleVerification);
+  }
+
+  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6})
+  @ParameterizedTest
+  void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
+    var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
+    // Bundle from endpoint _should_ contain sensitive codes because the "cert" provided is allowed
+    // to get SAMHSA data
+    assertTrue(anyClaimsContainSamhsaCode(getEobFromBundle(bundle), true));
   }
 
   // The following group of tests is used to ensure the validity of the test data.
@@ -440,5 +486,14 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private String normalize(String val) {
     return val.trim().replace(".", "").toLowerCase();
+  }
+
+  @AllArgsConstructor
+  private enum SamhsaCertType {
+    NO_CERT(null),
+    SAMHSA_ALLOWED_CERT("samhsa_allowed"),
+    SAMHSA_NOT_ALLOWED_CERT("samhsa_not_allowed");
+
+    private final String certValue;
   }
 }
