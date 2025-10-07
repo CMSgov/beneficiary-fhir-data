@@ -11,7 +11,7 @@ import java.io.IOException;
 public interface Source<T> extends Closeable {
 
   /**
-   * Checks whether the source has any more input; if not it closes the stream.
+   * Checks whether the source has any more input, if not it closes the stream.
    *
    * @return {@code boolean} true if the input has more to read, false otherwise
    */
