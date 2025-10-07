@@ -1029,7 +1029,9 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_uniq_id, 
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id, {prod}.clm_val_sqnc_num, {prod}.clm_prod_type_cd
+                            ORDER BY {clm}.clm_uniq_id, 
+                                {prod}.clm_val_sqnc_num, 
+                                {prod}.clm_prod_type_cd
                         ) AS row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
                     JOIN claims {clm} 
