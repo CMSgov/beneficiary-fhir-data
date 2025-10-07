@@ -1059,7 +1059,9 @@ class IdrClaimItem(IdrBaseModel):
                     {prod}.*, 
                     ROW_NUMBER() OVER (
                         PARTITION BY clm_uniq_id 
-                        ORDER BY clm_uniq_id, {prod}.clm_val_sqnc_num
+                        ORDER BY clm_uniq_id, 
+                        {prod}.clm_val_sqnc_num,
+                        {prod}.clm_prod_type_cd
                     ) AS line_num
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
                     JOIN claims {clm} 

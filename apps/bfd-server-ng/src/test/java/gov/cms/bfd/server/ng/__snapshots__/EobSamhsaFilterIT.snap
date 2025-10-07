@@ -496,12 +496,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
@@ -512,39 +506,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "Y93.1",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "sequence" : 3,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "principal",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
             "code" : "V97.0",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "sequence" : 4,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "V97.0",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "sequence" : 5,
+        "sequence" : 2,
         "type" : [ {
           "coding" : [ {
             "code" : "admitting",
@@ -564,11 +530,45 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 3,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "code" : "V97.0",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "onAdmission" : {
+          "coding" : [ {
+            "code" : "0",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+          } ]
+        },
+        "sequence" : 4,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "code" : "Y93.1",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "sequence" : 5,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "principal",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -3588,29 +3588,29 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "diagnosis" : [ {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "E02.90",
+            "code" : "W61.62",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "W61.62",
+            "code" : "E02.90",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+            "code" : "admitting",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -3636,6 +3636,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "code" : "W61.62",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "sequence" : 4,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
             "code" : "W59.22XA",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
@@ -3645,20 +3659,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "principal",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "W61.62",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "sequence" : 6,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
@@ -3674,7 +3674,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 7,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -3694,7 +3694,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 9,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -3714,7 +3714,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 11,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -5482,17 +5482,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "Y",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
             "code" : "externalcauseofinjury",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "code" : "R46.5",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "sequence" : 2,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "admitting",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -5508,7 +5516,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 2,
+        "sequence" : 3,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -5518,22 +5526,14 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "R46.5",
+            "code" : "E11.69",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "sequence" : 3,
-        "type" : [ {
+        "onAdmission" : {
           "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "E11.69",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+            "code" : "Y",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
         "sequence" : 4,
@@ -7919,8 +7919,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "principal",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+            "code" : "other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
@@ -7933,8 +7933,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+            "code" : "principal",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -9626,12 +9626,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
@@ -9642,39 +9636,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "Y93.1",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "sequence" : 3,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "principal",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
             "code" : "V97.0",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "sequence" : 4,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "V97.0",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "sequence" : 5,
+        "sequence" : 2,
         "type" : [ {
           "coding" : [ {
             "code" : "admitting",
@@ -9694,11 +9660,45 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 3,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "code" : "V97.0",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "onAdmission" : {
+          "coding" : [ {
+            "code" : "0",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+          } ]
+        },
+        "sequence" : 4,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "code" : "Y93.1",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "sequence" : 5,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "principal",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -12718,29 +12718,29 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "diagnosis" : [ {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "E02.90",
+            "code" : "W61.62",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "W61.62",
+            "code" : "E02.90",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+            "code" : "admitting",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -12766,6 +12766,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
+            "code" : "W61.62",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "sequence" : 4,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
             "code" : "W59.22XA",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
@@ -12775,20 +12789,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "principal",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "W61.62",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "sequence" : 6,
-        "type" : [ {
-          "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
@@ -12804,7 +12804,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 7,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -12824,7 +12824,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 9,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -12844,7 +12844,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 11,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -14612,17 +14612,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "Y",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
             "code" : "externalcauseofinjury",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+          } ]
+        } ]
+      }, {
+        "diagnosisCodeableConcept" : {
+          "coding" : [ {
+            "code" : "R46.5",
+            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+          } ]
+        },
+        "sequence" : 2,
+        "type" : [ {
+          "coding" : [ {
+            "code" : "admitting",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -14638,7 +14646,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
-        "sequence" : 2,
+        "sequence" : 3,
         "type" : [ {
           "coding" : [ {
             "code" : "other",
@@ -14648,22 +14656,14 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "diagnosisCodeableConcept" : {
           "coding" : [ {
-            "code" : "R46.5",
+            "code" : "E11.69",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "sequence" : 3,
-        "type" : [ {
+        "onAdmission" : {
           "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        } ]
-      }, {
-        "diagnosisCodeableConcept" : {
-          "coding" : [ {
-            "code" : "E11.69",
-            "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+            "code" : "Y",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
         "sequence" : 4,
@@ -17049,8 +17049,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "principal",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+            "code" : "other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
@@ -17063,8 +17063,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+            "code" : "principal",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
