@@ -6,7 +6,12 @@ from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
 
-from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE
+from constants import (
+    CLAIM_TYPE_CODES,
+    EXCLUDED_CLAIM_TYPE_CODES,
+    DEFAULT_MAX_DATE,
+    DEFAULT_MIN_DATE,
+)
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -617,16 +622,26 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 
 def claim_type_clause(start_time: datetime) -> str:
-    latest_claims_env = "IDR_LATEST_CLAIMS"
+    fetch_latest_claims = "IDR_LATEST_CLAIMS" in os.environ and os.environ["IDR_LATEST_CLAIMS"] in (
+        "1",
+        "true",
+    )
+    add_latest_claim_ind = (
+        f""" AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y' """ if fetch_latest_claims else ""
+    )
     start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
-        {
-        " AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y' "
-        if latest_claims_env in os.environ and os.environ[latest_claims_env] in ("1", "true")
-        else ""
-    }
+        {ALIAS_CLM}.clm_type_cd IN ({
+        ",".join(
+            [
+                str(c)
+                for c in CLAIM_TYPE_CODES
+                if not fetch_latest_claims or c not in EXCLUDED_CLAIM_TYPE_CODES
+            ]
+        )
+    })
+        {add_latest_claim_ind}
         AND
         (
             (

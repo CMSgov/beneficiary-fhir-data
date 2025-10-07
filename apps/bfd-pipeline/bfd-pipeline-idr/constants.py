@@ -2,6 +2,10 @@ DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
 
 CLAIM_TYPE_CODES = [
+    1,
+    2,
+    3,
+    4,
     10,
     20,
     30,
@@ -122,4 +126,11 @@ CLAIM_TYPE_CODES = [
     2700,
     2800,
     2900,
+]
+
+EXCLUDED_CLAIM_TYPE_CODES = [
+    1,
+    2,
+    3,
+    4
 ]
