@@ -2,7 +2,7 @@
 # type: ignore [reportUntypedFunctionDecorator]
 from hamilton.function_modifiers import parameterize, value
 
-from hamilton_loader import PostgresLoader
+from loader import PostgresLoader
 from model import (
     IdrBeneficiary,
     IdrBeneficiaryDualEligibility,

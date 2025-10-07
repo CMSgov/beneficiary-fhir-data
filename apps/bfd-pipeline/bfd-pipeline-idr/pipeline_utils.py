@@ -7,8 +7,8 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from hamilton_extractor import PostgresExtractor, SnowflakeExtractor
-from hamilton_loader import PostgresLoader
+from extractor import PostgresExtractor, SnowflakeExtractor
+from loader import PostgresLoader
 from model import (
     LoadProgress,
     T,

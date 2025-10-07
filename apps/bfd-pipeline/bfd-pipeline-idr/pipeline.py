@@ -1,133 +1,14 @@
-import logging
+# type: ignore [reportUnknownMemberType]
 import os
 import sys
-import time
-from datetime import UTC, datetime, timedelta
 
-from snowflake.connector import ProgrammingError
-from snowflake.connector.errors import ForbiddenError
-from snowflake.connector.network import ReauthenticationRequest, RetryRequest
+import ray
+from hamilton import base, driver
+from hamilton.plugins.h_ray import RayGraphAdapter
 
-import extractor
-import loader
-from extractor import Extractor, PostgresExtractor, SnowflakeExtractor
-from loader import PostgresLoader, get_connection_string
-from model import (
-    IdrBeneficiary,
-    IdrBeneficiaryDualEligibility,
-    IdrBeneficiaryEntitlement,
-    IdrBeneficiaryEntitlementReason,
-    IdrBeneficiaryMbiId,
-    IdrBeneficiaryOvershareMbi,
-    IdrBeneficiaryStatus,
-    IdrBeneficiaryThirdParty,
-    IdrClaim,
-    IdrClaimAnsiSignature,
-    IdrClaimDateSignature,
-    IdrClaimFiss,
-    IdrClaimInstitutional,
-    IdrClaimItem,
-    IdrClaimLineInstitutional,
-    IdrClaimLineProfessional,
-    IdrClaimProfessional,
-    LoadProgress,
-    T,
-)
-
-console_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-console_handler.setFormatter(formatter)
-logging.basicConfig(level=logging.INFO, handlers=[console_handler])
-
-logger = logging.getLogger(__name__)
-
-
-def main() -> None:
-    batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
-    mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    if mode == "local":
-        pg_local = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
-        run_pipeline(
-            PostgresExtractor(
-                connection_string=pg_local,
-                batch_size=batch_size,
-            ),
-            pg_local,
-        )
-    elif mode == "synthetic":
-        run_pipeline(
-            PostgresExtractor(
-                connection_string=get_connection_string(),
-                batch_size=batch_size,
-            ),
-            get_connection_string(),
-        )
-    else:
-        run_pipeline(
-            SnowflakeExtractor(
-                batch_size=batch_size,
-            ),
-            get_connection_string(),
-        )
-
-
-def get_progress(
-    connection_string: str, table_name: str, start_time: datetime
-) -> LoadProgress | None:
-    return PostgresExtractor(connection_string, batch_size=1).extract_single(
-        LoadProgress,
-        LoadProgress.fetch_query(False, start_time),
-        {LoadProgress.query_placeholder(): table_name},
-    )
-
-
-def extract_and_load(
-    cls: type[T],
-    data_extractor: Extractor,
-    connection_string: str,
-) -> tuple[PostgresLoader, bool]:
-    logger.info("loading %s", cls.table())
-    batch_start = datetime.now()
-
-    last_error = datetime.min.replace(tzinfo=UTC)
-    loader = PostgresLoader(connection_string)
-    error_count = 0
-    max_errors = 3
-    while True:
-        try:
-            progress = get_progress(connection_string, cls.table(), batch_start)
-
-            logger.info(
-                "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
-                cls.table(),
-                progress.last_ts if progress else "none",
-                progress.batch_start_ts if progress else "none",
-                progress.batch_complete_ts if progress else "none",
-            )
-            data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
-            data_loaded = loader.load(data_iter, cls, batch_start, progress)
-            return (loader, data_loaded)
-        # Snowflake will throw a reauth error if the pipeline has been running for several hours
-        # but it seems to be wrapped in a ProgrammingError.
-        # Unclear the best way to handle this, it will require a bit more trial and error.
-        except (ReauthenticationRequest, RetryRequest, ForbiddenError, ProgrammingError) as ex:
-            time_expired = datetime.now(UTC) - last_error > timedelta(seconds=10)
-            if time_expired:
-                error_count = 0
-            error_count += 1
-            if error_count < max_errors:
-                last_error = datetime.now(UTC)
-                logger.warning("received transient error, retrying...", exc_info=ex)
-                data_extractor.reconnect()
-            else:
-                logger.error("max attempts exceeded")
-                raise ex
-            time.sleep(1)
-
-
-def load_all(data_extractor: Extractor, connection_string: str, *cls: type[T]) -> None:
-    for c in cls:
-        extract_and_load(c, data_extractor, connection_string)
+import pipeline_nodes
+from loader import get_connection_string
+from pipeline_utils import configure_logger
 
 
 def parse_bool(var: str) -> bool:
@@ -135,49 +16,75 @@ def parse_bool(var: str) -> bool:
     return var.lower() == "true" or var == "1"
 
 
-def run_pipeline(data_extractor: Extractor, connection_string: str) -> None:
+def main() -> None:
+    logger = configure_logger("driver")
     logger.info("load start")
+
+    parallelism = int(os.environ.get("PARALLELISM", "6"))
+    ray.init(logging_level="info", num_cpus=parallelism)
+
+    dict_builder = base.DictResult()
+    adapter = RayGraphAdapter(result_builder=dict_builder)
+    dr = driver.Builder().with_modules(pipeline_nodes).with_adapters(adapter).build()
+
+    batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    if mode == "local":
+        connection_string = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
+    elif mode == "synthetic":
+        connection_string = get_connection_string()
+    else:
+        connection_string = get_connection_string()
 
     # temporary flags to load a subset of data for testing
     load_benes = parse_bool(os.environ.get("IDR_LOAD_BENES", "true"))
     load_claims = parse_bool(os.environ.get("IDR_LOAD_CLAIMS", "true"))
 
-    if load_benes:
-        load_all(
-            data_extractor,
-            connection_string,
-            # Overshare MBIs must be loaded before other beneficiary information
-            IdrBeneficiaryOvershareMbi,
-            IdrBeneficiaryMbiId,
-            IdrBeneficiary,
-            IdrBeneficiaryStatus,
-            IdrBeneficiaryThirdParty,
-            IdrBeneficiaryEntitlement,
-            IdrBeneficiaryEntitlementReason,
-            IdrBeneficiaryDualEligibility,
-            # Ignore for now, we'll likely source these elsewhere when we load contract data
-            # IdrContractPbpNumber,
-            # IdrElectionPeriodUsage,
-        )
+    print(f"load_benes: {load_benes}")
+    print(f"load_claims: {load_claims}")
 
-    if load_claims:
-        load_all(
-            data_extractor,
-            connection_string,
-            IdrClaim,
-            IdrClaimInstitutional,
-            IdrClaimFiss,
-            IdrClaimDateSignature,
-            IdrClaimItem,
-            IdrClaimLineInstitutional,
-            IdrClaimAnsiSignature,
-            IdrClaimProfessional,
-            IdrClaimLineProfessional,
+    if load_benes and load_claims:
+        dr.execute(
+            final_vars=["idr_beneficiary"],
+            inputs={
+                "config_mode": mode,
+                "config_batch_size": batch_size,
+                "config_connection_string": connection_string,
+            },
         )
-
-    logger.info("done")
-    extractor.print_timers()
-    loader.print_timers()
+    elif load_benes:
+        # Since the DAG contains the dependency ordering, we need to override all claims nodes
+        # in order to skip them and load only beneficiary data
+        overrides = {
+            "idr_claim": None,
+            "idr_claim_institutional": None,
+            "idr_claim_date_signature": None,
+            "idr_claim_fiss": None,
+            "idr_claim_item": None,
+            "idr_claim_line_institutional": None,
+            "idr_claim_ansi_signature": None,
+            "idr_claim_professional": None,
+            "idr_claim_line_professional": None,
+        }
+        dr.execute(
+            final_vars=["idr_beneficiary"],
+            overrides=overrides,
+            inputs={
+                "config_mode": mode,
+                "config_batch_size": batch_size,
+                "config_connection_string": connection_string,
+            },
+        )
+    elif load_claims:
+        # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
+        dr.execute(
+            final_vars=["idr_claim"],
+            inputs={
+                "config_mode": mode,
+                "config_batch_size": batch_size,
+                "config_connection_string": connection_string,
+            },
+        )
 
 
 if __name__ == "__main__":
