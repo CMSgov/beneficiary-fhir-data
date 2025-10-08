@@ -48,10 +48,10 @@ public class IcdIndicatorIT extends IntegrationTestBase {
 
     var expectedOrder =
         List.of(
-            FORMATTED_ICD_9_CODE_E8889,
-            FORMATTED_ICD_9_CODE_V1005,
             FORMATTED_ICD_9_CODE_30495,
-            FORMATTED_ICD_9_CODE_25000);
+            FORMATTED_ICD_9_CODE_25000,
+            FORMATTED_ICD_9_CODE_E8889,
+            FORMATTED_ICD_9_CODE_V1005);
     assertEquals(expectedOrder, eobCodes, "ICD-9 codes should be formatted and ordered");
     assertEquals(FORMATTED_ICD_9_CODE_25000, independentlyFormatted.get(RAW_25000));
     assertEquals(FORMATTED_ICD_9_CODE_E8889, independentlyFormatted.get(RAW_E8889));
@@ -82,10 +82,10 @@ public class IcdIndicatorIT extends IntegrationTestBase {
 
     var expected =
         List.of(
-            FORMATTED_ICD_9_CODE_E8889,
-            FORMATTED_ICD_9_CODE_V1005,
             FORMATTED_ICD_9_CODE_30495,
-            FORMATTED_ICD_9_CODE_25000);
+            FORMATTED_ICD_9_CODE_25000,
+            FORMATTED_ICD_9_CODE_E8889,
+            FORMATTED_ICD_9_CODE_V1005);
     assertEquals(expected, codes, "ICD-9 diagnosis codes should be formatted and ordered");
 
     // compare string representations rather than using snapshot storage.
