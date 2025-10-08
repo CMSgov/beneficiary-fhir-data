@@ -10,7 +10,6 @@ from constants import (
     CLAIM_TYPE_CODES,
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
-    PART_D_CLAIM_TYPE_CODES,
 )
 
 type DbType = str | float | int | bool | date | datetime
@@ -626,15 +625,13 @@ def claim_type_clause(start_time: datetime) -> str:
         "1",
         "true",
     )
-    claim_type_codes = CLAIM_TYPE_CODES
     add_latest_claim_ind = ""
     if fetch_latest_claims:
-        claim_type_codes += PART_D_CLAIM_TYPE_CODES
         add_latest_claim_ind = f" AND {ALIAS_CLM}.clm_ltst_clm_ind = 'Y' "
     start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
         {add_latest_claim_ind}
         AND
         (
