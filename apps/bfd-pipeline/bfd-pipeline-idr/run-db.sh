@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -26,19 +26,20 @@ docker exec bfd-idr-db timeout 15 bash -c 'until echo > /dev/tcp/localhost/5432;
 
 echo
 echo Creating database
-docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd idr
+docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd fhirdb
 
 echo
 echo Database created successfully.
 
-docker cp ./mock-idr.sql bfd-idr-db:/docker-entrypoint-initdb.d/mock-idr.sql
-docker cp ./bfd.sql bfd-idr-db:/docker-entrypoint-initdb.d/bfd.sql
+script_dir=$(path=$(realpath "$0") && dirname "$path")
+
+docker cp "$script_dir/mock-idr.sql" bfd-idr-db:/docker-entrypoint-initdb.d/mock-idr.sql
 
 echo
 echo Creating schema.
 
-docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/mock-idr.sql
-docker exec -u postgres bfd-idr-db psql idr bfd -f docker-entrypoint-initdb.d/bfd.sql
+docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d/mock-idr.sql
+"$script_dir/../../bfd-db-migrator-ng/migrate-local.sh"
 
 uv sync
 BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run load_synthetic.py "$1" && uv run pipeline.py local

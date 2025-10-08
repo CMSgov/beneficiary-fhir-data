@@ -1,3 +1,5 @@
+import shutil
+import subprocess
 import time
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
@@ -21,6 +23,27 @@ from pipeline import run_pipeline
 testcontainers_config.ryuk_disabled = True
 
 
+def _run_migrator(postgres: PostgresContainer) -> None:
+    # Python recommends using an absolute path when running an executable
+    # to avoid any ambiguity
+    mvn = shutil.which("mvn") or "mvn"
+    try:
+        subprocess.run(
+            f"{mvn} flyway:migrate "
+            "-Dflyway.url="
+            f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
+            f"-Dflyway.user={postgres.username} "
+            f"-Dflyway.password={postgres.password}",
+            cwd="../../bfd-db-migrator-ng",
+            shell=True,
+            capture_output=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as ex:
+        print(ex.output)
+        raise
+
+
 @pytest.fixture(scope="session", autouse=True)
 def psql_url() -> Generator[str]:
     with PostgresContainer("postgres:16", driver="") as postgres:
@@ -30,10 +53,8 @@ def psql_url() -> Generator[str]:
         with Path("./mock-idr.sql").open() as f:
             conn.execute(f.read())  # type: ignore
         conn.commit()
-        with Path("./bfd.sql").open() as f:
-            conn.execute(f.read())  # type: ignore
-        conn.commit()
 
+        _run_migrator(postgres)
         load_from_csv(conn, "./test_samples1")
 
         yield psql_url
