@@ -776,36 +776,6 @@
   VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
   uasJ/R5hG+geJ+ydxt8EmVKpmA==
   -----END CERTIFICATE-----
-/bfd/${env}/server/nonsensitive/client_certificates/bfd_sandbox_pentest: |-
-  -----BEGIN CERTIFICATE-----
-  MIIE4DCCAsigAwIBAgIJAP3m5mKhXrnzMA0GCSqGSIb3DQEBDAUAMB4xHDAaBgNV
-  BAMTE2JmZC1zYW5kYm94LXBlbnRlc3QwHhcNMjUwOTEyMjEyMTU4WhcNMjcwOTEy
-  MjEyMTU4WjAeMRwwGgYDVQQDExNiZmQtc2FuZGJveC1wZW50ZXN0MIICIjANBgkq
-  hkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA67FA+t31TIXy9r/Sq2MAVhHCfQEYo93b
-  Mr8fdpV1JUMFW3RFyekuHwS897yrup0uOpQ2rPE6Cqn/gjHOX2mTS2ZptXp8AgWM
-  lqgAk9QA/qTlfxnYvxz6LHVgBvOinaEWftgn1zyu9hWGiPA+nz4oB8tskrfLvxQ+
-  J6igpfA4jSX4wwm86twygPr6jxrqMvLFFbSs1Nmr5IFexuRPuNPxQW+crl1f6JpR
-  oVTiCo6d3GKzkHGrNY9+83oY2OTfvXeY/c0rLMrl0dNHl/QX5oTw0Qjswy6pPmh3
-  KzyGF8G0yFkrZHMNyPV7nrCcZ40lBHUX4VCCCFClUKVEbG4ZggNkg07cxlp1scFs
-  9q+gSRrWCPHW5fI/2vy86ihjmcDnSeZhyjomuTENVwGGDK6+lRgEoe1pVtjGoSkt
-  QUEPdI8ez1LL0KutTmiDziFEOUTO2H7qukeLpx7yFCVkuTEvg8JewOvF+z4eWC89
-  O3AdNbnq8DrEWkITwYezMRPr2+m7q1UzDvXbZ7NNFfb9joHoeF/5gWJYG+8GFAqF
-  hJKjwyXtWf3WjJ8rsU3aFs5GGQeIC75SvsYyM5WKHm7SeJCyIlKdDgSIDT9B6hax
-  wwoC0ZmPbIoTh5amPmaO663KgfyRZzQafcujJ4lgk2k+AhKRgOIqysZwU/0oWpby
-  of14ZZEO8GkCAwEAAaMhMB8wHQYDVR0OBBYEFN+xMknNq9LAV6zhr1H18HrxEdRX
-  MA0GCSqGSIb3DQEBDAUAA4ICAQBwLMyu6fNVz35yab5/U4mgQc/5/l91wXgpWB19
-  dg3D+P3n+XyV1P3Lt+C204d59HNTeiyeojbx0ittrJxuLqbXMqjuyVkjapzvXRnZ
-  LVC01NHG2qPjMrUsL8EgX7EZZQwMOYHt+BLnx9joWaOfU3cW4GtaUDzafhxFyk18
-  dUzhpIRoprRqn1k7zrsRRkkHSS12WJlJu/TblBxSmZHmNtpXdgFjbTRwRT2hA6uR
-  Dri+9iFpgCILwgto7UuVLsue8TV+Sf+5xaSPET4Zbomcy9qP5uQQ+nJETzvu8lJ1
-  P3NG9QBHfKH0cgoJsprlKbwsUqJoh1dvoN+DIh/RmbPK3O6B9BXKbbi9AFpUjDtf
-  ReA1eiIpeCayh8hatdVMYYJ88s0YYIeh3dEODz+3bbMx44YPvAKGDEg0wgSSMw3c
-  v5UX9RiA5rLsOstL2tBVDxJoX0HY19gqDKsZPVT7Xuh+1t9OIYGJ0lHCWpZq4Hib
-  L4TeIY9d2JS20cmapa1tZraqrDrkPySf3pBiEVGSQBh1Ga6BXTU/WibxSH5Qoslk
-  dNCC1enac026624Ab8+PRTq/0FUta6fNT/EDwQ5isxwj4grj5B8dXvDRkJBNW7J1
-  upDUlxyxewplELmvJQn0BioFMo1Wc61NtwxfaEEssQaiWw1qrQ5doNj5OmL7pkX3
-  Bf/HFw==
-  -----END CERTIFICATE-----
 /bfd/${env}/server/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
@@ -1418,36 +1388,6 @@
   THwBCPrZEN9PhXPIk5KQjLPC6hqecrwPjqdwEmtVcxZWKch1ZwiZw8zzja6hPgFg
   VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
   uasJ/R5hG+geJ+ydxt8EmVKpmA==
-  -----END CERTIFICATE-----
-/bfd/${env}/server-ng/nonsensitive/client_certificates/bfd_sandbox_pentest: |-
-  -----BEGIN CERTIFICATE-----
-  MIIE4DCCAsigAwIBAgIJAP3m5mKhXrnzMA0GCSqGSIb3DQEBDAUAMB4xHDAaBgNV
-  BAMTE2JmZC1zYW5kYm94LXBlbnRlc3QwHhcNMjUwOTEyMjEyMTU4WhcNMjcwOTEy
-  MjEyMTU4WjAeMRwwGgYDVQQDExNiZmQtc2FuZGJveC1wZW50ZXN0MIICIjANBgkq
-  hkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA67FA+t31TIXy9r/Sq2MAVhHCfQEYo93b
-  Mr8fdpV1JUMFW3RFyekuHwS897yrup0uOpQ2rPE6Cqn/gjHOX2mTS2ZptXp8AgWM
-  lqgAk9QA/qTlfxnYvxz6LHVgBvOinaEWftgn1zyu9hWGiPA+nz4oB8tskrfLvxQ+
-  J6igpfA4jSX4wwm86twygPr6jxrqMvLFFbSs1Nmr5IFexuRPuNPxQW+crl1f6JpR
-  oVTiCo6d3GKzkHGrNY9+83oY2OTfvXeY/c0rLMrl0dNHl/QX5oTw0Qjswy6pPmh3
-  KzyGF8G0yFkrZHMNyPV7nrCcZ40lBHUX4VCCCFClUKVEbG4ZggNkg07cxlp1scFs
-  9q+gSRrWCPHW5fI/2vy86ihjmcDnSeZhyjomuTENVwGGDK6+lRgEoe1pVtjGoSkt
-  QUEPdI8ez1LL0KutTmiDziFEOUTO2H7qukeLpx7yFCVkuTEvg8JewOvF+z4eWC89
-  O3AdNbnq8DrEWkITwYezMRPr2+m7q1UzDvXbZ7NNFfb9joHoeF/5gWJYG+8GFAqF
-  hJKjwyXtWf3WjJ8rsU3aFs5GGQeIC75SvsYyM5WKHm7SeJCyIlKdDgSIDT9B6hax
-  wwoC0ZmPbIoTh5amPmaO663KgfyRZzQafcujJ4lgk2k+AhKRgOIqysZwU/0oWpby
-  of14ZZEO8GkCAwEAAaMhMB8wHQYDVR0OBBYEFN+xMknNq9LAV6zhr1H18HrxEdRX
-  MA0GCSqGSIb3DQEBDAUAA4ICAQBwLMyu6fNVz35yab5/U4mgQc/5/l91wXgpWB19
-  dg3D+P3n+XyV1P3Lt+C204d59HNTeiyeojbx0ittrJxuLqbXMqjuyVkjapzvXRnZ
-  LVC01NHG2qPjMrUsL8EgX7EZZQwMOYHt+BLnx9joWaOfU3cW4GtaUDzafhxFyk18
-  dUzhpIRoprRqn1k7zrsRRkkHSS12WJlJu/TblBxSmZHmNtpXdgFjbTRwRT2hA6uR
-  Dri+9iFpgCILwgto7UuVLsue8TV+Sf+5xaSPET4Zbomcy9qP5uQQ+nJETzvu8lJ1
-  P3NG9QBHfKH0cgoJsprlKbwsUqJoh1dvoN+DIh/RmbPK3O6B9BXKbbi9AFpUjDtf
-  ReA1eiIpeCayh8hatdVMYYJ88s0YYIeh3dEODz+3bbMx44YPvAKGDEg0wgSSMw3c
-  v5UX9RiA5rLsOstL2tBVDxJoX0HY19gqDKsZPVT7Xuh+1t9OIYGJ0lHCWpZq4Hib
-  L4TeIY9d2JS20cmapa1tZraqrDrkPySf3pBiEVGSQBh1Ga6BXTU/WibxSH5Qoslk
-  dNCC1enac026624Ab8+PRTq/0FUta6fNT/EDwQ5isxwj4grj5B8dXvDRkJBNW7J1
-  upDUlxyxewplELmvJQn0BioFMo1Wc61NtwxfaEEssQaiWw1qrQ5doNj5OmL7pkX3
-  Bf/HFw==
   -----END CERTIFICATE-----
 /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_root_ca_test", "bluebutton_root_ca_sbx", "bb2_local_client", "bluebutton_backend_test_samhsa", "regression_tests"]'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3
