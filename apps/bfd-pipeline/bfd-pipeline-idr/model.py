@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
@@ -618,6 +619,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
         WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
+
 
 def claim_type_clause(start_time: datetime) -> str:
     fetch_latest_claims = "IDR_LATEST_CLAIMS" in os.environ and os.environ["IDR_LATEST_CLAIMS"] in (
