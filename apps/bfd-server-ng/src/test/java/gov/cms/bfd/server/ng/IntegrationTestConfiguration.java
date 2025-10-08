@@ -40,6 +40,24 @@ public class IntegrationTestConfiguration {
     container.start();
     runPython(container, "uv", "sync");
     runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
+
+    // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
+    // Reason: PAC data older than 60 days is filtered by coalescing
+    // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
+    // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
+
+    container.execInContainer(
+        "psql",
+        "-U",
+        "bfdtest",
+        "-d",
+        "testdb",
+        "-c",
+        "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
+            + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
+            + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
+            + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
+
     runPython(container, "uv", "run", "pipeline.py", "synthetic");
 
     return container;
