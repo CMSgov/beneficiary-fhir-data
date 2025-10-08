@@ -87,7 +87,7 @@ def extract_and_load(
     connection_string: str,
 ) -> tuple[PostgresLoader, bool]:
     logger.info("loading %s", cls.table())
-    batch_start = datetime.now()
+    batch_start = datetime.now(UTC)
 
     last_error = datetime.min.replace(tzinfo=UTC)
     loader = PostgresLoader(connection_string)
