@@ -634,7 +634,7 @@ def claim_type_clause(start_time: datetime) -> str:
     start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {add_latest_claim_ind}
         AND
         (
