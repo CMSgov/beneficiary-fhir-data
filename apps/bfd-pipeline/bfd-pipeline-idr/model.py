@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
@@ -629,7 +629,9 @@ def claim_type_clause(start_time: datetime) -> str:
                 ','.join([str(c) for c in PART_D_CLAIM_TYPE_CODES])
             }))"
         )
-    start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
+    # PAC data older than 60 days should be filtered
+    pac_cutoff_date = start_time - timedelta(days=60)
+    start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
         {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
