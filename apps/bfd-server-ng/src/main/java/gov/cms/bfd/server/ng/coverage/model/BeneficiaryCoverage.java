@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
@@ -28,11 +28,11 @@ import org.hl7.fhir.r4.model.Reference;
 public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
-  private Set<BeneficiaryEntitlement> beneficiaryEntitlements;
+  private SortedSet<BeneficiaryEntitlement> beneficiaryEntitlements;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
-  private Set<BeneficiaryThirdParty> beneficiaryThirdParties;
+  private SortedSet<BeneficiaryThirdParty> beneficiaryThirdParties;
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")

@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -86,7 +86,7 @@ public class Claim {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
-  private Set<ClaimItem> claimItems;
+  private SortedSet<ClaimItem> claimItems;
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
@@ -140,16 +140,14 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    claimItems.stream()
-        .sorted(Comparator.comparing(c -> c.getClaimItemId().getBfdRowId()))
-        .forEach(
-            item -> {
-              item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
-              item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
-              item.getClaimProcedure()
-                  .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
-                  .ifPresent(eob::addDiagnosis);
-            });
+    claimItems.forEach(
+        item -> {
+          item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
+          item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
+          item.getClaimProcedure()
+              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
+              .ifPresent(eob::addDiagnosis);
+        });
     billingProvider
         .toFhir(claimTypeCode)
         .ifPresent(
