@@ -131,7 +131,7 @@ jobs:
           echo "Validating inputs to ensure they conform to expected formats..."
           echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
@@ -293,7 +293,7 @@ jobs:
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}

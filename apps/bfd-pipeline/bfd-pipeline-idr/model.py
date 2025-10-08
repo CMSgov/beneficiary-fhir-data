@@ -1,4 +1,3 @@
-import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from datetime import UTC, date, datetime
@@ -620,7 +619,6 @@ class IdrContractPbpNumber(IdrBaseModel):
         WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
 
-
 def claim_type_clause(start_time: datetime) -> str:
     fetch_latest_claims = "IDR_LATEST_CLAIMS" in os.environ and os.environ["IDR_LATEST_CLAIMS"] in (
         "1",
@@ -634,7 +632,7 @@ def claim_type_clause(start_time: datetime) -> str:
     start_time_sql = start_time.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
         {add_latest_claim_ind}
         AND
         (
@@ -644,15 +642,15 @@ def claim_type_clause(start_time: datetime) -> str:
                                 '{MCS_CLM_SOURCE}',
                                 '{VMS_CLM_SOURCE}'
                             )
-                AND 
+                AND
                 COALESCE(
                     {ALIAS_CLM}.idr_updt_ts,
                     {ALIAS_CLM}.idr_insrt_ts,
-                    {ALIAS_CLM}.clm_idr_ld_dt)  >= {start_time_sql}
-            ) 
+                    {ALIAS_CLM}.clm_idr_ld_dt) >= {start_time_sql}
+            )
             OR {ALIAS_CLM}.clm_src_id = '{NCH_CLM_SOURCE}'
         )
-        )
+    )
     """
 
 
@@ -994,7 +992,7 @@ class IdrClaimItem(IdrBaseModel):
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
         val = ALIAS_VAL
-        # This query is taking all of the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
+        # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
         # do three separate database queries to load these in the server, or we have to join on each
@@ -1012,7 +1010,7 @@ class IdrClaimItem(IdrBaseModel):
         #      itself and are not monotonically increasing.
         #      We perform an intermediary step to create our own line number for clm_prod values.
         #   3. Take our list of claim_uniq_id + line number and left join each table against it to
-        #      to get the final result.
+        #      get the final result.
 
         return f"""
                 WITH claims AS (
@@ -1045,11 +1043,13 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_uniq_id, 
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id
+                            ORDER BY {clm}.clm_uniq_id,
+                                {prod}.clm_prod_type_cd,
+                                {prod}.clm_val_sqnc_num
                         ) AS row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
                     JOIN claims {clm} 
-                        ON prod.geo_bene_sk = {clm}.geo_bene_sk
+                        ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
@@ -1058,7 +1058,7 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_uniq_id, 
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id
+                            ORDER BY {clm}.clm_uniq_id, {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
                     JOIN claims {clm} 
@@ -1072,8 +1072,10 @@ class IdrClaimItem(IdrBaseModel):
                     {clm}.clm_uniq_id, 
                     {prod}.*, 
                     ROW_NUMBER() OVER (
-                        PARTITION BY clm_uniq_id 
-                        ORDER BY clm_uniq_id
+                        PARTITION BY {clm}.clm_uniq_id 
+                        ORDER BY {clm}.clm_uniq_id,
+                            {prod}.clm_prod_type_cd,
+                            {prod}.clm_val_sqnc_num
                     ) AS line_num
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
                     JOIN claims {clm} 

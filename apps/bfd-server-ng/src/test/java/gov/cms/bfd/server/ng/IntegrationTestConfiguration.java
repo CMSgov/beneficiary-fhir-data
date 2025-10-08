@@ -55,8 +55,8 @@ public class IntegrationTestConfiguration {
         "-c",
         "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
             + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
-            + "\"idr_insrt_ts\" = CURRENT_DATE,"
-            + "\"idr_updt_ts\" = CURRENT_DATE;");
+            + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
+            + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
 
     runPython(container, "uv", "run", "pipeline.py", "synthetic");
 
