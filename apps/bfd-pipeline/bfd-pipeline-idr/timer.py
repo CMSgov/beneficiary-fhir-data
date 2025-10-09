@@ -2,7 +2,7 @@ import logging
 import sys
 import time
 
-logger = logging.getLogger("pipeline_timer")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 if not logger.handlers:
     console_handler = logging.StreamHandler(sys.stdout)

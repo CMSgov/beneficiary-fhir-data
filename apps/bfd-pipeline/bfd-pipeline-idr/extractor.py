@@ -19,7 +19,7 @@ cursor_execute_timer = Timer("cursor_execute")
 cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
 
-logger = logging.getLogger("pipeline_worker")
+logger = logging.getLogger(__name__)
 
 
 def get_min_transaction_date() -> datetime:
@@ -32,6 +32,10 @@ def get_min_transaction_date() -> datetime:
 class Extractor(ABC):
     @abstractmethod
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+        pass
+
+    @abstractmethod
+    def reconnect(self) -> None:
         pass
 
     def _coalesce_dates(self, cols: list[str]) -> list[str]:
@@ -115,38 +119,35 @@ class PostgresExtractor(Extractor):
     def __init__(self, connection_string: str, batch_size: int) -> None:
         super().__init__()
         self.connection_string = connection_string
+        self.conn = psycopg.connect(connection_string)
         self.batch_size = batch_size
+
+    def reconnect(self) -> None:
+        self.conn = psycopg.connect(self.connection_string)
 
     def extract_many(
         self, cls: type[T], sql: str, params: Mapping[str, DbType]
     ) -> Iterator[list[T]]:
-        conn = psycopg.connect(self.connection_string)
-        try:
-            with conn.cursor(row_factory=class_row(cls)) as cur:
-                cur.execute(sql, params)  # type: ignore
-                batch: list[T] = cur.fetchmany(self.batch_size)
-                while len(batch) > 0:
-                    yield batch
-                    batch = cur.fetchmany(self.batch_size)
-        finally:
-            if conn:
-                conn.close()
+        with self.conn.cursor(row_factory=class_row(cls)) as cur:
+            cur.execute(sql, params)  # type: ignore
+            batch: list[T] = cur.fetchmany(self.batch_size)
+            while len(batch) > 0:
+                yield batch
+                batch = cur.fetchmany(self.batch_size)
 
     def extract_single(self, cls: type[T], sql: str, params: dict[str, DbType]) -> T | None:
-        conn = psycopg.connect(self.connection_string)
-        try:
-            with conn.cursor(row_factory=class_row(cls)) as cur:
-                cur.execute(sql, params)  # type: ignore
-                return cur.fetchone()
-        finally:
-            if conn:
-                conn.close()
+        with self.conn.cursor(row_factory=class_row(cls)) as cur:
+            cur.execute(sql, params)  # type: ignore
+            return cur.fetchone()
 
 
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int) -> None:
-        super().__init__()
+        self.conn = SnowflakeExtractor._connect()
         self.batch_size = batch_size
+
+    def reconnect(self) -> None:
+        self.conn = SnowflakeExtractor._connect()
 
     @staticmethod
     def _connect() -> SnowflakeConnection:
@@ -171,11 +172,10 @@ class SnowflakeExtractor(Extractor):
 
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         cur = None
-        conn = self._connect()
 
         try:
             cursor_execute_timer.start()
-            cur = conn.cursor(DictCursor)
+            cur = self.conn.cursor(DictCursor)
             cur.execute(sql, params)
             cursor_execute_timer.stop(cls)
 
@@ -200,5 +200,3 @@ class SnowflakeExtractor(Extractor):
         finally:
             if cur:
                 cur.close()
-            if conn:
-                conn.close()

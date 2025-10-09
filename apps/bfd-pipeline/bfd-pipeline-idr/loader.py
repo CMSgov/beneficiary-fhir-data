@@ -15,7 +15,7 @@ copy_timer = Timer("copy")
 insert_timer = Timer("insert")
 commit_timer = Timer("commit")
 
-logger = logging.getLogger("pipeline_worker")
+logger = logging.getLogger(__name__)
 
 
 def get_connection_string() -> str:
@@ -30,16 +30,11 @@ class PostgresLoader:
         self,
         connection_string: str,
     ) -> None:
-        self.connection_string = connection_string
+        self.conn = psycopg.connect(connection_string)
 
     def run_sql(self, sql: str) -> None:
-        conn = psycopg.connect(self.connection_string)
-        try:
-            conn.execute(sql)  # type: ignore
-            conn.commit()
-        finally:
-            if conn:
-                conn.close()
+        self.conn.execute(sql)  # type: ignore
+        self.conn.commit()
 
     def load(
         self,
@@ -48,8 +43,7 @@ class PostgresLoader:
         batch_start: datetime,
         progress: LoadProgress | None,
     ) -> bool:
-        conn = psycopg.connect(self.connection_string)
-        return BatchLoader(conn, fetch_results, model, batch_start, progress).load()
+        return BatchLoader(self.conn, fetch_results, model, batch_start, progress).load()
 
 
 class BatchLoader:
