@@ -41,15 +41,10 @@ def main() -> None:
         .build()
     )
 
-    graph = dr.graph
-    for node_name, node in graph.nodes.items():
-        print(f"Node: {node_name}")
-        print(f" Dependencies (incoming edges): {list(node.input_types.keys())}")
-
     batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
-        connection_string = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
+        connection_string = "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
     elif mode == "synthetic":
         connection_string = get_connection_string()
     else:
