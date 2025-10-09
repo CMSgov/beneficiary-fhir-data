@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def get_connection_string() -> str:
     port = os.environ.get("BFD_DB_PORT") or "5432"
-    dbname = os.environ.get("BFD_DB_NAME") or "idr"
+    dbname = os.environ.get("BFD_DB_NAME") or "fhirdb"
     return f"host={os.environ['BFD_DB_ENDPOINT']} port={port} dbname={dbname} \
         user={os.environ['BFD_DB_USERNAME']} password={os.environ['BFD_DB_PASSWORD']}"
 

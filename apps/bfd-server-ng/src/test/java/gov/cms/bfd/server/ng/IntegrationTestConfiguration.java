@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Map;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -34,15 +36,55 @@ public class IntegrationTestConfiguration {
             .withUsername("bfdtest")
             .withPassword("bfdtest")
             .waitingFor(Wait.forListeningPort())
-            .withInitScripts(
-                new ClassPathResource("mock-idr.sql").getPath(),
-                new ClassPathResource("bfd.sql").getPath());
+            .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
     container.start();
+    runMigrator(container);
+
     runPython(container, "uv", "sync");
     runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
+
+    // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
+    // Reason: PAC data older than 60 days is filtered by coalescing
+    // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
+    // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
+
+    container.execInContainer(
+        "psql",
+        "-U",
+        "bfdtest",
+        "-d",
+        "testdb",
+        "-c",
+        "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
+            + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
+            + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
+            + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
+
     runPython(container, "uv", "run", "pipeline.py", "synthetic");
 
     return container;
+  }
+
+  private void runMigrator(PostgreSQLContainer<?> container) {
+    var flyway =
+        Flyway.configure()
+            .configuration(
+                Map.of(
+                    "flyway.schemas",
+                    "idr",
+                    "flyway.url",
+                    container.getJdbcUrl(),
+                    "flyway.user",
+                    container.getUsername(),
+                    "flyway.password",
+                    container.getPassword(),
+                    "flyway.locations",
+                    "filesystem:" + Paths.get(baseDir, "../bfd-db-migrator-ng/migrations")))
+            .load();
+    var result = flyway.migrate();
+    if (!result.success) {
+      throw new RuntimeException(result.exceptionObject);
+    }
   }
 
   private void runPython(PostgreSQLContainer<?> container, String... args)
