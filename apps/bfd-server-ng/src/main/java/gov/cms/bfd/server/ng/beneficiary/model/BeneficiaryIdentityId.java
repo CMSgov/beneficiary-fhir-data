@@ -5,10 +5,16 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /** Represents the composite primary key for the {@link BeneficiaryIdentity} entity. */
+@EqualsAndHashCode
+@NoArgsConstructor
 @Getter
+@AllArgsConstructor
 @Embeddable
 public class BeneficiaryIdentityId implements Serializable {
 

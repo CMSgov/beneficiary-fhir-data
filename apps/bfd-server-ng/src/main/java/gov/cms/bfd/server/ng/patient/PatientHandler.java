@@ -73,21 +73,21 @@ public class PatientHandler {
       }
 
       id.toFhirLink(Long.parseLong(patient.getId()))
-          .ifPresent(
-              generatedLink -> {
-                if (patient.getLink().stream()
-                    .noneMatch(
-                        existingLink ->
-                            existingLink.getType() == generatedLink.getType()
-                                && existingLink
-                                    .getOther()
-                                    .getReference()
-                                    .equals(generatedLink.getOther().getReference()))) {
-                  patient.addLink(generatedLink);
-                }
-              });
+          .filter(generatedLink -> !isDuplicateLink(patient, generatedLink))
+          .ifPresent(patient::addLink);
     }
 
     return patient;
+  }
+
+  private boolean isDuplicateLink(Patient patient, Patient.PatientLinkComponent newLink) {
+    return patient.getLink().stream()
+        .anyMatch(
+            existingLink ->
+                existingLink.getType() == newLink.getType()
+                    && existingLink
+                        .getOther()
+                        .getReference()
+                        .equals(newLink.getOther().getReference()));
   }
 }
