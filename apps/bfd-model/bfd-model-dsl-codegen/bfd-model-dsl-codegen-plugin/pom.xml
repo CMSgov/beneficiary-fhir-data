@@ -124,15 +124,14 @@
                     <artifactId>maven-plugin-plugin</artifactId>
                     <version>${maven.plugin.version}</version>
                     <configuration>
-                        <!-- Explicit goalPrefix avoids descriptor generation errors when the
-                             plugin artifactId doesn't map cleanly to a single prefix. -->
+                        <!-- Explicit goalPrefix avoids descriptor generation errors. -->
                         <goalPrefix>bfd-model-dsl-codegen</goalPrefix>
                     </configuration>
                     <dependencies>
                         <dependency>
                         <groupId>org.ow2.asm</groupId>
                         <artifactId>asm</artifactId>
-                        <version>9.8</version>
+                        <version>${asm.version}</version>
                         </dependency>
                     </dependencies>
                     <executions>
