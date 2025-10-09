@@ -143,6 +143,7 @@ class PostgresExtractor(Extractor):
 
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int) -> None:
+        super().__init__()
         self.conn = SnowflakeExtractor._connect()
         self.batch_size = batch_size
 

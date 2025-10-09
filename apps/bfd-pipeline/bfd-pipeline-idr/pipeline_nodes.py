@@ -49,7 +49,7 @@ def idr_claims(
     )
 
 
-# if initial load, Stage 2: Load only overshared MBIs after loading in ALL claim tables
+# Stage 2: Load only overshared MBIs after loading in ALL claim tables
 @config.when(load_type="initial")
 def idr_beneficiary_overshare_mbi_initial(
     idr_claim_institutional: bool,
@@ -73,7 +73,7 @@ def idr_beneficiary_overshare_mbi_initial(
     )
 
 
-# Stage 4: Load auxiliary beneficiary tables in parallel
+# Stage 3: Load auxiliary beneficiary tables in parallel
 @config.when(load_type="initial")
 @parameterize(
     idr_beneficiary_status=dict(cls=value(IdrBeneficiaryStatus)),
