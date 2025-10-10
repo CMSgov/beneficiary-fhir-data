@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
@@ -24,12 +25,23 @@ class FhirInputConverterTest {
     assertEquals(List.of(), FhirInputConverter.getSourceIdsForTagCode(null));
     assertEquals(List.of(), FhirInputConverter.getSourceIdsForTagCode(new TokenParam()));
 
+    var emptyId = new IdType();
+    var blankId = new IdType("");
+
+    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(null));
+    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(emptyId));
+    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(blankId));
+
+    var emptyReference = new ReferenceParam();
+
+    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(null, ""));
+    assertThrows(
+        InvalidRequestException.class, () -> FhirInputConverter.toLong(emptyReference, ""));
+
     assertThrows(
         InvalidRequestException.class, () -> FhirInputConverter.toCoverageCompositeId(null));
-    var emptyId = new IdType();
     assertThrows(
         InvalidRequestException.class, () -> FhirInputConverter.toCoverageCompositeId(emptyId));
-    var blankId = new IdType("");
     assertThrows(
         InvalidRequestException.class, () -> FhirInputConverter.toCoverageCompositeId(blankId));
 

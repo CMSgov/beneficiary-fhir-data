@@ -49,7 +49,11 @@ public class FhirInputConverter {
       throw new InvalidRequestException("ID is missing");
     }
     try {
-      return id.getIdPartAsLong();
+      var longId = id.getIdPartAsLong();
+      if (longId == null) {
+        throw new InvalidRequestException("ID is not a valid number");
+      }
+      return longId;
     } catch (NumberFormatException ex) {
       throw new InvalidRequestException("ID is not a valid number");
     }
@@ -80,7 +84,7 @@ public class FhirInputConverter {
    * @return ID
    */
   public static Long toLong(@Nullable ReferenceParam reference, String validResourceType) {
-    if (reference == null) {
+    if (reference == null || reference.getIdPartAsLong() == null) {
       throw new InvalidRequestException("Reference is missing");
     }
     var resourceType = reference.getResourceType();
