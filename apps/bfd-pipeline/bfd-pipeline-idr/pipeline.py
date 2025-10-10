@@ -55,7 +55,7 @@ def main() -> None:
     load_claims = parse_bool(os.environ.get("IDR_LOAD_CLAIMS", "true"))
 
     logger.info(f"load_benes: {load_benes}")
-    print(f"load_claims: {load_claims}")
+    logger.info(f"load_claims: {load_claims}")
 
     if load_benes and load_claims:
         dr.execute(
