@@ -51,7 +51,7 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 - Add the data to `bfd.sql` (BFD database definition)
 - Add the data to `model.py`, queries will be auto-generated using those fields
 - Add the data to `generator_util.py`, for synthetic data generation
-- If adding a new table, register it in the call to `load_all` in `pipeline.py`
+- If adding a new table, register it in `main` for the corresponding states (initial load vs incremental load and bene only vs claims only vs all claims load-in) in `pipeline.py`
 - If adding a new table, register it in the list of CSVs to load in `load_synthetic.py`
 
 ## Loading synthetic data
