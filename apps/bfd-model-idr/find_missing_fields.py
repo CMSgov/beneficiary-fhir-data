@@ -43,29 +43,47 @@ def extract_csv_columns(csv_path: Path) -> set[str]:
         columns = [row[0].strip().lower() for row in reader if row and row[0].strip()]
     return set(columns)
 
+def extract_cclf_fields(csv_path: Path) -> set[str]:
+    fields = set()
 
-def main(csv_file: str, *yaml_files: str) -> None:
+    with open(csv_path, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            populated = row.get("Populated in CCLF?", "").strip().lower()
+            field = row.get("Field", "").strip()
+            if populated == "yes" and field:
+                fields.add(field.lower())
+    return fields
+
+def main(cclf_file: str, csv_file: str, *yaml_files: str) -> None:
     yaml_paths = [Path(yaml_file) for yaml_file in yaml_files]
     yaml_columns = extract_source_columns(yaml_paths)
     csv_columns = extract_csv_columns(Path(csv_file))
+    cclf_columns = extract_cclf_fields(Path(cclf_file))
 
     missing_in_csv = yaml_columns - csv_columns
     extra_in_csv = csv_columns - yaml_columns
+    missing_from_cclf = cclf_columns - csv_columns
 
     print("\n=== Comparison Results ===")
 
     if missing_in_csv:
         print("YAML fields missing in schema")
         for col in sorted(missing_in_csv):
-            print(f" - {col}")
+            print(f" {col}")
     else:
         print("All YAML fields are present in schema")
 
     if extra_in_csv:
         print("\nExtra columns in schema not found in YAML:")
         for col in sorted(extra_in_csv):
-            print(f" - {col}")
+            print(f" {col}")
+
+    if missing_from_cclf:
+        print("\nCCLF fields missing in schema:")
+        for col in sorted(missing_from_cclf):
+            print(f" {col}")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], *sys.argv[2:])
+    main(sys.argv[1], sys.argv[2],*sys.argv[3:])
