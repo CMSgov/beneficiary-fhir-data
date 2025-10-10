@@ -32,7 +32,7 @@ def main() -> None:
     dict_builder = base.DictResult()
     adapter = RayGraphAdapter(result_builder=dict_builder)
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
-    print(f"load_type: {load_type}")
+    logger.info(f"load_type: {load_type}")
     dr = (
         driver.Builder()
         .with_config({"load_type": load_type})
