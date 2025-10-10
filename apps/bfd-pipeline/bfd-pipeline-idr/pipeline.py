@@ -8,6 +8,7 @@ from hamilton import base, driver
 from hamilton.plugins.h_ray import RayGraphAdapter
 
 import pipeline_nodes
+from constants import CLAIM_AUX_TABLES
 from loader import get_connection_string
 
 console_handler = logging.StreamHandler()
@@ -32,7 +33,7 @@ def main() -> None:
     dict_builder = base.DictResult()
     adapter = RayGraphAdapter(result_builder=dict_builder)
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
-    logger.info(f"load_type: {load_type}")
+    logger.info("load_type %s", load_type)
     dr = (
         driver.Builder()
         .with_config({"load_type": load_type})
@@ -45,8 +46,6 @@ def main() -> None:
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
         connection_string = "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
-    elif mode == "synthetic":
-        connection_string = get_connection_string()
     else:
         connection_string = get_connection_string()
 
@@ -54,8 +53,8 @@ def main() -> None:
     load_benes = parse_bool(os.environ.get("IDR_LOAD_BENES", "true"))
     load_claims = parse_bool(os.environ.get("IDR_LOAD_CLAIMS", "true"))
 
-    logger.info(f"load_benes: {load_benes}")
-    logger.info(f"load_claims: {load_claims}")
+    logger.info("load_benes %s", load_benes)
+    logger.info("load_claims %s", load_claims)
 
     if load_benes and load_claims:
         dr.execute(
@@ -69,18 +68,8 @@ def main() -> None:
     elif load_benes:
         # Since the DAG contains the dependency ordering, we need to override all claims nodes
         # in order to skip them and load only beneficiary data
-        overrides = {
-            "idr_claim": None,
-            "idr_claim_initial": None,
-            "idr_claim_institutional": None,
-            "idr_claim_date_signature": None,
-            "idr_claim_fiss": None,
-            "idr_claim_item": None,
-            "idr_claim_line_institutional": None,
-            "idr_claim_ansi_signature": None,
-            "idr_claim_professional": None,
-            "idr_claim_line_professional": None,
-        }
+        overrides = {table: None for table in CLAIM_AUX_TABLES}
+        overrides["idr_claim"] = None
         dr.execute(
             final_vars=["idr_beneficiary"],
             overrides=overrides,
@@ -93,17 +82,7 @@ def main() -> None:
     elif load_claims and load_type == "initial":
         # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
         dr.execute(
-            final_vars=[
-                "idr_claim_institutional",
-                "idr_claim_date_signature",
-                "idr_claim_fiss",
-                "idr_claim_item",
-                "idr_claim_line_institutional",
-                "idr_claim_ansi_signature",
-                "idr_claim_professional",
-                "idr_claim_line_professional",
-                "idr_claim_initial",
-            ],
+            final_vars=CLAIM_AUX_TABLES,
             inputs={
                 "config_mode": mode,
                 "config_batch_size": batch_size,
