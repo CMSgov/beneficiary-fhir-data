@@ -6,8 +6,11 @@
 
     <property name="LOG_FILE" value="target/failsafe-reports/logs/integration-tests-${PID:-0}.log"/>
 
+    <appender name="THREAD_SAFE_APPENDER" class="gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender"/>
+
     <root level="${logback.level:-info}">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
+        <appender-ref ref="THREAD_SAFE_APPENDER"/>
     </root>
 </configuration>

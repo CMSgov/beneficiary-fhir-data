@@ -22,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
  * the API.
  */
 public class FhirInputConverter {
+  private FhirInputConverter() {}
+
   /**
    * Converts a {@link DateRangeParam} to a {@link DateTimeRange}.
    *
@@ -60,7 +62,7 @@ public class FhirInputConverter {
    * @return int value
    */
   public static Optional<Integer> toIntOptional(@Nullable NumberParam numberParam) {
-    if (numberParam == null) {
+    if (numberParam == null || numberParam.getValue() == null) {
       return Optional.empty();
     }
     try {
@@ -123,8 +125,7 @@ public class FhirInputConverter {
       throw new InvalidRequestException("Coverage ID must not be null or empty");
     }
 
-    String rawCompositeIdStr = coverageId.getIdPart();
-
+    var rawCompositeIdStr = coverageId.getIdPart();
     return CoverageCompositeId.parse(rawCompositeIdStr);
   }
 
@@ -136,12 +137,11 @@ public class FhirInputConverter {
    * @return A list of matching ClaimSourceId enums.
    */
   public static List<ClaimSourceId> getSourceIdsForTagCode(@Nullable TokenParam tag) {
-
-    if (tag == null) {
+    if (tag == null || tag.getValue() == null) {
       return Collections.emptyList();
     }
 
-    Set<String> SUPPORTED_ADJUDICATION_STATUSES =
+    var supportedAdjudicationStatuses =
         Set.of(
             IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
             IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
@@ -150,26 +150,26 @@ public class FhirInputConverter {
 
     if (systemFromTag != null && !systemFromTag.equals(SystemUrls.SYS_ADJUDICATION_STATUS)) {
       throw new InvalidRequestException(
-          "Unsupported system for _tag adjudication status. Expected system '"
-              + SystemUrls.SYS_ADJUDICATION_STATUS
-              + "'.");
+          String.format(
+              "Unsupported system for _tag adjudication status. Expected system '%s'.",
+              SystemUrls.SYS_ADJUDICATION_STATUS));
     }
 
     var statusValue = tag.getValue();
 
-    if (!SUPPORTED_ADJUDICATION_STATUSES.contains(statusValue.toUpperCase())) {
+    if (!supportedAdjudicationStatuses.contains(statusValue.toUpperCase())) {
       throw new InvalidRequestException(
-          "Unsupported _tag value for adjudication status. Supported values are '"
-              + IdrConstants.ADJUDICATION_STATUS_PARTIAL
-              + "' and '"
-              + IdrConstants.ADJUDICATION_STATUS_FINAL
-              + "'.");
+          String.format(
+              "Unsupported _tag value for adjudication status. Supported values are '%s' and '%s'.",
+              IdrConstants.ADJUDICATION_STATUS_PARTIAL, IdrConstants.ADJUDICATION_STATUS_FINAL));
     }
     return Stream.of(ClaimSourceId.values())
         .filter(
-            sourceId ->
-                sourceId.getAdjudicationStatus().isPresent()
-                    && sourceId.getAdjudicationStatus().get().equalsIgnoreCase(statusValue))
+            sourceId -> {
+              var adjudicationStatus = sourceId.getAdjudicationStatus();
+              return adjudicationStatus.isPresent()
+                  && adjudicationStatus.get().equalsIgnoreCase(statusValue);
+            })
         .toList();
   }
 }

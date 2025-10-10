@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-public class ServerConfigurationIT extends IntegrationTestBase {
+class ServerConfigurationIT extends IntegrationTestBase {
 
   static final String EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT =
       "HAPI-0302: Unknown resource type 'ExplanationOfBenefit'";
