@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 IDR_USERNAME="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/idr_username --with-decryption --query "Parameter.Value" --output text)"
 export IDR_USERNAME
 IDR_PRIVATE_KEY="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitive/idr_private_key --with-decryption --query "Parameter.Value" --output text)"

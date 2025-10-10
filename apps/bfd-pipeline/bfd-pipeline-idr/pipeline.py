@@ -46,7 +46,7 @@ def main() -> None:
     batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
-        pg_local = "host=localhost dbname=idr user=bfd password=InsecureLocalDev"
+        pg_local = "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
         run_pipeline(
             PostgresExtractor(
                 connection_string=pg_local,
@@ -87,8 +87,7 @@ def extract_and_load(
     connection_string: str,
 ) -> tuple[PostgresLoader, bool]:
     logger.info("loading %s", cls.table())
-    # PAC data older than 60days should be filtered
-    batch_start = datetime.now(UTC) - timedelta(days=60)
+    batch_start = datetime.now(UTC)
 
     last_error = datetime.min.replace(tzinfo=UTC)
     loader = PostgresLoader(connection_string)
