@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.api.Constants;
@@ -8,10 +9,14 @@ import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.eob.EobResourceProvider;
+import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Bundle;
@@ -20,8 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class EobSearchIT extends IntegrationTestBase {
+class EobSearchIT extends IntegrationTestBase {
+  @Autowired private EobResourceProvider eobResourceProvider;
+  @Mock HttpServletRequest request;
 
   private IQuery<Bundle> searchBundle() {
     return getFhirClient()
@@ -43,6 +52,16 @@ public class EobSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @Test
+  void eobSearchQueryCount() {
+    var events = ThreadSafeAppender.startRecord();
+    var bundle =
+        eobResourceProvider.searchByPatient(
+            new ReferenceParam("178083966"), null, null, null, null, null, request);
+    assertFalse(bundle.getEntry().isEmpty());
+    assertEquals(3, queryCount(events));
   }
 
   @ParameterizedTest
@@ -239,7 +258,7 @@ public class EobSearchIT extends IntegrationTestBase {
   void eobSearchByTagEmpty(SearchStyleEnum searchStyle) {
     String validTagWithNoMatches = IdrConstants.ADJUDICATION_STATUS_PARTIAL;
 
-    Bundle eobBundle =
+    var eobBundle =
         searchBundle()
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)

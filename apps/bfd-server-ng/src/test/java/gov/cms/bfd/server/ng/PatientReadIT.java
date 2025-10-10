@@ -2,20 +2,27 @@ package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.patient.PatientResourceProvider;
+import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import io.restassured.RestAssured;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class PatientReadIT extends IntegrationTestBase {
+class PatientReadIT extends IntegrationTestBase {
+  @Autowired private PatientResourceProvider patientResourceProvider;
+
   private IReadTyped<Patient> patientRead() {
     return getFhirClient().read().resource(Patient.class);
   }
@@ -25,6 +32,14 @@ public class PatientReadIT extends IntegrationTestBase {
     var patient = patientRead().withId(Long.parseLong(BENE_ID_PART_A_ONLY)).execute();
     assertFalse(patient.isEmpty());
     expectFhir().toMatchSnapshot(patient);
+  }
+
+  @Test
+  void patientQueryCount() {
+    var events = ThreadSafeAppender.startRecord();
+    var patient = patientResourceProvider.find(new IdType(BENE_ID_PART_A_ONLY));
+    assertNotNull(patient);
+    assertEquals(2, queryCount(events));
   }
 
   @Test

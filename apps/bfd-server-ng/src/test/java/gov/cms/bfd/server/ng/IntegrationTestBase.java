@@ -4,6 +4,7 @@ import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
@@ -100,5 +101,10 @@ public class IntegrationTestBase {
 
   protected List<Extension> getExtensionByUrl(DomainResource resource, String url) {
     return resource.getExtension().stream().filter(e -> e.getUrl().equals(url)).toList();
+  }
+
+  protected long queryCount(List<ILoggingEvent> events) {
+    // SQL queries are logged under the org.hibernate.SQL logger
+    return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
   }
 }
