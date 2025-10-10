@@ -57,16 +57,16 @@ public class ClaimItem implements Comparable<ClaimItem> {
    * @return stream of ZonedDateTimes
    */
   Stream<ZonedDateTime> streamTimestamps() {
-    var itemTs = Optional.ofNullable(bfdUpdatedTimestamp).stream();
+    var itemTs = Stream.of(bfdUpdatedTimestamp);
 
     var lineInstitutionalStream =
         getClaimLineInstitutional()
             .map(
                 cli -> {
-                  var cliTs = Optional.ofNullable(cli.getBfdUpdatedTimestamp()).stream();
+                  var cliTs = Stream.of(cli.getBfdUpdatedTimestamp());
                   var ansiTs =
                       cli.getAnsiSignature()
-                          .map(ansi -> Optional.ofNullable(ansi.getBfdUpdatedTimestamp()).stream())
+                          .map(ansi -> Stream.of(ansi.getBfdUpdatedTimestamp()))
                           .orElseGet(Stream::empty);
                   return Stream.concat(cliTs, ansiTs);
                 })

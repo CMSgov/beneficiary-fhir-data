@@ -88,7 +88,7 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
 
-  private Optional<ClaimInstitutional> getClaimInstitutional() {
+  Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
 
@@ -218,16 +218,11 @@ public class Claim {
     var ciStream = getClaimInstitutional().map(ClaimInstitutional::getBfdUpdatedTimestamp).stream();
     var cfStream = getClaimFiss().map(ClaimFiss::getBfdUpdatedTimestamp).stream();
     var cdsStream = Stream.of(claimDateSignature.getBfdUpdatedTimestamp());
-    var itemsStream = claimItems.stream().flatMap(this::streamItemTimestamps);
+    var itemsStream = claimItems.stream().flatMap(ClaimItem::streamTimestamps);
 
-    var allCandidates =
-        Stream.concat(
-            Stream.of(meta.getUpdatedTimestamp()),
-            Stream.concat(
-                ciStream, Stream.concat(cfStream, Stream.concat(cdsStream, itemsStream))));
-
-    return allCandidates
-        .filter(java.util.Objects::nonNull)
+    return Stream.of(
+            Stream.of(meta.getUpdatedTimestamp()), ciStream, cfStream, cdsStream, itemsStream)
+        .flatMap(s -> s)
         .max(Comparator.naturalOrder())
         .orElse(meta.getUpdatedTimestamp());
   }
@@ -247,9 +242,5 @@ public class Claim {
     // if the order changes.
     eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
-  }
-
-  private Stream<ZonedDateTime> streamItemTimestamps(ClaimItem item) {
-    return item.streamTimestamps();
   }
 }

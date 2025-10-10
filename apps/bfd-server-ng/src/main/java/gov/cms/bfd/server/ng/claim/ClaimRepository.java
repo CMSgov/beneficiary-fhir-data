@@ -30,19 +30,6 @@ public class ClaimRepository {
       LEFT JOIN FETCH cli.ansiSignature a
     """;
 
-  private static final String CLAIM_TABLES =
-      """
-      SELECT c
-      FROM Claim c
-      JOIN FETCH c.beneficiary b
-      JOIN FETCH c.claimDateSignature AS cds
-      JOIN FETCH c.claimItems AS cl
-      LEFT JOIN FETCH c.claimInstitutional ci
-      LEFT JOIN FETCH cl.claimLineInstitutional cli
-      LEFT JOIN FETCH c.claimFiss cf
-      LEFT JOIN FETCH cli.ansiSignature a
-    """;
-
   /**
    * Search for a claim by its ID.
    *
@@ -166,6 +153,8 @@ public class ClaimRepository {
             .setParameter("claimUniqueId", claimUniqueId)
             .getResultList();
 
-    return results.stream().findFirst();
+    var optionalClaim = results.stream().findFirst();
+    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+    return optionalClaim;
   }
 }
