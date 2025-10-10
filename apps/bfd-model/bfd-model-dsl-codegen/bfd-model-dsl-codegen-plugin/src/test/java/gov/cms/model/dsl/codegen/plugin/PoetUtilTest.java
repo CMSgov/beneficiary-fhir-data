@@ -159,7 +159,7 @@ public class PoetUtilTest {
   @Test
   public void testCreateGroupedPropertiesGetter() {
     assertEquals(
-        """
+"""
 public java.util.Map<java.lang.String, java.util.Optional<java.lang.String>> getDiagnosisCodes() {
   java.util.Map<java.lang.String, java.util.Optional<java.lang.String>> diagnosisCodes = new java.util.HashMap<>();
   diagnosisCodes.put("diagnosis1Code", getDiagnosis1Code());

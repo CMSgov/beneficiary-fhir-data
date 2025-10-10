@@ -11,7 +11,7 @@ public interface ClaimTransformerInterface {
    * provide NPI tax info.
    *
    * @param claimEntity generic entity {@link Object} associated with a claim type.
-   * @param includeTaxNumbers {@link boolean} denoting inclusion of tax numbers.
+   * @param includeTaxNumbers {@code boolean} denoting inclusion of tax numbers.
    * @return {@link ExplanationOfBenefit}
    */
   ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers);

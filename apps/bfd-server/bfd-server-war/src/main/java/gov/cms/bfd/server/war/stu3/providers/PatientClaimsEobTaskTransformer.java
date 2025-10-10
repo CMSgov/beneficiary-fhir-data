@@ -196,7 +196,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   /**
    * Sets the {@link #includeTaxNumbers} which will turn on processing of NPI tax number info.
    *
-   * @param includeTaxNumbers {@link boolean} to enable/disable NPI tax number processing.
+   * @param includeTaxNumbers {@code boolean} to enable/disable NPI tax number processing.
    */
   public void setIncludeTaxNumbers(boolean includeTaxNumbers) {
     this.includeTaxNumbers = includeTaxNumbers;

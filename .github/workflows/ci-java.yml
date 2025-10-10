@@ -63,7 +63,7 @@ jobs:
       - name: 'Setup JDK'
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'corretto'
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn com.spotify.fmt:fmt-maven-plugin:check
@@ -82,7 +82,7 @@ jobs:
       - name: 'Setup JDK'
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'corretto'
           cache: 'maven'
       - name: Install uv
