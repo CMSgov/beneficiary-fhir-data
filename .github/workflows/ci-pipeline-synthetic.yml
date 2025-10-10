@@ -12,34 +12,40 @@ jobs:
   run-synthetic:
     runs-on: ubuntu-24.04
     steps:
-    - name: Checkout code
-      id: code-checkout
-      uses: actions/checkout@v4
-    - name: Install uv
-      uses: astral-sh/setup-uv@v6
-      with:
+      - name: Checkout code
+        id: code-checkout
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
           version: "0.8.10"
-    - name: Install node
-      uses: actions/setup-node@v5
-      with:
-        node-version: '22'
-    - name: Install dependencies
-      run: npm install -g fsh-sushi
-    - name: Build sushi
-      run:  |
-        cd ${{ github.workspace }}/apps/bfd-model-idr
-        sushi build ./sushi
-    - name: Ensure synthetic data pipeline runs
-      run: |
-        cd ${{ github.workspace }}/apps/bfd-model-idr
-        uv run patient_generator.py
-        uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
-        cd ../bfd-pipeline/bfd-pipeline-idr
-        ./run-db.sh
-    - name: Ensure synthetic data pipeline runs with sandbox benes
-      run: |
-        cd ${{ github.workspace }}/apps/bfd-model-idr
-        uv run patient_generator.py --benes ./Benes-Sandbox.csv
-        uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
-        cd ../bfd-pipeline/bfd-pipeline-idr
-        ./run-db.sh
+      - name: Install node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      # Maven is needed to run the migrator
+      - name: "Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "corretto"
+      - name: Install dependencies
+        run: npm install -g fsh-sushi
+      - name: Build sushi
+        run: |
+          cd ${{ github.workspace }}/apps/bfd-model-idr
+          sushi build ./sushi
+      - name: Ensure synthetic data pipeline runs
+        run: |
+          cd ${{ github.workspace }}/apps/bfd-model-idr
+          uv run patient_generator.py
+          uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
+          cd ../bfd-pipeline/bfd-pipeline-idr
+          ./run-db.sh
+      - name: Ensure synthetic data pipeline runs with sandbox benes
+        run: |
+          cd ${{ github.workspace }}/apps/bfd-model-idr
+          uv run patient_generator.py --benes ./Benes-Sandbox.csv
+          uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
+          cd ../bfd-pipeline/bfd-pipeline-idr
+          ./run-db.sh

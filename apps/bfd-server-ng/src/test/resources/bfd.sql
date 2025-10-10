@@ -1,1 +1,0 @@
-../../../../bfd-pipeline/bfd-pipeline-idr/bfd.sql

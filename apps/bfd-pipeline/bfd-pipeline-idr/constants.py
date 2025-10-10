@@ -127,3 +127,5 @@ CLAIM_TYPE_CODES = [
     2800,
     2900,
 ]
+
+PART_D_CLAIM_TYPE_CODES = [1, 2, 3, 4]

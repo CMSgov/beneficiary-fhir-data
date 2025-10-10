@@ -18,7 +18,7 @@ paths = [
 ]
 regexTarget = "match"
 regexes = [
-  '''(1EG4TE5MK73)''', # Sample notional MBI referenced as part of https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi.pdf
+    '''(1EG4TE5MK73)''', # Sample notional MBI referenced as part of https://www.cms.gov/medicare/new-medicare-card/understanding-the-mbi.pdf
 ]
 
 [allowlist]
@@ -30,6 +30,7 @@ commits = [
 ]
 paths = [
     '''apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/test/resources/FISS.ndjson''',
+    '''apps/bfd-db-migrator-ng/migrations/V1_1_0__initial.sql''',
     '''ops/ansible/roles/bfd-server/test/test_basic.yml''',
     '''apps/bfd-server/dev/ssl-stores/client-unsecured-key.pem''',
     '''apps/bfd-server/dev/ssl-stores/server.key''',
