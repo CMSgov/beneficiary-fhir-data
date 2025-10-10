@@ -550,7 +550,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
     clm_ltst_clm_ind = "N"
     if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82):
-        clm_ltst_clm_ind = "Y"
+        clm_ltst_clm_ind = random.choice(["Y", "N"])
     claim["CLM"]["CLM_LTST_CLM_IND"] = clm_ltst_clm_ind
 
     claim["CLM_DCMTN"]["CLM_DT_SGNTR_SK"] = claim["CLM"]["CLM_DT_SGNTR_SK"]
