@@ -31,15 +31,6 @@ public class Meta {
   }
 
   /**
-   * Returns meta information for the Coverage resource.
-   *
-   * @return meta
-   */
-  public org.hl7.fhir.r4.model.Meta toFhirCoverage() {
-    return toFhirCoverage(updatedTimestamp);
-  }
-
-  /**
    * Builds Coverage meta using a supplied lastUpdated.
    *
    * @param overrideLastUpdated timestamp to set as lastUpdated
