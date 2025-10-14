@@ -21,8 +21,8 @@ class BillingProvider {
 
   Optional<Organization> toFhir(ClaimTypeCode claimTypeCode) {
     if (!(claimTypeCode.isBetween(5, 69)
-        || claimTypeCode.isBetween(2000, 2700)
-        || claimTypeCode.isBetween(1000, 1700))) {
+        || claimTypeCode.isBetween(2000, 2699)
+        || claimTypeCode.isBetween(1000, 1699))) {
       return Optional.empty();
     }
 
