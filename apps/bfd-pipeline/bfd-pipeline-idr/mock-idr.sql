@@ -238,6 +238,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     clm_bnft_enhncmt_1_cd VARCHAR(2),
+    clm_ngaco_pbpmt_sw,
     clm_ngaco_cptatn_sw VARCHAR(1),
     clm_ngaco_pdschrg_hcbs_sw VARCHAR(1),
     clm_ngaco_snf_wvr_sw VARCHAR(1),
@@ -476,14 +477,13 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry (
-    clm_lctn_hstry_sk BIGINT NOT NULL PRIMARY KEY,
     clm_audt_trl_stus_cd VARCHAR(2),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ
+    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
-    clm_clm_line_rx_sk BIGINT NOT NULL PRIMARY KEY,
     clm_brnd_gnrc_cd VARCHAR(1) NOT NULL,
     clm_cmpnd_cd VARCHAR(1) NOT NULL,
     clm_ctstrphc_cvrg_ind_cd VARCHAR(1) NOT NULL,
@@ -510,6 +510,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     clm_rptd_mftr_dscnt_amt NUMERIC,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ
+    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
@@ -531,16 +532,15 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     clm_dt_sgntr_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
-    clm_demo_2nd_num,
-    clm_demo_3rd_num,
-    clm_demo_4th_num,
-    clm_demo_5th_num,
-    clm_line_ngaco_cptatn_sw,
-    clm_line_ngaco_pbpmt_sw,
-    clm_line_ngaco_pdschrg_hcbs_sw,
-    clm_line_ngaco_snf_wvr_sw,
-    clm_line_ngaco_tlhlth_sw,
-    clm_ngaco_cmg_wvr_sw,
-    clm_ngaco_pbpmt_sw,
+    CLM_LINE_BNFT_ENHNCMT_2_CD VARCHAR(2),
+    CLM_LINE_BNFT_ENHNCMT_3_CD VARCHAR(2),
+    CLM_LINE_BNFT_ENHNCMT_4_CD VARCHAR(2),
+    CLM_LINE_BNFT_ENHNCMT_5_CD VARCHAR(2),
+    clm_line_ngaco_cptatn_sw VARCHAR(1),
+    clm_line_ngaco_pdschrg_hcbs_sw VARCHAR(1),
+    clm_line_ngaco_snf_wvr_sw VARCHAR(1),
+    clm_line_ngaco_tlhlth_sw VARCHAR(1),
+    clm_line_aco_care_mgmt_hcbs_sw VARCHAR(1),
+    clm_line_ngaco_pbpmt_sw VARCHAR(1),
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
