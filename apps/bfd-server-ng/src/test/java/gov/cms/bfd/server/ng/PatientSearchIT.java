@@ -48,6 +48,22 @@ public class PatientSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdMergedBeneficiary(SearchStyleEnum searchStyle) {
+    var patientBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(Patient.SP_RES_ID)
+                    .exactly()
+                    .identifier(HISTORICAL_MERGED_BENE_SK_KILL_CREDIT2))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(1, patientBundle.getEntry().size());
+
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
   void patientSearchByIdMergedBene(SearchStyleEnum searchStyle) {
     var patientBundle =
         searchBundle()
