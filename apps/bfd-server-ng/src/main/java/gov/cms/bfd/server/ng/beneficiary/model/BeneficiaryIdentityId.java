@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @Embeddable
-public class BeneficiaryIdentityId implements Serializable {
+public class BeneficiaryIdentityId {
 
   @Column(name = "bene_sk")
   protected long beneSk;
