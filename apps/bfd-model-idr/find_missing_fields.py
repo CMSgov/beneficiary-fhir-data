@@ -6,15 +6,13 @@ from pathlib import Path
 import yaml
 
 
-def extract_source_columns(yamp_paths: list[Path]) -> set[str]:
+def extract_source_columns(yamp_paths: list[Path]) -> (set[str], set[str]):
     pattern = re.compile(r"ExplanationOfBenefit-(?:Base|Pharmacy)\.(.+)")
-    source_columns: set[str] = set()
+    columns_to_view: dict[str, str | None] = {}
 
     for yaml_path in yamp_paths:
         with open(yaml_path, "r") as f:
             data = yaml.safe_load(f)
-
-        file_columns = set()
 
         for definition in data:
             if not isinstance(definition, dict):
@@ -27,13 +25,10 @@ def extract_source_columns(yamp_paths: list[Path]) -> set[str]:
                 match = pattern.search(definition["inputPath"])
                 if match:
                     col = match.group(1)
-
             if col:
-                file_columns.add(str(col).strip().lower())
-
-        source_columns.update(file_columns)
-
-    return source_columns
+                view = definition.get("sourceView")
+                columns_to_view[col.strip().lower()] = (view.strip().lower() if isinstance(view, str) else None)
+    return columns_to_view
 
 
 def extract_csv_columns(csv_path: Path) -> set[str]:
@@ -61,16 +56,19 @@ def main(cclf_file: str, csv_file: str, *yaml_files: str) -> None:
     csv_columns = extract_csv_columns(Path(csv_file))
     cclf_columns = extract_cclf_fields(Path(cclf_file))
 
-    missing_in_csv = yaml_columns - csv_columns
-    extra_in_csv = csv_columns - yaml_columns
+    missing_in_csv = set(yaml_columns.keys()) - csv_columns
+    extra_in_csv = csv_columns - set(yaml_columns.keys())
     missing_from_cclf = cclf_columns - csv_columns
 
     print("\n=== Comparison Results ===")
 
     if missing_in_csv:
         print("YAML fields missing in schema")
-        for col in sorted(missing_in_csv):
-            print(f" {col}")
+        # for col in sorted(missing_in_csv):
+        #     print(f" {col}")
+        extracted_values = {key: yaml_columns[key] for key in missing_in_csv if key in yaml_columns}
+        for k, v in extracted_values.items():
+            print(k, ", ", v)
     else:
         print("All YAML fields are present in schema")
 
