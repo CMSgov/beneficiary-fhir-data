@@ -20,12 +20,8 @@ public class Meta {
    * @return meta
    */
   org.hl7.fhir.r4.model.Meta toFhirPatient() {
-    return toFhirPatient(updatedTimestamp);
-  }
-
-  org.hl7.fhir.r4.model.Meta toFhirPatient(ZonedDateTime overrideLastUpdated) {
     return new org.hl7.fhir.r4.model.Meta()
-        .setLastUpdated(DateUtil.toDate(overrideLastUpdated))
+        .setLastUpdated(DateUtil.toDate(updatedTimestamp))
         .addProfile(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0)
         .addProfile(SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0);
   }
