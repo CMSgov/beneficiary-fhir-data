@@ -57,7 +57,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.10" },
     { name = "pydantic", specifier = ">=2.11.9" },
     { name = "ray", specifier = "==2.47" },
-    { name = "sf-hamilton", extras = ["ray"], specifier = ">=1.42.0" },
+    { name = "sf-hamilton", extras = ["ray"], specifier = "==1.88.0" },
     { name = "snowflake-connector-python", specifier = ">=3.17.4" },
 ]
 

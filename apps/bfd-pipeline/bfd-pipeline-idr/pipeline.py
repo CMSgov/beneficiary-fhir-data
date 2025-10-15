@@ -1,11 +1,10 @@
-# type: ignore [reportUnknownMemberType]
 import logging
 import os
 import sys
 
 import ray
-from hamilton import base, driver
-from hamilton.plugins.h_ray import RayGraphAdapter
+from hamilton import base, driver  # type: ignore
+from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
 
 import pipeline_nodes
 from constants import CLAIM_AUX_TABLES
@@ -28,7 +27,7 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
-    ray.init(logging_level="info", num_cpus=parallelism)
+    ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
 
     dict_builder = base.DictResult()
     adapter = RayGraphAdapter(result_builder=dict_builder)
@@ -57,7 +56,7 @@ def main() -> None:
     logger.info("load_claims %s", load_claims)
 
     if load_benes and load_claims:
-        dr.execute(
+        dr.execute(  # type: ignore
             final_vars=["idr_beneficiary"],
             inputs={
                 "config_mode": mode,
@@ -70,7 +69,7 @@ def main() -> None:
         # in order to skip them and load only beneficiary data
         overrides = {table: None for table in CLAIM_AUX_TABLES}
         overrides["idr_claim"] = None
-        dr.execute(
+        dr.execute(  # type: ignore
             final_vars=["idr_beneficiary"],
             overrides=overrides,
             inputs={
@@ -81,8 +80,8 @@ def main() -> None:
         )
     elif load_claims and load_type == "initial":
         # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
-        dr.execute(
-            final_vars=CLAIM_AUX_TABLES,
+        dr.execute(  # type: ignore
+            final_vars=CLAIM_AUX_TABLES,  # type: ignore
             inputs={
                 "config_mode": mode,
                 "config_batch_size": batch_size,
@@ -91,7 +90,7 @@ def main() -> None:
         )
     elif load_claims and load_type == "incremental":
         # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
-        dr.execute(
+        dr.execute(  # type: ignore
             final_vars=["idr_claim"],
             inputs={
                 "config_mode": mode,
