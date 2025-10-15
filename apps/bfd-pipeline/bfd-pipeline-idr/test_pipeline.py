@@ -105,20 +105,21 @@ class TestPipeline:
         conn.execute(
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(timestamp)s
+            SET idr_insrt_ts=%(none)s
             WHERE clm_uniq_id = 9844382563835
             """,
-            {"timestamp": None},
+            {"none": None},
         )
 
         conn.execute(
             """
             UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(timestamp)s
+            SET idr_updt_ts=%(none)s
             WHERE clm_uniq_id = 6919983105596
             """,
-            {"timestamp": None},
+            {"none": None},
         )
+        conn.commit()
         run_pipeline(PostgresExtractor(psql_url, 100_000), psql_url)
 
         cur = conn.execute("select * from idr.beneficiary order by bene_sk")
@@ -198,12 +199,12 @@ class TestPipeline:
         assert rows[0]["clm_nrln_ric_cd"] == "W"
 
         cur = conn.execute("select * from idr.claim_institutional order by clm_uniq_id")
-        assert cur.rowcount == 52
+        assert cur.rowcount == 72
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
-        assert cur.rowcount == 122
+        assert cur.rowcount == 142
         rows = cur.fetchmany(1)
         assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
 
@@ -213,12 +214,12 @@ class TestPipeline:
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_item order by clm_uniq_id")
-        assert cur.rowcount == 1272
+        assert cur.rowcount == 1590
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
         cur = conn.execute("select * from idr.claim_line_institutional order by clm_uniq_id")
-        assert cur.rowcount == 419
+        assert cur.rowcount == 594
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
