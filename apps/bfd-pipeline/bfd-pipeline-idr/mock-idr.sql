@@ -294,9 +294,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
     clm_instnl_prfnl_amt NUMERIC,
     clm_mdcr_ip_bene_ddctbl_amt NUMERIC,
     clm_instnl_drg_outlier_amt NUMERIC,
+    dgns_drg_outlier_cd VARCHAR(1),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    dgns_drg_outlier_cd VARCHAR(1),
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
@@ -519,29 +519,15 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
-    prvdr_sk BIGINT NOT NULL PRIMARY KEY,
-    prvdr_last_name VARCHAR(35),
-    idr_insrt_ts TIMESTAMPTZ,
-    idr_updt_ts TIMESTAMPTZ
-);
-
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr (
-    clm_rlt_cond_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
-    clm_rlt_cond_cd VARCHAR(2) NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ,
-    idr_updt_ts TIMESTAMPTZ
-);
-
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     geo_bene_sk BIGINT NOT NULL,
     clm_dt_sgntr_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
-    CLM_LINE_BNFT_ENHNCMT_2_CD VARCHAR(2),
-    CLM_LINE_BNFT_ENHNCMT_3_CD VARCHAR(2),
-    CLM_LINE_BNFT_ENHNCMT_4_CD VARCHAR(2),
-    CLM_LINE_BNFT_ENHNCMT_5_CD VARCHAR(2),
+    clm_line_bnft_enhncmt_2_cd VARCHAR(2),
+    clm_line_bnft_enhncmt_3_cd VARCHAR(2),
+    clm_line_bnft_enhncmt_4_cd VARCHAR(2),
+    clm_line_bnft_enhncmt_5_cd VARCHAR(2),
     clm_line_ngaco_cptatn_sw VARCHAR(1),
     clm_line_ngaco_pdschrg_hcbs_sw VARCHAR(1),
     clm_line_ngaco_snf_wvr_sw VARCHAR(1),

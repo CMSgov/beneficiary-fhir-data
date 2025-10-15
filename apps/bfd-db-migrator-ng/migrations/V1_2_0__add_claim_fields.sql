@@ -2,14 +2,10 @@ ALTER TABLE idr.contract_pbp_number
 ADD COLUMN cntrct_pbp_name VARCHAR(75);
 
 ALTER TABLE idr.claim_professional
-ADD COLUMN clm_audt_trl_stus_cd VARCHAR(2);
-
-ALTER TABLE idr.claim_line_professional
-ADD COLUMN clm_rndrg_prvdr_type_cd VARCHAR(3);
+ADD COLUMN clm_audt_trl_stus_cd VARCHAR(2); --v2_mdcr_clm_lctn_hstry
 
 ALTER TABLE idr.claim_institutional
-ADD COLUMN dgns_drg_outlier_cd VARCHAR(1),
-ADD COLUMN clm_rlt_cond_cd VARCHAR(2); -- from v2_mdcr_clm_rlt_cond_sgntr_mbr, check if should be here or claim line institutional or its own table
+ADD COLUMN dgns_drg_outlier_cd VARCHAR(1);
 
 ALTER TABLE idr.claim
 ADD COLUMN clm_adjstmt_type_cd VARCHAR(2),
@@ -18,15 +14,17 @@ ADD COLUMN clm_blg_prvdr_zip5_cd VARCHAR(5),
 ADD COLUMN clm_sbmt_frmt_cd VARCHAR(1),
 ADD COLUMN clm_sbmtr_cntrct_num VARCHAR(5),
 ADD COLUMN clm_sbmtr_cntrct_pbp_num VARCHAR(3),
+-- from v2_mdcr_clm_dcmtn
 ADD COLUMN clm_bnft_enhncmt_1_cd VARCHAR(2),
 ADD COLUMN clm_ngaco_pbpmt_sw VARCHAR(1),
 ADD COLUMN clm_ngaco_cptatn_sw VARCHAR(1),
 ADD COLUMN clm_ngaco_pdschrg_hcbs_sw VARCHAR(1),
 ADD COLUMN clm_ngaco_snf_wvr_sw VARCHAR(1),
-ADD COLUMN clm_ngaco_tlhlth_sw VARCHAR(1),
-ADD COLUMN prvdr_last_name VARCHAR(35); -- from v2_mdcr_prvdr_hstry, pharmacy only but not line lvl, verify if can be here or separate table needed;
+ADD COLUMN clm_ngaco_tlhlth_sw VARCHAR(1);
 
 ALTER TABLE idr.claim_item
+ADD COLUMN clm_rndrg_prvdr_type_cd VARCHAR(3),
+-- from v2_mdcr_clm_line_dcmtn
 ADD COLUMN clm_line_bnft_enhncmt_2_cd VARCHAR(2),
 ADD COLUMN clm_line_bnft_enhncmt_3_cd VARCHAR(2),
 ADD COLUMN clm_line_bnft_enhncmt_4_cd VARCHAR(2),
