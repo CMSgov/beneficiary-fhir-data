@@ -48,7 +48,7 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 ## Adding data to the model
 
 - Add the data to `mock-idr.sql` (local representation of the IDR schema)
-- Add the data to `bfd.sql` (BFD database definition)
+- Update migrations
 - Add the data to `model.py`, queries will be auto-generated using those fields
 - Add the data to `generator_util.py`, for synthetic data generation
 - If adding a new table, register it in the call to `load_all` in `pipeline.py`
