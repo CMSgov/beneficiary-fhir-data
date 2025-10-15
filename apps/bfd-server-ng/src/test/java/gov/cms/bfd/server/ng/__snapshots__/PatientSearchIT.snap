@@ -334,94 +334,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdEmpty[POST]=[
 ]
 
 
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET]=[
-{
-  "entry" : [ {
-    "resource" : {
-      "id" : "848484848",
-      "link" : [ {
-        "other" : {
-          "display" : "517782585",
-          "reference" : "Patient/517782585"
-        },
-        "type" : "replaced-by"
-      } ],
-      "resourceType" : "Patient"
-    }
-  } ],
-  "id" : "{uuid}",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient?_id=848484848"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET_WITH_SEARCH]=[
-{
-  "entry" : [ {
-    "resource" : {
-      "id" : "848484848",
-      "link" : [ {
-        "other" : {
-          "display" : "517782585",
-          "reference" : "Patient/517782585"
-        },
-        "type" : "replaced-by"
-      } ],
-      "resourceType" : "Patient"
-    }
-  } ],
-  "id" : "{uuid}",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search?_id=848484848"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
-{
-  "entry" : [ {
-    "resource" : {
-      "id" : "848484848",
-      "link" : [ {
-        "other" : {
-          "display" : "517782585",
-          "reference" : "Patient/517782585"
-        },
-        "type" : "replaced-by"
-      } ],
-      "resourceType" : "Patient"
-    }
-  } ],
-  "id" : "{uuid}",
-  "link" : [ {
-    "relation" : "self",
-    "url" : "http://localhost/v3/fhir/Patient/_search"
-  } ],
-  "meta" : {
-    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
-  },
-  "resourceType" : "Bundle",
-  "type" : "searchset"
-}
-]
-
-
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneficiary[GET]=[
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[GET]=[
 {
   "entry" : [ {
     "resource" : {
@@ -519,7 +432,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneficiary[GET]=[
 ]
 
 
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneficiary[GET_WITH_SEARCH]=[
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[GET_WITH_SEARCH]=[
 {
   "entry" : [ {
     "resource" : {
@@ -617,7 +530,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneficiary[GET_WIT
 ]
 
 
-gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneficiary[POST]=[
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[POST]=[
 {
   "entry" : [ {
     "resource" : {
@@ -697,6 +610,93 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneficiary[POST]=[
       "name" : [ {
         "family" : "Heeler",
         "given" : [ "Alex", "Joey" ]
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient/_search"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "id" : "848484848",
+      "link" : [ {
+        "other" : {
+          "display" : "517782585",
+          "reference" : "Patient/517782585"
+        },
+        "type" : "replaced-by"
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient?_id=848484848"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[GET_WITH_SEARCH]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "id" : "848484848",
+      "link" : [ {
+        "other" : {
+          "display" : "517782585",
+          "reference" : "Patient/517782585"
+        },
+        "type" : "replaced-by"
+      } ],
+      "resourceType" : "Patient"
+    }
+  } ],
+  "id" : "{uuid}",
+  "link" : [ {
+    "relation" : "self",
+    "url" : "http://localhost/v3/fhir/Patient/_search?_id=848484848"
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBene[POST]=[
+{
+  "entry" : [ {
+    "resource" : {
+      "id" : "848484848",
+      "link" : [ {
+        "other" : {
+          "display" : "517782585",
+          "reference" : "Patient/517782585"
+        },
+        "type" : "replaced-by"
       } ],
       "resourceType" : "Patient"
     }
