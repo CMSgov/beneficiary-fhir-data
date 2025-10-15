@@ -86,7 +86,7 @@ public class PatientSearchIT extends IntegrationTestBase {
     var patient = (Patient) patientBundle.getEntryFirstRep().getResource();
     assertNotNull(patient.getLink(), "Patient links should not be null");
 
-    Set<String> uniqueLinkRepresentations =
+    var uniqueLinkRepresentations =
         patient.getLink().stream()
             .map(link -> link.getType().toCode() + "_" + link.getOther().getReference())
             .collect(Collectors.toSet());
