@@ -16,7 +16,7 @@ public interface CcwRifLoadPreValidateInterface {
    * Validity will be what the implementation decides.
    *
    * @param dataSetManifest a {@link DataSetManifest}
-   * @return {@link boolean} the validity status
+   * @return {@code boolean} the validity status
    * @throws Exception if there is an issue during validation
    */
   public boolean isValid(DataSetManifest dataSetManifest) throws Exception;

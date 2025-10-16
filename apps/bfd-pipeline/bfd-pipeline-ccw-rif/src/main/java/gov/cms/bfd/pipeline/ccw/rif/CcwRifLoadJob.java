@@ -173,7 +173,7 @@ public final class CcwRifLoadJob implements PipelineJob {
    * @param options the {@link ExtractionOptions} to use
    * @param dataSetQueue the {@link DataSetQueue} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
-   * @param isIdempotentMode the {@link boolean} TRUE if running in idempotent mode
+   * @param isIdempotentMode the {@code boolean} TRUE if running in idempotent mode
    * @param runInterval used to construct the job schedule
    * @param statusReporter used to update external processes with our latest status
    */
