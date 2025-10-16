@@ -143,8 +143,11 @@ public class Claim {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
-              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
+              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
               .ifPresent(eob::addDiagnosis);
+          item.getClaimLineProfessional()
+                  .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
+                  .ifPresent(eob::addContained);
         });
     billingProvider
         .toFhir(claimTypeCode)
