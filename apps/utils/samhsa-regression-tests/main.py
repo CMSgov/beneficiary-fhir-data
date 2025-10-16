@@ -21,11 +21,14 @@ from psycopg import sql
 from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
+CLM_UNIQ_ID_IDENTIFIER_SYSTEM = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
+CLM_UNIQ_ID_IDENTIFIER_CODE = "uc"
+
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO").upper())
 logger = logging.getLogger()
 
 
-class SamhsaFilterResult(StrEnum):
+class VerifyFilteringResult(StrEnum):
     EMPTY_RESPONSE = auto()
     FILTERED_RESPONSE = auto()
     UNFILTERED_RESPONSE = auto()
@@ -246,10 +249,28 @@ async def query_samhsa_benes_with_claims(
         ]
 
 
-async def verify_samhsa_filtered(
-    url: str, samhsa_session: ClientSession, no_samhsa_session: ClientSession, bene_sk: str
-) -> SamhsaFilterResult:
-    patient_query = {"patient": bene_sk}
+def get_uniq_clm_id_for_bundle_resource(bundle_resource: dict[str, Any]) -> str:
+    # If we can't find the uniq_clm_id, something's wrong and a StopIteration _should_ be raised.
+    return next(
+        identifier["value"]
+        for identifier in bundle_resource["identifier"]
+        if "type" in identifier
+        and "coding" in identifier["type"]
+        and any(
+            coding["system"] == CLM_UNIQ_ID_IDENTIFIER_SYSTEM
+            and coding["code"] == CLM_UNIQ_ID_IDENTIFIER_CODE
+            for coding in identifier["type"]["coding"]
+        )
+    )
+
+
+async def verify_samhsa_filtering(
+    url: str,
+    samhsa_session: ClientSession,
+    no_samhsa_session: ClientSession,
+    samhsa_bene: BeneWithSamshaClaims,
+) -> VerifyFilteringResult:
+    patient_query = {"patient": samhsa_bene.bene_sk}
     try:
         async with (
             samhsa_session.get(url=url, params=patient_query) as samhsa_response,
@@ -258,28 +279,50 @@ async def verify_samhsa_filtered(
             samhsa_bundle = json.loads(await samhsa_response.read())
             no_samhsa_bundle = json.loads(await no_samhsa_response.read())
 
-            samhsa_entry_size = len(samhsa_bundle.get("entry", []))
-            no_samhsa_entry_size = len(no_samhsa_bundle.get("entry", []))
-            logger.log(
-                logging.DEBUG,
+            samhsa_bundle_entries: list[dict[str, Any]] = samhsa_bundle.get("entry", [])
+            no_samhsa_bundle_entries: list[dict[str, Any]] = no_samhsa_bundle.get("entry", [])
+            samhsa_entry_size = len(samhsa_bundle_entries)
+            no_samhsa_entry_size = len(no_samhsa_bundle_entries)
+            logger.debug(
                 "Bene SK: %s, Non-SAMHSA bundle 'entry' size: %d, SAMHSA-bundle 'entry' size: %d",
-                bene_sk,
+                samhsa_bene.bene_sk,
                 no_samhsa_entry_size,
                 samhsa_entry_size,
             )
 
             if samhsa_entry_size == 0:
-                return SamhsaFilterResult.EMPTY_RESPONSE
+                logger.warning("Response bundle for %s was empty", samhsa_bene.bene_sk)
+                return VerifyFilteringResult.EMPTY_RESPONSE
 
+            all_samhsa_allowed_clm_ids = [
+                get_uniq_clm_id_for_bundle_resource(entry["resource"])
+                for entry in samhsa_bundle_entries
+            ]
+            all_samhsa_filtered_clm_ids = [
+                get_uniq_clm_id_for_bundle_resource(entry["resource"])
+                for entry in no_samhsa_bundle_entries
+            ]
+            bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
+            samhsa_claims_filtered_if_needed = (
+                len(set(all_samhsa_filtered_clm_ids).intersection(bene_samhsa_claims_set)) == 0
+            )
+            samhsa_claims_unfiltered_when_authorized = (
+                len(set(all_samhsa_allowed_clm_ids).intersection(bene_samhsa_claims_set)) > 0
+            )
+            logger.debug(
+                "Bene SK: %s, SAMHSA filtering: %s, SAMHSA non-filtering: %s",
+                samhsa_bene.bene_sk,
+                samhsa_claims_filtered_if_needed,
+                samhsa_claims_unfiltered_when_authorized,
+            )
             return (
-                SamhsaFilterResult.FILTERED_RESPONSE
+                VerifyFilteringResult.FILTERED_RESPONSE
                 if no_samhsa_entry_size < samhsa_entry_size
-                else SamhsaFilterResult.UNFILTERED_RESPONSE
+                else VerifyFilteringResult.UNFILTERED_RESPONSE
             )
     except Exception:
-        logger.exception("Unable to get url %s")
-
-    return SamhsaFilterResult.EMPTY_RESPONSE
+        logger.exception("Failed to query for %s", samhsa_bene.bene_sk)
+        return VerifyFilteringResult.EMPTY_RESPONSE
 
 
 @click.command()
@@ -429,36 +472,36 @@ async def main(
     ):
         results = await asyncio.gather(
             *(
-                verify_samhsa_filtered(
+                verify_samhsa_filtering(
                     url=full_eob_url,
                     samhsa_session=samhsa_session,
                     no_samhsa_session=no_samhsa_session,
-                    bene_sk=samhsa_bene.bene_sk,
+                    samhsa_bene=samhsa_bene,
                 )
                 for samhsa_bene in samhsa_benes
             )
         )
 
         all_samhsa_filtered = all(
-            res == SamhsaFilterResult.FILTERED_RESPONSE
+            res == VerifyFilteringResult.FILTERED_RESPONSE
             for res in results
-            if res != SamhsaFilterResult.EMPTY_RESPONSE
+            if res != VerifyFilteringResult.EMPTY_RESPONSE
         )
 
         logger.log(
             logging.INFO,
             "Filtered responses count: %d",
-            len([res for res in results if res == SamhsaFilterResult.FILTERED_RESPONSE]),
+            len([res for res in results if res == VerifyFilteringResult.FILTERED_RESPONSE]),
         )
         logger.log(
             logging.INFO,
             "Unfiltered responses count: %d",
-            len([res for res in results if res == SamhsaFilterResult.UNFILTERED_RESPONSE]),
+            len([res for res in results if res == VerifyFilteringResult.UNFILTERED_RESPONSE]),
         )
         logger.log(
             logging.INFO,
             "Empty responses count: %d",
-            len([res for res in results if res == SamhsaFilterResult.EMPTY_RESPONSE]),
+            len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
         )
         logger.log(
             logging.INFO,
@@ -467,7 +510,10 @@ async def main(
                 res
                 for res in results
                 if res
-                in [SamhsaFilterResult.FILTERED_RESPONSE, SamhsaFilterResult.UNFILTERED_RESPONSE]
+                in [
+                    VerifyFilteringResult.FILTERED_RESPONSE,
+                    VerifyFilteringResult.UNFILTERED_RESPONSE,
+                ]
             ]),
             "SUCCEEDED" if all_samhsa_filtered else "FAILED",
         )
