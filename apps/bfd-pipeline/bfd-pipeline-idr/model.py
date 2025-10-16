@@ -1169,6 +1169,7 @@ class IdrClaimItem(IdrBaseModel):
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
                     AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk 
                     AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
+                    AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
