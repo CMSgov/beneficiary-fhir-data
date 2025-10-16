@@ -39,6 +39,10 @@ ADD COLUMN clm_line_ngaco_pbpmt_sw VARCHAR(1);
 CREATE TABLE idr.claim_line_rx (
     clm_uniq_id BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
     clm_brnd_gnrc_cd VARCHAR(1) NOT NULL,
     clm_cmpnd_cd VARCHAR(1) NOT NULL,
     clm_ctstrphc_cvrg_ind_cd VARCHAR(1) NOT NULL,

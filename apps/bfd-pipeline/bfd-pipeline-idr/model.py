@@ -925,7 +925,7 @@ class IdrClaimItem(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
     # columns from V2_MDCR_CLM_LINE
-    clm_line_num: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_line_num: Annotated[int, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_int)]
     clm_line_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_alowd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ansthsa_unit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -996,6 +996,7 @@ class IdrClaimItem(IdrBaseModel):
     ]
     clm_val_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_val_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    # columns from v2_mdcr_clm_line_dcmtn
     clm_line_bnft_enhncmt_2_cd: Annotated[
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
     ]
@@ -1397,7 +1398,7 @@ class LoadProgress(IdrBaseModel):
 
 
 class IdrClaimLineRx(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -1446,11 +1447,12 @@ class IdrClaimLineRx(IdrBaseModel):
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {line} ON
-                {clm}.geo_bene_sk = {line}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {line}.clm_type_cd AND
-                {clm}.clm_num_sk = {line}.clm_num_sk
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {line}
+                ON {line}.geo_bene_sk = {clm}.geo_bene_sk
+                AND {line}.clm_type_cd = {clm}.clm_type_cd
+                AND {line}.clm_num_sk = {clm}.clm_num_sk 
+                AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                AND {line}.clm_uniq_id = {clm}.clm_uniq_id
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
