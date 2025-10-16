@@ -1165,10 +1165,10 @@ class IdrClaimItem(IdrBaseModel):
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {val}.clm_val_sqnc_num = cg.bfd_row_id
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
-                    ON {line_dcmtn}.geo_bene_sk = {clm}.geo_bene_sk
-                    AND {line_dcmtn}.clm_type_cd = {clm}.clm_type_cd
-                    AND {line_dcmtn}.clm_num_sk = {clm}.clm_num_sk 
-                    AND {line_dcmtn}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                    ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
+                    AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
+                    AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk 
+                    AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
@@ -1422,6 +1422,7 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_rptd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
