@@ -435,7 +435,6 @@ class IdrBeneficiaryStatus(IdrBaseModel):
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
-    idr_insrt_ts: datetime
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
@@ -740,7 +739,7 @@ class IdrClaim(IdrBaseModel):
     ]
     idr_insrt_ts_dcmtn: Annotated[
         datetime,
-        {ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_insrt_ts"},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_dcmtn: Annotated[
@@ -1285,9 +1284,6 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_audt_trl_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
-    ]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
@@ -1296,6 +1292,20 @@ class IdrClaimProfessional(IdrBaseModel):
     idr_updt_ts: Annotated[
         datetime,
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    # column from v2_mdcr_clm_lctn_hstry
+    clm_audt_trl_stus_cd: Annotated[
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+    ]
+    idr_insrt_ts_lctn_hstry: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_lctn_hstry: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
 

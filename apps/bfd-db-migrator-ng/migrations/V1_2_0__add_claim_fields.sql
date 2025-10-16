@@ -4,7 +4,9 @@ ADD COLUMN cntrct_pbp_name VARCHAR(75);
 ALTER TABLE idr.claim_professional
 --v2_mdcr_clm_lctn_hstry
 ADD COLUMN clm_audt_trl_stus_cd VARCHAR(2),
-ADD COLUMN clm_lctn_cd_sqnc_num BIGINT;
+ADD COLUMN clm_lctn_cd_sqnc_num BIGINT,
+ADD COLUMN idr_insrt_ts_lctn_hstry TIMESTAMPTZ,
+ADD COLUMN idr_updt_ts_lctn_hstry TIMESTAMPTZ;
 
 ALTER TABLE idr.claim_institutional
 ADD COLUMN dgns_drg_outlier_cd VARCHAR(1);
