@@ -18,14 +18,6 @@ commit_timer = Timer("commit")
 logger = logging.getLogger(__name__)
 
 
-def print_timers() -> None:
-    idr_query_timer.print_results()
-    temp_table_timer.print_results()
-    copy_timer.print_results()
-    insert_timer.print_results()
-    commit_timer.print_results()
-
-
 def get_connection_string() -> str:
     port = os.environ.get("BFD_DB_PORT") or "5432"
     dbname = os.environ.get("BFD_DB_NAME") or "fhirdb"
@@ -90,6 +82,7 @@ class BatchLoader:
 
         with self.conn.cursor() as cur:
             self._insert_batch_start(cur)
+            self.conn.commit()
             data_loaded = False
             num_rows = 0
 
@@ -99,7 +92,7 @@ class BatchLoader:
                 # We unfortunately need to use a while true loop here since we need to wrap the
                 # iterator with the timer calls.
                 results = next(self.fetch_results, None)
-                idr_query_timer.stop()
+                idr_query_timer.stop(self.table)
                 if results is None:
                     break
 
@@ -109,23 +102,23 @@ class BatchLoader:
 
                 temp_table_timer.start()
                 self._setup_temp_table(cur)
-                temp_table_timer.stop()
+                temp_table_timer.stop(self.table)
 
                 copy_timer.start()
                 self._copy_data(cur, results)
-                copy_timer.stop()
+                copy_timer.stop(self.table)
 
                 if results:
                     # Upsert into the main table
                     insert_timer.start()
                     self._merge(cur, timestamp)
-                    insert_timer.stop()
+                    insert_timer.stop(self.table)
 
                     self._calculate_load_progress(cur, results)
 
                 commit_timer.start()
                 self.conn.commit()
-                commit_timer.stop()
+                commit_timer.stop(self.table)
 
             self._mark_batch_complete(cur)
             self.conn.commit()
