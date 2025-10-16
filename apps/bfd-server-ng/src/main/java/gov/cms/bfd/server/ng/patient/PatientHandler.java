@@ -70,13 +70,26 @@ public class PatientHandler {
       // check for merged bene and if mbi identifier has already been added to the patient
       if (!beneficiary.isMergedBeneficiary()
           && patient.getIdentifier().stream()
-              .noneMatch(identifier -> identifier.getValue().equals(id.getMbi()))) {
+              .noneMatch(identifier -> identifier.getValue().equals(id.getId().getMbi()))) {
         patient.addIdentifier(id.toFhirIdentifier());
       }
 
-      id.toFhirLink(Long.parseLong(patient.getId())).ifPresent(patient::addLink);
+      id.toFhirLink(Long.parseLong(patient.getId()))
+          .filter(generatedLink -> !isDuplicateLink(patient, generatedLink))
+          .ifPresent(patient::addLink);
     }
 
     return patient;
+  }
+
+  private boolean isDuplicateLink(Patient patient, Patient.PatientLinkComponent newLink) {
+    return patient.getLink().stream()
+        .anyMatch(
+            existingLink ->
+                existingLink.getType() == newLink.getType()
+                    && existingLink
+                        .getOther()
+                        .getReference()
+                        .equals(newLink.getOther().getReference()));
   }
 }
