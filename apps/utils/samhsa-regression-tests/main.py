@@ -30,8 +30,8 @@ logger = logging.getLogger()
 
 class VerifyFilteringResult(StrEnum):
     EMPTY_RESPONSE = auto()
-    FILTERED_RESPONSE = auto()
-    UNFILTERED_RESPONSE = auto()
+    PASS = auto()
+    FAIL = auto()
 
 
 class ClaimItemSamhsaColumn(StrEnum):
@@ -309,17 +309,23 @@ async def verify_samhsa_filtering(
             samhsa_claims_unfiltered_when_authorized = (
                 len(set(all_samhsa_allowed_clm_ids).intersection(bene_samhsa_claims_set)) > 0
             )
-            logger.debug(
-                "Bene SK: %s, SAMHSA filtering: %s, SAMHSA non-filtering: %s",
+            final_result = (
+                VerifyFilteringResult.PASS
+                if samhsa_claims_filtered_if_needed and samhsa_claims_unfiltered_when_authorized
+                else VerifyFilteringResult.FAIL
+            )
+            logger.info(
+                (
+                    "Bene SK: %s, SAMHSA claims excluded for non-SAMHSA cert: %s, SAMHSA claims "
+                    "included for SAMHSA cert: %s, final result: %s"
+                ),
                 samhsa_bene.bene_sk,
                 samhsa_claims_filtered_if_needed,
                 samhsa_claims_unfiltered_when_authorized,
+                final_result,
             )
-            return (
-                VerifyFilteringResult.FILTERED_RESPONSE
-                if no_samhsa_entry_size < samhsa_entry_size
-                else VerifyFilteringResult.UNFILTERED_RESPONSE
-            )
+
+            return final_result
     except Exception:
         logger.exception("Failed to query for %s", samhsa_bene.bene_sk)
         return VerifyFilteringResult.EMPTY_RESPONSE
@@ -483,39 +489,36 @@ async def main(
         )
 
         all_samhsa_filtered = all(
-            res == VerifyFilteringResult.FILTERED_RESPONSE
+            res == VerifyFilteringResult.PASS
             for res in results
             if res != VerifyFilteringResult.EMPTY_RESPONSE
         )
 
-        logger.log(
-            logging.INFO,
-            "Filtered responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.FILTERED_RESPONSE]),
+        logger.info(
+            "Passing responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.PASS]),
         )
-        logger.log(
-            logging.INFO,
-            "Unfiltered responses count: %d",
-            len([res for res in results if res == VerifyFilteringResult.UNFILTERED_RESPONSE]),
+        logger.info(
+            "Failing responses count: %d",
+            len([res for res in results if res == VerifyFilteringResult.FAIL]),
         )
-        logger.log(
-            logging.INFO,
+        logger.info(
             "Empty responses count: %d",
             len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
         )
         logger.log(
-            logging.INFO,
-            "Filtering result of %d non-empty SAMHSA EoBs: %s",
+            logging.INFO if all_samhsa_filtered else logging.ERROR,
+            "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
             len([
                 res
                 for res in results
                 if res
                 in [
-                    VerifyFilteringResult.FILTERED_RESPONSE,
-                    VerifyFilteringResult.UNFILTERED_RESPONSE,
+                    VerifyFilteringResult.PASS,
+                    VerifyFilteringResult.FAIL,
                 ]
             ]),
-            "SUCCEEDED" if all_samhsa_filtered else "FAILED",
+            "PASSED" if all_samhsa_filtered else "FAILED",
         )
 
         return all_samhsa_filtered
