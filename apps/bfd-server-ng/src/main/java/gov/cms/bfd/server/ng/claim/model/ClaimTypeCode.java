@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -336,6 +338,15 @@ public enum ClaimTypeCode {
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)
             .setCoverage(new Reference().setDisplay("Part A")));
+  }
+
+  Optional<String> toDisplay() {
+      var partBCodes = Set.of(1700, 1800, 2700, 2800);
+
+      if (partBCodes.contains(code)) {
+          return Optional.of("Part B");
+      }
+      return Optional.empty();
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {

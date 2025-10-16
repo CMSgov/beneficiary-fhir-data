@@ -206,12 +206,27 @@ public class Claim {
               benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), getClaimValues()));
         });
 
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    toFhirReference().ifPresent(insurance::setCoverage);
+
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 
     return sortedEob(eob);
   }
+
+    Optional<Reference> toFhirReference() {
+        return Stream.of(
+            claimRecordTypeCode.map(ClaimRecordTypeCode::getDisplay),
+            claimNearLineRecordTypeCode.map(ClaimNearLineRecordTypeCode::getDisplay),
+            claimTypeCode.toDisplay()
+            )
+            .flatMap(Optional::stream)
+            .findFirst()
+            .map(display -> new Reference().setDisplay(display));
+    }
 
   private List<ClaimValue> getClaimValues() {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
