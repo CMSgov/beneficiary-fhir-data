@@ -482,6 +482,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry (
     clm_num_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
     clm_audt_trl_stus_cd VARCHAR(2),
+    clm_lctn_cd_sqnc_num BIGINT NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
@@ -539,5 +540,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     clm_line_ngaco_tlhlth_sw VARCHAR(1),
     clm_line_aco_care_mgmt_hcbs_sw VARCHAR(1),
     clm_line_ngaco_pbpmt_sw VARCHAR(1),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );

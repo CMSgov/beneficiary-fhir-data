@@ -2,7 +2,9 @@ ALTER TABLE idr.contract_pbp_number
 ADD COLUMN cntrct_pbp_name VARCHAR(75);
 
 ALTER TABLE idr.claim_professional
-ADD COLUMN clm_audt_trl_stus_cd VARCHAR(2); --v2_mdcr_clm_lctn_hstry
+--v2_mdcr_clm_lctn_hstry
+ADD COLUMN clm_audt_trl_stus_cd VARCHAR(2),
+ADD COLUMN clm_lctn_cd_sqnc_num BIGINT;
 
 ALTER TABLE idr.claim_institutional
 ADD COLUMN dgns_drg_outlier_cd VARCHAR(1);
@@ -34,7 +36,9 @@ ADD COLUMN clm_line_ngaco_pdschrg_hcbs_sw VARCHAR(1),
 ADD COLUMN clm_line_ngaco_snf_wvr_sw VARCHAR(1),
 ADD COLUMN clm_line_ngaco_tlhlth_sw VARCHAR(1),
 ADD COLUMN clm_line_aco_care_mgmt_hcbs_sw VARCHAR(1),
-ADD COLUMN clm_line_ngaco_pbpmt_sw VARCHAR(1);
+ADD COLUMN clm_line_ngaco_pbpmt_sw VARCHAR(1),
+ADD COLUMN idr_insrt_ts_line_dcmtn TIMESTAMPTZ,
+ADD COLUMN idr_updt_ts_line_dcmtn TIMESTAMPTZ;
 
 CREATE TABLE idr.claim_line_rx (
     clm_uniq_id BIGINT NOT NULL,
