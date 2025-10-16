@@ -2,11 +2,9 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
@@ -22,21 +20,8 @@ import org.hl7.fhir.r4.model.Reference;
 @Table(name = "beneficiary_identity", schema = "idr")
 @Entity
 public class BeneficiaryIdentity {
-  @Id
-  @Column(name = "bene_sk")
-  protected long beneSk;
 
-  @Column(name = "bene_mbi_id")
-  private String mbi;
-
-  @Column(name = "bene_xref_efctv_sk_computed")
-  private long xrefSk;
-
-  @Column(name = "bene_mbi_efctv_dt")
-  private Optional<LocalDate> mbiEffectiveDate;
-
-  @Column(name = "bene_mbi_obslt_dt")
-  private Optional<LocalDate> mbiObsoleteDate;
+  @EmbeddedId private BeneficiaryIdentityId id;
 
   /**
    * Transforms the identity record to a FHIR {@link Identifier} if a valid MBI is present.
@@ -44,10 +29,10 @@ public class BeneficiaryIdentity {
    * @return identifier
    */
   public Identifier toFhirIdentifier() {
-    var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(mbi);
+    var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(id.getMbi());
     var period = new Period();
-    mbiEffectiveDate.ifPresent(e -> period.setStart(DateUtil.toDate(e)));
-    mbiObsoleteDate.ifPresent(o -> period.setEnd(DateUtil.toDate(o)));
+    id.getMbiEffectiveDate().ifPresent(e -> period.setStart(DateUtil.toDate(e)));
+    id.getMbiObsoleteDate().ifPresent(o -> period.setEnd(DateUtil.toDate(o)));
     identifier.setPeriod(period);
 
     final var memberNumber = "MB";
@@ -69,9 +54,9 @@ public class BeneficiaryIdentity {
    */
   public Optional<Patient.PatientLinkComponent> toFhirLink(long requestedBeneSk) {
 
-    var beneSkMatches = beneSk == requestedBeneSk;
-    var currentIsXref = xrefSk == beneSk;
-    var requestedIsXref = xrefSk == requestedBeneSk;
+    var beneSkMatches = id.getBeneSk() == requestedBeneSk;
+    var currentIsXref = id.getXrefSk() == id.getBeneSk();
+    var requestedIsXref = id.getXrefSk() == requestedBeneSk;
 
     // This identity record is the current xref record and it has a different bene_sk, so the
     // requested bene_sk is replaced by this one
@@ -92,8 +77,8 @@ public class BeneficiaryIdentity {
     var link = new Patient.PatientLinkComponent();
     link.setType(linkType);
     var reference = new Reference();
-    reference.setReference("Patient/" + beneSk);
-    reference.setDisplay(String.valueOf(beneSk));
+    reference.setReference("Patient/" + id.getBeneSk());
+    reference.setDisplay(String.valueOf(id.getBeneSk()));
     link.setOther(reference);
     return link;
   }
