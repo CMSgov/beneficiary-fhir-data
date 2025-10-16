@@ -14,7 +14,7 @@ env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
   # Pin tool versions to match workspace configuration
-  PYTHON_VERSION: "3.14.0"
+  PYTHON_VERSION: "3.13.7"
   UV_VERSION: "0.5.18"
 
 jobs:
