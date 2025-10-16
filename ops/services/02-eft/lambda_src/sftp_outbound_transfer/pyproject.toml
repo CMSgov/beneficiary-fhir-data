@@ -1,7 +1,7 @@
 [project]
 name = "sftp-outbound-transfer"
 version = "1.0.0"
-requires-python = ">=3.14"
+requires-python = ">=3.13.7,<3.14"
 dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3", "pydantic"]
 
 [dependency-groups]
